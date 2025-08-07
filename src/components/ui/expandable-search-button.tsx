@@ -66,7 +66,6 @@ export function ExpandableSearchButton({
           )}
         >
           {!isExpanded && (
-            <Search className="w-4 h-4" />
           )}
           
           {isExpanded && (
@@ -77,18 +76,14 @@ export function ExpandableSearchButton({
                 value={searchValue}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 placeholder={placeholder}
-                className="bg-transparent border-none outline-none text-sm font-medium text-[var(--button-ghost-text)] placeholder-ghost-text flex-1 order-1"
               />
-              <Search className="order-2" />
               <div
                 onClick={(e) => {
                   e.stopPropagation()
                   e.preventDefault()
                   handleClose()
                 }}
-                className="order-3 p-1 hover:bg-[var(--button-ghost-hover-bg)] rounded-full transition-colors shrink-0 cursor-pointer"
               >
-                <X className="h-3 w-3 text-[var(--button-ghost-text)] shrink-0" />
               </div>
             </>
           )}

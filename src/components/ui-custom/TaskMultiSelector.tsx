@@ -44,18 +44,12 @@ export function TaskMultiSelector({
   
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <div className="h-10 bg-gray-100 animate-pulse rounded-md"></div>
-        <div className="text-sm text-gray-500">Cargando tareas...</div>
       </div>
     );
   }
   
   return (
-    <div className="space-y-3">
       {/* Selector para agregar tareas */}
-      <div className="flex gap-2">
-        <div className="flex-1">
           <Select value={selectedTaskId} onValueChange={setSelectedTaskId}>
             <SelectTrigger>
               <SelectValue placeholder={placeholder} />
@@ -74,29 +68,17 @@ export function TaskMultiSelector({
           onClick={() => addTask(selectedTaskId)}
           disabled={!selectedTaskId}
           size="sm"
-          className="px-3"
         >
-          <Package className="w-4 h-4 mr-1" />
           Agregar
         </Button>
       </div>
       
       {/* Lista de tareas seleccionadas */}
       {selectedTasks.length > 0 && (
-        <Card className="p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Check className="w-4 h-4 text-green-600" />
-            <span className="text-sm font-medium">
               {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's' : ''} seleccionada{selectedTasks.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="space-y-2">
             {selectedTasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium">{task.name_rendered}</span>
-                  <Badge variant="outline" className="text-xs">
                     {task.unit_name}
                   </Badge>
                 </div>
@@ -105,9 +87,7 @@ export function TaskMultiSelector({
                   variant="ghost"
                   size="sm"
                   onClick={() => removeTask(task.id)}
-                  className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
                 >
-                  <X className="w-3 h-3" />
                 </Button>
               </div>
             ))}
@@ -117,7 +97,6 @@ export function TaskMultiSelector({
       
       {/* Empty state */}
       {selectedTasks.length === 0 && (
-        <div className="text-xs text-gray-500 px-1">
           Selecciona las tareas de construcción relacionadas con este movimiento
         </div>
       )}

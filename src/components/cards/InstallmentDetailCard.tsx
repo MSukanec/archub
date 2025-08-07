@@ -30,8 +30,6 @@ export default function InstallmentDetailCard({
 }: InstallmentDetailCardProps) {
   if (!item.contact_name) {
     return (
-      <div className="p-4 bg-card border border-border rounded-lg">
-        <div className="text-sm text-muted-foreground">Sin contacto</div>
       </div>
     );
   }
@@ -44,18 +42,10 @@ export default function InstallmentDetailCard({
   const formattedDate = format(new Date(item.movement_date), "dd MMM yyyy", { locale: es });
 
   return (
-    <div className="p-4 bg-card border border-border rounded-lg">
-      <div className="flex items-center justify-between">
         {/* Left side: Avatar, name, date and type */}
-        <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10">
-            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium text-sm">{displayName}</div>
-            <div className="text-xs text-muted-foreground">{formattedDate}</div>
             {item.subcategory_name && (
-              <Badge variant="secondary" className="text-xs mt-1">
                 {item.subcategory_name}
               </Badge>
             )}
@@ -63,13 +53,9 @@ export default function InstallmentDetailCard({
         </div>
 
         {/* Right side: Wallet and Amount with exchange rate */}
-        <div className="text-right">
-          <div className="text-sm">{item.wallet_name || '-'}</div>
-          <div className="font-medium text-green-600">
             {item.currency_symbol || '$'} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
           {item.exchange_rate && (
-            <div className="text-xs text-muted-foreground">
               Cotización: $ {item.exchange_rate.toLocaleString('es-AR')}
             </div>
           )}

@@ -33,15 +33,12 @@ export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
   }
 
   if (isLoading) {
-    return <span className="text-xs text-muted-foreground">...</span>
   }
 
   if (totalSubtotal === 0) {
-    return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
-    <span className="text-xs font-semibold text-foreground">
       {formatCost(totalSubtotal)}
     </span>
   )

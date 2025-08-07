@@ -9,7 +9,6 @@ interface MiniTrendChartProps {
 export function MiniTrendChart({ data, color, isLoading }: MiniTrendChartProps) {
   if (isLoading || !data || data.length === 0) {
     return (
-      <div className="h-12 w-full bg-muted/20 rounded animate-pulse" />
     )
   }
 
@@ -18,14 +17,11 @@ export function MiniTrendChart({ data, color, isLoading }: MiniTrendChartProps) 
 
   if (!hasData) {
     return (
-      <div className="h-12 w-full flex items-center justify-center">
-        <div className="text-xs text-muted-foreground">Sin datos</div>
       </div>
     )
   }
 
   return (
-    <div className="h-12 w-full" style={{ minHeight: '48px', minWidth: '100px' }}>
       <ResponsiveContainer width="100%" height={48}>
         <LineChart 
           data={data} 

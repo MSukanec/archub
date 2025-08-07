@@ -28,10 +28,8 @@ interface Props {
 
 export function TransferFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
-    <div className="space-y-4">
 
         {/* Moneda y Cantidad en la misma línea */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="currency_id"
@@ -80,7 +78,6 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
         </div>
 
         {/* Billeteras Origen y Destino */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="wallet_id_from"

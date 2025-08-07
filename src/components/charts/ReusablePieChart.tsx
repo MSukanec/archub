@@ -38,16 +38,12 @@ export function ReusablePieChart({
   
   if (isLoading) {
     return (
-      <div className="h-72 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">{loadingText}</div>
       </div>
     )
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-72 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">{emptyText}</div>
       </div>
     )
   }
@@ -57,9 +53,6 @@ export function ReusablePieChart({
       const data = payload[0].payload
       const percentage = data.percentage || ((data[dataKey] / data.total) * 100)
       return (
-        <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-          <p className="font-medium mb-1">{data[nameKey]}</p>
-          <p className="text-sm text-muted-foreground">
             {valueFormatter(data[dataKey])} {percentage ? `(${percentage.toFixed(1)}%)` : ''}
           </p>
         </div>
@@ -83,7 +76,6 @@ export function ReusablePieChart({
         fill="white" 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
-        className="text-xs font-medium"
       >
         {`${percentage.toFixed(0)}%`}
       </text>
@@ -91,7 +83,6 @@ export function ReusablePieChart({
   }
 
   return (
-    <div className="h-72">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart margin={{ top: 10, right: 10, bottom: 45, left: 10 }}>
           <Pie
@@ -114,7 +105,6 @@ export function ReusablePieChart({
             height={30}
             wrapperStyle={{ paddingTop: '2px', fontSize: '12px' }}
             formatter={(value, entry: any) => (
-              <span style={{ color: entry.color }} className="text-xs">
                 {entry.payload[nameKey]}
               </span>
             )}

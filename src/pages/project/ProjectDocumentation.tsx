@@ -21,7 +21,6 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
         <DocumentHierarchy />
       </div>
     </Layout>

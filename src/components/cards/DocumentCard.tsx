@@ -33,13 +33,9 @@ type DocumentCardProps = {
 // Get file icon based on file type
 const getFileIcon = (fileType: string) => {
   if (fileType?.startsWith('image/')) {
-    return <FileImage className="h-5 w-5 text-[var(--accent)]" />;
   } else if (fileType?.includes('pdf')) {
-    return <FileText className="h-5 w-5 text-[var(--accent)]" />;
   } else if (fileType?.includes('spreadsheet') || fileType?.includes('excel')) {
-    return <FileSpreadsheet className="h-5 w-5 text-[var(--accent)]" />;
   } else {
-    return <File className="h-5 w-5 text-[var(--accent)]" />;
   }
 };
 
@@ -74,36 +70,28 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document, onView, onEdit, o
       actions={[
         {
           label: "Ver",
-          icon: <Eye className="w-4 h-4" />,
           onClick: () => onView?.(document)
         },
         {
           label: "Editar",
-          icon: <Edit className="w-4 h-4" />,
           onClick: () => onEdit?.(document)
         },
         {
           label: "Eliminar",
-          icon: <Trash2 className="w-4 h-4" />,
           onClick: () => onDelete?.(document)
         }
       ]}
     >
-      <div className="flex items-center gap-3 bg-transparent border border-input rounded-lg p-3 mb-2">
         {/* File icon */}
-        <div className="shrink-0">
           {getFileIcon(file_type || '')}
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
           {/* Document name (user-defined) */}
-          <div className="font-medium text-foreground truncate mb-1">
             {document.name || file_name}
           </div>
 
           {/* Real file name */}
-          <div className="text-xs text-muted-foreground truncate">
             {file_name}
           </div>
         </div>

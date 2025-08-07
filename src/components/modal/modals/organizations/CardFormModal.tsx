@@ -142,7 +142,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="created_by"
@@ -254,26 +253,15 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   );
 
   const viewPanel = isEditing ? (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Título</h4>
-        <p className="text-muted-foreground mt-1">{card?.title || 'Sin título'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Descripción</h4>
-        <p className="text-muted-foreground mt-1">{card?.description || 'Sin descripción'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">{card?.creator?.full_name || 'Sin creador'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Asignado a</h4>
-        <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Fecha límite</h4>
-        <p className="text-muted-foreground mt-1">{card?.due_date || 'Sin fecha límite'}</p>
       </div>
     </div>
   ) : editPanel;

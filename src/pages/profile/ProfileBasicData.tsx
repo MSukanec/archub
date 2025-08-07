@@ -184,7 +184,6 @@ export default function ProfileBasicData() {
   if (isLoading) {
     return (
       <Layout headerProps={headerProps}>
-        <div className="text-center text-muted-foreground">
           Loading profile...
         </div>
       </Layout>
@@ -195,53 +194,41 @@ export default function ProfileBasicData() {
     <Layout headerProps={headerProps}>
       {/* ActionBar */}
       <ActionBarDesktop
-        title="Mi Perfil"
-        icon={<UserCircle className="h-5 w-5" />}
         showProjectSelector={false}
         showSearch={false}
         showGrouping={false}
         features={[
           {
-            icon: <User className="h-4 w-4" />,
             title: "Información Personal",
             description: "Administra tu información personal básica como nombre, apellido, país de origen y fecha de nacimiento."
           },
           {
-            icon: <Camera className="h-4 w-4" />,
             title: "Avatar y Personalización", 
             description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
           },
           {
-            icon: <Shield className="h-4 w-4" />,
             title: "Modo de Uso y Seguridad",
             description: "Define tu perfil profesional y gestiona la seguridad de tu cuenta con opciones de cierre de sesión."
           },
           {
-            icon: <Settings className="h-4 w-4" />,
             title: "Configuración de Cuenta",
             description: "Accede a preferencias avanzadas y gestiona la configuración de tu cuenta de usuario."
           }
         ]}
       />
       
-      <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}
         <FeatureIntroduction
-          title="Gestión de Perfil de Usuario"
-          icon={<UserCircle className="h-6 w-6" />}
           features={[
             {
-              icon: <User className="h-4 w-4" />,
               title: "Información Personal",
               description: "Administra tu información personal básica como nombre, apellido, país de origen y fecha de nacimiento."
             },
             {
-              icon: <Camera className="h-4 w-4" />,
               title: "Avatar y Personalización", 
               description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
             },
             {
-              icon: <Shield className="h-4 w-4" />,
               title: "Modo de Uso y Seguridad",
               description: "Define tu perfil profesional y gestiona la seguridad de tu cuenta con opciones de cierre de sesión."
             }
@@ -250,39 +237,24 @@ export default function ProfileBasicData() {
 
         {/* Saving indicator */}
         {isSaving && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
             Guardando...
           </div>
         )}
 
         {/* Perfil Section */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Perfil</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
                 Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.
               </p>
             </div>
 
             {/* Right Column - Form Fields */}
-            <div className="space-y-6">
               {/* Avatar */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Avatar</Label>
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16">
                     <AvatarImage src={avatarUrl} />
-                    <AvatarFallback className="text-lg font-medium">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="space-y-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -290,7 +262,6 @@ export default function ProfileBasicData() {
                     >
                       Cambiar
                     </Button>
-                    <p className="text-xs text-muted-foreground">
                       Sube una foto o proporciona una URL
                     </p>
                   </div>
@@ -298,27 +269,19 @@ export default function ProfileBasicData() {
               </div>
               
               {/* Name */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Nombre completo</Label>
                 <Input
                   value={userData?.user?.full_name || ''}
                   disabled
-                  className="bg-muted"
                 />
-                <p className="text-xs text-muted-foreground">
                   Este es tu nombre para mostrar. Puede ser tu nombre real o un seudónimo.
                 </p>
               </div>
               
               {/* Email */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Dirección de email</Label>
                 <Input
                   value={userData?.user?.email || ''}
                   disabled
-                  className="bg-muted"
                 />
-                <p className="text-xs text-muted-foreground">
                   Esta es la dirección de email de tu cuenta.
                 </p>
               </div>
@@ -326,34 +289,21 @@ export default function ProfileBasicData() {
           </div>
         </div>
 
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Información Personal Section */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Información Personal</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
                 Actualiza tus datos personales aquí.
               </p>
             </div>
 
             {/* Right Column - Form Fields */}
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Nombre</Label>
                   <Input
                     value={firstName}
                     onChange={(e) => handleFirstNameChange(e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Apellido</Label>
                   <Input
                     value={lastName}
                     onChange={(e) => handleLastNameChange(e.target.value)}
@@ -361,9 +311,6 @@ export default function ProfileBasicData() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">País</Label>
                   <Select value={country} onValueChange={handleCountryChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un país" />
@@ -378,8 +325,6 @@ export default function ProfileBasicData() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Fecha de nacimiento</Label>
                   <Input
                     type="date"
                     value={birthdate}
@@ -391,39 +336,22 @@ export default function ProfileBasicData() {
           </div>
         </div>
 
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Modo de Usuario */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Modo de uso</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
                 Personaliza tu experiencia según tu tipo de actividad.
               </p>
             </div>
 
             {/* Right Column - Current Mode and Change Button */}
-            <div className="space-y-6">
-              <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
                 {(() => {
                   const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
                   const ModeIcon = modeInfo.icon;
                   return (
                     <>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-[var(--accent)]">Modo de uso actual</Label>
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-md bg-[var(--accent)]/10">
-                            <ModeIcon className="h-5 w-5 text-[var(--accent)]" />
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{modeInfo.label}</p>
-                            <p className="text-xs text-muted-foreground">{modeInfo.description}</p>
                           </div>
                         </div>
                       </div>
@@ -435,7 +363,6 @@ export default function ProfileBasicData() {
                           backgroundColor: 'var(--accent)',
                           color: 'var(--accent-foreground)'
                         }}
-                        className="hover:opacity-90"
                       >
                         Elegir modo de uso
                       </Button>
@@ -447,28 +374,16 @@ export default function ProfileBasicData() {
           </div>
         </div>
 
-        <hr className="border-t border-[var(--section-divider)] my-8" />
 
         {/* Zona de Peligro */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Left Column - Title and Description */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-[var(--accent)]" />
-                <h3 className="text-lg font-semibold">Zona de peligro</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
                 Acciones irreversibles y destructivas.
               </p>
             </div>
 
             {/* Right Column - Form Fields */}
-            <div className="space-y-6">
-              <div className="space-y-4 p-4 border border-destructive rounded-lg">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-destructive">Cerrar sesión</Label>
-                  <p className="text-xs text-muted-foreground">
                     Cerrar sesión de tu cuenta. Serás redirigido a la página de inicio de sesión.
                   </p>
                 </div>

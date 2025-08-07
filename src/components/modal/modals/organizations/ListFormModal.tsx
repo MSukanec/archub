@@ -124,7 +124,6 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form className="space-y-4">
         <FormField
           control={form.control}
           name="created_by"
@@ -183,14 +182,9 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
   );
 
   const viewPanel = isEditing ? (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Nombre</h4>
-        <p className="text-muted-foreground mt-1">{list?.name || 'Sin nombre'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">
           {users.find(u => u.id === list?.created_by)?.full_name || 'Sin creador'}
         </p>
       </div>

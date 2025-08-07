@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
@@ -106,11 +105,7 @@ export default function OrganizationActivity() {
 
   // Custom filters para ActionBar
   const customFilters = (
-    <div className="w-64 p-3 space-y-3">
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -122,10 +117,7 @@ export default function OrganizationActivity() {
         </Select>
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-[var(--menues-fg)] opacity-70">Filtrar por miembro</Label>
         <Select value={filterByType} onValueChange={setFilterByType}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -142,10 +134,6 @@ export default function OrganizationActivity() {
   if (!organizationId) {
     return (
       <Layout>
-        <div className="text-center py-12 text-muted-foreground">
-          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">No hay organización seleccionada.</p>
-          <p className="text-xs">Selecciona una organización para ver la actividad.</p>
         </div>
       </Layout>
     );
@@ -158,11 +146,8 @@ export default function OrganizationActivity() {
       label: 'Fecha',
       width: '15%',
       render: (activity: any) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">
             {activity.created_at ? format(new Date(activity.created_at), 'dd MMM yyyy', { locale: es }) : 'N/A'}
           </span>
-          <span className="text-xs text-muted-foreground">
             {activity.created_at ? formatDistanceToNow(new Date(activity.created_at), { 
               addSuffix: true, 
               locale: es 
@@ -178,14 +163,10 @@ export default function OrganizationActivity() {
       label: 'Autor',
       width: '15%',
       render: (activity: any) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="w-8 h-8">
             <AvatarImage src={activity.author?.avatar_url} />
-            <AvatarFallback className="text-xs">
               {getInitials(activity.author?.full_name || 'Usuario')}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium">
             {activity.author?.full_name || 'Usuario'}
           </span>
         </div>
@@ -198,7 +179,6 @@ export default function OrganizationActivity() {
       label: 'Tipo',
       width: '15%',
       render: (activity: any) => (
-        <Badge variant="outline" className="text-xs">
           {activity.type_label}
         </Badge>
       ),
@@ -209,7 +189,6 @@ export default function OrganizationActivity() {
       key: 'description',
       label: 'Descripción',
       render: (activity: any) => (
-        <span className="text-sm text-muted-foreground">
           {activity.description}
         </span>
       ),
@@ -228,9 +207,7 @@ export default function OrganizationActivity() {
             e.stopPropagation();
             handleActivityClick(activity);
           }}
-          className="h-8 px-2 text-xs"
         >
-          <Eye className="w-3 h-3 mr-1" />
           Ver detalles
         </Button>
       ),
@@ -240,30 +217,23 @@ export default function OrganizationActivity() {
 
   return (
     <Layout>
-      <div className="space-y-6">
         {/* ActionBar Desktop */}
         <ActionBarDesktop
-          title="Actividad"
-          icon={<Activity className="w-5 h-5" />}
           showProjectSelector={false}
           features={[
             {
-              icon: <Building className="w-5 h-5" />,
               title: "Registro central de actividades",
               description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
             },
             {
-              icon: <Activity className="w-5 h-5" />,
               title: "Filtrado por miembro",
               description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
             },
             {
-              icon: <Search className="w-5 h-5" />,
               title: "Búsqueda avanzada de actividades",
               description: "Sistema de búsqueda que permite localizar actividades específicas por descripción, autor, tipo de acción o fecha. Incluye filtros para acotar resultados por período de tiempo, tipo de actividad y responsable de la acción."
             },
             {
-              icon: <Filter className="w-5 h-5" />,
               title: "Organización temporal y filtrado",
               description: "Las actividades se organizan cronológicamente con opciones de filtrado por miembro del equipo, tipo de acción (creación, edición, eliminación) y período temporal para facilitar el seguimiento y auditoría."
             }
@@ -275,36 +245,13 @@ export default function OrganizationActivity() {
           onClearFilters={clearFilters}
         />
 
-        {/* Feature Introduction - Mobile only */}
-        <div className="md:hidden">
-          <FeatureIntroduction
-            title="Actividad"
-            icon={<Activity className="w-5 h-5" />}
-            features={[
-              {
-                icon: <Building className="w-5 h-5" />,
-                title: "Registro central de actividades",
-                description: "En esta sección quedan asentadas todas las acciones importantes que realiza la organización, permitiendo dar seguimiento a cada cosa que sucede. Desde la creación de proyectos hasta movimientos financieros, todo queda registrado para mantener un historial completo."
-              },
-              {
-                icon: <Activity className="w-5 h-5" />,
-                title: "Filtrado por miembro",
-                description: "Las acciones están organizadas y filtradas por miembro de la organización, de manera tal que se puede saber exactamente quién hizo cada cosa. Esto permite identificar responsabilidades, reconocer contribuciones y mantener la trazabilidad de las decisiones tomadas."
-              }
-            ]}
-          />
-        </div>
+        {/* Feature Introduction removida */}
 
         {/* Activity Chart and Table */}
         {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
-            <p className="text-sm">Cargando actividades...</p>
           </div>
         ) : sortedActivities.length === 0 ? (
           <EmptyState
-            icon={<Activity className="w-12 h-12" />}
-            title="No hay actividades registradas"
             description="Cuando se realicen acciones en la organización, aparecerán aquí."
           />
         ) : (

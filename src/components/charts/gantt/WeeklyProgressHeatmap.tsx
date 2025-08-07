@@ -76,12 +76,7 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
   }
 
   return (
-    <Card className="h-[350px]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Heatmap de Avance Semanal</CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-6 gap-2 h-64">
           {heatmapData.map((week, index) => (
             <div
               key={week.week}
@@ -92,28 +87,18 @@ export default function WeeklyProgressHeatmap({ data }: WeeklyProgressHeatmapPro
               `}
               title={`${week.week}: ${week.progress}% promedio (${week.tasks} tareas)`}
             >
-              <div className="text-xs font-medium text-center">
                 {week.week}
               </div>
-              <div className="text-xs font-bold">
                 {week.progress}%
               </div>
               {week.tasks > 0 && (
-                <div className="text-xs opacity-70">
                   {week.tasks}t
                 </div>
               )}
             </div>
           ))}
         </div>
-        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <span>Menos</span>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 bg-muted rounded-sm border"></div>
-            <div className="w-3 h-3 [background-color:var(--chart-5)] rounded-sm border"></div>
-            <div className="w-3 h-3 [background-color:var(--chart-4)] rounded-sm border"></div>
-            <div className="w-3 h-3 [background-color:var(--chart-3)] rounded-sm border"></div>
-            <div className="w-3 h-3 [background-color:var(--chart-1)] rounded-sm border"></div>
           </div>
           <span>Más</span>
         </div>

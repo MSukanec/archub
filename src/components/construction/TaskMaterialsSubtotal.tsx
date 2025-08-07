@@ -28,15 +28,12 @@ export default function TaskMaterialsSubtotal({ task }: TaskMaterialsSubtotalPro
   }
 
   if (isLoading) {
-    return <span className="text-xs text-muted-foreground">...</span>
   }
 
   if (subtotal === 0) {
-    return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
-    <span className="text-xs font-medium text-foreground">
       {formatCost(subtotal)}
     </span>
   )

@@ -160,16 +160,11 @@ export default function AdminTaskParameters() {
               setIsEditorModalOpen(true);
             }}
             size="sm"
-            className="gap-2"
           >
-            <Plus className="h-4 w-4" />
             Nuevo Parámetro
           </Button>
         ]
       }}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-lg font-semibold">Cargando parámetros...</div>
           </div>
         </div>
       </Layout>
@@ -184,11 +179,8 @@ export default function AdminTaskParameters() {
         searchValue: searchTerm,
         onSearchChange: setSearchTerm,
         customFilters: (
-          <div className="space-y-3">
             <div>
-              <Label className="text-xs font-medium">Ordenar por</Label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccionar orden" />
                 </SelectTrigger>
                 <SelectContent>
@@ -210,59 +202,31 @@ export default function AdminTaskParameters() {
               setIsEditorModalOpen(true);
             }}
             size="sm"
-            className="gap-2"
           >
-            <Plus className="h-4 w-4" />
             Nuevo Parámetro
           </Button>
         ]
       }}>
-        <div className="space-y-6">
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <List className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Total Parámetros</p>
-                    <p className="text-lg font-semibold">{stats.totalParameters}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Tipo Select</p>
-                    <p className="text-lg font-semibold">{stats.selectParameters}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Hash className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Total Opciones</p>
-                    <p className="text-lg font-semibold">{stats.totalOptions}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="p-3">
-              <CardContent className="p-0">
-                <div className="flex items-center space-x-2">
-                  <Settings className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Obligatorios</p>
-                    <p className="text-lg font-semibold">{stats.requiredParameters}</p>
                   </div>
                 </div>
               </CardContent>
@@ -270,10 +234,7 @@ export default function AdminTaskParameters() {
           </div>
 
           {/* Parameters Accordion */}
-          <div className="space-y-2">
             {filteredAndSortedParameters.length === 0 ? (
-              <Card className="p-8">
-                <div className="text-center text-muted-foreground">
                   {searchTerm ? 'No se encontraron parámetros que coincidan con la búsqueda' : 'No hay parámetros creados'}
                 </div>
               </Card>
@@ -290,27 +251,16 @@ export default function AdminTaskParameters() {
                   >
                     <Card>
                       <CollapsibleTrigger asChild>
-                        <div className="p-3 cursor-pointer hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
                               {isExpanded ? (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
                               ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                               )}
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <h3 className="font-medium text-sm">{parameter.label}</h3>
-                                  <Badge variant={getParameterTypeVariant(parameter.type)} className="text-xs">
                                     {getParameterTypeLabel(parameter.type)}
                                   </Badge>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
                                   {parameter.name} • {optionsCount} opciones
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-1">
                               {parameter.type === 'select' && (
                                 <Button
                                   variant="ghost"
@@ -322,7 +272,6 @@ export default function AdminTaskParameters() {
                                     setIsOptionModalOpen(true);
                                   }}
                                 >
-                                  <Plus className="h-3 w-3" />
                                 </Button>
                               )}
                               <Button
@@ -334,7 +283,6 @@ export default function AdminTaskParameters() {
                                   setIsEditorModalOpen(true);
                                 }}
                               >
-                                <Edit className="h-3 w-3" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -344,7 +292,6 @@ export default function AdminTaskParameters() {
                                   setDeleteParameterId(parameter.id);
                                 }}
                               >
-                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -352,24 +299,15 @@ export default function AdminTaskParameters() {
                       </CollapsibleTrigger>
 
                       <CollapsibleContent>
-                        <div className="px-3 pb-3 border-t border-border">
-                          <div className="pt-3">
-                            <div className="space-y-2">
                               {parameter.options && parameter.options.length > 0 ? (
                                 parameter.options
                                   .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
                                   .map((option) => (
-                                  <Card key={option.id} className="p-3">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex-1">
-                                        <span className="text-xs font-medium">{option.label}</span>
                                         {option.name && (
-                                          <span className="text-xs text-muted-foreground ml-2">
                                             ({option.name})
                                           </span>
                                         )}
                                       </div>
-                                      <div className="flex items-center space-x-1">
                                         <Button
                                           variant="ghost"
                                           size="sm"
@@ -379,21 +317,18 @@ export default function AdminTaskParameters() {
                                             setIsOptionModalOpen(true);
                                           }}
                                         >
-                                          <Edit className="h-3 w-3" />
                                         </Button>
                                         <Button
                                           variant="ghost"
                                           size="sm"
                                           onClick={() => setDeleteOptionId(option.id)}
                                         >
-                                          <Trash2 className="h-3 w-3" />
                                         </Button>
                                       </div>
                                     </div>
                                   </Card>
                                 ))
                               ) : (
-                                <div className="text-center py-2 text-xs text-muted-foreground">
                                   No hay opciones definidas
                                 </div>
                               )}
@@ -452,7 +387,6 @@ export default function AdminTaskParameters() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteParameterId && handleDeleteParameter(deleteParameterId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>
@@ -473,7 +407,6 @@ export default function AdminTaskParameters() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteOptionId && handleDeleteOption(deleteOptionId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>

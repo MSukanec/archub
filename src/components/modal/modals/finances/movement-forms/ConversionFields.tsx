@@ -32,19 +32,13 @@ interface Props {
 
 export function ConversionFields({ form, currencies, wallets, members, concepts, movement }: Props) {
   return (
-    <div className="space-y-4">
 
         {/* Sección ORIGEN */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
-            <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
           </div>
           
           {/* Moneda y Billetera en la misma fila */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="currency_id_from"
@@ -120,16 +114,11 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
         </div>
 
         {/* Sección DESTINO */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
-            <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
           </div>
           
           {/* Moneda y Billetera en la misma fila */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="currency_id_to"

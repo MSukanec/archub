@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiRows } from '@/components/ui-custom/ComboBoxMultiRows';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -364,90 +363,64 @@ export default function OrganizationPreferences() {
         title: "Preferencias"
       }}
     >
-      <div className="space-y-8">
         {/* ActionBar - Desktop Only */}
         <ActionBarDesktop 
-          title="Preferencias de la Organización"
-          icon={<Settings className="h-5 w-5" />}
           showProjectSelector={false}
           showSearch={false}
           showGrouping={false}
           features={[
             {
-              icon: <Coins className="h-4 w-4" />,
               title: "Monedas Predeterminadas", 
               description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
             },
             {
-              icon: <Coins className="h-4 w-4" />,
               title: "Billeteras por Defecto",
               description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
             },
             {
-              icon: <Package2 className="h-4 w-4" />,
               title: "Conceptos de Finanzas", 
               description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
             },
             {
-              icon: <Settings className="h-4 w-4" />,
               title: "Preferencias Globales",
               description: "Administrar las preferencias globales que afectan a todos los proyectos"
             }
           ]}
         />
 
-        {/* FeatureIntroduction - Mobile Only */}
-        <FeatureIntroduction
-          icon={<Coins className="h-5 w-5" />}
-          title="Preferencias de la Organización"
           features={[
             {
-              icon: <Coins className="h-4 w-4" />,
               title: "Monedas Predeterminadas",
               description: "Configurar monedas predeterminadas y secundarias para movimientos financieros"
             },
             {
-              icon: <Coins className="h-4 w-4" />,
               title: "Billeteras por Defecto",
               description: "Establecer billeteras por defecto para optimizar la gestión de flujo de caja"
             },
             {
-              icon: <Package2 className="h-4 w-4" />,
               title: "Conceptos de Finanzas",
               description: "Administrar los conceptos disponibles para categorizar movimientos financieros"
             },
             {
-              icon: <Settings className="h-4 w-4" />,
               title: "Preferencias Globales",
               description: "Administrar las preferencias globales que afectan a todos los proyectos"
             }
           ]}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Titles and Descriptions */}
-          <div className="space-y-12">
             {/* Monedas y Billeteras Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Coins className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Monedas y Billeteras</h2>
                 <HelpPopover 
-                  title="Monedas y Billeteras"
                   description="Estas configuraciones determinan qué monedas y billeteras tendrás disponibles al crear movimientos financieros. Tu selección por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales."
                 />
               </div>
-              <p className="text-sm text-muted-foreground">
                 Configura las monedas y billeteras que utilizas frecuentemente en tu organización
               </p>
             </div>
           </div>
 
           {/* Right Column - Form Fields */}
-          <div className="space-y-8">
             {/* Monedas y Billeteras */}
-            <div className="space-y-4">
-              <div className="space-y-2">
                 <Label htmlFor="default-currency">Moneda por Defecto</Label>
                 <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
                   <SelectTrigger id="default-currency">
@@ -463,7 +436,6 @@ export default function OrganizationPreferences() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
                 <ComboBoxMultiRows
                   options={availableSecondaryCurrencies.map(currency => ({
@@ -477,7 +449,6 @@ export default function OrganizationPreferences() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="default-wallet">Billetera por Defecto</Label>
                 <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
                   <SelectTrigger id="default-wallet">
@@ -493,7 +464,6 @@ export default function OrganizationPreferences() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
                 <ComboBoxMultiRows
                   options={availableSecondaryWallets.map(wallet => ({
@@ -511,36 +481,22 @@ export default function OrganizationPreferences() {
         </div>
 
         {/* Section Divider */}
-        {/* <div className="border-t border-[var(--section-divider)] my-8" /> */}
 
         {/* Conceptos de Finanzas Section - TEMPORARILY HIDDEN */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Description */}
-          {/* <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Package2 className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Conceptos de Finanzas</h2>
                 <HelpPopover 
-                  title="Conceptos de Finanzas"
                   description="Administra los conceptos disponibles para categorizar tus movimientos financieros. Los conceptos del sistema son predeterminados, mientras que puedes crear conceptos personalizados para tu organización."
                 />
               </div>
-              <p className="text-sm text-muted-foreground">
                 Gestiona los conceptos disponibles para categorizar movimientos financieros. Los conceptos del sistema no pueden ser modificados, pero puedes crear conceptos personalizados para tu organización.
               </p>
             </div>
           </div> */}
 
           {/* Right Column - Concepts Tree */}
-          {/* <div className="space-y-4">
             {conceptsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
               </div>
             ) : concepts.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
               </div>
             ) : (
               <DraggableConceptTree

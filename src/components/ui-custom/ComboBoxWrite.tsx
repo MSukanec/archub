@@ -101,18 +101,14 @@ export function ComboBox({
           )}
           disabled={disabled}
         >
-          <span className="line-clamp-1 text-xs">
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0 bg-[var(--card-bg)] border-[var(--card-border)] shadow-lg max-h-60 overflow-hidden" 
         align="start" 
         style={{ zIndex: 9999 }}
       >
-        <Command className="bg-[var(--card-bg)]" shouldFilter={false}>
           <CommandInput 
             placeholder={searchPlaceholder}
             value={onSearchChange ? searchQuery : searchValue}
@@ -123,11 +119,8 @@ export function ComboBox({
                 setSearchValue(value);
               }
             }}
-            className="text-sm bg-[var(--card-bg)] border-none text-foreground placeholder:text-muted-foreground"
           />
-          <CommandList className="max-h-48 overflow-y-auto scrollbar-thin">
             {filteredOptions.length === 0 && !canCreateNew && (
-              <CommandEmpty className="text-sm text-muted-foreground py-3 text-center">{emptyMessage}</CommandEmpty>
             )}
             
             <CommandGroup>
@@ -136,7 +129,6 @@ export function ComboBox({
                   key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors"
                 >
                   <Check
                     className={cn(
@@ -144,7 +136,6 @@ export function ComboBox({
                       value === option.value ? "opacity-100 text-accent" : "opacity-0"
                     )}
                   />
-                  <span className="text-foreground truncate">{option.label}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -154,11 +145,8 @@ export function ComboBox({
                 <CommandItem
                   value={`create-${searchValue}`}
                   onSelect={handleCreateNew}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors border-t border-border"
                   disabled={isCreating}
                 >
-                  {createIcon && <span className="mr-2 text-accent">{createIcon}</span>}
-                  <span className="text-accent font-medium">
                     {isCreating 
                       ? `Creando "${searchValue.trim()}"...`
                       : createLabel(searchValue.trim())

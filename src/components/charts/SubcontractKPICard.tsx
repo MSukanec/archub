@@ -29,42 +29,28 @@ export function SubcontractKPICard({
 }: SubcontractKPICardProps) {
   if (isLoading) {
     return (
-      <Card className="h-full relative overflow-hidden">
-        <CardContent className="p-4 h-full flex flex-col">
-          <div className="h-12 bg-muted/20 rounded animate-pulse mb-4" />
-          <div className="flex-1"></div>
-          <div className="h-4 bg-muted/20 rounded animate-pulse mb-2" />
-          <div className="h-6 bg-muted/20 rounded animate-pulse" />
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="h-full relative overflow-hidden">
-      <CardContent className="p-4 h-full flex flex-col">
         {/* Spacer to push content down */}
-        <div className="flex-1"></div>
         
         {/* Icon and Title Section - positioned lower */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
             {icon && (
               <div style={{ color }}>
                 {icon}
               </div>
             )}
-            <span className="text-sm text-muted-foreground">
               {title}
             </span>
           </div>
-          <Badge variant="outline" className="text-xs">
             {currencyCode}
           </Badge>
         </div>
         
         {/* Amount - smaller size like reference */}
-        <div className="text-lg font-bold" style={{ color }}>
           {formatter(value)}
         </div>
       </CardContent>

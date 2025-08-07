@@ -63,8 +63,6 @@ export default function ConstructionLabor() {
       case 'propia':
         return (
           <EmptyState
-            icon={<UserCheck className="w-12 h-12 text-muted-foreground" />}
-            title="Mano de Obra Propia"
             description="Aquí podrás gestionar la mano de obra propia de tu organización. Esta funcionalidad estará disponible próximamente."
           />
         )
@@ -73,8 +71,6 @@ export default function ConstructionLabor() {
       case 'otros':
         return (
           <EmptyState
-            icon={<MoreHorizontal className="w-12 h-12 text-muted-foreground" />}
-            title="Otros"
             description="Otros tipos de mano de obra y recursos humanos. Esta funcionalidad estará disponible próximamente."
           />
         )
@@ -85,7 +81,6 @@ export default function ConstructionLabor() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
         {renderTabContent()}
       </div>
     </Layout>

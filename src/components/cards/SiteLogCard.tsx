@@ -91,44 +91,32 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
       actions={[
         {
           label: "Favorito",
-          icon: <Star className="w-4 h-4" />,
           onClick: () => onToggleFavorite(siteLog.id, !siteLog.is_favorite)
         },
         {
           label: "Editar",
-          icon: <Edit className="w-4 h-4" />,
           onClick: () => onEdit(siteLog)
         },
         {
           label: "Eliminar",
-          icon: <Trash2 className="w-4 h-4" />,
           variant: "destructive" as const,
           onClick: () => onDelete(siteLog)
         }
       ]}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <Card className="bg-[var(--card-bg)] border-[var(--card-border)] shadow-sm transition-all">
           <CollapsibleTrigger asChild>
-            <CardContent className="p-3 cursor-pointer">
-              <div className="flex items-center justify-between">
                 {/* Left side: Avatar + Info */}
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-8 h-8">
                     <AvatarImage 
                       src={siteLog.creator?.avatar_url || ''} 
                       alt={siteLog.creator?.full_name || 'Usuario'} 
                     />
-                    <AvatarFallback className="text-xs font-medium">
                       {getInitials(siteLog.creator?.full_name || 'Usuario')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium text-sm text-[var(--card-fg)]">
                       {siteLog.creator?.full_name || 'Usuario'}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-medium text-accent">
                         {entryTypeConfig.label}
                       </span>
                       <span>|</span>
@@ -140,11 +128,8 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                 </div>
 
                 {/* Right side: Chevron */}
-                <div className="flex items-center gap-2">
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
               </div>
@@ -152,23 +137,15 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
           </CollapsibleTrigger>
 
           <CollapsibleContent>
-            <CardContent className="px-3 pb-3 pt-0">
-              <div className="border-t border-muted-foreground/20 pt-3 space-y-4">
                 {/* Comments */}
                 {siteLog.comments && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Comentarios:</h4>
-                    <p className="text-sm text-muted-foreground">{siteLog.comments}</p>
                   </div>
                 )}
 
                 {/* Weather */}
                 {weatherConfig && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Clima:</h4>
-                    <div className="flex items-center gap-2">
-                      <weatherConfig.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{weatherConfig.label}</span>
                     </div>
                   </div>
                 )}
@@ -176,14 +153,9 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                 {/* Events */}
                 {siteLog.events && siteLog.events.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Eventos ({siteLog.events.length}):</h4>
-                    <div className="space-y-2">
                       {siteLog.events.map((event: any, index: number) => (
-                        <div key={index} className="p-2 bg-muted/30 rounded">
-                          <div className="font-medium text-xs text-accent mb-1">
                             {event.event_type?.name || 'Evento'}
                           </div>
-                          <p className="text-xs text-muted-foreground">{event.description}</p>
                         </div>
                       ))}
                     </div>
@@ -193,14 +165,9 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                 {/* Personnel */}
                 {siteLog.personnel && siteLog.personnel.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Asistencias ({siteLog.personnel.length}):</h4>
-                    <div className="space-y-2">
                       {siteLog.personnel.map((attendee: any, index: number) => (
-                        <div key={index} className="p-2 bg-blue-50 rounded">
-                          <div className="font-medium text-xs text-blue-800 mb-1">
                             {attendee.personnel?.full_name || 'Personal'}
                           </div>
-                          <div className="text-xs text-blue-600">
                             {attendee.attendance_type || 'Presente'}
                           </div>
                         </div>
@@ -212,14 +179,9 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                 {/* Equipment */}
                 {siteLog.equipment && siteLog.equipment.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Maquinaria ({siteLog.equipment.length}):</h4>
-                    <div className="space-y-2">
                       {siteLog.equipment.map((equipment: any, index: number) => (
-                        <div key={index} className="p-2 bg-amber-50 rounded">
-                          <div className="font-medium text-xs text-amber-800 mb-1">
                             {equipment.equipment?.name || 'Equipo'}
                           </div>
-                          <div className="text-xs text-amber-600">
                             Cantidad: {equipment.quantity || 1}
                           </div>
                         </div>
@@ -231,8 +193,6 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                 {/* Files */}
                 {siteLog.files && siteLog.files.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-sm mb-2">Archivos ({siteLog.files.length}):</h4>
-                    <div className="flex flex-wrap gap-2">
                       {siteLog.files.map((file: any, index: number) => {
                         const imageUrls = siteLog.files.filter((f: any) => f.file_type === 'image').map((f: any) => f.file_url);
                         
@@ -241,12 +201,9 @@ export default function SiteLogCard({ siteLog, onEdit, onDelete, onToggleFavorit
                             key={index}
                             src={file.file_url} 
                             alt={file.file_name}
-                            className="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => onImageClick && onImageClick(file.file_url, imageUrls)}
                           />
                         ) : (
-                          <div key={index} className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                            <FileText className="w-6 h-6 text-muted-foreground" />
                           </div>
                         );
                       })}

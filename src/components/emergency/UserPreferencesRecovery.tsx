@@ -91,13 +91,7 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <AlertTriangle className="h-12 w-12 text-yellow-500" />
           </div>
-          <CardTitle className="text-xl">Datos de Usuario Perdidos</CardTitle>
           <CardDescription>
             Se detectó que faltan las preferencias de usuario. Esto puede ocurrir por:
             <br />• Problemas de sincronización con la base de datos
@@ -105,10 +99,6 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
             <br />• Errores en funciones de base de datos
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h4 className="font-medium text-yellow-800 mb-2">¿Qué vamos a hacer?</h4>
-            <ul className="text-sm text-yellow-700 space-y-1">
               <li>• Recrear las preferencias con valores seguros</li>
               <li>• Restaurar acceso a organización y proyecto</li>
               <li>• Mantener configuración de tema</li>
@@ -119,11 +109,9 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
           <Button 
             onClick={handleRecoverPreferences} 
             disabled={isRecovering}
-            className="w-full"
           >
             {isRecovering ? (
               <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 Restaurando...
               </>
             ) : (
@@ -131,7 +119,6 @@ export function UserPreferencesRecovery({ userId, onRecoveryComplete }: UserPref
             )}
           </Button>
 
-          <p className="text-xs text-muted-foreground text-center">
             Esta acción es segura y no eliminará otros datos.
           </p>
         </CardContent>

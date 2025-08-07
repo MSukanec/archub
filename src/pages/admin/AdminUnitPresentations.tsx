@@ -94,7 +94,6 @@ export default function AdminUnitPresentations() {
       label: 'Fecha',
       width: '5%',
       render: (unitPresentation: UnitPresentation) => (
-        <span className="text-xs text-muted-foreground">
           {format(new Date(unitPresentation.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -103,11 +102,6 @@ export default function AdminUnitPresentations() {
       key: 'name',
       label: 'Presentación',
       render: (unitPresentation: UnitPresentation) => (
-        <div className="flex items-center gap-2">
-          <Ruler className="h-4 w-4 text-muted-foreground" />
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{unitPresentation.name}</span>
-            <span className="text-xs text-muted-foreground">
               {unitPresentation.equivalence} {unitPresentation.unit?.name}
             </span>
           </div>
@@ -118,8 +112,6 @@ export default function AdminUnitPresentations() {
       key: 'unit',
       label: 'Unidad Base',
       render: (unitPresentation: UnitPresentation) => (
-        <Badge variant="secondary" className="text-xs">
-          <Package className="h-3 w-3 mr-1" />
           {unitPresentation.unit?.name || 'Sin unidad'}
         </Badge>
       )
@@ -128,7 +120,6 @@ export default function AdminUnitPresentations() {
       key: 'equivalence',
       label: 'Equivalencia',
       render: (unitPresentation: UnitPresentation) => (
-        <span className="text-sm font-medium">
           {unitPresentation.equivalence}
         </span>
       )
@@ -137,7 +128,6 @@ export default function AdminUnitPresentations() {
       key: 'description',
       label: 'Descripción',
       render: (unitPresentation: UnitPresentation) => (
-        <span className="text-sm text-muted-foreground truncate max-w-[200px]">
           {unitPresentation.description || '-'}
         </span>
       )
@@ -147,22 +137,17 @@ export default function AdminUnitPresentations() {
       label: 'Acciones',
       width: '10%',
       render: (unitPresentation: UnitPresentation) => (
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(unitPresentation)}
-            className="h-7 w-7 p-0"
           >
-            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(unitPresentation)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >
-            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -171,11 +156,7 @@ export default function AdminUnitPresentations() {
 
   // Custom filters component
   const customFilters = (
-    <div className="grid grid-cols-1 gap-3">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Unidad Base</Label>
         <Select value={filterByUnit} onValueChange={setFilterByUnit}>
-          <SelectTrigger className="h-8">
             <SelectValue placeholder="Todas las unidades" />
           </SelectTrigger>
           <SelectContent>
@@ -189,10 +170,7 @@ export default function AdminUnitPresentations() {
         </Select>
       </div>
       
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -222,16 +200,12 @@ export default function AdminUnitPresentations() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
         {/* Unit Presentations Table */}
         <Table
           data={sortedUnitPresentations}
           columns={columns}
           isLoading={isLoading}
           emptyState={
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay unidades</h3>
-              <p className="text-sm text-muted-foreground mt-1">No hay unidades de presentación que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />

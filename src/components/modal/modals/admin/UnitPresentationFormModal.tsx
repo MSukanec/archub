@@ -118,7 +118,6 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Unit Selection */}
         <FormField
           control={form.control}
@@ -192,7 +191,6 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
               <FormControl>
                 <Textarea
                   placeholder="Descripción adicional de la presentación..."
-                  className="resize-none"
                   rows={3}
                   {...field}
                 />

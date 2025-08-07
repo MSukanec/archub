@@ -141,7 +141,6 @@ export default function ProjectHeroImage({
   };
 
   return (
-    <div className="w-full">
       {/* Hero Image Container */}
       <div 
         className={`relative w-full h-64 md:h-80 rounded-lg overflow-hidden transition-colors ${
@@ -158,21 +157,16 @@ export default function ProjectHeroImage({
             <img
               src={currentImageUrl}
               alt="Imagen principal del proyecto"
-              className="w-full h-full object-cover"
               key={currentImageUrl} // Force re-render when URL changes
             />
             
             {/* Overlay with actions */}
-            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-              <div className="flex gap-2">
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={() => document.getElementById('hero-image-input')?.click()}
                   disabled={isUploading}
-                  className="bg-white/90 text-black hover:bg-white"
                 >
-                  <Camera className="h-4 w-4 mr-1" />
                   Cambiar
                 </Button>
                 <Button
@@ -180,9 +174,7 @@ export default function ProjectHeroImage({
                   variant="destructive"
                   onClick={() => removeMutation.mutate()}
                   disabled={removeMutation.isPending}
-                  className="bg-red-500/90 hover:bg-red-500"
                 >
-                  <X className="h-4 w-4 mr-1" />
                   Eliminar
                 </Button>
               </div>
@@ -192,23 +184,14 @@ export default function ProjectHeroImage({
           <>
             {/* No Image Placeholder - styled like EmptyState */}
             <div 
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-muted-foreground/25 hover:border-[var(--accent)]/50 transition-colors bg-card rounded-lg"
               onClick={() => document.getElementById('hero-image-input')?.click()}
             >
-              <div className="text-center space-y-4 p-8">
-                <div className="w-16 h-16 mx-auto bg-muted/50 rounded-full flex items-center justify-center border border-muted-foreground/20">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground max-w-sm">
                     Arrastra una imagen aquí o haz clic para seleccionar la imagen principal de tu proyecto
                   </p>
-                  <p className="text-xs text-muted-foreground">
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 10MB
                   </p>
                 </div>
-                <Button disabled={isUploading} variant="outline" className="gap-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]">
-                  <Upload className="h-4 w-4" />
                   {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
                 </Button>
               </div>
@@ -218,10 +201,6 @@ export default function ProjectHeroImage({
         
         {/* Loading overlay */}
         {isUploading && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-4 flex items-center gap-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-              <span className="text-sm font-medium">Subiendo imagen...</span>
             </div>
           </div>
         )}
@@ -233,7 +212,6 @@ export default function ProjectHeroImage({
         type="file"
         accept="image/*"
         onChange={handleInputChange}
-        className="hidden"
       />
     </div>
   );

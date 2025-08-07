@@ -142,12 +142,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
   }
 
   const viewPanel = (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-lg">
-        <Building2 className="h-5 w-5 text-muted-foreground" />
         <div>
-          <p className="font-medium">{editingOrganization?.name}</p>
-          <p className="text-sm text-muted-foreground">
             Organización {editingOrganization?.is_active ? 'activa' : 'inactiva'}
           </p>
         </div>
@@ -157,7 +152,6 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
 
   const editPanel = (
     <Form {...form}>
-      <div className="space-y-4">
         <FormField
           control={form.control}
           name="name"

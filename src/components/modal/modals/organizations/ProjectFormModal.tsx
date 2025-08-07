@@ -265,15 +265,11 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
   const viewPanel = (
     <>
       <div>
-        <h4 className="font-medium">Nombre del proyecto</h4>
-        <p className="text-muted-foreground mt-1">
           {editingProject?.name || 'Sin nombre'}
         </p>
       </div>
       
       <div>
-        <h4 className="font-medium">Estado</h4>
-        <p className="text-muted-foreground mt-1">
           {editingProject?.status === 'active' ? 'Activo' : 
            editingProject?.status === 'completed' ? 'Completado' :
            editingProject?.status === 'paused' ? 'Pausado' : 'Inactivo'}
@@ -282,26 +278,18 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
       
       {editingProject?.creator && (
         <div>
-          <h4 className="font-medium">Creador</h4>
-          <p className="text-muted-foreground mt-1">{editingProject.creator.full_name}</p>
         </div>
       )}
       
       <div>
-        <h4 className="font-medium">Fecha de creación</h4>
-        <p className="text-muted-foreground mt-1">
           {editingProject?.created_at ? new Date(editingProject.created_at).toLocaleDateString('es-ES') : 'Sin fecha'}
         </p>
       </div>
       
       <div>
-        <h4 className="font-medium">Color del proyecto</h4>
-        <div className="flex items-center gap-2 mt-1">
           <div 
-            className="w-4 h-4 rounded border"
             style={{ backgroundColor: editingProject?.color || '#ffffff' }}
           />
-          <p className="text-muted-foreground">
             {editingProject?.color || '#ffffff'}
           </p>
         </div>
@@ -311,7 +299,6 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           {/* Creador */}
           <FormField
             control={form.control}
@@ -456,19 +443,16 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
               <FormItem>
                 <FormLabel>Color del proyecto</FormLabel>
                 <FormControl>
-                  <div className="flex items-center gap-2">
                     <Input
                       type="color"
                       value={field.value || "#ffffff"}
                       onChange={field.onChange}
-                      className="w-16 h-10 p-1 border rounded"
                     />
                     <Input
                       type="text"
                       value={field.value || "#ffffff"}
                       onChange={field.onChange}
                       placeholder="#ffffff"
-                      className="flex-1"
                     />
                   </div>
                 </FormControl>
@@ -489,7 +473,6 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
           <button
             type="button"
             onClick={() => setPanel('view')}
-            className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Volver
           </button>

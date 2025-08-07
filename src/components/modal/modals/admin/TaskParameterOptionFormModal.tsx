@@ -176,28 +176,19 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
   };
 
   const viewPanel = (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Nombre (visible)</h4>
-        <p className="text-muted-foreground mt-1">{option?.label || 'Sin nombre'}</p>
       </div>
       
       <div>
-        <h4 className="font-medium">Descripción</h4>
-        <p className="text-muted-foreground mt-1">{option?.description || 'Sin descripción'}</p>
       </div>
       
       <div>
-        <h4 className="font-medium">Slug</h4>
-        <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin slug'}</p>
       </div>
 
       {/* Show category and unit info for "Tipo de Tarea" parameter */}
       {isTipoTareaParameter && (
         <>
           <div>
-            <h4 className="font-medium">Categoría (Rubro)</h4>
-            <p className="text-muted-foreground mt-1">
               {(option as any)?.category_id 
                 ? categories.find(c => c.id === (option as any)?.category_id)?.name || 'Categoría no encontrada'
                 : 'Sin categoría'
@@ -206,8 +197,6 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
           </div>
           
           <div>
-            <h4 className="font-medium">Unidad</h4>
-            <p className="text-muted-foreground mt-1">
               {(option as any)?.unit_id 
                 ? units.find(u => u.id === (option as any)?.unit_id)?.name || 'Unidad no encontrada'
                 : 'Sin unidad'
@@ -220,9 +209,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
   );
 
   const editPanel = (
-    <div className="space-y-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           {/* Label Field */}
           <FormField
             control={form.control}
@@ -273,7 +260,6 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
                     {...field} 
                   />
                 </FormControl>
-                <div className="text-sm text-muted-foreground">
                   Se genera automáticamente basado en el nombre. Puedes modificarlo si es necesario.
                 </div>
                 <FormMessage />

@@ -61,9 +61,6 @@ export function CurrentPlan({
         userData?.plan?.name?.toLowerCase() === 'teams' && "border-[var(--plan-teams-bg)]",
         className
       )}>
-        {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-[var(--plan-free-bg)] transition-all duration-150" />}
-        {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-[var(--plan-pro-bg)] transition-all duration-150" />}
-        {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-[var(--plan-teams-bg)] transition-all duration-150" />}
       </div>
     );
   }
@@ -77,7 +74,6 @@ export function CurrentPlan({
       styles.container,
       className
     )}>
-      <div className="flex items-center gap-2 mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.05s_forwards]">
         <div className={cn(
           "rounded-full border-2 bg-white flex items-center justify-center transition-all duration-150",
           styles.iconContainer
@@ -89,7 +85,6 @@ export function CurrentPlan({
         <span className={cn(styles.title, "font-medium text-gray-600")}>Plan actual:</span>
       </div>
       
-      <div className="mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.1s_forwards]">
         <span className={cn(
           styles.planName,
           "font-semibold capitalize",

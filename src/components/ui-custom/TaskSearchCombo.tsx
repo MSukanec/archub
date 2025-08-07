@@ -88,7 +88,6 @@ export function TaskSearchCombo({
   const activeFiltersCount = Object.values(filters).filter(f => f && f !== 'all').length;
 
   return (
-    <div className="flex items-center gap-2">
       {/* Filtros a la izquierda */}
       {onFiltersChange && filterOptions && (
         <Popover open={showFilters} onOpenChange={setShowFilters}>
@@ -103,41 +102,30 @@ export function TaskSearchCombo({
                 activeFiltersCount > 0 && "bg-accent text-accent-foreground"
               )}
             >
-              <Filter className="w-4 h-4 font-normal" />
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-accent text-accent-foreground rounded-full text-[8px] flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-3" align="start">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Filtros</h4>
                 {activeFiltersCount > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onFiltersChange({ origin: 'all' })}
-                    className="h-6 px-2 text-xs"
                   >
-                    <X className="w-3 h-3 mr-1" />
                     Limpiar
                   </Button>
                 )}
               </div>
               
               {/* Filtro por Origen */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Origen</label>
                 <Select
                   value={filters.origin || "all"}
                   onValueChange={(value: 'all' | 'system' | 'organization') => 
                     onFiltersChange({ ...filters, origin: value })
                   }
                 >
-                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -149,8 +137,6 @@ export function TaskSearchCombo({
               </div>
 
               {/* Filtro por Rubro */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Rubro</label>
                 <Select
                   value={filters.rubro || ""}
                   onValueChange={(value) => 
@@ -163,7 +149,6 @@ export function TaskSearchCombo({
                     })
                   }
                 >
-                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
                     <SelectValue placeholder="Todos los rubros" />
                   </SelectTrigger>
                   <SelectContent>
@@ -176,8 +161,6 @@ export function TaskSearchCombo({
               </div>
 
               {/* Filtro por Categoría */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Categoría</label>
                 <Select
                   value={filters.category || ""}
                   onValueChange={(value) => 
@@ -190,7 +173,6 @@ export function TaskSearchCombo({
                   }
                   disabled={!filters.rubro}
                 >
-                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
                     <SelectValue placeholder={filters.rubro ? "Todas las categorías" : "Selecciona rubro primero"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -203,8 +185,6 @@ export function TaskSearchCombo({
               </div>
 
               {/* Filtro por Subcategoría */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Subcategoría</label>
                 <Select
                   value={filters.subcategory || ""}
                   onValueChange={(value) => 
@@ -212,7 +192,6 @@ export function TaskSearchCombo({
                   }
                   disabled={!filters.category}
                 >
-                  <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
                     <SelectValue placeholder={filters.category ? "Todas las subcategorías" : "Selecciona categoría primero"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -229,7 +208,6 @@ export function TaskSearchCombo({
       )}
 
       {/* Campo de búsqueda principal */}
-      <div className="flex-1">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <button
@@ -244,68 +222,53 @@ export function TaskSearchCombo({
               )}
               disabled={disabled}
             >
-              <span className="truncate text-left">
                 {selectedOption ? selectedOption.label : placeholder}
               </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </button>
           </PopoverTrigger>
           <PopoverContent 
-            className="p-0 z-[9999] bg-background border border-[var(--input-border)]" 
             align="start"
             style={{ width: 'var(--radix-popover-trigger-width)' }}
           >
-            <Command className="bg-background rounded-md border-[var(--input-border)]" shouldFilter={false}>
-              <div className="relative">
                 <CommandInput 
                   placeholder={searchPlaceholder} 
                   onValueChange={onSearchChange}
-                  className="text-xs h-8 border-0 bg-transparent placeholder:text-[var(--input-placeholder)] text-foreground pr-8"
                   value={searchQuery}
                 />
                 {searchQuery && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-accent/20"
                     onClick={() => {
                       if (onSearchChange) {
                         onSearchChange('');
                       }
                     }}
                   >
-                    <X className="h-3 w-3" />
                   </Button>
                 )}
               </div>
           
           {/* Solo mostrar CommandEmpty si no hay opciones Y hay una búsqueda activa */}
           {options.length === 0 && searchQuery.length >= 3 && (
-            <CommandEmpty className="text-xs py-3 px-3 text-center">
               {showCreateButton && onCreateTask ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Parece que esta tarea no existe, ¿quieres crearla tú?</p>
                   <button
                     type="button"
                     onClick={() => {
                       setOpen(false);
                       onCreateTask();
                     }}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
                   >
-                    <Plus className="w-4 h-4" />
                     Crear Tarea Personalizada
                   </button>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">{emptyText}</p>
               )}
             </CommandEmpty>
           )}
 
           {/* Solo mostrar CommandGroup si hay opciones */}
           {options.length > 0 && (
-            <CommandGroup className="max-h-48 overflow-auto">
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
@@ -314,7 +277,6 @@ export function TaskSearchCombo({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
-                  className="text-xs py-2 px-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-foreground"
                 >
                   <Check
                     className={cn(
@@ -322,7 +284,6 @@ export function TaskSearchCombo({
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <span className="truncate">{option.label}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -330,7 +291,6 @@ export function TaskSearchCombo({
 
           {/* Estado vacío cuando no hay búsqueda activa */}
           {options.length === 0 && searchQuery.length < 3 && (
-            <div className="py-2 px-3 text-xs text-[var(--input-placeholder)] text-center">
               Escribe al menos 3 caracteres para buscar
             </div>
           )}

@@ -21,7 +21,6 @@ export function TimePeriodSelector({
   ]
 
   return (
-    <div className="w-auto min-w-[140px]">
       <Selector
         options={timePeriodOptions}
         value={value}

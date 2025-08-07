@@ -99,7 +99,6 @@ export function OrganizationStatsCards({
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
       {stats.map((stat, index) => (
         <motion.div
           key={stat.title}
@@ -107,10 +106,7 @@ export function OrganizationStatsCards({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1, duration: 0.3 }}
         >
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-4">
               {/* Large Chart Taking Most Space */}
-              <div className="h-20 lg:h-24 mb-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stat.trendData}>
                     <Line 
@@ -126,18 +122,15 @@ export function OrganizationStatsCards({
               </div>
               
               {/* Small Icon and Title */}
-              <div className="flex items-center gap-2 mb-1">
                 <div className={`h-4 w-4 lg:h-5 lg:w-5 rounded-full bg-opacity-20 ${stat.bgColor} flex items-center justify-center`}>
                   <stat.icon className={`h-2 w-2 lg:h-3 lg:w-3 ${stat.color}`} />
                 </div>
-                <CardTitle className="text-xs lg:text-sm font-medium text-muted-foreground truncate">
                   {stat.title}
                 </CardTitle>
               </div>
               
               {/* Small Number at Bottom */}
               <motion.div 
-                className="text-sm lg:text-base font-bold text-foreground"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: index * 0.1 + 0.2, duration: 0.3 }}

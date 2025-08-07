@@ -133,7 +133,6 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
 
 
       {/* Fila: Moneda | Billetera */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="currency_id"
@@ -186,7 +185,6 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
       </div>
 
       {/* Fila: Monto | Cotización */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="amount"
@@ -233,7 +231,6 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
 
 
       {/* Campo para Selección de Subcontrato */}
-      <div className="col-span-2">
         <FormField
           control={form.control}
           name="subcontrato"
@@ -265,10 +262,7 @@ export function SubcontratosFields({ form, currencies, wallets, members, concept
       </div>
 
       {/* Botón para Configuración Adicional */}
-      <div className="col-span-2">
         <FormSubsectionButton
-          icon={<Package />}
-          title="Configuración de Subcontrato"
           description="Configura el subcontrato relacionado con este pago"
           onClick={onOpenTasksSubform}
         />

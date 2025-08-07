@@ -637,7 +637,6 @@ export function ConstructionTaskFormModal({
 
   // Panel de vista (vacío para este modal)
   const viewPanel = (
-    <div className="p-4 text-center text-muted-foreground">
       Este modal no tiene vista previa
     </div>
   );
@@ -645,7 +644,6 @@ export function ConstructionTaskFormModal({
   const editPanel = (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
-      className="flex flex-col h-full"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -654,31 +652,20 @@ export function ConstructionTaskFormModal({
       }}
     >
       {/* Sección fija superior */}
-      <div className="flex-shrink-0 space-y-6">
 
 
         {/* Errores y estado */}
-        <div className="space-y-2">
           {errors.selectedTasks && (
-            <p className="text-sm text-destructive">{errors.selectedTasks.message}</p>
           )}
         </div>
       </div>
 
       {/* Layout de dos columnas */}
-      <div className="flex-1 min-h-0 grid grid-cols-2 gap-4">
         {/* Columna Izquierda - Tareas Disponibles */}
-        <div className="border rounded-lg">
-          <div className="p-3 border-b bg-muted">
-            <h3 className="text-sm font-medium">Tareas Disponibles</h3>
           </div>
           
           {/* Filtros en la columna izquierda - inline */}
-          <div className="p-3 border-b space-y-3">
-            <div className="grid grid-cols-2 gap-3">
               {/* Filtro por Rubro */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
                   Filtrar por Rubro
                 </Label>
                 <ComboBox
@@ -688,28 +675,22 @@ export function ConstructionTaskFormModal({
                   placeholder="Todos los rubros"
                   searchPlaceholder="Buscar rubro..."
                   emptyMessage="No se encontraron rubros"
-                  className="text-xs"
                 />
               </div>
               
               {/* Campo de búsqueda */}
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
                   Búsqueda de Texto
                 </Label>
-                <div className="relative">
                   <input
                     type="text"
                     placeholder="Buscar por nombre o categoría..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       ✕
                     </button>
@@ -720,21 +701,13 @@ export function ConstructionTaskFormModal({
           </div>
           
           {/* Table Header */}
-          <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
-            <div className="text-xs font-medium">TAREA</div>
           </div>
 
           {/* Table Body */}
-          <ScrollArea className="h-[350px]">
-            <div className="divide-y">
               {filteredTasks.length === 0 ? (
-                <div className="text-center py-8 space-y-4">
-                  <div className="text-muted-foreground">
                     {searchQuery ? "No se encontraron tareas" : "No hay tareas disponibles"}
                   </div>
                   {searchQuery && (
-                    <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
                         ¿No encuentras la tarea que necesitas?
                       </p>
                       <Button
@@ -746,9 +719,7 @@ export function ConstructionTaskFormModal({
                           setPanel('subform');
                           setCurrentSubform('parametric-task');
                         }}
-                        className="gap-2"
                       >
-                        <Plus className="w-4 h-4" />
                         Crear Tarea Personalizada
                       </Button>
                     </div>
@@ -771,11 +742,8 @@ export function ConstructionTaskFormModal({
                     >
                       {/* Task Name */}
                       <div>
-                        <div className="text-sm leading-tight line-clamp-2">
                           {task.name_rendered || 'Sin nombre'}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
                     </div>
@@ -787,24 +755,13 @@ export function ConstructionTaskFormModal({
         </div>
 
         {/* Columna Derecha - Tareas Seleccionadas */}
-        <div className="border rounded-lg">
-          <div className="p-3 border-b bg-muted">
-            <h3 className="text-sm font-medium">Tareas Seleccionadas ({selectedTasks.length})</h3>
           </div>
           
           {/* Selected Tasks Header */}
-          <div className="grid gap-2 py-2 px-3 bg-muted/50 font-medium text-xs border-b" style={{gridTemplateColumns: "1fr auto auto auto"}}>
-            <div className="text-xs font-medium">TAREA</div>
-            <div className="text-xs font-medium w-16">CANT.</div>
-            <div className="text-xs font-medium w-20">FASE</div>
-            <div className="text-xs font-medium w-8"></div>
           </div>
 
           {/* Selected Tasks Body */}
-          <ScrollArea className="h-[350px]">
-            <div className="divide-y">
               {selectedTasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
                   No hay tareas seleccionadas
                 </div>
               ) : (
@@ -813,19 +770,14 @@ export function ConstructionTaskFormModal({
                   if (!task) return null;
                   
                   return (
-                    <div key={`${selectedTask.task_id}-${index}`} className="grid gap-2 py-3 px-3" style={{gridTemplateColumns: "1fr auto auto auto"}}>
                       {/* Task Name */}
                       <div>
-                        <div className="text-sm leading-tight line-clamp-2">
                           {task.name_rendered || 'Sin nombre'}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
 
                       {/* Cantidad Input */}
-                      <div className="w-16">
                         <Input
                           type="number"
                           value={selectedTask.quantity}
@@ -837,14 +789,12 @@ export function ConstructionTaskFormModal({
                               )
                             );
                           }}
-                          className="h-8 text-xs"
                           min="0"
                           step="0.01"
                         />
                       </div>
 
                       {/* Fase Select */}
-                      <div className="w-20">
                         <Select 
                           value={selectedTask.project_phase_id || ""}
                           onValueChange={(value) => {
@@ -855,7 +805,6 @@ export function ConstructionTaskFormModal({
                             );
                           }}
                         >
-                          <SelectTrigger className="h-8 text-xs">
                             <SelectValue placeholder="Fase" />
                           </SelectTrigger>
                           <SelectContent>
@@ -869,16 +818,13 @@ export function ConstructionTaskFormModal({
                       </div>
 
                       {/* Delete Button */}
-                      <div className="w-8">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0"
                           onClick={() => {
                             setSelectedTasks(prev => prev.filter((_, i) => i !== index));
                           }}
                         >
-                          <X className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -899,12 +845,8 @@ export function ConstructionTaskFormModal({
     switch (currentSubform) {
       case 'parametric-task':
         return (
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto space-y-6">
               {/* Tabs personalizadas al estilo ActionBar */}
-              <div className="px-6 pt-0 pb-0">
                 <div 
-                  className="flex items-center rounded-lg p-1 gap-0.5 bg-[var(--button-ghost-bg)] border border-[var(--card-border)] shadow-button-normal w-full"
                 >
                   <button
                     onClick={() => setActiveTab('parametric')}
@@ -932,14 +874,8 @@ export function ConstructionTaskFormModal({
               {activeTab === 'parametric' && (
                 <div>
                   {/* Título de sección para tarea paramétrica */}
-                  <div className="mb-4 px-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-                        <Layers className="w-4 h-4 text-accent" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-foreground">Tarea Paramétrica de la Comunidad</h3>
-                        <p className="text-xs text-muted-foreground">Esta tarea se generará mediante parámetros configurables y formará parte de la librería de tareas disponible para toda la comunidad de usuarios.</p>
                       </div>
                     </div>
                   </div>
@@ -961,25 +897,15 @@ export function ConstructionTaskFormModal({
               {activeTab === 'custom' && (
                 <div>
                   {/* Título de sección para tarea personalizada */}
-                  <div className="mb-4 px-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-                        <Wrench className="w-4 h-4 text-accent" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-foreground">Tarea Completamente Personalizada</h3>
-                        <p className="text-xs text-muted-foreground">Esta tarea será completamente personalizada y única para tu proyecto. Solo estará disponible para ti y no se compartirá con otros usuarios.</p>
                       </div>
                     </div>
                   </div>
                   
                   {/* Formulario de tarea personalizada */}
-                  <div className="space-y-6">
                     {/* 1. Rubro y Unidad en la misma fila */}
-                    <div className="grid grid-cols-2 gap-4">
                       {/* ComboBox para Rubros */}
-                      <div className="space-y-2">
-                        <Label className="text-xs font-medium text-foreground">
                           Rubro *
                         </Label>
                         <ComboBox
@@ -995,8 +921,6 @@ export function ConstructionTaskFormModal({
                       </div>
 
                       {/* Select para Unidades */}
-                      <div className="space-y-2">
-                        <Label className="text-xs font-medium text-foreground">
                           Unidad *
                         </Label>
                         <Select value={selectedUnitId} onValueChange={setSelectedUnitId} disabled={unitsLoading}>
@@ -1015,8 +939,6 @@ export function ConstructionTaskFormModal({
                     </div>
 
                     {/* 2. Textarea para Nombre de la Tarea */}
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium text-foreground">
                         Nombre de la Tarea *
                       </Label>
                       <Textarea
@@ -1024,7 +946,6 @@ export function ConstructionTaskFormModal({
                         value={taskNameText}
                         onChange={(e) => setTaskNameText(e.target.value)}
                         rows={3}
-                        className="resize-none"
                       />
                     </div>
                   </div>
@@ -1040,16 +961,13 @@ export function ConstructionTaskFormModal({
 
   const headerContent = currentPanel === 'subform' ? (
     <FormModalHeader
-      title="Crear Nueva Tarea Personalizada"
       description="Elige el método para crear tu nueva tarea de construcción"
       icon={Plus}
       leftActions={
         <Button
           variant="ghost"
           onClick={() => setPanel('edit')}
-          className="flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" />
           Volver
         </Button>
       }

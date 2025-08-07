@@ -196,8 +196,6 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     <>
       {isSystemConcept && (
         <div>
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Los conceptos del sistema no pueden ser modificados. Solo puedes ver su información.
             </AlertDescription>
@@ -206,7 +204,6 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           {/* Nombre del Concepto */}
           <FormField
             control={form.control}
@@ -249,7 +246,6 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
           {parentConcept && (
             <div>
               <Alert>
-                <Package2 className="h-4 w-4" />
                 <AlertDescription>
                   Este concepto será creado como hijo de: <strong>{parentConcept.name}</strong>
                 </AlertDescription>

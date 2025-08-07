@@ -123,14 +123,12 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Creator Field */}
         <FormField
           control={form.control}
           name="created_by"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
               <FormControl>
                 <UserSelector
                   users={organizationMembers?.map(member => ({
@@ -158,7 +156,6 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Nombre de la carpeta <span className="text-[var(--accent)]">*</span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -173,11 +170,6 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
 
         {/* Parent Info Display */}
         {parentName && (
-          <div className="p-3 bg-muted/30 rounded-md border">
-            <div className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Esta será una subcarpeta de: <span className="font-medium text-foreground">{parentName}</span>
               </span>
             </div>
           </div>
@@ -187,21 +179,14 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
   );
 
   const viewPanel = editingFolder ? (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Nombre</h4>
-        <p className="text-muted-foreground mt-1">{editingFolder.name}</p>
       </div>
       <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">
           {organizationMembers?.find(m => m.user_id === editingFolder.created_by)?.full_name || 'Usuario'}
         </p>
       </div>
       {parentName && (
         <div>
-          <h4 className="font-medium">Carpeta padre</h4>
-          <p className="text-muted-foreground mt-1">{parentName}</p>
         </div>
       )}
     </div>

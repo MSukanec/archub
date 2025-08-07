@@ -51,7 +51,6 @@ export default function SidebarButton({
     }
   };
   return (
-    <div className="relative group">
       <button
         ref={buttonRef}
         className={cn(
@@ -96,15 +95,12 @@ export default function SidebarButton({
     >
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
       {!isChild && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
               alt="Avatar"
-              className="w-[28px] h-[28px] rounded-full"
             />
           ) : userFullName ? (
-            <div className="w-[28px] h-[28px] rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
             </div>
           ) : (
@@ -126,7 +122,6 @@ export default function SidebarButton({
             {label}
           </span>
           {rightIcon && (
-            <div className="flex-shrink-0 ml-2">
               {rightIcon}
             </div>
           )}

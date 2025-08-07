@@ -125,10 +125,6 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
               <FormItem>
                 <FormLabel>Cliente</FormLabel>
                 <FormControl>
-                  <div className="flex items-center justify-center p-4 border-accent border-dashed border-2 rounded-lg bg-muted/50">
-                    <div className="text-center">
-                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground mb-2">
                         Aún no tienes Clientes, ¿quieres agregar uno?
                       </p>
                       <Link href="/project/clients">
@@ -163,7 +159,6 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
       />
 
       {/* Fila: Moneda | Billetera */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="currency_id"
@@ -216,7 +211,6 @@ export function AportesFields({ form, currencies, wallets, members, concepts, pr
       </div>
 
       {/* Fila: Cantidad | Cotización */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="amount"

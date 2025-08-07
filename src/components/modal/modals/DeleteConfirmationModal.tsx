@@ -125,19 +125,11 @@ export default function DeleteConfirmationModal({
   const viewPanel = null; // Not needed for delete confirmation
 
   const editPanel = (
-    <div className="space-y-6">
       {/* Warning section */}
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 flex-shrink-0">
-          <Trash2 className="h-6 w-6 text-destructive" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm text-foreground leading-relaxed">
             {description}
           </p>
           {itemName && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Elemento: <span className="font-medium text-foreground">{itemName}</span>
             </p>
           )}
         </div>
@@ -145,23 +137,15 @@ export default function DeleteConfirmationModal({
 
       {/* Dangerous mode input */}
       {mode === 'dangerous' && itemName && (
-        <div className="space-y-3">
-          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-              <p className="text-sm text-destructive font-medium">
                 Esta acción no se puede deshacer
               </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Para confirmar, escribí el nombre del elemento: <span className="font-medium text-foreground">{itemName}</span>
             </p>
           </div>
           <Input
             placeholder={`Escribí "${itemName}" para confirmar`}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="font-mono"
             autoFocus
           />
         </div>
@@ -169,8 +153,6 @@ export default function DeleteConfirmationModal({
 
       {/* Replace mode controls */}
       {mode === 'replace' && (
-        <div className="space-y-4">
-          <div className="space-y-2">
             <Label htmlFor="action-type">¿Qué acción querés realizar?</Label>
             <Select value={actionType} onValueChange={(value: 'delete' | 'replace') => setActionType(value)}>
               <SelectTrigger>
@@ -184,7 +166,6 @@ export default function DeleteConfirmationModal({
           </div>
 
           {actionType === 'replace' && (
-            <div className="space-y-2">
               <Label htmlFor="replacement-category">¿Por cuál {itemType} querés reemplazarlo?</Label>
               <ComboBox
                 value={selectedReplacementId}
@@ -201,10 +182,6 @@ export default function DeleteConfirmationModal({
 
       {/* Warning message for simple mode */}
       {mode === 'simple' && (
-        <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive font-medium">
               Esta acción no se puede deshacer
             </p>
           </div>
@@ -213,10 +190,6 @@ export default function DeleteConfirmationModal({
 
       {/* Warning message for replace mode */}
       {mode === 'replace' && (
-        <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive font-medium">
               {actionType === 'replace' 
                 ? `Esta acción reemplazará todos los usos del ${itemType} actual`
                 : 'Esta acción no se puede deshacer'

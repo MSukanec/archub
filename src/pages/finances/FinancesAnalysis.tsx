@@ -151,11 +151,8 @@ export default function FinancesAnalysis() {
         label: 'Categoría',
         width: '40%',
         render: (item: any) => (
-          <div className="space-y-1">
-            <div className="font-medium text-sm">
               {item.category}
             </div>
-            <div className="text-xs text-muted-foreground">
               {item.subcategory}
             </div>
           </div>
@@ -166,7 +163,6 @@ export default function FinancesAnalysis() {
         label: 'Monto',
         width: '30%',
         render: (item: any) => (
-          <div className="font-medium text-sm text-red-600 dark:text-red-400">
             {formatAmount(item.amount, item.currency_symbol)}
           </div>
         )
@@ -176,7 +172,6 @@ export default function FinancesAnalysis() {
         label: '% de Incidencia',
         width: '30%',
         render: (item: any) => (
-          <div className="font-medium text-sm">
             {item.percentage}%
           </div>
         )
@@ -419,7 +414,6 @@ export default function FinancesAnalysis() {
         label: 'Subcategoría',
         width: '40%',
         render: (item: any) => (
-          <div className="text-sm">
             {item.subcategory}
           </div>
         )
@@ -429,7 +423,6 @@ export default function FinancesAnalysis() {
         label: 'Monto',
         width: '30%',
         render: (item: any) => (
-          <div className="font-medium text-sm text-red-600 dark:text-red-400">
             {formatAmount(item.amount, item.currency_symbol)}
           </div>
         )
@@ -439,7 +432,6 @@ export default function FinancesAnalysis() {
         label: '% de Incidencia',
         width: '30%',
         render: (item: any) => (
-          <div className="font-medium text-sm">
             {item.percentage}%
           </div>
         )
@@ -451,22 +443,18 @@ export default function FinancesAnalysis() {
 
   const features = [
     {
-      icon: <Calculator className="w-6 h-6" />,
       title: "Cálculo Automático de Porcentajes",
       description: "Calcula automáticamente el porcentaje de incidencia de cada categoría sobre el total de egresos."
     },
     {
-      icon: <PieChart className="w-6 h-6" />,
       title: "Agrupación por Categoría",
       description: "Organiza los gastos por categoría y subcategoría para un análisis detallado de la distribución."
     },
     {
-      icon: <BarChart3 className="w-6 h-6" />,
       title: "Totales por Moneda",
       description: "Agrupa y suma los montos por tipo de moneda para análisis multi-divisa."
     },
     {
-      icon: <TrendingDown className="w-6 h-6" />,
       title: "Ordenamiento Inteligente",
       description: "Los conceptos se ordenan automáticamente de mayor a menor impacto económico."
     }
@@ -498,7 +486,6 @@ export default function FinancesAnalysis() {
         onTabChange: setActiveTab
       }}
     >
-      <div className="space-y-4">
 
 
         {/* Tab Content */}
@@ -521,9 +508,6 @@ export default function FinancesAnalysis() {
                     // Don't show totals for mixed currencies in discriminado mode
                     return (
                       <>
-                        <div className="col-span-1 truncate">{groupKey}</div>
-                        <div className="col-span-1 text-muted-foreground">-</div>
-                        <div className="col-span-1 text-muted-foreground">-</div>
                       </>
                     );
                   }
@@ -535,16 +519,11 @@ export default function FinancesAnalysis() {
                   
                   return (
                     <>
-                      <div className="col-span-1 truncate">{groupKey}</div>
-                      <div className="col-span-1">{formatAmount(totalAmount, currencySymbol)}</div>
-                      <div className="col-span-1">{totalPercentage}%</div>
                     </>
                   );
                 }}
                 emptyState={
                   <EmptyState
-                    icon={<BarChart3 className="h-8 w-8" />}
-                    title="No hay datos que coincidan"
                     description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
                   />
                 }
@@ -556,8 +535,6 @@ export default function FinancesAnalysis() {
                 isLoading={isLoading}
                 emptyState={
                   <EmptyState
-                    icon={<BarChart3 className="h-8 w-8" />}
-                    title="No hay datos que coincidan"
                     description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
                   />
                 }
@@ -565,14 +542,10 @@ export default function FinancesAnalysis() {
             )
           ) : expenseMovements.length === 0 ? (
             <EmptyState
-              icon={<TrendingDown className="h-8 w-8" />}
-              title="No hay egresos registrados"
               description="Comienza registrando movimientos de egreso en la sección de Movimientos para ver el análisis de gastos por categoría."
             />
           ) : (
             <EmptyState
-              icon={<BarChart3 className="h-8 w-8" />}
-              title="No hay datos que coincidan"
               description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
             />
           )
@@ -586,7 +559,6 @@ export default function FinancesAnalysis() {
                   label: 'Subcontrato',
                   width: '20%',
                   render: (item: any) => (
-                    <div className="font-medium text-sm">
                       {item.subcontrato}
                     </div>
                   )
@@ -596,7 +568,6 @@ export default function FinancesAnalysis() {
                   label: 'Proveedor',
                   width: '20%',
                   render: (item: any) => (
-                    <div className="text-sm">
                       {item.proveedor}
                     </div>
                   )
@@ -607,10 +578,8 @@ export default function FinancesAnalysis() {
                   width: '20%',
                   render: (item: any) => (
                     <div>
-                      <div className="font-medium text-sm">
                         {item.currencySymbol} {(item.montoTotal || 0).toLocaleString('es-AR')}
                       </div>
-                      <div className="text-xs text-muted-foreground">
                         USD {Math.round(item.montoTotalUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
@@ -622,10 +591,8 @@ export default function FinancesAnalysis() {
                   width: '20%',
                   render: (item: any) => (
                     <div>
-                      <div className="font-medium text-sm">
                         {item.currencySymbol} {(item.pagoALaFecha || 0).toLocaleString('es-AR')}
                       </div>
-                      <div className="text-xs text-muted-foreground">
                         USD {Math.round(item.pagoALaFechaUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
@@ -637,10 +604,8 @@ export default function FinancesAnalysis() {
                   width: '20%',
                   render: (item: any) => (
                     <div>
-                      <div className="font-medium text-sm">
                         {item.currencySymbol} {(item.saldo || 0).toLocaleString('es-AR')}
                       </div>
-                      <div className="text-xs text-muted-foreground">
                         USD {Math.round(item.saldoUSD || 0).toLocaleString('es-AR')}
                       </div>
                     </div>
@@ -652,36 +617,26 @@ export default function FinancesAnalysis() {
               mode="construction"
               emptyState={
                 <EmptyState
-                  icon={<Calculator className="h-8 w-8" />}
-                  title="No hay subcontratos registrados"
                   description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
                 />
               }
             />
           ) : (
             <EmptyState
-              icon={<Calculator className="h-8 w-8" />}
-              title="No hay subcontratos registrados"
               description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
             />
           )
         ) : (
           // Tab Gráficos - Múltiples visualizaciones
-          <div className="space-y-6">
             {/* Primera fila - Gráficos de categorías */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nuevo gráfico creativo */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
                     Análisis de Tendencias
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground">
                     Gráfico de barras con proyección y análisis comparativo
                   </p>
                 </CardHeader>
-                <CardContent className="pb-2">
                   <ExpensesTrendChart data={chartData || []} isLoading={isLoading} />
                 </CardContent>
               </Card>
@@ -689,15 +644,11 @@ export default function FinancesAnalysis() {
               {/* Sunburst Chart con título cambiado */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <LayoutGrid className="h-5 w-5" />
                     Egresos por Categorías
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground">
                     Distribución circular de gastos por categorías principales
                   </p>
                 </CardHeader>
-                <CardContent className="pb-2">
                   <ExpensesSunburstChart data={sunburstData || []} isLoading={isLoading} />
                 </CardContent>
               </Card>
@@ -706,22 +657,17 @@ export default function FinancesAnalysis() {
             {/* Segunda fila - Treemap de subcategorías */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
                   Mapa de Subcategorías
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
                   Visualización jerárquica de subcategorías con áreas proporcionales a los montos
                 </p>
               </CardHeader>
-              <CardContent className="pb-2">
                 <ExpensesTreemapChart data={treemapData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
 
             {/* Tercera fila - Sunburst Radial */}
             <Card>
-              <CardContent className="p-6">
                 <ExpensesSunburstRadialChart data={sunburstRadialData || []} isLoading={isLoading} />
               </CardContent>
             </Card>

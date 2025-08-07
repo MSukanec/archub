@@ -146,22 +146,18 @@ export default function AdminTaskParameters() {
   // Features for ActionBar expandable info
   const features = [
     {
-      icon: <Settings className="w-4 h-4" />,
       title: "Gestión Avanzada de Parámetros",
       description: "Sistema completo de administración de parámetros reutilizables para tareas de construcción con soporte para diferentes tipos de datos."
     },
     {
-      icon: <Building2 className="w-4 h-4" />,
       title: "Configuración de Opciones",
       description: "Permite crear y gestionar opciones personalizadas para parámetros de selección, organizadas en grupos para facilitar su uso."
     },
     {
-      icon: <Eye className="w-4 h-4" />,
       title: "Vista Unificada de Parámetros",
       description: "Visualización centralizada de todos los parámetros con estadísticas en tiempo real y herramientas de búsqueda avanzada."
     },
     {
-      icon: <Plus className="w-4 h-4" />,
       title: "Sistema de Templates Dinámicos",
       description: "Integración completa con plantillas de tareas para generar descripciones automáticas basadas en los parámetros configurados."
     }
@@ -170,7 +166,6 @@ export default function AdminTaskParameters() {
   // Custom filters dropdown for ActionBar
   const renderCustomFilters = () => (
     <Select value={sortBy} onValueChange={setSortBy}>
-      <SelectTrigger className="w-[140px]">
         <SelectValue placeholder="Ordenar por" />
       </SelectTrigger>
       <SelectContent>
@@ -185,7 +180,6 @@ export default function AdminTaskParameters() {
   if (isLoading) {
     return (
       <Layout wide={true}>
-        <div className="p-8 text-center text-muted-foreground">
           Cargando parámetros...
         </div>
       </Layout>
@@ -206,7 +200,6 @@ export default function AdminTaskParameters() {
 
     if (!parameter) {
       return (
-        <div className="text-center py-8 text-muted-foreground">
           Selecciona un parámetro para ver sus opciones
         </div>
       );
@@ -215,8 +208,6 @@ export default function AdminTaskParameters() {
     if (parameterValues.length === 0) {
       return (
         <EmptyState
-          icon={<Settings className="w-8 h-8 text-muted-foreground" />}
-          title="No hay opciones en este parámetro"
           description="Comienza agregando la primera opción para este parámetro"
         />
       );
@@ -228,14 +219,12 @@ export default function AdminTaskParameters() {
         key: 'label',
         label: 'Nombre (visible)',
         render: (value: TaskParameterOption) => (
-          <div className="font-medium text-sm">{value.label}</div>
         )
       },
       {
         key: 'description',
         label: 'Descripción',
         render: (value: TaskParameterOption) => (
-          <div className="text-sm text-muted-foreground">
             {value.description || 'Sin descripción'}
           </div>
         )
@@ -247,13 +236,10 @@ export default function AdminTaskParameters() {
           render: (value: TaskParameterOption) => {
             const unit = units.find(u => u.id === value.unit_id);
             return (
-              <div className="text-sm">
                 {unit ? (
-                  <Badge variant="outline" className="text-xs">
                     {unit.abbreviation || unit.name}
                   </Badge>
                 ) : (
-                  <span className="text-muted-foreground">Sin unidad</span>
                 )}
               </div>
             );
@@ -265,13 +251,10 @@ export default function AdminTaskParameters() {
           render: (value: TaskParameterOption) => {
             const category = categories.find(c => c.id === value.category_id);
             return (
-              <div className="text-sm">
                 {category ? (
-                  <Badge variant="secondary" className="text-xs">
                     {category.code} - {category.name}
                   </Badge>
                 ) : (
-                  <span className="text-muted-foreground">Sin categoría</span>
                 )}
               </div>
             );
@@ -282,18 +265,15 @@ export default function AdminTaskParameters() {
         key: 'name',
         label: 'Slug',
         render: (value: TaskParameterOption) => (
-          <div className="text-sm text-muted-foreground">{value.name}</div>
         )
       },
       {
         key: 'actions',
         label: 'Acciones',
         render: (value: TaskParameterOption) => (
-          <div className="flex items-center gap-2">
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0"
               onClick={() => {
                 openModal('task-parameter-option', {
                   parameterId: parameter.id,
@@ -302,12 +282,10 @@ export default function AdminTaskParameters() {
                 });
               }}
             >
-              <Edit className="h-3 w-3" />
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
               onClick={() => {
                 openModal('delete-confirmation', {
                   title: 'Eliminar Opción',
@@ -319,7 +297,6 @@ export default function AdminTaskParameters() {
                 });
               }}
             >
-              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         ),
@@ -382,12 +359,10 @@ export default function AdminTaskParameters() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
         {activeTab === "lista" && (
           <>
             {filteredAndSortedParameters.length === 0 ? (
               <EmptyState
-                icon={<Settings className="w-12 h-12 text-muted-foreground" />}
                 title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
                 description={searchTerm 
                   ? 'Prueba ajustando los filtros de búsqueda' 
@@ -399,14 +374,10 @@ export default function AdminTaskParameters() {
                 {/* Parameter Selection Card */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <List className="h-5 w-5" />
                       Seleccionar Parámetro
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="parameter-select">Parámetro</Label>
                           <Select
@@ -419,8 +390,6 @@ export default function AdminTaskParameters() {
                             <SelectContent>
                               {filteredAndSortedParameters.map((parameter) => (
                                 <SelectItem key={parameter.id} value={parameter.id}>
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-xs">
                                       {parameter.type}
                                     </Badge>
                                     {parameter.label}
@@ -432,15 +401,10 @@ export default function AdminTaskParameters() {
                         </div>
                         
                         {selectedParameter && (
-                          <div className="flex flex-col justify-end">
-                            <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
-                              <div className="text-sm text-muted-foreground mb-1">
                                 Parámetro seleccionado:
                               </div>
-                              <div className="font-medium">
                                 {selectedParameter.label}
                               </div>
-                              <div className="text-xs text-muted-foreground mt-1">
                                 Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
                               </div>
                             </div>
@@ -455,9 +419,6 @@ export default function AdminTaskParameters() {
                 {selectedParameter ? (
                   <ParameterValuesTable parameterId={selectedParameter.id} />
                 ) : (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <div className="text-lg font-medium mb-2">
                       Selecciona un parámetro
                     </div>
                     <div>

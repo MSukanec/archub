@@ -197,7 +197,6 @@ export default function AdminUsers() {
       label: 'Fecha de Registro',
       width: '16.66%',
       render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -207,7 +206,6 @@ export default function AdminUsers() {
       label: 'Última Actividad',
       width: '16.66%',
       render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
           {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -217,16 +215,10 @@ export default function AdminUsers() {
       label: 'Usuario',
       width: '16.66%',
       render: (user: User) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
             <AvatarImage src={user.avatar_url} />
-            <AvatarFallback className="text-xs">
               {user.full_name?.slice(0, 2).toUpperCase() || user.email.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{user.full_name || 'Sin nombre'}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
           </div>
         </div>
       )
@@ -236,9 +228,6 @@ export default function AdminUsers() {
       label: 'Organizaciones',
       width: '16.66%',
       render: (user: User) => (
-        <div className="flex items-center gap-1">
-          <Building className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xs">{user.organizations_count}</span>
         </div>
       )
     },
@@ -247,7 +236,6 @@ export default function AdminUsers() {
       label: 'Estado',
       width: '16.66%',
       render: (user: User) => (
-        <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
           {user.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       )
@@ -257,22 +245,17 @@ export default function AdminUsers() {
       label: 'Acciones',
       width: '16.66%',
       render: (user: User) => (
-        <div className="flex items-center space-x-2">
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => handleEdit(user)}
-            className="h-8 w-8 p-0"
           >
-            <Edit className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => handleDeleteDangerous(user)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
           >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -280,11 +263,7 @@ export default function AdminUsers() {
   ]
 
   const customFilters = (
-    <div className="space-y-3 w-72">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -295,10 +274,7 @@ export default function AdminUsers() {
         </Select>
       </div>
       
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Estado</Label>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -327,46 +303,24 @@ export default function AdminUsers() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Total Usuarios</p>
-                <p className="text-lg font-semibold">{stats?.total || 0}</p>
               </div>
-              <Users className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Usuarios Activos</p>
-                <p className="text-lg font-semibold">{stats?.active || 0}</p>
               </div>
-              <UserCheck className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Usuarios Inactivos</p>
-                <p className="text-lg font-semibold">{stats?.inactive || 0}</p>
               </div>
-              <UserX className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Con Organizaciones</p>
-                <p className="text-lg font-semibold">{stats?.withOrganizations || 0}</p>
               </div>
-              <Building className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
         </div>
@@ -377,9 +331,6 @@ export default function AdminUsers() {
           columns={columns}
           isLoading={isLoading}
           emptyState={
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay usuarios</h3>
-              <p className="text-sm text-muted-foreground mt-1">No hay usuarios que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />
@@ -400,7 +351,6 @@ export default function AdminUsers() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
             >
               Desactivar
             </AlertDialogAction>

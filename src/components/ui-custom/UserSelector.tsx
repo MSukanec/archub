@@ -37,16 +37,11 @@ export default function UserSelector({
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className={className}>
-        <div className="flex items-center gap-2">
           {selectedUser ? (
             <>
-              <User className="w-4 h-4 text-muted-foreground" />
-              <span className="truncate">{selectedUser.full_name || 'Sin nombre'}</span>
             </>
           ) : (
             <>
-              <User className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">{placeholder}</span>
             </>
           )}
         </div>
@@ -54,8 +49,6 @@ export default function UserSelector({
       <SelectContent>
         {sortedUsers.map((user) => (
           <SelectItem key={user.id} value={user.id}>
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-muted-foreground" />
               <span>{user.full_name || 'Sin nombre'}</span>
             </div>
           </SelectItem>

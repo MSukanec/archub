@@ -178,18 +178,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
 
   // Panel de vista (no se usa, pero requerido por la arquitectura)
   const viewPanel = (
-    <div className="space-y-4">
       <p>Vista no implementada</p>
     </div>
   );
 
   // Panel principal para edición
   const editPanel = (
-    <div className="space-y-4">
       {/* Fecha y Título - Inline */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="date" className="text-xs font-medium">
             Fecha *
           </Label>
           <DatePicker
@@ -202,12 +197,9 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             placeholder="Seleccionar fecha..."
           />
           {form.formState.errors.date && (
-            <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
           )}
         </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="title" className="text-xs font-medium">
             Título *
           </Label>
           <Input
@@ -216,14 +208,11 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             {...form.register('title')}
           />
           {form.formState.errors.title && (
-            <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
           )}
         </div>
       </div>
 
       {/* Estado */}
-      <div className="space-y-1">
-        <Label htmlFor="status" className="text-xs font-medium">
           Estado *
         </Label>
         <Select
@@ -241,26 +230,20 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           </SelectContent>
         </Select>
         {form.formState.errors.status && (
-          <p className="text-xs text-destructive">{form.formState.errors.status.message}</p>
         )}
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="notes" className="text-xs font-medium">
           Notas
         </Label>
         <Textarea
           id="notes"
           placeholder="Notas adicionales del subcontrato..."
           {...form.register('notes')}
-          className="min-h-[120px] resize-none"
         />
       </div>
 
       {/* Sección de Tareas del Subcontrato */}
       <FormSubsectionButton
-        icon={<Package />}
-        title="Tareas del Subcontrato"
         description={selectedTasks.length > 0 ? `${selectedTasks.length} tarea${selectedTasks.length !== 1 ? 's' : ''} seleccionada${selectedTasks.length !== 1 ? 's' : ''}` : "Selecciona las tareas que incluirá este subcontrato"}
         onClick={() => {
           setCurrentSubform('tasks');
@@ -308,30 +291,16 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const getSubform = () => {
     if (currentSubform === 'tasks') {
       return (
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Package className="w-4 h-4 text-accent" />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-foreground">Seleccionar Tareas del Proyecto</h3>
-              <p className="text-xs text-muted-foreground">Elige las tareas que incluirá este subcontrato</p>
             </div>
           </div>
 
           {/* Header de la tabla */}
-          <div className="grid grid-cols-12 gap-2 py-3 px-4 bg-muted/50 font-medium text-xs border-b rounded-t-lg border">
-            <div className="col-span-1 text-xs font-medium"></div>
-            <div className="col-span-8 text-xs font-medium">Tarea</div>
-            <div className="col-span-3 text-xs font-medium">Cantidad</div>
           </div>
 
           {/* Lista de tareas */}
-          <div className="border border-t-0 rounded-b-lg">
-            <ScrollArea className="h-[400px]">
-              <div className="divide-y">
                 {projectTasks.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
                     No hay tareas disponibles en este proyecto
                   </div>
                 ) : (
@@ -340,9 +309,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
                     const selectedQuantity = getSelectedQuantity(task.task_id || '');
                     
                     return (
-                      <div key={task.id} className="grid grid-cols-12 gap-2 py-3 px-4 hover:bg-muted/30">
                         {/* Checkbox */}
-                        <div className="col-span-1 flex items-center">
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={(checked) => 
@@ -352,23 +319,17 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
                         </div>
 
                         {/* Información de la tarea */}
-                        <div className="col-span-8">
-                          <div className="text-sm leading-tight line-clamp-2">
                             {task.task?.display_name || 'Tarea sin nombre'}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                            <span className="font-bold">{task.task?.category_name || 'Sin rubro'}</span>
                             <span>•</span>
                             <span>{task.task?.unit_name || 'UN'}</span>
                             <span>•</span>
-                            <span className="text-accent font-medium">
                               Total: {task.quantity || 0}
                             </span>
                           </div>
                         </div>
 
                         {/* Input de cantidad */}
-                        <div className="col-span-3">
                           {isSelected && (
                             <Input
                               type="number"
@@ -377,7 +338,6 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
                                 const newQuantity = parseFloat(e.target.value) || 1;
                                 handleQuantityChange(task.task_id || '', newQuantity);
                               }}
-                              className="h-8 text-xs"
                               min="0.01"
                               max={task.quantity || 999999}
                               step="0.01"

@@ -365,10 +365,7 @@ export function TemplateNameBuilder({
   );
 
   return (
-    <div className="space-y-3">
       {/* Action selector */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-muted-foreground">
           Acción de la Plantilla
         </label>
         <CustomCombobox
@@ -384,30 +381,21 @@ export function TemplateNameBuilder({
       </div>
 
       {/* Preview area */}
-      <div className="min-h-[80px] p-3 border border-input rounded-md bg-background">
         {elements.length === 0 ? (
-          <div className="text-muted-foreground text-sm flex items-center gap-2">
-            <Type className="h-4 w-4" />
             Seleccione una Acción para comenzar a construir la plantilla
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2 items-center">
             {elements.map((element) => (
-              <div key={element.id} className="flex items-center">
                 {element.type === 'parameter' ? (
                   <Badge 
                     variant="secondary" 
-                    className="flex items-center gap-1 px-2 py-1 bg-accent/20 hover:bg-accent/30 transition-colors"
                   >
-                    <span className="text-xs font-medium">
                       {element.parameter?.label || element.content}
                     </span>
                     {!disabled && (
                       <button
                         onClick={() => removeElement(element.id)}
-                        className="ml-1 hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
                       >
-                        <X className="h-3 w-3" />
                       </button>
                     )}
                   </Badge>
@@ -415,9 +403,7 @@ export function TemplateNameBuilder({
                   // Immutable action element (styled differently)
                   <Badge 
                     variant="outline" 
-                    className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
                   >
-                    <span className="text-xs font-medium">
                       {element.content}
                     </span>
                   </Badge>
@@ -425,9 +411,7 @@ export function TemplateNameBuilder({
                   // Immutable name element (styled similarly to action)
                   <Badge 
                     variant="outline" 
-                    className="flex items-center gap-1 px-2 py-1 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300"
                   >
-                    <span className="text-xs font-medium">
                       {element.content}
                     </span>
                   </Badge>
@@ -435,15 +419,12 @@ export function TemplateNameBuilder({
                   // Immutable period element
                   <Badge 
                     variant="outline" 
-                    className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300"
                   >
-                    <span className="text-xs font-medium">
                       {element.content}
                     </span>
                   </Badge>
                 ) : (
                   // Regular text element
-                  <div className="flex items-center">
                     {editingText === element.id ? (
                       <Input
                         ref={inputRef}
@@ -451,7 +432,6 @@ export function TemplateNameBuilder({
                         onChange={(e) => setEditingValue(e.target.value)}
                         onBlur={saveEditedText}
                         onKeyDown={handleKeyPress}
-                        className="h-6 text-xs px-1 py-0 min-w-[50px] w-auto"
                         style={{ width: `${Math.max(50, editingValue.length * 8)}px` }}
                       />
                     ) : (
@@ -467,9 +447,7 @@ export function TemplateNameBuilder({
                     {!disabled && editingText !== element.id && (
                       <button
                         onClick={() => removeElement(element.id)}
-                        className="ml-1 opacity-0 hover:opacity-100 hover:bg-destructive/20 rounded-full p-0.5 transition-all"
                       >
-                        <X className="h-3 w-3" />
                       </button>
                     )}
                   </div>
@@ -482,26 +460,19 @@ export function TemplateNameBuilder({
 
       {/* Control buttons */}
       {!disabled && (
-        <div className="flex gap-2">
           <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="h-8"
                 disabled={availableParameters.length === 0}
               >
-                <Plus className="h-4 w-4 mr-1" />
                 Insertar Parámetro
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-2 z-[9999]" align="start">
-              <div className="space-y-1">
-                <div className="text-xs font-medium text-muted-foreground mb-2">
                   Parámetros disponibles:
                 </div>
                 {availableParameters.length === 0 ? (
-                  <div className="text-xs text-muted-foreground py-2">
                     Todos los parámetros ya están en uso
                   </div>
                 ) : (
@@ -509,10 +480,7 @@ export function TemplateNameBuilder({
                     <button
                       key={parameter.id}
                       onClick={() => addParameter(parameter)}
-                      className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent rounded transition-colors"
                     >
-                      <div className="font-medium">{parameter.label}</div>
-                      <div className="text-xs text-muted-foreground">
                         {parameter.type}
                         {parameter.unit && ` (${parameter.unit})`}
                         {parameter.is_required && " • Requerido"}
@@ -528,10 +496,8 @@ export function TemplateNameBuilder({
             type="button"
             variant="outline" 
             size="sm" 
-            className="h-8"
             onClick={addTextElement}
           >
-            <Type className="h-4 w-4 mr-1" />
             Agregar Texto
           </Button>
         </div>
@@ -539,9 +505,6 @@ export function TemplateNameBuilder({
 
       {/* Preview with example values */}
       {elements.length > 0 && (
-        <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded border">
-          <div className="font-medium mb-1">Vista previa con valores de ejemplo:</div>
-          <div className="italic">
             {elements.map((element) => {
               if (element.type === 'parameter') {
                 // Generate example values based on parameter type

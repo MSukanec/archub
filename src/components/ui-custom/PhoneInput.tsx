@@ -60,7 +60,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
     };
 
     return (
-      <div className="flex">
         {/* Botón selector de país */}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -74,21 +73,15 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                 "hover:bg-[var(--input-bg)]"
               )}
             >
-              <div className="flex items-center gap-1">
-                <span className="text-base leading-none">{selectedCountry.flag}</span>
-                <span className="text-xs leading-tight">{selectedCountry.dialCode}</span>
-                <ChevronDown className="h-3 w-3 opacity-50 ml-0.5 shrink-0" />
               </div>
             </button>
           </PopoverTrigger>
           <PopoverContent 
-            className="w-[280px] p-0 border-[var(--input-border)]" 
             align="start"
             style={{
               boxShadow: 'none'
             }}
           >
-            <div className="max-h-[200px] overflow-auto">
               {countries.map((country) => (
                 <button
                   key={country.code}
@@ -101,9 +94,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
                     "bg-accent text-accent-foreground"
                   )}
                 >
-                  <span className="text-sm">{country.flag}</span>
-                  <span className="flex-1 font-medium text-xs">{country.name}</span>
-                  <span className="text-xs text-muted-foreground">
                     {country.dialCode}
                   </span>
                 </button>

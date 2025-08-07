@@ -181,8 +181,6 @@ export function ConstructionPhaseFormModal({
   const viewPanel = null; // No view mode for this modal
 
   const editPanel = (
-    <div className="space-y-4">
-      <div className="space-y-2">
         <Label htmlFor="name">Nombre de la Fase *</Label>
         <Input
           id="name"
@@ -190,11 +188,9 @@ export function ConstructionPhaseFormModal({
           {...register('name')}
         />
         {errors.name && (
-          <p className="text-sm text-red-500">{errors.name.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
         <Label htmlFor="description">Descripción</Label>
         <Textarea
           id="description"

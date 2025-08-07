@@ -50,14 +50,11 @@ export function FormSubsectionButton({
         )}
       >
         {/* Icon */}
-        <div className="flex-shrink-0 w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-          <div className="w-4 h-4 text-accent [&>svg]:w-4 [&>svg]:h-4">
             {icon}
           </div>  
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
           <div className={cn(
             "font-medium text-sm transition-colors duration-200",
             "text-foreground",
@@ -65,13 +62,11 @@ export function FormSubsectionButton({
           )}>
             {title}
           </div>
-          <div className="text-xs text-muted-foreground mt-0.5 truncate">
             {description}
           </div>
         </div>
 
         {/* Always Visible Add Icon */}
-        <div className="flex-shrink-0">
           <Plus className={cn(
             "h-4 w-4 text-muted-foreground transition-colors duration-200",
             isHovered && !disabled && "text-accent"

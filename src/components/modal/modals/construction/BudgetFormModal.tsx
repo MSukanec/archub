@@ -156,20 +156,13 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   };
 
   const viewPanel = (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Nombre del presupuesto</h4>
-        <p className="text-muted-foreground mt-1">{budget?.name || 'Sin nombre'}</p>
       </div>
       
       <div>
-        <h4 className="font-medium">Descripción</h4>
-        <p className="text-muted-foreground mt-1">{budget?.description || 'Sin descripción'}</p>
       </div>
 
       <div>
-        <h4 className="font-medium">Estado</h4>
-        <p className="text-muted-foreground mt-1">
           {budget?.status === 'draft' ? 'Borrador' : 
            budget?.status === 'approved' ? 'Aprobado' : 
            budget?.status === 'in_progress' ? 'En progreso' : 
@@ -179,8 +172,6 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       </div>
 
       <div>
-        <h4 className="font-medium">Fecha de creación</h4>
-        <p className="text-muted-foreground mt-1">
           {budget?.created_at ? new Date(budget.created_at).toLocaleDateString('es-ES') : 'Sin fecha'}
         </p>
       </div>
@@ -189,14 +180,12 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Fecha de creación */}
         <FormField
           control={form.control}
           name="created_at"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="required-asterisk">Fecha de creación</FormLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -219,7 +208,6 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="required-asterisk">Nombre del presupuesto</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Ej. Presupuesto de construcción principal"
@@ -241,7 +229,6 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
               <FormControl>
                 <Textarea 
                   placeholder="Describe brevemente el alcance de este presupuesto..."
-                  className="resize-none"
                   rows={3}
                   {...field}
                 />
@@ -257,7 +244,6 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="required-asterisk">Estado</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>

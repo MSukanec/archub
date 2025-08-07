@@ -121,7 +121,6 @@ export default function AdminProducts() {
       label: 'Fecha',
       width: '5%',
       render: (product: Product) => (
-        <span className="text-xs text-muted-foreground">
           {format(new Date(product.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -131,8 +130,6 @@ export default function AdminProducts() {
       label: 'Categoría',
       width: '20%',
       render: (product: Product) => (
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground font-mono leading-tight">
             {product.categoryHierarchy || 'Sin categoría'}
           </span>
         </div>
@@ -142,7 +139,6 @@ export default function AdminProducts() {
       key: 'material',
       label: 'Material',
       render: (product: Product) => (
-        <Badge variant="secondary" className="text-xs">
           {product.material?.name || 'Sin material'}
         </Badge>
       )
@@ -151,9 +147,6 @@ export default function AdminProducts() {
       key: 'brand',
       label: 'Marca',
       render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <Tag className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm">{product.brand?.name || 'Sin marca'}</span>
         </div>
       )
     },
@@ -161,9 +154,6 @@ export default function AdminProducts() {
       key: 'name',
       label: 'Modelo',
       render: (product: Product) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-sm">{product.name}</span>
-          <span className="text-xs text-muted-foreground">
             {product.unit_presentation ? 
               `${product.unit_presentation.name} (${product.unit_presentation.equivalence} ${product.unit_presentation.unit?.name})` : 
               'Sin unidad'
@@ -176,8 +166,6 @@ export default function AdminProducts() {
       key: 'default_price',
       label: 'Precio por Defecto',
       render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-mono">
             {product.default_price !== null && product.default_price !== undefined ? 
               `S/. ${product.default_price.toFixed(2)}` : 
               '-'
@@ -190,7 +178,6 @@ export default function AdminProducts() {
       key: 'default_provider',
       label: 'Proveedor por Defecto',
       render: (product: Product) => (
-        <span className="text-sm text-muted-foreground truncate max-w-[150px]">
           {product.default_provider || '-'}
         </span>
       )
@@ -199,7 +186,6 @@ export default function AdminProducts() {
       key: 'description',
       label: 'Descripción',
       render: (product: Product) => (
-        <span className="text-sm text-muted-foreground truncate max-w-[200px]">
           {product.description || '-'}
         </span>
       )
@@ -209,19 +195,15 @@ export default function AdminProducts() {
       label: 'URL',
       width: '8%',
       render: (product: Product) => (
-        <div className="flex items-center">
           {product.url ? (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.open(product.url, '_blank')}
-              className="h-7 px-2 text-blue-600 hover:text-blue-700"
             >
-              <ExternalLink className="h-3 w-3 mr-1" />
               URL
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">-</span>
           )}
         </div>
       )
@@ -231,7 +213,6 @@ export default function AdminProducts() {
       label: 'Imagen',
       width: '8%',
       render: (product: Product) => (
-        <div className="flex items-center">
           {product.image_url ? (
             <Button
               variant="ghost"
@@ -240,25 +221,20 @@ export default function AdminProducts() {
                 setLightboxImages([product.image_url!])
                 openLightbox(0)
               }}
-              className="h-7 w-7 p-0"
             >
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="h-6 w-6 object-cover rounded"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.innerHTML = '<Image className="h-3 w-3 text-muted-foreground" />';
                   }
                 }}
               />
             </Button>
           ) : (
-            <div className="flex items-center justify-center h-7 w-7">
-              <Image className="h-3 w-3 text-muted-foreground" />
             </div>
           )}
         </div>
@@ -269,30 +245,23 @@ export default function AdminProducts() {
       label: 'Acciones',
       width: '10%',
       render: (product: Product) => (
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(product)}
-            className="h-7 w-7 p-0"
           >
-            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDuplicate(product)}
-            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
           >
-            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(product)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >
-            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -301,11 +270,7 @@ export default function AdminProducts() {
 
   // Custom filters component
   const customFilters = (
-    <div className="grid grid-cols-1 gap-3">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Material</Label>
         <Select value={filterByMaterial} onValueChange={setFilterByMaterial}>
-          <SelectTrigger className="h-8">
             <SelectValue placeholder="Todos los materiales" />
           </SelectTrigger>
           <SelectContent>
@@ -319,10 +284,7 @@ export default function AdminProducts() {
         </Select>
       </div>
       
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Marca</Label>
         <Select value={filterByBrand} onValueChange={setFilterByBrand}>
-          <SelectTrigger className="h-8">
             <SelectValue placeholder="Todas las marcas" />
           </SelectTrigger>
           <SelectContent>
@@ -336,10 +298,7 @@ export default function AdminProducts() {
         </Select>
       </div>
       
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -369,16 +328,12 @@ export default function AdminProducts() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
         {/* Products Table */}
         <Table
           data={sortedProducts}
           columns={columns}
           isLoading={isLoading}
           emptyState={
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay productos</h3>
-              <p className="text-sm text-muted-foreground mt-1">No hay productos que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />

@@ -90,7 +90,6 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Brand Name */}
         <FormField
           control={form.control}

@@ -25,12 +25,9 @@ export function SubcontractPaymentsChart({
 }: SubcontractPaymentsChartProps) {
   if (isLoading) {
     return (
-      <Card className="col-span-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-muted/20 rounded animate-pulse" />
         </CardContent>
       </Card>
     )
@@ -38,13 +35,9 @@ export function SubcontractPaymentsChart({
 
   if (!data || data.length === 0) {
     return (
-      <Card className="col-span-4">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">No hay datos de pagos disponibles</div>
           </div>
         </CardContent>
       </Card>
@@ -63,10 +56,6 @@ export function SubcontractPaymentsChart({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium">{label}</p>
-          <p className="text-sm" style={{ color: 'var(--chart-1)' }}>
-            <span className="font-medium">Pagos: </span>
             {formatCurrency(payload[0].value)}
           </p>
         </div>
@@ -76,9 +65,6 @@ export function SubcontractPaymentsChart({
   }
 
   return (
-    <Card className="col-span-4">
-      <CardContent className="p-4">
-        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}

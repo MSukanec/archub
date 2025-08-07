@@ -34,15 +34,12 @@ export function FormModalFooter({
   const finalOnLeftClick = onLeftClick; // Permite manejar el cierre desde el componente padre
   const finalOnRightClick = onSubmit || onRightClick;
   return (
-    <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
-      <div className="flex gap-2 w-full">
         {finalLeftLabel && finalOnLeftClick ? (
           <>
             <Button
               type="button"
               variant="secondary"
               onClick={finalOnLeftClick}
-              className="w-1/4"
             >
               {finalLeftLabel}
             </Button>
@@ -50,7 +47,6 @@ export function FormModalFooter({
               type="button"
               variant={submitVariant}
               onClick={finalOnRightClick}
-              className="w-3/4"
               disabled={submitDisabled}
             >
               {showLoadingSpinner ? 'Cargando...' : finalRightLabel}
@@ -61,7 +57,6 @@ export function FormModalFooter({
             type="button"
             variant={submitVariant}
             onClick={finalOnRightClick}
-            className="w-full"
             disabled={submitDisabled}
           >
             {showLoadingSpinner ? 'Cargando...' : finalRightLabel}

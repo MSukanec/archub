@@ -189,26 +189,15 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
   };
 
   const viewPanel = (
-    <div className="space-y-4">
       <div>
-        <label className="text-sm font-medium">Título</label>
-        <p className="text-sm text-muted-foreground mt-1">{entry?.title}</p>
       </div>
       <div>
-        <label className="text-sm font-medium">Descripción</label>
-        <p className="text-sm text-muted-foreground mt-1">{entry?.description}</p>
       </div>
       <div>
-        <label className="text-sm font-medium">Tipo</label>
-        <p className="text-sm text-muted-foreground mt-1">{entry?.type}</p>
       </div>
       <div>
-        <label className="text-sm font-medium">Fecha</label>
-        <p className="text-sm text-muted-foreground mt-1">{entry?.date}</p>
       </div>
       <div>
-        <label className="text-sm font-medium">Visibilidad</label>
-        <p className="text-sm text-muted-foreground mt-1">
           {entry?.is_public ? 'Pública' : 'Privada'}
         </p>
       </div>
@@ -217,7 +206,6 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -241,7 +229,6 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
               <FormControl>
                 <Textarea 
                   placeholder="Descripción detallada del cambio"
-                  className="min-h-[100px]"
                   {...field} 
                 />
               </FormControl>
@@ -291,10 +278,7 @@ export function ChangelogFormModal({ modalData, onClose }: ChangelogFormModalPro
           control={form.control}
           name="is_public"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
                 <FormLabel>Entrada Pública</FormLabel>
-                <div className="text-xs text-muted-foreground">
                   La entrada será visible para todos los usuarios
                 </div>
               </div>

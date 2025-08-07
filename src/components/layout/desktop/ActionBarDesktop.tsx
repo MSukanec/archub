@@ -46,7 +46,6 @@ interface ActionBarDesktopProps {
   // Header section (new)
   title?: string
   icon?: React.ReactNode
-  // Expandable info section (now using FeatureIntroduction format)
   features?: FeatureItem[]
   // Project selector control
   showProjectSelector?: boolean
@@ -146,9 +145,7 @@ export function ActionBarDesktop({
       style={{ backgroundColor: "var(--card-bg)" }}
     >
       {/* Bottom Row - ActionBar Content */}
-      <div className="flex items-center justify-between px-4 py-3">
         {/* Left side - Tabs OR Budget Selector */}
-        <div className="flex items-center gap-3">
           {/* Tabs */}
           {tabs && activeTab && onTabChange && (
             <Tabs
@@ -160,8 +157,6 @@ export function ActionBarDesktop({
           
           {/* Budget Selector */}
           {budgetSelector && (
-            <div className="flex items-center gap-2">
-              <div className="w-64">
                 <Selector
                   options={budgetSelector.budgets.map((budget: any) => ({
                     value: budget.id,
@@ -170,24 +165,19 @@ export function ActionBarDesktop({
                   value={budgetSelector.selectedBudgetId}
                   onValueChange={budgetSelector.onBudgetChange}
                   placeholder="Selecciona un presupuesto"
-                  className="h-8"
                 />
               </div>
               
-              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost-icon"
                   onClick={budgetSelector.onEditBudget}
                 >
-                  <Edit className="w-4 h-4" />
                 </Button>
                 
                 <Button
                   variant="ghost-icon"
-                  className="text-destructive hover:text-destructive"
                   onClick={budgetSelector.onDeleteBudget}
                 >
-                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -195,8 +185,6 @@ export function ActionBarDesktop({
           
           {/* Parameter Selector */}
           {parameterSelector && (
-            <div className="flex items-center gap-2">
-              <div className="w-64">
                 <Selector
                   options={parameterSelector.parameters.map((parameter: any) => ({
                     value: parameter.id,
@@ -205,24 +193,19 @@ export function ActionBarDesktop({
                   value={parameterSelector.selectedParameterId}
                   onValueChange={parameterSelector.onParameterChange}
                   placeholder="Selecciona un parámetro"
-                  className="h-8"
                 />
               </div>
               
-              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost-icon"
                   onClick={parameterSelector.onEditParameter}
                 >
-                  <Edit className="w-4 h-4" />
                 </Button>
                 
                 <Button
                   variant="ghost-icon"
-                  className="text-destructive hover:text-destructive"
                   onClick={parameterSelector.onDeleteParameter}
                 >
-                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -230,7 +213,6 @@ export function ActionBarDesktop({
         </div>
 
         {/* Right side - Filters and Actions */}
-        <div className="flex items-center gap-2">
           {/* Custom Filters */}
           {customFilters && (
             <Popover>
@@ -241,11 +223,8 @@ export function ActionBarDesktop({
                     hasActiveFilters && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
                   )}
                 >
-                  <Filter className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-2">
-                <div className="space-y-1">
                   {customFilters}
                 </div>
               </PopoverContent>
@@ -262,11 +241,8 @@ export function ActionBarDesktop({
                     groupingType !== 'none' && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
                   )}
                 >
-                  <LayoutGrid className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56 p-0">
-                <div className="py-2">
                   {groupingOptions ? (
                     groupingOptions.map((option) => (
                       <button
@@ -335,9 +311,7 @@ export function ActionBarDesktop({
             <Button
               variant="ghost"
               onClick={onTodayClick}
-              title="Ir a hoy"
             >
-              <CalendarDays className="w-4 h-4 mr-1" />
               Hoy
             </Button>
           )}
@@ -363,7 +337,6 @@ export function ActionBarDesktop({
               <Button
                 onClick={onPrimaryActionClick}
               >
-                <Plus className="w-4 h-4 mr-2" />
                 {primaryActionLabel}
               </Button>
             </CustomRestricted>

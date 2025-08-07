@@ -102,10 +102,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
   const viewPanel = null // No necesitamos vista de solo lectura
 
   const editPanel = (
-    <div className="space-y-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="title"
@@ -149,7 +146,6 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="amount"
@@ -216,7 +212,6 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="status"
@@ -268,7 +263,6 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
                 <FormControl>
                   <Textarea
                     placeholder="Detalles adicionales sobre la oferta..."
-                    className="min-h-[100px]"
                     {...field}
                     value={field.value || ""}
                   />

@@ -264,31 +264,23 @@ export function TaskParameterDependencyManager() {
 
   if (parametersLoading || dependenciesLoading) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
         Cargando sistema de dependencias...
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
       {/* Header y botón para crear nueva dependencia */}
-      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <TreePine className="w-5 h-5" />
             Gestión de Dependencias entre Parámetros
           </h3>
-          <p className="text-sm text-muted-foreground">
             Define relaciones tipo "árbol genealógico" donde al elegir una opción se habilitan ciertos parámetros.
           </p>
         </div>
         <Button
           onClick={() => setIsCreating(true)}
           disabled={isCreating}
-          className="flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" />
           Nueva Dependencia
         </Button>
       </div>
@@ -297,7 +289,6 @@ export function TaskParameterDependencyManager() {
       {isCreating && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
               <span>Crear Nueva Dependencia</span>
               <Button
                 variant="ghost"
@@ -312,15 +303,10 @@ export function TaskParameterDependencyManager() {
                   });
                 }}
               >
-                <X className="w-4 h-4" />
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
             {/* Parte 1: Definir la dependencia básica */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Parámetro Padre</label>
                 <Select
                   value={newDependency.parent_parameter_id}
                   onValueChange={(value) => setNewDependency(prev => ({
@@ -342,8 +328,6 @@ export function TaskParameterDependencyManager() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Opción del Padre</label>
                 <Select
                   value={newDependency.parent_option_id}
                   onValueChange={(value) => setNewDependency(prev => ({ ...prev, parent_option_id: value }))}
@@ -362,8 +346,6 @@ export function TaskParameterDependencyManager() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Parámetro Hijo</label>
                 <Select
                   value={newDependency.child_parameter_id}
                   onValueChange={(value) => setNewDependency(prev => ({
@@ -390,16 +372,11 @@ export function TaskParameterDependencyManager() {
 
             {/* Parte 2: Seleccionar opciones del parámetro hijo (opcional) */}
             {newDependency.child_parameter_id && childOptions.length > 0 && (
-              <div className="space-y-3">
                 <Separator />
                 <div>
-                  <h4 className="font-medium mb-2">Opciones Habilitadas del Parámetro Hijo (Opcional)</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
                     Si no seleccionas ninguna opción, se habilitarán todas las opciones del parámetro hijo.
                   </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {childOptions.map((option) => (
-                      <div key={option.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={option.id}
                           checked={newDependency.selected_child_options.includes(option.id)}
@@ -407,7 +384,6 @@ export function TaskParameterDependencyManager() {
                         />
                         <label
                           htmlFor={option.id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
                           {option.label}
                         </label>
@@ -418,7 +394,6 @@ export function TaskParameterDependencyManager() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -437,7 +412,6 @@ export function TaskParameterDependencyManager() {
                 onClick={handleCreateDependency}
                 disabled={createDependencyMutation.isPending}
               >
-                <Save className="w-4 h-4 mr-2" />
                 {createDependencyMutation.isPending ? 'Guardando...' : 'Guardar Dependencia'}
               </Button>
             </div>
@@ -446,84 +420,57 @@ export function TaskParameterDependencyManager() {
       )}
 
       {/* Lista de dependencias existentes */}
-      <div className="space-y-4">
-        <h4 className="font-semibold">Dependencias Configuradas ({dependencies.length})</h4>
         
         {dependencies.length === 0 ? (
           <Card>
-            <CardContent className="text-center py-8">
-              <TreePine className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="font-medium mb-2">No hay dependencias configuradas</h3>
-              <p className="text-sm text-muted-foreground">
                 Crea tu primera dependencia para empezar a construir el árbol de parámetros.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
             {dependencies.map((dependency) => (
               <Card key={dependency.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0"
                         onClick={() => toggleDependencyExpansion(dependency.id)}
                       >
                         {expandedDependencies.has(dependency.id) ? (
-                          <ChevronDown className="w-4 h-4" />
                         ) : (
-                          <ChevronRight className="w-4 h-4" />
                         )}
                       </Button>
                       
-                      <div className="flex items-center gap-2 text-sm">
                         <Badge variant="outline">
                           {dependency.parent_parameter?.label}
                         </Badge>
-                        <span className="text-muted-foreground">→</span>
                         <Badge variant="secondary">
                           {dependency.parent_option?.label}
                         </Badge>
-                        <span className="text-muted-foreground">activa</span>
                         <Badge variant="default">
                           {dependency.child_parameter?.label}
                         </Badge>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                         onClick={() => deleteDependencyMutation.mutate(dependency.id)}
                         disabled={deleteDependencyMutation.isPending}
                       >
-                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
 
                   {/* Detalle expandido */}
                   {expandedDependencies.has(dependency.id) && (
-                    <div className="mt-4 pt-4 border-t space-y-2">
-                      <div className="text-sm">
-                        <p className="font-medium">Regla de dependencia:</p>
-                        <p className="text-muted-foreground">
                           Cuando se seleccione "{dependency.parent_option?.label}" en "{dependency.parent_parameter?.label}", 
                           se habilitará el parámetro "{dependency.child_parameter?.label}".
                         </p>
                       </div>
                       
                       {dependency.child_options && dependency.child_options.length > 0 && (
-                        <div className="text-sm">
-                          <p className="font-medium">Opciones habilitadas en el parámetro hijo:</p>
-                          <div className="flex flex-wrap gap-1 mt-1">
                             {dependency.child_options.map((option) => (
-                              <Badge key={option.id} variant="outline" className="text-xs">
                                 {option.label}
                               </Badge>
                             ))}
@@ -532,8 +479,6 @@ export function TaskParameterDependencyManager() {
                       )}
                       
                       {(!dependency.child_options || dependency.child_options.length === 0) && (
-                        <div className="text-sm">
-                          <p className="text-muted-foreground">
                             Se habilitarán todas las opciones del parámetro hijo.
                           </p>
                         </div>

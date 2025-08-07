@@ -169,8 +169,6 @@ export function ConstructionTaskScheduleModal({
   };
 
   const viewPanel = (
-    <div className="space-y-6">
-      <div className="text-center py-8 text-muted-foreground">
         Vista de cronograma de tareas
       </div>
     </div>
@@ -179,7 +177,6 @@ export function ConstructionTaskScheduleModal({
   const editPanel = (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
-      className="space-y-6"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -188,16 +185,11 @@ export function ConstructionTaskScheduleModal({
       }}
     >
       {/* Información de la tarea */}
-      <div className="p-3">
-        <h4 className="font-medium mb-2">Tarea:</h4>
-        <p className="text-sm text-muted-foreground leading-5">
           {modalData.editingTask?.task?.display_name || modalData.editingTask?.task?.code || 'Sin nombre'}
         </p>
       </div>
 
       {/* Fase y Progreso en línea */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
           <Label htmlFor="project_phase_id">Fase del Proyecto</Label>
           <Select 
             value={watch('project_phase_id') || ""}
@@ -216,11 +208,9 @@ export function ConstructionTaskScheduleModal({
             </SelectContent>
           </Select>
           {errors.project_phase_id && (
-            <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
           <Label htmlFor="progress_percent">Progreso (%)</Label>
           <Input
             type="number"
@@ -234,14 +224,11 @@ export function ConstructionTaskScheduleModal({
             })}
           />
           {errors.progress_percent && (
-            <p className="text-sm text-destructive">{errors.progress_percent.message}</p>
           )}
         </div>
       </div>
 
       {/* Fecha de inicio y Duración en línea */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
           <Label htmlFor="start_date">Fecha de Inicio</Label>
           <Input
             type="date"
@@ -249,11 +236,9 @@ export function ConstructionTaskScheduleModal({
             {...register('start_date')}
           />
           {errors.start_date && (
-            <p className="text-sm text-destructive">{errors.start_date.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
           <Label htmlFor="duration_in_days">Duración (días)</Label>
           <Input
             type="number"
@@ -266,13 +251,11 @@ export function ConstructionTaskScheduleModal({
             })}
           />
           {errors.duration_in_days && (
-            <p className="text-sm text-destructive">{errors.duration_in_days.message}</p>
           )}
         </div>
       </div>
 
       {/* Notas */}
-      <div className="space-y-2">
         <Label htmlFor="notes">Notas</Label>
         <Textarea
           id="notes"
@@ -281,7 +264,6 @@ export function ConstructionTaskScheduleModal({
           rows={3}
         />
         {errors.notes && (
-          <p className="text-sm text-destructive">{errors.notes.message}</p>
         )}
       </div>
     </form>
@@ -289,7 +271,6 @@ export function ConstructionTaskScheduleModal({
 
   const headerContent = (
     <FormModalHeader 
-      title="Cronograma de Tarea"
       icon={Calendar}
     />
   );

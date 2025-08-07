@@ -13,7 +13,6 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Badge } from '@/components/ui/badge'
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
 interface Contact {
@@ -212,22 +211,18 @@ export default function ProjectClients() {
   // ActionBar features
   const features = [
     {
-      icon: <UserCheck className="h-4 w-4" />,
       title: "Vincular Contactos al Proyecto",
       description: "Agrega contactos de tu organización como clientes del proyecto actual para un control detallado."
     },
     {
-      icon: <CreditCard className="h-4 w-4" />,
       title: "Gestión de Compromisos Financieros",
       description: "Administra los montos comprometidos por cada cliente y configura las monedas correspondientes."
     },
     {
-      icon: <Users className="h-4 w-4" />,
       title: "Roles y Permisos",
       description: "Asigna roles específicos a cada cliente y controla su nivel de acceso a la información del proyecto."
     },
     {
-      icon: <TrendingUp className="h-4 w-4" />,
       title: "Seguimiento de Aportes",
       description: "Conecta automáticamente los aportes financieros con los clientes correspondientes para un seguimiento completo."
     }
@@ -236,16 +231,11 @@ export default function ProjectClients() {
   if (isLoading || loadingClients) {
     return (
       <Layout>
-        <div className="space-y-6">
           <ActionBarDesktop
-            title="Gestión de Clientes del Proyecto"
-            icon={<Handshake className="h-5 w-5" />}
             features={features}
             primaryActionLabel="Agregar Cliente"
             onPrimaryActionClick={() => openModal('project-client')}
           />
-          <div className="flex items-center justify-center h-64">
-            <div className="text-sm text-muted-foreground">Cargando clientes...</div>
           </div>
         </div>
       </Layout>
@@ -254,48 +244,30 @@ export default function ProjectClients() {
 
   return (
     <Layout>
-      <div className="space-y-6">
         {/* ActionBar */}
         <ActionBarDesktop
-          title="Gestión de Clientes del Proyecto"
-          icon={<Handshake className="h-5 w-5" />}
           features={features}
           primaryActionLabel="Agregar Cliente"
           onPrimaryActionClick={() => openModal('project-client')}
         />
 
         {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Gestión de Clientes del Proyecto"
-          icon={<Handshake className="h-6 w-6" />}
           features={features}
-          className="md:hidden"
         />
 
         {/* Conditional rendering: Two-column layout OR full-width empty state */}
         {projectClients && projectClients.length > 0 ? (
           /* Two Column Layout - Section descriptions left, content right */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Column - Section Description */}
-            <div className="lg:col-span-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Handshake className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Clientes Activos</h2>
               </div>
-              <p className="text-sm text-muted-foreground">
                 Gestiona los clientes vinculados al proyecto actual. Controla sus compromisos financieros y nivel de acceso.
               </p>
-              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                <div className="text-xs text-muted-foreground mb-1">Total de clientes</div>
-                <div className="text-2xl font-bold text-foreground">
                   {projectClients?.length || 0}
                 </div>
               </div>
             </div>
 
             {/* Right Column - Clients Content */}
-            <div className="lg:col-span-8">
-              <div className="space-y-2">
                 {projectClients.map((client) => {
                   const contact = client.contact
                   const displayName = contact?.company_name || 
@@ -305,28 +277,16 @@ export default function ProjectClients() {
                     : `${contact?.first_name?.charAt(0) || ''}${contact?.last_name?.charAt(0) || ''}`.toUpperCase()
 
                   return (
-                    <Card key={client.id} className="p-4">
-                      <CardContent className="p-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback className="text-sm">{initials}</AvatarFallback>
                             </Avatar>
                             
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-medium text-sm">
                                   {displayName}
                                 </h4>
                               </div>
-                              <p className="text-xs text-muted-foreground">
                                 {contact?.email || 'Sin email'}
                               </p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-4">
-                            <Badge variant="secondary" className="text-xs">
                               {client.role || 'Cliente'}
                             </Badge>
 
@@ -335,9 +295,7 @@ export default function ProjectClients() {
                               size="sm"
                               onClick={() => handleRemoveClient(client)}
                               disabled={removeClientMutation.isPending}
-                              className="h-8 w-8 p-0"
                             >
-                              <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </div>
                         </div>
@@ -349,10 +307,7 @@ export default function ProjectClients() {
             </div>
           </div>
         ) : (
-          /* Full-width Custom Empty State - spans entire width below FeatureIntroduction */
           <EmptyState
-            icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
-            title="No hay clientes agregados"
             description="Comienza agregando el primer cliente al proyecto desde tus contactos organizacionales."
           />
         )}

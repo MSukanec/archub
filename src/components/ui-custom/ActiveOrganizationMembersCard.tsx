@@ -21,17 +21,13 @@ export function ActiveOrganizationMembersCard({ members }: ActiveOrganizationMem
   const remainingCount = members.length > 4 ? members.length - 4 : 0;
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center -space-x-1">
         {displayMembers.map((member) => (
           <Avatar 
             key={member.id} 
-            className="w-12 h-12 border-3 border-[var(--card-bg)] avatar-border"
           >
             {member.avatar_url ? (
               <AvatarImage src={member.avatar_url} alt="Avatar" />
             ) : (
-              <AvatarFallback className="text-base font-semibold">
                 {member.user?.full_name
                   ? member.user.full_name
                       .split(' ')
@@ -48,7 +44,6 @@ export function ActiveOrganizationMembersCard({ members }: ActiveOrganizationMem
         ))}
       </div>
       {remainingCount > 0 && (
-        <div className="text-lg font-semibold text-muted-foreground">
           +{remainingCount}
         </div>
       )}

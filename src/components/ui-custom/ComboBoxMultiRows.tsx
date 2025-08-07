@@ -64,22 +64,17 @@ export function ComboBoxMultiRows({
     <div className={cn("space-y-3", className)}>
       {/* Selected items */}
       {value.length > 0 && (
-        <div className="space-y-2">
           {value.map((selectedValue) => (
             <div
               key={selectedValue}
-              className="flex items-center gap-2"
             >
-              <div className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 items-center">
                 {getOptionLabel(selectedValue)}
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleRemove(selectedValue)}
-                className="text-destructive hover:text-destructive h-10 w-10 p-0 shrink-0"
               >
-                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
@@ -88,7 +83,6 @@ export function ComboBoxMultiRows({
 
       {/* ComboBox for adding new item */}
       {showComboBox && availableOptions.length > 0 && (
-        <div className="space-y-2">
           <ComboBox
             options={availableOptions}
             value={newValue}
@@ -107,16 +101,13 @@ export function ComboBoxMultiRows({
         <Button
           variant="default"
           onClick={() => setShowComboBox(true)}
-          className="w-full"
         >
-          <Plus className="h-4 w-4 mr-2" />
           {addButtonText}
         </Button>
       )}
 
       {/* No more options available */}
       {availableOptions.length === 0 && value.length < options.length && (
-        <p className="text-sm text-muted-foreground">
           Todas las opciones disponibles han sido seleccionadas.
         </p>
       )}

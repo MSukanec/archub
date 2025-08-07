@@ -17,7 +17,6 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
 import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
 import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 import { Card } from '@/components/ui/card';
 
 function TasksContent() {
@@ -64,26 +63,22 @@ function TasksContent() {
     setActions({
       slot2: {
         id: 'search',
-        icon: <Search className="h-5 w-5" />,
         label: 'Buscar',
         onClick: () => {} // TODO: implement search
       },
       slot3: {
         id: 'create',
-        icon: <Plus className="h-6 w-6" />,
         label: 'Nueva Lista',
         onClick: () => openModal('list', { boardId: currentBoardId }),
         variant: 'primary'
       },
       slot4: {
         id: 'filter',
-        icon: <Filter className="h-5 w-5" />,
         label: 'Filtros',
         onClick: () => {} // TODO: implement filters
       },
       slot5: {
         id: 'clear',
-        icon: <X className="h-5 w-5" />,
         label: 'Limpiar',
         onClick: () => {} // TODO: implement clear filters
       }
@@ -176,9 +171,6 @@ function TasksContent() {
 
     return (
       <Layout headerProps={loadingHeaderProps} wide={true}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-lg font-semibold">Cargando tableros...</div>
           </div>
         </div>
       </Layout>
@@ -195,28 +187,20 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
-        {/* FeatureIntroduction */}
-        <FeatureIntroduction
-          title="Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
           features={[
             {
-              icon: <Kanban className="w-5 h-5" />,
               title: "Tableros Kanban organizados",
               description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
             },
             {
-              icon: <List className="w-5 h-5" />,
               title: "Listas flexibles y personalizables",
               description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
             },
             {
-              icon: <CheckSquare className="w-5 h-5" />,
               title: "Seguimiento de completitud",
               description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
             },
             {
-              icon: <Plus className="w-5 h-5" />,
               title: "Colaboración en equipo",
               description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
             }
@@ -225,27 +209,21 @@ function TasksContent() {
 
         {/* ActionBar Desktop - ALWAYS VISIBLE */}
         <ActionBarDesktop
-          title="Gestión de Tareas para Hacer"
-          icon={<CheckSquare className="w-5 h-5" />}
           showProjectSelector={false}
           features={[
             {
-              icon: <Kanban className="w-5 h-5" />,
               title: "Organización visual tipo Kanban",
               description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
             },
             {
-              icon: <List className="w-5 h-5" />,
               title: "Múltiples tableros por organización",
               description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
             },
             {
-              icon: <CheckSquare className="w-5 h-5" />,
               title: "Colaboración y asignación de responsables",
               description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
             },
             {
-              icon: <Plus className="w-5 h-5" />,
               title: "Gestión flexible de contenido",
               description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
             }
@@ -257,7 +235,6 @@ function TasksContent() {
               current={boards.length}
             >
               <Button onClick={() => openModal('board', {})}>
-                <Plus className="w-4 h-4 mr-2" />
                 Nuevo Tablero
               </Button>
             </CustomRestricted>
@@ -265,8 +242,6 @@ function TasksContent() {
         />
 
         <EmptyState
-          icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
-          title="Aún no hay tareas!"
           description="Crea tu primer tablero para comenzar a organizar tareas"
         />
       </Layout>
@@ -277,28 +252,20 @@ function TasksContent() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* FeatureIntroduction */}
-      <FeatureIntroduction
-        title="Tareas para Hacer"
-        icon={<CheckSquare className="w-5 h-5" />}
         features={[
           {
-            icon: <Kanban className="w-5 h-5" />,
             title: "Tableros Kanban organizados",
             description: "Gestiona tus tareas con un sistema visual tipo Kanban donde puedes organizar las tareas en listas personalizables como 'Por hacer', 'En progreso' y 'Completadas', facilitando el seguimiento del flujo de trabajo."
           },
           {
-            icon: <List className="w-5 h-5" />,
             title: "Listas flexibles y personalizables",
             description: "Crea tantas listas como necesites dentro de cada tablero, asigna responsables, establece fechas límite y mueve las tareas fácilmente entre diferentes estados según avance el proyecto."
           },
           {
-            icon: <CheckSquare className="w-5 h-5" />,
             title: "Seguimiento de completitud",
             description: "Marca tareas como completadas con un sistema de checkbox visual, mantén un historial de tareas terminadas y visualiza el progreso general del equipo en tiempo real."
           },
           {
-            icon: <Plus className="w-5 h-5" />,
             title: "Colaboración en equipo",
             description: "Asigna tareas a miembros específicos del equipo, agrega descripciones detalladas, comenta en las tareas y mantén a todos informados sobre el progreso del proyecto."
           }
@@ -307,26 +274,20 @@ function TasksContent() {
 
       {/* ActionBar Desktop */}
       <ActionBarDesktop
-        title="Gestión de Tareas para Hacer"
-        icon={<CheckSquare className="w-5 h-5" />}
         features={[
           {
-            icon: <Kanban className="w-5 h-5" />,
             title: "Organización visual tipo Kanban",
             description: "Sistema de tableros visuales que permite gestionar el flujo de trabajo mediante listas personalizables como 'Por hacer', 'En progreso' y 'Completadas' para un seguimiento intuitivo del estado de cada tarea."
           },
           {
-            icon: <List className="w-5 h-5" />,
             title: "Múltiples tableros por organización",
             description: "Capacidad de crear tableros independientes para diferentes proyectos o áreas de trabajo, cada uno con sus propias listas y tareas específicas para mejor organización."
           },
           {
-            icon: <CheckSquare className="w-5 h-5" />,
             title: "Colaboración y asignación de responsables",
             description: "Sistema completo de asignación de tareas a miembros del equipo con fechas límite, descripciones detalladas y seguimiento del progreso individual y grupal."
           },
           {
-            icon: <Plus className="w-5 h-5" />,
             title: "Gestión flexible de contenido",
             description: "Funcionalidad drag & drop para reorganizar tareas entre listas, edición rápida de contenido, y herramientas de búsqueda y filtrado para localizar información específica."
           }
@@ -347,7 +308,6 @@ function TasksContent() {
               variant="secondary" 
               onClick={() => openModal('board', {})}
             >
-              <Plus className="w-4 h-4 mr-2" />
               Nuevo Tablero
             </Button>
           </CustomRestricted>
@@ -383,8 +343,6 @@ function TasksContent() {
         />
       ) : (
         <EmptyState
-          icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
-          title="Selecciona un tablero"
           description="Elige un tablero del selector para comenzar a gestionar tus tareas"
         />
       )}

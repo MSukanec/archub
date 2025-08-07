@@ -88,26 +88,14 @@ export function Step2FinancialSetup() {
   const isValid = formData.organization_name && defaultCurrency && defaultWallet;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto bg-[var(--card-bg)] border-[var(--card-border)]">
-      <CardHeader className="text-center pb-4">
-        <div className="flex items-center justify-center mb-4">
-          <div className="p-3 rounded-lg bg-[var(--accent)] text-white">
-            <Coins className="h-8 w-8" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">Configuración de Organización</CardTitle>
-        <CardDescription className="text-base">
           Define el nombre de tu organización y sus preferencias financieras iniciales.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
         {/* Nombre de Organización */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="organization_name">Nombre de Organización / Empresa <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
-              title="Organización"
               description="El nombre de tu empresa o estudio será visible en reportes, presupuestos y documentación oficial. Asegúrate de usar el nombre legal completo."
               primaryActionText="Entendido"
               placement="top"
@@ -122,11 +110,7 @@ export function Step2FinancialSetup() {
         </div>
 
         {/* Moneda por Defecto */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="default-currency">Moneda por Defecto <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
-              title="Moneda Principal"
               description="La moneda principal que utilizarás para la mayoría de tus transacciones y reportes financieros."
               primaryActionText="Entendido"
               placement="top"
@@ -147,11 +131,8 @@ export function Step2FinancialSetup() {
         </div>
 
         {/* Monedas Secundarias */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
             <Label>Monedas Secundarias</Label>
             <HelpPopover
-              title="Monedas Adicionales"
               description="Otras monedas que puedes utilizar ocasionalmente en tu organización."
               primaryActionText="Entendido"
               placement="top"
@@ -171,11 +152,7 @@ export function Step2FinancialSetup() {
         </div>
 
         {/* Billetera por Defecto */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="default-wallet">Billetera por Defecto <span className="text-[var(--accent)]">*</span></Label>
             <HelpPopover
-              title="Billetera Principal"
               description="La cuenta o método de pago principal que utilizarás para la mayoría de tus transacciones."
               primaryActionText="Entendido"
               placement="top"
@@ -196,11 +173,8 @@ export function Step2FinancialSetup() {
         </div>
 
         {/* Billeteras Secundarias */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
             <Label>Billeteras Secundarias</Label>
             <HelpPopover
-              title="Billeteras Adicionales"
               description="Otras cuentas o métodos de pago que puedes utilizar ocasionalmente."
               primaryActionText="Entendido"
               placement="top"
@@ -219,19 +193,15 @@ export function Step2FinancialSetup() {
           />
         </div>
 
-        <div className="flex justify-between pt-4">
           <Button 
             onClick={goPrevStep}
             variant="outline"
-            className="px-8"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
           <Button 
             onClick={handleNext}
             disabled={!isValid}
-            className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-8"
           >
             Siguiente
           </Button>

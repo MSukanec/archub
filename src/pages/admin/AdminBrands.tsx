@@ -87,7 +87,6 @@ export default function AdminBrands() {
       label: 'Fecha de Creación',
       width: '5%',
       render: (brand: Brand) => (
-        <span className="text-xs text-muted-foreground">
           {format(new Date(brand.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -96,9 +95,6 @@ export default function AdminBrands() {
       key: 'name',
       label: 'Marca',
       render: (brand: Brand) => (
-        <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium text-sm">{brand.name}</span>
         </div>
       )
     },
@@ -107,22 +103,17 @@ export default function AdminBrands() {
       label: 'Acciones',
       width: '10%',
       render: (brand: Brand) => (
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(brand)}
-            className="h-7 w-7 p-0"
           >
-            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(brand)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >
-            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -131,11 +122,7 @@ export default function AdminBrands() {
 
   // Custom filters component
   const customFilters = (
-    <div className="grid grid-cols-1 gap-3">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Ordenar por</Label>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -163,7 +150,6 @@ export default function AdminBrands() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
         {/* KPI Cards removed as requested */}
 
         {/* Brands Table */}
@@ -172,9 +158,6 @@ export default function AdminBrands() {
           columns={columns}
           isLoading={isLoading}
           emptyState={
-            <div className="text-center py-8">
-              <h3 className="text-lg font-medium text-muted-foreground">No hay marcas</h3>
-              <p className="text-sm text-muted-foreground mt-1">No hay marcas que coincidan con los filtros seleccionados.</p>
             </div>
           }
         />

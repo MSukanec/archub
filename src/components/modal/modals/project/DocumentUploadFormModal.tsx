@@ -319,14 +319,12 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Creator Field */}
         <FormField
           control={form.control}
           name="created_by"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
               <FormControl>
                 <UserSelector
                   users={organizationMembers?.map(member => ({
@@ -353,7 +351,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           name="folder_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -400,20 +397,13 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         />
 
         {/* File Upload Section */}
-        <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Archivos <span className="text-[var(--accent)]">*</span>
             </label>
             <div 
               onClick={triggerFileInput}
-              className="relative border-2 border-dashed border-[var(--card-border)] rounded-lg p-6 text-center hover:border-[var(--accent)] transition-colors cursor-pointer"
             >
-              <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
                 Haz clic aquí para seleccionar archivos
               </p>
-              <p className="text-xs text-muted-foreground">
                 Formatos soportados: PDF, DOC, XLS, PPT, imágenes, CAD, 3D, comprimidos
               </p>
               <input
@@ -422,33 +412,23 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                 multiple
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.cad,.dwg,.zip,.rar,.7z"
                 onChange={handleFileSelect}
-                className="hidden"
               />
             </div>
           </div>
 
           {/* Selected Files Display */}
           {selectedFiles.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
                 Archivos seleccionados ({selectedFiles.length})
               </label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
                 {selectedFiles.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 border border-[var(--card-border)] rounded-md bg-[var(--card-bg)]"
                   >
-                    <div className="flex items-center space-x-3 flex-1">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
                         <Input
                           value={fileNames[index] || ''}
                           onChange={(e) => updateFileName(index, e.target.value)}
                           placeholder="Nombre del documento"
-                          className="text-sm"
                         />
-                        <p className="text-xs text-muted-foreground mt-1">
                           Archivo original: {file.name}
                         </p>
                       </div>
@@ -458,9 +438,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                       variant="ghost"
                       size="sm"
                       onClick={() => removeFile(index)}
-                      className="h-8 w-8 p-0"
                     >
-                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
@@ -489,7 +467,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         />
 
         {/* Status and Visibility Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="status"
@@ -538,15 +515,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
           {/* Existing Documents Section (only in edit mode) */}
           {isEditing && groupDocuments.length > 0 && (
-            <div className="col-span-full">
-              <h4 className="text-sm font-medium mb-3">Documentos Existentes</h4>
-              <div className="space-y-2">
                 {groupDocuments.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
-                    <div className="flex items-center gap-2">
-                      <File className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{doc.file_name}</span>
-                      <span className="text-xs text-muted-foreground">({doc.status})</span>
                     </div>
                   </div>
                 ))}

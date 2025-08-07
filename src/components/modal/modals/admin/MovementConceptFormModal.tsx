@@ -195,7 +195,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   const editPanel = (
     <FormModalBody columns={1}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -285,18 +284,11 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   );
 
   const viewPanel = editingConcept ? (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Nombre</h4>
-        <p className="text-muted-foreground mt-1">{editingConcept?.name || 'Sin nombre'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Concepto Padre</h4>
-        <p className="text-muted-foreground mt-1">{editingConcept?.parent_name || 'Sin padre'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Tipo</h4>
-        <p className="text-muted-foreground mt-1">{editingConcept?.is_system ? 'Sistema' : 'Usuario'}</p>
       </div>
     </div>
   ) : null;

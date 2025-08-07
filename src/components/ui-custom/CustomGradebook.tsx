@@ -251,54 +251,34 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
 
   return (
-    <div className="relative border border-border rounded-lg overflow-hidden bg-card">
       {/* Header with title and export */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         <div>
-          <h3 className="text-sm text-[var(--table-header-fg)]">Registro de Asistencia</h3>
-          <p className="text-sm text-[var(--table-header-fg)]">
             {workers.length} trabajadores • {dateRange.length} días
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
           {/* Legend */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--accent)]"></div>
-              <span className="text-[var(--table-header-fg)]">Jornada completa</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <span className="text-[var(--table-header-fg)]">Media jornada</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <span className="text-[var(--table-header-fg)]">Ausente</span>
             </div>
           </div>
 
           {/* Export Button */}
           {onExportAttendance && (
             <Button onClick={onExportAttendance} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
               Exportar
             </Button>
           )}
         </div>
       </div>
       {/* Unified Header Row - matching Gantt design */}
-      <div className="flex border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)]">
         {/* Left Panel Header - Personnel */}
-        <div className="flex-shrink-0 w-64 border-r border-[var(--table-header-border)] h-14 flex bg-[var(--table-header-bg)]">
-          <div className="px-4 flex items-center font-medium text-xs text-[var(--table-header-fg)] uppercase tracking-wider">
             Personal / Asistencia
           </div>
         </div>
 
         {/* Timeline Header - Days */}
         <div 
-          className="flex-1 overflow-x-auto" 
           id="timeline-header-scroll"
           style={{
             scrollbarWidth: 'none',
@@ -320,20 +300,16 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
           </style>
           <div style={{ width: `${dateRange.length * 65}px` }}>
             {/* Month Headers Row */}
-            <div className="flex h-6">
               {monthHeaders.map((monthHeader, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-center text-xs font-medium text-[var(--table-header-fg)] border-r border-[var(--table-header-border)]/30 last:border-r-0"
                   style={{ width: `${monthHeader.span * 65}px` }}
                 >
-                  <span className="capitalize">{monthHeader.month}</span>
                 </div>
               ))}
             </div>
             
             {/* Days Row */}
-            <div className="flex h-8 border-t border-[var(--table-header-border)]">
               {dateRange.map((date) => {
                 const isTodayDate = isToday(date)
                 const isWeekendDay = isWeekend(date)
@@ -357,17 +333,13 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className="relative flex">
         {/* Fixed Personnel Names Column */}
-        <div className="flex-shrink-0 w-64 bg-[var(--table-header-bg)] border-r border-border overflow-hidden">
           {/* Personnel List - grouped by contact type */}
           <div>
               {Object.entries(groupedWorkers).length > 0 ? (
                 Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                   <div key={contactType}>
                     {/* Contact Type Header */}
-                    <div className="h-12 px-4 bg-[var(--table-row-bg)] border-b border-[var(--table-row-border)] flex items-center">
-                      <span className="text-xs font-medium uppercase tracking-wider text-[var(--table-row-fg)]">
                         {contactType} ({workersInGroup.length})
                       </span>
                     </div>
@@ -380,14 +352,10 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                       
                       return (
                         <div key={worker.id} className={`h-12 px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
-                          <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarImage src={worker.avatar_url} alt={worker.name} />
-                            <AvatarFallback className="text-xs font-medium">
                               {getInitials(worker.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-[var(--table-row-fg)]">{worker.name}</div>
                           </div>
                         </div>
                       );
@@ -395,7 +363,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                   </div>
                 ))
               ) : (
-                <div className="h-32 flex items-center justify-center text-[var(--table-row-fg)] text-sm">
                   No se encontraron resultados
                 </div>
               )}
@@ -405,7 +372,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
         {/* Timeline Content with synchronized scrolling */}
         <div 
           ref={setTimelineElement}
-          className="flex-1 overflow-x-scroll gantt-timeline-scroll relative" 
           id="timeline-content-scroll"
           style={{
             scrollbarWidth: 'auto',
@@ -424,7 +390,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
               Object.entries(groupedWorkers).map(([contactType, workersInGroup], groupIndex) => (
                 <div key={contactType}>
                   {/* Contact Type Header Row */}
-                  <div className="h-12 border-b border-[var(--table-row-border)] bg-[var(--table-row-bg)] flex">
                     {dateRange.map((date) => {
                       const isTodayDate = isToday(date)
                       return (
@@ -462,7 +427,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                             >
                               {isWeekendDay ? (
                                 <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center`}>
-                                  <span className="text-xs text-gray-400">×</span>
                                 </div>
                               ) : (
                                 <button
@@ -487,8 +451,6 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
                 </div>
               ))
             ) : (
-              <div className="h-32 flex items-center justify-center">
-                <span className="text-[var(--table-row-fg)] text-sm">No se encontraron resultados</span>
               </div>
             )}
           </div>

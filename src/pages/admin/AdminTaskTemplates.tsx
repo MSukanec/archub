@@ -32,11 +32,7 @@ export default function AdminTaskTemplates() {
       key: 'name',
       label: 'Nombre',
       render: (template: any) => (
-        <div className="flex items-center gap-2">
-          <FileCode className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <div>
-            <div className="font-medium text-sm">{template.name}</div>
-            <div className="text-xs text-muted-foreground">{template.slug}</div>
           </div>
         </div>
       )
@@ -45,7 +41,6 @@ export default function AdminTaskTemplates() {
       key: 'unit',
       label: 'Unidad',
       render: (template: any) => (
-        <Badge variant="outline" className="text-xs">
           {template.unit?.name || 'Sin unidad'}
         </Badge>
       )
@@ -54,7 +49,6 @@ export default function AdminTaskTemplates() {
       key: 'parameters',
       label: 'Parámetros',
       render: (template: any) => (
-        <div className="text-sm text-muted-foreground">
           {template.parameters?.length || 0} parámetros
         </div>
       )
@@ -63,7 +57,6 @@ export default function AdminTaskTemplates() {
       key: 'status',
       label: 'Estado',
       render: (template: any) => (
-        <Badge variant={template.is_active ? 'default' : 'secondary'} className="text-xs">
           {template.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       )
@@ -72,41 +65,33 @@ export default function AdminTaskTemplates() {
       key: 'actions',
       label: 'Acciones',
       render: (template: any) => (
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
             onClick={() => {
               setSelectedTemplate(template)
               setActiveTab('Editor')
             }}
           >
-            <Eye className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
             onClick={() => openModal('task-template', { template })}
           >
-            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
             onClick={() => {
               // TODO: Implementar duplicar plantilla
               console.log('Duplicar plantilla:', template.id)
             }}
           >
-            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Plantilla',
@@ -119,7 +104,6 @@ export default function AdminTaskTemplates() {
               })
             }}
           >
-            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -144,7 +128,6 @@ export default function AdminTaskTemplates() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
         {activeTab === 'Lista' && (
           <Table
             data={filteredTemplates}
@@ -157,7 +140,6 @@ export default function AdminTaskTemplates() {
             }}
             emptyState={
               <EmptyState
-                icon={<FileCode className="w-12 h-12 text-muted-foreground" />}
                 title={searchValue ? "No se encontraron plantillas" : "No hay plantillas"}
                 description={searchValue 
                   ? 'Prueba ajustando el término de búsqueda'
@@ -167,9 +149,7 @@ export default function AdminTaskTemplates() {
                   !searchValue && (
                     <Button
                       onClick={() => openModal('task-template')}
-                      className="flex items-center gap-2"
                     >
-                      <Plus className="h-4 w-4" />
                       Crear Primera Plantilla
                     </Button>
                   )
@@ -182,25 +162,17 @@ export default function AdminTaskTemplates() {
         {activeTab === 'Editor' && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
                 Editor de Plantilla
               </CardTitle>
             </CardHeader>
             <CardContent>
               {selectedTemplate ? (
-                <div className="space-y-6">
-                  <div className="text-center py-8">
-                    <h3 className="text-lg font-medium">Editando: {selectedTemplate.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
                       Editor de plantilla en desarrollo...
                     </p>
                   </div>
                 </div>
               ) : (
                 <EmptyState
-                  icon={<Settings className="w-12 h-12 text-muted-foreground" />}
-                  title="Selecciona una plantilla"
                   description="Elige una plantilla de la lista para comenzar a editarla"
                   action={
                     <Button

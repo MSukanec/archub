@@ -20,7 +20,6 @@ export function MovementConceptTree({
   onDelete
 }: MovementConceptTreeProps) {
   return (
-    <div className="space-y-1">
       {concepts.map((concept) => (
         <ConceptRow
           key={concept.id}
@@ -60,42 +59,32 @@ function ConceptRow({
     <>
       {/* Main row */}
       <div 
-        className="flex items-center justify-between py-3 px-4 hover:bg-muted/50 rounded-lg border border-transparent hover:border-border transition-colors"
         style={{ marginLeft: `${level * 24}px` }}
       >
-        <div className="flex items-center gap-3">
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
             onClick={() => hasChildren && onToggleExpand(concept.id)}
             disabled={!hasChildren}
           >
             {hasChildren ? (
               isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
               )
             ) : (
-              <Package className="h-4 w-4 text-muted-foreground" />
             )}
           </Button>
 
           {/* Concept Name */}
-          <span className="font-medium text-foreground">{concept.name}</span>
           
           {/* System/User Badge */}
-          <Badge variant={concept.is_system ? "default" : "secondary"} className="text-xs">
             {concept.is_system ? (
               <>
-                <Settings className="h-3 w-3 mr-1" />
                 Sistema
               </>
             ) : (
               <>
-                <User className="h-3 w-3 mr-1" />
                 Usuario
               </>
             )}
@@ -103,7 +92,6 @@ function ConceptRow({
 
           {/* View Mode Badge */}
           {concept.view_mode && (
-            <Badge variant="outline" className="text-xs">
               {concept.view_mode === 'types' && 'Tipos'}
               {concept.view_mode === 'categories' && 'Categorías'} 
               {concept.view_mode === 'subcategories' && 'Subcategorías'}
@@ -112,23 +100,18 @@ function ConceptRow({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onEdit(concept)}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
           >
-            <Edit className="h-4 w-4" />
           </Button>
           
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onDelete(concept.id)}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
           >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>

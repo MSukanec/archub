@@ -144,20 +144,12 @@ export default function ProjectBasicData() {
         ]
       }}
     >
-      <div className="max-w-5xl mx-auto space-y-8">
         {/* Hero Image Section */}
-        <div className="space-y-6">
           {/* Section Header */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Imagen Principal</h2>
               <HelpPopover 
-                title="Imagen Principal del Proyecto"
                 description="Sube una imagen representativa de tu proyecto que se mostrará como imagen principal. Esta imagen aparecerá en las tarjetas del proyecto y en la página de información básica. Formatos aceptados: JPG, PNG, WebP con un tamaño máximo de 10MB."
               />
             </div>
-            <p className="text-sm text-muted-foreground">
               Define la imagen representativa de tu proyecto que se mostrará en tarjetas y reportes
             </p>
           </div>
@@ -173,30 +165,19 @@ export default function ProjectBasicData() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Titles and Descriptions */}
-          <div className="space-y-12">
             {/* Información General Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Información General</h2>
                 <HelpPopover 
-                  title="Información General"
                   description="Esta información define las características principales de tu proyecto. El nombre y descripción se utilizan en reportes y documentos, mientras que el tipo y estado ayudan a categorizar y hacer seguimiento del progreso."
                 />
               </div>
-              <p className="text-sm text-muted-foreground">
                 Define las características principales y estado actual de tu proyecto
               </p>
             </div>
           </div>
 
           {/* Right Column - Form Fields */}
-          <div className="space-y-8">
             {/* Información General */}
-            <div className="space-y-4">
-              <div className="space-y-2">
                 <Label htmlFor="project-name">Nombre del Proyecto</Label>
                 <Input
                   id="project-name"
@@ -206,7 +187,6 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="project-description">Descripción</Label>
                 <Textarea
                   id="project-description"
@@ -217,7 +197,6 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="project-location">Ubicación</Label>
                 <Input
                   id="project-location"
@@ -227,7 +206,6 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="project-client">Cliente</Label>
                 <Input
                   id="project-client"
@@ -237,7 +215,6 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="start-date">Fecha de Inicio</Label>
                 <Input
                   id="start-date"
@@ -247,7 +224,6 @@ export default function ProjectBasicData() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="end-date">Fecha Estimada de Finalización</Label>
                 <Input
                   id="end-date"

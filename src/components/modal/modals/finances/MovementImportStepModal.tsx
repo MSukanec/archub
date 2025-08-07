@@ -615,9 +615,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         category.children.forEach((subcategory, idx) => {
           result.push(
             <SelectItem key={`${category.id}-${subcategory.id}-${idx}`} value={subcategory.id}>
-              <div className="flex flex-col">
                 <span>{subcategory.name}</span>
-                <span className="text-xs text-muted-foreground">
                   ↳ {category.name}
                 </span>
               </div>
@@ -1113,8 +1111,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   // Step content renderers
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="space-y-3">
         <Label>Creador de los movimientos</Label>
         <UserSelector
           users={users}
@@ -1126,7 +1122,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
 
 
-      <div className="space-y-3">
         <Label>Archivo de movimientos</Label>
         {!parsedData && (
           <div
@@ -1137,9 +1132,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             )}
           >
             <input {...getInputProps()} />
-            <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium">Haz clic o arrastra un archivo</p>
-            <p className="text-xs text-muted-foreground mt-1">
               Formatos soportados: .xlsx, .xls, .csv (máximo 50MB)
             </p>
           </div>
@@ -1147,7 +1139,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
         {parsedData && (
           <Alert>
-            <CheckCircle className="h-4 w-4" />
             <AlertDescription>
               Archivo cargado: {parsedData.fileName} ({parsedData.rows.length} filas)
             </AlertDescription>
@@ -1155,16 +1146,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         )}
       </div>
 
-      <Alert className="border-amber-200 bg-amber-50 text-amber-800">
-        <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription>
           El archivo debe tener una fila de encabezados en la primera línea
         </AlertDescription>
       </Alert>
 
       {isProcessing && (
-        <div className="flex items-center justify-center py-4">
-          <RefreshCcw className="h-5 w-5 animate-spin mr-2" />
           <span>Procesando archivo...</span>
         </div>
       )}
@@ -1313,31 +1300,16 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   }
 
   const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="column-mapping" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Mapear columnas del archivo
         </Label>
-        <p className="text-sm text-muted-foreground">
           Vincula las columnas de tu archivo Excel con los campos de Archub. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
         </p>
       </div>
 
       {parsedData && (
-        <div className="space-y-4">
           {/* Encabezados explicativos */}
-          <div className="grid grid-cols-12 gap-4 items-center mb-2 px-4">
-            <div className="col-span-1"></div>
-            <div className="col-span-4">
-              <div className="text-sm font-medium text-primary">TU ARCHIVO EXCEL</div>
-              <div className="text-xs text-muted-foreground">Columnas encontradas</div>
             </div>
-            <div className="col-span-1"></div>
-            <div className="col-span-4">
-              <div className="text-sm font-medium text-primary">CAMPOS DE ARCHUB</div>
-              <div className="text-xs text-muted-foreground">Selecciona el campo correspondiente</div>
             </div>
-            <div className="col-span-2"></div>
           </div>
 
           {parsedData.headers.map((header, index) => {
@@ -1345,27 +1317,14 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             const sampleValue = parsedData.rows[0]?.[index]
             
             return (
-              <Card key={index} className="hover:shadow-sm transition-shadow">
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-12 gap-4 items-center">
-                    <div className="col-span-1 text-center">
-                      <Badge variant="outline" className="text-xs font-mono w-8 h-6 font-bold">{String.fromCharCode(65 + index)}</Badge>
                     </div>
-                    <div className="col-span-4">
-                      <div className="font-medium text-sm text-foreground">{header}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{String(sampleValue).substring(0, 20)}{String(sampleValue).length > 20 ? '...' : ''}</span>}
                       </div>
                     </div>
-                    <div className="col-span-1 text-center">
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <div className="col-span-4">
                       <Select 
                         value={columnMapping[index] || ''} 
                         onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
                       >
-                        <SelectTrigger className="h-9">
                           <SelectValue placeholder="Seleccionar campo de Archub" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1378,13 +1337,10 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="col-span-2 text-right">
                       {mappedField ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
                           ✓ Vinculado
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-xs">
                           Sin vincular
                         </Badge>
                       )}
@@ -1402,11 +1358,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
   const renderStep3 = () => {
     if (Object.keys(incompatibleValues).length === 0) {
       return (
-        <div className="space-y-6">
-          <div className="text-center py-8">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">¡Todos los valores son compatibles!</h3>
-            <p className="text-sm text-muted-foreground">
               No se encontraron valores que requieran mapeo manual. Puedes continuar a la vista previa.
             </p>
           </div>
@@ -1415,15 +1366,11 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
 
     return (
-      <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium mb-2">Resolver valores incompatibles</h3>
-          <p className="text-sm text-muted-foreground">
             Los siguientes valores de tu archivo no coinciden con los datos existentes en Archub. Mapéalos manualmente o déjalos sin asignar.
           </p>
         </div>
 
-        <div className="space-y-6">
           {Object.entries(incompatibleValues)
             .sort(([fieldNameA], [fieldNameB]) => {
               // Order according to movement table: CATEGORIA > SUBCATEGORIA > MONEDA > BILLETERA
@@ -1447,27 +1394,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             const fieldLabel = AVAILABLE_FIELDS.find(f => f.value === fieldName)?.label || fieldName
             return (
               <Card key={fieldName}>
-                <CardContent className="p-4">
-                <div className="mb-4">
                   <div>
-                    <h4 className="font-medium text-sm mb-1">Campo: {fieldLabel}</h4>
-                    <p className="text-xs text-muted-foreground">
                       {values.length} valor(es) incompatible(s) encontrado(s)
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
                   {values.map((value, index) => {
                     const mappingKey = `${fieldName}_${value}`
                     const validation = validateFieldValue(fieldName, value)
                     
                     return (
-                      <div key={index} className="grid grid-cols-12 gap-4 items-center p-3 bg-gray-50 rounded">
-                        <div className="col-span-4">
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-orange-500" />
-                            <span className="font-mono text-sm">
                               {(() => {
                                 const hierarchyText = getFieldHierarchyInfo(fieldName, value)
                                 const parts = hierarchyText.split(' > ')
@@ -1475,39 +1412,26 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                                 if (parts.length === 2) {
                                   return (
                                     <>
-                                      <span className="text-green-600 font-medium">{parts[0]} &gt;</span>
-                                      <span className="text-orange-600 ml-1">{parts[1]}</span>
                                     </>
                                   )
                                 }
                                 
-                                return <span className="text-orange-600">{hierarchyText}</span>
                               })()}
                             </span>
                           </div>
-                          <div className="text-xs mt-1">
                             {fieldName === 'category_id' ? (
                               <span>
-                                <span className="text-green-600 font-medium">Tipo de Archub &gt;</span>
-                                <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
                               </span>
                             ) : fieldName === 'subcategory_id' ? (
                               <span>
-                                <span className="text-green-600 font-medium">Categoría de Archub &gt;</span>
-                                <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">Valor de tu archivo</span>
                             )}
                           </div>
                         </div>
                         
-                        <div className="col-span-1 text-center">
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </div>
                         
-                        <div className="col-span-5">
-                          <div className="space-y-2">
                             <ComboBox
                               key={`${mappingKey}-${manualMappings[mappingKey] || 'empty'}`}
                               value={manualMappings[mappingKey] || ''}
@@ -1555,7 +1479,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                               placeholder="Seleccionar valor o dejar sin asignar"
                               searchPlaceholder="Buscar..."
                               emptyMessage="No se encontraron opciones"
-                              className="h-9"
                             />
                             
                             {/* Botón crear nuevo para categorías y subcategorías */}
@@ -1564,24 +1487,18 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                className="w-full"
                                 onClick={() => handleCreateNewCategory(fieldName, value)}
                               >
-                                <Plus className="h-3 w-3 mr-1" />
                                 Crear {fieldName === 'category_id' ? 'categoría' : 'subcategoría'} "{value}"
                               </Button>
                             )}
                           </div>
                         </div>
                         
-                        <div className="col-span-2">
                           {manualMappings[mappingKey] !== undefined ? (
-                            <div className="flex items-center gap-1 text-green-700 text-xs">
-                              <CheckCircle className="h-3 w-3" />
                               <span>{manualMappings[mappingKey] === '' ? 'NULL' : 'Mapeado'}</span>
                             </div>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Sin mapear</span>
                           )}
                         </div>
                       </div>
@@ -1595,7 +1512,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         </div>
 
         <Alert>
-          <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             <strong>Importante:</strong> Los valores sin mapear se importarán como NULL en la base de datos. 
             Esto significa que esos campos estarán vacíos y podrás completarlos manualmente después de la importación.
@@ -1604,14 +1520,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
         {/* Dialog for selecting parent category when creating subcategory */}
         {showSubcategoryDialog && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-medium mb-4">Seleccionar categoría padre</h3>
-              <p className="text-sm text-muted-foreground mb-4">
                 La subcategoría "{pendingSubcategoryName}" necesita una categoría padre.
               </p>
               
-              <div className="space-y-4">
                 <div>
                   <Label>Categoría padre</Label>
                   <Select 
@@ -1631,7 +1542,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                   </Select>
                 </div>
 
-                <div className="flex gap-2 justify-end">
                   <Button 
                     variant="outline" 
                     onClick={() => {
@@ -1678,25 +1588,17 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     }
 
     return (
-      <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium mb-2">Vista previa</h3>
-          <p className="text-sm text-muted-foreground">
             Revisa los datos antes de importar. Puedes seleccionar filas específicas.
           </p>
         </div>
 
         {normalizedValues.size > 0 && (
           <Alert>
-            <CheckCircle className="h-4 w-4" />
             <AlertDescription>
-              <div className="font-medium mb-2">Valores normalizados automáticamente:</div>
-              <div className="text-xs space-y-1">
                 {Array.from(normalizedValues).slice(0, 5).map((mapping, index) => (
-                  <div key={index} className="text-muted-foreground">{mapping}</div>
                 ))}
                 {normalizedValues.size > 5 && (
-                  <div className="text-muted-foreground">...y {normalizedValues.size - 5} más</div>
                 )}
               </div>
             </AlertDescription>
@@ -1704,8 +1606,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         )}
 
       {parsedData && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
             <Badge variant="outline">
               {parsedData.rows.length} filas encontradas
             </Badge>
@@ -1724,11 +1624,9 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             </Button>
           </div>
 
-          <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-12">
                     <Checkbox
                       checked={selectedRows.size === parsedData.rows.length}
                       onCheckedChange={(checked) => {
@@ -1744,7 +1642,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                     <TableHead key={index}>
                       {header}
                       {columnMapping[index.toString()] && (
-                        <Badge variant="secondary" className="ml-2 text-xs">
                           {AVAILABLE_FIELDS.find(f => f.value === columnMapping[index.toString()])?.label}
                         </Badge>
                       )}
@@ -1770,7 +1667,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                       />
                     </TableCell>
                     {row.map((cell, cellIndex) => (
-                      <TableCell key={cellIndex} className="max-w-32 truncate">
                         {cell?.toString() || ''}
                       </TableCell>
                     ))}
@@ -1781,14 +1677,12 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
           </div>
 
           {parsedData.rows.length > 10 && (
-            <p className="text-xs text-muted-foreground text-center">
               Mostrando las primeras 10 filas de {parsedData.rows.length}
             </p>
           )}
 
           {selectedRows.size > 0 && (
             <Alert>
-              <CheckCircle className="h-4 w-4" />
               <AlertDescription>
                 Se importarán {selectedRows.size} filas seleccionadas
               </AlertDescription>
@@ -1815,7 +1709,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
 
   const headerContent = (
     <FormModalStepHeader
-      title="Importar Movimientos"
       icon={Upload}
       stepConfig={stepConfig}
     />
@@ -1835,21 +1728,15 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
         stepContent={getCurrentStepContent()}
         onClose={onClose}
         columns={1}
-        className="md:min-w-[800px] md:max-w-[1000px]"
       />
       
       {/* Dialog for creating subcategory with parent selection */}
       {showSubcategoryDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">
               Crear subcategoría "{pendingSubcategoryName}"
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">
               Selecciona la categoría padre para esta subcategoría:
             </p>
             
-            <div className="space-y-4">
               <Select value={selectedParentCategory} onValueChange={setSelectedParentCategory}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar categoría padre" />
@@ -1863,7 +1750,6 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                 </SelectContent>
               </Select>
               
-              <div className="flex gap-2 justify-end">
                 <Button
                   variant="outline"
                   onClick={() => {

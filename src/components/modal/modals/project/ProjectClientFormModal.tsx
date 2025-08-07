@@ -154,18 +154,13 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
 
   const viewPanel = (
     <div>
-      <p className="text-muted-foreground">
         Selecciona un contacto de tu organización para agregarlo como cliente del proyecto actual.
       </p>
     </div>
   )
 
   const editPanel = (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Seleccionar Contacto *</label>
         {organizationContacts === undefined ? (
-          <div className="text-sm text-muted-foreground">Cargando contactos...</div>
         ) : (
           <Select value={selectedContactId} onValueChange={setSelectedContactId}>
             <SelectTrigger>
@@ -191,12 +186,10 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
           </Select>
         )}
         {organizationContacts !== undefined && availableContacts.length === 0 && (
-          <p className="text-xs text-muted-foreground">
             Todos los contactos disponibles ya están agregados como clientes del proyecto.
           </p>
         )}
         {organizationContacts !== undefined && (
-          <p className="text-xs text-muted-foreground">
             Contactos disponibles: {availableContacts.length} de {organizationContacts.length} total
           </p>
         )}
@@ -206,7 +199,6 @@ export default function ProjectClientFormModal({ onClose }: ProjectClientFormMod
 
   const headerContent = (
     <FormModalHeader
-      title="Agregar Cliente al Proyecto"
       icon={UserPlus}
     />
   )

@@ -33,22 +33,18 @@ export default function ProjectDashboard() {
   // ActionBar features
   const features = [
     {
-      icon: <BarChart3 className="h-4 w-4" />,
       title: "Estadísticas Integrales del Proyecto",
       description: "Visualiza métricas clave incluyendo progreso de construcción, estado financiero, documentos y actividad del equipo en tiempo real."
     },
     {
-      icon: <TrendingUp className="h-4 w-4" />,
       title: "Análisis de Tendencias y Progreso",
       description: "Monitorea el avance temporal del proyecto con gráficos de actividad y análisis de productividad por período."
     },
     {
-      icon: <Users className="h-4 w-4" />,
       title: "Gestión Centralizada del Equipo",
       description: "Controla la participación de miembros, clientes y roles dentro del proyecto desde una vista unificada."
     },
     {
-      icon: <Calendar className="h-4 w-4" />,
       title: "Panel de Control Ejecutivo",
       description: "Accede rápidamente a todas las secciones del proyecto y toma decisiones informadas basadas en datos actualizados."
     }
@@ -60,9 +56,7 @@ export default function ProjectDashboard() {
   if (!currentProject && !statsLoading) {
     return (
       <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
-        <div className="space-y-6">
           <EmptyState
-            title="No hay proyecto seleccionado"
             description="Selecciona un proyecto desde el selector del header para ver el resumen del proyecto."
           />
         </div>
@@ -72,7 +66,6 @@ export default function ProjectDashboard() {
 
   return (
     <Layout wide headerProps={{ title: "Resumen del Proyecto" }}>
-      <div className="space-y-6">
         {/* Hero Card with Project Background - Only render if we have a project */}
         {currentProject && organizationId && (
           <ProjectHeroCard 
@@ -86,19 +79,14 @@ export default function ProjectDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8"
         >
           <div 
-            className="rounded-lg p-8 text-center border"
             style={{ 
               backgroundColor: 'var(--card-bg)', 
               borderColor: 'var(--card-border)',
               color: 'var(--card-text)'
             }}
           >
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold mb-2">Próximamente</h3>
-              <p className="text-sm text-muted-foreground">
                 Estamos trabajando en nuevas funcionalidades para el dashboard del proyecto. 
                 Próximamente tendrás acceso a análisis avanzados, reportes detallados y herramientas de gestión adicionales.
               </p>

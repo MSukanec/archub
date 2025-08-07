@@ -19,7 +19,6 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ContactCard from '@/components/cards/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
@@ -54,7 +53,6 @@ export default function OrganizationContacts() {
       setActions({
         slot2: {
           id: 'search',
-          icon: <Search className="h-5 w-5" />,
           label: 'Buscar',
           onClick: () => {
             const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement
@@ -65,14 +63,12 @@ export default function OrganizationContacts() {
         },
         slot3: {
           id: 'create',
-          icon: <UserPlus className="h-6 w-6" />,
           label: 'Crear Contacto',
           onClick: () => openModal('contact', { isEditing: false }),
           variant: 'primary'
         },
         slot4: {
           id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
             console.log('Toggle filtros')
@@ -80,7 +76,6 @@ export default function OrganizationContacts() {
         },
         slot5: {
           id: 'clear',
-          icon: <X className="h-5 w-5" />,
           label: 'Limpiar',
           onClick: () => {
             setSearchValue('')
@@ -214,27 +209,20 @@ export default function OrganizationContacts() {
       label: "Contacto",
       sortable: true,
       render: (contact: any) => (
-        <div className="flex items-center gap-3">
           {contact.linked_user ? (
-            <Avatar className="w-8 h-8">
               <AvatarImage src={contact.linked_user.avatar_url} />
               <AvatarFallback>
                 {contact.linked_user.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-medium">
               {contact.first_name?.charAt(0) || 'C'}
             </div>
           )}
           <div>
-            <div className="font-medium text-sm">
               {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
             </div>
             {contact.linked_user && (
-              <div className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-green-500" />
-                <span className="text-xs text-muted-foreground">Usuario de Archub</span>
               </div>
             )}
           </div>
@@ -245,7 +233,6 @@ export default function OrganizationContacts() {
       key: "contact_type_id" as const,
       label: "Tipo",
       render: (contact: any) => (
-        <Badge variant="secondary" className="text-xs">
           {contactTypes.find(t => t.id === contact.contact_type_id)?.name || 'Sin tipo'}
         </Badge>
       )
@@ -254,7 +241,6 @@ export default function OrganizationContacts() {
       key: "email" as const,
       label: "Email",
       render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
           {contact.email || '—'}
         </div>
       )
@@ -263,7 +249,6 @@ export default function OrganizationContacts() {
       key: "company_name" as const,
       label: "Empresa",
       render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
           {contact.company_name || '—'}
         </div>
       )
@@ -274,7 +259,6 @@ export default function OrganizationContacts() {
       sortable: true,
       sortType: "date" as const,
       render: (contact: any) => (
-        <div className="text-sm text-muted-foreground">
           {format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}
         </div>
       )
@@ -284,7 +268,6 @@ export default function OrganizationContacts() {
       label: "Acciones",
       sortable: false,
       render: (contact: any) => (
-        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -296,9 +279,7 @@ export default function OrganizationContacts() {
                 description: "Los datos del contacto se han copiado al portapapeles"
               })
             }}
-            className="h-8 w-8 p-0"
           >
-            <Share2 className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -307,9 +288,7 @@ export default function OrganizationContacts() {
               e.stopPropagation()
               openModal('contact', { editingContact: contact, isEditing: true })
             }}
-            className="h-8 w-8 p-0"
           >
-            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -318,9 +297,7 @@ export default function OrganizationContacts() {
               e.stopPropagation()
               handleDeleteContact(contact)
             }}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -341,8 +318,6 @@ export default function OrganizationContacts() {
     return (
       <Layout>
         <EmptyState
-          icon={<Users className="w-8 h-8 text-muted-foreground" />}
-          title="No hay contactos"
           description="Comienza agregando tu primer contacto a la organización"
         />
       </Layout>
@@ -351,7 +326,6 @@ export default function OrganizationContacts() {
 
   return (
     <Layout>
-      <div className="space-y-6">
         {/* ActionBar Desktop */}
         <ActionBarDesktopRow
           filters={[
@@ -398,29 +372,20 @@ export default function OrganizationContacts() {
           ]}
         />
 
-        {/* FeatureIntroduction - Solo mobile */}
-        <div className="md:hidden">
-          <FeatureIntroduction
-            title="Contactos"
-            icon={<Users className="w-5 h-5" />}
             features={[
               {
-                icon: <Building className="w-5 h-5" />,
                 title: "Gestión integral de personas",
                 description: "Esta página tiene el rol de agregar cada persona que está vinculada a acciones que suceden en la plataforma, tales como compañeros de trabajo, clientes, asesores, trabajadores y cualquier persona relevante para los proyectos de la organización."
               },
               {
-                icon: <UserCheck className="w-5 h-5" />,
                 title: "Vinculación con usuarios de Archub",
                 description: "En el caso de que algún contacto estuviera registrado en Archub, se puede vincular ahí mismo de manera tal que se pueda contactar con él y enviarle avisos o información importante directamente a través de la plataforma."
               },
               {
-                icon: <Users className="w-5 h-5" />,
                 title: "Base fundamental para otras funciones",
                 description: "Es fundamental entender que los contactos se relacionan directamente con la gran mayoría de funciones de la página y por ende, el primer paso muchas veces es aquí. Desde asignar responsables hasta vincular clientes con proyectos."
               },
               {
-                icon: <Share2 className="w-5 h-5" />,
                 title: "Compartir información fácilmente",
                 description: "Se puede compartir información de un contacto (como el teléfono, el mail, empresa, etc.) muy fácilmente haciendo click en el botón 'Compartir Información' de las acciones, copiando automáticamente los datos al portapapeles."
               }
@@ -433,10 +398,6 @@ export default function OrganizationContacts() {
           columns={columns}
           isLoading={contactsLoading}
           emptyState={
-            <div className="text-center py-8">
-              <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
-              <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
             </div>
           }
 

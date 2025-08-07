@@ -44,17 +44,11 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
           <span>Moneda</span>
           <span>Billetera</span>
           <span>Balance</span>
         </div>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="grid grid-cols-3 gap-4 text-sm animate-pulse">
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
           </div>
         ))}
       </div>
@@ -63,10 +57,6 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
 
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <div className="flex flex-col items-center gap-2">
-          <Wallet2 className="h-8 w-8 text-muted-foreground/50" />
-          <p className="text-sm">No hay datos de balances disponibles</p>
         </div>
       </div>
     )
@@ -94,28 +84,18 @@ export function WalletCurrencyBalanceTable({ data, isLoading }: WalletCurrencyBa
   }
 
   return (
-    <div className="space-y-3">
       {/* Header */}
-      <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
         <span>Moneda</span>
         <span>Billetera</span>
         <span>Balance</span>
       </div>
 
       {/* Data rows */}
-      <div className="space-y-2 max-h-[240px] overflow-y-auto">
         {data.map((item, index) => (
-          <div key={`${item.wallet}-${item.currency}-${index}`} className="grid grid-cols-3 gap-4 text-sm items-center py-2">
             {/* Moneda */}
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-mono font-semibold">{getCurrencyCode(item.currency)}</span>
             </div>
 
             {/* Billetera */}
-            <div className="flex items-center gap-2">
-              <Wallet2 className="h-4 w-4 text-muted-foreground" />
-              <span className="truncate">{item.wallet}</span>
             </div>
 
             {/* Balance */}

@@ -103,31 +103,20 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
-      <div className="w-full max-w-md">
         <Card style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-          <CardHeader className="space-y-4 text-center">
-            <div className="flex items-center justify-center space-x-2">
-              <Building className="h-8 w-8 text-[var(--accent)]" />
-              <span className="text-2xl font-bold" style={{ color: 'var(--text-default)' }}>Archub</span>
             </div>
-            <CardTitle className="text-xl" style={{ color: 'var(--text-default)' }}>Comenzar gratis</CardTitle>
             <CardDescription style={{ color: 'var(--text-muted)' }}>
               Crea tu cuenta y empieza a gestionar proyectos hoy mismo
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
             {/* Google Sign Up */}
             <Button
               variant="outline"
-              className="w-full h-10"
               onClick={handleGoogleSignUp}
               disabled={loading}
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -149,17 +138,10 @@ export default function Register() {
               Continuar con Google
             </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" style={{ borderColor: 'var(--card-border)' }} />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-muted)' }}>O continúa con</span>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
                 <Label htmlFor="fullName">Nombre completo</Label>
                 <Input
                   id="fullName"
@@ -172,7 +154,6 @@ export default function Register() {
                 />
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -185,9 +166,7 @@ export default function Register() {
                 />
               </div>
               
-              <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
                   <Input
                     id="password"
                     name="password"
@@ -201,21 +180,16 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                <div className="relative">
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -229,13 +203,10 @@ export default function Register() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -243,12 +214,10 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Creando cuenta...
                   </>
                 ) : (
@@ -257,10 +226,7 @@ export default function Register() {
               </Button>
             </form>
 
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">¿Ya tienes una cuenta? </span>
               <Link href="/login">
-                <Button variant="link" className="px-0 text-[var(--accent)] hover:text-[var(--accent)]/80">
                   Inicia sesión aquí
                 </Button>
               </Link>

@@ -647,7 +647,6 @@ export function GanttTimelineBar({
       {/* Relleno de progreso para tareas */}
       {item.type === 'task' && getProgressPercent() > 0 && (
         <div 
-          className="absolute top-0 left-0 h-full rounded-sm transition-all duration-300"
           style={{ 
             width: `${getProgressPercent()}%`,
             backgroundColor: 'var(--accent)',
@@ -658,7 +657,6 @@ export function GanttTimelineBar({
       
       {/* Contenido de la barra con nombre de la tarea */}
       <div 
-        className="task-bar-content relative z-10 px-1 h-full flex items-center text-[var(--table-row-fg)]"
         style={{
           fontSize: '9px',
           lineHeight: '10px',
@@ -671,7 +669,6 @@ export function GanttTimelineBar({
           hyphens: 'auto'
         }}
       >
-        <span className="font-medium">
           {item.name}
         </span>
       </div>
@@ -681,18 +678,14 @@ export function GanttTimelineBar({
         <>
           {/* Handle de redimensionamiento izquierdo - MITAD DE ANCHO y color accent */}
           <div
-            className="absolute left-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-l z-20"
             style={{ backgroundColor: 'var(--accent)' }}
             onMouseDown={(e) => handleResizeStart(e, 'start')}
-            title="Arrastrar para cambiar fecha de inicio"
           />
           
           {/* Handle de redimensionamiento derecho - MITAD DE ANCHO y color accent */}
           <div
-            className="absolute right-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-r z-20"
             style={{ backgroundColor: 'var(--accent)' }}
             onMouseDown={(e) => handleResizeStart(e, 'end')}
-            title="Arrastrar para cambiar fecha final"
           />
         </>
       )}
@@ -702,24 +695,20 @@ export function GanttTimelineBar({
         <>
           {/* Punto izquierdo - SIEMPRE color accent - hover: 1.5x más grande */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:w-6 hover:h-6 transition-all duration-200"
             style={{ 
               left: '-30px',
               backgroundColor: 'var(--accent)'
             }}
             onMouseDown={(e) => handleConnectionStart(e, 'start')}
-            title="Conectar desde inicio"
           />
           
           {/* Punto derecho - SIEMPRE color accent - hover: 1.5x más grande */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white rounded-full cursor-crosshair shadow-lg z-50 opacity-0 group-hover:opacity-100 hover:w-6 hover:h-6 transition-all duration-200"
             style={{ 
               right: '-30px',
               backgroundColor: 'var(--accent)'
             }}
             onMouseDown={(e) => handleConnectionStart(e, 'end')}
-            title="Conectar desde final"
           />
         </>
       )}

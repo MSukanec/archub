@@ -222,53 +222,38 @@ export function HeaderDesktop({
       }`}
     >
       {/* Primera fila: Breadcrumb y Selector de Proyecto */}
-      <div className="w-full h-10 px-4 flex items-center justify-between">
         {/* Left: Breadcrumb */}
-        <div className="flex items-center gap-2">
           {isProjectBasedSection ? (
             /* Project-based breadcrumb with dropdown */
-            <div className="flex items-center gap-1">
               <CustomRestricted feature="project_management">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
                     >
-                      <ChevronDown className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
                     {projects.map((project) => (
                       <DropdownMenuItem
                         key={project.id}
                         onClick={() => handleProjectChange(project.id)}
                         className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
                       >
-                        <div className="flex items-center w-full">
-                          <Folder className="w-4 h-4 mr-2" />
-                          <span className="truncate">{project.name}</span>
                         </div>
                         {userData?.preferences?.last_project_id === project.id && (
-                          <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
                         )}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CustomRestricted>
-              <span className="text-xs font-normal text-[var(--layout-text)]">
                 {projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto"}
               </span>
-              <span className="text-xs text-[var(--layout-text-muted)]">/</span>
-              <span className="text-xs font-normal text-[var(--layout-text)]">
                 {getCurrentSectionLabel()}
               </span>
               {pageMap[location] && getCurrentSectionLabel() !== pageMap[location] && (
                 <>
-                  <span className="text-xs text-[var(--layout-text-muted)]">/</span>
-                  <span className="text-xs font-normal text-[var(--layout-text)]">
                     {pageMap[location]}
                   </span>
                 </>
@@ -276,23 +261,19 @@ export function HeaderDesktop({
             </div>
           ) : (
             /* Non-project breadcrumb */
-            <h1 className="text-xs font-normal text-[var(--layout-text)]">
               {title || getCurrentSectionLabel()}
             </h1>
           )}
         </div>
 
         {/* Right: Action Buttons */}
-        <div className="flex items-center gap-2">
           {/* Additional Button (appears first/left) */}
           {actionButton?.additionalButton && (
             <Button
               variant={actionButton.additionalButton.variant || "ghost"}
               size="sm"
               onClick={actionButton.additionalButton.onClick}
-              className="h-8 px-3 text-xs font-normal"
             >
-              {actionButton.additionalButton.icon && <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />}
               {actionButton.additionalButton.label}
             </Button>
           )}
@@ -302,9 +283,7 @@ export function HeaderDesktop({
               variant="default"
               size="sm"
               onClick={actionButton.onClick}
-              className="h-8 px-3 text-xs font-normal"
             >
-              {actionButton.icon && <actionButton.icon className="w-4 h-4 mr-1" />}
               {actionButton.label}
             </Button>
           )}
@@ -313,8 +292,6 @@ export function HeaderDesktop({
 
       {/* Segunda fila: Tabs (solo si hay tabs) */}
       {hasTabs && (
-        <div className="w-full h-10 px-4 flex items-center">
-          <div className="flex items-center space-x-6">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -328,7 +305,6 @@ export function HeaderDesktop({
                 {tab.label}
                 {tab.isActive && (
                   <div 
-                    className="absolute -bottom-[9px] left-0 right-0 h-0.5"
                     style={{ backgroundColor: 'var(--accent)' }}
                   />
                 )}

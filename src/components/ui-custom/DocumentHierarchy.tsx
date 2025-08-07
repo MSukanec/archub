@@ -50,15 +50,11 @@ const getStatusIcon = (status: string) => {
   switch (status) {
     case 'completed':
     case 'aprobado':
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
     case 'failed':
     case 'rechazado':
-      return <XCircle className="h-4 w-4 text-red-500" />;
     case 'running':
     case 'en_revision':
-      return <Clock className="h-4 w-4 text-blue-500" />;
     default:
-      return <Circle className="h-4 w-4 text-gray-400" />;
   }
 };
 
@@ -128,14 +124,11 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
   };
 
   if (foldersLoading) {
-    return <div className="text-center py-8">Cargando carpetas...</div>;
   }
 
   if (!folders || folders.length === 0) {
     return (
       <EmptyState
-        icon={<FolderOpen className="w-12 h-12" />}
-        title="No hay carpetas de documentos"
         description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
       />
     );
@@ -202,34 +195,20 @@ function FolderItemWithSubfolders({
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
 
   return (
-    <div className="space-y-2">
-      <Card className="w-full">
-        <CardHeader className="py-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={onToggle}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="flex-shrink-0">
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
                 {isExpanded ? (
-                  <FolderOpen className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
                 ) : (
-                  <FolderClosed className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
                 )}
-                <span className="font-medium">{folder.name}</span>
               </div>
 
-              <Badge variant="outline" className="text-xs">
                 {totalDocuments} archivo{totalDocuments !== 1 ? 's' : ''}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -237,9 +216,7 @@ function FolderItemWithSubfolders({
                   parentId: folder.id,
                   parentName: folder.name
                 })}
-                className="h-8 px-2 text-xs"
               >
-                <Plus className="h-3 w-3 mr-1" />
                 Nueva Subcarpeta
               </Button>
               <Button
@@ -248,9 +225,7 @@ function FolderItemWithSubfolders({
                 onClick={() => openModal('document-upload', { 
                   defaultFolderId: folder.id 
                 })}
-                className="h-8 px-2 text-xs"
               >
-                <Upload className="h-3 w-3 mr-1" />
                 Subir
               </Button>
               <Button
@@ -262,10 +237,7 @@ function FolderItemWithSubfolders({
                   parentId: folder.parent_id,
                   mode: 'edit'
                 })}
-                className="h-8 w-8 p-0"
-                title="Editar carpeta"
               >
-                <Edit className="h-3 w-3" />
               </Button>
               <Button
                 variant="ghost"
@@ -282,26 +254,19 @@ function FolderItemWithSubfolders({
                   },
                   isLoading: isDeleting
                 })}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                title="Eliminar carpeta"
               >
-                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
         </CardHeader>
 
         {isExpanded && (
-          <CardContent className="pt-0 pb-4">
             {groupsLoading ? (
-              <div className="text-sm text-muted-foreground py-2">Cargando entregas...</div>
             ) : (
               <>
                 {/* Subfolders */}
                 {subfolders.length > 0 && (
-                  <div className="mb-4 space-y-2">
                     {subfolders.map((subfolder) => (
-                      <div key={subfolder.id} className="ml-6">
                         <FolderItem
                           folder={subfolder}
                           isExpanded={expandedFolders[subfolder.id] || false}
@@ -329,19 +294,14 @@ function FolderItemWithSubfolders({
                     />
                   ))
                 ) : (
-                  <div className="text-center py-4 text-sm text-muted-foreground">
-                    <Package className="h-6 w-6 mx-auto mb-2 opacity-50" />
                     No hay entregas en esta carpeta
-                    <div className="mt-2">
                       <Button
                         variant="default"
                         size="sm"
                         onClick={() => openModal('document-upload', { 
                           defaultFolderId: folder.id 
                         })}
-                        className="h-8 px-3 text-xs"
                       >
-                        <Plus className="h-3 w-3 mr-1" />
                         Crear Primera Entrega
                       </Button>
                     </div>
@@ -350,9 +310,6 @@ function FolderItemWithSubfolders({
 
                 {/* Ungrouped Documents */}
                 {ungroupedDocuments.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-3">Documentos sin entrega</h4>
-                    <div className="bg-muted/30 rounded-lg border">
                       {ungroupedDocuments.map((document, index) => (
                         <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
                           <DocumentItem document={document} />
@@ -393,33 +350,20 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
 
   return (
-    <Card className="w-full">
-      <CardHeader className="py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={onToggle}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="flex-shrink-0">
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
               )}
             </div>
 
-            <div className="flex items-center gap-2">
               {isExpanded ? (
-                <FolderOpen className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
               ) : (
-                <FolderClosed className="h-4 w-4" style={{ color: 'hsl(var(--accent))' }} />
               )}
-              <span className="text-sm font-medium">{folder.name}</span>
             </div>
 
-            <Badge variant="outline" className="text-xs">
               {totalDocuments} archivo{totalDocuments !== 1 ? 's' : ''}
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <Button
               variant="ghost"
               size="sm"
@@ -427,9 +371,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 parentId: folder.id,
                 parentName: folder.name
               })}
-              className="h-7 px-2 text-xs"
             >
-              <Plus className="h-3 w-3 mr-1" />
               Nueva Subcarpeta
             </Button>
             <Button
@@ -438,9 +380,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
               onClick={() => openModal('document-upload', { 
                 defaultFolderId: folder.id 
               })}
-              className="h-7 px-2 text-xs"
             >
-              <Upload className="h-3 w-3 mr-1" />
               Subir
             </Button>
             <Button
@@ -452,10 +392,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 parentId: folder.parent_id,
                 mode: 'edit'
               })}
-              className="h-7 w-7 p-0"
-              title="Editar subcarpeta"
             >
-              <Edit className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
@@ -472,19 +409,14 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 },
                 isLoading: isDeleting
               })}
-              className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
-              title="Eliminar subcarpeta"
             >
-              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
       </CardHeader>
 
       {isExpanded && (
-        <CardContent className="pt-0 pb-3">
           {groupsLoading ? (
-            <div className="text-sm text-muted-foreground py-2">Cargando entregas...</div>
           ) : (
             <>
               {/* Document Groups (Entregas) */}
@@ -499,19 +431,14 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                   />
                 ))
               ) : (
-                <div className="text-center py-3 text-sm text-muted-foreground">
-                  <Package className="h-5 w-5 mx-auto mb-2 opacity-50" />
                   No hay entregas en esta carpeta
-                  <div className="mt-2">
                     <Button
                       variant="default"
                       size="sm"
                       onClick={() => openModal('document-upload', { 
                         defaultFolderId: folder.id 
                       })}
-                      className="h-7 px-3 text-xs"
                     >
-                      <Plus className="h-3 w-3 mr-1" />
                       Crear Primera Entrega
                     </Button>
                   </div>
@@ -520,9 +447,6 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
 
               {/* Ungrouped Documents */}
               {ungroupedDocuments.length > 0 && (
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Documentos sin entrega</h4>
-                  <div className="bg-muted/30 rounded-lg border">
                     {ungroupedDocuments.map((document, index) => (
                       <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
                         <DocumentItem document={document} />
@@ -551,35 +475,23 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
   const { openModal } = useGlobalModalStore();
 
   return (
-    <div className="mb-3 border rounded-lg">
       <Button
         variant="ghost"
         onClick={onToggle}
-        className="w-full h-auto p-3 justify-start"
       >
-        <div className="flex items-center gap-3 flex-1">
           {isExpanded ? (
-            <ChevronDown className="h-4 w-4" />
           ) : (
-            <ChevronRight className="h-4 w-4" />
           )}
-          <Package className="h-4 w-4" />
-          <span className="font-medium">{group.name}</span>
-          <Badge variant="outline" className="text-xs">
             {groupDocuments?.length || 0} archivo{(groupDocuments?.length || 0) !== 1 ? 's' : ''}
           </Badge>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">
             <span>Entrega</span>
           </Badge>
         </div>
       </Button>
 
       {isExpanded && (
-        <div className="px-3 pb-3">
           {groupDocuments && groupDocuments.length > 0 ? (
-            <div className="bg-muted/30 rounded-lg border">
               {groupDocuments.map((document, index) => (
                 <div key={document.id} className={index !== groupDocuments.length - 1 ? "border-b border-border/50" : ""}>
                   <DocumentItem document={document} />
@@ -587,7 +499,6 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-4 text-sm text-muted-foreground">
               Esta entrega está vacía
             </div>
           )}
@@ -608,13 +519,9 @@ function DocumentItem({ document }: DocumentItemProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'aprobado':
-        return <Circle className="h-3 w-3 text-green-500 fill-current" />;
       case 'rechazado':
-        return <Circle className="h-3 w-3 text-red-500 fill-current" />;
       case 'en_revision':
-        return <Circle className="h-3 w-3 text-blue-500 fill-current" />;
       default:
-        return <Circle className="h-3 w-3 text-gray-400 fill-current" />;
     }
   };
 
@@ -665,24 +572,18 @@ function DocumentItem({ document }: DocumentItemProps) {
   };
 
   return (
-    <div className="flex items-center px-3 py-2 hover:bg-muted/50 rounded-md transition-colors">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Status dot */}
-        <div className="flex-shrink-0">
           {getStatusIcon(document.status)}
         </div>
         
         {/* File icon */}
-        <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
         
         {/* File name */}
-        <div className="font-medium truncate min-w-0 flex-1">
           {document.name}
         </div>
       </div>
       
       {/* Status text */}
-      <div className="text-xs text-muted-foreground min-w-0 px-2">
         {document.status === 'aprobado' && 'Aprobado'}
         {document.status === 'rechazado' && 'Rechazado'}
         {document.status === 'en_revision' && 'En revisión'}
@@ -690,48 +591,34 @@ function DocumentItem({ document }: DocumentItemProps) {
       </div>
       
       {/* File size */}
-      <div className="text-xs text-muted-foreground min-w-0 px-2">
         {formatFileSize(document.file_size)}
       </div>
       
       {/* Date */}
-      <div className="text-xs text-muted-foreground min-w-0 px-2">
         {formatDate(document.created_at)}
       </div>
       
       {/* Actions */}
-      <div className="flex items-center gap-1 flex-shrink-0 ml-2">
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-6 w-6 p-0 hover:bg-blue-50"
           onClick={handleDownload}
-          title="Descargar archivo"
         >
-          <Download className="h-3 w-3" />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-6 w-6 p-0 hover:bg-gray-50"
-              title="Más opciones"
             >
-              <MoreVertical className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={handleView}>
-              <Eye className="h-4 w-4 mr-2" />
               Ver archivo
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleEdit}>
-              <Edit className="h-4 w-4 mr-2" />
               Editar
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-              <Trash2 className="h-4 w-4 mr-2" />
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>

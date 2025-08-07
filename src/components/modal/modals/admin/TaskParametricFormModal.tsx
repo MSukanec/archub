@@ -359,7 +359,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
             {/* Componente constructor de parámetros */}
             <ParametricTaskBuilder 
               onSelectionChange={setSelections}
@@ -373,12 +372,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
       
       case 2:
         return (
-          <div className="space-y-6">
             {/* Agregar material */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="material-select" className="text-xs font-medium">Material</Label>
                   <ComboBox
                     options={materialOptions}
                     value={selectedMaterialId}
@@ -388,8 +383,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
                 </div>
                 
                 <div>
-                  <Label htmlFor="material-amount" className="text-xs font-medium">Cantidad</Label>
-                  <div className="flex items-center gap-2">
                     <Input
                       id="material-amount"
                       type="number"
@@ -400,7 +393,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
                       min="0"
                     />
                     {selectedMaterialUnit && (
-                      <Badge variant="outline" className="text-xs">
                         {selectedMaterialUnit}
                       </Badge>
                     )}
@@ -411,9 +403,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
               <Button 
                 onClick={handleAddMaterial}
                 disabled={!selectedMaterialId || !materialAmount || isLoading}
-                className="w-full"
               >
-                <Plus className="h-4 w-4 mr-2" />
                 Agregar Material
               </Button>
             </div>
@@ -423,13 +413,7 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
               <>
                 <Separator />
                 <div>
-                  <Label className="text-sm font-medium">Materiales Agregados</Label>
-                  <div className="mt-2 space-y-2">
                     {taskMaterials.map((material, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{material.material_name}</p>
-                          <p className="text-xs text-muted-foreground">
                             {material.amount} {material.unit_name}
                           </p>
                         </div>
@@ -452,7 +436,6 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
                             setTaskMaterials(prev => prev.filter((_, i) => i !== index))
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -506,11 +489,8 @@ export function ParametricTaskFormModal({ modalData, onClose }: ParametricTaskFo
   )
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
         {headerContent}
         
-        <div className="flex-1 overflow-y-auto p-6">
           {getStepContent()}
         </div>
         

@@ -174,7 +174,6 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
@@ -240,18 +239,11 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
   );
 
   const viewPanel = editingMember ? (
-    <div className="space-y-4">
       <div>
-        <h4 className="font-medium">Email</h4>
-        <p className="text-muted-foreground mt-1">{editingMember?.email || 'Sin email'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Rol</h4>
-        <p className="text-muted-foreground mt-1">{editingMember?.role?.name || 'Sin rol'}</p>
       </div>
       <div>
-        <h4 className="font-medium">Estado</h4>
-        <p className="text-muted-foreground mt-1">{editingMember?.status || 'Activo'}</p>
       </div>
     </div>
   ) : null;

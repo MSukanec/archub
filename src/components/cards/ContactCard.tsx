@@ -79,55 +79,40 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onEdit, onDelete, on
       actions={[
         {
           label: 'Editar',
-          icon: <Edit className="w-4 h-4" />,
           variant: 'default',
           onClick: () => onEdit?.(contact)
         },
         {
           label: 'Eliminar',
-          icon: <Trash2 className="w-4 h-4" />,
           variant: 'destructive',
           onClick: () => onDelete?.(contact)
         }
       ]}
     >
-      <div className="p-4 bg-card border border-card-border rounded-lg">
-        <div className="flex items-center gap-3">
           {/* Avatar */}
-          <Avatar className="w-10 h-10">
             <AvatarImage src={avatar} />
-            <AvatarFallback className="text-sm font-medium">
               {avatarFallback}
             </AvatarFallback>
           </Avatar>
 
           {/* Contact Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-medium text-sm truncate">
                 {displayName}
               </p>
               {linked_user_id && (
-                <Badge variant="secondary" className="text-xs shrink-0">
-                  <CheckCircle className="w-3 h-3 mr-1" />
                   Usuario
                 </Badge>
               )}
               {typeDisplay && (
-                <Badge variant="outline" className="text-xs shrink-0">
                   {typeDisplay}
                 </Badge>
               )}
             </div>
             
-            <div className="flex flex-col gap-0.5">
               {displayEmail && (
-                <p className="text-xs text-muted-foreground truncate">
                   {displayEmail}
                 </p>
               )}
               {company_name && (
-                <p className="text-xs text-muted-foreground truncate">
                   {company_name}
                 </p>
               )}

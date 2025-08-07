@@ -50,20 +50,11 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
       editLabel="Editar"
       deleteLabel="Eliminar"
     >
-      <Card className="border rounded-lg hover:shadow-sm transition-shadow">
-        <div className="p-3 space-y-3">
           {/* Top Row: Code and Quantity */}
-          <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-xs font-mono">
               {task.task_id?.substring(0, 8) || 'Sin código'}
             </Badge>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Cant:</span>
-              <span className="text-sm font-medium">{task.quantity}</span>
               {unitName && (
                 <>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <span className="text-sm font-medium">{unitName}</span>
                 </>
               )}
             </div>
@@ -72,7 +63,6 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
           {/* Middle Row: Task Name */}
           <div>
             <h3 
-              className="text-sm font-medium leading-5 text-foreground"
               title={processedName}
             >
               {displayName}
@@ -80,14 +70,7 @@ export function BudgetTaskCard({ task, processedName, unitName, onEdit, onDelete
           </div>
 
           {/* Bottom Row: Rubro and Cost */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Rubro:</span>
-              <span className="text-xs font-medium">{task.category_name || 'Sin rubro'}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">$0</span>
-              <span className="text-xs text-muted-foreground">0.0%</span>
             </div>
           </div>
         </div>

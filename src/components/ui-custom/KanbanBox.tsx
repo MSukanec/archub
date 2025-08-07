@@ -108,9 +108,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="text-lg font-semibold">Cargando tablero...</div>
         </div>
       </div>
     );
@@ -119,8 +116,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
   if (lists.length === 0) {
     return (
       <EmptyState
-        icon={<List className="w-8 h-8 text-muted-foreground" />}
-        title="No hay listas en este tablero"
         description="Crea tu primera lista para comenzar a organizar tareas"
       />
     );
@@ -134,7 +129,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
             <div 
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="flex h-full overflow-x-auto pb-4 gap-0 md:gap-4 snap-x snap-mandatory md:snap-none md:justify-start"
               style={{ minWidth: 'fit-content', width: '100%' }}
             >
               {lists.map((list, index) => (
@@ -143,44 +137,31 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none"
                     >
                       <Card className={`h-fit w-full md:max-w-none mx-3 md:mx-0 ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
                         {/* List Header */}
                         <div 
                           {...provided.dragHandleProps}
-                          className="flex items-center justify-between p-3 border-b cursor-grab active:cursor-grabbing"
                         >
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm">{list.name}</h3>
-                            <Badge variant="secondary" className="text-xs">
                               {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-2">
                             {list.creator && (
-                              <Avatar className="h-5 w-5">
                                 {list.creator.avatar_url && <AvatarImage src={list.creator.avatar_url} />}
-                                <AvatarFallback className="text-xs">
                                   {list.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                                 </AvatarFallback>
                               </Avatar>
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                  <MoreHorizontal className="h-3 w-3" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => openModal('list', { boardId, list, isEditing: true })}>
-                                  <Edit className="h-3 w-3 mr-2" />
                                   Editar lista
                                 </DropdownMenuItem>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                      <Trash2 className="h-3 w-3 mr-2" />
                                       Eliminar lista
                                     </DropdownMenuItem>
                                   </AlertDialogTrigger>
@@ -194,7 +175,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                       <AlertDialogAction 
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         onClick={() => onDeleteList?.(list.id)}
                                       >
                                         Eliminar
@@ -208,13 +188,10 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                         </div>
 
                         {/* Cards Container */}
-                        <div className="p-3">
                           {/* Add Card Button - Always show first */}
                           <Button
                             onClick={() => openModal('card', { listId: list.id })}
-                            className="w-full mb-2 h-8 justify-start"
                           >
-                            <Plus className="h-3 w-3 mr-2" />
                             Añade una tarjeta
                           </Button>
 
@@ -253,27 +230,22 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                           onClick={() => onCardEdit?.(card)}
                                         >
                                           {/* Hover Action Buttons */}
-                                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 onCardEdit?.(card);
                                               }}
                                             >
-                                              <Edit className="h-3 w-3" />
                                             </Button>
                                             <AlertDialog>
                                               <AlertDialogTrigger asChild>
                                                 <Button
                                                   variant="ghost"
                                                   size="sm"
-                                                  className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
                                                   onClick={(e) => e.stopPropagation()}
                                                 >
-                                                  <Trash2 className="h-3 w-3" />
                                                 </Button>
                                               </AlertDialogTrigger>
                                               <AlertDialogContent>
@@ -286,7 +258,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                 <AlertDialogFooter>
                                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                                   <AlertDialogAction 
-                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                     onClick={() => onDeleteCard?.(card.id)}
                                                   >
                                                     Eliminar
@@ -297,38 +268,28 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                           </div>
 
                                           {/* Completion Status and Creator Info Header */}
-                                          <div className="flex items-start gap-2 mb-2">
                                             {/* Completion Checkbox */}
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleToggleCompleted(card.id, !card.is_completed);
                                               }}
                                             >
                                               {card.is_completed ? (
-                                                <CheckCircle className="h-4 w-4 text-primary" />
                                               ) : (
-                                                <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
                                               )}
                                             </Button>
 
                                             {/* Creator Info and Date */}
-                                            <div className="flex items-center justify-between flex-1 min-w-0">
-                                              <div className="flex items-center gap-2 min-w-0">
-                                                <Avatar className="h-6 w-6 flex-shrink-0">
                                                   <AvatarImage src={creatorInfo?.avatar} />
-                                                  <AvatarFallback className="text-xs">
                                                     {creatorInfo?.initials || 'U'}
                                                   </AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-xs text-muted-foreground font-medium truncate">
                                                   {creatorInfo?.name || 'Usuario'}
                                                 </span>
                                               </div>
-                                              <span className="text-xs text-muted-foreground flex-shrink-0">
                                                 {new Date(card.created_at).toLocaleDateString('es-ES', {
                                                   month: 'short',
                                                   day: 'numeric'
@@ -355,8 +316,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
                                           {/* Completed Date */}
                                           {card.is_completed && card.completed_at && (
-                                            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
-                                              <CheckCircle className="h-3 w-3" />
                                               <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
                                                 day: 'numeric',
                                                 month: 'short'
@@ -372,7 +331,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
                                 {/* Completed tasks accordion */}
                                 {cardsByList[list.id]?.filter(card => card.is_completed).length > 0 && (
-                                  <div className="pt-4">
                                     <Collapsible 
                                       open={completedAccordionState[list.id] || false} 
                                       onOpenChange={(open) => setCompletedAccordionState(prev => ({ ...prev, [list.id]: open }))}
@@ -380,14 +338,10 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                       <CollapsibleTrigger asChild>
                                         <Button
                                           variant="ghost"
-                                          className="h-auto p-2 w-full justify-start text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
                                         >
                                           <ChevronRight className={`h-4 w-4 transition-transform ${completedAccordionState[list.id] ? 'rotate-90' : ''}`} />
-                                          <span className="ml-1">Completadas ({cardsByList[list.id]?.filter(card => card.is_completed).length})</span>
                                         </Button>
                                       </CollapsibleTrigger>
-                                      <CollapsibleContent className="mt-2">
-                                        <div className="space-y-2">
                                           {cardsByList[list.id]?.filter(card => card.is_completed).map((card, completedIndex) => {
                                             const creatorInfo = card.creator ? {
                                               name: card.creator.full_name || card.creator.email || 'Usuario',
@@ -415,27 +369,22 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                       onClick={() => onCardEdit?.(card)}
                                                     >
                                                       {/* Hover Action Buttons */}
-                                                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button
                                                           variant="ghost"
                                                           size="sm"
-                                                          className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
                                                           onClick={(e) => {
                                                             e.stopPropagation();
                                                             onCardEdit?.(card);
                                                           }}
                                                         >
-                                                          <Edit className="h-3 w-3" />
                                                         </Button>
                                                         <AlertDialog>
                                                           <AlertDialogTrigger asChild>
                                                             <Button
                                                               variant="ghost"
                                                               size="sm"
-                                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
                                                               onClick={(e) => e.stopPropagation()}
                                                             >
-                                                              <Trash2 className="h-3 w-3" />
                                                             </Button>
                                                           </AlertDialogTrigger>
                                                           <AlertDialogContent>
@@ -448,7 +397,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                             <AlertDialogFooter>
                                                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                                               <AlertDialogAction 
-                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                                 onClick={() => onDeleteCard?.(card.id)}
                                                               >
                                                                 Eliminar
@@ -459,38 +407,28 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                       </div>
 
                                                       {/* Completion Status and Creator Info Header */}
-                                                      <div className="flex items-start gap-2 mb-2">
                                                         {/* Completion Checkbox */}
                                                         <Button
                                                           variant="ghost"
                                                           size="sm"
-                                                          className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
                                                           onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleToggleCompleted(card.id, !card.is_completed);
                                                           }}
                                                         >
                                                           {card.is_completed ? (
-                                                            <CheckCircle className="h-4 w-4 text-primary" />
                                                           ) : (
-                                                            <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
                                                           )}
                                                         </Button>
 
                                                         {/* Creator Info and Date */}
-                                                        <div className="flex items-center justify-between flex-1 min-w-0">
-                                                          <div className="flex items-center gap-2 min-w-0">
-                                                            <Avatar className="h-6 w-6 flex-shrink-0">
                                                               <AvatarImage src={creatorInfo?.avatar} />
-                                                              <AvatarFallback className="text-xs">
                                                                 {creatorInfo?.initials || 'U'}
                                                               </AvatarFallback>
                                                             </Avatar>
-                                                            <span className="text-xs text-muted-foreground font-medium truncate">
                                                               {creatorInfo?.name || 'Usuario'}
                                                             </span>
                                                           </div>
-                                                          <span className="text-xs text-muted-foreground flex-shrink-0">
                                                             {new Date(card.created_at).toLocaleDateString('es-ES', {
                                                               month: 'short',
                                                               day: 'numeric'
@@ -517,8 +455,6 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
 
                                                       {/* Completed Date */}
                                                       {card.is_completed && card.completed_at && (
-                                                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
-                                                          <CheckCircle className="h-3 w-3" />
                                                           <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
                                                             day: 'numeric',
                                                             month: 'short'
@@ -549,12 +485,8 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
               ))}
               
               {/* Add New List Button */}
-              <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none">
-                <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors mx-3 md:mx-0 relative overflow-hidden" style={{ borderColor: 'hsl(var(--accent))' }}>
                   {/* Diagonal Hatch Background Pattern */}
-                  <div className="absolute inset-0 z-0 overflow-hidden">
                     <div 
-                      className="absolute inset-0 opacity-10"
                       style={{
                         backgroundImage: `repeating-linear-gradient(
                           45deg,
@@ -570,10 +502,8 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                   <Button
                     variant="ghost"
                     onClick={onCreateList}
-                    className="w-full h-12 justify-center hover:text-foreground relative z-10"
                     style={{ color: 'hsl(var(--accent))' }}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
                     Añade otra lista
                   </Button>
                 </Card>

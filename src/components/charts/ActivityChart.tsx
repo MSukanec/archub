@@ -29,27 +29,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const users = payload[0]?.payload?.users || []
     
     return (
-      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
-        <p className="font-medium mb-2">{label}</p>
-        <p className="text-sm font-medium mb-2" style={{ color: '#92c900' }}>
           Actividad total: {payload[0]?.value || 0}
         </p>
         {users.length > 0 && (
-          <div className="space-y-1">
-            <p className="text-xs text-gray-600 mb-1">Usuarios activos:</p>
             {users.slice(0, 3).map((user: any) => (
-              <div key={user.user_id} className="flex items-center gap-2">
-                <Avatar className="h-4 w-4">
                   <AvatarImage src={user.avatar_url} alt={user.full_name} />
-                  <AvatarFallback className="text-xs">
                     {user.full_name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs">{user.full_name}: {user.activity_count}</span>
               </div>
             ))}
             {users.length > 3 && (
-              <p className="text-xs text-gray-500">+{users.length - 3} más</p>
             )}
           </div>
         )}
@@ -87,9 +77,7 @@ const CustomDot = (props: any) => {
             width={28}
             height={28}
           >
-            <Avatar className="h-7 w-7 border-2 border-white shadow-md">
               <AvatarImage src={user.avatar_url} alt={user.full_name} />
-              <AvatarFallback className="text-xs bg-accent text-accent-foreground">
                 {user.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -115,14 +103,11 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
             <div>
               <CardTitle>Actividad por Miembro</CardTitle>
-              <p className="text-sm text-muted-foreground">
                 Actividad de miembros en los {getTimePeriodLabel(timePeriod)}
               </p>
             </div>
-            <div className="flex gap-1">
               <Button variant="outline" size="sm" disabled>Semana</Button>
               <Button variant="outline" size="sm" disabled>Mes</Button>
               <Button variant="outline" size="sm" disabled>Año</Button>
@@ -130,11 +115,6 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
               </div>
             </div>
           </div>
@@ -146,14 +126,11 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
           <div>
             <CardTitle>Actividad por Miembro</CardTitle>
-            <p className="text-sm text-muted-foreground">
               Actividad de miembros en los {getTimePeriodLabel(timePeriod)}
             </p>
           </div>
-          <div className="flex gap-1">
             <Button 
               variant={timePeriod === 'week' ? "default" : "outline"} 
               size="sm"
@@ -179,7 +156,6 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 30, right: 20, left: 0, bottom: 20 }}>
               <defs>

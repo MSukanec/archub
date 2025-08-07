@@ -215,14 +215,10 @@ export function SidebarSubmenu() {
       onMouseLeave={() => setSecondaryHovered(false)}
     >
       {/* Section Title Header */}
-      <div className="h-9 flex items-center px-3 bg-[var(--secondary-sidebar-bg)]">
         {isSecondarySidebarExpanded && (
-          <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getSectionInfo().icon;
-              return <IconComponent className="w-[18px] h-[18px] text-[var(--secondary-sidebar-fg)]" />;
             })()}
-            <span className="text-sm font-normal text-[var(--secondary-sidebar-fg)]">
               {getSectionInfo().title}
             </span>
           </div>
@@ -230,27 +226,19 @@ export function SidebarSubmenu() {
       </div>
 
       {/* Contenido del submenú */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
-        <div className="flex flex-col gap-[1px]">
           {filteredSubmenu.length > 0 ? (
             filteredSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
                 return (
-                  <div key={index} className="mb-[1px]">
                     {/* Título del acordeón */}
                     {isSecondarySidebarExpanded && (
-                      <div className="h-8 flex items-center px-3 mb-[1px]">
-                        <span className="text-xs font-semibold text-[var(--secondary-sidebar-fg)] opacity-60 uppercase tracking-wider">
                           {item.label}
                         </span>
                       </div>
                     )}
                     {/* Items del acordeón */}
-                    <div className="flex flex-col gap-[1px]">
                       {item.items?.map((subItem, subIndex) => (
-                        <div key={subIndex} className="mb-[1px]">
                           <SidebarButton
-                            icon={<subItem.icon className="w-[18px] h-[18px]" />}
                             href={subItem.href}
                             isActive={location === subItem.href}
                             onClick={subItem.onClick}
@@ -268,8 +256,6 @@ export function SidebarSubmenu() {
               // Plan component
               if (item.type === 'plan') {
                 return (
-                  <div key={index} className="mb-[1px]">
-                    <div className="p-1">
                       <Plan isExpanded={isSecondarySidebarExpanded} />
                     </div>
                   </div>
@@ -279,10 +265,8 @@ export function SidebarSubmenu() {
               // Botón normal con posible restricción
               if (item.restricted) {
                 return (
-                  <div key={index} className="mb-[1px]">
                     <CustomRestricted reason={typeof item.restricted === 'string' ? item.restricted : 'coming_soon'}>
                       <SidebarButton
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
                         href="#"
                         isActive={false}
                         onClick={() => {}}
@@ -298,10 +282,8 @@ export function SidebarSubmenu() {
               // Botón con restricción de modo general
               if (item.generalModeRestricted) {
                 return (
-                  <div key={index} className="mb-[1px]">
                     <CustomRestricted reason="general_mode" functionName={item.label}>
                       <SidebarButton
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
                         href={item.href}
                         isActive={location === item.href}
                         onClick={item.onClick}
@@ -315,9 +297,7 @@ export function SidebarSubmenu() {
               }
 
               return (
-                <div key={index} className="mb-[1px]">
                   <SidebarButton
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}
                     isActive={location === item.href}
                     onClick={item.onClick}

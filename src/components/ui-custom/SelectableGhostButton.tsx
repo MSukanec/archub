@@ -61,12 +61,8 @@ export function SelectableGhostButton({
           disabled={disabled}
         >
           {icon && <span style={{ marginRight: '0.2em' }}>{icon}</span>}
-          <span className="font-medium">{title}:</span>
-          <span style={{ marginLeft: '0.2em' }} className="font-normal">{selectedLabel}</span>
-          {showChevron && <ChevronDown className="w-3 h-3" style={{ marginLeft: '0.2em' }} />}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
         {placeholder && (
           <DropdownMenuItem
             onClick={() => onSelect("", { value: "", label: defaultLabel })}

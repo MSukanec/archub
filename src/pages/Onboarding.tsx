@@ -33,15 +33,12 @@ export default function Onboarding() {
   // Basic auth check without onboarding redirection
   if (!initialized || authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
         <AuthModal open={true} onOpenChange={() => {}} />
       </div>
     );
@@ -256,10 +253,6 @@ export default function Onboarding() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
-          <p className="text-[var(--muted-foreground)]">Cargando...</p>
         </div>
       </div>
     );
@@ -279,19 +272,12 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
         {/* Header with step indicator */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
             ¡Bienvenido a Archub!
           </h1>
           
-          <div className="flex items-center justify-center space-x-2 mt-4">
-            <p className="text-sm text-slate-600 dark:text-slate-300">
               Paso {currentStep} de {totalSteps}
             </p>
-            <div className="flex space-x-1">
               {Array.from({ length: totalSteps }, (_, index) => (
                 <div
                   key={index}

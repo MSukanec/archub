@@ -16,11 +16,9 @@ export default function TaskLaborCost({ task }: TaskLaborCostProps) {
   }
 
   if (laborCostPerUnit === 0) {
-    return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
-    <span className="text-xs font-medium text-foreground">
       {formatCost(laborCostPerUnit)}
     </span>
   )

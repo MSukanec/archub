@@ -22,7 +22,6 @@ export default function FormModalBody({
   const paddingClasses = className?.includes("p-0") ? "" : `${paddingX} ${paddingY}`;
   
   return (
-    <div className="flex-1 overflow-y-auto relative z-[200000]">
       <div className={cn(
         "gap-6 text-sm",
         paddingClasses,

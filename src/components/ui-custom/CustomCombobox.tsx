@@ -55,12 +55,9 @@ export function CustomCombobox({
             className
           )}
         >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
             {selectedOption ? (
               <>
-                <span className="truncate">{selectedOption.name}</span>
                 {selectedOption.code && (
-                  <Badge variant="secondary" className="text-xs px-1.5 py-0.5 flex-shrink-0">
                     {selectedOption.code}
                   </Badge>
                 )}
@@ -69,23 +66,17 @@ export function CustomCombobox({
               placeholder
             )}
           </div>
-          <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0 bg-[var(--popover-bg)] border border-[var(--card-border)]" 
         align="start"
         style={{ zIndex: 99999 }}
       >
-        <Command className="bg-[var(--popover-bg)]">
           <CommandInput 
             placeholder={searchPlaceholder} 
-            className="text-xs border-none focus:ring-0"
           />
-          <CommandEmpty className="text-xs text-[var(--input-placeholder)] py-2 px-3">
             {emptyMessage}
           </CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-y-auto p-1">
             {allowClear && (
               <CommandItem
                 value="__clear__"
@@ -93,7 +84,6 @@ export function CustomCombobox({
                   onValueChange(null);
                   setOpen(false);
                 }}
-                className="text-xs py-2 px-2 rounded-sm hover:bg-[var(--card-hover-bg)] cursor-pointer"
               >
                 <Check
                   className={cn(
@@ -112,7 +102,6 @@ export function CustomCombobox({
                   onValueChange(option.id);
                   setOpen(false);
                 }}
-                className="text-xs py-2 px-2 rounded-sm hover:bg-[var(--card-hover-bg)] cursor-pointer"
               >
                 <Check
                   className={cn(
@@ -120,10 +109,7 @@ export function CustomCombobox({
                     option.id === value ? "opacity-100" : "opacity-0"
                   )}
                 />
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="truncate">{option.name}</span>
                   {option.code && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5 flex-shrink-0">
                       {option.code}
                     </Badge>
                   )}

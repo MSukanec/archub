@@ -52,29 +52,18 @@ export function ProjectQuickActions() {
   ]
 
   return (
-    <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-[var(--accent)]" />
-          <CardTitle className="text-foreground">Acciones Rápidas</CardTitle>
         </div>
-        <p className="text-sm text-muted-foreground">
           Accesos directos a las funciones principales
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3">
           {actions.map((action) => (
             <Button
               key={action.label}
               variant="outline"
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-accent/50 bg-[var(--card-bg)] border-[var(--card-border)]"
               onClick={action.onClick}
             >
               <action.icon className={`h-5 w-5 ${action.color}`} />
-              <div className="text-center">
-                <div className="font-medium text-sm text-foreground">{action.label}</div>
-                <div className="text-xs text-muted-foreground">{action.description}</div>
               </div>
             </Button>
           ))}

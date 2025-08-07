@@ -22,25 +22,21 @@ export function FormModalStepFooter({
 
   return (
     <div className={`p-2 border-t border-[var(--card-border)] mt-auto ${className}`}>
-      <div className="flex gap-2 w-full">
         {hasCancel && (
           <Button
             variant="secondary"
             onClick={cancelAction.onClick}
             disabled={cancelAction.disabled}
-            className="w-1/4"
           >
             {cancelAction.loading ? 'Cargando...' : cancelAction.label}
           </Button>
         )}
         
-        <div className="flex gap-2 w-3/4">
           {hasPrevious && (
             <Button
               variant="secondary"
               onClick={previousAction.onClick}
               disabled={previousAction.disabled}
-              className="flex-1"
             >
               {previousAction.loading ? 'Cargando...' : previousAction.label}
             </Button>
@@ -51,7 +47,6 @@ export function FormModalStepFooter({
               variant={nextAction.variant || "default"}
               onClick={nextAction.onClick}
               disabled={nextAction.disabled}
-              className="flex-1"
             >
               {nextAction.loading ? 'Cargando...' : nextAction.label}
             </Button>
@@ -62,7 +57,6 @@ export function FormModalStepFooter({
               variant={submitAction.variant || "default"}
               onClick={submitAction.onClick}
               disabled={submitAction.disabled}
-              className="flex-1"
             >
               {submitAction.loading ? 'Cargando...' : submitAction.label}
             </Button>
@@ -74,7 +68,6 @@ export function FormModalStepFooter({
               variant={action.variant || "default"}
               onClick={action.onClick}
               disabled={action.disabled}
-              className="flex-1"
             >
               {action.loading ? 'Cargando...' : action.label}
             </Button>
