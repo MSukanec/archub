@@ -13,7 +13,7 @@ interface UserOrganizationPreferences {
 
 export function useUserOrganizationPreferences(organizationId: string | undefined) {
   const { data: userData } = useCurrentUser()
-  const userId = userData?.user?.id
+  const userId = userData?.user?.id // Este es el ID correcto de la tabla users
 
   return useQuery({
     queryKey: ['user-organization-preferences', userId, organizationId],

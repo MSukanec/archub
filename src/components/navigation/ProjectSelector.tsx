@@ -10,7 +10,7 @@ import {
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useProjectContext } from '@/stores/projectContext'
-import { useUpdateUserOrganizationPreferences, useGetLastProjectForOrganization } from '@/hooks/use-user-organization-preferences'
+// Eliminamos el sistema problemático de user_organization_preferences
 import { useEffect } from 'react'
 
 export function ProjectSelector() {
@@ -19,16 +19,13 @@ export function ProjectSelector() {
   const { selectedProjectId, setSelectedProject } = useProjectContext()
   const organizationId = userData?.organization?.id
   
-  // Get last project for current organization using new system
-  const lastProjectId = useGetLastProjectForOrganization(organizationId)
-  
-  // Update user organization preferences when project changes
-  const updateProjectMutation = useUpdateUserOrganizationPreferences()
+  // Usar el proyecto directamente desde las preferencias del usuario
+  const lastProjectId = userData?.preferences?.last_project_id
 
-  // Initialize project from organization preferences, always ensure a project is selected
+  // Initialize project from user preferences, always ensure a project is selected
   useEffect(() => {
     if (organizationId && projects.length > 0) {
-      // Try to use saved project from organization preferences if it exists
+      // Try to use saved project if it exists in current organization
       if (lastProjectId && projects.some(p => p.id === lastProjectId)) {
         setSelectedProject(lastProjectId)
       } else {
@@ -36,15 +33,10 @@ export function ProjectSelector() {
         const firstProject = projects[0]
         if (firstProject) {
           setSelectedProject(firstProject.id)
-          // Update organization preferences to reflect this selection
-          updateProjectMutation.mutate({
-            organizationId,
-            lastProjectId: firstProject.id
-          })
         }
       }
     }
-  }, [organizationId, lastProjectId, projects, setSelectedProject, updateProjectMutation])
+  }, [organizationId, lastProjectId, projects, setSelectedProject])
   
   // Find current project based on selectedProjectId
   const currentProject = selectedProjectId 
@@ -52,27 +44,13 @@ export function ProjectSelector() {
     : null
 
   const handleProjectSelect = (projectId: string) => {
-    console.log("🎯 ProjectSelector: Selecting project", { 
-      from: selectedProjectId, 
-      to: projectId,
-      projectName: projects.find(p => p.id === projectId)?.name,
-      organizationId,
-      userId: userData?.user?.id
-    });
-    
     // Don't change selection if clicking the same project
     if (selectedProjectId === projectId) {
       return
     }
     
-    // Update context and database using new organization preferences system
+    // Update context only - project persistence will be handled by projectContext.ts
     setSelectedProject(projectId)
-    if (organizationId) {
-      console.log("🎯 ProjectSelector: Calling mutation with", { organizationId, projectId });
-      updateProjectMutation.mutate({
-        organizationId,
-        lastProjectId: projectId
-      }, {
         onSuccess: (data) => {
           console.log("🎯 ProjectSelector: Mutation successful", data);
         },

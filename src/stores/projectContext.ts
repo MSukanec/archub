@@ -21,24 +21,22 @@ export const useProjectContext = create<ProjectContextState>()(
         
         const currentOrgId = organizationId || get().currentOrganizationId;
         
-        // Si cambiamos de organización, persistir el proyecto en las preferencias
-        if (currentOrgId && projectId) {
-          // Obtener user_id del authStore
+        // Si cambiamos de proyecto, persistir en user_preferences.last_project_id
+        if (projectId) {
           const user = useAuthStore.getState().user;
           if (user) {
-            // Usar la API para persistir en user_organization_preferences
-            fetch('/api/user/update-organization-preferences', {
+            // Usar el endpoint simple que actualiza user_preferences
+            fetch('/api/user/select-project', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'x-user-id': user.id
               },
               body: JSON.stringify({
-                organization_id: currentOrgId,
-                last_project_id: projectId
+                project_id: projectId
               })
             }).catch(error => {
-              console.error("🔧 Error updating organization preferences:", error);
+              console.error("🔧 Error updating project selection:", error);
             });
           }
         }
