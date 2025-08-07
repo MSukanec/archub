@@ -59,6 +59,8 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
     return acc;
   }, {} as Record<string, KanbanCard[]>);
 
+
+
   // Sort cards by completion status first, then by creation date within each list
   Object.keys(cardsByList).forEach(listId => {
     cardsByList[listId].sort((a, b) => {
@@ -114,398 +116,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
     );
   }
 
-  // Render individual list component
-  const renderKanbanList = (list: KanbanList, index: number, isMobile: boolean = false) => (
-    <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          className={isMobile ? "w-full max-w-sm mx-auto" : "flex-shrink-0 w-full lg:w-80"}
-        >
-          <div className={`h-fit w-full ${isMobile ? "" : "mx-3 lg:mx-0"} ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
-            {/* List Header */}
-            <div 
-              {...provided.dragHandleProps}
-              className="flex items-center justify-between pb-3 cursor-grab active:cursor-grabbing"
-            >
-              <div className="flex items-center gap-3">
-                <h3 className="font-medium text-sm">{list.name}</h3>
-                <span className="text-sm text-muted-foreground">
-                  {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {list.creator && (
-                  <Avatar className="h-5 w-5">
-                    {list.creator.avatar_url && <AvatarImage src={list.creator.avatar_url} />}
-                    <AvatarFallback className="text-xs">
-                      {list.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openModal('list', { boardId, list, isEditing: true })}>
-                      <Edit className="h-3 w-3 mr-2" />
-                      Editar lista
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-destructive" 
-                      onClick={() => openModal('delete-confirmation', {
-                        mode: 'simple',
-                        title: '¿Eliminar lista?',
-                        description: `Esta acción eliminará permanentemente la lista "${list.name}" y todas sus tarjetas.`,
-                        itemName: list.name,
-                        itemType: 'lista',
-                        destructiveActionText: 'Eliminar lista',
-                        onConfirm: () => onDeleteList?.(list.id)
-                      })}
-                    >
-                      <Trash2 className="h-3 w-3 mr-2" />
-                      Eliminar lista
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-            
-            {/* Línea divisoria con color accent */}
-            <div className="w-full h-0.5 bg-accent mb-4"></div>
 
-            {/* Cards Container */}
-            <div>
-              {/* Add Card Button - Always show first */}
-              <Button
-                onClick={() => openModal('card', { listId: list.id, boardId })}
-                className="w-full mb-2 h-8 justify-start"
-              >
-                <Plus className="h-3 w-3 mr-2" />
-                Añade una tarjeta
-              </Button>
-
-              <Droppable droppableId={list.id} type="CARD">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`space-y-2 min-h-[80px] transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-accent/10' : ''
-                    }`}
-                  >
-                    {/* Active (non-completed) tasks */}
-                    {cardsByList[list.id]?.filter(card => !card.is_completed).map((card, index) => {
-                      const creatorInfo = card.creator ? {
-                        name: card.creator.full_name || card.creator.email || 'Usuario',
-                        avatar: card.creator.avatar_url || undefined,
-                        initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
-                      } : {
-                        name: 'Usuario',
-                        avatar: undefined,
-                        initials: 'U'
-                      };
-                      
-                      return (
-                        <div key={card.id}>
-                          <Draggable draggableId={card.id} index={index}>
-                            {(provided, snapshot) => (
-                            <Card
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
-                                snapshot.isDragging ? 'shadow-md rotate-1' : ''
-                              }`}
-                              onClick={() => onCardEdit?.(card)}
-                            >
-                              {/* Hover Action Buttons */}
-                              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onCardEdit?.(card);
-                                  }}
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openModal('delete-confirmation', {
-                                      mode: 'simple',
-                                      title: '¿Eliminar tarjeta?',
-                                      description: `Esta acción eliminará permanentemente la tarjeta "${card.title}".`,
-                                      itemName: card.title,
-                                      itemType: 'tarjeta',
-                                      destructiveActionText: 'Eliminar tarjeta',
-                                      onConfirm: () => onDeleteCard?.(card.id)
-                                    });
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-
-                              {/* Completion Status and Creator Info Header */}
-                              <div className="flex items-start gap-2 mb-2">
-                                {/* Completion Checkbox */}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleCompleted(card.id, !card.is_completed);
-                                  }}
-                                >
-                                  {card.is_completed ? (
-                                    <CheckCircle className="h-4 w-4 text-primary" />
-                                  ) : (
-                                    <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                                  )}
-                                </Button>
-
-                                {/* Creator Info and Date */}
-                                <div className="flex items-center justify-between flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <Avatar className="h-6 w-6 flex-shrink-0">
-                                      <AvatarImage src={creatorInfo?.avatar} />
-                                      <AvatarFallback className="text-xs">
-                                        {creatorInfo?.initials || 'U'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-xs text-muted-foreground font-medium truncate">
-                                      {creatorInfo?.name || 'Usuario'}
-                                    </span>
-                                  </div>
-                                  <span className="text-xs text-muted-foreground flex-shrink-0">
-                                    {new Intl.DateTimeFormat('es-ES', {
-                                      month: 'short',
-                                      day: 'numeric'
-                                    }).format(new Date(card.created_at))}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Card Content */}
-                              <div className="space-y-2">
-                                <h4 className="font-medium text-sm leading-tight">{card.title}</h4>
-                                {card.description && (
-                                  <p className="text-xs text-muted-foreground line-clamp-2">{card.description}</p>
-                                )}
-
-                                {/* Assigned User + Labels */}
-                                {(card.assignedUser || card.labels?.length > 0) && (
-                                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
-                                    {card.assignedUser && (
-                                      <div className="flex items-center gap-1">
-                                        <Avatar className="h-4 w-4">
-                                          <AvatarImage src={card.assignedUser.avatar_url} />
-                                          <AvatarFallback className="text-[10px]">
-                                            {card.assignedUser.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <span className="truncate max-w-20">{card.assignedUser.full_name || 'Usuario'}</span>
-                                      </div>
-                                    )}
-                                    {card.labels?.map((label, idx) => (
-                                      <Badge 
-                                        key={idx} 
-                                        variant="secondary" 
-                                        className="text-[10px] px-1 py-0 h-4"
-                                      >
-                                        {label}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </Card>
-                            )}
-                          </Draggable>
-                        </div>
-                      );
-                    })}
-
-                    {/* Completed tasks - collapsible section */}
-                    {cardsByList[list.id]?.filter(card => card.is_completed).length > 0 && (
-                      <Collapsible 
-                        open={completedAccordionState[list.id]} 
-                        onOpenChange={(open) => setCompletedAccordionState(prev => ({ ...prev, [list.id]: open }))}
-                      >
-                        <CollapsibleTrigger asChild>
-                          <Button variant="ghost" className="w-full h-8 justify-between text-xs text-muted-foreground hover:text-foreground p-2">
-                            <span>Completadas ({cardsByList[list.id]?.filter(card => card.is_completed).length})</span>
-                            <ChevronRight className={`h-3 w-3 transition-transform ${completedAccordionState[list.id] ? 'rotate-90' : ''}`} />
-                          </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="space-y-2 mt-2">
-                          {cardsByList[list.id]?.filter(card => card.is_completed).map((card, index) => {
-                            const totalActiveTasks = cardsByList[list.id]?.filter(card => !card.is_completed).length || 0;
-                            const adjustedIndex = totalActiveTasks + index;
-                            
-                            const creatorInfo = card.creator ? {
-                              name: card.creator.full_name || card.creator.email || 'Usuario',
-                              avatar: card.creator.avatar_url || undefined,
-                              initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
-                            } : {
-                              name: 'Usuario',
-                              avatar: undefined,
-                              initials: 'U'
-                            };
-                            
-                            return (
-                              <div key={card.id}>
-                                <Draggable draggableId={card.id} index={adjustedIndex}>
-                                  {(provided, snapshot) => (
-                                  <Card
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group opacity-60 ${
-                                      snapshot.isDragging ? 'shadow-md rotate-1' : ''
-                                    }`}
-                                    onClick={() => onCardEdit?.(card)}
-                                  >
-                                    {/* Hover Action Buttons */}
-                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onCardEdit?.(card);
-                                        }}
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          openModal('delete-confirmation', {
-                                            mode: 'simple',
-                                            title: '¿Eliminar tarjeta?',
-                                            description: `Esta acción eliminará permanentemente la tarjeta "${card.title}".`,
-                                            itemName: card.title,
-                                            itemType: 'tarjeta',
-                                            destructiveActionText: 'Eliminar tarjeta',
-                                            onConfirm: () => onDeleteCard?.(card.id)
-                                          });
-                                        }}
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-
-                                    {/* Completion Status and Creator Info Header */}
-                                    <div className="flex items-start gap-2 mb-2">
-                                      {/* Completion Checkbox */}
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleToggleCompleted(card.id, !card.is_completed);
-                                        }}
-                                      >
-                                        {card.is_completed ? (
-                                          <CheckCircle className="h-4 w-4 text-primary" />
-                                        ) : (
-                                          <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                                        )}
-                                      </Button>
-
-                                      {/* Creator Info and Date */}
-                                      <div className="flex items-center justify-between flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 min-w-0">
-                                          <Avatar className="h-6 w-6 flex-shrink-0">
-                                            <AvatarImage src={creatorInfo?.avatar} />
-                                            <AvatarFallback className="text-xs">
-                                              {creatorInfo?.initials || 'U'}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <span className="text-xs text-muted-foreground font-medium truncate">
-                                            {creatorInfo?.name || 'Usuario'}
-                                          </span>
-                                        </div>
-                                        <span className="text-xs text-muted-foreground flex-shrink-0">
-                                          {new Intl.DateTimeFormat('es-ES', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          }).format(new Date(card.created_at))}
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    {/* Card Content */}
-                                    <div className="space-y-2">
-                                      <h4 className="font-medium text-sm leading-tight line-through">{card.title}</h4>
-                                      {card.description && (
-                                        <p className="text-xs text-muted-foreground line-clamp-2 line-through">{card.description}</p>
-                                      )}
-
-                                      {/* Assigned User + Labels */}
-                                      {(card.assignedUser || card.labels?.length > 0) && (
-                                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
-                                          {card.assignedUser && (
-                                            <div className="flex items-center gap-1">
-                                              <Avatar className="h-4 w-4">
-                                                <AvatarImage src={card.assignedUser.avatar_url} />
-                                                <AvatarFallback className="text-[10px]">
-                                                  {card.assignedUser.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                                                </AvatarFallback>
-                                              </Avatar>
-                                              <span className="truncate max-w-20">{card.assignedUser.full_name || 'Usuario'}</span>
-                                            </div>
-                                          )}
-                                          {card.labels?.map((label, idx) => (
-                                            <Badge 
-                                              key={idx} 
-                                              variant="secondary" 
-                                              className="text-[10px] px-1 py-0 h-4"
-                                            >
-                                              {label}
-                                            </Badge>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </Card>
-                                  )}
-                                </Draggable>
-                              </div>
-                            );
-                          })}
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          </div>
-        </div>
-      )}
-    </Draggable>
-  );
 
   return (
     <>
@@ -515,168 +126,442 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
             <div 
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="w-full h-full"
+              className="flex h-full overflow-x-auto pb-4 gap-0 md:gap-4 snap-x snap-mandatory md:snap-none md:justify-start"
+              style={{ minWidth: 'fit-content', width: '100%' }}
             >
-              {/* Mobile: Horizontal carousel with snap */}
-              <div className="md:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-                <div className="flex">
-                  {lists.map((list, index) => (
-                    <section
-                      key={list.id}
-                      className="snap-center shrink-0 px-4 py-2"
-                      style={{ minWidth: '100vw' }}
+              {lists.map((list, index) => (
+                <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none"
                     >
-                      {renderKanbanList(list, index, true)}
-                    </section>
-                  ))}
-                  
-                  {/* Mobile: Add List Button */}
-                  <section
-                    className="snap-center shrink-0 px-4 py-2"
-                    style={{ minWidth: '100vw' }}
-                  >
-                    <Card 
-                      className="w-full max-w-sm mx-auto h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors relative overflow-hidden cursor-pointer" 
-                      style={{ borderColor: 'hsl(var(--accent))' }}
-                      onClick={onCreateList}
-                    >
-                      <div className="absolute inset-0 z-0 overflow-hidden">
+                      <div className={`h-fit w-full md:max-w-none mx-3 md:mx-0 ${snapshot.isDragging ? 'shadow-lg rotate-1' : ''}`}>
+                        {/* List Header */}
                         <div 
-                          className="absolute inset-0 opacity-5"
-                          style={{
-                            backgroundImage: `repeating-linear-gradient(
-                              45deg,
-                              hsl(var(--accent)),
-                              hsl(var(--accent)) 1px,
-                              transparent 1px,
-                              transparent 6px
-                            )`
-                          }}
-                        />
-                      </div>
-                      <div className="relative z-10 p-8 text-center">
-                        <List className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-                        <h3 className="font-medium text-sm mb-1">Añadir nueva lista</h3>
-                        <p className="text-xs text-muted-foreground">Organiza tus tareas en una nueva columna</p>
-                        <Button className="mt-4 h-8 text-xs">
-                          <Plus className="w-3 h-3 mr-1" />
-                          Crear Lista
-                        </Button>
-                      </div>
-                    </Card>
-                  </section>
-                </div>
-              </div>
+                          {...provided.dragHandleProps}
+                          className="flex items-center justify-between pb-3 cursor-grab active:cursor-grabbing"
+                        >
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-medium text-sm">{list.name}</h3>
+                            <span className="text-sm text-muted-foreground">
+                              {cardsByList[list.id]?.filter(card => !card.is_completed).length || 0}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {list.creator && (
+                              <Avatar className="h-5 w-5">
+                                {list.creator.avatar_url && <AvatarImage src={list.creator.avatar_url} />}
+                                <AvatarFallback className="text-xs">
+                                  {list.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openModal('list', { boardId, list, isEditing: true })}>
+                                  <Edit className="h-3 w-3 mr-2" />
+                                  Editar lista
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive" 
+                                  onClick={() => openModal('delete-confirmation', {
+                                    mode: 'simple',
+                                    title: '¿Eliminar lista?',
+                                    description: `Esta acción eliminará permanentemente la lista "${list.name}" y todas sus tarjetas.`,
+                                    itemName: list.name,
+                                    itemType: 'lista',
+                                    destructiveActionText: 'Eliminar lista',
+                                    onConfirm: () => onDeleteList?.(list.id)
+                                  })}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-2" />
+                                  Eliminar lista
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                        
+                        {/* Línea divisoria con color accent */}
+                        <div className="w-full h-0.5 bg-accent mb-4"></div>
 
-              {/* Desktop: Grid layout with proper overflow handling */}
-              <div className="hidden md:block">
-                {lists.length === 0 ? (
-                  // Empty state for desktop
-                  <div className="flex items-center justify-center h-64">
-                    <EmptyState
-                      icon={<List className="w-8 h-8 text-muted-foreground" />}
-                      title="No hay listas creadas"
-                      description="Crea tu primera lista para empezar a organizar las tareas"
-                      action={
-                        <Button onClick={onCreateList}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Nueva Lista
-                        </Button>
-                      }
+                        {/* Cards Container */}
+                        <div>
+                          {/* Add Card Button - Always show first */}
+                          <Button
+                            onClick={() => openModal('card', { listId: list.id, boardId })}
+                            className="w-full mb-2 h-8 justify-start"
+                          >
+                            <Plus className="h-3 w-3 mr-2" />
+                            Añade una tarjeta
+                          </Button>
+
+                          <Droppable droppableId={list.id} type="CARD">
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`space-y-2 min-h-[80px] transition-colors ${
+                                  snapshot.isDraggingOver ? 'bg-accent/10' : ''
+                                }`}
+                              >
+                                {/* Active (non-completed) tasks */}
+                                {cardsByList[list.id]?.filter(card => !card.is_completed).map((card, index) => {
+                                  const creatorInfo = card.creator ? {
+                                    name: card.creator.full_name || card.creator.email || 'Usuario',
+                                    avatar: card.creator.avatar_url || undefined,
+                                    initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
+                                  } : {
+                                    name: 'Usuario',
+                                    avatar: undefined,
+                                    initials: 'U'
+                                  };
+                                  
+                                  return (
+                                    <div key={card.id}>
+                                      <Draggable draggableId={card.id} index={index}>
+                                        {(provided, snapshot) => (
+                                        <Card
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                          className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
+                                            snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                          }`}
+                                          onClick={() => onCardEdit?.(card)}
+                                        >
+                                          {/* Hover Action Buttons */}
+                                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                onCardEdit?.(card);
+                                              }}
+                                            >
+                                              <Edit className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                openModal('delete-confirmation', {
+                                                  mode: 'simple',
+                                                  title: '¿Eliminar tarjeta?',
+                                                  description: `Esta acción eliminará permanentemente la tarjeta "${card.title}".`,
+                                                  itemName: card.title,
+                                                  itemType: 'tarjeta',
+                                                  destructiveActionText: 'Eliminar tarjeta',
+                                                  onConfirm: () => onDeleteCard?.(card.id)
+                                                });
+                                              }}
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+
+                                          {/* Completion Status and Creator Info Header */}
+                                          <div className="flex items-start gap-2 mb-2">
+                                            {/* Completion Checkbox */}
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleCompleted(card.id, !card.is_completed);
+                                              }}
+                                            >
+                                              {card.is_completed ? (
+                                                <CheckCircle className="h-4 w-4 text-primary" />
+                                              ) : (
+                                                <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                              )}
+                                            </Button>
+
+                                            {/* Creator Info and Date */}
+                                            <div className="flex items-center justify-between flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 min-w-0">
+                                                <Avatar className="h-6 w-6 flex-shrink-0">
+                                                  <AvatarImage src={creatorInfo?.avatar} />
+                                                  <AvatarFallback className="text-xs">
+                                                    {creatorInfo?.initials || 'U'}
+                                                  </AvatarFallback>
+                                                </Avatar>
+                                                <span className="text-xs text-muted-foreground font-medium truncate">
+                                                  {creatorInfo?.name || 'Usuario'}
+                                                </span>
+                                              </div>
+                                              <span className="text-xs text-muted-foreground flex-shrink-0">
+                                                {new Date(card.created_at).toLocaleDateString('es-ES', {
+                                                  month: 'short',
+                                                  day: 'numeric'
+                                                })}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Card Content */}
+                                          <div className={`text-sm font-medium mb-1 ${
+                                            card.is_completed 
+                                              ? 'line-through text-muted-foreground opacity-60' 
+                                              : ''
+                                          }`}>
+                                            {card.title}
+                                          </div>
+                                          {card.description && (
+                                            <div className={`text-xs text-muted-foreground line-clamp-2 ${
+                                              card.is_completed ? 'opacity-50' : ''
+                                            }`}>
+                                              {card.description}
+                                            </div>
+                                          )}
+
+                                          {/* Completed Date */}
+                                          {card.is_completed && card.completed_at && (
+                                            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
+                                              <CheckCircle className="h-3 w-3" />
+                                              <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'short'
+                                              })}</span>
+                                            </div>
+                                          )}
+                                        </Card>
+                                      )}
+                                      </Draggable>
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Completed tasks accordion */}
+                                {cardsByList[list.id]?.filter(card => card.is_completed).length > 0 && (
+                                  <div className="pt-4">
+                                    <Collapsible 
+                                      open={completedAccordionState[list.id] || false} 
+                                      onOpenChange={(open) => setCompletedAccordionState(prev => ({ ...prev, [list.id]: open }))}
+                                    >
+                                      <CollapsibleTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          className="h-auto p-2 w-full justify-start text-sm text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+                                        >
+                                          <ChevronRight className={`h-4 w-4 transition-transform ${completedAccordionState[list.id] ? 'rotate-90' : ''}`} />
+                                          <span className="ml-1">Completadas ({cardsByList[list.id]?.filter(card => card.is_completed).length})</span>
+                                        </Button>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="mt-2">
+                                        <div className="space-y-2">
+                                          {cardsByList[list.id]?.filter(card => card.is_completed).map((card, completedIndex) => {
+                                            const creatorInfo = card.creator ? {
+                                              name: card.creator.full_name || card.creator.email || 'Usuario',
+                                              avatar: card.creator.avatar_url || undefined,
+                                              initials: card.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'
+                                            } : {
+                                              name: 'Usuario',
+                                              avatar: undefined,
+                                              initials: 'U'
+                                            };
+                                            
+                                            const actualIndex = cardsByList[list.id]?.findIndex(c => c.id === card.id) || 0;
+                                            
+                                            return (
+                                              <div key={card.id}>
+                                                <Draggable draggableId={card.id} index={actualIndex}>
+                                                  {(provided, snapshot) => (
+                                                    <Card
+                                                      ref={provided.innerRef}
+                                                      {...provided.draggableProps}
+                                                      {...provided.dragHandleProps}
+                                                      className={`p-3 cursor-pointer hover:shadow-sm transition-shadow relative group ${
+                                                        snapshot.isDragging ? 'shadow-md rotate-1' : ''
+                                                      }`}
+                                                      onClick={() => onCardEdit?.(card)}
+                                                    >
+                                                      {/* Hover Action Buttons */}
+                                                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                          variant="ghost"
+                                                          size="sm"
+                                                          className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onCardEdit?.(card);
+                                                          }}
+                                                        >
+                                                          <Edit className="h-3 w-3" />
+                                                        </Button>
+                                                        <AlertDialog>
+                                                          <AlertDialogTrigger asChild>
+                                                            <Button
+                                                              variant="ghost"
+                                                              size="sm"
+                                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                                              onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                              <Trash2 className="h-3 w-3" />
+                                                            </Button>
+                                                          </AlertDialogTrigger>
+                                                          <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                              <AlertDialogTitle>¿Eliminar tarjeta?</AlertDialogTitle>
+                                                              <AlertDialogDescription>
+                                                                Esta acción eliminará permanentemente la tarjeta "{card.title}".
+                                                              </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                              <AlertDialogAction 
+                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                onClick={() => onDeleteCard?.(card.id)}
+                                                              >
+                                                                Eliminar
+                                                              </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                          </AlertDialogContent>
+                                                        </AlertDialog>
+                                                      </div>
+
+                                                      {/* Completion Status and Creator Info Header */}
+                                                      <div className="flex items-start gap-2 mb-2">
+                                                        {/* Completion Checkbox */}
+                                                        <Button
+                                                          variant="ghost"
+                                                          size="sm"
+                                                          className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleToggleCompleted(card.id, !card.is_completed);
+                                                          }}
+                                                        >
+                                                          {card.is_completed ? (
+                                                            <CheckCircle className="h-4 w-4 text-primary" />
+                                                          ) : (
+                                                            <Circle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                                          )}
+                                                        </Button>
+
+                                                        {/* Creator Info and Date */}
+                                                        <div className="flex items-center justify-between flex-1 min-w-0">
+                                                          <div className="flex items-center gap-2 min-w-0">
+                                                            <Avatar className="h-6 w-6 flex-shrink-0">
+                                                              <AvatarImage src={creatorInfo?.avatar} />
+                                                              <AvatarFallback className="text-xs">
+                                                                {creatorInfo?.initials || 'U'}
+                                                              </AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="text-xs text-muted-foreground font-medium truncate">
+                                                              {creatorInfo?.name || 'Usuario'}
+                                                            </span>
+                                                          </div>
+                                                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                                                            {new Date(card.created_at).toLocaleDateString('es-ES', {
+                                                              month: 'short',
+                                                              day: 'numeric'
+                                                            })}
+                                                          </span>
+                                                        </div>
+                                                      </div>
+                                                      
+                                                      {/* Card Content */}
+                                                      <div className={`text-sm font-medium mb-1 ${
+                                                        card.is_completed 
+                                                          ? 'line-through text-muted-foreground opacity-60' 
+                                                          : ''
+                                                      }`}>
+                                                        {card.title}
+                                                      </div>
+                                                      {card.description && (
+                                                        <div className={`text-xs text-muted-foreground line-clamp-2 ${
+                                                          card.is_completed ? 'opacity-50' : ''
+                                                        }`}>
+                                                          {card.description}
+                                                        </div>
+                                                      )}
+
+                                                      {/* Completed Date */}
+                                                      {card.is_completed && card.completed_at && (
+                                                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground opacity-60">
+                                                          <CheckCircle className="h-3 w-3" />
+                                                          <span>Completado el {new Date(card.completed_at).toLocaleDateString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'short'
+                                                          })}</span>
+                                                        </div>
+                                                      )}
+                                                    </Card>
+                                                  )}
+                                                </Draggable>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  </div>
+                                )}
+
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              
+              {/* Add New List Button */}
+              <div className="flex-shrink-0 w-full md:w-80 snap-center md:snap-align-none">
+                <Card className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors mx-3 md:mx-0 relative overflow-hidden" style={{ borderColor: 'hsl(var(--accent))' }}>
+                  {/* Diagonal Hatch Background Pattern */}
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div 
+                      className="absolute inset-0 opacity-10"
+                      style={{
+                        backgroundImage: `repeating-linear-gradient(
+                          45deg,
+                          hsl(var(--accent)) 0px,
+                          hsl(var(--accent)) 1px,
+                          transparent 1px,
+                          transparent 12px
+                        )`
+                      }}
                     />
                   </div>
-                ) : lists.length <= 4 ? (
-                  // 1-4 lists: No scroll, use grid
-                  <div className="grid gap-4 h-full" style={{ gridTemplateColumns: `repeat(${lists.length + 1}, 1fr)` }}>
-                    {lists.map((list, index) => (
-                      <div key={list.id} className="min-w-0">
-                        {renderKanbanList(list, index)}
-                      </div>
-                    ))}
-                    
-                    {/* Desktop: Add List Button */}
-                    <div className="min-w-0">
-                      <Card 
-                        className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors relative overflow-hidden cursor-pointer" 
-                        style={{ borderColor: 'hsl(var(--accent))' }}
-                        onClick={onCreateList}
-                      >
-                        <div className="absolute inset-0 z-0 overflow-hidden">
-                          <div 
-                            className="absolute inset-0 opacity-5"
-                            style={{
-                              backgroundImage: `repeating-linear-gradient(
-                                45deg,
-                                hsl(var(--accent)),
-                                hsl(var(--accent)) 1px,
-                                transparent 1px,
-                                transparent 6px
-                              )`
-                            }}
-                          />
-                        </div>
-                        <div className="relative z-10 p-8 text-center">
-                          <List className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-                          <h3 className="font-medium text-sm mb-1">Añadir nueva lista</h3>
-                          <p className="text-xs text-muted-foreground">Organiza tus tareas en una nueva columna</p>
-                          <Button className="mt-4 h-8 text-xs">
-                            <Plus className="w-3 h-3 mr-1" />
-                            Crear Lista
-                          </Button>
-                        </div>
-                      </Card>
-                    </div>
-                  </div>
-                ) : (
-                  // 5+ lists: Horizontal scroll with hidden scrollbar
-                  <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-                    {lists.map((list, index) => (
-                      <div key={list.id} className="flex-shrink-0 w-80">
-                        {renderKanbanList(list, index)}
-                      </div>
-                    ))}
-                    
-                    {/* Desktop: Add List Button for scroll layout */}
-                    <div className="flex-shrink-0 w-80">
-                      <Card 
-                        className="w-full h-fit bg-muted/20 border-dashed border-2 hover:bg-muted/30 transition-colors relative overflow-hidden cursor-pointer" 
-                        style={{ borderColor: 'hsl(var(--accent))' }}
-                        onClick={onCreateList}
-                      >
-                        <div className="absolute inset-0 z-0 overflow-hidden">
-                          <div 
-                            className="absolute inset-0 opacity-5"
-                            style={{
-                              backgroundImage: `repeating-linear-gradient(
-                                45deg,
-                                hsl(var(--accent)),
-                                hsl(var(--accent)) 1px,
-                                transparent 1px,
-                                transparent 6px
-                              )`
-                            }}
-                          />
-                        </div>
-                        <div className="relative z-10 p-8 text-center">
-                          <List className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-                          <h3 className="font-medium text-sm mb-1">Añadir nueva lista</h3>
-                          <p className="text-xs text-muted-foreground">Organiza tus tareas en una nueva columna</p>
-                          <Button className="mt-4 h-8 text-xs">
-                            <Plus className="w-3 h-3 mr-1" />
-                            Crear Lista
-                          </Button>
-                        </div>
-                      </Card>
-                    </div>
-                  </div>
-                )}
+                  
+                  <Button
+                    variant="ghost"
+                    onClick={onCreateList}
+                    className="w-full h-12 justify-center hover:text-foreground relative z-10"
+                    style={{ color: 'hsl(var(--accent))' }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Añade otra lista
+                  </Button>
+                </Card>
               </div>
-
+              
               {provided.placeholder}
             </div>
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Modals are managed by ModalFactory now */}
+
     </>
   );
 }
