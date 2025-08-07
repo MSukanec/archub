@@ -17,7 +17,6 @@ import { FolderPlus, FolderOpen } from 'lucide-react';
 import UserSelector from '@/components/ui-custom/UserSelector';
 
 const documentFolderSchema = z.object({
-  created_by: z.string().min(1, 'El creador es obligatorio'),
   name: z.string().min(1, 'El nombre de la carpeta es obligatorio'),
 });
 
@@ -30,7 +29,6 @@ interface DocumentFolderFormModalProps {
     editingFolder?: {
       id: string;
       name: string;
-      created_by: string;
     };
   };
   onClose: () => void;
@@ -58,20 +56,18 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
   const form = useForm<DocumentFolderFormData>({
     resolver: zodResolver(documentFolderSchema),
     defaultValues: {
-      created_by: '',
       name: '',
     },
   });
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (userData?.user?.id && organizationMembers) {
+    if (userData?.user?.id) {
       form.reset({
-        created_by: editingFolder?.created_by || userData.user.id,
         name: editingFolder?.name || '',
       });
     }
-  }, [userData, organizationMembers, editingFolder, form]);
+  }, [userData, editingFolder, form]);
 
   const handleClose = () => {
     form.reset();
@@ -80,15 +76,15 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
 
   const createMutation = useMutation({
     mutationFn: async (data: DocumentFolderFormData) => {
-      if (!organizationId) {
-        throw new Error('No hay organización seleccionada');
+      if (!organizationId || !userData?.user?.id) {
+        throw new Error('No hay organización seleccionada o usuario no autenticado');
       }
 
       const folderData = {
         name: data.name,
-        created_by: data.created_by,
+        created_by: userData.user.id, // Use current user ID automatically
         organization_id: organizationId,
-        parent_id: parentId || null,
+        parent_id: parentId || undefined,
       };
 
       if (isEditing && editingFolder) {
@@ -124,33 +120,6 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Creator Field */}
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={organizationMembers?.map(member => ({
-                    id: member.user_id,
-                    full_name: member.full_name,
-                    email: member.email,
-                    avatar_url: member.avatar_url,
-                    first_name: member.full_name.split(' ')[0] || '',
-                    last_name: member.full_name.split(' ').slice(1).join(' ') || ''
-                  })) || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Folder Name Field */}
         <FormField
           control={form.control}
@@ -192,12 +161,7 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
         <h4 className="font-medium">Nombre</h4>
         <p className="text-muted-foreground mt-1">{editingFolder.name}</p>
       </div>
-      <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">
-          {organizationMembers?.find(m => m.user_id === editingFolder.created_by)?.full_name || 'Usuario'}
-        </p>
-      </div>
+
       {parentName && (
         <div>
           <h4 className="font-medium">Carpeta padre</h4>
@@ -220,7 +184,8 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
       onLeftClick={handleClose}
       rightLabel={isEditing ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={createMutation.isPending}
+      submitDisabled={createMutation.isPending}
+      showLoadingSpinner={createMutation.isPending}
     />
   );
 

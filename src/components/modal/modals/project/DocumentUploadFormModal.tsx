@@ -20,11 +20,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File, FileText, FolderOpen } from 'lucide-react';
-import UserSelector from '@/components/ui-custom/UserSelector';
+
 import { supabase } from '@/lib/supabase';
 
 const documentUploadSchema = z.object({
-  created_by: z.string().min(1, 'El creador es obligatorio'),
   folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
   group_id: z.string().optional(),
   status: z.string().min(1, 'El estado es obligatorio'),
@@ -78,7 +77,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const form = useForm<DocumentUploadFormData>({
     resolver: zodResolver(documentUploadSchema),
     defaultValues: {
-      created_by: '',
       folder_id: defaultFolderId || '',
       group_id: defaultGroupId || '',
       status: 'pendiente',
@@ -95,7 +93,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       setSelectedFolderId(editingGroup.folder_id || '');
       
       form.reset({
-        created_by: editingGroup.created_by || userData.user.id,
         folder_id: editingGroup.folder_id || defaultFolderId || '',
         group_id: editingGroup.id || defaultGroupId || '',
         status: editingGroup.status || 'pendiente',
@@ -116,12 +113,8 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (userData && organizationMembers && !isEditing) {
-      // Find current user's member ID in the organization
-      const currentUserMember = organizationMembers.find(member => member.user_id === userData?.user?.id);
-      
+    if (userData && !isEditing) {
       form.reset({
-        created_by: currentUserMember?.user_id || userData.user.id,
         folder_id: defaultFolderId || '',
         group_id: defaultGroupId || '',
         status: 'pendiente',
@@ -320,33 +313,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Creator Field */}
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creado por <span className="text-[var(--accent)]">*</span></FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={organizationMembers?.map(member => ({
-                    id: member.user_id,
-                    full_name: member.full_name,
-                    email: member.email,
-                    avatar_url: member.avatar_url,
-                    first_name: member.full_name.split(' ')[0] || '',
-                    last_name: member.full_name.split(' ').slice(1).join(' ') || ''
-                  })) || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Folder Field */}
         <FormField
           control={form.control}
