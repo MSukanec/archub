@@ -2,17 +2,15 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-import { Users, Plus, Trash2, UserPlus, Handshake, CreditCard, UserCheck, TrendingUp } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { Users, Plus, Trash2, Handshake } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
 
 interface Contact {
   id: string
@@ -43,36 +41,8 @@ export default function ProjectClients() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
 
-
-
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
-
-  // Get organization contacts
-  const { data: organizationContacts } = useQuery({
-    queryKey: ['organization-contacts', organizationId],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase client not initialized')
-      
-      const { data, error } = await supabase
-        .from('contacts')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          company_name,
-          email,
-          phone,
-          full_name
-        `)
-        .eq('organization_id', organizationId)
-        .order('first_name', { ascending: true })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!organizationId && !!supabase
-  })
 
   // Get project clients
   const { data: projectClients, isLoading: loadingClients } = useQuery({
@@ -115,8 +85,6 @@ export default function ProjectClients() {
     enabled: !!projectId && !!organizationId && !!supabase
   })
 
-
-
   // Remove client mutation
   const removeClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
@@ -145,52 +113,6 @@ export default function ProjectClients() {
     }
   })
 
-  // Calculate available contacts (not already added as clients)
-  const availableContacts = useMemo(() => {
-    if (!organizationContacts || !projectClients) return []
-    
-    const existingClientIds = new Set(projectClients.map(pc => pc.client_id))
-    return organizationContacts.filter(contact => !existingClientIds.has(contact.id))
-  }, [organizationContacts, projectClients])
-
-  // Add client mutation
-  const addClientMutation = useMutation({
-    mutationFn: async (contactId: string) => {
-      if (!supabase || !projectId || !organizationId) throw new Error('Missing required parameters')
-      
-      const { error } = await supabase
-        .from('project_clients')
-        .insert({
-          project_id: projectId,
-          client_id: contactId,
-          committed_amount: 0,
-          currency_id: userData?.organization?.default_currency_id || '',
-          role: 'Cliente',
-          is_active: true,
-          notes: '',
-          organization_id: organizationId
-        })
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      toast({
-        title: "Cliente agregado",
-        description: "El cliente ha sido agregado al proyecto exitosamente",
-      })
-      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al agregar cliente",
-        description: error.message || "Hubo un problema al agregar el cliente",
-        variant: "destructive",
-      })
-    }
-  })
-
-
-
   const handleRemoveClient = (client: ProjectClient) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -202,12 +124,6 @@ export default function ProjectClients() {
       isLoading: removeClientMutation.isPending
     });
   }
-
-
-
-
-
-
 
   if (isLoading || loadingClients) {
     return (
@@ -242,7 +158,6 @@ export default function ProjectClients() {
       }}
     >
       <div className="space-y-6">
-        {/* Conditional rendering: Two-column layout OR full-width empty state */}
         {projectClients && projectClients.length > 0 ? (
           /* Two Column Layout - Section descriptions left, content right */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -313,7 +228,7 @@ export default function ProjectClients() {
             </div>
           </div>
         ) : (
-          /* Full-width Custom Empty State - spans entire width below header */
+          /* Full-width Custom Empty State */
           <EmptyState
             icon={<Users className="w-16 h-16 text-muted-foreground/50" />}
             title="No hay clientes agregados"
@@ -327,8 +242,6 @@ export default function ProjectClients() {
           />
         )}
       </div>
-      
-
     </Layout>
   )
 }
