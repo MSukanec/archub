@@ -13,18 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UserSelector from "@/components/ui-custom/UserSelector";
-import DatePicker from "@/components/ui-custom/DatePicker";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useToast } from "@/hooks/use-toast";
 
 const cardSchema = z.object({
-  title: z.string().min(1, "El título es requerido"),
-  description: z.string().optional(),
   created_by: z.string().min(1, "El creador es requerido"),
   assigned_to: z.string().optional(),
-  due_date: z.date().optional(),
+  title: z.string().min(1, "El título es requerido"),
+  description: z.string().optional(),
 });
 
 type CardFormData = z.infer<typeof cardSchema>;
@@ -59,11 +57,10 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const form = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
-      title: card?.title || '',
-      description: card?.description || '',
       created_by: card?.created_by || userData?.user?.id || '',
       assigned_to: card?.assigned_to || '',
-      due_date: card?.due_date ? new Date(card.due_date) : undefined,
+      title: card?.title || '',
+      description: card?.description || '',
     }
   });
 
@@ -96,7 +93,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           title: data.title,
           description: data.description || undefined,
           assigned_to: data.assigned_to || undefined,
-          due_date: data.due_date ? data.due_date.toISOString().split('T')[0] : undefined,
           list_id: card.list_id
         });
         
@@ -121,8 +117,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           title: data.title,
           description: data.description || undefined,
           created_by: data.created_by,
-          assigned_to: data.assigned_to || undefined,
-          due_date: data.due_date ? data.due_date.toISOString().split('T')[0] : undefined
+          assigned_to: data.assigned_to || undefined
         });
         
         handleClose();
@@ -144,24 +139,45 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="created_by"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Creador</FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={users}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar creador"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="created_by"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creador</FormLabel>
+                <FormControl>
+                  <UserSelector
+                    users={users}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar creador"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="assigned_to"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Asignado a (opcional)</FormLabel>
+                <FormControl>
+                  <UserSelector
+                    users={users}
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    placeholder="Sin asignar"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -197,43 +213,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="assigned_to"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Asignado a (opcional)</FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={users}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  placeholder="Sin asignar"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="due_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha límite (opcional)</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha límite"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </form>
     </Form>
   );
@@ -257,6 +236,16 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
 
   const viewPanel = isEditing ? (
     <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-medium">Creador</h4>
+          <p className="text-muted-foreground mt-1">{card?.creator?.full_name || 'Sin creador'}</p>
+        </div>
+        <div>
+          <h4 className="font-medium">Asignado a</h4>
+          <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
+        </div>
+      </div>
       <div>
         <h4 className="font-medium">Título</h4>
         <p className="text-muted-foreground mt-1">{card?.title || 'Sin título'}</p>
@@ -264,18 +253,6 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       <div>
         <h4 className="font-medium">Descripción</h4>
         <p className="text-muted-foreground mt-1">{card?.description || 'Sin descripción'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Creador</h4>
-        <p className="text-muted-foreground mt-1">{card?.creator?.full_name || 'Sin creador'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Asignado a</h4>
-        <p className="text-muted-foreground mt-1">{card?.assignedUser?.full_name || 'Sin asignar'}</p>
-      </div>
-      <div>
-        <h4 className="font-medium">Fecha límite</h4>
-        <p className="text-muted-foreground mt-1">{card?.due_date || 'Sin fecha límite'}</p>
       </div>
     </div>
   ) : editPanel;
