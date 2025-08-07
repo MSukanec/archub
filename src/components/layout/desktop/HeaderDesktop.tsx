@@ -13,6 +13,7 @@ import {
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
+import { useUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
@@ -80,6 +81,7 @@ export function HeaderDesktop({
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjects(userData?.preferences?.last_organization_id);
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(userData?.organization?.id);
   const { setSidebarContext, currentSidebarContext, setActiveSidebarSection } = useNavigationStore();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
@@ -244,14 +246,14 @@ export function HeaderDesktop({
                       projects.map((project) => (
                         <DropdownMenuItem
                           key={project.id}
-                          onClick={() => handleProjectChange(project.id)}
-                          className={`${userData?.preferences?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
+                          onClick={() => updateProjectMutation.mutate(project.id)}
+                          className={`${userOrgPrefs?.last_project_id === project.id ? 'bg-[var(--accent)] text-white' : ''}`}
                         >
                           <div className="flex items-center w-full">
                             <Folder className="w-4 h-4 mr-2" />
                             <span className="truncate">{project.name}</span>
                           </div>
-                          {userData?.preferences?.last_project_id === project.id && (
+                          {userOrgPrefs?.last_project_id === project.id && (
                             <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
                           )}
                         </DropdownMenuItem>
@@ -284,7 +286,7 @@ export function HeaderDesktop({
               <span className="text-xs font-normal text-[var(--layout-text)]">
                 {projects.length === 0 
                   ? "No hay proyectos" 
-                  : projects.find(p => p.id === userData?.preferences?.last_project_id)?.name || "Sin proyecto seleccionado"
+                  : projects.find(p => p.id === userOrgPrefs?.last_project_id)?.name || "Sin proyecto seleccionado"
                 }
               </span>
               <span className="text-xs text-[var(--layout-text-muted)]">/</span>
