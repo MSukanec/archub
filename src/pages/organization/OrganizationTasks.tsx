@@ -216,21 +216,10 @@ function TasksContent() {
 
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
-
-
-        {/* ActionBar Desktop - Empty state message */}
-        <div className="bg-card rounded-lg border p-6 text-center">
-          <Kanban className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No hay tableros creados</h3>
-          <p className="text-muted-foreground mb-4">
-            Crea tu primer tablero para comenzar a organizar tareas con el sistema Kanban
-          </p>
-        </div>
-
         <EmptyState
           icon={<Kanban className="w-8 h-8 text-muted-foreground" />}
-          title="Aún no hay tareas!"
-          description="Crea tu primer tablero para comenzar a organizar tareas"
+          title="No hay tableros creados"
+          description="Crea tu primer tablero para comenzar a organizar tareas con el sistema Kanban"
           action={
             <CustomRestricted 
               feature="max_kanban_boards" 
