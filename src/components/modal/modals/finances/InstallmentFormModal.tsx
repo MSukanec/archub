@@ -259,6 +259,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
+        created_by: userData.id,
       }
 
       console.log('Movement data to insert:', movementData)
