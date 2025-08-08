@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { BarChart3, TrendingUp, LayoutGrid, Calculator } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, LayoutGrid, Calculator } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
