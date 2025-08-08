@@ -53,7 +53,7 @@ export default function ProjectGallery() {
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
-  const [fileTypeFilter, setFileTypeFilter] = useState<string>('all');
+  const [fileTypeFilter, setFileTypeFilter] = useState<string>('Todo');
 
   // Set sidebar context based on current route
   useEffect(() => {
@@ -179,9 +179,9 @@ export default function ProjectGallery() {
     }
 
     // File type filter
-    if (fileTypeFilter !== 'all') {
+    if (fileTypeFilter !== 'Todo') {
       filtered = filtered.filter(file => 
-        fileTypeFilter === 'image'
+        fileTypeFilter === 'Imágenes'
           ? file.file_type === 'image' || file.file_type?.startsWith('image/')
           : file.file_type === 'video' || file.file_type?.startsWith('video/')
       );
@@ -397,7 +397,18 @@ export default function ProjectGallery() {
         {/* Action Bar with Search and Filters */}
         {filteredFiles.length > 0 && (
           <ActionBarDesktopRow 
-            filters={[]}
+            filters={[
+              {
+                key: "fileType",
+                label: "Tipo de Archivo",
+                icon: Filter,
+                value: fileTypeFilter,
+                setValue: setFileTypeFilter,
+                options: ["Todo", "Imágenes", "Videos"],
+                defaultLabel: "Todo",
+                enabled: true
+              }
+            ]}
             actions={[
               {
                 label: "Buscar",
@@ -415,12 +426,12 @@ export default function ProjectGallery() {
                 },
                 variant: "ghost"
               },
-              ...(searchTerm || fileTypeFilter !== 'all' ? [{
+              ...(searchTerm || fileTypeFilter !== 'Todo' ? [{
                 label: "Limpiar",
                 icon: X,
                 onClick: () => {
                   setSearchTerm('');
-                  setFileTypeFilter('all');
+                  setFileTypeFilter('Todo');
                 },
                 variant: "ghost" as const
               }] : [])
