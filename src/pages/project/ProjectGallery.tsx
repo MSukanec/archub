@@ -398,26 +398,19 @@ export default function ProjectGallery() {
         {/* Action Bar with Filter Buttons */}
         {filteredFiles.length > 0 && (
           <ActionBarDesktopRow 
-            filters={[]}
-            actions={[
+            filters={[
               {
-                label: "Todo",
+                key: "fileType",
+                label: "Tipo de Archivo",
                 icon: Filter,
-                onClick: () => setFileTypeFilter('Todo'),
-                variant: fileTypeFilter === 'Todo' ? 'default' : 'outline'
-              },
-              {
-                label: "Imágenes", 
-                icon: Images,
-                onClick: () => setFileTypeFilter('Imágenes'),
-                variant: fileTypeFilter === 'Imágenes' ? 'default' : 'outline'
-              },
-              {
-                label: "Videos",
-                icon: Play,
-                onClick: () => setFileTypeFilter('Videos'),
-                variant: fileTypeFilter === 'Videos' ? 'default' : 'outline'
-              },
+                value: fileTypeFilter,
+                setValue: setFileTypeFilter,
+                options: ["Todo", "Imágenes", "Videos"],
+                defaultLabel: "Todo",
+                enabled: true
+              }
+            ]}
+            actions={[
               {
                 label: "Buscar",
                 icon: Search,
