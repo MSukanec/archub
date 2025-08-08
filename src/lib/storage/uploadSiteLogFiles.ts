@@ -107,14 +107,14 @@ export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promis
     // Extract file path from URL
     const url = new URL(fileUrl)
     const pathSegments = url.pathname.split('/')
-    const bucketIndex = pathSegments.findIndex(segment => segment === 'site-log-files')
+    const bucketIndex = pathSegments.findIndex(segment => segment === 'project-media')
     
     if (bucketIndex !== -1 && bucketIndex < pathSegments.length - 1) {
       const filePath = pathSegments.slice(bucketIndex + 1).join('/')
       
       // Delete from storage
       const { error: storageError } = await supabase.storage
-        .from('site-log-files')
+        .from('project-media')
         .remove([filePath])
 
       if (storageError) {
@@ -124,7 +124,7 @@ export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promis
 
     // Delete record from database
     const { error: dbError } = await supabase
-      .from('site_log_files')
+      .from('project_media')
       .delete()
       .eq('id', fileId)
 
