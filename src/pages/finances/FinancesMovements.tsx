@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet } from "lucide-react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { Layout } from "@/components/layout/desktop/Layout";
 
@@ -875,17 +876,11 @@ export default function Movements() {
         }
 
         try {
-          // Handle different date formats properly
-          let date;
-          if (displayDate.includes('T')) {
-            // ISO format with time - parse normally but format as local date
-            date = new Date(displayDate);
-          } else {
-            // Date only format - force local timezone to avoid UTC shift
-            date = new Date(displayDate + 'T00:00:00');
-          }
+          // Simply use the date string directly with new Date()
+          const date = new Date(displayDate);
           
           if (isNaN(date.getTime())) {
+            console.log('Invalid date for item:', displayDate, item);
             return (
               <div className="text-xs text-muted-foreground">
                 Fecha inválida
@@ -895,10 +890,11 @@ export default function Movements() {
 
           return (
             <div className="text-xs">
-              <div>{format(date, "dd/MM/yyyy", { locale: es })}</div>
+              <div>{format(date, "dd/MM/yyyy")}</div>
             </div>
           );
         } catch (error) {
+          console.log('Date formatting error:', error, displayDate, item);
           return (
             <div className="text-xs text-muted-foreground">Fecha inválida</div>
           );
