@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 // Gallery file interface
 interface GalleryFile {
@@ -399,38 +400,38 @@ export default function ProjectGallery() {
         {filteredFiles.length > 0 && (
           <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
             <div className="flex items-center justify-between px-4 py-3">
-              {/* Filter buttons on the left - Ghost buttons that look pressed when active */}
-              <div className="flex items-center gap-2">
+              {/* Filter buttons on the left - Using same style as TableTopBar tabs */}
+              <div className="flex items-center gap-1">
                 <Button
-                  variant="ghost"
+                  variant={fileTypeFilter === 'Todo' ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setFileTypeFilter('Todo')}
-                  className={fileTypeFilter === 'Todo' 
-                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
-                    : "h-8 px-3 text-xs"
-                  }
+                  className={cn(
+                    "h-8 px-3 text-xs font-normal",
+                    fileTypeFilter === 'Todo' ? "button-secondary-pressed" : ""
+                  )}
                 >
                   Todo
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant={fileTypeFilter === 'Imágenes' ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setFileTypeFilter('Imágenes')}
-                  className={fileTypeFilter === 'Imágenes' 
-                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
-                    : "h-8 px-3 text-xs"
-                  }
+                  className={cn(
+                    "h-8 px-3 text-xs font-normal",
+                    fileTypeFilter === 'Imágenes' ? "button-secondary-pressed" : ""
+                  )}
                 >
                   Imágenes
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant={fileTypeFilter === 'Videos' ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setFileTypeFilter('Videos')}
-                  className={fileTypeFilter === 'Videos' 
-                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
-                    : "h-8 px-3 text-xs"
-                  }
+                  className={cn(
+                    "h-8 px-3 text-xs font-normal",
+                    fileTypeFilter === 'Videos' ? "button-secondary-pressed" : ""
+                  )}
                 >
                   Videos
                 </Button>
