@@ -6,12 +6,12 @@ import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, 
 
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useFinancialSummary, useMonthlyFlowData, useWalletBalances, useRecentMovements, useExpensesByCategory } from '@/hooks/use-finance-dashboard-simple'
+import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useProjects } from '@/hooks/use-projects'
+
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
-import { ExpensesByCategoryChart } from '@/components/charts/ExpensesByCategoryChart'
+
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
 import { format } from 'date-fns'
@@ -30,18 +30,16 @@ export default function FinancesDashboard() {
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
   const defaultCurrency = organizationCurrencies?.find(c => c.is_default)?.currency
   
-  // Get projects for filter
-  const { data: projects = [] } = useProjects(organizationId)
+
   
   // Use current project for data queries
   const effectiveProjectId = projectId || ""
   
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, 'desde-siempre')
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, 'desde-siempre')
-  const { data: walletBalances, isLoading: walletsLoading } = useWalletBalances(organizationId, effectiveProjectId, 'desde-siempre')
+
   const { data: walletCurrencyBalances, isLoading: walletCurrencyLoading } = useWalletCurrencyBalances(organizationId, effectiveProjectId, 'desde-siempre')
-  const { data: recentMovements, isLoading: recentLoading } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
-  const { data: expensesByCategory, isLoading: categoriesLoading } = useExpensesByCategory(organizationId, effectiveProjectId, 'desde-siempre')
+  const { data: recentMovements } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
   
   const formatCurrency = (amount: number) => {
     // Use the default currency for formatting
@@ -85,11 +83,6 @@ export default function FinancesDashboard() {
     if (balance < 0) return { color: 'var(--chart-negative)' }
     return { color: 'var(--chart-neutral)' }
   }
-
-  const currentOrganization = userData?.organization;
-  const currentProject = userData?.organizations?.[0]?.projects?.[0];
-
-
 
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
@@ -370,7 +363,6 @@ export default function FinancesDashboard() {
             </Card>
           </div>
         </div>
-
 
         </>
         )}
