@@ -82,22 +82,35 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         entry_type: 'registro_general',
       }));
 
-      // El created_by debe ser el UUID del usuario, no del organization_member
-      const createdByUserId = userData.user?.id;
+      // Obtener el organization_member ID consultando directamente
+      const { data: memberData } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userData.user?.id)
+        .eq('is_active', true)
+        .single();
+      
+      if (!memberData?.id) {
+        throw new Error('No se encontró la membresía activa de la organización');
+      }
+      
+      const createdByMemberId = memberData.id;
       
       console.log('Upload data check:', {
         projectId,
         organizationId,
-        createdBy: createdByUserId,
+        createdBy: createdByMemberId,
         filesCount: galleryFiles.length,
-        userFound: !!createdByUserId
+        memberData: memberData,
+        userId: userData.user?.id
       });
 
       return uploadGalleryFiles(
         galleryFiles,
         projectId,
         organizationId,
-        createdByUserId
+        createdByMemberId
       );
     },
     onSuccess: () => {
