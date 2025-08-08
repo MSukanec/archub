@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, TrendingUp, FileText, Users, BarChart3, Tag, FolderTree, Star, Coins, Wallet } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 import { Layout } from "@/components/layout/desktop/Layout";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -34,20 +33,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+
 import { Table } from "@/components/ui-custom/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 
-import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
-import { ActionBarDesktop } from "@/components/layout/desktop/ActionBarDesktop";
-import { ActionBarDesktopRow } from "@/components/layout/desktop/ActionBarDesktopRow";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
-
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -188,7 +183,7 @@ export default function Movements() {
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
-            console.log("Filter clicked");
+
           },
         },
         slot5: {
@@ -216,7 +211,7 @@ export default function Movements() {
         clearActions();
       }
     };
-  }, [isMobile]); // Removed unstable dependencies
+  }, [isMobile]);
 
   // Filter states
   const [filterByType, setFilterByType] = useState("all");
@@ -232,8 +227,6 @@ export default function Movements() {
   const organizationId = userData?.preferences?.last_organization_id;
   const { selectedProjectId, isGlobalView } = useProjectContext();
   const projectId = selectedProjectId;
-
-
 
   const { data: movements = [], isLoading } = useMovements(
     organizationId,
@@ -252,8 +245,6 @@ export default function Movements() {
   
   // Use isGlobalView from store instead of deriving from projectId  
   const isGeneralMode = isGlobalView;
-
-
 
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();
@@ -453,7 +444,7 @@ export default function Movements() {
         description: "El movimiento se ha actualizado correctamente.",
       });
     } catch (error) {
-      console.error("Error toggling favorite:", error);
+
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado de favorito.",
@@ -1340,13 +1331,6 @@ export default function Movements() {
       }}
       wide={true}
     >
-
-
-
-
-
-
-
       <Table
         columns={tableColumns}
         data={processedMovements}
