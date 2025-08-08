@@ -12,7 +12,9 @@ import {
   Download, 
   Trash2, 
   PlayCircle, 
-  FolderOpen 
+  FolderOpen,
+  Grid3X3,
+  LayoutGrid
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -49,6 +51,7 @@ export function Gallery({
 }: GalleryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
+  const [galleryStyle, setGalleryStyle] = useState<'uniform' | 'masonry'>('uniform');
 
   // Filter files
   const filteredFiles = useMemo(() => {
@@ -177,6 +180,20 @@ export function Gallery({
               <Filter className="mr-1 h-3 w-3" />
               Filtros
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
+              className="h-8 px-3 text-xs"
+              title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
+            >
+              {galleryStyle === 'uniform' ? (
+                <LayoutGrid className="mr-1 h-3 w-3" />
+              ) : (
+                <Grid3X3 className="mr-1 h-3 w-3" />
+              )}
+              Estilo
+            </Button>
             {(searchTerm || fileTypeFilter !== 'Todo') && (
               <Button
                 variant="ghost"
@@ -196,82 +213,163 @@ export function Gallery({
 
       {/* Gallery Grid */}
       {filteredFiles.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1">
-          {filteredFiles.map((file) => (
-            <div key={file.id} className="group relative aspect-square">
-              {/* Image/Video Preview */}
-              <div 
-                className="w-full h-full cursor-pointer relative overflow-hidden bg-gray-100"
-                onClick={() => handleImageClick(file)}
-              >
-                {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
-                  <img
-                    src={file.file_url}
-                    alt={file.file_name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
-                    <PlayCircle className="w-8 h-8 text-white absolute z-10" />
-                    <video
+        galleryStyle === 'uniform' ? (
+          // Uniform Grid Style
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1">
+            {filteredFiles.map((file) => (
+              <div key={file.id} className="group relative aspect-square">
+                {/* Image/Video Preview */}
+                <div 
+                  className="w-full h-full cursor-pointer relative overflow-hidden bg-gray-100"
+                  onClick={() => handleImageClick(file)}
+                >
+                  {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
+                    <img
                       src={file.file_url}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      muted
+                      alt={file.file_name}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
                     />
+                  ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
+                      <PlayCircle className="w-8 h-8 text-white absolute z-10" />
+                      <video
+                        src={file.file_url}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        muted
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <FolderOpen className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Overlay with actions */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    {onEdit && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Edit className="w-3 h-3 text-gray-700" />
+                      </Button>
+                    )}
+                    {onDownload && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDownload(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Download className="w-3 h-3 text-gray-700" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </Button>
+                    )}
                   </div>
-                ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                    <FolderOpen className="w-8 h-8 text-gray-400" />
-                  </div>
-                )}
-                
-                {/* Overlay with actions */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  {onEdit && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(file);
-                      }}
-                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                    >
-                      <Edit className="w-3 h-3 text-gray-700" />
-                    </Button>
-                  )}
-                  {onDownload && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDownload(file);
-                      }}
-                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                    >
-                      <Download className="w-3 h-3 text-gray-700" />
-                    </Button>
-                  )}
-                  {onDelete && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(file);
-                      }}
-                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
-                    >
-                      <Trash2 className="w-3 h-3 text-red-500" />
-                    </Button>
-                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          // Masonry Style
+          <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-1 space-y-1">
+            {filteredFiles.map((file) => (
+              <div key={file.id} className="group relative break-inside-avoid mb-1">
+                {/* Image/Video Preview */}
+                <div 
+                  className="cursor-pointer relative overflow-hidden bg-gray-100"
+                  onClick={() => handleImageClick(file)}
+                >
+                  {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
+                    <img
+                      src={file.file_url}
+                      alt={file.file_name}
+                      className="w-full h-auto object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
+                    <div className="w-full aspect-video bg-gray-100 flex items-center justify-center relative">
+                      <PlayCircle className="w-8 h-8 text-white absolute z-10" />
+                      <video
+                        src={file.file_url}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        muted
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
+                      <FolderOpen className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Overlay with actions */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    {onEdit && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Edit className="w-3 h-3 text-gray-700" />
+                      </Button>
+                    )}
+                    {onDownload && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDownload(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Download className="w-3 h-3 text-gray-700" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(file);
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         <EmptyState
           icon={<Search className="w-12 h-12 text-muted-foreground" />}
