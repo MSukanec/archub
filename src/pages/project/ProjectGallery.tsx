@@ -396,8 +396,8 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Filter Buttons using SelectableGhostButton style */}
-        {filteredFiles.length > 0 && (
+        {/* Filter Buttons - Always show when we have any files */}
+        {allFiles.length > 0 && (
           <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
             <div className="flex items-center justify-between px-4 py-3">
               {/* Filter buttons on the left - Using same style as TableTopBar tabs */}
