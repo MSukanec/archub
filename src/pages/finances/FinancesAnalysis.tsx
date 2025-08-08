@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { BarChart3, TrendingDown, Calculator, TrendingUp, LayoutGrid } from 'lucide-react'
+import { BarChart3, TrendingUp, LayoutGrid, Calculator } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,6 +35,7 @@ export default function FinancesAnalysis() {
     'e854de08-da8f-4769-a2c5-b24b622f20b0'  // Indirectos
   ]
   
+  // Filter only expense movements
   const expenseMovements = movements.filter(movement => 
     movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7' && // EGRESOS
     allowedCategoryIds.includes(movement.category_id) // Only specified categories
@@ -216,49 +217,45 @@ export default function FinancesAnalysis() {
   // Process data for sunburst chart - categories only (same as pie chart)
   const sunburstData = chartData
 
+  // Common color configuration for all charts
+  const categoryColors = {
+    'Mano de Obra': 'var(--chart-1)', // Verde
+    'Materiales': 'var(--chart-2)',   // Azul-Verde
+    'Indirectos': 'var(--chart-3)'    // Azul
+  }
+
+  const colorVariations = {
+    'var(--chart-1)': [ // Mano de Obra (Verde)
+      'hsl(110, 40%, 35%)',
+      'hsl(110, 40%, 40%)', 
+      'hsl(110, 40%, 45%)',
+      'hsl(110, 40%, 50%)',
+      'hsl(110, 40%, 55%)'
+    ],
+    'var(--chart-2)': [ // Materiales (Azul-Verde)
+      'hsl(173, 58%, 25%)',
+      'hsl(173, 58%, 30%)',
+      'hsl(173, 58%, 35%)',
+      'hsl(173, 58%, 40%)',
+      'hsl(173, 58%, 45%)'
+    ],
+    'var(--chart-3)': [ // Indirectos (Azul)
+      'hsl(197, 37%, 15%)',
+      'hsl(197, 37%, 20%)',
+      'hsl(197, 37%, 25%)',
+      'hsl(197, 37%, 30%)',
+      'hsl(197, 37%, 35%)'
+    ]
+  }
+
+  // Get subcategory color variations
+  const getSubcategoryColor = (categoryColor: string, index: number) => {
+    const variations = colorVariations[categoryColor as keyof typeof colorVariations]
+    return variations ? variations[index % variations.length] : categoryColor
+  }
+
   // Process data for treemap chart - subcategories
   const treemapData = useMemo(() => {
-    const categoryColors = {
-      'Mano de Obra': 'var(--chart-1)', // Verde
-      'Materiales': 'var(--chart-2)',   // Azul-Verde
-      'Indirectos': 'var(--chart-3)'    // Azul
-    }
-
-    // Generate color variations for subcategories within each category
-    const getSubcategoryColor = (categoryColor: string, index: number, total: number) => {
-      // For CSS variables, we need to get the computed color and vary it
-      // Since we can't easily parse CSS variables, we'll use predefined variations
-      const colorVariations = {
-        'var(--chart-1)': [ // Mano de Obra (Verde)
-          'hsl(110, 40%, 35%)',
-          'hsl(110, 40%, 40%)', 
-          'hsl(110, 40%, 45%)',
-          'hsl(110, 40%, 50%)',
-          'hsl(110, 40%, 55%)'
-        ],
-        'var(--chart-2)': [ // Materiales (Azul-Verde)
-          'hsl(173, 58%, 25%)',
-          'hsl(173, 58%, 30%)',
-          'hsl(173, 58%, 35%)',
-          'hsl(173, 58%, 40%)',
-          'hsl(173, 58%, 45%)'
-        ],
-        'var(--chart-3)': [ // Indirectos (Azul)
-          'hsl(197, 37%, 15%)',
-          'hsl(197, 37%, 20%)',
-          'hsl(197, 37%, 25%)',
-          'hsl(197, 37%, 30%)',
-          'hsl(197, 37%, 35%)'
-        ]
-      }
-      
-      const variations = colorVariations[categoryColor as keyof typeof colorVariations]
-      if (variations) {
-        return variations[index % variations.length]
-      }
-      
-      return categoryColor
-    }
 
     // Group by category and subcategory
     const subcategoryMap = new Map<string, { category: string; amount: number }>()
@@ -311,7 +308,7 @@ export default function FinancesAnalysis() {
           size: sub.amount,
           category,
           subcategory: sub.subcategory,
-          color: getSubcategoryColor(categoryColor, index, subcategories.length),
+          color: getSubcategoryColor(categoryColor, index),
           percentage: totalAmount > 0 ? Number(((sub.amount / totalAmount) * 100).toFixed(1)) : 0
         })
       })
@@ -576,7 +573,6 @@ export default function FinancesAnalysis() {
                 <ExpensesSunburstRadialChart data={sunburstRadialData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
-
 
           </div>
         )}
