@@ -121,9 +121,6 @@ export function SidebarSubmenu() {
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline', requiresProject: true },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: 'coming_soon', requiresProject: true },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: 'coming_soon', requiresProject: true },
     ],
 
     'construccion': [
