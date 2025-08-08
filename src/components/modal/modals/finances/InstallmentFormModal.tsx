@@ -250,14 +250,19 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
         if (movementError) throw movementError
 
-        // Actualizar la relación con terceros
+        // Actualizar la relación con terceros - primero eliminar la existente y crear nueva
+        await supabase!
+          .from('movement_third_party_contributions')
+          .delete()
+          .eq('movement_id', editingInstallment.id)
+
         const { error: contributionError } = await supabase!
           .from('movement_third_party_contributions')
-          .update({
+          .insert([{
+            movement_id: editingInstallment.id,
             third_party_id: data.third_party_id,
             receipt_number: data.receipt_number || null,
-          })
-          .eq('movement_id', editingInstallment.id)
+          }])
 
         if (contributionError) throw contributionError
 
