@@ -1,18 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Button } from '@/components/ui/button'
-import { BarChart3, TrendingDown, Calculator, PieChart, DollarSign, FileText, TrendingUp, LayoutGrid } from 'lucide-react'
+import { BarChart3, TrendingDown, Calculator, TrendingUp, LayoutGrid } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useNavigationStore } from '@/stores/navigationStore'
-
-import { useProjects } from '@/hooks/use-projects'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
 import { ExpensesSunburstRadialChart } from '@/components/charts/ExpensesSunburstRadialChart'
@@ -23,33 +16,16 @@ export default function FinancesAnalysis() {
   const [groupByCategory, setGroupByCategory] = useState(true)
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('pesificado')
   const [activeTab, setActiveTab] = useState("analysis")
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("")
   
   const { data: userData } = useCurrentUser()
   
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
 
-  // Initialize selected project with current project
-  useEffect(() => {
-    if (projectId && !selectedProjectId) {
-      setSelectedProjectId(projectId)
-    }
-  }, [projectId, selectedProjectId])
-
-  // Get projects for filter
-  const { data: projects = [] } = useProjects(organizationId)
-  
-  // Prepare data for filters
-  const availableProjects = useMemo(() => {
-    const projectOptions = projects.map(project => project.name)
-    return ['Todos los Proyectos', ...projectOptions]
-  }, [projects])
-
-  // Get movements data - use selectedProjectId for filtering, empty string for all projects
+  // Get movements data for the current project
   const { data: movements = [], isLoading } = useMovements(
     organizationId || '',
-    selectedProjectId === 'all' ? '' : selectedProjectId || ''
+    projectId || ''
   )
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
@@ -443,29 +419,6 @@ export default function FinancesAnalysis() {
 
   const groupedColumns = getGroupedColumns()
 
-  const features = [
-    {
-      icon: <Calculator className="w-6 h-6" />,
-      title: "Cálculo Automático de Porcentajes",
-      description: "Calcula automáticamente el porcentaje de incidencia de cada categoría sobre el total de egresos."
-    },
-    {
-      icon: <PieChart className="w-6 h-6" />,
-      title: "Agrupación por Categoría",
-      description: "Organiza los gastos por categoría y subcategoría para un análisis detallado de la distribución."
-    },
-    {
-      icon: <BarChart3 className="w-6 h-6" />,
-      title: "Totales por Moneda",
-      description: "Agrupa y suma los montos por tipo de moneda para análisis multi-divisa."
-    },
-    {
-      icon: <TrendingDown className="w-6 h-6" />,
-      title: "Ordenamiento Inteligente",
-      description: "Los conceptos se ordenan automáticamente de mayor a menor impacto económico."
-    }
-  ]
-
   // Crear tabs para el header
   const headerTabs = [
     {
@@ -488,8 +441,6 @@ export default function FinancesAnalysis() {
       }}
     >
       <div className="space-y-4">
-
-
         {/* Tab Content */}
         {activeTab === "analysis" ? (
           // Tab Análisis por Subcategorías - Contenido actual
