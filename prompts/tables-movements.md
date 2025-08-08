@@ -130,3 +130,28 @@ TABLA MOVEMENT_CONCEPTS:
   }
 ]
 
+TABLA MOVEMENT_THIRD_PARTY_CONTRIBUTIONS:
+
+[
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "third_party_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "receipt_number",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
+

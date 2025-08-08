@@ -31,13 +31,14 @@ const installmentSchema = z.object({
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
-  contact_id: z.string().min(1, 'Cliente es requerido'),
+  third_party_id: z.string().min(1, 'Cliente es requerido'),
   subcategory_id: z.string().min(1, 'Concepto es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
   description: z.string().optional(),
+  receipt_number: z.string().optional(),
 })
 
 type InstallmentForm = z.infer<typeof installmentSchema>
@@ -62,13 +63,14 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     resolver: zodResolver(installmentSchema),
     defaultValues: {
       movement_date: new Date(),
-      contact_id: '',
+      third_party_id: '',
       subcategory_id: '',
       currency_id: '',
       wallet_id: '',
       amount: 0,
       exchange_rate: undefined,
       description: '',
+      receipt_number: '',
     }
   })
 
@@ -151,27 +153,28 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       console.log('Loading editing installment:', editingInstallment)
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
-      form.reset({
-        created_by: editingInstallment.created_by || '',
-        movement_date: installmentDate,
-        contact_id: editingInstallment.contact_id || '',
-        subcategory_id: editingInstallment.subcategory_id || '',
-        currency_id: editingInstallment.currency_id || '',
-        wallet_id: editingInstallment.wallet_id || '',
-        amount: editingInstallment.amount || 0,
-        exchange_rate: editingInstallment.exchange_rate || undefined,
-        description: editingInstallment.description || '',
-      })
-      
-      console.log('Form reset with values:', {
-        movement_date: installmentDate,
-        contact_id: editingInstallment.contact_id,
-        subcategory_id: editingInstallment.subcategory_id,
-        currency_id: editingInstallment.currency_id,
-        amount: editingInstallment.amount,
-        description: editingInstallment.description,
-        exchange_rate: editingInstallment.exchange_rate
-      })
+      // Cargar datos de la relación con terceros
+      const loadThirdPartyData = async () => {
+        const { data: contribution } = await supabase!
+          .from('movement_third_party_contributions')
+          .select('third_party_id, receipt_number')
+          .eq('movement_id', editingInstallment.id)
+          .single()
+
+        form.reset({
+          movement_date: installmentDate,
+          third_party_id: contribution?.third_party_id || '',
+          subcategory_id: editingInstallment.subcategory_id || '',
+          currency_id: editingInstallment.currency_id || '',
+          wallet_id: editingInstallment.wallet_id || '',
+          amount: editingInstallment.amount || 0,
+          exchange_rate: editingInstallment.exchange_rate || undefined,
+          description: editingInstallment.description || '',
+          receipt_number: contribution?.receipt_number || '',
+        })
+      }
+
+      loadThirdPartyData()
     }
   }, [editingInstallment, form, currencies])
 
@@ -225,7 +228,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
-        contact_id: data.contact_id,
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         amount: data.amount,
@@ -237,24 +239,50 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
 
       if (editingInstallment) {
-        const { data: result, error } = await supabase!
+        // Actualizar el movimiento
+        const { data: movement, error: movementError } = await supabase!
           .from('movements')
           .update(movementData)
           .eq('id', editingInstallment.id)
           .select()
           .single()
 
-        if (error) throw error
-        return result
+        if (movementError) throw movementError
+
+        // Actualizar la relación con terceros
+        const { error: contributionError } = await supabase!
+          .from('movement_third_party_contributions')
+          .update({
+            third_party_id: data.third_party_id,
+            receipt_number: data.receipt_number || null,
+          })
+          .eq('movement_id', editingInstallment.id)
+
+        if (contributionError) throw contributionError
+
+        return movement
       } else {
-        const { data: result, error } = await supabase!
+        // Crear el movimiento
+        const { data: movement, error: movementError } = await supabase!
           .from('movements')
           .insert([movementData])
           .select()
           .single()
 
-        if (error) throw error
-        return result
+        if (movementError) throw movementError
+
+        // Crear la relación con terceros
+        const { error: contributionError } = await supabase!
+          .from('movement_third_party_contributions')
+          .insert([{
+            movement_id: movement.id,
+            third_party_id: data.third_party_id,
+            receipt_number: data.receipt_number || null,
+          }])
+
+        if (contributionError) throw contributionError
+
+        return movement
       }
     },
     onSuccess: () => {
@@ -295,12 +323,9 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           <h4 className="font-medium text-foreground mb-2">Cliente</h4>
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {editingInstallment.contact?.first_name?.[0]}
-                {editingInstallment.contact?.last_name?.[0]}
-              </AvatarFallback>
+              <AvatarFallback>CL</AvatarFallback>
             </Avatar>
-            <span className="text-sm">{editingInstallment.contact?.full_name}</span>
+            <span className="text-sm">Cliente del aporte</span>
           </div>
         </div>
         <div>
@@ -408,7 +433,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           {/* 2. Cliente */}
           <FormField
             control={form.control}
-            name="contact_id"
+            name="third_party_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cliente *</FormLabel>
@@ -529,24 +554,43 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
             />
           </div>
 
-          {/* 5. Descripción */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción (opcional)</FormLabel>
-                <FormControl>
-                <Textarea
-                  placeholder="Descripción del aporte..."
-                  {...field}
-                  rows={3}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* 5. Descripción - Número de Recibo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción del aporte..."
+                      {...field}
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="receipt_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de Recibo (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ej: RC-001"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
       </form>
     </Form>
     )
