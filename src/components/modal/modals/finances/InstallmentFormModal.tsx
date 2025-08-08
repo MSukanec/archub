@@ -266,7 +266,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
-        created_by: userData.id,
+        created_by: userData.user.id,
       }
 
       console.log('Movement data to insert:', movementData)
@@ -342,13 +342,13 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       let errorMessage = error.message || 'Error desconocido'
       
       // Si es un error de Supabase, extraer información más detallada
-      if (error.code) {
-        errorMessage = `Código ${error.code}: ${error.message}`
-        if (error.details) {
-          errorMessage += `\nDetalles: ${error.details}`
+      if ((error as any).code) {
+        errorMessage = `Código ${(error as any).code}: ${error.message}`
+        if ((error as any).details) {
+          errorMessage += `\nDetalles: ${(error as any).details}`
         }
-        if (error.hint) {
-          errorMessage += `\nSugerencia: ${error.hint}`
+        if ((error as any).hint) {
+          errorMessage += `\nSugerencia: ${(error as any).hint}`
         }
       }
       

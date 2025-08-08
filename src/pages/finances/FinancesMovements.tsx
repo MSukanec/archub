@@ -295,7 +295,7 @@ export default function Movements() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["movements"] });
-      setDeletingMovement(null);
+      // setDeletingMovement(null); // TODO: Add this state if needed
       toast({
         title: result.isConversion 
           ? "Conversión eliminada" 
@@ -961,7 +961,7 @@ export default function Movements() {
       width: "15%", // Aumentado de 10% a 15% (1.5x)
       sortable: true,
       sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => {
+      render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
             <div className="text-xs">
@@ -973,7 +973,7 @@ export default function Movements() {
         if ('is_transfer_group' in item) {
           return (
             <div className="text-xs">
-              <span className="font-bold">Transferencia</span> - {item.from_wallet} → {item.to_wallet}
+              <span className="font-bold">Transferencia</span>
             </div>
           );
         }
@@ -996,7 +996,7 @@ export default function Movements() {
       label: "Descripción",
       sortable: true,
       sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => {
+      render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
             <div>
@@ -1014,7 +1014,7 @@ export default function Movements() {
           return (
             <div>
               <div className="text-xs font-medium">
-                Transferencia {item.from_wallet} → {item.to_wallet}
+                Transferencia
               </div>
               <div className="text-xs text-muted-foreground">
                 {item.description || "Sin descripción"}
