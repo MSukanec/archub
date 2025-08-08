@@ -32,7 +32,7 @@ export async function uploadGalleryFiles(
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
-        .from('project-media')
+        .from('media')
         .getPublicUrl(filePath);
 
       const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video';
@@ -69,7 +69,7 @@ export async function uploadGalleryFiles(
 
       // Now upload to Supabase Storage - RLS should allow it
       const { error: uploadError } = await supabase.storage
-        .from('project-media')
+        .from('media')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true

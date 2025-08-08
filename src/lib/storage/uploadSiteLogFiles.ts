@@ -29,7 +29,7 @@ export async function uploadSiteLogFiles(
 
       // First, create the database record to satisfy RLS
       const { data: urlData } = supabase.storage
-        .from('project-media')
+        .from('media')
         .getPublicUrl(filePath)
 
       const fileType: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video'
@@ -56,7 +56,7 @@ export async function uploadSiteLogFiles(
 
       // Now upload to Supabase Storage - RLS should allow it
       const { error: uploadError } = await supabase.storage
-        .from('project-media')
+        .from('media')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -107,14 +107,14 @@ export async function deleteSiteLogFile(fileId: string, fileUrl: string): Promis
     // Extract file path from URL
     const url = new URL(fileUrl)
     const pathSegments = url.pathname.split('/')
-    const bucketIndex = pathSegments.findIndex(segment => segment === 'project-media')
+    const bucketIndex = pathSegments.findIndex(segment => segment === 'media')
     
     if (bucketIndex !== -1 && bucketIndex < pathSegments.length - 1) {
       const filePath = pathSegments.slice(bucketIndex + 1).join('/')
       
       // Delete from storage
       const { error: storageError } = await supabase.storage
-        .from('project-media')
+        .from('media')
         .remove([filePath])
 
       if (storageError) {
