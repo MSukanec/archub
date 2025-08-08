@@ -10,12 +10,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 import { useToast } from '@/hooks/use-toast';
-import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
-import { useMobile } from '@/hooks/use-mobile';
-
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
 import { 
@@ -25,16 +21,10 @@ import {
   FilterX,
   Plus,
   Download, 
-  ChevronLeft, 
-  ChevronRight, 
   PlayCircle, 
-  X,
   Edit,
   Trash2,
-  Camera,
-  FolderOpen,
-  Calendar,
-  Eye
+  FolderOpen
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,10 +36,10 @@ interface GalleryFile {
   file_type: string;
   file_name: string;
   created_at: string;
-  site_log_id?: string;
   description?: string;
   project_id?: string;
   project_name?: string;
+  visibility: 'organization' | 'project';
 }
 
 export default function ProjectGallery() {
@@ -57,19 +47,13 @@ export default function ProjectGallery() {
   const storedProjectId = userData?.preferences?.last_project_id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { setActions, setShowActionBar } = useMobileActionBar();
-  const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const { setSidebarContext } = useNavigationStore();
   const [location] = useLocation();
   
-  // Modal states  
-  const [editingFile, setEditingFile] = useState<GalleryFile | null>(null);
-  
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<string>('all');
-  const [entryTypeFilter, setEntryTypeFilter] = useState<string>('all');
 
   // Set sidebar context based on current route
   useEffect(() => {
@@ -203,13 +187,8 @@ export default function ProjectGallery() {
       );
     }
 
-    // Entry type filter
-    if (entryTypeFilter !== 'all') {
-      filtered = filtered.filter(file => file.entry_type === entryTypeFilter);
-    }
-
     return filtered;
-  }, [galleryFiles, searchTerm, fileTypeFilter, entryTypeFilter]);
+  }, [galleryFiles, searchTerm, fileTypeFilter]);
 
   // Lightbox setup - usar TODAS las imágenes de galleryFiles, no solo las filtradas
   const imageUrls = useMemo(() => 
@@ -281,15 +260,7 @@ export default function ProjectGallery() {
     },
   });
 
-  // Mobile Action Bar setup
-  useEffect(() => {
-    if (isMobile) {
-      setShowActionBar(true);
-      return () => {
-        setShowActionBar(false);
-      };
-    }
-  }, [isMobile, setShowActionBar]);
+
 
   // Functions
   const handleImageClick = (file: GalleryFile) => {
@@ -302,7 +273,6 @@ export default function ProjectGallery() {
   };
 
   const handleEdit = (file: GalleryFile) => {
-    setEditingFile(file);
     openModal('gallery', { editingFile: file });
   };
 
@@ -328,20 +298,7 @@ export default function ProjectGallery() {
     document.body.removeChild(link);
   };
 
-  const getEntryTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      'avance_de_obra': 'Avance de Obra',
-      'visita_tecnica': 'Visita Técnica',
-      'problema_detectado': 'Problema Detectado',
-      'pedido_material': 'Pedido Material',
-      'nota_climatica': 'Nota Climática',
-      'decision': 'Decisión',
-      'inspeccion': 'Inspección',
-      'foto_diaria': 'Foto Diaria',
-      'registro_general': 'Registro General'
-    };
-    return types[type] || type;
-  };
+
 
   if (isLoading) {
     return (
@@ -464,34 +421,13 @@ export default function ProjectGallery() {
               </Select>
             </div>
 
-            <div className="min-w-[180px]">
-              <Select value={entryTypeFilter} onValueChange={setEntryTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Tipo de entrada" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tipos</SelectItem>
-                  <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                  <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-                  <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                  <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                  <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-                  <SelectItem value="decision">Decisión</SelectItem>
-                  <SelectItem value="inspeccion">Inspección</SelectItem>
-                  <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                  <SelectItem value="registro_general">Registro General</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {(searchTerm || fileTypeFilter !== 'all' || entryTypeFilter !== 'all') && (
+            {(searchTerm || fileTypeFilter !== 'all') && (
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => {
                   setSearchTerm('');
                   setFileTypeFilter('all');
-                  setEntryTypeFilter('all');
                 }}
                 className="h-10"
               >
@@ -594,7 +530,7 @@ export default function ProjectGallery() {
                     {file.file_name}
                   </h3>
                   <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{getEntryTypeLabel(file.entry_type)}</span>
+                    <span>{file.file_type === 'image' ? 'Imagen' : file.file_type === 'video' ? 'Video' : 'Archivo'}</span>
                     <span>{format(new Date(file.created_at), 'dd/MM/yy', { locale: es })}</span>
                   </div>
                   {!projectId && file.project_name && (
@@ -617,7 +553,6 @@ export default function ProjectGallery() {
                 onClick={() => {
                   setSearchTerm('');
                   setFileTypeFilter('all');
-                  setEntryTypeFilter('all');
                 }}
               >
                 <FilterX className="w-4 h-4 mr-2" />
