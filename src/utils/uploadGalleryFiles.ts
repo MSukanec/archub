@@ -30,7 +30,20 @@ export async function uploadGalleryFiles(
 
 
 
-      // First, create the database record to satisfy RLS
+      // First upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        throw uploadError;
+      }
+
+      // Get the public URL after successful upload
       const { data: urlData } = supabase.storage
         .from('media')
         .getPublicUrl(filePath);
@@ -50,7 +63,7 @@ export async function uploadGalleryFiles(
         visibility: 'organization'
       };
 
-      console.log('Insertando en DB:', insertData);
+      console.log('Insertando en DB después de subir archivo:', insertData);
       console.log('File details:', {
         name: file.name,
         size: file.size,
@@ -58,31 +71,35 @@ export async function uploadGalleryFiles(
         customTitle: title
       });
 
+      // Test current user auth first
+      const { data: authUser } = await supabase.auth.getUser();
+      console.log('Current auth user:', authUser?.user?.id);
+      
+      // Test if we can select from table first
+      const { data: testSelect, error: selectError } = await supabase
+        .from('project_media')
+        .select('id')
+        .limit(1);
+      console.log('Test select result:', { testSelect, selectError });
+
+      // Now create the database record
       const { error: dbError } = await supabase
         .from('project_media')
         .insert(insertData);
 
       if (dbError) {
         console.error('Error creating file record:', dbError);
-        throw dbError;
-      }
-
-      // Now upload to Supabase Storage - RLS should allow it
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
+        console.error('Detailed error:', {
+          message: dbError.message,
+          details: dbError.details,
+          hint: dbError.hint,
+          code: dbError.code
         });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-        // Clean up database record if upload fails
-        await supabase
-          .from('project_media')
-          .delete()
-          .eq('file_path', filePath);
-        throw uploadError;
+        // Clean up uploaded file if DB insertion failed
+        await supabase.storage
+          .from('media')
+          .remove([filePath]);
+        throw dbError;
       }
 
       console.log('Archivo subido exitosamente:', filePath);

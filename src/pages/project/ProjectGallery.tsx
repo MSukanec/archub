@@ -235,7 +235,7 @@ export default function ProjectGallery() {
 
       // Get file info first
       const { data: fileData, error: fetchError } = await supabase
-        .from('site_log_files')
+        .from('project_media')
         .select('file_path')
         .eq('id', fileId)
         .single();
@@ -244,14 +244,14 @@ export default function ProjectGallery() {
 
       // Delete from storage
       const { error: storageError } = await supabase.storage
-        .from('site-log-files')
+        .from('media')
         .remove([fileData.file_path]);
 
       if (storageError) throw storageError;
 
       // Delete from database
       const { error: dbError } = await supabase
-        .from('site_log_files')
+        .from('project_media')
         .delete()
         .eq('id', fileId);
 
