@@ -24,7 +24,8 @@ import {
   Edit,
   Trash2,
   FolderOpen,
-  X
+  X,
+  Play
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -394,74 +395,56 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Filter Buttons like in Tasks table */}
+        {/* Action Bar with Filter Buttons */}
         {filteredFiles.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Button
-              variant={fileTypeFilter === 'Todo' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFileTypeFilter('Todo')}
-              className="h-8"
-            >
-              Todo
-            </Button>
-            <Button
-              variant={fileTypeFilter === 'Imágenes' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFileTypeFilter('Imágenes')}
-              className="h-8"
-            >
-              Imágenes
-            </Button>
-            <Button
-              variant={fileTypeFilter === 'Videos' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFileTypeFilter('Videos')}
-              className="h-8"
-            >
-              Videos
-            </Button>
-            
-            {/* Right side actions */}
-            <div className="ml-auto flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
+          <ActionBarDesktopRow 
+            filters={[]}
+            actions={[
+              {
+                label: "Todo",
+                icon: Filter,
+                onClick: () => setFileTypeFilter('Todo'),
+                variant: fileTypeFilter === 'Todo' ? 'default' : 'outline'
+              },
+              {
+                label: "Imágenes", 
+                icon: Images,
+                onClick: () => setFileTypeFilter('Imágenes'),
+                variant: fileTypeFilter === 'Imágenes' ? 'default' : 'outline'
+              },
+              {
+                label: "Videos",
+                icon: Play,
+                onClick: () => setFileTypeFilter('Videos'),
+                variant: fileTypeFilter === 'Videos' ? 'default' : 'outline'
+              },
+              {
+                label: "Buscar",
+                icon: Search,
+                onClick: () => {
                   console.log("Search clicked - TODO: Implement search modal");
-                }}
-                className="h-8"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Buscar
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
+                },
+                variant: "ghost"
+              },
+              {
+                label: "Filtros", 
+                icon: Filter,
+                onClick: () => {
                   console.log("Filters clicked - TODO: Implement filters modal");
-                }}
-                className="h-8"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filtros
-              </Button>
-              {(searchTerm || fileTypeFilter !== 'Todo') && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFileTypeFilter('Todo');
-                  }}
-                  className="h-8"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Limpiar
-                </Button>
-              )}
-            </div>
-          </div>
+                },
+                variant: "ghost"
+              },
+              ...(searchTerm || fileTypeFilter !== 'Todo' ? [{
+                label: "Limpiar",
+                icon: X,
+                onClick: () => {
+                  setSearchTerm('');
+                  setFileTypeFilter('Todo');
+                },
+                variant: "ghost" as const
+              }] : [])
+            ]}
+          />
         )}
 
         {/* Results Summary */}
