@@ -17,6 +17,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import UserSelector from '@/components/ui-custom/UserSelector'
 import { CalendarIcon, DollarSign, User, Coins } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -192,12 +193,12 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
       
       // Usar la billetera por defecto
-      if (wallets) {
+      if (wallets && wallets.length > 0) {
         const defaultWallet = wallets.find(w => w.is_default)
-        if (defaultWallet) {
-          form.setValue('wallet_id', defaultWallet.wallets?.id)
-        } else if (wallets.length > 0) {
-          form.setValue('wallet_id', wallets[0].wallets?.id)
+        if (defaultWallet && defaultWallet.wallets?.id) {
+          form.setValue('wallet_id', defaultWallet.wallets.id)
+        } else if (wallets[0].wallets?.id) {
+          form.setValue('wallet_id', wallets[0].wallets.id)
         }
       }
     }
@@ -496,8 +497,11 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                       </SelectTrigger>
                       <SelectContent>
                         {wallets?.map((orgWallet) => (
-                          <SelectItem key={orgWallet.wallets?.id} value={orgWallet.wallets?.id}>
-                            {orgWallet.wallets?.name}
+                          <SelectItem 
+                            key={orgWallet.wallets?.id} 
+                            value={orgWallet.wallets?.id || ''}
+                          >
+                            {orgWallet.wallets?.name || 'Sin nombre'}
                           </SelectItem>
                         ))}
                       </SelectContent>
