@@ -83,27 +83,43 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       }));
 
       // Obtener el organization_member ID consultando directamente
-      const { data: memberData } = await supabase
+      console.log('Searching for organization member:', {
+        organizationId,
+        userId: userData.user?.id
+      });
+      
+      const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('id')
+        .select('id, user_id, organization_id, is_active')
         .eq('organization_id', organizationId)
         .eq('user_id', userData.user?.id)
         .eq('is_active', true)
         .single();
       
-      if (!memberData?.id) {
-        throw new Error('No se encontró la membresía activa de la organización');
+      console.log('Member query result:', { memberData, memberError });
+      
+      if (memberError || !memberData?.id) {
+        // Fallback: try to find any active member for this user
+        const { data: fallbackData } = await supabase
+          .from('organization_members')
+          .select('*')
+          .eq('user_id', userData.user?.id)
+          .eq('is_active', true);
+        
+        console.log('Fallback member search:', fallbackData);
+        throw new Error(`No se encontró la membresía activa. Error: ${memberError?.message || 'Member not found'}`);
       }
       
       const createdByMemberId = memberData.id;
       
-      console.log('Upload data check:', {
+      console.log('Final upload data check:', {
         projectId,
         organizationId,
         createdBy: createdByMemberId,
         filesCount: galleryFiles.length,
         memberData: memberData,
-        userId: userData.user?.id
+        userId: userData.user?.id,
+        memberExists: !!memberData?.id
       });
 
       return uploadGalleryFiles(
