@@ -591,10 +591,9 @@ export default function ProjectGallery() {
             description="No se encontraron archivos con los filtros aplicados. Intenta cambiar los criterios de búsqueda."
             action={
               <Button 
-                variant="outline"
                 onClick={() => {
                   setSearchTerm('');
-                  setFileTypeFilter('all');
+                  setFileTypeFilter('Todo');
                 }}
               >
                 <FilterX className="w-4 h-4 mr-2" />
