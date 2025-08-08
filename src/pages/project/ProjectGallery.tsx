@@ -395,37 +395,43 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Filter Buttons - Using custom layout to get individual buttons */}
+        {/* Filter Buttons using SelectableGhostButton style */}
         {filteredFiles.length > 0 && (
           <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
             <div className="flex items-center justify-between px-4 py-3">
-              {/* Filter buttons on the left - Individual buttons like in Tasks table */}
+              {/* Filter buttons on the left - Ghost buttons that look pressed when active */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant={fileTypeFilter === 'Todo' ? 'default' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setFileTypeFilter('Todo')}
-                  className="h-8 px-3 text-xs"
+                  className={fileTypeFilter === 'Todo' 
+                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
+                    : "h-8 px-3 text-xs"
+                  }
                 >
-                  <Filter className="mr-1 h-3 w-3" />
                   Todo
                 </Button>
                 <Button
-                  variant={fileTypeFilter === 'Imágenes' ? 'default' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setFileTypeFilter('Imágenes')}
-                  className="h-8 px-3 text-xs"
+                  className={fileTypeFilter === 'Imágenes' 
+                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
+                    : "h-8 px-3 text-xs"
+                  }
                 >
-                  <Images className="mr-1 h-3 w-3" />
                   Imágenes
                 </Button>
                 <Button
-                  variant={fileTypeFilter === 'Videos' ? 'default' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setFileTypeFilter('Videos')}
-                  className="h-8 px-3 text-xs"
+                  className={fileTypeFilter === 'Videos' 
+                    ? "h-8 px-3 text-xs bg-[var(--button-ghost-hover-bg)] text-[var(--button-ghost-hover-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)]"
+                    : "h-8 px-3 text-xs"
+                  }
                 >
-                  <Play className="mr-1 h-3 w-3" />
                   Videos
                 </Button>
               </div>
