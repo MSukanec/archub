@@ -395,49 +395,82 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Action Bar with Filter Buttons */}
+        {/* Filter Buttons - Using custom layout to get individual buttons */}
         {filteredFiles.length > 0 && (
-          <ActionBarDesktopRow 
-            filters={[
-              {
-                key: "fileType",
-                label: "Tipo de Archivo",
-                icon: Filter,
-                value: fileTypeFilter,
-                setValue: setFileTypeFilter,
-                options: ["Todo", "Imágenes", "Videos"],
-                defaultLabel: "Todo",
-                enabled: true
-              }
-            ]}
-            actions={[
-              {
-                label: "Buscar",
-                icon: Search,
-                onClick: () => {
-                  console.log("Search clicked - TODO: Implement search modal");
-                },
-                variant: "ghost"
-              },
-              {
-                label: "Filtros", 
-                icon: Filter,
-                onClick: () => {
-                  console.log("Filters clicked - TODO: Implement filters modal");
-                },
-                variant: "ghost"
-              },
-              ...(searchTerm || fileTypeFilter !== 'Todo' ? [{
-                label: "Limpiar",
-                icon: X,
-                onClick: () => {
-                  setSearchTerm('');
-                  setFileTypeFilter('Todo');
-                },
-                variant: "ghost" as const
-              }] : [])
-            ]}
-          />
+          <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
+            <div className="flex items-center justify-between px-4 py-3">
+              {/* Filter buttons on the left - Individual buttons like in Tasks table */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={fileTypeFilter === 'Todo' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFileTypeFilter('Todo')}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Filter className="mr-1 h-3 w-3" />
+                  Todo
+                </Button>
+                <Button
+                  variant={fileTypeFilter === 'Imágenes' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFileTypeFilter('Imágenes')}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Images className="mr-1 h-3 w-3" />
+                  Imágenes
+                </Button>
+                <Button
+                  variant={fileTypeFilter === 'Videos' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFileTypeFilter('Videos')}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Play className="mr-1 h-3 w-3" />
+                  Videos
+                </Button>
+              </div>
+
+              {/* Actions on the right */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    console.log("Search clicked - TODO: Implement search modal");
+                  }}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Search className="mr-1 h-3 w-3" />
+                  Buscar
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    console.log("Filters clicked - TODO: Implement filters modal");
+                  }}
+                  className="h-8 px-3 text-xs"
+                >
+                  <Filter className="mr-1 h-3 w-3" />
+                  Filtros
+                </Button>
+                {(searchTerm || fileTypeFilter !== 'Todo') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setFileTypeFilter('Todo');
+                    }}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Limpiar
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Results Summary */}

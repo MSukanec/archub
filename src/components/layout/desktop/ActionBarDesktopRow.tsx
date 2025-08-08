@@ -84,7 +84,7 @@ export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
               onClick={action.onClick}
               className="h-8 px-3 text-xs"
             >
-              <action.icon className="mr-1 h-3 w-3" />
+              {action.icon && <action.icon className="mr-1 h-3 w-3" />}
               {action.label}
             </Button>
           ))}
