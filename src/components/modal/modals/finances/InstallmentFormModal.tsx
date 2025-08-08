@@ -28,12 +28,11 @@ import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 
 const installmentSchema = z.object({
-  created_by: z.string().min(1, 'Creador es requerido'),
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
   contact_id: z.string().min(1, 'Cliente es requerido'),
-  subcategory_id: z.string().min(1, 'Subcategoría es requerida'),
+  subcategory_id: z.string().min(1, 'Concepto es requerido'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
@@ -62,7 +61,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const form = useForm<InstallmentForm>({
     resolver: zodResolver(installmentSchema),
     defaultValues: {
-      created_by: '',
       movement_date: new Date(),
       contact_id: '',
       subcategory_id: '',
@@ -180,30 +178,27 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Inicializar valores por defecto
   React.useEffect(() => {
     if (!editingInstallment) {
-      // Seleccionar usuario actual como creador
-      if (userData?.user?.id && members) {
-        const currentMember = members.find(m => m.user_id === userData.user.id)
-        if (currentMember) {
-          form.setValue('created_by', currentMember.id)
-        }
-      }
-      
       // Usar la primera moneda disponible por defecto
       if (currencies && currencies.length > 0) {
-        form.setValue('currency_id', currencies[0].id)
+        const defaultCurrency = currencies.find(c => c.is_default)?.currency?.id
+        if (defaultCurrency) {
+          form.setValue('currency_id', defaultCurrency)
+        } else {
+          form.setValue('currency_id', currencies[0].currency?.id)
+        }
       }
       
       // Usar la billetera por defecto
       if (wallets) {
         const defaultWallet = wallets.find(w => w.is_default)
         if (defaultWallet) {
-          form.setValue('wallet_id', defaultWallet.id)
+          form.setValue('wallet_id', defaultWallet.wallets?.id)
         } else if (wallets.length > 0) {
-          form.setValue('wallet_id', wallets[0].id)
+          form.setValue('wallet_id', wallets[0].wallets?.id)
         }
       }
     }
-  }, [currencies, wallets, members, userData, editingInstallment, form])
+  }, [currencies, wallets, editingInstallment, form])
 
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
@@ -230,7 +225,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: data.created_by,
         contact_id: data.contact_id,
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
@@ -344,28 +338,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* 1. Creador - Fecha (inline) */}
+          {/* 1. Fecha - Concepto */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <UserSelector
-                      users={members || []}
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Creador"
-                      placeholder="Seleccionar creador"
-                      required={true}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="movement_date"
@@ -404,36 +378,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* 2. Cliente - Concepto (inline) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="contact_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <UserSelector
-                      users={projectClients?.map(client => ({
-                        id: client.contact.id,
-                        full_name: client.contact?.full_name,
-                        first_name: client.contact?.first_name,
-                        last_name: client.contact?.last_name,
-                        company_name: client.contact?.company_name,
-                      })) || []}
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Cliente"
-                      placeholder="Seleccionar cliente"
-                      required={true}
-                      showCompany={true}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
@@ -461,23 +405,22 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
             />
           </div>
 
-        {/* 5. Moneda - Billetera */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* 2. Cliente */}
           <FormField
             control={form.control}
-            name="currency_id"
+            name="contact_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Moneda *</FormLabel>
+                <FormLabel>Cliente *</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar moneda" />
+                      <SelectValue placeholder="Seleccionar cliente" />
                     </SelectTrigger>
                     <SelectContent>
-                      {currencies?.map((currency) => (
-                        <SelectItem key={currency.id} value={currency.id}>
-                          {currency.name} ({currency.code})
+                      {projectClients?.map((client) => (
+                        <SelectItem key={client.contact.id} value={client.contact.id}>
+                          {client.contact.company_name || client.contact.full_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -488,85 +431,112 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
             )}
           />
 
+          {/* 3. Moneda - Billetera */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="currency_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Moneda *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar moneda" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies?.map((orgCurrency) => (
+                          <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id}>
+                            {orgCurrency.currency?.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="wallet_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billetera *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar billetera" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {wallets?.map((orgWallet) => (
+                          <SelectItem key={orgWallet.wallets?.id} value={orgWallet.wallets?.id}>
+                            {orgWallet.wallets?.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* 4. Monto - Cotización */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Monto *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cotización (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      placeholder="Ej: 1000.00"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* 5. Descripción */}
           <FormField
             control={form.control}
-            name="wallet_id"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Billetera *</FormLabel>
+                <FormLabel>Descripción (opcional)</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar billetera" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {wallets?.map((wallet) => (
-                        <SelectItem key={wallet.id} value={wallet.id}>
-                          {wallet.wallets?.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* 6. Monto - Cotización */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Monto *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    placeholder="Ej: 1.0000"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* 7. Descripción */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (opcional)</FormLabel>
-              <FormControl>
                 <Textarea
                   placeholder="Descripción del aporte..."
                   {...field}
