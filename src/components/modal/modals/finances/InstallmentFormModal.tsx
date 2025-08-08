@@ -81,6 +81,13 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
+  // Debug: mostrar datos de billeteras
+  React.useEffect(() => {
+    if (wallets) {
+      console.log('Wallets data:', wallets)
+    }
+  }, [wallets])
+  
   // Hook para obtener subcategorías de "Aportes de Terceros"
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
     queryKey: ['aportes-terceros-subcategories', organizationId],
@@ -207,9 +214,24 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
+      console.log('Creating installment with data:', data)
+      console.log('Available wallets:', wallets)
+      
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
+
+      // Validar que la billetera existe
+      if (!data.wallet_id) {
+        throw new Error('Wallet ID is required')
+      }
+
+      const selectedWallet = wallets?.find(w => w.wallets?.id === data.wallet_id)
+      if (!selectedWallet) {
+        throw new Error(`Wallet with ID ${data.wallet_id} not found`)
+      }
+
+      console.log('Selected wallet:', selectedWallet)
 
       // Obtener la categoría padre de la subcategoría seleccionada
       const { data: subcategory } = await supabase!
@@ -238,6 +260,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
       }
+
+      console.log('Movement data to insert:', movementData)
 
       if (editingInstallment) {
         // Actualizar el movimiento
