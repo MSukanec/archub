@@ -2,18 +2,14 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Receipt, Edit, Trash2, Users, Coins, FileText, Filter, X, Search, Plus, Upload, BarChart3 } from 'lucide-react'
+import { Receipt, Edit, Trash2 } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -85,8 +81,6 @@ interface InstallmentSummary {
 export default function FinancesInstallments() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("clients")
-  const [filterByContact, setFilterByContact] = useState("all")
-  const [filterByCurrency, setFilterByCurrency] = useState("all")
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -380,93 +374,26 @@ export default function FinancesInstallments() {
     return { clientSummary: [...sortedSummary, totalsRow], availableCurrencies: currencies }
   }, [projectClients, installments, allCurrencies])
 
-  // Apply search and filters to installments
+  // Apply search filter to installments
   const filteredInstallments = installments.filter(installment => {
-    // Search filter
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase()
-      const contactName = installment.contact_name 
-        ? `${installment.contact_name} ${installment.contact_company || ''}`.toLowerCase()
-        : ''
-      const description = (installment.description || '').toLowerCase()
-      
-      if (!contactName.includes(searchLower) && !description.includes(searchLower)) {
-        return false
-      }
-    }
+    if (!searchValue) return true
     
-    // Contact filter
-    if (filterByContact !== 'all' && installment.contact_id !== filterByContact) {
-      return false
-    }
+    const searchLower = searchValue.toLowerCase()
+    const contactName = installment.contact_name 
+      ? `${installment.contact_name} ${installment.contact_company || ''}`.toLowerCase()
+      : ''
+    const description = (installment.description || '').toLowerCase()
     
-    // Currency filter
-    if (filterByCurrency !== 'all' && installment.currency_id !== filterByCurrency) {
-      return false
-    }
-    
-    return true
+    return contactName.includes(searchLower) || description.includes(searchLower)
   })
 
-  // Check if filters are active
-  const hasActiveFilters = searchValue !== "" || filterByContact !== "all" || filterByCurrency !== "all"
-
-  // Handler functions for ActionBar
+  // Handler for adding installment
   const handleAddInstallment = () => {
     openModal('installment', {
       projectId: projectId || '',
       organizationId: organizationId || ''
     })
   }
-
-  const handleClearFilters = () => {
-    setSearchValue("")
-    setFilterByContact("all")
-    setFilterByCurrency("all")
-  }
-
-  // Custom filters component
-  const customFilters = (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por contacto
-        </Label>
-        <Select value={filterByContact} onValueChange={setFilterByContact}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todos los contactos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los contactos</SelectItem>
-            {projectClients.map(client => (
-              <SelectItem key={client.contact.id} value={client.contact.id}>
-                {client.contact.company_name || client.contact.full_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label className="text-xs font-medium text-muted-foreground">
-          Filtrar por moneda
-        </Label>
-        <Select value={filterByCurrency} onValueChange={setFilterByCurrency}>
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Todas las monedas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las monedas</SelectItem>
-            {currencies.map(currency => (
-              <SelectItem key={currency?.id} value={currency?.id}>
-                {currency?.code}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
 
   const handleEdit = (installment: any) => {
     openModal('installment', {
@@ -1040,7 +967,9 @@ export default function FinancesInstallments() {
   const headerProps = {
     title: "Aportes de Terceros",
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    primaryActionLabel: "Nuevo Compromiso",
+    onPrimaryActionClick: handleAddInstallment
   }
 
   if (isLoading) {
@@ -1055,52 +984,6 @@ export default function FinancesInstallments() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Feature Introduction */}
-      <FeatureIntroduction
-          icon={<Receipt className="h-6 w-6" />}
-          title="Gestión de Aportes de Terceros"
-          features={[
-            { icon: <Receipt className="h-4 w-4" />, title: "Aportes Detallados", description: "Registro detallado de aportes financieros de clientes e inversores" },
-            { icon: <Receipt className="h-4 w-4" />, title: "Multi-moneda", description: "Seguimiento de aportes con múltiples monedas y cotizaciones" },
-            { icon: <Receipt className="h-4 w-4" />, title: "Análisis USD", description: "Cálculo automático de equivalencias en USD para análisis financiero" },
-            { icon: <Receipt className="h-4 w-4" />, title: "Resúmenes", description: "Resúmenes por cliente con porcentajes de cumplimiento y montos restantes" }
-          ]}
-        />
-
-      {/* Action Bar Desktop con funcionalidad normal */}
-      <ActionBarDesktop
-        title="Gestión de Aportes de Terceros"
-        icon={<Receipt className="w-6 h-6" />}
-        features={[
-          {
-            icon: <Users className="w-5 h-5" />,
-            title: "Aportes Detallados por Cliente",
-            description: "Registro detallado de aportes financieros de clientes e inversores con seguimiento individualizado de compromisos."
-          },
-          {
-            icon: <Coins className="w-5 h-5" />,
-            title: "Análisis Multi-moneda",
-            description: "Seguimiento de aportes con múltiples monedas y cotizaciones automáticas para control completo de flujos financieros."
-          },
-          {
-            icon: <BarChart3 className="w-5 h-5" />,
-            title: "Análisis USD Dolarizado",
-            description: "Cálculo automático de equivalencias en USD para análisis financiero unificado y reportes consolidados."
-          },
-          {
-            icon: <FileText className="w-5 h-5" />,
-            title: "Resúmenes y Porcentajes",
-            description: "Resúmenes por cliente con porcentajes de cumplimiento, montos restantes y métricas de desempeño financiero."
-          }
-        ]}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        primaryActionLabel="Nuevo Compromiso"
-        onPrimaryActionClick={handleAddInstallment}
-        customFilters={customFilters}
-        onClearFilters={handleClearFilters}
-        hasActiveFilters={hasActiveFilters}
-      />
 
       {/* Conditional Content - EmptyState o Tabs */}
       {installments.length === 0 ? (
