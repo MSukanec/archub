@@ -394,49 +394,74 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Action Bar with Search and Filters */}
+        {/* Filter Buttons like in Tasks table */}
         {filteredFiles.length > 0 && (
-          <ActionBarDesktopRow 
-            filters={[
-              {
-                key: "fileType",
-                label: "Tipo de Archivo",
-                icon: Filter,
-                value: fileTypeFilter,
-                setValue: setFileTypeFilter,
-                options: ["Todo", "Imágenes", "Videos"],
-                defaultLabel: "Todo",
-                enabled: true
-              }
-            ]}
-            actions={[
-              {
-                label: "Buscar",
-                icon: Search,
-                onClick: () => {
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button
+              variant={fileTypeFilter === 'Todo' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFileTypeFilter('Todo')}
+              className="h-8"
+            >
+              Todo
+            </Button>
+            <Button
+              variant={fileTypeFilter === 'Imágenes' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFileTypeFilter('Imágenes')}
+              className="h-8"
+            >
+              Imágenes
+            </Button>
+            <Button
+              variant={fileTypeFilter === 'Videos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFileTypeFilter('Videos')}
+              className="h-8"
+            >
+              Videos
+            </Button>
+            
+            {/* Right side actions */}
+            <div className="ml-auto flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
                   console.log("Search clicked - TODO: Implement search modal");
-                },
-                variant: "ghost"
-              },
-              {
-                label: "Filtros", 
-                icon: Filter,
-                onClick: () => {
+                }}
+                className="h-8"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Buscar
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
                   console.log("Filters clicked - TODO: Implement filters modal");
-                },
-                variant: "ghost"
-              },
-              ...(searchTerm || fileTypeFilter !== 'Todo' ? [{
-                label: "Limpiar",
-                icon: X,
-                onClick: () => {
-                  setSearchTerm('');
-                  setFileTypeFilter('Todo');
-                },
-                variant: "ghost" as const
-              }] : [])
-            ]}
-          />
+                }}
+                className="h-8"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filtros
+              </Button>
+              {(searchTerm || fileTypeFilter !== 'Todo') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFileTypeFilter('Todo');
+                  }}
+                  className="h-8"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Limpiar
+                </Button>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Results Summary */}
