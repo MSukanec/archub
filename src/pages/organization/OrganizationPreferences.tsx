@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Coins, Package2, Plus, Settings, CheckCircle, XCircle, Filter, Search } from 'lucide-react';
+import { Coins, Settings } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
@@ -9,10 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ComboBoxMultiRows } from '@/components/ui-custom/ComboBoxMultiRows';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { DraggableConceptTree, MovementConceptNode } from '@/components/ui-custom/DraggableConceptTree';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -22,10 +18,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import { useOrganizationMovementConcepts, MovementConceptOrganization } from '@/hooks/use-organization-movement-concepts';
-import { useDeleteMovementConcept, useMoveConceptToParent } from '@/hooks/use-movement-concepts-admin';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 
 export default function OrganizationPreferences() {
   const { data: userData } = useCurrentUser();
@@ -41,20 +33,6 @@ export default function OrganizationPreferences() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
-
-  // Movement concepts states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set());
-  const [systemFilter, setSystemFilter] = useState<'all' | 'system' | 'user'>('all');
-
-  // Global modal store
-  const { openModal } = useGlobalModalStore();
-  const { showDeleteConfirmation } = useDeleteConfirmation();
-
-  // Movement concepts hooks
-  const { data: concepts = [], isLoading: conceptsLoading } = useOrganizationMovementConcepts(userData?.organization?.id);
-  const deleteConceptMutation = useDeleteMovementConcept();
-  const moveConceptMutation = useMoveConceptToParent();
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -86,148 +64,134 @@ export default function OrganizationPreferences() {
     }
   }, [organizationWallets]);
 
-  // Save default currency mutation
+  // Mutations for saving preferences
   const saveDefaultCurrencyMutation = useMutation({
     mutationFn: async (currencyId: string) => {
-      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
-
-      // First, remove default from all currencies
-      await supabase
-        .from('organization_currencies')
-        .update({ is_default: false })
-        .eq('organization_id', userData.organization.id);
-
-      // Then set the new default
       const { error } = await supabase
         .from('organization_currencies')
-        .update({ is_default: true })
-        .eq('organization_id', userData.organization.id)
-        .eq('currency_id', currencyId);
-
+        .update({ is_default: false })
+        .eq('organization_id', userData?.organization?.id);
+      
       if (error) throw error;
+
+      const { error: error2 } = await supabase
+        .from('organization_currencies')
+        .upsert({
+          organization_id: userData?.organization?.id!,
+          currency_id: currencyId,
+          is_default: true,
+          is_active: true
+        }, {
+          onConflict: 'organization_id,currency_id'
+        });
+
+      if (error2) throw error2;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
-      toast({ title: "Moneda por defecto actualizada", description: "Los cambios se han guardado correctamente." });
+      toast({ title: 'Moneda por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
+      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies'] });
     },
+    onError: (error) => {
+      toast({ 
+        title: 'Error', 
+        description: 'No se pudo actualizar la moneda por defecto.',
+        variant: 'destructive'
+      });
+    }
   });
 
-  // Save default wallet mutation
   const saveDefaultWalletMutation = useMutation({
     mutationFn: async (walletId: string) => {
-      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
-
-      // First, remove default from all wallets
-      await supabase
-        .from('organization_wallets')
-        .update({ is_default: false })
-        .eq('organization_id', userData.organization.id);
-
-      // Then set the new default
       const { error } = await supabase
         .from('organization_wallets')
-        .update({ is_default: true })
-        .eq('organization_id', userData.organization.id)
-        .eq('wallet_id', walletId);
-
+        .update({ is_default: false })
+        .eq('organization_id', userData?.organization?.id);
+      
       if (error) throw error;
+
+      const { error: error2 } = await supabase
+        .from('organization_wallets')
+        .upsert({
+          organization_id: userData?.organization?.id!,
+          wallet_id: walletId,
+          is_default: true,
+          is_active: true
+        }, {
+          onConflict: 'organization_id,wallet_id'
+        });
+
+      if (error2) throw error2;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
-      toast({ title: "Billetera por defecto actualizada", description: "Los cambios se han guardado correctamente." });
+      toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
+      queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
     },
+    onError: (error) => {
+      toast({ 
+        title: 'Error', 
+        description: 'No se pudo actualizar la billetera por defecto.',
+        variant: 'destructive'
+      });
+    }
   });
 
-  // Add/remove secondary currencies
   const updateSecondaryCurrenciesMutation = useMutation({
     mutationFn: async (currencyIds: string[]) => {
-      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
-
-      // Get current organization currencies
-      const { data: currentCurrencies } = await supabase
+      // Delete all non-default currencies
+      await supabase
         .from('organization_currencies')
-        .select('currency_id')
-        .eq('organization_id', userData.organization.id);
+        .delete()
+        .eq('organization_id', userData?.organization?.id)
+        .eq('is_default', false);
 
-      const currentIds = currentCurrencies?.map(c => c.currency_id) || [];
-      const allSelectedIds = [defaultCurrency, ...currencyIds].filter(Boolean);
-
-      // Remove currencies that are not selected
-      const toRemove = currentIds.filter(id => !allSelectedIds.includes(id));
-      if (toRemove.length > 0) {
-        await supabase
+      // Insert new secondary currencies
+      if (currencyIds.length > 0) {
+        const { error } = await supabase
           .from('organization_currencies')
-          .delete()
-          .eq('organization_id', userData.organization.id!)
-          .in('currency_id', toRemove);
-      }
+          .insert(currencyIds.map(id => ({
+            organization_id: userData?.organization?.id!,
+            currency_id: id,
+            is_default: false,
+            is_active: true
+          })));
 
-      // Add new currencies
-      const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
-      if (toAdd.length > 0) {
-        const newRecords = toAdd.map(currencyId => ({
-          organization_id: userData.organization?.id!,
-          currency_id: currencyId,
-          is_active: true,
-          is_default: currencyId === defaultCurrency,
-        }));
-
-        await supabase
-          .from('organization_currencies')
-          .insert(newRecords);
+        if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
-      toast({ title: "Monedas secundarias actualizadas", description: "Los cambios se han guardado correctamente." });
-    },
+      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies'] });
+    }
   });
 
-  // Add/remove secondary wallets
   const updateSecondaryWalletsMutation = useMutation({
     mutationFn: async (walletIds: string[]) => {
-      if (!userData?.organization?.id || !supabase) throw new Error('No organization found');
-
-      // Get current organization wallets
-      const { data: currentWallets } = await supabase
+      // Delete all non-default wallets
+      await supabase
         .from('organization_wallets')
-        .select('wallet_id')
-        .eq('organization_id', userData.organization.id);
+        .delete()
+        .eq('organization_id', userData?.organization?.id)
+        .eq('is_default', false);
 
-      const currentIds = currentWallets?.map(w => w.wallet_id) || [];
-      const allSelectedIds = [defaultWallet, ...walletIds].filter(Boolean);
-
-      // Remove wallets that are not selected
-      const toRemove = currentIds.filter(id => !allSelectedIds.includes(id));
-      if (toRemove.length > 0) {
-        await supabase
+      // Insert new secondary wallets
+      if (walletIds.length > 0) {
+        const { error } = await supabase
           .from('organization_wallets')
-          .delete()
-          .eq('organization_id', userData.organization.id!)
-          .in('wallet_id', toRemove);
-      }
+          .insert(walletIds.map(id => ({
+            organization_id: userData?.organization?.id!,
+            wallet_id: id,
+            is_default: false,
+            is_active: true
+          })));
 
-      // Add new wallets
-      const toAdd = allSelectedIds.filter(id => !currentIds.includes(id));
-      if (toAdd.length > 0) {
-        const newRecords = toAdd.map(walletId => ({
-          organization_id: userData.organization?.id!,
-          wallet_id: walletId,
-          is_active: true,
-          is_default: walletId === defaultWallet,
-        }));
-
-        await supabase
-          .from('organization_wallets')
-          .insert(newRecords);
+        if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
-      toast({ title: "Billeteras secundarias actualizadas", description: "Los cambios se han guardado correctamente." });
-    },
+      queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
+    }
   });
 
+  // Handlers
   const handleDefaultCurrencyChange = (currencyId: string) => {
     setDefaultCurrency(currencyId);
     // Remove from secondary currencies if it was there
@@ -256,106 +220,6 @@ export default function OrganizationPreferences() {
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
-  // Movement concepts functions
-  const calculateStats = (concepts: MovementConceptOrganization[]) => {
-    let totalConcepts = 0;
-    let systemConcepts = 0;
-    let userConcepts = 0;
-
-    const countRecursive = (concepts: MovementConceptOrganization[]) => {
-      concepts.forEach(concept => {
-        totalConcepts++;
-        
-        if (concept.is_system) {
-          systemConcepts++;
-        } else {
-          userConcepts++;
-        }
-        
-        if (concept.children && concept.children.length > 0) {
-          countRecursive(concept.children);
-        }
-      });
-    };
-
-    countRecursive(concepts);
-    return { 
-      totalConcepts, 
-      systemConcepts, 
-      userConcepts 
-    };
-  };
-
-  const stats = calculateStats(concepts);
-
-  const handleOpenCreateModal = () => {
-    openModal('organization-movement-concept');
-  };
-
-  const handleOpenEditModal = (concept: MovementConceptOrganization) => {
-    openModal('organization-movement-concept', { editingConcept: concept });
-  };
-
-  const handleCreateChildConcept = (parentConcept: MovementConceptNode) => {
-    openModal('organization-movement-concept', { 
-      parentConcept: {
-        id: parentConcept.id,
-        name: parentConcept.name,
-        parent_id: parentConcept.parent_id,
-        is_system: parentConcept.is_system
-      }
-    });
-  };
-
-  const handleDeleteConcept = (conceptId: string) => {
-    // Find the concept to get its name
-    const findConceptInTree = (concepts: MovementConceptOrganization[], id: string): MovementConceptOrganization | null => {
-      for (const concept of concepts) {
-        if (concept.id === id) return concept;
-        if (concept.children) {
-          const found = findConceptInTree(concept.children, id);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const concept = findConceptInTree(concepts, conceptId);
-    if (!concept) return;
-
-    // Check if it's a system concept
-    if (concept.is_system) {
-      toast({
-        title: "Eliminación no permitida",
-        description: "Los conceptos del sistema no pueden ser eliminados",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    showDeleteConfirmation({
-      title: "Eliminar Concepto",
-      description: `¿Estás seguro de que deseas eliminar el concepto "${concept.name}"? Esta acción no se puede deshacer.`,
-      itemName: concept.name,
-      mode: 'dangerous',
-      onConfirm: async () => {
-        try {
-          await deleteConceptMutation.mutateAsync(conceptId);
-        } catch (error) {
-          console.error('Error deleting concept:', error);
-        }
-      }
-    });
-  };
-
-  const handleMoveToParent = async (conceptId: string, newParentId: string | null) => {
-    try {
-      await moveConceptMutation.mutateAsync({ conceptId, newParentId });
-    } catch (error) {
-      console.error('Error moving concept:', error);
-    }
-  };
-
   return (
     <Layout 
       wide={false}
@@ -381,7 +245,7 @@ export default function OrganizationPreferences() {
         <FeatureIntroduction
           icon={<Coins className="h-5 w-5" />}
           title="Preferencias de la Organización"
-
+          features={[]}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -469,62 +333,6 @@ export default function OrganizationPreferences() {
             </div>
           </div>
         </div>
-
-        {/* Section Divider */}
-        {/* <div className="border-t border-[var(--section-divider)] my-8" /> */}
-
-        {/* Conceptos de Finanzas Section - TEMPORARILY HIDDEN */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left Column - Description */}
-          {/* <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Package2 className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Conceptos de Finanzas</h2>
-                <HelpPopover 
-                  title="Conceptos de Finanzas"
-                  description="Administra los conceptos disponibles para categorizar tus movimientos financieros. Los conceptos del sistema son predeterminados, mientras que puedes crear conceptos personalizados para tu organización."
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Gestiona los conceptos disponibles para categorizar movimientos financieros. Los conceptos del sistema no pueden ser modificados, pero puedes crear conceptos personalizados para tu organización.
-              </p>
-            </div>
-          </div> */}
-
-          {/* Right Column - Concepts Tree */}
-          {/* <div className="space-y-4">
-            {conceptsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">Cargando conceptos...</div>
-              </div>
-            ) : concepts.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-sm text-muted-foreground">No hay conceptos disponibles</div>
-              </div>
-            ) : (
-              <DraggableConceptTree
-                concepts={concepts}
-                expandedConcepts={expandedConcepts}
-                onToggleExpanded={(conceptId: string) => {
-                  setExpandedConcepts(prev => {
-                    const newSet = new Set(prev);
-                    if (newSet.has(conceptId)) {
-                      newSet.delete(conceptId);
-                    } else {
-                      newSet.add(conceptId);
-                    }
-                    return newSet;
-                  });
-                }}
-                onEdit={handleOpenEditModal}
-                onDelete={handleDeleteConcept}
-                onCreateChild={handleCreateChildConcept}
-                onMove={handleMoveToParent}
-              />
-            )}
-          </div>
-        </div> */}
       </div>
     </Layout>
   );
