@@ -214,9 +214,8 @@ export function Gallery({
               </PopoverTrigger>
               <PopoverContent className="w-64 p-3" align="start">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Filtros</h4>
-                    {activeFiltersCount > 0 && (
+                  {activeFiltersCount > 0 && (
+                    <div className="flex justify-end">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -226,8 +225,8 @@ export function Gallery({
                         <X className="w-3 h-3 mr-1" />
                         Limpiar
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   
                   {/* Filtro por Tipo de Archivo */}
                   <div className="space-y-1">
@@ -236,7 +235,7 @@ export function Gallery({
                       value={fileTypeFilter}
                       onValueChange={(value: 'Todo' | 'Imágenes' | 'Videos') => setFileTypeFilter(value)}
                     >
-                      <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -254,7 +253,7 @@ export function Gallery({
                       value={sourceFilter}
                       onValueChange={(value: 'all' | 'standalone' | 'sitelog') => setSourceFilter(value)}
                     >
-                      <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                      <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
