@@ -329,10 +329,26 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       onClose()
     },
     onError: (error) => {
+      console.error('Error creating installment:', error)
+      console.error('Full error object:', JSON.stringify(error, null, 2))
+      
+      let errorMessage = error.message || 'Error desconocido'
+      
+      // Si es un error de Supabase, extraer información más detallada
+      if (error.code) {
+        errorMessage = `Código ${error.code}: ${error.message}`
+        if (error.details) {
+          errorMessage += `\nDetalles: ${error.details}`
+        }
+        if (error.hint) {
+          errorMessage += `\nSugerencia: ${error.hint}`
+        }
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${editingInstallment ? 'actualizar' : 'registrar'} el aporte: ${error.message}`,
+        description: `Error al ${editingInstallment ? 'actualizar' : 'registrar'} el aporte: ${errorMessage}`,
       })
     }
   })
