@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Search, 
   Filter, 
@@ -32,6 +34,7 @@ interface GalleryFile {
   description?: string;
   visibility: string;
   created_by: string;
+  site_log_id?: string | null;
 }
 
 interface GalleryProps {
@@ -52,6 +55,8 @@ export function Gallery({
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
   const [galleryStyle, setGalleryStyle] = useState<'uniform' | 'masonry'>('uniform');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'standalone' | 'sitelog'>('all');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Filter files
   const filteredFiles = useMemo(() => {
@@ -73,8 +78,17 @@ export function Gallery({
       );
     }
 
+    // Source filter (site_log_id)
+    if (sourceFilter !== 'all') {
+      filtered = filtered.filter(file => 
+        sourceFilter === 'standalone' 
+          ? (!file.site_log_id || file.site_log_id === null)
+          : (file.site_log_id && file.site_log_id !== null)
+      );
+    }
+
     return filtered;
-  }, [files, searchTerm, fileTypeFilter]);
+  }, [files, searchTerm, fileTypeFilter, sourceFilter]);
 
   // Lightbox setup - usar TODAS las imágenes de files, no solo las filtradas
   const imageUrls = useMemo(() => 
@@ -103,7 +117,17 @@ export function Gallery({
   const clearFilters = () => {
     setSearchTerm('');
     setFileTypeFilter('Todo');
+    setSourceFilter('all');
   };
+
+  // Count active filters
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (fileTypeFilter !== 'Todo') count++;
+    if (sourceFilter !== 'all') count++;
+    return count;
+  }, [searchTerm, fileTypeFilter, sourceFilter]);
 
   if (files.length === 0) {
     return (
@@ -169,17 +193,80 @@ export function Gallery({
               <Search className="mr-1 h-3 w-3" />
               Buscar
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                console.log("Filters clicked - TODO: Implement filters modal");
-              }}
-              className="h-8 px-3 text-xs"
-            >
-              <Filter className="mr-1 h-3 w-3" />
-              Filtros
-            </Button>
+            <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-8 px-3 text-xs",
+                    activeFiltersCount > 0 && "bg-secondary text-secondary-foreground"
+                  )}
+                >
+                  <Filter className="mr-1 h-3 w-3" />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="ml-1 bg-primary text-primary-foreground rounded-full w-4 h-4 text-xs flex items-center justify-center">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-3" align="start">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Filtros</h4>
+                    {activeFiltersCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="h-6 px-2 text-xs"
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        Limpiar
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Filtro por Tipo de Archivo */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">Tipo de Archivo</label>
+                    <Select
+                      value={fileTypeFilter}
+                      onValueChange={(value: 'Todo' | 'Imágenes' | 'Videos') => setFileTypeFilter(value)}
+                    >
+                      <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todo">Todos los archivos</SelectItem>
+                        <SelectItem value="Imágenes">Solo imágenes</SelectItem>
+                        <SelectItem value="Videos">Solo videos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por Fuente */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">Fuente del Archivo</label>
+                    <Select
+                      value={sourceFilter}
+                      onValueChange={(value: 'all' | 'standalone' | 'sitelog') => setSourceFilter(value)}
+                    >
+                      <SelectTrigger className="h-7 text-xs border-[var(--input-border)]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos los archivos</SelectItem>
+                        <SelectItem value="standalone">Archivos independientes</SelectItem>
+                        <SelectItem value="sitelog">Archivos de bitácora</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="ghost"
               size="sm"
@@ -194,7 +281,7 @@ export function Gallery({
               )}
               Estilo
             </Button>
-            {(searchTerm || fileTypeFilter !== 'Todo') && (
+            {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"

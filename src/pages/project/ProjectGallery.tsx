@@ -138,7 +138,8 @@ export default function ProjectGallery() {
           project_name: file.projects?.name || 'Proyecto sin nombre',
           file_size: file.file_size,
           visibility: file.visibility as 'organization' | 'project',
-          created_by: file.created_by
+          created_by: file.created_by,
+          site_log_id: file.site_log_id
         };
       }) || [];
     },
