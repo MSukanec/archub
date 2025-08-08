@@ -247,12 +247,19 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       // Usar el ID conocido del tipo "Ingresos" (concepto de sistema)
       const typeId = '8862eee7-dd00-4f01-9335-5ea0070d3403'
 
+      // El wallet_id del formulario es el ID real de la billetera, pero movements.wallet_id
+      // referencia a organization_wallets.id, no a wallets.id
+      const organizationWallet = wallets?.find(w => w.wallets?.id === data.wallet_id)
+      if (!organizationWallet) {
+        throw new Error(`Organization wallet not found for wallet ID: ${data.wallet_id}`)
+      }
+
       const movementData = {
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
         currency_id: data.currency_id,
-        wallet_id: data.wallet_id,
+        wallet_id: organizationWallet.id, // Usar el ID de organization_wallets
         amount: data.amount,
         description: data.description || null,
         exchange_rate: data.exchange_rate || null,
