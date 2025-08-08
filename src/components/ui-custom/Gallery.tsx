@@ -192,114 +192,84 @@ export function Gallery({
         </div>
       </div>
 
-      {/* Results Summary */}
-      {filteredFiles.length > 0 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            {filteredFiles.length} archivo{filteredFiles.length !== 1 ? 's' : ''} encontrado{filteredFiles.length !== 1 ? 's' : ''}
-          </span>
-          {showProjectName && (
-            <span>
-              Mostrando archivos de todos los proyectos
-            </span>
-          )}
-        </div>
-      )}
+
 
       {/* Gallery Grid */}
       {filteredFiles.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1">
           {filteredFiles.map((file) => (
-            <Card key={file.id} className="group overflow-hidden">
-              <div className="aspect-square relative">
-                {/* Image/Video Preview */}
-                <div 
-                  className="w-full h-full cursor-pointer relative overflow-hidden"
-                  onClick={() => handleImageClick(file)}
-                >
-                  {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
-                    <img
+            <div key={file.id} className="group relative aspect-square">
+              {/* Image/Video Preview */}
+              <div 
+                className="w-full h-full cursor-pointer relative overflow-hidden bg-gray-100"
+                onClick={() => handleImageClick(file)}
+              >
+                {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
+                  <img
+                    src={file.file_url}
+                    alt={file.file_name}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
+                    <PlayCircle className="w-8 h-8 text-white absolute z-10" />
+                    <video
                       src={file.file_url}
-                      alt={file.file_name}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      muted
                     />
-                  ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <PlayCircle className="w-8 h-8 text-gray-400" />
-                      <video
-                        src={file.file_url}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        muted
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <FolderOpen className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                  
-                  {/* Overlay with actions */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    {onEdit && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(file);
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                    )}
-                    {onDownload && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDownload(file);
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(file);
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Trash2 className="w-3 h-3 text-red-400" />
-                      </Button>
-                    )}
                   </div>
-                </div>
-              </div>
-              
-              {/* File info */}
-              <div className="p-3">
-                <h3 className="font-medium text-sm truncate" title={file.file_name}>
-                  {file.file_name}
-                </h3>
-                <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                  <span>{file.file_type === 'image' ? 'Imagen' : file.file_type === 'video' ? 'Video' : 'Archivo'}</span>
-                  <span>{format(new Date(file.created_at), 'dd/MM/yy', { locale: es })}</span>
-                </div>
-                {showProjectName && file.project_name && (
-                  <div className="mt-1 text-xs text-muted-foreground truncate">
-                    {file.project_name}
+                ) : (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                    <FolderOpen className="w-8 h-8 text-gray-400" />
                   </div>
                 )}
+                
+                {/* Overlay with actions */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  {onEdit && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(file);
+                      }}
+                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                    >
+                      <Edit className="w-3 h-3 text-gray-700" />
+                    </Button>
+                  )}
+                  {onDownload && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDownload(file);
+                      }}
+                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                    >
+                      <Download className="w-3 h-3 text-gray-700" />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(file);
+                      }}
+                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </Button>
+                  )}
+                </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       ) : (
