@@ -82,30 +82,22 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         entry_type: 'registro_general',
       }));
 
-      // Obtener el organization_member ID para created_by
-      const currentMembership = userData.memberships?.find(
-        m => m.organization_id === organizationId
-      );
-      
-      if (!currentMembership?.id) {
-        throw new Error('No se encontró la membresía de la organización');
-      }
-      
-      const createdByMemberId = currentMembership.id;
+      // El created_by debe ser el UUID del usuario, no del organization_member
+      const createdByUserId = userData.user?.id;
       
       console.log('Upload data check:', {
         projectId,
         organizationId,
-        createdBy: createdByMemberId,
+        createdBy: createdByUserId,
         filesCount: galleryFiles.length,
-        membershipFound: !!currentMembership
+        userFound: !!createdByUserId
       });
 
       return uploadGalleryFiles(
         galleryFiles,
         projectId,
         organizationId,
-        createdByMemberId
+        createdByUserId
       );
     },
     onSuccess: () => {
