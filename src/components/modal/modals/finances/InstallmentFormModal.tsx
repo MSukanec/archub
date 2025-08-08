@@ -224,14 +224,16 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       // Usar el ID conocido del tipo "Ingresos" (concepto de sistema)
       const typeId = '8862eee7-dd00-4f01-9335-5ea0070d3403'
 
+      // Por ahora, usar contact_id hasta que se cree la nueva tabla
       const movementData = {
         organization_id: userData.organization.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
+        contact_id: data.third_party_id, // Temporal: usar contact_id hasta migrar
         currency_id: data.currency_id,
         wallet_id: data.wallet_id,
         amount: data.amount,
-        description: data.description || null,
+        description: `${data.description || ''}${data.receipt_number ? ` - Recibo: ${data.receipt_number}` : ''}`.trim(),
         exchange_rate: data.exchange_rate || null,
         type_id: typeId,
         category_id: subcategory.parent_id,
@@ -239,50 +241,24 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
 
       if (editingInstallment) {
-        // Actualizar el movimiento
-        const { data: movement, error: movementError } = await supabase!
+        const { data: result, error } = await supabase!
           .from('movements')
           .update(movementData)
           .eq('id', editingInstallment.id)
           .select()
           .single()
 
-        if (movementError) throw movementError
-
-        // Actualizar la relación con terceros
-        const { error: contributionError } = await supabase!
-          .from('movement_third_party_contributions')
-          .update({
-            third_party_id: data.third_party_id,
-            receipt_number: data.receipt_number || null,
-          })
-          .eq('movement_id', editingInstallment.id)
-
-        if (contributionError) throw contributionError
-
-        return movement
+        if (error) throw error
+        return result
       } else {
-        // Crear el movimiento
-        const { data: movement, error: movementError } = await supabase!
+        const { data: result, error } = await supabase!
           .from('movements')
           .insert([movementData])
           .select()
           .single()
 
-        if (movementError) throw movementError
-
-        // Crear la relación con terceros
-        const { error: contributionError } = await supabase!
-          .from('movement_third_party_contributions')
-          .insert([{
-            movement_id: movement.id,
-            third_party_id: data.third_party_id,
-            receipt_number: data.receipt_number || null,
-          }])
-
-        if (contributionError) throw contributionError
-
-        return movement
+        if (error) throw error
+        return result
       }
     },
     onSuccess: () => {
