@@ -8,12 +8,11 @@ import { supabase } from '@/lib/supabase';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
+import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
 import { 
   Images, 
   Filter, 
@@ -24,7 +23,8 @@ import {
   PlayCircle, 
   Edit,
   Trash2,
-  FolderOpen
+  FolderOpen,
+  X
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -394,49 +394,39 @@ export default function ProjectGallery() {
       }}
     >
       <div className="space-y-6">
-        {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <Input
-              id="gallery-search"
-              type="text"
-              placeholder="Buscar archivos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          
-          <div id="gallery-filters" className="flex flex-col sm:flex-row gap-4">
-            <div className="min-w-[180px]">
-              <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Tipo de archivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los archivos</SelectItem>
-                  <SelectItem value="image">Solo imágenes</SelectItem>
-                  <SelectItem value="video">Solo videos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {(searchTerm || fileTypeFilter !== 'all') && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
+        {/* Action Bar with Search and Filters */}
+        {filteredFiles.length > 0 && (
+          <ActionBarDesktopRow 
+            filters={[]}
+            actions={[
+              {
+                label: "Buscar",
+                icon: Search,
+                onClick: () => {
+                  console.log("Search clicked - TODO: Implement search modal");
+                },
+                variant: "ghost"
+              },
+              {
+                label: "Filtros", 
+                icon: Filter,
+                onClick: () => {
+                  console.log("Filters clicked - TODO: Implement filters modal");
+                },
+                variant: "ghost"
+              },
+              ...(searchTerm || fileTypeFilter !== 'all' ? [{
+                label: "Limpiar",
+                icon: X,
+                onClick: () => {
                   setSearchTerm('');
                   setFileTypeFilter('all');
-                }}
-                className="h-10"
-              >
-                <FilterX className="w-4 h-4 mr-2" />
-                Limpiar
-              </Button>
-            )}
-          </div>
-        </div>
+                },
+                variant: "ghost" as const
+              }] : [])
+            ]}
+          />
+        )}
 
         {/* Results Summary */}
         {filteredFiles.length > 0 && (
