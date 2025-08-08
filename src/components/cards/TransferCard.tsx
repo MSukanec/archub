@@ -3,21 +3,7 @@ import { ArrowLeftRight, Edit, Star, Trash2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard'
-
-export interface TransferGroup {
-  id: string
-  transfer_group_id: string
-  movements: any[]
-  currency: string
-  amount: number
-  description: string
-  movement_date: string
-  created_at: string
-  creator: any
-  from_wallet: string
-  to_wallet: string
-  is_transfer_group: true
-}
+import type { TransferGroup } from '@/types/finances'
 
 interface TransferCardProps {
   transfer: TransferGroup

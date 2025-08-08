@@ -42,7 +42,7 @@ import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
-import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
+import TransferCard from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
@@ -62,74 +62,8 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";
 
-interface Movement {
-  id: string;
-  description: string;
-  amount: number;
-  exchange_rate?: number;
-  created_at: string;
-  movement_date: string;
-  created_by: string;
-  organization_id: string;
-  project_id: string;
-  type_id: string;
-  category_id: string;
-  subcategory_id?: string;
-  currency_id: string;
-  wallet_id: string;
-  is_favorite?: boolean;
-  conversion_group_id?: string;
-  transfer_group_id?: string;
-  movement_data?: {
-    type?: {
-      id: string;
-      name: string;
-    };
-    category?: {
-      id: string;
-      name: string;
-    };
-    subcategory?: {
-      id: string;
-      name: string;
-    };
-    currency?: {
-      id: string;
-      name: string;
-      code: string;
-    };
-    wallet?: {
-      id: string;
-      name: string;
-    };
-  };
-  creator?: {
-    id: string;
-    full_name?: string;
-    email: string;
-    avatar_url?: string;
-  };
-}
-
-interface ConversionGroup {
-  id: string;
-  conversion_group_id: string;
-  movements: Movement[];
-  from_currency: string;
-  to_currency: string;
-  from_amount: number;
-  to_amount: number;
-  description: string;
-  movement_date: string;
-  created_at: string;
-  creator?: {
-    id: string;
-    full_name?: string;
-    email: string;
-    avatar_url?: string;
-  };
-  is_conversion_group: true;
-}
+// Import types from dedicated finance types file
+import type { Movement, ConversionGroup, TransferGroup } from "@/types/finances";
 
 export default function Movements() {
   // Función para formatear moneda
