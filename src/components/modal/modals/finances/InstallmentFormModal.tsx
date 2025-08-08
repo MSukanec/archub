@@ -472,7 +472,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                       <SelectContent>
                         {currencies?.map((orgCurrency) => (
                           <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id}>
-                            {orgCurrency.currency?.code}
+                            {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
                           </SelectItem>
                         ))}
                       </SelectContent>
