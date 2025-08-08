@@ -296,7 +296,7 @@ export function Gallery({
           <div 
             className="grid gap-1" 
             style={{ 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(3, 1fr)',
               gridAutoRows: '10px'
             }}
           >
