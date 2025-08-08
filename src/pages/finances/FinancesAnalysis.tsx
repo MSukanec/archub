@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMovements } from '@/hooks/use-movements'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useSubcontracts } from '@/hooks/use-subcontracts'
-import { useSubcontractAnalysis } from '@/hooks/use-subcontract-analysis'
+
 import { useProjects } from '@/hooks/use-projects'
 import { ExpensesSunburstChart } from '@/components/charts/ExpensesSunburstChart'
 import { ExpensesTreemapChart } from '@/components/charts/ExpensesTreemapChart'
@@ -51,11 +50,6 @@ export default function FinancesAnalysis() {
   const { data: movements = [], isLoading } = useMovements(
     organizationId || '',
     selectedProjectId === 'all' ? '' : selectedProjectId || ''
-  )
-
-  // Get subcontracts analysis data - use selectedProjectId, but for subcontracts we need a specific project
-  const { data: subcontractAnalysisData = [], isLoading: isLoadingSubcontracts } = useSubcontractAnalysis(
-    selectedProjectId === 'all' ? (projectId || null) : (selectedProjectId || null)
   )
 
   // Filter only expense movements (EGRESOS) by UUID and specific categories
@@ -480,11 +474,6 @@ export default function FinancesAnalysis() {
       isActive: activeTab === "analysis"
     },
     {
-      id: "subcontracts", 
-      label: "Análisis de Subcontratos",
-      isActive: activeTab === "subcontracts"
-    },
-    {
       id: "charts",
       label: "Gráficos", 
       isActive: activeTab === "charts"
@@ -574,95 +563,6 @@ export default function FinancesAnalysis() {
               icon={<BarChart3 className="h-8 w-8" />}
               title="No hay datos que coincidan"
               description="Intenta cambiar los filtros de búsqueda para encontrar los análisis que buscas."
-            />
-          )
-        ) : activeTab === "subcontracts" ? (
-          // Tab Análisis de Subcontratos - Nueva funcionalidad
-          subcontractAnalysisData.length > 0 ? (
-            <Table
-              columns={[
-                {
-                  key: 'subcontrato',
-                  label: 'Subcontrato',
-                  width: '20%',
-                  render: (item: any) => (
-                    <div className="font-medium text-sm">
-                      {item.subcontrato}
-                    </div>
-                  )
-                },
-                {
-                  key: 'proveedor',
-                  label: 'Proveedor',
-                  width: '20%',
-                  render: (item: any) => (
-                    <div className="text-sm">
-                      {item.proveedor}
-                    </div>
-                  )
-                },
-                {
-                  key: 'montoTotal',
-                  label: 'Monto Total',
-                  width: '20%',
-                  render: (item: any) => (
-                    <div>
-                      <div className="font-medium text-sm">
-                        {item.currencySymbol} {(item.montoTotal || 0).toLocaleString('es-AR')}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        USD {Math.round(item.montoTotalUSD || 0).toLocaleString('es-AR')}
-                      </div>
-                    </div>
-                  )
-                },
-                {
-                  key: 'pagoALaFecha',
-                  label: 'Pago a la Fecha',
-                  width: '20%',
-                  render: (item: any) => (
-                    <div>
-                      <div className="font-medium text-sm">
-                        {item.currencySymbol} {(item.pagoALaFecha || 0).toLocaleString('es-AR')}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        USD {Math.round(item.pagoALaFechaUSD || 0).toLocaleString('es-AR')}
-                      </div>
-                    </div>
-                  )
-                },
-                {
-                  key: 'saldo',
-                  label: 'Saldo',
-                  width: '20%',
-                  render: (item: any) => (
-                    <div>
-                      <div className="font-medium text-sm">
-                        {item.currencySymbol} {(item.saldo || 0).toLocaleString('es-AR')}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        USD {Math.round(item.saldoUSD || 0).toLocaleString('es-AR')}
-                      </div>
-                    </div>
-                  )
-                }
-              ]}
-              data={[...subcontractAnalysisData].sort((a, b) => a.subcontrato.localeCompare(b.subcontrato))}
-              isLoading={isLoadingSubcontracts}
-              mode="construction"
-              emptyState={
-                <EmptyState
-                  icon={<Calculator className="h-8 w-8" />}
-                  title="No hay subcontratos registrados"
-                  description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
-                />
-              }
-            />
-          ) : (
-            <EmptyState
-              icon={<Calculator className="h-8 w-8" />}
-              title="No hay subcontratos registrados"
-              description="Comienza creando subcontratos en la sección de Construcción para ver el análisis de pagos."
             />
           )
         ) : (
