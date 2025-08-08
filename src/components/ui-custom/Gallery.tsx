@@ -214,20 +214,6 @@ export function Gallery({
               </PopoverTrigger>
               <PopoverContent className="w-64 p-3" align="start">
                 <div className="space-y-3">
-                  {activeFiltersCount > 0 && (
-                    <div className="flex justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="h-6 px-2 text-xs"
-                      >
-                        <X className="w-3 h-3 mr-1" />
-                        Limpiar
-                      </Button>
-                    </div>
-                  )}
-                  
                   {/* Filtro por Tipo de Archivo */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-muted-foreground">Tipo de Archivo</label>
