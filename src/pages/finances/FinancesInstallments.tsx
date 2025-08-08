@@ -968,8 +968,10 @@ export default function FinancesInstallments() {
     title: "Aportes de Terceros",
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    primaryActionLabel: "Nuevo Compromiso",
-    onPrimaryActionClick: handleAddInstallment
+    actionButton: {
+      label: "Nuevo Compromiso",
+      onClick: handleAddInstallment
+    }
   }
 
   if (isLoading) {
