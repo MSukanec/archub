@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Coins, Settings } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Coins } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiRows } from '@/components/ui-custom/ComboBoxMultiRows';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -232,21 +230,7 @@ export default function OrganizationPreferences() {
       }}
     >
       <div className="space-y-6">
-        {/* ActionBar - Desktop Only */}
-        <ActionBarDesktop 
-          title="Preferencias de la Organización"
-          icon={<Settings className="h-5 w-5" />}
-          showProjectSelector={false}
-          showSearch={false}
-          showGrouping={false}
-        />
 
-        {/* FeatureIntroduction - Mobile Only */}
-        <FeatureIntroduction
-          icon={<Coins className="h-5 w-5" />}
-          title="Preferencias de la Organización"
-          features={[]}
-        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Titles and Descriptions */}
