@@ -28,7 +28,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
 
-      console.log('Fetching attendance data for project:', projectId, 'in organization:', organizationId)
+
 
       // Query the new attendees table structure
       const { data: attendanceData, error } = await supabase
@@ -39,18 +39,19 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
             id,
             first_name,
             last_name,
-            contact_type_id,
             organization_id,
-            contact_type:contact_types(
-              id,
-              name
+            contact_type_links(
+              contact_type:contact_types(
+                id,
+                name
+              )
             )
           )
         `)
         .eq('project_id', projectId)
 
       if (error) {
-        console.error('Error fetching attendance data:', error)
+
         return []
       }
 
@@ -59,7 +60,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
         item.contact?.organization_id === organizationId
       )
 
-      console.log('Filtered attendance data:', filteredData.length, 'records')
+
       
       return filteredData
     },
@@ -80,7 +81,7 @@ function useContactTypes() {
         .order('name')
 
       if (error) {
-        console.error('Error fetching contact types:', error)
+
         return []
       }
 
@@ -100,13 +101,14 @@ function transformAttendanceData(attendanceData: any[]) {
     if (attendance.contact) {
       const workerId = attendance.contact.id
       const workerName = `${attendance.contact.first_name || ''} ${attendance.contact.last_name || ''}`.trim()
-      const contactTypeName = attendance.contact.contact_type?.name || 'Sin tipo'
+      const contactTypeName = attendance.contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
+      const contactTypeId = attendance.contact.contact_type_links?.[0]?.contact_type?.id
       
       workersMap.set(workerId, {
         id: workerId,
         name: workerName || 'Sin nombre',
         contactType: contactTypeName,
-        contactTypeId: attendance.contact.contact_type_id
+        contactTypeId: contactTypeId
       })
     }
   })
@@ -206,12 +208,7 @@ export default function ConstructionAttendance() {
     const worker = filteredWorkers.find(w => w.id === workerId);
     if (!worker) return;
 
-    console.log('🔄 Opening attendance modal for editing:', {
-      workerId,
-      workerName: worker.name,
-      date,
-      existingAttendance
-    });
+
 
     // Open the attendance modal with editing data
     openModal('attendance', {
