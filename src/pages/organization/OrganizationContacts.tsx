@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building, MapPin, Globe, Share, ExternalLink } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import React, { useState, useEffect } from 'react'
@@ -655,140 +655,222 @@ function ContactDetailPanel({
   onEdit: () => void, 
   onDelete: () => void 
 }) {
+  const displayName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+  
+  // Funciones de acción
+  const handleCall = () => {
+    if (contact.phone) {
+      window.open(`tel:${contact.phone}`, '_self')
+    }
+  }
+  
+  const handleEmail = () => {
+    if (contact.email) {
+      window.open(`mailto:${contact.email}`, '_self')
+    }
+  }
+  
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: displayName,
+        text: `Información de contacto: ${displayName}`,
+        url: window.location.href
+      })
+    }
+  }
+
   return (
-    <>
-      {/* Header del panel */}
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            {contact.linked_user ? (
-              <Avatar className="w-16 h-16">
-                <AvatarImage src={contact.linked_user.avatar_url} />
-                <AvatarFallback className="text-lg">
-                  {contact.linked_user.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-lg font-medium">
-                {contact.first_name?.charAt(0) || 'C'}
-              </div>
-            )}
-            <div>
-              <h2 className="text-xl font-semibold">
-                {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
-              </h2>
-              {contact.linked_user && (
-                <div className="flex items-center gap-1 mt-1">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-sm text-muted-foreground">Usuario de Archub</span>
-                </div>
-              )}
-              {contact.contact_types && contact.contact_types.length > 0 && (
-                <div className="flex gap-1 mt-2">
-                  {contact.contact_types.map((typeLink: any, index: number) => (
-                    <Badge key={`${typeLink.type_id}-${index}`} variant="secondary" className="text-xs">
-                      {typeLink.contact_type?.name}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+    <div className="h-full overflow-y-auto">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-950/20 p-6 border-b">
+        {/* Botones de acción superiores */}
+        <div className="absolute top-4 right-4 flex gap-2">
+          <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800">
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800">
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Avatar y información principal */}
+        <div className="flex flex-col items-center text-center space-y-4">
+          {contact.linked_user ? (
+            <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
+              <AvatarImage src={contact.linked_user.avatar_url} />
+              <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                {contact.linked_user.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 border-4 border-white shadow-lg flex items-center justify-center text-2xl font-semibold text-white">
+              {contact.first_name?.charAt(0) || 'C'}
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8">
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-
-      {/* Información de contacto */}
-      <CardContent className="flex-1 space-y-6">
-        <div className="space-y-4">
-          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-            Información de Contacto
-          </h3>
+          )}
           
-          <div className="space-y-3">
-            {contact.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <div className="text-sm font-medium">{contact.phone}</div>
-                  <div className="text-xs text-muted-foreground">Teléfono</div>
-                </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {displayName}
+            </h2>
+            
+            {contact.linked_user && (
+              <div className="flex items-center justify-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-gray-600 dark:text-gray-300">Usuario de Archub</span>
               </div>
             )}
             
-            {contact.email && (
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <div className="text-sm font-medium">{contact.email}</div>
-                  <div className="text-xs text-muted-foreground">Email</div>
-                </div>
-              </div>
-            )}
-            
-            {contact.address && (
-              <div className="flex items-center gap-3">
-                <Building className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <div className="text-sm font-medium">{contact.address}</div>
-                  <div className="text-xs text-muted-foreground">Dirección</div>
-                </div>
+            {contact.contact_types && contact.contact_types.length > 0 && (
+              <div className="flex gap-1 justify-center flex-wrap">
+                {contact.contact_types.map((typeLink: any, index: number) => (
+                  <Badge key={`${typeLink.type_id}-${index}`} variant="secondary" className="text-xs">
+                    {typeLink.contact_type?.name}
+                  </Badge>
+                ))}
               </div>
             )}
           </div>
+
+          {/* Botones de acción principales */}
+          <div className="flex gap-2 pt-2">
+            {contact.phone && (
+              <Button onClick={handleCall} size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                <Phone className="w-4 h-4 mr-1" />
+                Llamar
+              </Button>
+            )}
+            {contact.email && (
+              <Button onClick={handleEmail} variant="outline" size="sm">
+                <Mail className="w-4 h-4 mr-1" />
+                Email
+              </Button>
+            )}
+            <Button onClick={handleShare} variant="outline" size="sm">
+              <Share className="w-4 h-4 mr-1" />
+              Compartir
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Información en cards */}
+      <div className="p-6 space-y-6">
+        {/* Grid de información básica - 2x2 */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Email */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium text-sm truncate" title={contact.email || '-'}>
+                  {contact.email || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Teléfono */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Teléfono</p>
+                <p className="font-medium text-sm truncate" title={contact.phone || '-'}>
+                  {contact.phone || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Dirección */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Dirección</p>
+                <p className="font-medium text-sm truncate" title={contact.address || '-'}>
+                  {contact.address || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* País */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">País</p>
+                <p className="font-medium text-sm truncate" title={contact.country || '-'}>
+                  {contact.country || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {contact.notes && (
+        {/* Información adicional */}
+        {(contact.company_name || contact.notes) && (
           <div className="space-y-4">
             <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-              Notas
+              Información Adicional
             </h3>
-            <div className="text-sm text-muted-foreground">
-              {contact.notes}
-            </div>
+            
+            {contact.company_name && (
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <Building className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Empresa</p>
+                    <p className="font-medium text-sm">{contact.company_name}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {contact.notes && (
+              <Card className="p-4">
+                <h4 className="font-medium text-sm mb-2">Notas</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {contact.notes}
+                </p>
+              </Card>
+            )}
           </div>
         )}
 
+        {/* Metadata */}
         <div className="space-y-4">
           <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-            Información Adicional
+            Información del Sistema
           </h3>
           
           <div className="grid grid-cols-1 gap-3 text-xs">
-            <div className="flex justify-between">
+            <div className="flex justify-between py-2 border-b border-border">
               <span className="text-muted-foreground">Creado:</span>
-              <span>{format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}</span>
+              <span>{format(new Date(contact.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
             </div>
             {contact.updated_at !== contact.created_at && (
-              <div className="flex justify-between">
+              <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Actualizado:</span>
-                <span>{format(new Date(contact.updated_at), 'dd/MM/yyyy', { locale: es })}</span>
+                <span>{format(new Date(contact.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer con acciones */}
-        <div className="pt-4 border-t border-border">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1">
-              <Share2 className="w-4 h-4 mr-2" />
-              Compartir
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1">
-              <Send className="w-4 h-4 mr-2" />
-              Mensaje
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }
