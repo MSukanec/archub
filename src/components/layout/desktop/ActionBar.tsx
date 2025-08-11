@@ -24,20 +24,38 @@ interface ActionConfig {
 
 interface ActionBarProps {
   // Configuración de filtros - completamente flexible
-  filters: FilterConfig[];
+  filters?: FilterConfig[];
   
   // Configuración de acciones - completamente flexible  
-  actions: ActionConfig[];
+  actions?: ActionConfig[];
   
   // Opcional: restricciones personalizadas
   customRestricted?: ReactNode;
+  
+  // Opcional: children para contenido personalizado
+  children?: ReactNode;
 }
 
 export const ActionBar: React.FC<ActionBarProps> = ({
   filters = [],
   actions = [],
-  customRestricted
+  customRestricted,
+  children
 }) => {
+  // Si hay children, usar layout simple sin configuración
+  if (children) {
+    return (
+      <div 
+        className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"
+        style={{ backgroundColor: "var(--card-bg)" }}
+      >
+        <div className="flex items-center justify-between px-4 py-3">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"

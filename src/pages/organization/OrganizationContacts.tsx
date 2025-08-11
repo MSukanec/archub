@@ -465,76 +465,78 @@ export default function OrganizationContacts() {
       <div className="grid grid-cols-12 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-7 space-y-4">
-          {/* Botones ghost simples */}
-          <div className="flex items-center gap-2 mb-6">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2"
-              onClick={() => setShowSearch(!showSearch)}
-            >
-              <Search className="h-4 w-4" />
-              Buscar
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filtros
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[200px]">
-                <div className="space-y-3 p-3">
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Ordenar</Label>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Ordenar por..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                        <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Tipo</Label>
-                    <Select value={filterByType} onValueChange={setFilterByType}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Filtrar por tipo..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos los tipos</SelectItem>
-                        {contactTypes?.map((type) => (
-                          <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {(sortBy !== 'name_asc' || filterByType !== 'all' || searchValue || showSearch) && (
-              <Button
-                variant="ghost"
-                size="sm"
+          {/* ActionBar con botones ghost simples */}
+          <ActionBar>
+            <div className="flex items-center gap-2 w-full">
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 className="gap-2"
-                onClick={() => {
-                  setSearchValue("");
-                  setSortBy('name_asc');
-                  setFilterByType('all');
-                  setShowSearch(false);
-                }}
+                onClick={() => setShowSearch(!showSearch)}
               >
-                <X className="h-4 w-4" />
-                Limpiar
+                <Search className="h-4 w-4" />
+                Buscar
               </Button>
-            )}
-          </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filtros
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-[200px]">
+                  <div className="space-y-3 p-3">
+                    <div>
+                      <Label className="text-xs font-medium mb-2 block">Ordenar</Label>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Ordenar por..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                          <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium mb-2 block">Tipo</Label>
+                      <Select value={filterByType} onValueChange={setFilterByType}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Filtrar por tipo..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los tipos</SelectItem>
+                          {contactTypes?.map((type) => (
+                            <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {(sortBy !== 'name_asc' || filterByType !== 'all' || searchValue || showSearch) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    setSearchValue("");
+                    setSortBy('name_asc');
+                    setFilterByType('all');
+                    setShowSearch(false);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                  Limpiar
+                </Button>
+              )}
+            </div>
+          </ActionBar>
           
           {/* Campo de búsqueda expandible */}
           {showSearch && (
