@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
 import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/ImageLightbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -180,8 +180,7 @@ export default function ConstructionLogs() {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [publicOnly, setPublicOnly] = useState(false);
   const { openModal } = useGlobalModalStore();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [siteLogToDelete, setSiteLogToDelete] = useState<any>(null);
+
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
   const [activeTab, setActiveTab] = useState("bitacoras");
@@ -261,8 +260,6 @@ export default function ConstructionLogs() {
         title: "Entrada eliminada",
         description: "La entrada de bitácora ha sido eliminada correctamente",
       });
-      setDeleteDialogOpen(false);
-      setSiteLogToDelete(null);
     },
     onError: (error) => {
 
@@ -312,8 +309,14 @@ export default function ConstructionLogs() {
   };
 
   const handleDeleteSiteLog = (siteLog: any) => {
-    setSiteLogToDelete(siteLog);
-    setDeleteDialogOpen(true);
+    openModal('delete-confirmation', {
+      mode: 'simple',
+      title: 'Eliminar entrada de bitácora',
+      description: '¿Estás seguro de que quieres eliminar esta entrada de bitácora? Esta acción no se puede deshacer.',
+      destructiveActionText: 'Eliminar entrada',
+      onConfirm: () => deleteSiteLogMutation.mutate(siteLog.id),
+      isLoading: deleteSiteLogMutation.isPending
+    });
   };
 
   // Header tabs configuration
@@ -481,8 +484,7 @@ export default function ConstructionLogs() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteDialogOpen(true);
-                            setSiteLogToDelete(siteLog);
+                            handleDeleteSiteLog(siteLog);
                           }}
                           className="h-8 w-8 p-0 hover:bg-transparent group"
                         >
@@ -673,26 +675,7 @@ export default function ConstructionLogs() {
         </>
       )}
 
-      {/* Diálogo de confirmación para eliminar */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar entrada de bitácora?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente esta entrada de la bitácora.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => siteLogToDelete && deleteSiteLogMutation.mutate(siteLogToDelete.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
 
       {/* Image Lightbox */}
       <ImageLightbox
