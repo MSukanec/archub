@@ -2213,7 +2213,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const editPanel = (
     <div className="space-y-4">
       {/* Campos centralizados: Fecha y Tipo de Movimiento */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="space-y-4">
         {/* Fecha */}
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -2350,44 +2350,46 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               </Select>
             )}
             
-            {/* Select de Subcategoría */}
-            {selectedCategoryId && (
-              <Select 
-                value={selectedSubcategoryId} 
-                onValueChange={(value) => {
-                  console.log('🎯 Subcategory selected:', value)
-                  setSelectedSubcategoryId(value)
-                  
-                  // Actualizar formularios
-                  form.setValue('subcategory_id', value)
-                  
-                  const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
-                  allForms.forEach(specialForm => {
-                    specialForm.setValue('subcategory_id', value)
-                  })
-                  
-                  // Detectar subcontratos por UUID específico
-                  if (value === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
-                    setMovementType('subcontratos')
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar subcategoría..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {(() => {
-                    const selectedType = organizationConcepts?.find(concept => concept.id === selectedTypeId)
-                    const selectedCategory = selectedType?.children?.find((cat: any) => cat.id === selectedCategoryId)
-                    return selectedCategory?.children?.map((subcategory: any) => (
+            {/* Select de Subcategoría - Solo mostrar si la categoría tiene hijos */}
+            {selectedCategoryId && (() => {
+              const selectedType = organizationConcepts?.find(concept => concept.id === selectedTypeId)
+              const selectedCategory = selectedType?.children?.find((cat: any) => cat.id === selectedCategoryId)
+              const hasSubcategories = selectedCategory?.children && selectedCategory.children.length > 0
+              
+              return hasSubcategories ? (
+                <Select 
+                  value={selectedSubcategoryId} 
+                  onValueChange={(value) => {
+                    console.log('🎯 Subcategory selected:', value)
+                    setSelectedSubcategoryId(value)
+                    
+                    // Actualizar formularios
+                    form.setValue('subcategory_id', value)
+                    
+                    const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
+                    allForms.forEach(specialForm => {
+                      specialForm.setValue('subcategory_id', value)
+                    })
+                    
+                    // Detectar subcontratos por UUID específico
+                    if (value === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+                      setMovementType('subcontratos')
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar subcategoría..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedCategory.children.map((subcategory: any) => (
                       <SelectItem key={subcategory.id} value={subcategory.id}>
                         {subcategory.name}
                       </SelectItem>
-                    )) || []
-                  })()}
-                </SelectContent>
-              </Select>
-            )}
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null
+            })()}
           </div>
         </div>
       </div>
