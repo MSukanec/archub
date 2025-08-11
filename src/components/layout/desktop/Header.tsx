@@ -39,7 +39,7 @@ interface Tab {
   restrictionReason?: string;
 }
 
-interface HeaderDesktopProps {
+interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
   showSearch?: boolean;
@@ -69,7 +69,7 @@ interface HeaderDesktopProps {
   breadcrumb?: { name: string; href: string }[];
 }
 
-export function HeaderDesktop({
+export function Header({
   icon,
   title,
   showSearch = false,
@@ -84,7 +84,7 @@ export function HeaderDesktop({
   onTabChange,
   actionButton,
   breadcrumb,
-}: HeaderDesktopProps = {}) {
+}: HeaderProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
 
@@ -108,7 +108,7 @@ export function HeaderDesktop({
       if (!supabase || !userData?.user?.id || !userData?.organization?.id)
         return;
 
-      console.log("🔧 HeaderDesktop: Updating project", {
+      console.log("🔧 Header: Updating project", {
         projectId,
         organizationId: userData.organization.id,
       });
@@ -126,7 +126,7 @@ export function HeaderDesktop({
         );
 
       if (error) {
-        console.error("🔧 HeaderDesktop: Error updating project", error);
+        console.error("🔧 Header: Error updating project", error);
         // Fallback to localStorage
         localStorage.setItem(
           `last-project-${userData.organization.id}`,
@@ -137,7 +137,7 @@ export function HeaderDesktop({
       return projectId;
     },
     onSuccess: (projectId) => {
-      console.log("🔧 HeaderDesktop: Project updated successfully", projectId);
+      console.log("🔧 Header: Project updated successfully", projectId);
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
       queryClient.invalidateQueries({
         queryKey: ["user-organization-preferences"],

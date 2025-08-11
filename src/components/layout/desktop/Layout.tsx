@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { SidebarSubmenu } from "./SidebarSubmenu";
-import { HeaderDesktop } from "./HeaderDesktop";
+import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -93,7 +93,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Header Desktop - Hidden on mobile */}
       <div className="hidden md:block">
-        <HeaderDesktop {...headerProps} />
+        <Header {...headerProps} />
       </div>
 
       <main

@@ -9,7 +9,7 @@ import { Plus, FileCode, Edit, Copy, Trash2, Search, Settings, Eye } from 'lucid
 import { Table } from '@/components/ui-custom/Table'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { HeaderDesktop } from '@/components/layout/desktop/HeaderDesktop'
+import { Header } from '@/components/layout/desktop/Header'
 
 type TabType = 'Lista' | 'Editor'
 
