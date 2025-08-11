@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 const budgetSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -71,16 +71,18 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
     setPanel('edit');
   }, [budget, form, setPanel]);
 
+  const { selectedProjectId } = useNavigationStore()
+
   const createBudgetMutation = useMutation({
     mutationFn: async (data: BudgetFormData) => {
-      if (!supabase || !userData?.organization?.id || !userData?.organization_preferences?.last_project_id) {
+      if (!userData?.organization?.id || !selectedProjectId) {
         throw new Error('Missing required data');
       }
 
       const budgetData = {
         name: data.name,
         description: data.description || null,
-        project_id: userData.organization_preferences.last_project_id,
+        project_id: selectedProjectId,
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),
@@ -88,24 +90,35 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       };
 
       if (isEditing && budget) {
-        const { data: result, error } = await supabase
-          .from('budgets')
-          .update(budgetData)
-          .eq('id', budget.id)
-          .select()
-          .single();
+        // Use server endpoint for updating
+        const response = await fetch(`/api/budgets/${budget.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(budgetData),
+        })
 
-        if (error) throw error;
-        return result;
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        return await response.json()
       } else {
-        const { data: result, error } = await supabase
-          .from('budgets')
-          .insert(budgetData)
-          .select()
-          .single();
+        // Use server endpoint for creating
+        const response = await fetch('/api/budgets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(budgetData),
+        })
 
-        if (error) throw error;
-        return result;
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        return await response.json()
       }
     },
     onSuccess: (result) => {
