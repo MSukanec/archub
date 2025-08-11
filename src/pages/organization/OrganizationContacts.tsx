@@ -462,7 +462,7 @@ export default function OrganizationContacts() {
         } : undefined
       }}
     >
-      <div className="grid grid-cols-2 gap-6 h-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-1 space-y-4 overflow-hidden">
           {/* ActionBar con botones ghost simples */}
@@ -608,8 +608,8 @@ export default function OrganizationContacts() {
           </div>
         </div>
 
-        {/* Columna derecha - Detalles del contacto */}
-        <div className="col-span-1">
+        {/* Columna derecha - Detalles del contacto - Solo visible en desktop */}
+        <div className="col-span-1 hidden md:block">
           <Card className="h-full">
             {selectedContact ? (
               <ContactDetailPanel 
