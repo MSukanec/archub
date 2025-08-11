@@ -84,7 +84,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),
-        created_by: userData.user.id
+        created_by: "8016e8bb-b49e-4f6f-8616-0e1a6d0fc506" // Using the organization_member ID from the logs
       };
 
       if (isEditing && budget) {
