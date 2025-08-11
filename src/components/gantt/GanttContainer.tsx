@@ -661,35 +661,7 @@ export function GanttContainer({
                       })()}
                     </div>
                     
-                    {/* Botones de acción flotantes para fases header */}
-                    {item.type === 'phase' && (onItemEdit || onItemDelete) && hoveredRowId === item.id && (
-                      <div className="absolute right-[152px] top-1/2 transform -translate-y-1/2 flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded shadow-md px-1 py-1 opacity-100 transition-opacity z-50">
-                        {onItemEdit && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onItemEdit(item);
-                            }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                            title="Editar fase"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </button>
-                        )}
-                        {onItemDelete && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onItemDelete(item);
-                            }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
-                            title="Eliminar fase"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    {/* Las fases header NO deben tener botones de acción */}
                   </div>
                 ) : (
                   <div className="group w-full h-full flex cursor-pointer transition-colors relative"
@@ -731,9 +703,9 @@ export function GanttContainer({
                     
                     {/* Columna Cantidad - 75px fijo */}
                     <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
-                      {item.type === 'task' && item.taskData?.quantity && item.taskData?.unit_name && (
+                      {item.type === 'task' && item.quantity && (
                         <span className="text-xs text-[var(--table-row-fg)]">
-                          {item.taskData.quantity} {item.taskData.unit_name}
+                          {item.quantity}
                         </span>
                       )}
                     </div>
