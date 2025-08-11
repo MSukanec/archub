@@ -195,7 +195,15 @@ export default function ConstructionSchedule() {
             <GanttContainer
               data={ganttData}
               dependencies={dependencies}
-              onItemEdit={(item) => openModal('construction-task-schedule', { taskId: item.id })}
+              onItemEdit={(item) => {
+                const task = filteredTasks.find(t => t.id === item.id)
+                if (task) {
+                  openModal('construction-task-form', { 
+                    constructionTask: task,
+                    mode: 'edit'
+                  })
+                }
+              }}
               onItemDelete={(item) => {
                 const task = filteredTasks.find(t => t.id === item.id)
                 showDeleteConfirmation({
