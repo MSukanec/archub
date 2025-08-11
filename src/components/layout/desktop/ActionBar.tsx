@@ -22,7 +22,7 @@ interface ActionConfig {
   enabled?: boolean;
 }
 
-interface ActionBarDesktopRowProps {
+interface ActionBarProps {
   // Configuración de filtros - completamente flexible
   filters: FilterConfig[];
   
@@ -33,7 +33,7 @@ interface ActionBarDesktopRowProps {
   customRestricted?: ReactNode;
 }
 
-export const ActionBarDesktopRow: React.FC<ActionBarDesktopRowProps> = ({
+export const ActionBar: React.FC<ActionBarProps> = ({
   filters = [],
   actions = [],
   customRestricted

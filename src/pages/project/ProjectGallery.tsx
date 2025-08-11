@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Gallery } from '@/components/ui-custom/Gallery';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+import { ActionBar } from '@/components/layout/desktop/ActionBar';
 import { Images, Plus } from 'lucide-react';
 
 // Gallery file interface

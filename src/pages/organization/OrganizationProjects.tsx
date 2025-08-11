@@ -25,7 +25,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectItem from '@/components/cards/ProjectItem'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+import { ActionBar } from '@/components/layout/desktop/ActionBar'
 
 
 
@@ -311,8 +311,8 @@ export default function OrganizationProjects() {
         {/* Mostrar contenido solo si hay proyectos */}
         {filteredProjects.length > 0 ? (
           <>
-            {/* ActionBarDesktopRow - Show only when there are projects */}
-            <ActionBarDesktopRow 
+            {/* ActionBar - Show only when there are projects */}
+            <ActionBar 
               filters={[]}
               actions={[
                 {

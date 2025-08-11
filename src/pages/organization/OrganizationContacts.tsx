@@ -23,7 +23,7 @@ import ContactCard from '@/components/cards/mobile/ContactCard'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
+import { ActionBar } from '@/components/layout/desktop/ActionBar'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'

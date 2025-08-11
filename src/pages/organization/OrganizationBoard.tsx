@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+import { ActionBar } from '@/components/layout/desktop/ActionBar';
 
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
@@ -250,7 +250,7 @@ function BoardContent() {
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* ActionBar Desktop - Solo selector de tableros */}
-      <ActionBarDesktopRow
+      <ActionBar
         filters={[
           {
             key: 'board',
