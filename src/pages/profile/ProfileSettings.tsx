@@ -1,5 +1,5 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
@@ -107,32 +107,6 @@ export default function ProfileSettings() {
 
   return (
     <Layout headerProps={headerProps}>
-      {/* ActionBar */}
-      <ActionBarDesktop
-        title="Preferencias"
-        icon={<Settings className="h-5 w-5" />}
-        showProjectSelector={false}
-        showSearch={false}
-        showGrouping={false}
-        features={[
-          {
-            icon: <Palette className="h-4 w-4" />,
-            title: "Tema Visual",
-            description: "Personaliza la apariencia de tu aplicación cambiando entre tema claro y oscuro según tu preferencia."
-          },
-          {
-            icon: <Monitor className="h-4 w-4" />, 
-            title: "Sidebar y Navegación",
-            description: "Configura el comportamiento de la barra lateral para mantenerla fija o permitir que se oculte automáticamente."
-          },
-
-          {
-            icon: <Shield className="h-4 w-4" />,
-            title: "Configuración Avanzada",
-            description: "Accede a opciones avanzadas de configuración y personalización de tu experiencia de usuario."
-          }
-        ]}
-      />
 
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}

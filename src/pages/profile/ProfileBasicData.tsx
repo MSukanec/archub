@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, UserCircle, Shield } from 'lucide-react'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -205,36 +205,6 @@ export default function ProfileBasicData() {
 
   return (
     <Layout headerProps={headerProps}>
-      {/* ActionBar */}
-      <ActionBarDesktop
-        title="Mi Perfil"
-        icon={<UserCircle className="h-5 w-5" />}
-        showProjectSelector={false}
-        showSearch={false}
-        showGrouping={false}
-        features={[
-          {
-            icon: <User className="h-4 w-4" />,
-            title: "Información Personal",
-            description: "Administra tu información personal básica como nombre, apellido, país de origen y fecha de nacimiento."
-          },
-          {
-            icon: <Camera className="h-4 w-4" />,
-            title: "Avatar y Personalización", 
-            description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
-          },
-          {
-            icon: <Shield className="h-4 w-4" />,
-            title: "Modo de Uso y Seguridad",
-            description: "Define tu perfil profesional y gestiona la seguridad de tu cuenta con opciones de cierre de sesión."
-          },
-          {
-            icon: <Settings className="h-4 w-4" />,
-            title: "Configuración de Cuenta",
-            description: "Accede a preferencias avanzadas y gestiona la configuración de tu cuenta de usuario."
-          }
-        ]}
-      />
       
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Feature Introduction */}

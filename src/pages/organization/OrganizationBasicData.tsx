@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
+
 import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -283,17 +283,6 @@ export default function OrganizationBasicData() {
       }}
     >
       <div className="space-y-6">
-        {/* ActionBar - Desktop Only */}
-        <ActionBarDesktop 
-          title="Datos Básicos"
-          icon={<Building2 className="h-5 w-5" />}
-          showProjectSelector={false}
-          showSearch={false}
-          showGrouping={false}
-        />
-
-
-
         {/* Logo Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Logo Description */}

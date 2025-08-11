@@ -1,5 +1,5 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -431,36 +431,6 @@ export default function OrganizationManagement() {
 
   return (
     <Layout headerProps={headerProps}>
-      {/* ActionBar */}
-      <ActionBarDesktop
-        title="Gestión de Organizaciones"
-        icon={<Building className="h-5 w-5" />}
-        showProjectSelector={false}
-        showSearch={false}
-        showGrouping={false}
-        features={[
-          {
-            icon: <Settings className="h-4 w-4" />,
-            title: "Administración de Organizaciones",
-            description: "Crea, edita y gestiona las organizaciones de las que formas parte, incluyendo configuración de roles y permisos."
-          },
-          {
-            icon: <Users className="h-4 w-4" />,
-            title: "Gestión de Miembros",
-            description: "Administra los miembros de cada organización, invita nuevos colaboradores y gestiona sus roles y permisos."
-          },
-          {
-            icon: <Crown className="h-4 w-4" />,
-            title: "Planes y Suscripciones",
-            description: "Visualiza y gestiona los planes de suscripción de tus organizaciones con diferentes niveles de funcionalidad."
-          },
-          {
-            icon: <BarChart3 className="h-4 w-4" />,
-            title: "Estadísticas y Análisis",
-            description: "Accede a métricas detalladas sobre el uso y rendimiento de cada organización en la plataforma."
-          }
-        ]}
-      />
 
       <div className="space-y-6">
         {/* Plan Card con color del plan actual */}

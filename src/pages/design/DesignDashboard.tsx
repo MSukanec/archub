@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Palette } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+
 import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function DesignDashboard() {
@@ -23,15 +23,14 @@ export default function DesignDashboard() {
     }
   ]
 
+  const headerProps = {
+    title: "Resumen de Diseño",
+    icon: Palette,
+  }
+
   return (
-    <Layout wide>
+    <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktop
-          title="Resumen de Diseño"
-          icon={<Palette className="h-5 w-5" />}
-          features={features}
-        />
 
         {/* Feature Introduction - Mobile only */}
         <FeatureIntroduction
