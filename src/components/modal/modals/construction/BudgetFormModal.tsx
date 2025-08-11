@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 // Removed navigationStore import - using userData.preferences.last_project_id instead;
@@ -38,6 +39,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const { budget, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
+  const { data: members } = useOrganizationMembers(userData?.organization?.id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!budget;
@@ -77,19 +79,11 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         throw new Error('Missing required data');
       }
 
-      // Get the correct organization member ID
-      const memberResponse = await fetch('/api/user/organization-member', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!memberResponse.ok) {
-        throw new Error('Failed to get organization member ID')
+      // Find current member ID from organization members
+      const currentMember = members?.find(member => member.user_id === userData.user.id)
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización')
       }
-
-      const memberData = await memberResponse.json()
 
       const budgetData = {
         name: data.name,
@@ -98,7 +92,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),
-        created_by: memberData.id
+        created_by: currentMember.id
       };
 
       if (isEditing && budget) {
