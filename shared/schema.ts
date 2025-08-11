@@ -320,14 +320,7 @@ export const movement_subcontracts = pgTable("movement_subcontracts", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Movement Third Party Contributions Junction Table
-export const movement_third_party_contributions = pgTable("movement_third_party_contributions", {
-  movement_id: uuid("movement_id").notNull(),
-  third_party_id: uuid("third_party_id").notNull(),
-  receipt_number: text("receipt_number"),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
+
 
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
   id: true,
@@ -360,10 +353,7 @@ export const insertMovementSubcontractSchema = createInsertSchema(movement_subco
   created_at: true,
 });
 
-export const insertMovementThirdPartyContributionSchema = createInsertSchema(movement_third_party_contributions).omit({
-  created_at: true,
-  updated_at: true,
-});
+
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
@@ -391,8 +381,7 @@ export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
 export type MovementSubcontract = typeof movement_subcontracts.$inferSelect;
 export type InsertMovementSubcontract = z.infer<typeof insertMovementSubcontractSchema>;
-export type MovementThirdPartyContribution = typeof movement_third_party_contributions.$inferSelect;
-export type InsertMovementThirdPartyContribution = z.infer<typeof insertMovementThirdPartyContributionSchema>;
+
 
 // Subcontracts tables
 export const subcontracts = pgTable("subcontracts", {
