@@ -1,25 +1,14 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState, useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useEffect } from 'react'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
-
-import { Users, Download, Calendar, CalendarDays, Clock, BarChart3, Filter, X, Plus } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { format } from 'date-fns'
-import { useLocation } from 'wouter'
-
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { Users, Plus } from 'lucide-react'
+import { format } from 'date-fns'
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -68,28 +57,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
   })
 }
 
-// Hook to fetch contact types for filtering
-function useContactTypes() {
-  return useQuery({
-    queryKey: ['contact-types'],
-    queryFn: async () => {
-      if (!supabase) return []
 
-      const { data: contactTypes, error } = await supabase
-        .from('contact_types')
-        .select('*')
-        .order('name')
-
-      if (error) {
-
-        return []
-      }
-
-      return contactTypes || []
-    },
-    enabled: !!supabase
-  })
-}
 
 // Transform attendance data for gradebook display
 function transformAttendanceData(attendanceData: any[]) {
@@ -142,18 +110,12 @@ function transformAttendanceData(attendanceData: any[]) {
 }
 
 export default function ConstructionAttendance() {
-  const [searchValue, setSearchValue] = useState("")
-  const [selectedContactType, setSelectedContactType] = useState<string>("")
-  const [triggerTodayCenter, setTriggerTodayCenter] = useState(false)
   const { openModal } = useGlobalModalStore()
-
-  const [location, navigate] = useLocation()
   const { data: userData } = useCurrentUser()
   const { data: attendanceData = [], isLoading } = useAttendanceData(
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
-  const { data: contactTypes = [] } = useContactTypes()
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -162,53 +124,14 @@ export default function ConstructionAttendance() {
   }, [])
 
   const { workers, attendance } = useMemo(() => {
-    return transformAttendanceData(attendanceData) // Remove contact type filter from here
+    return transformAttendanceData(attendanceData)
   }, [attendanceData])
-
-  // Filter workers based on search AND contact type
-  const filteredWorkers = useMemo(() => {
-    let filtered = workers
-    
-    // Filter by contact type
-    if (selectedContactType) {
-      filtered = filtered.filter(worker => worker.contactTypeId === selectedContactType)
-    }
-    
-    // Filter by search
-    if (searchValue.trim()) {
-      filtered = filtered.filter(worker => 
-        worker.name.toLowerCase().includes(searchValue.toLowerCase())
-      )
-    }
-    
-    return filtered
-  }, [workers, searchValue, selectedContactType])
-
-  // Filter attendance data for filtered workers
-  const filteredAttendance = useMemo(() => {
-    const filteredWorkerIds = new Set(filteredWorkers.map(w => w.id))
-    return attendance.filter(record => filteredWorkerIds.has(record.workerId))
-  }, [attendance, filteredWorkers])
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    setSearchValue("")
-    setSelectedContactType("")
-  }
-
-  // Navigate to today - centers view on today in gradebook
-  const handleTodayClick = () => {
-    // Toggle the trigger to force re-center on today
-    setTriggerTodayCenter(prev => !prev)
-  }
 
   // Handle editing attendance - opens modal with existing data
   const handleEditAttendance = (workerId: string, date: Date, existingAttendance?: any) => {
     // Find the worker details
-    const worker = filteredWorkers.find(w => w.id === workerId);
+    const worker = workers.find(w => w.id === workerId);
     if (!worker) return;
-
-
 
     // Open the attendance modal with editing data
     openModal('attendance', {
@@ -221,25 +144,6 @@ export default function ConstructionAttendance() {
       }
     });
   }
-
-
-
-  // Custom filters for ActionBar - Only contact type filter
-  const customFilters = (
-    <Select value={selectedContactType} onValueChange={setSelectedContactType}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Todos los tipos" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="">Todos los tipos</SelectItem>
-        {contactTypes.map(type => (
-          <SelectItem key={type.id} value={type.id}>
-            {type.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
 
   const headerProps = {
     icon: Users,
@@ -263,51 +167,19 @@ export default function ConstructionAttendance() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      {/* Feature Introduction */}
-      <FeatureIntroduction
-          title="Control de Asistencia de Personal"
-          icon={<Users className="w-6 h-6" />}
-          features={[
-            {
-              icon: <Calendar className="w-5 h-5" />,
-              title: "Registro Visual de Asistencia",
-              description: "Visualiza la asistencia del personal en formato de calendario con datos extraídos automáticamente de las entradas de bitácora del proyecto."
-            },
-            {
-              icon: <Filter className="w-5 h-5" />,
-              title: "Filtros por Tipo de Trabajador",
-              description: "Filtra la vista por tipos de personal (obreros, supervisores, técnicos) para análisis específicos por categoría profesional."
-            },
-            {
-              icon: <BarChart3 className="w-5 h-5" />,
-              title: "Estadísticas de Productividad",
-              description: "Revisa métricas de jornadas completas vs medias jornadas, días activos y tasas de asistencia para optimizar la gestión del equipo."
-            },
-            {
-              icon: <Clock className="w-5 h-5" />,
-              title: "Control de Períodos Flexibles",
-              description: "Configura rangos de fechas personalizados y oculta fines de semana para adaptar la vista a tu calendario de trabajo específico."
-            }
-          ]}
+      {workers.length > 0 ? (
+        <CustomGradebook 
+          workers={workers}
+          attendance={attendance}
+          onEditAttendance={handleEditAttendance}
         />
-
-
-
-        {/* Gradebook Component - Show always if there's original data, even if filtered workers is empty */}
-        {workers.length > 0 ? (
-          <CustomGradebook 
-            workers={filteredWorkers}
-            attendance={filteredAttendance}
-            triggerTodayCenter={triggerTodayCenter}
-            onEditAttendance={handleEditAttendance}
-          />
-        ) : (
-          <EmptyState
-            icon={<Users className="h-12 w-12" />}
-            title="Sin personal registrado"
-            description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-          />
-        )}
+      ) : (
+        <EmptyState
+          icon={<Users className="h-12 w-12" />}
+          title="Sin personal registrado"
+          description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+        />
+      )}
     </Layout>
   )
 }
