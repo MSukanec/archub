@@ -258,7 +258,7 @@ export function Header({
 
   return (
     <div
-      className={`fixed top-0 right-0 z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
+      className={`fixed top-0 right-0 z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--card-bg)] transition-all duration-300 ${
         // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
         isSecondaryExpanded
           ? "left-[304px]" // 40px main + 264px secondary
