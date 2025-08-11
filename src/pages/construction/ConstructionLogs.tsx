@@ -20,8 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
-import { FeatureIntroduction } from "@/components/ui-custom/FeatureIntroduction";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -32,7 +30,6 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useMobile } from "@/hooks/use-mobile";
-import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
 import SiteLogCard from "@/components/cards/SiteLogCard";
 
 // Entry types enum with their icons and labels
@@ -194,7 +191,6 @@ export default function ConstructionLogs() {
   const [activeTab, setActiveTab] = useState("bitacoras");
   
   const isMobile = useMobile();
-  const { setActions, setShowActionBar } = useMobileActionBar();
 
   const { data: userData, isLoading } = useCurrentUser();
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
@@ -223,51 +219,6 @@ export default function ConstructionLogs() {
       setExpandedLogId(siteLogs[0].id);
     }
   }, [siteLogs, expandedLogId]);
-
-  // Configure Mobile Action Bar
-  useEffect(() => {
-    if (isMobile) {
-      setActions({
-        slot2: {
-          id: 'search',
-          icon: <Search className="h-5 w-5" />,
-          label: 'Buscar',
-          onClick: () => {
-            // Focus search in header (if visible) or show search modal
-          }
-        },
-        slot3: {
-          id: 'create-log',
-          icon: <Plus className="h-6 w-6" />,
-          label: 'Nueva Bitácora',
-          onClick: () => openModal('site-log')
-        },
-        slot4: {
-          id: 'filters',
-          icon: <Filter className="h-5 w-5" />,
-          label: 'Filtros',
-          onClick: () => {
-            // Toggle filter panel or show filter modal
-          }
-        },
-        slot5: {
-          id: 'clear-filters',
-          icon: <X className="h-5 w-5" />,
-          label: 'Limpiar',
-          onClick: clearFilters
-        }
-      });
-      setShowActionBar(true);
-    } else {
-      setShowActionBar(false);
-    }
-
-    return () => {
-      if (isMobile) {
-        setShowActionBar(false);
-      }
-    };
-  }, [isMobile, setActions, setShowActionBar]);
 
   // Filtrar bitácoras según los criterios
   let filteredSiteLogs = siteLogs?.filter((log: any) => {
@@ -369,18 +320,6 @@ export default function ConstructionLogs() {
     setDeleteDialogOpen(true);
   };
 
-
-
-  const clearFilters = () => {
-    setSearchValue("");
-    setSortBy("date_recent");
-    setFilterByType("all");
-    setFavoritesOnly(false);
-    setPublicOnly(false);
-  };
-
-
-
   // Header tabs configuration
   const headerTabs = [
     {
@@ -420,36 +359,6 @@ export default function ConstructionLogs() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-      {/* Feature Introduction - Mobile only */}
-      <FeatureIntroduction
-        title="Bitácora de Construcción"
-        icon={<FileText className="w-6 h-6" />}
-        features={[
-          {
-            icon: <StickyNote className="w-5 h-5" />,
-            title: "Registro Diario Completo",
-            description: "Documenta avances de obra, visitas técnicas, problemas detectados, pedidos de material y notas climáticas con clasificación automática por tipo de entrada."
-          },
-          {
-            icon: <Camera className="w-5 h-5" />,
-            title: "Documentación Visual",
-            description: "Adjunta fotos y videos directamente a cada entrada para crear un registro visual completo del progreso y evidenciar cada etapa del proyecto."
-          },
-          {
-            icon: <Settings className="w-5 h-5" />,
-            title: "Control de Privacidad",
-            description: "Gestiona visibilidad de entradas (públicas/privadas), marca favoritos importantes y configura qué información es accesible para cada miembro del equipo."
-          },
-          {
-            icon: <Clock className="w-5 h-5" />,
-            title: "Seguimiento Temporal",
-            description: "Filtra entradas por fecha, tipo y estado para revisar cronológicamente el desarrollo del proyecto y generar reportes de progreso periódicos."
-          }
-        ]}
-      />
-
-
-
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
           icon={<FileText className="w-12 h-12 text-muted-foreground" />}
@@ -767,8 +676,6 @@ export default function ConstructionLogs() {
           </div>
         </>
       )}
-
-
 
       {/* Diálogo de confirmación para eliminar */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
