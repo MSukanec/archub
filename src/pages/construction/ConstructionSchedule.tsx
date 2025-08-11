@@ -2,20 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Clock, Activity, CheckSquare, BarChart3, TableIcon, Edit, Trash2 } from 'lucide-react'
+import { Calendar, Edit, Trash2, BarChart3, CheckSquare } from 'lucide-react'
 import { Plus } from 'lucide-react'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Table } from '@/components/ui-custom/Table'
-import ProgressCurve from '@/components/charts/gantt/ProgressCurve'
-import BurndownChart from '@/components/charts/gantt/BurndownChart'
-import WorkloadOverTime from '@/components/charts/gantt/WorkloadOverTime'
-import TasksByPhase from '@/components/charts/gantt/TasksByPhase'
-import DurationByRubro from '@/components/charts/gantt/DurationByRubro'
-import StatusBreakdown from '@/components/charts/gantt/StatusBreakdown'
-import CriticalPathDistribution from '@/components/charts/gantt/CriticalPathDistribution'
-import WeeklyProgressHeatmap from '@/components/charts/gantt/WeeklyProgressHeatmap'
-import DependencyNetwork from '@/components/charts/gantt/DependencyNetwork'
+
 import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
@@ -27,7 +19,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
-import { generateTaskDescription } from '@/utils/taskDescriptionGenerator'
+
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
@@ -76,18 +68,6 @@ export default function ConstructionSchedule() {
 
   // Usar todas las tareas sin filtro de búsqueda
   const filteredTasks = tasks
-
-  // Funciones memoizadas para evitar re-renderizados
-  const getRubroName = useMemo(() => (taskId: string) => {
-    const task = filteredTasks.find(t => t.id === taskId)
-    return task?.category_name || 'Sin rubro'
-  }, [filteredTasks])
-
-  const getUnitName = useMemo(() => (unitId: string | null) => {
-    if (!unitId) return 'Sin unidad'
-    const taskWithUnit = filteredTasks.find(t => t.unit_name)
-    return taskWithUnit?.unit_name || 'Sin unidad'
-  }, [filteredTasks])
 
   // Crear estructura Gantt simplificada con las tareas de la vista
   const ganttData = useMemo(() => {
@@ -201,36 +181,6 @@ export default function ConstructionSchedule() {
       headerProps={headerProps}
       wide={true}
     >
-      {/* Feature Introduction - Mobile only */}
-      <FeatureIntroduction
-        icon={<Calendar className="h-6 w-6" />}
-        title="Cronograma de Construcción"
-        className="md:hidden"
-        features={[
-          {
-            icon: <Clock className="h-5 w-5" />,
-            title: "Vista Gantt Avanzada",
-            description: "Visualiza el cronograma con barras temporales, dependencias y fases del proyecto organizadas jerárquicamente."
-          },
-          {
-            icon: <Activity className="h-5 w-5" />,
-            title: "Análisis Visual",
-            description: "Gráficos de progreso, burndown charts y análisis de rutas críticas para optimizar el cronograma."
-          },
-          {
-            icon: <CheckSquare className="h-5 w-5" />,
-            title: "Gestión de Dependencias",
-            description: "Define y visualiza dependencias entre tareas para identificar bottlenecks y rutas críticas."
-          },
-          {
-            icon: <BarChart3 className="h-5 w-5" />,
-            title: "Reportes de Avance",
-            description: "Métricas de progreso temporal, distribución de carga de trabajo y análisis de desviaciones."
-          }
-        ]}
-      />
-
-
 
       {/* Tab Content */}
       {activeTab === 'gantt' && (
