@@ -217,98 +217,20 @@ export default function ConstructionBudgets() {
 
 
 
-  // Mutación para actualizar last_budget_id en user_preferences
-  const updateBudgetPreferenceMutation = useMutation({
-    mutationFn: async (budgetId: string) => {
-      // ENHANCED SAFETY CHECK: Use central validation system
-      const safetyCheck = validateUserDataForDatabaseOperation(userData);
-      
-      if (!safetyCheck.isValid) {
-        console.error('🚨 DATABASE OPERATION BLOCKED:', safetyCheck.error);
-        logDatabaseOperation('UPDATE_BLOCKED', 'user_preferences', userData?.user?.id, {
-          reason: safetyCheck.error,
-          attemptedBudgetId: budgetId,
-          safetyDetails: safetyCheck.details
-        });
-        throw new Error(`Database operation blocked for safety: ${safetyCheck.error}`);
-      }
-      
-      // Log the operation for audit trail
-      logDatabaseOperation('UPDATE', 'user_preferences', userData.user.id, {
-        field: 'last_budget_id',
-        newValue: budgetId,
-        preferencesId: userData.preferences.id
-      });
-      
-      console.log('✅ Safely updating budget preference for user:', userData.user.id, 'with preferences ID:', userData.preferences.id);
-      
-      if (!supabase) {
-        throw new Error('Supabase client not available');
-      }
+  // Ya no necesitamos guardar last_budget_id ya que esa columna fue removida
 
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ last_budget_id: budgetId })
-        .eq('id', userData.preferences.id)
-        .eq('user_id', userData.user.id); // DOUBLE SAFETY: Also check user_id
-      
-      if (error) {
-        console.error('❌ Database error updating budget preference:', error);
-        logDatabaseOperation('UPDATE_ERROR', 'user_preferences', userData.user.id, {
-          error: error.message,
-          budgetId,
-          preferencesId: userData.preferences.id
-        });
-        throw error;
-      }
-      
-      console.log('✅ Budget preference update successful');
-      return budgetId;
-    },
-    onSuccess: (budgetId) => {
-      // Invalidar el caché del usuario para reflejar el cambio
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      console.log('Budget preference updated successfully:', budgetId);
-    },
-    onError: (error) => {
-      console.error('Error updating budget preference:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo guardar la selección del presupuesto",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Inicializar selectedBudgetId con last_budget_id de preferences
+  // Inicializar selectedBudgetId con el primer presupuesto disponible
   useEffect(() => {
-    if (budgets.length > 0 && userData?.preferences) {
-      if (userData.preferences.last_budget_id) {
-        const lastBudgetExists = budgets.some(budget => budget.id === userData.preferences.last_budget_id);
-        if (lastBudgetExists) {
-          // Solo cambiar si es diferente al actual
-          if (selectedBudgetId !== userData.preferences.last_budget_id) {
-            setSelectedBudgetId(userData.preferences.last_budget_id);
-            console.log('Budget selector initialized with last_budget_id:', userData.preferences.last_budget_id);
-          }
-        } else {
-          // Si el último presupuesto no existe, seleccionar el primero
-          setSelectedBudgetId(budgets[0].id);
-          updateBudgetPreferenceMutation.mutate(budgets[0].id);
-          console.log('Last budget not found, selecting first budget:', budgets[0].id);
-        }
-      } else {
-        // Si no hay last_budget_id, seleccionar el primero
-        setSelectedBudgetId(budgets[0].id);
-        updateBudgetPreferenceMutation.mutate(budgets[0].id);
-        console.log('No last budget ID, selecting first budget:', budgets[0].id);
-      }
+    if (budgets.length > 0 && !selectedBudgetId) {
+      // Seleccionar el primer presupuesto si no hay ninguno seleccionado
+      setSelectedBudgetId(budgets[0].id);
+      console.log('No last budget ID, selecting first budget:', budgets[0].id);
     } else if (budgets.length === 0 && selectedBudgetId) {
       // Si no hay presupuestos, limpiar la selección
       setSelectedBudgetId('');
       console.log('No budgets available, clearing selection');
     }
-  }, [budgets, userData?.preferences?.last_budget_id, userData?.preferences?.id]);
+  }, [budgets.length, selectedBudgetId]);
 
   // Filter and sort budgets
   const filteredBudgets = budgets
@@ -387,7 +309,7 @@ export default function ConstructionBudgets() {
 
   const handleBudgetChange = (budgetId: string) => {
     setSelectedBudgetId(budgetId)
-    updateBudgetPreferenceMutation.mutate(budgetId)
+    // Ya no guardamos en user_preferences porque la columna last_budget_id fue removida
   }
 
   // Handle add task to budget
