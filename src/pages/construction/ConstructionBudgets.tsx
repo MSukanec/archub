@@ -19,7 +19,7 @@ import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+// Removed direct Supabase import - now using server endpoints
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
 import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPopover'
@@ -34,24 +34,20 @@ const useTaskParameterValues = () => {
   return useQuery({
     queryKey: ['task-parameter-values'],
     queryFn: async () => {
-      if (!supabase) return [];
-      
-      const { data, error } = await supabase
-        .from('task_parameter_options')
-        .select(`
-          name, 
-          label,
-          task_parameters!inner(expression_template)
-        `);
-      
-      if (error) throw error;
-      
-      // Flatten the data structure to include expression_template directly
-      return data?.map(item => ({
-        name: item.name,
-        label: item.label,
-        expression_template: item.task_parameters?.expression_template || null
-      })) || [];
+      // Use server endpoint instead of direct Supabase access
+      const response = await fetch('/api/task-parameter-values', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data || []
     }
   });
 };

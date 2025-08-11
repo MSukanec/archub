@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+// Removed direct Supabase import - now using server endpoints
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
 
@@ -20,23 +20,26 @@ export function useBudgets(projectId?: string) {
   return useQuery({
     queryKey: ['budgets', projectId, userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase || !projectId || !userData?.organization?.id) {
+      if (!projectId || !userData?.organization?.id) {
         return []
       }
 
-      const { data, error } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('organization_id', userData.organization.id)
-        .order('created_at', { ascending: false })
+      // Use server endpoint instead of direct Supabase access
+      const response = await fetch(`/api/budgets?project_id=${projectId}&organization_id=${userData.organization.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
 
-      if (error) {
-        throw error
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
+
+      const data = await response.json()
       return data as Budget[]
     },
-    enabled: !!supabase && !!projectId && !!userData?.organization?.id
+    enabled: !!projectId && !!userData?.organization?.id
   })
 }
 
@@ -46,17 +49,20 @@ export function useCreateBudget() {
 
   return useMutation({
     mutationFn: async (budgetData: Omit<Budget, 'id' | 'created_at'> & { created_at: string }) => {
-      if (!supabase) {
-        throw new Error('Supabase client not available')
+      // Use server endpoint instead of direct Supabase access
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(budgetData),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const { data, error } = await supabase
-        .from('budgets')
-        .insert(budgetData)
-        .select()
-        .single()
-
-      if (error) throw error
+      const data = await response.json()
       return data
     },
     onSuccess: (data) => {
@@ -82,18 +88,20 @@ export function useUpdateBudget() {
 
   return useMutation({
     mutationFn: async ({ id, ...budgetData }: Partial<Budget> & { id: string }) => {
-      if (!supabase) {
-        throw new Error('Supabase client not available')
+      // Use server endpoint instead of direct Supabase access
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(budgetData),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const { data, error } = await supabase
-        .from('budgets')
-        .update(budgetData)
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (error) throw error
+      const data = await response.json()
       return data
     },
     onSuccess: () => {
@@ -118,16 +126,20 @@ export function useDeleteBudget() {
 
   return useMutation({
     mutationFn: async (budgetId: string) => {
-      if (!supabase) {
-        throw new Error('Supabase client not available')
+      // Use server endpoint instead of direct Supabase access
+      const response = await fetch(`/api/budgets/${budgetId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const { error } = await supabase
-        .from('budgets')
-        .delete()
-        .eq('id', budgetId)
-
-      if (error) throw error
+      const data = await response.json()
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budgets'] })

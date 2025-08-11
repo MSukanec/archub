@@ -151,6 +151,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get budgets for a project
+  app.get("/api/budgets", async (req, res) => {
+    try {
+      const { project_id, organization_id } = req.query;
+      
+      if (!project_id || !organization_id) {
+        return res.status(400).json({ error: "project_id and organization_id are required" });
+      }
+
+      const { data: budgets, error } = await supabase
+        .from('budgets')
+        .select('*')
+        .eq('project_id', project_id)
+        .eq('organization_id', organization_id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching budgets:", error);
+        return res.status(500).json({ error: "Failed to fetch budgets" });
+      }
+
+      res.json(budgets || []);
+    } catch (error) {
+      console.error("Error fetching budgets:", error);
+      res.status(500).json({ error: "Failed to fetch budgets" });
+    }
+  });
+
+  // Create a new budget
+  app.post("/api/budgets", async (req, res) => {
+    try {
+      const budgetData = req.body;
+
+      const { data: budget, error } = await supabase
+        .from('budgets')
+        .insert(budgetData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating budget:", error);
+        return res.status(500).json({ error: "Failed to create budget" });
+      }
+
+      res.json(budget);
+    } catch (error) {
+      console.error("Error creating budget:", error);
+      res.status(500).json({ error: "Failed to create budget" });
+    }
+  });
+
+  // Update a budget
+  app.patch("/api/budgets/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const { data: budget, error } = await supabase
+        .from('budgets')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating budget:", error);
+        return res.status(500).json({ error: "Failed to update budget" });
+      }
+
+      res.json(budget);
+    } catch (error) {
+      console.error("Error updating budget:", error);
+      res.status(500).json({ error: "Failed to update budget" });
+    }
+  });
+
+  // Delete a budget
+  app.delete("/api/budgets/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const { error } = await supabase
+        .from('budgets')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting budget:", error);
+        return res.status(500).json({ error: "Failed to delete budget" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting budget:", error);
+      res.status(500).json({ error: "Failed to delete budget" });
+    }
+  });
+
+  // Get task parameter values with expression templates
+  app.get("/api/task-parameter-values", async (req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from('task_parameter_options')
+        .select(`
+          name, 
+          label,
+          task_parameters!inner(expression_template)
+        `);
+      
+      if (error) {
+        console.error("Error fetching task parameter values:", error);
+        return res.status(500).json({ error: "Failed to fetch task parameter values" });
+      }
+      
+      // Flatten the data structure to include expression_template directly
+      const flattenedData = data?.map(item => ({
+        name: item.name,
+        label: item.label,
+        expression_template: item.task_parameters?.expression_template || null
+      })) || [];
+
+      res.json(flattenedData);
+    } catch (error) {
+      console.error("Error fetching task parameter values:", error);
+      res.status(500).json({ error: "Failed to fetch task parameter values" });
+    }
+  });
+
   // Get all countries
   app.get("/api/countries", async (req, res) => {
     try {
