@@ -1001,6 +1001,7 @@ export default function FinancesInstallments() {
               data={clientSummary}
               columns={contactSummaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
+              getItemId={(item) => item.contact_id || 'unknown'}
               renderCard={(item) => (
                 <ClientSummaryCard 
                   item={item} 
@@ -1015,6 +1016,7 @@ export default function FinancesInstallments() {
               data={clientSummary}
               columns={summaryColumns}
               defaultSort={{ key: 'contacto', direction: 'asc' }}
+              getItemId={(item) => item.contact_id || 'unknown'}
               renderCard={(item) => (
                 <CurrencyDetailCard item={item} />
               )}
@@ -1027,6 +1029,7 @@ export default function FinancesInstallments() {
                 data={filteredInstallments}
                 columns={detailColumns}
                 defaultSort={{ key: 'movement_date', direction: 'desc' }}
+                getItemId={(item) => item.id || 'unknown'}
                 renderCard={(item) => (
                   <InstallmentDetailCard 
                     item={item}
