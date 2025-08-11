@@ -583,27 +583,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
               </FormItem>
             )}
           />
-
-          {/* Botón de submit dentro del formulario */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={createInstallmentMutation.isPending}
-              className="min-w-[120px]"
-            >
-              {createInstallmentMutation.isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Guardando...</span>
-                </div>
-              ) : (
-                editingInstallment ? "Actualizar" : "Guardar Aporte"
-              )}
-            </Button>
-          </div>
         </form>
       </Form>
     )
@@ -616,7 +595,15 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     />
   )
 
-  const footerContent = null // Botones ahora están dentro del formulario
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={handleClose}
+      rightLabel={editingInstallment ? "Actualizar" : "Guardar Aporte"}
+      onRightClick={form.handleSubmit(onSubmit)}
+      showLoadingSpinner={createInstallmentMutation.isPending}
+    />
+  )
 
   return (
     <FormModalLayout
