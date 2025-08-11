@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Table } from '@/components/ui-custom/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
-import { useBudgets } from '@/hooks/use-budgets'
+import { useBudgets, useDeleteBudget } from '@/hooks/use-budgets'
 import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 
 import { useToast } from '@/hooks/use-toast'
@@ -246,34 +246,8 @@ export default function ConstructionBudgets() {
 
 
 
-  // Delete budget mutation
-  const deleteBudgetMutation = useMutation({
-    mutationFn: async (budgetId: string) => {
-      if (!supabase) throw new Error('Supabase client not available')
-      
-      const { error } = await supabase
-        .from('budgets')
-        .delete()
-        .eq('id', budgetId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budgets'] })
-      toast({
-        title: "Presupuesto eliminado",
-        description: "El presupuesto ha sido eliminado correctamente",
-      })
-      // Ya no necesitamos estado de eliminación
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el presupuesto",
-        variant: "destructive",
-      })
-    }
-  })
+  // Use the migrated delete budget hook
+  const deleteBudgetMutation = useDeleteBudget()
 
 
 
