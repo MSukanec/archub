@@ -182,15 +182,19 @@ TABLA CONTACTS:
     "data_type": "text"
   },
   {
-    "column_name": "contact_type_id",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "linked_user_id",
     "data_type": "uuid"
   },
   {
     "column_name": "full_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "national_id",
     "data_type": "text"
   }
 ]
