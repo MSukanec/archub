@@ -2,7 +2,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+// AlertDialog removido - ahora usamos modal de confirmación centralizado
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { useState, useEffect, Fragment, useMemo } from 'react'
@@ -26,7 +26,7 @@ import { TaskMaterialsPopover } from '@/components/construction/TaskMaterialsPop
 
 import { Input } from '@/components/ui/input'
 
-import { validateUserDataForDatabaseOperation, logDatabaseOperation } from '@/utils/databaseSafety'
+// Eliminado sistema de logs de seguridad de base de datos
 
 
 // Hook para obtener valores de parámetros con expression_template
@@ -77,7 +77,6 @@ async function processDisplayName(displayName: string, paramValues: any): Promis
     .in('name', paramValueIds);
   
   if (error) {
-    console.error("Error fetching parameter values:", error);
     return displayName;
   }
   
@@ -152,7 +151,7 @@ export default function ConstructionBudgets() {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
 
-  const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null)
+  // Estado de eliminación removido - ahora usamos modal de confirmación
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('')
 
   const { data: userData, isLoading } = useCurrentUser()
@@ -183,7 +182,6 @@ export default function ConstructionBudgets() {
         .order("name", { ascending: true });
 
       if (error) {
-        console.error("Error fetching units:", error);
         return [];
       }
 
@@ -222,13 +220,9 @@ export default function ConstructionBudgets() {
   // Inicializar selectedBudgetId con el primer presupuesto disponible
   useEffect(() => {
     if (budgets.length > 0 && !selectedBudgetId) {
-      // Seleccionar el primer presupuesto si no hay ninguno seleccionado
       setSelectedBudgetId(budgets[0].id);
-      console.log('No last budget ID, selecting first budget:', budgets[0].id);
     } else if (budgets.length === 0 && selectedBudgetId) {
-      // Si no hay presupuestos, limpiar la selección
       setSelectedBudgetId('');
-      console.log('No budgets available, clearing selection');
     }
   }, [budgets.length, selectedBudgetId]);
 
@@ -274,10 +268,9 @@ export default function ConstructionBudgets() {
         title: "Presupuesto eliminado",
         description: "El presupuesto ha sido eliminado correctamente",
       })
-      setDeletingBudget(null)
+      // Ya no necesitamos estado de eliminación
     },
     onError: (error) => {
-      console.error('Error deleting budget:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el presupuesto",
@@ -289,7 +282,13 @@ export default function ConstructionBudgets() {
 
 
   const handleDeleteBudget = (budget: Budget) => {
-    setDeletingBudget(budget)
+    openModal('delete-confirmation', {
+      title: 'Eliminar presupuesto',
+      message: `¿Estás seguro de que quieres eliminar el presupuesto "${budget.name}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      onConfirm: () => deleteBudgetMutation.mutate(budget.id),
+      isDangerous: true
+    });
   }
 
   const handleEditBudget = () => {
@@ -314,7 +313,6 @@ export default function ConstructionBudgets() {
 
   // Handle add task to budget
   const handleAddTask = (budgetId: string) => {
-    console.log('Abrir modal de agregar tareas');
     openModal('budget-task-bulk-add', { 
       budgetId,
       onSuccess: () => {
@@ -343,7 +341,6 @@ export default function ConstructionBudgets() {
       })
     },
     onError: (error) => {
-      console.error('Error deleting task:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar la tarea",
@@ -443,7 +440,6 @@ export default function ConstructionBudgets() {
           organization_id: task.organization_id,
         });
       } catch (error) {
-        console.error('Error updating task quantity:', error);
         toast({
           title: "Error",
           description: "No se pudo actualizar la cantidad",
@@ -470,7 +466,6 @@ export default function ConstructionBudgets() {
           description: "La tarea se eliminó del presupuesto correctamente",
         });
       } catch (error) {
-        console.error('Error deleting task:', error);
         toast({
           title: "Error",
           description: "No se pudo eliminar la tarea",
@@ -481,7 +476,6 @@ export default function ConstructionBudgets() {
 
     const handleAddTask = (budgetId: string) => {
       // TODO: Abrir modal de agregar tareas
-      console.log('Abrir modal de agregar tareas para presupuesto:', budgetId);
     };
 
     const getUnitName = (unitId: string | null): string => {
