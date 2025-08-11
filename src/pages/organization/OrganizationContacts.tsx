@@ -33,6 +33,7 @@ export default function OrganizationContacts() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
+  const [selectedContact, setSelectedContact] = useState<any>(null)
   const { openModal } = useGlobalModalStore()
 
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -229,7 +230,12 @@ export default function OrganizationContacts() {
       sortable: true,
       className: "w-1/5",
       render: (contact: any) => (
-        <div className="flex items-center gap-3">
+        <div 
+          className={`flex items-center gap-3 cursor-pointer p-2 -m-2 rounded-md transition-colors ${
+            selectedContact?.id === contact.id ? 'bg-accent/50' : 'hover:bg-muted/50'
+          }`}
+          onClick={() => setSelectedContact(contact)}
+        >
           {contact.linked_user ? (
             <Avatar className="w-8 h-8">
               <AvatarImage src={contact.linked_user.avatar_url} />
@@ -393,6 +399,7 @@ export default function OrganizationContacts() {
 
   return (
     <Layout
+      wide={true}
       headerProps={{
         icon: Users,
         title: "Contactos",
@@ -415,14 +422,11 @@ export default function OrganizationContacts() {
         } : undefined
       }}
     >
-      <div className="space-y-6">
-        
-        {/* Contenido para la tab de Personas */}
-        {activeTab === "personas" && (
-          <>
-            {/* FeatureIntroduction - Solo mobile */}
-
-
+      <div className="grid grid-cols-12 gap-6 h-full">
+        {/* Columna izquierda - Lista de contactos */}
+        <div className="col-span-7">
+          {/* Contenido para la tab de Personas */}
+          {activeTab === "personas" && (
             <Table
               data={filteredContacts}
               columns={columns}
@@ -492,23 +496,193 @@ export default function OrganizationContacts() {
                 />
               )}
               cardSpacing="space-y-3"
+              getItemId={(contact) => contact.id}
             />
-          </>
-        )}
+          )}
 
-        {/* Contenido para la tab de Empresas - Restringida */}
-        {activeTab === "empresas" && (
-          <CustomRestricted reason="coming_soon">
-            <div className="text-center py-12">
-              <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
-              <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
-            </div>
-          </CustomRestricted>
-        )}
+          {/* Contenido para la tab de Empresas - Restringida */}
+          {activeTab === "empresas" && (
+            <CustomRestricted reason="coming_soon">
+              <div className="text-center py-12">
+                <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
+                <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
+              </div>
+            </CustomRestricted>
+          )}
+        </div>
+
+        {/* Columna derecha - Detalles del contacto */}
+        <div className="col-span-5">
+          <div className="bg-card border border-border rounded-lg h-full">
+            {selectedContact ? (
+              <ContactDetailPanel 
+                contact={selectedContact} 
+                onEdit={() => handleEditContact(selectedContact)}
+                onDelete={() => handleDeleteContact(selectedContact)}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Selecciona un contacto</h3>
+                  <p className="text-muted-foreground">Haz clic en un contacto para ver sus detalles</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Los modales de confirmación ahora se manejan a través del sistema global */}
     </Layout>
+  )
+}
+
+// Componente para mostrar detalles del contacto
+function ContactDetailPanel({ 
+  contact, 
+  onEdit, 
+  onDelete 
+}: { 
+  contact: any, 
+  onEdit: () => void, 
+  onDelete: () => void 
+}) {
+  return (
+    <div className="h-full flex flex-col">
+      {/* Header del panel */}
+      <div className="p-6 border-b border-border">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            {contact.linked_user ? (
+              <Avatar className="w-16 h-16">
+                <AvatarImage src={contact.linked_user.avatar_url} />
+                <AvatarFallback className="text-lg">
+                  {contact.linked_user.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-lg font-medium">
+                {contact.first_name?.charAt(0) || 'C'}
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-semibold">
+                {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()}
+              </h2>
+              {contact.linked_user && (
+                <div className="flex items-center gap-1 mt-1">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-muted-foreground">Usuario de Archub</span>
+                </div>
+              )}
+              {contact.contact_types && contact.contact_types.length > 0 && (
+                <div className="flex gap-1 mt-2">
+                  {contact.contact_types.map((typeLink: any) => (
+                    <Badge key={typeLink.type_id} variant="secondary" className="text-xs">
+                      {typeLink.contact_type?.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onDelete}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Información de contacto */}
+      <div className="flex-1 p-6 space-y-6">
+        <div className="space-y-4">
+          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+            Información de Contacto
+          </h3>
+          
+          <div className="space-y-3">
+            {contact.phone && (
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">{contact.phone}</div>
+                  <div className="text-xs text-muted-foreground">Teléfono</div>
+                </div>
+              </div>
+            )}
+            
+            {contact.email && (
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">{contact.email}</div>
+                  <div className="text-xs text-muted-foreground">Email</div>
+                </div>
+              </div>
+            )}
+            
+            {contact.address && (
+              <div className="flex items-center gap-3">
+                <Building className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">{contact.address}</div>
+                  <div className="text-xs text-muted-foreground">Dirección</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {contact.notes && (
+          <div className="space-y-4">
+            <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+              Notas
+            </h3>
+            <div className="text-sm text-muted-foreground">
+              {contact.notes}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+            Información Adicional
+          </h3>
+          
+          <div className="grid grid-cols-1 gap-3 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Creado:</span>
+              <span>{format(new Date(contact.created_at), 'dd/MM/yyyy', { locale: es })}</span>
+            </div>
+            {contact.updated_at !== contact.created_at && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Actualizado:</span>
+                <span>{format(new Date(contact.updated_at), 'dd/MM/yyyy', { locale: es })}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer con acciones */}
+      <div className="p-6 border-t border-border">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1">
+            <Share2 className="w-4 h-4 mr-2" />
+            Compartir
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1">
+            <Send className="w-4 h-4 mr-2" />
+            Mensaje
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
