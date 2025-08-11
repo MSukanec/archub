@@ -315,7 +315,15 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
 
   const onSubmit = async (data: InstallmentForm) => {
-    await createInstallmentMutation.mutateAsync(data)
+    console.log('🔄 Form submission started', data)
+    console.log('🔄 Form errors:', form.formState.errors)
+    console.log('🔄 Form isValid:', form.formState.isValid)
+    
+    try {
+      await createInstallmentMutation.mutateAsync(data)
+    } catch (error) {
+      console.error('❌ Mutation error:', error)
+    }
   }
 
   const handleClose = () => {
