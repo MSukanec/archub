@@ -315,28 +315,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
 
   const onSubmit = async (data: InstallmentForm) => {
-    console.log('📋 Form submission started with data:', data)
-    console.log('📋 Form validation errors:', form.formState.errors)
-    
-    // Validar que todos los campos requeridos estén presentes
-    const requiredFields = ['movement_date', 'contact_id', 'subcategory_id', 'currency_id', 'wallet_id', 'amount']
-    const missingFields = requiredFields.filter(field => !data[field as keyof InstallmentForm])
-    
-    if (missingFields.length > 0) {
-      console.error('❌ Missing required fields:', missingFields)
-      toast({
-        variant: 'destructive',
-        title: 'Error de validación',
-        description: `Faltan campos requeridos: ${missingFields.join(', ')}`,
-      })
-      return
-    }
-    
-    try {
-      await createInstallmentMutation.mutateAsync(data)
-    } catch (error) {
-      console.error('❌ Error in submission:', error)
-    }
+    await createInstallmentMutation.mutateAsync(data)
   }
 
   const handleClose = () => {

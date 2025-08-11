@@ -558,13 +558,13 @@ export function Table<T = any>({
         ) : paginatedData.map((item, index) =>
           renderCard ? (
             // Use custom card renderer if provided
-            <div key={index} onClick={() => onCardClick?.(item)}>
+            <div key={getItemId(item)} onClick={() => onCardClick?.(item)}>
               {renderCard(item)}
             </div>
           ) : (
             // Default card layout
             <div
-              key={index}
+              key={getItemId(item)}
               className={cn(
                 "p-3 border border-[var(--card-border)] rounded-lg mb-2 bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer",
                 getRowClassName?.(item),
