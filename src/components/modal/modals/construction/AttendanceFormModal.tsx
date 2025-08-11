@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import UserSelector from '@/components/ui-custom/UserSelector'
+
 import DatePicker from '@/components/ui-custom/DatePicker'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -23,7 +23,6 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useContacts } from '@/hooks/use-contacts'
 
 const attendanceSchema = z.object({
-  created_by: z.string().uuid('Selecciona quién creó este registro'),
   attendance_date: z.date({
     required_error: 'La fecha es requerida'
   }),
@@ -59,7 +58,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
 
   // Get organization members and contacts - skip if no organizationId
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId || '')
-  const { data: contacts = [] } = useContacts(organizationId || '')
+  const { data: contacts = [] } = useContacts()
 
   // Convert members to users format for UserSelector (siguiendo patrón de MovementFormModal)
   const users = organizationMembers.map(member => ({
@@ -78,7 +77,6 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      created_by: currentUserId || '', // Usar user_id directamente como en MovementFormModal
       attendance_date: modalData?.editingData?.attendanceDate || (isEditing ? new Date(attendance?.created_at) : new Date()),
       contact_id: modalData?.editingData?.contactId || attendance?.contact_id || '',
       attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
@@ -91,6 +89,10 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     mutationFn: async (data: AttendanceForm) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
+      // Find current organization member ID
+      const currentMember = organizationMembers.find(m => m.user_id === currentUserId)
+      if (!currentMember) throw new Error('No se encontró el miembro de la organización')
+      
       const { error } = await supabase
         .from('attendees')
         .insert({
@@ -99,7 +101,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: organizationMembers.find(m => m.user_id === data.created_by)?.id || data.created_by,
+          created_by: currentMember.id, // Usar el ID del organization member
           project_id: projectId,
           created_at: data.attendance_date.toISOString(),
           updated_at: new Date().toISOString()
@@ -136,7 +138,6 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
-          created_by: organizationMembers.find(m => m.user_id === data.created_by)?.id || data.created_by,
           updated_at: new Date().toISOString()
         })
         .eq('id', attendance.id)
@@ -187,27 +188,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Creado por y Fecha - Inline */}
+        {/* Fecha y Personal - Inline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="created_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Creado por</FormLabel>
-                <FormControl>
-                  <UserSelector
-                    users={users}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar usuario..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="attendance_date"
@@ -227,33 +209,32 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
               </FormItem>
             )}
           />
-        </div>
 
-        {/* Personal */}
-        <FormField
-          control={form.control}
-          name="contact_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Personal</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar personal..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {contacts.map((contact) => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.first_name} {contact.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="contact_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Personal</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar personal..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {contacts.map((contact) => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.first_name} {contact.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Horario */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
