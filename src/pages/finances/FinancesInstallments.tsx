@@ -969,7 +969,7 @@ export default function FinancesInstallments() {
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: {
-      label: "Nuevo Compromiso",
+      label: "Nuevo Aporte",
       onClick: handleAddInstallment
     }
   }

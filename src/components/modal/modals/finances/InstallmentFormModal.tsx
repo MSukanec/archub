@@ -261,6 +261,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
+        contact_id: data.third_party_id, // Mapear third_party_id a contact_id
         created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null, // Usar el ID del miembro de la organización
       }
 
