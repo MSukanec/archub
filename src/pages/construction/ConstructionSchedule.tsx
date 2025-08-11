@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Edit, Trash2, BarChart3, CheckSquare } from 'lucide-react'
+import { Calendar, Trash2, BarChart3, CheckSquare } from 'lucide-react'
 import { Plus } from 'lucide-react'
 
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -165,15 +165,7 @@ export default function ConstructionSchedule() {
     icon: Calendar,
     title: "Cronograma",
     tabs: headerTabs,
-    onTabChange: setActiveTab,
-    actionButton: {
-      label: 'Nueva Tarea',
-      icon: Plus,
-      onClick: () => openModal('construction-task', { 
-        projectId: projectId || '', 
-        organizationId: organizationId || '' 
-      })
-    }
+    onTabChange: setActiveTab
   }
 
   return (
@@ -198,9 +190,8 @@ export default function ConstructionSchedule() {
               onItemEdit={(item) => {
                 const task = filteredTasks.find(t => t.id === item.id)
                 if (task) {
-                  openModal('construction-task-form', { 
-                    constructionTask: task,
-                    mode: 'edit'
+                  openModal('construction-task-schedule', { 
+                    taskId: task.id
                   })
                 }
               }}
