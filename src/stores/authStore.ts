@@ -31,7 +31,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
 
     if (!supabase) {
-      console.error("Supabase client not initialized");
       set({ user: null, loading: false, initialized: true });
       return;
     }
@@ -40,7 +39,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.getSession();
 
       if (error) {
-        console.error("Error getting session:", error.message);
         set({ user: null, loading: false, initialized: true });
         return;
       }
@@ -59,7 +57,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user: session?.user ?? null, loading: false });
       });
     } catch (err) {
-      console.error("Initialize error:", err);
       set({ user: null, loading: false, initialized: true });
     }
   },

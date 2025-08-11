@@ -108,11 +108,21 @@ export function useCurrentUser(forceRefresh?: boolean) {
       }
 
       // Get the session token to send to the server
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData?.session?.access_token
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       
-      if (!token) {
-        throw new Error('No authentication token available')
+      if (sessionError) {
+        throw new Error(`Session error: ${sessionError.message}`)
+      }
+      
+      let token = sessionData?.session?.access_token
+      
+      if (!token || !sessionData?.session) {
+        // Try to refresh the session
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshError || !refreshData?.session?.access_token) {
+          throw new Error('No valid authentication token available')
+        }
+        token = refreshData.session.access_token
       }
 
       // Add refresh parameter if forced refresh is requested
