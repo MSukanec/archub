@@ -43,6 +43,7 @@ export default function OrganizationContacts() {
   const [sortBy, setSortBy] = useState('name_asc')
   const [filterByType, setFilterByType] = useState('all')
   const [selectedContact, setSelectedContact] = useState<any>(null)
+  const [showSearch, setShowSearch] = useState(false)
   const { openModal } = useGlobalModalStore()
 
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -464,54 +465,91 @@ export default function OrganizationContacts() {
       <div className="grid grid-cols-12 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-7 space-y-4">
-          {/* ActionBar con búsqueda y filtros */}
-          <ActionBar
-            searchProps={{
-              value: searchValue,
-              onChange: setSearchValue,
-              placeholder: "Buscar contactos..."
-            }}
-            filterProps={{
-              isActive: sortBy !== 'name_asc' || filterByType !== 'all',
-              onClear: () => {
-                setSearchValue("");
-                setSortBy('name_asc');
-                setFilterByType('all');
-              },
-              content: (
-                <div className="space-y-3 p-2 min-w-[200px]">
-                  <div>
-                    <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Más Recientes" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                        <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                      </SelectContent>
-                    </Select>
+          {/* ActionBar con botones ghost */}
+          <ActionBar>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                <Search className="h-4 w-4" />
+                Buscar
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filtros
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  <div className="space-y-3 p-2">
+                    <div>
+                      <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Más Recientes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                          <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                      <Select value={filterByType} onValueChange={setFilterByType}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Todos los Tipos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los Tipos</SelectItem>
+                          {contactTypes?.map((type) => (
+                            <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                    <Select value={filterByType} onValueChange={setFilterByType}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Todos los Tipos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos los Tipos</SelectItem>
-                        {contactTypes?.map((type) => (
-                          <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )
-            }}
-          />
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {(sortBy !== 'name_asc' || filterByType !== 'all' || searchValue || showSearch) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    setSearchValue("");
+                    setSortBy('name_asc');
+                    setFilterByType('all');
+                    setShowSearch(false);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                  Limpiar
+                </Button>
+              )}
+            </div>
+          </ActionBar>
+          
+          {/* Campo de búsqueda expandible */}
+          {showSearch && (
+            <div className="bg-card border border-border rounded-lg p-3">
+              <Input
+                placeholder="Buscar contactos..."
+                value={searchValue}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+                className="h-9"
+                autoFocus
+              />
+            </div>
+          )}
 
           {/* Lista de contactos agrupada por letra */}
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
