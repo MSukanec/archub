@@ -2,6 +2,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Table } from '@/components/ui-custom/Table'
 import { Label } from '@/components/ui/label'
@@ -161,6 +162,13 @@ export default function OrganizationContacts() {
 
     return filtered
   }, [contacts, searchValue, filterByType, sortBy])
+
+  // Seleccionar automáticamente el primer contacto cuando cambien los contactos filtrados
+  React.useEffect(() => {
+    if (filteredContacts.length > 0 && !selectedContact) {
+      setSelectedContact(filteredContacts[0])
+    }
+  }, [filteredContacts, selectedContact])
 
   const handleEditContact = (contact: any) => {
     openModal('contact', { 
@@ -516,7 +524,7 @@ export default function OrganizationContacts() {
 
         {/* Columna derecha - Detalles del contacto */}
         <div className="col-span-5">
-          <div className="bg-card border border-border rounded-lg h-full">
+          <Card className="h-full">
             {selectedContact ? (
               <ContactDetailPanel 
                 contact={selectedContact} 
@@ -532,7 +540,7 @@ export default function OrganizationContacts() {
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
 
