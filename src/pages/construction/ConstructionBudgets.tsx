@@ -5,14 +5,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-
 import { useState, useEffect, Fragment, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Calculator, Plus, Trash2, Building2, Edit, FileText, BarChart3, Settings, CheckSquare, Filter, Target } from 'lucide-react'
+import { Calculator, Plus, Trash2, Building2, Edit, FileText, Settings } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 // Using Table component for budget tasks display
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { Table } from '@/components/ui-custom/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
@@ -789,33 +787,6 @@ export default function ConstructionBudgets() {
 
   return (
     <Layout wide={true} headerProps={headerProps}>
-      {/* Feature Introduction - Mobile only */}
-      <FeatureIntroduction
-        title="Gestión de Presupuestos"
-        icon={<Calculator className="w-6 h-6" />}
-        features={[
-          {
-            icon: <CheckSquare className="w-4 h-4" />,
-            title: "Presupuestos Detallados",
-            description: "Crea y gestiona presupuestos con tareas específicas, cantidades y costos detallados por proyecto."
-          },
-          {
-            icon: <Filter className="w-4 h-4" />,
-            title: "Organización por Rubros",
-            description: "Agrupa tareas por categorías para una mejor visualización y análisis de costos por área."
-          },
-          {
-            icon: <Target className="w-4 h-4" />,
-            title: "Búsqueda Inteligente",
-            description: "Encuentra rápidamente tareas del catálogo o crea nuevas tareas personalizadas para tu presupuesto."
-          },
-          {
-            icon: <BarChart3 className="w-4 h-4" />,
-            title: "Control de Costos",
-            description: "Monitorea el progreso y los totales de tu presupuesto en tiempo real con actualizaciones automáticas."
-          }
-        ]}
-      />
 
       {/* Budget Selector Card */}
       {budgets.length > 0 && (
