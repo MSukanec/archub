@@ -103,10 +103,8 @@ export default function ConstructionSchedule() {
         let validEndDate = task.end_date;
         let validDuration = task.duration_in_days;
 
-        // Si no hay start_date, usar fecha de hoy
-        if (!validStartDate) {
-          validStartDate = new Date().toISOString().split('T')[0];
-        }
+        // No forzar fecha de hoy si no hay start_date
+        // Dejar validStartDate como null si no existe
 
         // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
         if (validStartDate && !validEndDate && !validDuration) {
@@ -121,6 +119,7 @@ export default function ConstructionSchedule() {
           startDate: validStartDate,
           endDate: validEndDate,
           durationInDays: validDuration,
+          quantity: task.quantity,
           taskData: task
         });
       });
