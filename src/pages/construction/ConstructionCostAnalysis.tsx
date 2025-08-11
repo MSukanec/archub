@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useMaterials, useDeleteMaterial } from '@/hooks/use-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { BarChart3, Search, Layers, Grid, TableIcon, Users, Package, DollarSign, Edit, Trash2 } from 'lucide-react'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BarChart3, TableIcon, Users, Package, DollarSign, Edit, Trash2, Plus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -18,11 +15,9 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
 export default function ConstructionCostAnalysis() {
-  const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("tareas")
   const [dataType, setDataType] = useState("todos")
 
-  
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { data: materials = [], isLoading: materialsLoading } = useMaterials()
   const deleteMaterialMutation = useDeleteMaterial()
@@ -36,20 +31,11 @@ export default function ConstructionCostAnalysis() {
     setSidebarContext('construction')
   }, [setSidebarContext])
 
-  // Filter tasks
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = (task.name_rendered?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
-      (task.code?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
-      (task.category_name?.toLowerCase() || '').includes(searchValue.toLowerCase())
-    
-    return matchesSearch
-  })
+  // Filter tasks (no search filtering since search is removed)
+  const filteredTasks = tasks
 
-  // Filter materials by type and search
+  // Filter materials by type only (no search filtering)
   const filteredMaterials = materials.filter((material) => {
-    const matchesSearch = (material.name?.toLowerCase() || '').includes(searchValue.toLowerCase()) ||
-      (material.category?.name?.toLowerCase() || '').includes(searchValue.toLowerCase())
-    
     let matchesType = true
     if (dataType === "sistema") {
       matchesType = material.is_system === true
@@ -58,7 +44,7 @@ export default function ConstructionCostAnalysis() {
     }
     // "todos" shows all materials regardless of type
     
-    return matchesSearch && matchesType
+    return matchesType
   })
 
   // Data type selector options
@@ -68,30 +54,58 @@ export default function ConstructionCostAnalysis() {
     { value: "organizacion", label: "De la Organización" }
   ]
 
-
-
-  const features = [
+  // Header tabs configuration
+  const headerTabs = [
     {
-      icon: <BarChart3 className="w-4 h-4" />,
-      title: "Análisis de Costos por Categoría",
-      description: "Visualiza y compara los costos de tareas organizadas por categorías y subcategorías específicas."
+      id: "tareas",
+      label: "Tareas",
+      icon: <TableIcon className="h-4 w-4" />,
+      isActive: activeTab === "tareas"
     },
     {
-      icon: <Search className="w-4 h-4" />,
-      title: "Búsqueda Avanzada de Tareas",
-      description: "Encuentra rápidamente tareas específicas usando códigos, nombres, rubros o categorías."
+      id: "mano-obra",
+      label: "Mano de Obra",
+      icon: <Users className="h-4 w-4" />,
+      isActive: activeTab === "mano-obra"
     },
     {
-      icon: <Layers className="w-4 h-4" />,
-      title: "Filtrado por Rubros",
-      description: "Organiza y filtra las tareas por diferentes rubros de construcción para mejor análisis."
+      id: "materiales",
+      label: "Materiales",
+      icon: <Package className="h-4 w-4" />,
+      isActive: activeTab === "materiales"
     },
     {
-      icon: <Grid className="w-4 h-4" />,
-      title: "Vista Comparativa de Costos",
-      description: "Compara costos unitarios y cantidades entre diferentes tareas del mismo tipo."
+      id: "indirectos",
+      label: "Indirectos",
+      icon: <DollarSign className="h-4 w-4" />,
+      isActive: activeTab === "indirectos"
     }
   ]
+
+  // Header configuration
+  const headerProps = {
+    title: "Análisis de Costos",
+    icon: BarChart3,
+    tabs: headerTabs,
+    onTabChange: (tabId: string) => setActiveTab(tabId),
+    // Add action button based on active tab
+    ...(activeTab === 'materiales' && {
+      actionButton: {
+        label: "Crear Material",
+        icon: Plus,
+        onClick: () => openModal('material-form', {}),
+        variant: "default" as const
+      }
+    }),
+    ...(activeTab === 'tareas' && {
+      actionButton: {
+        label: "Crear Tarea Personalizada",
+        icon: Plus,
+        onClick: () => openModal('parametric-task', {}),
+        variant: "default" as const
+      }
+    })
+  }
 
 
 
@@ -276,7 +290,7 @@ export default function ConstructionCostAnalysis() {
 
   if (tasksLoading) {
     return (
-      <Layout wide>
+      <Layout headerProps={headerProps} wide>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando análisis de costos...</div>
         </div>
@@ -285,45 +299,20 @@ export default function ConstructionCostAnalysis() {
   }
 
   return (
-    <Layout wide>
+    <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* ActionBar with Tabs */}
-        <ActionBarDesktop
-          title="Análisis de Costos"
-          icon={<BarChart3 className="w-6 h-6" />}
-          features={features}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          showProjectSelector={false}
-          primaryActionLabel={
-            activeTab === 'materiales' ? "Crear Material" : 
-            activeTab === 'tareas' ? "Crear Tarea Personalizada" : 
-            undefined
-          }
-          onPrimaryActionClick={
-            activeTab === 'materiales' ? () => openModal('material-form', {}) :
-            activeTab === 'tareas' ? () => openModal('parametric-task', {}) :
-            undefined
-          }
-          customGhostButtons={[
-            <div key="data-type-selector" className="flex items-center">
-              <Selector
-                options={dataTypeOptions}
-                value={dataType}
-                onValueChange={setDataType}
-                className="h-8"
-              />
-            </div>
-          ]}
-          tabs={[
-            { value: 'tareas', label: 'Tareas', icon: <TableIcon className="h-4 w-4" /> },
-            { value: 'mano-obra', label: 'Mano de Obra', icon: <Users className="h-4 w-4" /> },
-            { value: 'materiales', label: 'Materiales', icon: <Package className="h-4 w-4" /> },
-            { value: 'indirectos', label: 'Indirectos', icon: <DollarSign className="h-4 w-4" /> }
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        {/* Data type selector for materials tab */}
+        {activeTab === 'materiales' && (
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">Tipo de material:</span>
+            <Selector
+              options={dataTypeOptions}
+              value={dataType}
+              onValueChange={setDataType}
+              className="h-8"
+            />
+          </div>
+        )}
 
         {/* Tab Content */}
         {activeTab === 'tareas' && (
