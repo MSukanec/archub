@@ -101,9 +101,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-5 md:p-6 pb-12 ${
           // Calculate top padding based on header content
           headerProps?.pageTitle && headerProps?.tabs?.length 
-            ? "md:pt-32" // breadcrumb + page title + tabs (h-28 + padding)
+            ? "md:pt-44" // breadcrumb + page title + tabs (h-40 + padding)
             : headerProps?.pageTitle 
-            ? "md:pt-24" // breadcrumb + page title (h-20 + padding)
+            ? "md:pt-34" // breadcrumb + page title (h-30 + padding)
             : headerProps?.tabs?.length 
             ? "md:pt-24" // breadcrumb + tabs (h-20 + padding)
             : "md:pt-14" // just breadcrumb (h-10 + padding)
