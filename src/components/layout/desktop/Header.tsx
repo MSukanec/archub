@@ -266,7 +266,7 @@ export function Header({
       }`}
     >
       {/* Primera fila: Breadcrumb y Selector de Proyecto */}
-      <div className="w-full h-10 px-6 flex items-center justify-between">
+      <div className="w-full h-10 px-12 flex items-center justify-between">
         {/* Left: Breadcrumb */}
         <div className="flex items-center gap-2">
           {isProjectBasedSection ? (
@@ -410,7 +410,7 @@ export function Header({
 
       {/* Segunda fila: Título de página grande (solo si se proporciona pageTitle) */}
       {hasPageTitle && (
-        <div className="w-full h-16 px-6 flex items-end pb-2">
+        <div className="w-full h-16 px-12 flex items-end pb-2">
           <h1 className="text-5xl font-semibold text-black dark:text-white uppercase tracking-wide">
             {pageTitle}
           </h1>
@@ -419,7 +419,7 @@ export function Header({
 
       {/* Tercera fila: Tabs (solo si hay tabs) */}
       {hasTabs && (
-        <div className="w-full h-10 px-6 flex items-center">
+        <div className="w-full h-10 px-12 flex items-center">
           <div className="flex items-center space-x-6">
             {tabs.map((tab) => {
               const tabContent = (

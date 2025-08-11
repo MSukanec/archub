@@ -98,15 +98,15 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
 
       <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-5 md:p-6 pb-12 ${
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-10 py-5 md:px-12 md:py-6 pb-12 ${
           // Calculate top padding based on header content
-          headerProps?.pageTitle && headerProps?.tabs?.length 
+          headerProps?.pageTitle && headerProps?.tabs?.length
             ? "md:pt-40" // breadcrumb + page title + tabs (h-36 + padding)
-            : headerProps?.pageTitle 
-            ? "md:pt-30" // breadcrumb + page title (h-26 + padding)
-            : headerProps?.tabs?.length 
-            ? "md:pt-24" // breadcrumb + tabs (h-20 + padding)
-            : "md:pt-14" // just breadcrumb (h-10 + padding)
+            : headerProps?.pageTitle
+              ? "md:pt-30" // breadcrumb + page title (h-26 + padding)
+              : headerProps?.tabs?.length
+                ? "md:pt-24" // breadcrumb + tabs (h-20 + padding)
+                : "md:pt-14" // just breadcrumb (h-10 + padding)
         } ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded
