@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
+import { Package, DollarSign, AlertTriangle, CheckCircle, Wallet } from "lucide-react";
 
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -9,6 +9,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SubcontractKPICard } from '@/components/charts/SubcontractKPICard';
 import { SubcontractPaymentsChart } from '@/components/charts/SubcontractPaymentsChart';
 
@@ -475,50 +476,6 @@ export default function FinancesSubcontracts() {
     >
       <div className="space-y-6">
 
-
-        {/* Gráfico de Pagos por Mes */}
-        <div className="grid grid-cols-4 gap-4">
-          <SubcontractPaymentsChart
-            data={paymentsChartData}
-            isLoading={isLoading}
-            currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
-
-          />
-        </div>
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SubcontractKPICard
-            title="Valor Total Contratado"
-            value={totalContractValue}
-            icon={<DollarSign className="h-4 w-4" />}
-            color="var(--chart-positive)"
-            isLoading={isLoading}
-            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
-            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
-          />
-          
-          <SubcontractKPICard
-            title="Total Pagado"
-            value={totalPaid}
-            icon={<CheckCircle className="h-4 w-4" />}
-            color="var(--chart-2)"
-            isLoading={isLoading}
-            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
-            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
-          />
-          
-          <SubcontractKPICard
-            title="Diferencia"
-            value={totalPending}
-            icon={<AlertTriangle className="h-4 w-4" />}
-            color={totalPending > 0 ? "var(--chart-positive)" : totalPending < 0 ? "var(--chart-negative)" : "var(--chart-neutral)"}
-            isLoading={isLoading}
-            formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
-            currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
-          />
-        </div>
-
         {/* Contenido condicional por tab */}
         {activeTab === 'summary' && (
           enrichedSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
@@ -526,17 +483,69 @@ export default function FinancesSubcontracts() {
               icon={<Package className="w-12 h-12 text-muted-foreground" />}
               title="Aún no tienes subcontratos creados"
               description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
+              action={
+                <Button asChild>
+                  <a href="/construction/subcontracts">
+                    Ir a Gestión de Subcontratos
+                  </a>
+                </Button>
+              }
             />
           ) : (
-            <div className="space-y-4">
-              <Table
-                columns={columns}
-                data={enrichedSubcontracts}
-                isLoading={isLoading || isLoadingAnalysis}
-                className="bg-card"
-                defaultSort={{ key: 'title', direction: 'asc' }}
-                getItemId={(item) => item.id || 'unknown'}
-              />
+            <div className="space-y-6">
+              {/* Gráfico de Pagos por Mes */}
+              <div className="grid grid-cols-4 gap-4">
+                <SubcontractPaymentsChart
+                  data={paymentsChartData}
+                  isLoading={isLoading}
+                  currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
+                />
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SubcontractKPICard
+                  title="Valor Total Contratado"
+                  value={totalContractValue}
+                  icon={<DollarSign className="h-4 w-4" />}
+                  color="var(--chart-positive)"
+                  isLoading={isLoading}
+                  formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+                  currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
+                />
+                
+                <SubcontractKPICard
+                  title="Total Pagado"
+                  value={totalPaid}
+                  icon={<CheckCircle className="h-4 w-4" />}
+                  color="var(--chart-2)"
+                  isLoading={isLoading}
+                  formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+                  currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
+                />
+                
+                <SubcontractKPICard
+                  title="Diferencia"
+                  value={totalPending}
+                  icon={<AlertTriangle className="h-4 w-4" />}
+                  color={totalPending > 0 ? "var(--chart-positive)" : totalPending < 0 ? "var(--chart-negative)" : "var(--chart-neutral)"}
+                  isLoading={isLoading}
+                  formatter={(val) => formatCurrency(val, currencyView === 'dolarizado' ? 'US$' : '$')}
+                  currencyCode={currencyView === 'dolarizado' ? 'USD' : 'ARS'}
+                />
+              </div>
+
+              {/* Tabla de subcontratos */}
+              <div className="space-y-4">
+                <Table
+                  columns={columns}
+                  data={enrichedSubcontracts}
+                  isLoading={isLoading || isLoadingAnalysis}
+                  className="bg-card"
+                  defaultSort={{ key: 'title', direction: 'asc' }}
+                  getItemId={(item) => item.id || 'unknown'}
+                />
+              </div>
             </div>
           )
         )}
@@ -547,6 +556,13 @@ export default function FinancesSubcontracts() {
               icon={<DollarSign className="w-12 h-12 text-muted-foreground" />}
               title="Aún no hay pagos registrados"
               description="Los pagos a subcontratistas aparecerán aquí una vez que se registren movimientos financieros asociados a los subcontratos."
+              action={
+                <Button asChild>
+                  <a href="/construction/subcontracts">
+                    Ir a Gestión de Subcontratos
+                  </a>
+                </Button>
+              }
             />
           ) : (
             <div className="space-y-4">
