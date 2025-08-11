@@ -69,7 +69,7 @@ export function useSiteLogTimeline(
         .lte('log_date', format(now, 'yyyy-MM-dd'))
 
       if (siteLogsError) {
-        console.error('Error fetching site logs for timeline:', siteLogsError)
+
         throw siteLogsError
       }
 
@@ -80,7 +80,7 @@ export function useSiteLogTimeline(
       const [filesResult, eventsResult, attendeesResult, equipmentResult] = await Promise.all([
         // Files
         supabase
-          .from('site_log_files')
+          .from('project_media')
           .select('site_log_id')
           .in('site_log_id', siteLogIds),
         
@@ -103,10 +103,8 @@ export function useSiteLogTimeline(
           .in('site_log_id', siteLogIds)
       ])
 
-      if (filesResult.error) console.error('Error fetching files:', filesResult.error)
-      if (eventsResult.error) console.error('Error fetching events:', eventsResult.error)
-      if (attendeesResult.error) console.error('Error fetching attendees:', attendeesResult.error)
-      if (equipmentResult.error) console.error('Error fetching equipment:', equipmentResult.error)
+
+
 
       // Group data by site log ID
       const filesByLogId = (filesResult.data || []).reduce((acc, file) => {

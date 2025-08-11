@@ -143,13 +143,11 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         `)
         .in('site_log_id', logIds);
 
-      // Fetch files separately - handle missing table gracefully
+      // Fetch files separately from project_media table
       const { data: filesData } = await supabase
         .from('project_media')
         .select('*')
-        .in('site_log_id', logIds)
-        .then(result => result)
-        .catch(() => ({ data: null }));
+        .in('site_log_id', logIds);
 
       // Combine data and fix creator structure
       const data = logsData.map(log => ({
