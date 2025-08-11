@@ -41,7 +41,6 @@ const installmentSchema = z.object({
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
   description: z.string().optional(),
-  receipt_number: z.string().optional(),
 })
 
 type InstallmentForm = z.infer<typeof installmentSchema>
@@ -75,7 +74,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       amount: 0,
       exchange_rate: undefined,
       description: '',
-      receipt_number: '',
     }
   })
 
@@ -165,28 +163,16 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       console.log('Loading editing installment:', editingInstallment)
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
-      // Cargar datos de la relación con terceros
-      const loadThirdPartyData = async () => {
-        const { data: contribution } = await supabase!
-          .from('movement_third_party_contributions')
-          .select('third_party_id, receipt_number')
-          .eq('movement_id', editingInstallment.id)
-          .single()
-
-        form.reset({
-          movement_date: installmentDate,
-          third_party_id: contribution?.third_party_id || editingInstallment.contact_id || '',
-          subcategory_id: editingInstallment.subcategory_id || '',
-          currency_id: editingInstallment.currency_id || '',
-          wallet_id: editingInstallment.wallet_id || '',
-          amount: editingInstallment.amount || 0,
-          exchange_rate: editingInstallment.exchange_rate || undefined,
-          description: editingInstallment.description || '',
-          receipt_number: contribution?.receipt_number || '',
-        })
-      }
-
-      loadThirdPartyData()
+      form.reset({
+        movement_date: installmentDate,
+        third_party_id: editingInstallment.contact_id || '',
+        subcategory_id: editingInstallment.subcategory_id || '',
+        currency_id: editingInstallment.currency_id || '',
+        wallet_id: editingInstallment.wallet_id || '',
+        amount: editingInstallment.amount || 0,
+        exchange_rate: editingInstallment.exchange_rate || undefined,
+        description: editingInstallment.description || '',
+      })
     }
   }, [editingInstallment, form, currencies, supabase])
 
@@ -264,7 +250,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
 
       const movementData = {
-        organization_id: userData.organization.id,
+        organization_id: userData?.organization?.id,
         project_id: projectId,
         movement_date: data.movement_date.toISOString().split('T')[0],
         currency_id: data.currency_id,
@@ -275,7 +261,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
-        created_by: userData.memberships?.find(m => m.organization_id === userData.organization.id)?.id || null, // Usar el ID del miembro de la organización
+        created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null, // Usar el ID del miembro de la organización
       }
 
       console.log('Movement data to insert:', movementData)
@@ -299,21 +285,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
         if (movementError) throw movementError
 
-        // Actualizar la relación con terceros - primero eliminar la existente y crear nueva
-        await supabase!
-          .from('movement_third_party_contributions')
-          .delete()
-          .eq('movement_id', editingInstallment.id)
-
-        const { error: contributionError } = await supabase!
-          .from('movement_third_party_contributions')
-          .insert([{
-            movement_id: editingInstallment.id,
-            third_party_id: data.third_party_id,
-            receipt_number: data.receipt_number || null,
-          }])
-
-        if (contributionError) throw contributionError
+        // No more third party contributions table
 
         return movement
       } else {
@@ -326,16 +298,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
         if (movementError) throw movementError
 
-        // Crear la relación con terceros
-        const { error: contributionError } = await supabase!
-          .from('movement_third_party_contributions')
-          .insert([{
-            movement_id: movement.id,
-            third_party_id: data.third_party_id,
-            receipt_number: data.receipt_number || null,
-          }])
-
-        if (contributionError) throw contributionError
+        // No more third party contributions table
 
         return movement
       }
@@ -628,43 +591,24 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
             />
           </div>
 
-          {/* 5. Descripción - Número de Recibo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción del aporte..."
-                      {...field}
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="receipt_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Número de Recibo (opcional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: RC-001"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          {/* 5. Descripción */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción (opcional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Descripción del aporte..."
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
       </form>
     </Form>
     )

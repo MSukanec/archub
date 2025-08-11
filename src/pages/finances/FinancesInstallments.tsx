@@ -358,10 +358,10 @@ export default function FinancesInstallments() {
     const totalsRow = {
       isTotal: true,
       contact_id: 'total',
-      contact: null,
+      contact: undefined,
       currencies: {},
       dollarizedTotal: 0,
-      client: null,
+      client: undefined,
       commitmentPercentage: 100,
       contributionPercentage: overallCompletionPercentage,
       totalCommittedAmount: totalCommittedAmountUSD,
@@ -660,7 +660,7 @@ export default function FinancesInstallments() {
         // Convert committed amount to USD if necessary
         let committedAmountUSD = committedAmount
         if (item.client?.currency_id) {
-          const clientCurrency = currencies?.find(c => c?.id === item.client.currency_id)
+          const clientCurrency = allCurrencies?.find(c => c?.id === item.client.currency_id)
           if (clientCurrency?.code !== 'USD') {
             // For now, we'll need an exchange rate to convert
             // In a real scenario, you might want to get this from the exchange rates table
@@ -888,7 +888,7 @@ export default function FinancesInstallments() {
       label: "Tipo",
       width: "16.7%",
       sortable: true,
-      sortType: "text" as const,
+      sortType: "string" as const,
       render: (item: any) => {
         const subcategoryName = item.subcategory_name || 'Sin especificar'
         return (
