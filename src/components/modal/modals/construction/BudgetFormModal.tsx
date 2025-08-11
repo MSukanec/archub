@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigationStore } from '@/stores/navigationStore';
+// Removed navigationStore import - using userData.preferences.last_project_id instead;
 
 const budgetSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -71,18 +71,16 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
     setPanel('edit');
   }, [budget, form, setPanel]);
 
-  const { selectedProjectId } = useNavigationStore()
-
   const createBudgetMutation = useMutation({
     mutationFn: async (data: BudgetFormData) => {
-      if (!userData?.organization?.id || !selectedProjectId) {
+      if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
         throw new Error('Missing required data');
       }
 
       const budgetData = {
         name: data.name,
         description: data.description || null,
-        project_id: selectedProjectId,
+        project_id: userData.preferences.last_project_id,
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),
