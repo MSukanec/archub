@@ -1,22 +1,21 @@
 import { useState } from "react";
-import { Package, Plus, Search, Filter, Edit, Trash2, DollarSign, Calendar, Building, Wallet, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
-import { FILTER_ICONS, FILTER_LABELS, ACTION_ICONS, ACTION_LABELS } from '@/constants/actionBarConstants';
+import { Package, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
+
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow';
+
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { Table } from "@/components/ui-custom/Table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { SubcontractKPICard } from '@/components/charts/SubcontractKPICard';
 import { SubcontractPaymentsChart } from '@/components/charts/SubcontractPaymentsChart';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMobile } from "@/hooks/use-mobile";
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
+
+import { useSubcontracts } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -25,23 +24,14 @@ import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter
 export default function FinancesSubcontracts() {
   const { data: userData } = useCurrentUser();
   const isMobile = useMobile();
-  const { openModal } = useGlobalModalStore();
-  const deleteSubcontract = useDeleteSubcontract();
+
+
   
-  // Estado para controles del ActionBar
-  const [searchQuery, setSearchQuery] = useState('');
+  // Estado para vista de moneda
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('dolarizado'); // Por defecto dolarizado
   const [activeTab, setActiveTab] = useState('summary');
 
-  // Función para crear subcontrato
-  const handleCreateSubcontract = () => {
-    openModal('subcontract', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
-      userId: userData?.user?.id,
-      isEditing: false
-    });
-  };
+
   
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
@@ -383,49 +373,6 @@ export default function FinancesSubcontracts() {
           </Badge>
         );
       }
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      sortable: false,
-      render: (subcontract: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => {
-              openModal('subcontract', {
-                projectId: userData?.preferences?.last_project_id,
-                organizationId: userData?.organization?.id,
-                userId: userData?.user?.id,
-                subcontractId: subcontract.id,
-                isEditing: true
-              });
-            }}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => {
-              openModal('delete-confirmation', {
-                title: 'Eliminar Subcontrato',
-                description: `¿Estás seguro de que deseas eliminar el subcontrato "${subcontract.title}"?`,
-                confirmText: 'Eliminar',
-                mode: 'dangerous',
-                onConfirm: () => {
-                  deleteSubcontract.mutate(subcontract.id);
-                }
-              });
-            }}
-          >
-            <Trash2 className="w-4 h-4 text-destructive" />
-          </Button>
-        </div>
-      )
     }
   ];
 
@@ -499,28 +446,7 @@ export default function FinancesSubcontracts() {
     }
   ];
 
-  // Filtrar subcontratos por búsqueda
-  const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
-    const searchLower = searchQuery.toLowerCase();
-    const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
-    
-    // Buscar en el nombre del contacto usando la misma lógica de renderizado
-    const contact = subcontract.contact;
-    const contactName = contact?.full_name || 
-      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-    const contactMatch = contactName?.toLowerCase().includes(searchLower);
-    
-    return titleMatch || contactMatch;
-  });
 
-  // Filtrar pagos por búsqueda
-  const filteredPayments = subcontractPayments.filter(payment => {
-    const searchLower = searchQuery.toLowerCase();
-    const titleMatch = payment.subcontract_title?.toLowerCase().includes(searchLower);
-    const contactMatch = payment.contact_name?.toLowerCase().includes(searchLower);
-    
-    return titleMatch || contactMatch;
-  });
 
   // Configurar tabs para el header
   const headerTabs = [
@@ -548,31 +474,7 @@ export default function FinancesSubcontracts() {
       headerProps={headerProps}
     >
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktopRow
-          filters={[
-            {
-              key: 'currency',
-              label: FILTER_LABELS.CURRENCY,
-              icon: FILTER_ICONS.CURRENCY,
-              value: currencyView === 'pesificado' ? 'Peso Argentino' : 'Dólar Estadounidense',
-              setValue: (value) => {
-                if (value === 'Peso Argentino') setCurrencyView('pesificado')
-                else setCurrencyView('dolarizado')
-              },
-              options: ['Peso Argentino', 'Dólar Estadounidense'],
-              defaultLabel: 'Seleccionar moneda'
-            }
-          ]}
-          actions={[
-            {
-              label: 'Crear Subcontrato',
-              icon: ACTION_ICONS.NEW,
-              onClick: handleCreateSubcontract,
-              variant: 'default'
-            }
-          ]}
-        />
+
 
         {/* Gráfico de Pagos por Mes */}
         <div className="grid grid-cols-4 gap-4">
@@ -619,7 +521,7 @@ export default function FinancesSubcontracts() {
 
         {/* Contenido condicional por tab */}
         {activeTab === 'summary' && (
-          filteredSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
+          enrichedSubcontracts.length === 0 && !isLoading && !isLoadingAnalysis ? (
             <EmptyState
               icon={<Package className="w-12 h-12 text-muted-foreground" />}
               title="Aún no tienes subcontratos creados"
@@ -629,7 +531,7 @@ export default function FinancesSubcontracts() {
             <div className="space-y-4">
               <Table
                 columns={columns}
-                data={filteredSubcontracts}
+                data={enrichedSubcontracts}
                 isLoading={isLoading || isLoadingAnalysis}
                 className="bg-card"
                 defaultSort={{ key: 'title', direction: 'asc' }}
@@ -640,7 +542,7 @@ export default function FinancesSubcontracts() {
         )}
 
         {activeTab === 'payments' && (
-          filteredPayments.length === 0 && !isLoadingPayments ? (
+          subcontractPayments.length === 0 && !isLoadingPayments ? (
             <EmptyState
               icon={<DollarSign className="w-12 h-12 text-muted-foreground" />}
               title="Aún no hay pagos registrados"
@@ -650,7 +552,7 @@ export default function FinancesSubcontracts() {
             <div className="space-y-4">
               <Table
                 columns={paymentsColumns}
-                data={filteredPayments}
+                data={subcontractPayments}
                 isLoading={isLoadingPayments}
                 className="bg-card"
                 defaultSort={{ key: 'movement_date', direction: 'desc' }}
