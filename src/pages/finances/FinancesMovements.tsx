@@ -353,7 +353,7 @@ export default function Movements() {
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
     // For conversions, we need to set special data so the modal can handle it
     const egresoMovement = conversionGroup.movements.find(m => 
-      m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+      m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
     ) || conversionGroup.movements[0];
     
     // Add conversion metadata to the movement
@@ -369,7 +369,7 @@ export default function Movements() {
   const handleEditTransfer = (transferGroup: TransferGroup) => {
     // For transfers, we need to set special data so the modal can handle it
     const egresoMovement = transferGroup.movements.find(m => 
-      m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+      m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
     ) || transferGroup.movements[0];
     
     // Add transfer metadata to the movement
@@ -555,10 +555,10 @@ export default function Movements() {
       if (groupMovements.length >= 2) {
         // Find egreso and ingreso movements
         const egresoMovement = groupMovements.find(m => 
-          m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+          m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
         );
         const ingresoMovement = groupMovements.find(m => 
-          m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+          m.movement_data?.type?.name?.toLowerCase()?.includes('ingreso')
         );
 
         if (egresoMovement && ingresoMovement) {
@@ -590,10 +590,10 @@ export default function Movements() {
       if (groupMovements.length >= 2) {
         // Find egreso and ingreso movements for transfer
         const egresoMovement = groupMovements.find(m => 
-          m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+          m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
         );
         const ingresoMovement = groupMovements.find(m => 
-          m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+          m.movement_data?.type?.name?.toLowerCase()?.includes('ingreso')
         );
 
         if (egresoMovement && ingresoMovement) {
@@ -950,7 +950,7 @@ export default function Movements() {
         
         return (
           <span className="text-xs font-medium">
-            {item.movement_data?.type?.name || "Sin tipo"}
+            {item.movement_data?.type?.name || item.type_name || "Sin tipo"}
           </span>
         );
       },
@@ -978,8 +978,8 @@ export default function Movements() {
           );
         }
         
-        const categoryName = item.movement_data?.category?.name || "Sin categoría";
-        const subcategoryName = item.movement_data?.subcategory?.name;
+        const categoryName = item.movement_data?.category?.name || item.category_name || "Sin categoría";
+        const subcategoryName = item.movement_data?.subcategory?.name || item.subcategory_name;
         
         return (
           <div className="space-y-1">
@@ -1068,10 +1068,10 @@ export default function Movements() {
       render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           const egresoMovement = item.movements.find(m => 
-            m.movement_data?.type?.name?.toLowerCase().includes('egreso')
+            m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
           );
           const ingresoMovement = item.movements.find(m => 
-            m.movement_data?.type?.name?.toLowerCase().includes('ingreso')
+            m.movement_data?.type?.name?.toLowerCase()?.includes('ingreso')
           );
           return (
             <div className="text-xs space-y-1">
@@ -1471,21 +1471,21 @@ export default function Movements() {
           }
           
           // For regular movements, determine type
-          const typeName = item.movement_data?.type?.name || "";
-          const categoryName = item.movement_data?.category?.name || "";
+          const typeName = item.movement_data?.type?.name || item.type_name || "";
+          const categoryName = item.movement_data?.category?.name || item.category_name || "";
           
           // Check for APORTES PROPIOS and RETIROS PROPIOS based on category name
-          if (categoryName.toLowerCase().includes("aportes propios") || 
-              categoryName.toLowerCase().includes("aportes_propios")) {
+          if (categoryName && (categoryName.toLowerCase().includes("aportes propios") || 
+              categoryName.toLowerCase().includes("aportes_propios"))) {
             return "movement-row-aportes-propios";
-          } else if (categoryName.toLowerCase().includes("retiros propios") || 
-                     categoryName.toLowerCase().includes("retiros_propios")) {
+          } else if (categoryName && (categoryName.toLowerCase().includes("retiros propios") || 
+                     categoryName.toLowerCase().includes("retiros_propios"))) {
             return "movement-row-retiros-propios";
           }
           
-          if (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso")) {
+          if (typeName && (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso"))) {
             return "movement-row-income";
-          } else if (typeName === "Egresos" || typeName.toLowerCase().includes("egreso")) {
+          } else if (typeName && (typeName === "Egresos" || typeName.toLowerCase().includes("egreso"))) {
             return "movement-row-expense";
           }
           return "";
