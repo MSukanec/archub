@@ -67,8 +67,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     defaultValues: {
       movement_date: new Date(),
       contact_id: '',
-      type_id: '',
-      category_id: '',
+      type_id: '8862eee7-dd00-4f01-9335-5ea0070d3403', // "Ingresos" - valor fijo para aportes
+      category_id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3', // "Aportes de Terceros" - valor fijo para aportes
       subcategory_id: '',
       currency_id: '',
       wallet_id: '',
@@ -153,6 +153,8 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       form.reset({
         movement_date: installmentDate,
         contact_id: editingInstallment.contact_id || '',
+        type_id: editingInstallment.type_id || '8862eee7-dd00-4f01-9335-5ea0070d3403',
+        category_id: editingInstallment.category_id || 'f3b96eda-15d5-4c96-ade7-6f53685115d3',
         subcategory_id: editingInstallment.subcategory_id || '',
         currency_id: editingInstallment.currency_id || '',
         wallet_id: editingInstallment.wallet_id || '',
@@ -185,6 +187,12 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           form.setValue('wallet_id', wallets[0].wallets.id)
         }
       }
+
+      // Establecer automáticamente type_id como "Ingresos"
+      form.setValue('type_id', '8862eee7-dd00-4f01-9335-5ea0070d3403')
+      
+      // Establecer automáticamente category_id como "Aportes de Terceros" 
+      form.setValue('category_id', 'f3b96eda-15d5-4c96-ade7-6f53685115d3')
     }
   }, [currencies, wallets, editingInstallment, form])
 
@@ -315,15 +323,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
 
   const onSubmit = async (data: InstallmentForm) => {
-    console.log('🔄 Form submission started', data)
-    console.log('🔄 Form errors:', form.formState.errors)
-    console.log('🔄 Form isValid:', form.formState.isValid)
-    
-    try {
-      await createInstallmentMutation.mutateAsync(data)
-    } catch (error) {
-      console.error('❌ Mutation error:', error)
-    }
+    await createInstallmentMutation.mutateAsync(data)
   }
 
   const handleClose = () => {
@@ -604,12 +604,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   )
 
   const handleSubmitClick = () => {
-    console.log('🔘 Submit button clicked')
-    console.log('🔘 Form values:', form.getValues())
-    console.log('🔘 Form errors:', form.formState.errors)
-    console.log('🔘 Form isValid:', form.formState.isValid)
-    console.log('🔘 Form isDirty:', form.formState.isDirty)
-    
     form.handleSubmit(onSubmit)()
   }
 
