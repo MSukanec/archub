@@ -462,9 +462,9 @@ export default function OrganizationContacts() {
         } : undefined
       }}
     >
-      <div className="grid grid-cols-12 gap-6 h-full">
+      <div className="grid grid-cols-2 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
-        <div className="col-span-7 space-y-4">
+        <div className="col-span-1 space-y-4 overflow-hidden">
           {/* ActionBar con botones ghost simples */}
           <ActionBar>
             <div className="flex items-center gap-2 w-full">
@@ -552,7 +552,7 @@ export default function OrganizationContacts() {
           )}
 
           {/* Lista de contactos agrupada por letra */}
-          <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
             {/* Contenido para la tab de Personas */}
             {activeTab === "personas" && (
               <>
@@ -609,7 +609,7 @@ export default function OrganizationContacts() {
         </div>
 
         {/* Columna derecha - Detalles del contacto */}
-        <div className="col-span-5">
+        <div className="col-span-1">
           <Card className="h-full">
             {selectedContact ? (
               <ContactDetailPanel 
