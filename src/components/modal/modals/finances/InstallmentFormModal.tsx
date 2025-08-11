@@ -603,12 +603,22 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     />
   )
 
+  const handleSubmitClick = () => {
+    console.log('🔘 Submit button clicked')
+    console.log('🔘 Form values:', form.getValues())
+    console.log('🔘 Form errors:', form.formState.errors)
+    console.log('🔘 Form isValid:', form.formState.isValid)
+    console.log('🔘 Form isDirty:', form.formState.isDirty)
+    
+    form.handleSubmit(onSubmit)()
+  }
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={editingInstallment ? "Actualizar" : "Guardar Aporte"}
-      onRightClick={form.handleSubmit(onSubmit)}
+      onRightClick={handleSubmitClick}
       showLoadingSpinner={createInstallmentMutation.isPending}
     />
   )
