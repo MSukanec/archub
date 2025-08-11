@@ -266,10 +266,12 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
-        created_by: userData.user.id,
+        created_by: userData.memberships?.find(m => m.organization_id === userData.organization.id)?.id || null, // Usar el ID del miembro de la organización
       }
 
       console.log('Movement data to insert:', movementData)
+      console.log('User data structure:', userData)
+      console.log('Available memberships:', userData.memberships)
 
       if (editingInstallment) {
         // Actualizar el movimiento
