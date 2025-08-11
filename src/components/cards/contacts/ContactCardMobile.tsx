@@ -41,7 +41,7 @@ const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-const ContactCard: React.FC<ContactCardProps> = ({
+const ContactCardMobile: React.FC<ContactCardProps> = ({
   contact,
   onEdit,
   onDelete,
@@ -134,4 +134,4 @@ const ContactCard: React.FC<ContactCardProps> = ({
   );
 };
 
-export default ContactCard;
+export default ContactCardMobile;

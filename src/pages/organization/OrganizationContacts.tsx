@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import ContactCard from '@/components/cards/mobile/ContactCard'
+import ContactCardMobile from '@/components/cards/contacts/ContactCardMobile'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 
@@ -572,14 +572,24 @@ export default function OrganizationContacts() {
                         </div>
                         <div className="space-y-2">
                           {contacts.map((contact) => (
-                            <ContactCardDesktop
-                              key={contact.id}
-                              contact={contact}
-                              onEdit={handleEditContact}
-                              onDelete={handleDeleteContact}
-                              onClick={setSelectedContact}
-                              isSelected={selectedContact?.id === contact.id}
-                            />
+                            isMobile ? (
+                              <ContactCardMobile
+                                key={contact.id}
+                                contact={contact}
+                                onEdit={handleEditContact}
+                                onDelete={handleDeleteContact}
+                                onClick={setSelectedContact}
+                              />
+                            ) : (
+                              <ContactCardDesktop
+                                key={contact.id}
+                                contact={contact}
+                                onEdit={handleEditContact}
+                                onDelete={handleDeleteContact}
+                                onClick={setSelectedContact}
+                                isSelected={selectedContact?.id === contact.id}
+                              />
+                            )
                           ))}
                         </div>
                       </div>
