@@ -73,12 +73,11 @@ export default function FinancesSubcontracts() {
             contact:contacts!inner(id, first_name, last_name, full_name)
           )
         `)
-        .eq('movement.project_id', userData.organization_preferences?.last_project_id)
-        .eq('movement.organization_id', userData.organization.id)
+        .eq('movement.project_id', userData.preferences?.last_project_id)
+        .eq('movement.organization_id', userData.organization?.id)
         .order('movement(movement_date)', { ascending: false });
 
       if (error) {
-        console.error('Error fetching subcontract payments:', error);
         return [];
       }
 
@@ -634,6 +633,7 @@ export default function FinancesSubcontracts() {
                 isLoading={isLoading || isLoadingAnalysis}
                 className="bg-card"
                 defaultSort={{ key: 'title', direction: 'asc' }}
+                getItemId={(item) => item.id || 'unknown'}
               />
             </div>
           )
@@ -654,6 +654,7 @@ export default function FinancesSubcontracts() {
                 isLoading={isLoadingPayments}
                 className="bg-card"
                 defaultSort={{ key: 'movement_date', direction: 'desc' }}
+                getItemId={(item) => item.id || 'unknown'}
               />
             </div>
           )
