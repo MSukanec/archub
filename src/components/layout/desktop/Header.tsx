@@ -410,7 +410,7 @@ export function Header({
 
       {/* Segunda fila: Título de página grande (solo si se proporciona pageTitle) */}
       {hasPageTitle && (
-        <div className="w-full h-16 px-12 flex items-end pb-2">
+        <div className="w-full h-16 px-12 flex items-end pb-1">
           <h1 className="text-5xl font-semibold text-black dark:text-white uppercase tracking-wide">
             {pageTitle}
           </h1>
