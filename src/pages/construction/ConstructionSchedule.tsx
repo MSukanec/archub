@@ -191,7 +191,10 @@ export default function ConstructionSchedule() {
                 const task = filteredTasks.find(t => t.id === item.id)
                 if (task) {
                   openModal('construction-task-schedule', { 
-                    taskId: task.id
+                    projectId: projectId || '',
+                    organizationId: organizationId || '',
+                    editingTask: task,
+                    isEditing: true
                   })
                 }
               }}
