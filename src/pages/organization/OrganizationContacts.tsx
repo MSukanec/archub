@@ -560,9 +560,9 @@ function ContactDetailPanel({
   onDelete: () => void 
 }) {
   return (
-    <div className="h-full flex flex-col">
+    <>
       {/* Header del panel */}
-      <div className="p-6 border-b border-border">
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             {contact.linked_user ? (
@@ -607,10 +607,10 @@ function ContactDetailPanel({
             </Button>
           </div>
         </div>
-      </div>
+      </CardHeader>
 
       {/* Información de contacto */}
-      <div className="flex-1 p-6 space-y-6">
+      <CardContent className="flex-1 space-y-6">
         <div className="space-y-4">
           <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
             Información de Contacto
@@ -678,21 +678,21 @@ function ContactDetailPanel({
             )}
           </div>
         </div>
-      </div>
 
-      {/* Footer con acciones */}
-      <div className="p-6 border-t border-border">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            <Share2 className="w-4 h-4 mr-2" />
-            Compartir
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            <Send className="w-4 h-4 mr-2" />
-            Mensaje
-          </Button>
+        {/* Footer con acciones */}
+        <div className="pt-4 border-t border-border">
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1">
+              <Share2 className="w-4 h-4 mr-2" />
+              Compartir
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1">
+              <Send className="w-4 h-4 mr-2" />
+              Mensaje
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </>
   )
 }
