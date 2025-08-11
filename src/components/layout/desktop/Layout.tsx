@@ -27,6 +27,7 @@ interface LayoutProps {
   headerProps?: {
     icon?: React.ComponentType<any>;
     title?: string;
+    pageTitle?: string;
     showSearch?: boolean;
     searchValue?: string;
     onSearchChange?: (value: string) => void;
@@ -98,7 +99,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       <main
         className={`transition-all duration-300 ease-in-out flex-1 overflow-auto p-5 md:p-6 pb-12 ${
-          headerProps?.tabs?.length ? "md:pt-24" : "md:pt-14"
+          // Calculate top padding based on header content
+          headerProps?.pageTitle && headerProps?.tabs?.length 
+            ? "md:pt-32" // breadcrumb + page title + tabs (h-28 + padding)
+            : headerProps?.pageTitle 
+            ? "md:pt-24" // breadcrumb + page title (h-20 + padding)
+            : headerProps?.tabs?.length 
+            ? "md:pt-24" // breadcrumb + tabs (h-20 + padding)
+            : "md:pt-14" // just breadcrumb (h-10 + padding)
         } ${
           // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
           isSecondaryExpanded

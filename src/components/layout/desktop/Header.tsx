@@ -42,6 +42,8 @@ interface Tab {
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
+  // 🆕 NUEVA PROP: Título de página grande
+  pageTitle?: string;
   showSearch?: boolean;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
@@ -72,6 +74,7 @@ interface HeaderProps {
 export function Header({
   icon,
   title,
+  pageTitle,
   showSearch = false,
   searchValue = "",
   onSearchChange,
@@ -243,10 +246,19 @@ export function Header({
   const isSecondaryExpanded =
     isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
+  const hasPageTitle = !!pageTitle;
+  
+  // Calculate header height based on content
+  const getHeaderHeight = () => {
+    if (hasPageTitle && hasTabs) return "h-28"; // breadcrumb + page title + tabs
+    if (hasPageTitle) return "h-20"; // breadcrumb + page title
+    if (hasTabs) return "h-20"; // breadcrumb + tabs  
+    return "h-10"; // just breadcrumb
+  };
 
   return (
     <div
-      className={`fixed top-0 right-0 z-50 ${hasTabs ? "h-20" : "h-10"} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
+      className={`fixed top-0 right-0 z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
         // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
         isSecondaryExpanded
           ? "left-[304px]" // 40px main + 264px secondary
@@ -396,7 +408,16 @@ export function Header({
         </div>
       </div>
 
-      {/* Segunda fila: Tabs (solo si hay tabs) */}
+      {/* Segunda fila: Título de página grande (solo si se proporciona pageTitle) */}
+      {hasPageTitle && (
+        <div className="w-full h-10 px-6 flex items-center">
+          <h1 className="text-2xl font-semibold text-[var(--layout-text)] uppercase tracking-wide">
+            {pageTitle}
+          </h1>
+        </div>
+      )}
+
+      {/* Tercera fila: Tabs (solo si hay tabs) */}
       {hasTabs && (
         <div className="w-full h-10 px-6 flex items-center">
           <div className="flex items-center space-x-6">
