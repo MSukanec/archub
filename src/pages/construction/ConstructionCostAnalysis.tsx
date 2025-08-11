@@ -86,6 +86,10 @@ export default function ConstructionCostAnalysis() {
   const headerProps = {
     title: "Análisis de Costos",
     icon: BarChart3,
+    breadcrumb: [
+      { name: "Construcción", href: "/construction" },
+      { name: "Análisis de Costos", href: "/construction/cost-analysis" }
+    ],
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
     // Add action button based on active tab

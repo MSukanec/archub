@@ -148,6 +148,10 @@ export default function ConstructionAttendance() {
   const headerProps = {
     icon: Users,
     title: "Asistencia",
+    breadcrumb: [
+      { name: "Construcción", href: "/construction" },
+      { name: "Asistencia", href: "/construction/attendance" }
+    ],
     actionButton: {
       label: 'Registrar Asistencia',
       icon: Plus,
