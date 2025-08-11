@@ -250,8 +250,8 @@ export function Header({
   
   // Calculate header height based on content
   const getHeaderHeight = () => {
-    if (hasPageTitle && hasTabs) return "h-40"; // breadcrumb + page title + tabs
-    if (hasPageTitle) return "h-30"; // breadcrumb + page title
+    if (hasPageTitle && hasTabs) return "h-36"; // breadcrumb + page title + tabs
+    if (hasPageTitle) return "h-26"; // breadcrumb + page title
     if (hasTabs) return "h-20"; // breadcrumb + tabs  
     return "h-10"; // just breadcrumb
   };
@@ -410,8 +410,8 @@ export function Header({
 
       {/* Segunda fila: Título de página grande (solo si se proporciona pageTitle) */}
       {hasPageTitle && (
-        <div className="w-full h-20 px-6 flex items-center">
-          <h1 className="text-2xl font-semibold text-black dark:text-white uppercase tracking-wide">
+        <div className="w-full h-16 px-6 flex items-end pb-2">
+          <h1 className="text-5xl font-semibold text-black dark:text-white uppercase tracking-wide">
             {pageTitle}
           </h1>
         </div>
