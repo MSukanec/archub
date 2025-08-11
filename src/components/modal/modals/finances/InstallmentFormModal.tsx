@@ -83,13 +83,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   
-  // Debug: mostrar datos de billeteras
-  React.useEffect(() => {
-    if (wallets) {
-      console.log('Wallets data:', wallets)
-    }
-  }, [wallets])
-  
   // Hook para obtener subcategorías de "Aportes de Terceros"
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
     queryKey: ['aportes-terceros-subcategories', organizationId],
@@ -114,9 +107,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .eq('organization_id', organizationId)
         .order('name')
       
-      console.log('System children of Aportes de Terceros:', systemChildren)
-      console.log('Organization children of Aportes de Terceros:', orgChildren)
-      
       // Combinar conceptos de sistema y organización
       const allChildren = [...(systemChildren || []), ...(orgChildren || [])]
       
@@ -129,21 +119,17 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           .is('organization_id', null)
           .single()
         
-        console.log('No children found, using system parent concept:', parentConcept)
+
         return parentConcept ? [parentConcept] : []
       }
       
-      console.log('Found subcategories:', allChildren)
+
       return allChildren
     },
     enabled: !!organizationId && !!supabase
   })
   
-  // Debug logs
-  React.useEffect(() => {
-    console.log('Currencies data:', currencies)
-    console.log('Subcategories data:', subcategories)
-  }, [currencies, subcategories])
+
   
   // Loading state for all necessary data
   const isLoading = currenciesLoading || clientsLoading || subcategoriesLoading || membersLoading || walletsLoading
@@ -160,7 +146,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Cargar datos del movimiento en edición
   React.useEffect(() => {
     if (editingInstallment && currencies) {
-      console.log('Loading editing installment:', editingInstallment)
+
       const installmentDate = editingInstallment.movement_date ? new Date(editingInstallment.movement_date) : new Date()
       
       form.reset({
@@ -204,8 +190,6 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
-      console.log('Creating installment with data:', data)
-      console.log('Available wallets:', wallets)
       
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
@@ -221,7 +205,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         throw new Error(`Wallet with ID ${data.wallet_id} not found`)
       }
 
-      console.log('Selected wallet:', selectedWallet)
+
 
       // Obtener la categoría padre de la subcategoría seleccionada
       const { data: subcategory } = await supabase!
@@ -230,10 +214,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .eq('id', data.subcategory_id)
         .single()
 
-      console.log('🔍 Subcategory query result:', { 
-        subcategory_id: data.subcategory_id, 
-        subcategory: subcategory 
-      })
+
 
       if (!subcategory) {
         throw new Error('Subcategoría no encontrada')
@@ -265,15 +246,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null, // Usar el ID del miembro de la organización
       }
 
-      console.log('Movement data to insert:', movementData)
-      console.log('🎯 Category/Subcategory check:', {
-        category_id: movementData.category_id,
-        subcategory_id: movementData.subcategory_id,
-        original_subcategory_id: data.subcategory_id,
-        parent_id_from_query: subcategory.parent_id
-      })
-      console.log('User data structure:', userData)
-      console.log('Available memberships:', userData.memberships)
+
 
       if (editingInstallment) {
         // Actualizar el movimiento
@@ -317,8 +290,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       onClose()
     },
     onError: (error) => {
-      console.error('Error creating installment:', error)
-      console.error('Full error object:', JSON.stringify(error, null, 2))
+
       
       let errorMessage = error.message || 'Error desconocido'
       
