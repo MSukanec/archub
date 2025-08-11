@@ -13,9 +13,9 @@ const Card = React.forwardRef<
       className,
     )}
     style={{
-      backgroundColor: "hsl(60, 8%, 95%)",
-      borderColor: "hsl(0, 0%, 90%)",
-      color: "hsl(0, 0%, 35%)"
+      backgroundColor: "var(--card-bg)",
+      borderColor: "var(--card-border)",
+      color: "var(--card-fg)"
     }}
     {...props}
   />
