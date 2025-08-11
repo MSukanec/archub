@@ -433,7 +433,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                       </SelectTrigger>
                       <SelectContent>
                         {subcategories?.map((subcategory) => (
-                          <SelectItem key={subcategory.id} value={subcategory.id}>
+                          <SelectItem key={`subcategory-${subcategory.id}`} value={subcategory.id}>
                             {subcategory.name}
                           </SelectItem>
                         ))}
@@ -460,7 +460,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                     </SelectTrigger>
                     <SelectContent>
                       {projectClients?.map((client) => (
-                        <SelectItem key={client.contact.id} value={client.contact.id}>
+                        <SelectItem key={`client-${client.contact.id}`} value={client.contact.id}>
                           {client.contact.company_name || client.contact.full_name}
                         </SelectItem>
                       ))}
@@ -487,7 +487,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                       </SelectTrigger>
                       <SelectContent>
                         {currencies?.map((orgCurrency) => (
-                          <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id}>
+                          <SelectItem 
+                            key={`currency-${orgCurrency.currency?.id}`} 
+                            value={orgCurrency.currency?.id || ''}
+                          >
                             {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
                           </SelectItem>
                         ))}
@@ -513,7 +516,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
                       <SelectContent>
                         {wallets?.map((orgWallet) => (
                           <SelectItem 
-                            key={orgWallet.wallets?.id} 
+                            key={`wallet-${orgWallet.wallets?.id}`} 
                             value={orgWallet.wallets?.id || ''}
                           >
                             {orgWallet.wallets?.name || 'Sin nombre'}
