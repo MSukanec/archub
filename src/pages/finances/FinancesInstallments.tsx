@@ -156,17 +156,14 @@ export default function FinancesInstallments() {
         .eq('name', 'Aportes de Terceros')
 
       if (error) {
-        console.error('Error fetching Aportes de Terceros concept:', error)
         return null
       }
 
       if (!data || data.length === 0) {
-        console.log('No Aportes de Terceros concept found, using correct movements ID f3b96eda-15d5-4c96-ade7-6f53685115d3')
         // Return the correct ID for Aportes de Terceros subcategory
         return { id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3', name: 'Aportes de Terceros' }
       }
 
-      console.log('Found Aportes de Terceros concept:', data[0])
       return data[0]
     },
     enabled: !!organizationId && !!supabase
@@ -178,16 +175,7 @@ export default function FinancesInstallments() {
     queryFn: async () => {
       if (!supabase || !organizationId || !projectId || !aportesDeTerrerosConcept) return []
 
-      console.log('Found concepts:', {
-        ingresos: '8862eee7-dd00-4f01-9335-5ea0070d3403',
-        aportesDeTerreros: aportesDeTerrerosConcept.id
-      })
 
-      console.log('Querying movements with:', {
-        organizationId,
-        projectId,
-        category_id: aportesDeTerrerosConcept.id
-      })
 
       // Use the new movement_view - much simpler query with all joins already done!
       // Changed from subcategory_id to category_id to filter by "Aportes de Terceros" category
@@ -199,10 +187,7 @@ export default function FinancesInstallments() {
         .eq('category_id', aportesDeTerrerosConcept.id)
         .order('movement_date', { ascending: false })
 
-      console.log('Movement view result:', { movements, error, count: movements?.length })
-
       if (error) {
-        console.error('Error fetching installments from view:', error)
         throw error
       }
 
@@ -704,14 +689,10 @@ export default function FinancesInstallments() {
                 if (clientInstallments.length > 0) {
                   const firstInstallment = clientInstallments[0]
                   openModal('installment', {
-                    installment: firstInstallment,
-                    onSave: (data: any) => {
-                      // Handle save - this will be handled by the modal
-                      console.log('Saving installment:', data)
-                    }
+                    projectId: projectId || '',
+                    organizationId: organizationId || '',
+                    editingInstallment: firstInstallment
                   })
-                } else {
-                  console.log('No installments found for client:', item.contact?.first_name)
                 }
               }}
               className="h-8 w-8 p-0"
