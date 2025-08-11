@@ -1,20 +1,12 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
-import { Plus, CheckSquare, Calendar, MapPin, User, Edit, Trash2, TableIcon, Settings, Search, Filter, FolderTree, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, CheckSquare, Settings } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktopRow } from '@/components/layout/desktop/ActionBarDesktopRow'
-import { FILTER_ICONS } from '@/constants/actionBarConstants'
+
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
