@@ -11,6 +11,7 @@ import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
@@ -582,8 +583,29 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
               </FormItem>
             )}
           />
-      </form>
-    </Form>
+
+          {/* Botón de submit dentro del formulario */}
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createInstallmentMutation.isPending}
+              className="min-w-[120px]"
+            >
+              {createInstallmentMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Guardando...</span>
+                </div>
+              ) : (
+                editingInstallment ? "Actualizar" : "Guardar Aporte"
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
     )
   }
 
@@ -594,15 +616,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     />
   )
 
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={handleClose}
-      rightLabel={editingInstallment ? "Actualizar" : "Guardar Aporte"}
-      onRightClick={form.handleSubmit(onSubmit)}
-      showLoadingSpinner={createInstallmentMutation.isPending}
-    />
-  )
+  const footerContent = null // Botones ahora están dentro del formulario
 
   return (
     <FormModalLayout
