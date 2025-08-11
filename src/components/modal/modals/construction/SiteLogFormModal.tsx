@@ -114,7 +114,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         organization_id: currentUser?.organization?.id || ''
       };
 
-      console.log('💾 Saving site log data:', siteLogData);
+
 
       let siteLogResult;
       
@@ -137,16 +137,16 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       }
 
       if (siteLogResult.error) {
-        console.error('❌ Error saving site log:', siteLogResult.error);
+
         throw new Error(siteLogResult.error.message);
       }
 
       const savedSiteLog = siteLogResult.data;
-      console.log('✅ Site log saved successfully:', savedSiteLog);
+
 
       // Ahora guardar los attendees si existen
       if (formData.attendees && formData.attendees.length > 0) {
-        console.log('👥 Saving attendees for site log:', savedSiteLog.id);
+
         
         // Primero eliminar attendees existentes si estamos actualizando
         if (siteLogId) {
@@ -172,10 +172,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           .insert(attendeesToInsert);
 
         if (attendeesError) {
-          console.error('❌ Error saving attendees:', attendeesError);
           // No throw aquí para no fallar todo el proceso
-        } else {
-          console.log('✅ Attendees saved successfully');
         }
       }
 
@@ -217,10 +214,8 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
   useEffect(() => {
     if (data) {
-      console.log('📝 Cargando datos para edición:', { data });
       // Los datos pueden venir anidados en data.data, normalizar
       const siteLogData = data.data || data;
-      console.log('📝 Datos normalizados:', { siteLogData });
       
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
@@ -233,7 +228,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         attendees: siteLogData.attendees || [],
         equipment: siteLogData.equipment || []
       };
-      console.log('🔄 Resetting form with values:', resetValues);
       form.reset(resetValues);
       setEvents(siteLogData.events || []);
       setAttendees(siteLogData.attendees || []);
@@ -310,11 +304,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   };
 
   const onSubmit = async (formData: SiteLogFormData) => {
-    console.log("💾 Guardando bitácora:", formData);
-    console.log("👥 Personal a guardar:", attendees);
-    console.log("📅 Eventos a guardar:", events);
-    console.log("🔧 Equipamiento a guardar:", equipment);
-    
     // Agregar los datos adicionales al formulario
     const completeFormData = {
       ...formData,
@@ -323,7 +312,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       equipment: equipment
     };
     
-    console.log("📋 Datos completos a enviar:", completeFormData);
     siteLogMutation.mutate(completeFormData);
   };
 
