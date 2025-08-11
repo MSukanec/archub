@@ -152,7 +152,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       
       form.reset({
         movement_date: installmentDate,
-        third_party_id: editingInstallment.contact_id || '',
+        contact_id: editingInstallment.contact_id || '',
         subcategory_id: editingInstallment.subcategory_id || '',
         currency_id: editingInstallment.currency_id || '',
         wallet_id: editingInstallment.wallet_id || '',
