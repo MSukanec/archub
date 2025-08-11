@@ -425,9 +425,10 @@ export default function OrganizationContacts() {
       <div className="grid grid-cols-12 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-7">
-          {/* Contenido para la tab de Personas */}
-          {activeTab === "personas" && (
-            <Table
+          <div className="bg-card border border-border rounded-lg h-full">
+            {/* Contenido para la tab de Personas */}
+            {activeTab === "personas" && (
+              <Table
               data={filteredContacts}
               columns={columns}
               isLoading={contactsLoading}
@@ -496,20 +497,21 @@ export default function OrganizationContacts() {
                 />
               )}
               cardSpacing="space-y-3"
-              getItemId={(contact) => contact.id}
-            />
-          )}
+                getItemId={(contact) => contact.id}
+              />
+            )}
 
-          {/* Contenido para la tab de Empresas - Restringida */}
-          {activeTab === "empresas" && (
-            <CustomRestricted reason="coming_soon">
-              <div className="text-center py-12">
-                <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
-                <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
-              </div>
-            </CustomRestricted>
-          )}
+            {/* Contenido para la tab de Empresas - Restringida */}
+            {activeTab === "empresas" && (
+              <CustomRestricted reason="coming_soon">
+                <div className="text-center py-12">
+                  <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
+                  <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
+                </div>
+              </CustomRestricted>
+            )}
+          </div>
         </div>
 
         {/* Columna derecha - Detalles del contacto */}
@@ -579,8 +581,8 @@ function ContactDetailPanel({
               )}
               {contact.contact_types && contact.contact_types.length > 0 && (
                 <div className="flex gap-1 mt-2">
-                  {contact.contact_types.map((typeLink: any) => (
-                    <Badge key={typeLink.type_id} variant="secondary" className="text-xs">
+                  {contact.contact_types.map((typeLink: any, index: number) => (
+                    <Badge key={`${typeLink.type_id}-${index}`} variant="secondary" className="text-xs">
                       {typeLink.contact_type?.name}
                     </Badge>
                   ))}
@@ -589,10 +591,10 @@ function ContactDetailPanel({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={onEdit}>
+            <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={onDelete}>
+            <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8">
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
