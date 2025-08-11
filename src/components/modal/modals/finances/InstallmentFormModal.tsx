@@ -240,6 +240,11 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         .eq('id', data.subcategory_id)
         .single()
 
+      console.log('🔍 Subcategory query result:', { 
+        subcategory_id: data.subcategory_id, 
+        subcategory: subcategory 
+      })
+
       if (!subcategory) {
         throw new Error('Subcategoría no encontrada')
       }
@@ -270,6 +275,12 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       }
 
       console.log('Movement data to insert:', movementData)
+      console.log('🎯 Category/Subcategory check:', {
+        category_id: movementData.category_id,
+        subcategory_id: movementData.subcategory_id,
+        original_subcategory_id: data.subcategory_id,
+        parent_id_from_query: subcategory.parent_id
+      })
       console.log('User data structure:', userData)
       console.log('Available memberships:', userData.memberships)
 
