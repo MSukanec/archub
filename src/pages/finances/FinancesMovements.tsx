@@ -876,8 +876,17 @@ export default function Movements() {
         }
 
         try {
-          // Simply use the date string directly with new Date()
-          const date = new Date(displayDate);
+          // Handle PostgreSQL date type correctly - treat as local date, not UTC
+          let date: Date;
+          
+          if (typeof displayDate === 'string' && displayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // For PostgreSQL date format "YYYY-MM-DD", create local date without timezone issues
+            const [year, month, day] = displayDate.split('-').map(Number);
+            date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+          } else {
+            // Fallback for other date formats
+            date = new Date(displayDate);
+          }
           
           if (isNaN(date.getTime())) {
             console.log('Invalid date for item:', displayDate, item);
