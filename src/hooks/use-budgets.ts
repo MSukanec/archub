@@ -24,8 +24,6 @@ export function useBudgets(projectId?: string) {
         return []
       }
 
-      console.log('Fetching budgets for project:', projectId, 'and organization:', userData.organization.id)
-      
       const { data, error } = await supabase
         .from('budgets')
         .select('*')
@@ -34,11 +32,8 @@ export function useBudgets(projectId?: string) {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching budgets:', error)
         throw error
       }
-
-      console.log('Budgets data received:', data)
       return data as Budget[]
     },
     enabled: !!supabase && !!projectId && !!userData?.organization?.id
@@ -64,38 +59,15 @@ export function useCreateBudget() {
       if (error) throw error
       return data
     },
-    onSuccess: async (data) => {
-      // Establecer automáticamente el nuevo presupuesto como activo en user_preferences
-      if (userData?.user?.id && userData?.preferences?.id) {
-        try {
-          console.log('🔄 Auto-activating new budget:', data.id)
-          
-          const { error: preferencesError } = await supabase
-            .from('user_preferences')
-            .update({ last_budget_id: data.id })
-            .eq('id', userData.preferences.id)
-            .eq('user_id', userData.user.id)
-
-          if (preferencesError) {
-            console.error('Error updating budget preference:', preferencesError)
-          } else {
-            console.log('✅ New budget automatically activated:', data.id)
-          }
-        } catch (error) {
-          console.error('Error auto-activating budget:', error)
-        }
-      }
-
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['budgets'] })
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
       
       toast({
         title: "Presupuesto creado",
-        description: "El presupuesto ha sido creado y activado automáticamente",
+        description: "El presupuesto ha sido creado correctamente",
       })
     },
     onError: (error) => {
-      console.error('Error creating budget:', error)
       toast({
         title: "Error",
         description: "No se pudo crear el presupuesto",
@@ -132,7 +104,6 @@ export function useUpdateBudget() {
       })
     },
     onError: (error) => {
-      console.error('Error updating budget:', error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el presupuesto",
@@ -166,7 +137,6 @@ export function useDeleteBudget() {
       })
     },
     onError: (error) => {
-      console.error('Error deleting budget:', error)
       toast({
         title: "Error",
         description: "No se pudo eliminar el presupuesto",
