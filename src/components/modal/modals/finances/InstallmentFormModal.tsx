@@ -33,7 +33,7 @@ const installmentSchema = z.object({
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
-  third_party_id: z.string().min(1, 'Cliente es requerido'),
+  contact_id: z.string().min(1, 'Cliente es requerido'),
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
   subcategory_id: z.string().min(1, 'Subcategoría es requerida'),
@@ -66,7 +66,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     resolver: zodResolver(installmentSchema),
     defaultValues: {
       movement_date: new Date(),
-      third_party_id: '',
+      contact_id: '',
       type_id: '',
       category_id: '',
       subcategory_id: '',
@@ -243,7 +243,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
         type_id: typeId,
         category_id: subcategory.parent_id,
         subcategory_id: data.subcategory_id,
-        contact_id: data.third_party_id, // Mapear third_party_id a contact_id
+        contact_id: data.contact_id, // Campo contact_id directo
         created_by: userData?.memberships?.find(m => m.organization_id === userData?.organization?.id)?.id || null, // Usar el ID del miembro de la organización
       }
 
@@ -283,10 +283,10 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       toast({
-        title: editingInstallment ? 'Compromiso actualizado' : 'Compromiso registrado',
+        title: editingInstallment ? 'Aporte actualizado' : 'Aporte registrado',
         description: editingInstallment 
-          ? 'El compromiso ha sido actualizado correctamente'
-          : 'El compromiso ha sido registrado correctamente',
+          ? 'El aporte ha sido actualizado correctamente'
+          : 'El aporte ha sido registrado correctamente',
       })
       onClose()
     },
@@ -315,7 +315,28 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
   })
 
   const onSubmit = async (data: InstallmentForm) => {
-    await createInstallmentMutation.mutateAsync(data)
+    console.log('📋 Form submission started with data:', data)
+    console.log('📋 Form validation errors:', form.formState.errors)
+    
+    // Validar que todos los campos requeridos estén presentes
+    const requiredFields = ['movement_date', 'contact_id', 'subcategory_id', 'currency_id', 'wallet_id', 'amount']
+    const missingFields = requiredFields.filter(field => !data[field as keyof InstallmentForm])
+    
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields)
+      toast({
+        variant: 'destructive',
+        title: 'Error de validación',
+        description: `Faltan campos requeridos: ${missingFields.join(', ')}`,
+      })
+      return
+    }
+    
+    try {
+      await createInstallmentMutation.mutateAsync(data)
+    } catch (error) {
+      console.error('❌ Error in submission:', error)
+    }
   }
 
   const handleClose = () => {
@@ -441,7 +462,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
           {/* 2. Cliente */}
           <FormField
             control={form.control}
-            name="third_party_id"
+            name="contact_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cliente *</FormLabel>
