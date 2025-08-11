@@ -3,6 +3,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Table } from '@/components/ui-custom/Table'
 import { Label } from '@/components/ui/label'
@@ -28,6 +35,7 @@ import { ActionBar } from '@/components/layout/desktop/ActionBar'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import ContactCardDesktop from '@/components/cards/contacts/ContactCardDesktop'
 
 export default function OrganizationContacts() {
   const [activeTab, setActiveTab] = useState("personas")
@@ -433,93 +441,102 @@ export default function OrganizationContacts() {
       <div className="grid grid-cols-12 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-7">
-          <div className="bg-card border border-border rounded-lg h-full">
-            {/* Contenido para la tab de Personas */}
-            {activeTab === "personas" && (
-              <Table
-              data={filteredContacts}
-              columns={columns}
-              isLoading={contactsLoading}
-              defaultSort={{
-                key: "name",
-                direction: "asc",
-              }}
-              topBar={{
-                showSearch: true,
-                searchValue: searchValue,
-                onSearchChange: setSearchValue,
-                showFilter: true,
-                isFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
-                renderFilterContent: () => (
-                  <div className="space-y-3 p-2 min-w-[200px]">
-                    <div>
-                      <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
-                      <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Más Recientes" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                          <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                      <Select value={filterByType} onValueChange={setFilterByType}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Todos los Tipos" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos los Tipos</SelectItem>
-                          {contactTypes?.map((type) => (
-                            <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                              {type.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                ),
-                showClearFilters: true,
-                onClearFilters: () => {
-                  setSearchValue("");
-                  setSortBy('name_asc');
-                  setFilterByType('all');
-                }
-              }}
-              emptyState={
-                <div className="text-center py-8">
-                  <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">No se encontraron contactos</p>
-                  <p className="text-xs text-muted-foreground mt-1">Intenta ajustar los filtros o crear un nuevo contacto</p>
+          <Card className="h-full">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Buscar contactos..."
+                    value={searchValue}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
+                    className="h-9"
+                  />
                 </div>
-              }
-              renderCard={(contact: any) => (
-                <ContactCard
-                  key={contact.id}
-                  contact={contact}
-                  onEdit={handleEditContact}
-                  onDelete={handleDeleteContact}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filtros
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px]">
+                    <div className="space-y-3 p-2">
+                      <div>
+                        <Label className="text-xs font-medium mb-1 block">Ordenar</Label>
+                        <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Más Recientes" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                            <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                        <Select value={filterByType} onValueChange={setFilterByType}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Todos los Tipos" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos los Tipos</SelectItem>
+                            {contactTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 space-y-3">
+              {/* Contenido para la tab de Personas */}
+              {activeTab === "personas" && (
+                <>
+                  {contactsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin h-8 w-8 border-b-2 border-gray-900 rounded-full"></div>
+                    </div>
+                  ) : filteredContacts.length > 0 ? (
+                    <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+                      {filteredContacts.map((contact) => (
+                        <ContactCardDesktop
+                          key={contact.id}
+                          contact={contact}
+                          onEdit={handleEditContact}
+                          onDelete={handleDeleteContact}
+                          onClick={setSelectedContact}
+                          isSelected={selectedContact?.id === contact.id}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No hay contactos</h3>
+                      <p className="text-muted-foreground">Comienza agregando tu primer contacto</p>
+                    </div>
+                  )}
+                </>
               )}
-              cardSpacing="space-y-3"
-                getItemId={(contact) => contact.id}
-              />
-            )}
 
-            {/* Contenido para la tab de Empresas - Restringida */}
-            {activeTab === "empresas" && (
-              <CustomRestricted reason="coming_soon">
-                <div className="text-center py-12">
-                  <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
-                  <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
-                </div>
-              </CustomRestricted>
-            )}
-          </div>
+              {/* Contenido para la tab de Empresas - Restringida */}
+              {activeTab === "empresas" && (
+                <CustomRestricted reason="coming_soon">
+                  <div className="text-center py-12">
+                    <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
+                    <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
+                  </div>
+                </CustomRestricted>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Columna derecha - Detalles del contacto */}
