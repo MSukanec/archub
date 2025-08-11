@@ -77,6 +77,20 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         throw new Error('Missing required data');
       }
 
+      // Get the correct organization member ID
+      const memberResponse = await fetch('/api/user/organization-member', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!memberResponse.ok) {
+        throw new Error('Failed to get organization member ID')
+      }
+
+      const memberData = await memberResponse.json()
+
       const budgetData = {
         name: data.name,
         description: data.description || null,
@@ -84,7 +98,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         organization_id: userData.organization.id,
         status: data.status,
         created_at: data.created_at.toISOString(),
-        created_by: "8016e8bb-b49e-4f6f-8616-0e1a6d0fc506" // Using the organization_member ID from the logs
+        created_by: memberData.id
       };
 
       if (isEditing && budget) {

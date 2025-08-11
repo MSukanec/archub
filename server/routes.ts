@@ -249,6 +249,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get organization member ID for current user
+  app.get("/api/user/organization-member", async (req, res) => {
+    try {
+      const user = await getCurrentUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { data: organizationMember, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('organization_id', user.last_organization_id)
+        .single();
+
+      if (error || !organizationMember) {
+        console.error("Error fetching organization member:", error);
+        return res.status(404).json({ error: "Organization member not found" });
+      }
+
+      res.json(organizationMember);
+    } catch (error) {
+      console.error("Error fetching organization member:", error);
+      res.status(500).json({ error: "Failed to fetch organization member" });
+    }
+  });
+
   // Get task parameter values with expression templates
   app.get("/api/task-parameter-values", async (req, res) => {
     try {
