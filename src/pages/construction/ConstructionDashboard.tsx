@@ -2,8 +2,6 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Building } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
 import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function ConstructionDashboard() {
@@ -14,33 +12,14 @@ export default function ConstructionDashboard() {
     setSidebarContext('construction')
   }, [setSidebarContext])
 
-  // ActionBar features
-  const features = [
-    {
-      icon: <Building className="h-4 w-4" />,
-      title: "Dashboard Integral",
-      description: "Panel de control con métricas principales del estado de construcción del proyecto."
-    }
-  ]
-
   return (
-    <Layout wide>
+    <Layout 
+      wide
+      headerProps={{
+        title: "Resumen de Construcción"
+      }}
+    >
       <div className="space-y-6">
-        {/* ActionBar */}
-        <ActionBarDesktop
-          title="Resumen de Construcción"
-          icon={<Building className="h-5 w-5" />}
-          features={features}
-        />
-
-        {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Resumen de Construcción"
-          icon={<Building className="h-6 w-6" />}
-          features={features}
-          className="md:hidden"
-        />
-
         {/* Coming Soon Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
