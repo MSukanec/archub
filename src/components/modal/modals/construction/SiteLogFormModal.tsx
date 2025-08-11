@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText, Plus, Trash2, Calendar, Cloud, Users, Wrench, Camera, ArrowLeft, X } from "lucide-react";
+import { FileText, Plus, Trash2, Cloud, Users, Wrench, Camera, ArrowLeft, X } from "lucide-react";
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
@@ -23,11 +23,9 @@ import { useModalPanelStore } from "../../form/modalPanelStore";
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
-import UserSelector from "@/components/ui-custom/UserSelector";
 
 // Schema basado en el modal original con valores exactos del enum
 const siteLogSchema = z.object({
-  created_by: z.string().min(1, "El creador es requerido"),
   log_date: z.string().min(1, "La fecha es requerida"),
   entry_type: z.enum([
     'avance_de_obra',
@@ -98,9 +96,15 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         throw new Error('Error de conexión con la base de datos');
       }
 
+      // Obtener el organization_member.id del usuario actual
+      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización para el usuario actual');
+      }
+
       const siteLogData = {
         log_date: formData.log_date,
-        created_by: formData.created_by, // Este ya es el organization_member.id correcto
+        created_by: currentMember.id, // Usar automáticamente el current user
         entry_type: formData.entry_type,
         weather: formData.weather,
         comments: formData.comments,
@@ -159,7 +163,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           attendance_type: attendee.attendance_type || 'full',
           hours_worked: attendee.hours_worked || 8,
           description: attendee.description || attendee.notes || '',
-          created_by: formData.created_by,
+          created_by: currentMember.id,
           project_id: currentUser?.preferences?.last_project_id || ''
         }));
 
@@ -198,7 +202,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
-      created_by: "", // Será seteado en useEffect cuando se carguen los members
       log_date: new Date().toISOString().split('T')[0],
       entry_type: "avance_de_obra",
       weather: null,
@@ -210,16 +213,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     }
   });
 
-  // Setear el miembro de organización actual como creador cuando se carguen los datos (solo si no hay data para editar)
-  useEffect(() => {
-    if (!data && members && members.length > 0 && currentUser?.user?.id && !form.watch('created_by')) {
-      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
-      if (currentMember) {
-        console.log('🔍 Setting default creator:', currentMember);
-        form.setValue('created_by', currentMember.id);
-      }
-    }
-  }, [data, members, currentUser, form]);
+
 
   useEffect(() => {
     if (data) {
@@ -230,7 +224,6 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       
       // Si estamos editando, cargar los datos existentes
       const resetValues = {
-        created_by: siteLogData.created_by || "", // Este ya es el organization_member.id correcto
         log_date: siteLogData.log_date || new Date().toISOString().split('T')[0],
         entry_type: siteLogData.entry_type || "avance_de_obra",
         weather: siteLogData.weather || null,
@@ -375,77 +368,18 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         }}
         className="space-y-6"
       >
-        {/* Información Básica */}
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 bg-accent/10 rounded-lg">
-              <Calendar className="w-4 h-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Información Básica</h3>
-              <p className="text-xs text-muted-foreground">Datos principales de la entrada de bitácora</p>
-            </div>
-          </div>
-
+          {/* Fecha - Condición */}
           <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="created_by"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Creado por</FormLabel>
-                  <FormControl>
-                    <UserSelector
-                      users={members || []}
-                      value={form.watch('created_by')}
-                      onChange={(value) => form.setValue('created_by', value)}
-                      placeholder="Seleccionar creador"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="log_date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha de bitácora</FormLabel>
+                  <FormLabel>Fecha</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="entry_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de bitácora</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
-                      <SelectItem value="decision">Decisión</SelectItem>
-                      <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
-                      <SelectItem value="inspeccion">Inspección</SelectItem>
-                      <SelectItem value="nota_climatica">Nota Climática</SelectItem>
-                      <SelectItem value="pedido_material">Pedido Material</SelectItem>
-                      <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
-                      <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -456,7 +390,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               name="weather"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Condición climática</FormLabel>
+                  <FormLabel>Condición</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
@@ -482,12 +416,42 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             />
           </div>
 
+          {/* Tipo */}
+          <FormField
+            control={form.control}
+            name="entry_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="avance_de_obra">Avance de Obra</SelectItem>
+                    <SelectItem value="decision">Decisión</SelectItem>
+                    <SelectItem value="foto_diaria">Foto Diaria</SelectItem>
+                    <SelectItem value="inspeccion">Inspección</SelectItem>
+                    <SelectItem value="nota_climatica">Nota Climática</SelectItem>
+                    <SelectItem value="pedido_material">Pedido Material</SelectItem>
+                    <SelectItem value="problema_detectado">Problema Detectado</SelectItem>
+                    <SelectItem value="visita_tecnica">Visita Técnica</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Comentarios */}
           <FormField
             control={form.control}
             name="comments"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Comentarios generales</FormLabel>
+                <FormLabel>Comentarios</FormLabel>
                 <FormControl>
                   <Textarea 
                     placeholder="Descripción general de las actividades del día..."
