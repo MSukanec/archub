@@ -853,10 +853,6 @@ function ContactDetailPanel({
 
         {/* Archivos y Media */}
         <div className="space-y-4">
-          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-            Archivos y Media
-          </h3>
-          
           <ContactAttachmentsPanel 
             contactId={contact.id} 
             contact={contact}
