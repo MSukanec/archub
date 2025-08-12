@@ -182,8 +182,9 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
 
   return (
     <div className="space-y-6">
-      {/* Botón de subir archivos alineado a la derecha */}
-      <div className="flex justify-end">
+      {/* Header con título y botón alineados */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Archivos y Media</h3>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="default" size="sm" className="gap-2">
