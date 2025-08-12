@@ -610,8 +610,13 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     <FormModalHeader
       title={
         currentPanel === 'subform' && currentSubform === 'attachments' 
-          ? ""
+          ? "Archivos y Media"
           : (isEditing ? "Editar Contacto" : "Nuevo Contacto")
+      }
+      description={
+        currentPanel === 'subform' && currentSubform === 'attachments' 
+          ? "Gestionar archivos adjuntos del contacto"
+          : undefined
       }
       icon={currentPanel === 'subform' && currentSubform === 'attachments' ? FileText : UserPlus}
       leftActions={
