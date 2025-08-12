@@ -587,20 +587,31 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             )}
           />
 
-          {/* FormSubsectionButton para Adjuntos - Solo mostrar en modo de edición si hay un contacto existente */}
-          {isEditing && editingContact && (
-            <div className="pt-4 border-t">
-              <FormSubsectionButton
-                icon={<FileText />}
-                title="Archivos y Media"
-                description="Gestionar archivos adjuntos del contacto"
-                onClick={() => {
+          {/* FormSubsectionButton para Adjuntos */}
+          <div className="pt-4 border-t">
+            <FormSubsectionButton
+              icon={<FileText />}
+              title="Archivos y Media"
+              description={
+                isEditing && editingContact 
+                  ? "Gestionar archivos adjuntos del contacto"
+                  : "Guarda el contacto primero y luego podrás subir archivos"
+              }
+              onClick={() => {
+                if (isEditing && editingContact) {
                   setPanel('subform');
                   setCurrentSubform('attachments');
-                }}
-              />
-            </div>
-          )}
+                } else {
+                  // Si no está en modo edición, mostrar toast explicativo y guardar
+                  toast({
+                    title: "Guardando contacto",
+                    description: "Después de guardar podrás editar el contacto para subir archivos",
+                  });
+                  form.handleSubmit(onSubmit)();
+                }
+              }}
+            />
+          </div>
         </form>
       </Form>
     </>
