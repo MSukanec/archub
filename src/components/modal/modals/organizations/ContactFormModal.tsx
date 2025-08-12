@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink, Upload } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink } from "lucide-react";
 
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 import { ComboBoxMultiSelect } from "@/components/ui-custom/ComboBoxMultiSelect";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -28,8 +28,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { PhoneInput } from "@/components/ui-custom/PhoneInput";
-import { useDropzone } from "react-dropzone";
-import { useCreateContactAttachment } from "@/hooks/useContactAttachments";
+
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -97,39 +96,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('photo');
-
-  const createAttachment = useCreateContactAttachment();
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: async (acceptedFiles) => {
-      if (!editingContact?.id) return;
-
-      for (const file of acceptedFiles) {
-        try {
-          await createAttachment.mutateAsync({
-            contactId: editingContact.id,
-            file: file,
-            category: selectedCategory
-          });
-          
-          toast({
-            title: "Archivo subido",
-            description: `${file.name} se ha subido correctamente`,
-          });
-        } catch (error) {
-          console.error('Error al subir archivo:', error);
-          toast({
-            title: "Error",
-            description: `No se pudo subir ${file.name}`,
-            variant: "destructive",
-          });
-        }
-      }
-    },
-    maxSize: 10 * 1024 * 1024, // 10MB
-    multiple: true
-  });
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
@@ -667,47 +633,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           </button>
         ) : undefined
       }
-      rightActions={
-        currentPanel === 'subform' && currentSubform === 'attachments' && editingContact ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="default" size="sm" className="gap-2">
-                <Upload className="w-4 h-4" />
-                Subir Archivos
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-sm mb-2">Seleccionar categoría</h4>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="photo">Foto</SelectItem>
-                      <SelectItem value="dni_front">DNI Frente</SelectItem>
-                      <SelectItem value="dni_back">DNI Dorso</SelectItem>
-                      <SelectItem value="document">Documento</SelectItem>
-                      <SelectItem value="other">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div
-                  {...getRootProps()}
-                  className="cursor-pointer"
-                >
-                  <input {...getInputProps()} />
-                  <Button className="w-full gap-2">
-                    <Upload className="w-4 h-4" />
-                    Seleccionar Archivos
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        ) : undefined
-      }
+      rightActions={undefined}
     />
   );
 

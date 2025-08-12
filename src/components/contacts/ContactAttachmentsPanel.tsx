@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Download, 
   Trash2, 
@@ -8,8 +10,9 @@ import {
   FileText, 
   Image as ImageIcon,
   Copy,
-  Share
+  Upload
 } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { 
   useContactAttachments, 
@@ -56,11 +59,42 @@ const categoryColors = {
 };
 
 export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmentsPanelProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('photo');
+  
   const { data: userData } = useCurrentUser();
   const { data: attachments = [], isLoading } = useContactAttachments(contactId);
+  const createAttachment = useCreateContactAttachment();
   const deleteAttachment = useDeleteContactAttachment();
   const setAvatar = useSetContactAvatar();
   const { toast } = useToast();
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: async (acceptedFiles) => {
+      for (const file of acceptedFiles) {
+        try {
+          await createAttachment.mutateAsync({
+            contactId,
+            file: file,
+            category: selectedCategory as 'photo' | 'dni_front' | 'dni_back' | 'document' | 'other'
+          });
+          
+          toast({
+            title: "Archivo subido",
+            description: `${file.name} se ha subido correctamente`,
+          });
+        } catch (error) {
+          console.error('Error al subir archivo:', error);
+          toast({
+            title: "Error",
+            description: `No se pudo subir ${file.name}`,
+            variant: "destructive",
+          });
+        }
+      }
+    },
+    maxSize: 10 * 1024 * 1024, // 10MB
+    multiple: true
+  });
 
 
 
@@ -148,13 +182,46 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
 
   return (
     <div className="space-y-6">
-      {/* Header con botones */}
-      <div className="flex items-center justify-between">
+      {/* Header con título y botón inline */}
+      <div className="flex items-center gap-4">
         <h3 className="text-lg font-semibold">Archivos y Media</h3>
-        <Button variant="ghost" size="sm" className="gap-2">
-          <Share className="w-4 h-4" />
-          Compartir
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="default" size="sm" className="gap-2">
+              <Upload className="w-4 h-4" />
+              Subir Archivos
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-sm mb-2">Seleccionar categoría</h4>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="photo">Foto</SelectItem>
+                    <SelectItem value="dni_front">DNI Frente</SelectItem>
+                    <SelectItem value="dni_back">DNI Dorso</SelectItem>
+                    <SelectItem value="document">Documento</SelectItem>
+                    <SelectItem value="other">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div
+                {...getRootProps()}
+                className="cursor-pointer"
+              >
+                <input {...getInputProps()} />
+                <Button className="w-full gap-2">
+                  <Upload className="w-4 h-4" />
+                  Seleccionar Archivos
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Galería de archivos */}
