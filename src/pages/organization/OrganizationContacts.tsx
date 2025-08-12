@@ -38,7 +38,6 @@ import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import ContactCardDesktop from '@/components/cards/contacts/ContactCardDesktop'
 import { ContactAvatarUploader } from '@/components/contacts/ContactAvatarUploader'
 import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function OrganizationContacts() {
   const [activeTab, setActiveTab] = useState("personas")
@@ -758,141 +757,114 @@ function ContactDetailPanel({
         </div>
       </div>
 
-      {/* Tabs con información y adjuntos */}
-      <div className="p-6">
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="info">Información</TabsTrigger>
-            <TabsTrigger value="attachments">
-              <FileText className="w-4 h-4 mr-2" />
-              Adjuntos
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="info" className="space-y-6 mt-6">
-            {/* Grid de información básica - 2x2 */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Email */}
-              <Card className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-accent/10 rounded-lg">
-                    <Mail className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium text-sm truncate" title={contact.email || '-'}>
-                      {contact.email || '-'}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Teléfono */}
-              <Card className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-accent/10 rounded-lg">
-                    <Phone className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Teléfono</p>
-                    <p className="font-medium text-sm truncate" title={contact.phone || '-'}>
-                      {contact.phone || '-'}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Dirección */}
-              <Card className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-accent/10 rounded-lg">
-                    <MapPin className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Dirección</p>
-                    <p className="font-medium text-sm truncate" title={contact.address || '-'}>
-                      {contact.address || '-'}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* País */}
-              <Card className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-accent/10 rounded-lg">
-                    <Globe className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">País</p>
-                    <p className="font-medium text-sm truncate" title={contact.country || '-'}>
-                      {contact.country || '-'}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            {/* Información adicional */}
-            {(contact.company_name || contact.notes) && (
-              <div className="space-y-4">
-                <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  Información Adicional
-                </h3>
-                
-                {contact.company_name && (
-                  <Card className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-accent/10 rounded-lg">
-                        <Building className="w-5 h-5 text-accent" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Empresa</p>
-                        <p className="font-medium text-sm">{contact.company_name}</p>
-                      </div>
-                    </div>
-                  </Card>
-                )}
-
-                {contact.notes && (
-                  <Card className="p-4">
-                    <h4 className="font-medium text-sm mb-2">Notas</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {contact.notes}
-                    </p>
-                  </Card>
-                )}
+      {/* Información en cards */}
+      <div className="p-6 space-y-6">
+        {/* Grid de información básica - 2x2 */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Email */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Mail className="w-5 h-5 text-accent" />
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium text-sm truncate" title={contact.email || '-'}>
+                  {contact.email || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Teléfono */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Phone className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Teléfono</p>
+                <p className="font-medium text-sm truncate" title={contact.phone || '-'}>
+                  {contact.phone || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Dirección */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <MapPin className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Dirección</p>
+                <p className="font-medium text-sm truncate" title={contact.address || '-'}>
+                  {contact.address || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* País */}
+          <Card className="p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Globe className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">País</p>
+                <p className="font-medium text-sm truncate" title={contact.country || '-'}>
+                  {contact.country || '-'}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Información adicional */}
+        {(contact.company_name || contact.notes) && (
+          <div className="space-y-4">
+            <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+              Información Adicional
+            </h3>
+            
+            {contact.company_name && (
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-accent/10 rounded-lg">
+                    <Building className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Empresa</p>
+                    <p className="font-medium text-sm">{contact.company_name}</p>
+                  </div>
+                </div>
+              </Card>
             )}
 
-            {/* Metadata */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                Información del Sistema
-              </h3>
-              
-              <div className="grid grid-cols-1 gap-3 text-xs">
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Creado:</span>
-                  <span>{format(new Date(contact.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
-                </div>
-                {contact.updated_at !== contact.created_at && (
-                  <div className="flex justify-between py-2 border-b border-border">
-                    <span className="text-muted-foreground">Actualizado:</span>
-                    <span>{format(new Date(contact.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
+            {contact.notes && (
+              <Card className="p-4">
+                <h4 className="font-medium text-sm mb-2">Notas</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {contact.notes}
+                </p>
+              </Card>
+            )}
+          </div>
+        )}
 
-          <TabsContent value="attachments" className="mt-6">
-            <ContactAttachmentsPanel 
-              contactId={contact.id} 
-              contact={contact}
-            />
-          </TabsContent>
-        </Tabs>
+        {/* Archivos y Media */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
+            Archivos y Media
+          </h3>
+          
+          <ContactAttachmentsPanel 
+            contactId={contact.id} 
+            contact={contact}
+          />
+        </div>
       </div>
     </div>
   )
