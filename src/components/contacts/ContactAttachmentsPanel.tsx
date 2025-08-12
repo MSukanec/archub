@@ -275,14 +275,15 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                 </div>
               )}
 
-              {/* Overlay con botón de opciones */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {/* Overlay con botón de opciones - solo en la esquina superior derecha */}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       size="sm"
                       variant="default"
                       title="Opciones"
+                      className="bg-black/60 hover:bg-black/80"
                     >
                       <MoreHorizontal className="w-3 h-3" />
                     </Button>
