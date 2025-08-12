@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
 import { 
   useContactAttachments, 
   useCreateContactAttachment, 
@@ -68,6 +69,30 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
   const deleteAttachment = useDeleteContactAttachment();
   const setAvatar = useSetContactAvatar();
   const { toast } = useToast();
+
+  // Lightbox setup - for all images in attachments
+  const imageUrls = useMemo(() => 
+    attachments
+      .filter(attachment => attachment.mime_type.startsWith('image/'))
+      .map(attachment => getAttachmentPublicUrl(attachment)), 
+    [attachments]
+  );
+  
+  const { 
+    isOpen: isLightboxOpen, 
+    currentIndex, 
+    openLightbox, 
+    closeLightbox
+  } = useImageLightbox(imageUrls);
+
+  const handleImageClick = (attachment: ContactAttachment) => {
+    if (attachment.mime_type.startsWith('image/')) {
+      const imageIndex = imageUrls.indexOf(getAttachmentPublicUrl(attachment));
+      if (imageIndex !== -1) {
+        openLightbox(imageIndex);
+      }
+    }
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: async (acceptedFiles) => {
@@ -241,7 +266,8 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                 <img
                   src={getAttachmentPublicUrl(attachment)}
                   alt={attachment.file_name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => handleImageClick(attachment)}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center p-4">
@@ -353,6 +379,14 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
           ))}
         </div>
       )}
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={imageUrls}
+        isOpen={isLightboxOpen}
+        currentIndex={currentIndex}
+        onClose={closeLightbox}
+      />
     </div>
   );
 }
