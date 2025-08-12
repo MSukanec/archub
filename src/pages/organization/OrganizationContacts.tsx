@@ -738,16 +738,16 @@ function ContactDetailPanel({
           {/* Botones de acción principales */}
           <div className="flex gap-2 pt-2">
             {contact.phone && (
-              <Button onClick={handleCall} variant="default" size="sm" title="Llamar">
+              <Button onClick={handleCall} variant="default" size="icon" title="Llamar" className="rounded-full">
                 <Phone className="w-4 h-4" />
               </Button>
             )}
             {contact.email && (
-              <Button onClick={handleEmail} variant="default" size="sm" title="Email">
+              <Button onClick={handleEmail} variant="default" size="icon" title="Email" className="rounded-full">
                 <Mail className="w-4 h-4" />
               </Button>
             )}
-            <Button onClick={handleShare} variant="default" size="sm" title="Compartir">
+            <Button onClick={handleShare} variant="default" size="icon" title="Compartir" className="rounded-full">
               <Share className="w-4 h-4" />
             </Button>
           </div>
