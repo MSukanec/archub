@@ -244,11 +244,8 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                <div className="w-full h-full flex items-center justify-center p-4">
                   {getFileIcon(attachment.mime_type)}
-                  <span className="text-xs text-center mt-2 text-muted-foreground truncate w-full">
-                    {attachment.file_name}
-                  </span>
                 </div>
               )}
 
@@ -351,15 +348,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                 )}
               </div>
 
-              {/* Info del archivo */}
-              <div className="absolute bottom-2 left-2 right-2">
-                <div className="bg-background/80 backdrop-blur-sm rounded p-1">
-                  <p className="text-xs truncate font-medium">{attachment.file_name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(attachment.size_bytes / 1024).toFixed(1)} KB
-                  </p>
-                </div>
-              </div>
+
             </div>
           ))}
         </div>
