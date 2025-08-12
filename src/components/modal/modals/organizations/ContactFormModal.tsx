@@ -606,13 +606,30 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
 
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? "Editar Contacto" : "Nuevo Contacto"}
-      icon={UserPlus}
+      title={
+        currentPanel === 'subform' && currentSubform === 'attachments' 
+          ? "Archivos y Media"
+          : (isEditing ? "Editar Contacto" : "Nuevo Contacto")
+      }
+      subtitle={
+        currentPanel === 'subform' && currentSubform === 'attachments' 
+          ? "Gestiona los archivos adjuntos y multimedia del contacto"
+          : undefined
+      }
+      icon={currentPanel === 'subform' && currentSubform === 'attachments' ? FileText : UserPlus}
       leftActions={
         currentPanel === 'edit' && isEditing ? (
           <button
             type="button"
             onClick={() => setPanel('view')}
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Volver
+          </button>
+        ) : currentPanel === 'subform' && currentSubform === 'attachments' ? (
+          <button
+            type="button"
+            onClick={() => setPanel('edit')}
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             ← Volver
