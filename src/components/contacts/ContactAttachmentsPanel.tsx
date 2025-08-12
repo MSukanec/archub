@@ -10,7 +10,8 @@ import {
   FileText, 
   Image as ImageIcon,
   Copy,
-  Upload
+  Upload,
+  MoreHorizontal
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
@@ -251,67 +252,88 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                 </div>
               )}
 
-              {/* Overlay con acciones */}
+              {/* Overlay con botón de opciones */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => handleDownload(attachment)}
-                    title="Descargar"
-                  >
-                    <Download className="w-3 h-3" />
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => handleCopyLink(attachment)}
-                    title="Copiar enlace"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </Button>
-
-                  {attachment.mime_type.startsWith('image/') && (
+                <Popover>
+                  <PopoverTrigger asChild>
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleSetAsAvatar(attachment)}
-                      disabled={attachment.id === contact.avatar_attachment_id}
-                      title="Usar como avatar"
+                      title="Opciones"
                     >
-                      <UserRound className="w-3 h-3" />
+                      <MoreHorizontal className="w-3 h-3" />
                     </Button>
-                  )}
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="destructive" title="Eliminar">
-                        <Trash2 className="w-3 h-3" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48">
+                    <div className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDownload(attachment)}
+                        className="w-full justify-start gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Descargar
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Eliminar adjunto</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {attachment.id === contact.avatar_attachment_id 
-                            ? 'Esto quitará el avatar del contacto y eliminará el archivo. ¿Continuar?'
-                            : '¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.'
-                          }
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteWithAvatarCheck(attachment)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyLink(attachment)}
+                        className="w-full justify-start gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copiar enlace
+                      </Button>
+
+                      {attachment.mime_type.startsWith('image/') && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSetAsAvatar(attachment)}
+                          disabled={attachment.id === contact.avatar_attachment_id}
+                          className="w-full justify-start gap-2"
                         >
-                          Eliminar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                          <UserRound className="w-4 h-4" />
+                          Usar como avatar
+                        </Button>
+                      )}
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Eliminar
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Eliminar adjunto</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {attachment.id === contact.avatar_attachment_id 
+                                ? 'Esto quitará el avatar del contacto y eliminará el archivo. ¿Continuar?'
+                                : '¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.'
+                              }
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteWithAvatarCheck(attachment)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Badges informativos */}
