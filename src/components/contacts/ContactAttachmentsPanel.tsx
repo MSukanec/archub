@@ -256,7 +256,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                 <div className="flex gap-1">
                   <Button
                     size="sm"
-                    variant="secondary"
+                    variant="default"
                     onClick={() => handleDownload(attachment)}
                     title="Descargar"
                   >
@@ -265,7 +265,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                   
                   <Button
                     size="sm"
-                    variant="secondary"
+                    variant="default"
                     onClick={() => handleCopyLink(attachment)}
                     title="Copiar enlace"
                   >
@@ -275,7 +275,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
                   {attachment.mime_type.startsWith('image/') && (
                     <Button
                       size="sm"
-                      variant="secondary"
+                      variant="default"
                       onClick={() => handleSetAsAvatar(attachment)}
                       disabled={attachment.id === contact.avatar_attachment_id}
                       title="Usar como avatar"
