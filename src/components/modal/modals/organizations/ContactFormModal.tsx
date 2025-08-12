@@ -611,11 +611,6 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
           ? "Archivos y Media"
           : (isEditing ? "Editar Contacto" : "Nuevo Contacto")
       }
-      subtitle={
-        currentPanel === 'subform' && currentSubform === 'attachments' 
-          ? "Gestiona los archivos adjuntos y multimedia del contacto"
-          : undefined
-      }
       icon={currentPanel === 'subform' && currentSubform === 'attachments' ? FileText : UserPlus}
       leftActions={
         currentPanel === 'edit' && isEditing ? (

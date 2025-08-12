@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Download, 
@@ -9,11 +8,11 @@ import {
   FileText, 
   Image as ImageIcon,
   Upload,
-  Copy,
-  Filter
+  Copy
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   useContactAttachments, 
   useCreateContactAttachment, 
@@ -60,7 +59,6 @@ const categoryColors = {
 
 export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmentsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('photo');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
 
   const { data: userData } = useCurrentUser();
   const { data: attachments = [], isLoading } = useContactAttachments(contactId);
@@ -68,10 +66,6 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
   const deleteAttachment = useDeleteContactAttachment();
   const setAvatar = useSetContactAvatar();
   const { toast } = useToast();
-
-  const filteredAttachments = filterCategory === 'all' 
-    ? attachments 
-    : attachments.filter(att => att.category === filterCategory);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -180,178 +174,159 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
 
   return (
     <div className="space-y-6">
-      {/* Área de dropzone */}
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          isDragActive 
-            ? 'border-accent bg-accent/5' 
-            : 'border-muted-foreground/25 hover:border-accent'
-        }`}
-      >
-        <input {...getInputProps()} />
-        <Upload className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground mb-2">
-          {isDragActive 
-            ? 'Suelta los archivos aquí...' 
-            : 'Arrastra archivos aquí o haz clic para seleccionar'
-          }
-        </p>
-        <p className="text-xs text-muted-foreground mb-4">
-          Máximo 10MB por archivo
-        </p>
-        
-        {/* Selector de categoría */}
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-xs text-muted-foreground">Categoría:</span>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-auto h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="photo">Foto</SelectItem>
-              <SelectItem value="dni_front">DNI Frente</SelectItem>
-              <SelectItem value="dni_back">DNI Dorso</SelectItem>
-              <SelectItem value="document">Documento</SelectItem>
-              <SelectItem value="other">Otro</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Header con botón de subir */}
+      <div className="flex items-center justify-end">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="default" className="gap-2">
+              <Upload className="w-4 h-4" />
+              Subir Archivos
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-sm mb-2">Seleccionar categoría</h4>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="photo">Foto</SelectItem>
+                    <SelectItem value="dni_front">DNI Frente</SelectItem>
+                    <SelectItem value="dni_back">DNI Dorso</SelectItem>
+                    <SelectItem value="document">Documento</SelectItem>
+                    <SelectItem value="other">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div
+                {...getRootProps()}
+                className="cursor-pointer"
+              >
+                <input {...getInputProps()} />
+                <Button className="w-full gap-2">
+                  <Upload className="w-4 h-4" />
+                  Seleccionar Archivos
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-2">
-        <Filter className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Filtrar por:</span>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-auto border-none bg-transparent hover:bg-muted">
-            <SelectValue>
-              {filterCategory === 'all' ? 'Todos' : categoryLabels[filterCategory as keyof typeof categoryLabels]}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {Object.entries(categoryLabels).map(([key, label]) => (
-              <SelectItem key={key} value={key}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Lista de adjuntos */}
-      {filteredAttachments.length === 0 ? (
+      {/* Galería de archivos */}
+      {attachments.length === 0 ? (
         <div className="p-8 text-center border-2 border-dashed border-muted-foreground/25 rounded-lg">
           <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">No hay adjuntos en esta categoría</p>
+          <p className="text-muted-foreground">No hay archivos adjuntos</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filteredAttachments.map((attachment) => (
-            <div key={attachment.id} className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-              {/* Miniatura si es imagen */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {attachments.map((attachment) => (
+            <div key={attachment.id} className="group relative aspect-square rounded-lg overflow-hidden border bg-muted/30 hover:bg-muted/50 transition-colors">
+              {/* Contenido del archivo */}
               {attachment.mime_type.startsWith('image/') ? (
-                <div className="relative w-12 h-12 rounded-md overflow-hidden shrink-0">
-                  <img
-                    src={getAttachmentPublicUrl(attachment)}
-                    alt={attachment.file_name}
-                    className="w-full h-full object-cover"
-                  />
-                  {attachment.id === contact.avatar_attachment_id && (
-                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                      <UserRound className="w-4 h-4 text-primary" />
-                    </div>
-                  )}
-                </div>
+                <img
+                  src={getAttachmentPublicUrl(attachment)}
+                  alt={attachment.file_name}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
+                <div className="w-full h-full flex flex-col items-center justify-center p-4">
                   {getFileIcon(attachment.mime_type)}
+                  <span className="text-xs text-center mt-2 text-muted-foreground truncate w-full">
+                    {attachment.file_name}
+                  </span>
                 </div>
               )}
 
-              {/* Información del archivo */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium truncate">
-                    {attachment.file_name}
-                  </span>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs ${categoryColors[attachment.category]}`}
+              {/* Overlay con acciones */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => handleDownload(attachment)}
+                    title="Descargar"
                   >
-                    {categoryLabels[attachment.category]}
-                  </Badge>
-                  {attachment.id === contact.avatar_attachment_id && (
-                    <Badge variant="default" className="text-xs">
-                      Avatar
-                    </Badge>
+                    <Download className="w-3 h-3" />
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => handleCopyLink(attachment)}
+                    title="Copiar enlace"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+
+                  {attachment.mime_type.startsWith('image/') && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleSetAsAvatar(attachment)}
+                      disabled={attachment.id === contact.avatar_attachment_id}
+                      title="Usar como avatar"
+                    >
+                      <UserRound className="w-3 h-3" />
+                    </Button>
                   )}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {(attachment.size_bytes / 1024).toFixed(1)} KB • {new Date(attachment.created_at).toLocaleDateString()}
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="destructive" title="Eliminar">
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Eliminar adjunto</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {attachment.id === contact.avatar_attachment_id 
+                            ? 'Esto quitará el avatar del contacto y eliminará el archivo. ¿Continuar?'
+                            : '¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.'
+                          }
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteWithAvatarCheck(attachment)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
 
-              {/* Acciones */}
-              <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleDownload(attachment)}
-                  title="Descargar"
+              {/* Badges informativos */}
+              <div className="absolute top-2 left-2 flex flex-col gap-1">
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs bg-background/80 ${categoryColors[attachment.category]}`}
                 >
-                  <Download className="w-4 h-4" />
-                </Button>
-                
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleCopyLink(attachment)}
-                  title="Copiar enlace"
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-
-                {attachment.mime_type.startsWith('image/') && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleSetAsAvatar(attachment)}
-                    disabled={attachment.id === contact.avatar_attachment_id}
-                    title="Usar como avatar"
-                  >
-                    <UserRound className="w-4 h-4" />
-                  </Button>
+                  {categoryLabels[attachment.category]}
+                </Badge>
+                {attachment.id === contact.avatar_attachment_id && (
+                  <Badge variant="default" className="text-xs bg-primary/90">
+                    Avatar
+                  </Badge>
                 )}
+              </div>
 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button size="sm" variant="ghost" title="Eliminar">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Eliminar adjunto</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {attachment.id === contact.avatar_attachment_id 
-                          ? 'Esto quitará el avatar del contacto y eliminará el archivo. ¿Continuar?'
-                          : '¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.'
-                        }
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteWithAvatarCheck(attachment)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Eliminar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+              {/* Info del archivo */}
+              <div className="absolute bottom-2 left-2 right-2">
+                <div className="bg-background/80 backdrop-blur-sm rounded p-1">
+                  <p className="text-xs truncate font-medium">{attachment.file_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(attachment.size_bytes / 1024).toFixed(1)} KB
+                  </p>
+                </div>
               </div>
             </div>
           ))}
