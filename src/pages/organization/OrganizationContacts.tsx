@@ -738,20 +738,17 @@ function ContactDetailPanel({
           {/* Botones de acción principales */}
           <div className="flex gap-2 pt-2">
             {contact.phone && (
-              <Button onClick={handleCall} size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Phone className="w-4 h-4 mr-1" />
-                Llamar
+              <Button onClick={handleCall} variant="default" size="sm" title="Llamar">
+                <Phone className="w-4 h-4" />
               </Button>
             )}
             {contact.email && (
-              <Button onClick={handleEmail} variant="outline" size="sm">
-                <Mail className="w-4 h-4 mr-1" />
-                Email
+              <Button onClick={handleEmail} variant="default" size="sm" title="Email">
+                <Mail className="w-4 h-4" />
               </Button>
             )}
-            <Button onClick={handleShare} variant="outline" size="sm">
-              <Share className="w-4 h-4 mr-1" />
-              Compartir
+            <Button onClick={handleShare} variant="default" size="sm" title="Compartir">
+              <Share className="w-4 h-4" />
             </Button>
           </div>
         </div>
