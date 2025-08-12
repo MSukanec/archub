@@ -8,7 +8,9 @@ import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check
 import { FormModalLayout } from "../../form/FormModalLayout";
 import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
+import { FormSubsectionButton } from "../../form/FormSubsectionButton";
 import { useModalPanelStore } from "../../form/modalPanelStore";
+import { ContactAttachmentsSubform } from "./contact-forms/ContactAttachmentsSubform";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,7 +86,7 @@ interface ContactFormModalProps {
 
 export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) {
   const { editingContact, isEditing = false } = modalData || {};
-  const { currentPanel, setPanel } = useModalPanelStore();
+  const { currentPanel, currentSubform, setPanel, setCurrentSubform } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
   const { data: contactTypes } = useContactTypes();
   const { toast } = useToast();
@@ -582,6 +584,21 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               </FormItem>
             )}
           />
+
+          {/* FormSubsectionButton para Adjuntos - Solo mostrar en modo de edición si hay un contacto existente */}
+          {isEditing && editingContact && (
+            <div className="pt-4 border-t">
+              <FormSubsectionButton
+                icon={<FileText />}
+                title="Archivos y Media"
+                description="Gestionar archivos adjuntos del contacto"
+                onClick={() => {
+                  setPanel('subform');
+                  setCurrentSubform('attachments');
+                }}
+              />
+            </div>
+          )}
         </form>
       </Form>
     </>
@@ -605,19 +622,32 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     />
   );
 
+  const attachmentsPanel = isEditing && editingContact ? (
+    <ContactAttachmentsSubform 
+      contactId={editingContact.id} 
+      contact={editingContact}
+    />
+  ) : null;
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={createContactMutation.isPending ? "Guardando..." : (isEditing ? "Actualizar Contacto" : "Crear Contacto")}
+      rightLabel={
+        currentPanel === 'subform' && currentSubform === 'attachments' ? "Cerrar" :
+        createContactMutation.isPending ? "Guardando..." : 
+        (isEditing ? "Actualizar Contacto" : "Crear Contacto")
+      }
       onRightClick={() => {
-        if (currentPanel === 'view' && isEditing) {
+        if (currentPanel === 'subform' && currentSubform === 'attachments') {
+          handleClose();
+        } else if (currentPanel === 'view' && isEditing) {
           setPanel('edit');
         } else {
           form.handleSubmit(onSubmit)();
         }
       }}
-      rightDisabled={createContactMutation.isPending}
+
     />
   );
 
@@ -626,6 +656,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={attachmentsPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
