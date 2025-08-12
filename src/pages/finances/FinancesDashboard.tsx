@@ -1,19 +1,17 @@
+import { useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet } from 'lucide-react'
-
-
+import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Building } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-
 import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
-
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
+import { ActionBar } from '@/components/layout/desktop/ActionBar'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
@@ -26,14 +24,15 @@ export default function FinancesDashboard() {
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
   
+  // State for view mode toggle
+  const [viewMode, setViewMode] = useState<'project' | 'all'>('project')
+  
   // Get organization currencies to determine default currency
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
   const defaultCurrency = organizationCurrencies?.find(c => c.is_default)?.currency
   
-
-  
-  // Use current project for data queries
-  const effectiveProjectId = projectId || ""
+  // Use current project for data queries or all projects based on view mode
+  const effectiveProjectId = viewMode === 'project' ? (projectId || "") : ""
   
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, 'desde-siempre')
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, 'desde-siempre')
@@ -87,6 +86,32 @@ export default function FinancesDashboard() {
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
       <div className="space-y-6">
+        {/* ActionBar with view mode toggle */}
+        <ActionBar>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Ver datos de:</span>
+            <div className="flex bg-muted rounded-lg p-1">
+              <Button
+                variant={viewMode === 'project' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('project')}
+                className="h-8 px-3"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Proyecto Actual
+              </Button>
+              <Button
+                variant={viewMode === 'all' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('all')}
+                className="h-8 px-3"
+              >
+                <Building className="w-4 h-4 mr-2" />
+                Toda la Organización
+              </Button>
+            </div>
+          </div>
+        </ActionBar>
 
         {/* Show empty state if no movements exist */}
         {!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0) ? (
