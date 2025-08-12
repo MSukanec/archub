@@ -683,7 +683,7 @@ function ContactDetailPanel({
   return (
     <div className="h-full overflow-y-auto">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-accent/5 to-accent/10 dark:from-accent/5 dark:to-accent/10 p-6 border-b">
+      <div className="relative bg-gradient-to-br from-accent/10 to-accent/20 dark:from-accent/10 dark:to-accent/15 p-6 border-b">
         {/* Botones de acción superiores */}
         <div className="absolute top-4 right-4 flex gap-2">
           <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8 bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background">
