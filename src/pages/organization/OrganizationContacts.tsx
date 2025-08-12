@@ -686,6 +686,17 @@ function ContactDetailPanel({
     <div className="h-full overflow-y-auto">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-6 border-b">
+        {/* Badges de tipo de contacto superiores izquierda */}
+        {contact.contact_types && contact.contact_types.length > 0 && (
+          <div className="absolute top-4 left-4 flex gap-1 flex-wrap max-w-[calc(100%-120px)]">
+            {contact.contact_types.map((typeLink: any, index: number) => (
+              <Badge key={`${typeLink.type_id}-${index}`} variant="secondary" className="text-xs bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background">
+                {typeLink.contact_type?.name}
+              </Badge>
+            ))}
+          </div>
+        )}
+
         {/* Botones de acción superiores */}
         <div className="absolute top-4 right-4 flex gap-2">
           <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8 bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background">
@@ -721,16 +732,6 @@ function ContactDetailPanel({
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="w-4 h-4 text-accent" />
                 <span className="text-sm text-muted-foreground">Usuario de Archub</span>
-              </div>
-            )}
-            
-            {contact.contact_types && contact.contact_types.length > 0 && (
-              <div className="flex gap-1 justify-center flex-wrap">
-                {contact.contact_types.map((typeLink: any, index: number) => (
-                  <Badge key={`${typeLink.type_id}-${index}`} variant="secondary" className="text-xs">
-                    {typeLink.contact_type?.name}
-                  </Badge>
-                ))}
               </div>
             )}
           </div>
