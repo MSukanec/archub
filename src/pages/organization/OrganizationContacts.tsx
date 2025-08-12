@@ -683,13 +683,13 @@ function ContactDetailPanel({
   return (
     <div className="h-full overflow-y-auto">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-950/20 p-6 border-b">
+      <div className="relative bg-gradient-to-br from-accent/5 to-accent/10 dark:from-accent/5 dark:to-accent/10 p-6 border-b">
         {/* Botones de acción superiores */}
         <div className="absolute top-4 right-4 flex gap-2">
-          <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800">
+          <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8 bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background">
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800">
+          <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 bg-background/80 hover:bg-background dark:bg-background/80 dark:hover:bg-background">
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
@@ -697,27 +697,27 @@ function ContactDetailPanel({
         {/* Avatar y información principal */}
         <div className="flex flex-col items-center text-center space-y-4">
           {contact.linked_user ? (
-            <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
+            <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
               <AvatarImage src={contact.linked_user.avatar_url} />
-              <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+              <AvatarFallback className="text-2xl font-semibold bg-accent text-accent-foreground">
                 {contact.linked_user.full_name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 border-4 border-white shadow-lg flex items-center justify-center text-2xl font-semibold text-white">
+            <div className="w-20 h-20 rounded-full bg-accent border-4 border-background shadow-lg flex items-center justify-center text-2xl font-semibold text-accent-foreground">
               {contact.first_name?.charAt(0) || 'C'}
             </div>
           )}
           
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-foreground">
               {displayName}
             </h2>
             
             {contact.linked_user && (
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">Usuario de Archub</span>
+                <CheckCircle className="w-4 h-4 text-accent" />
+                <span className="text-sm text-muted-foreground">Usuario de Archub</span>
               </div>
             )}
             
@@ -735,7 +735,7 @@ function ContactDetailPanel({
           {/* Botones de acción principales */}
           <div className="flex gap-2 pt-2">
             {contact.phone && (
-              <Button onClick={handleCall} size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+              <Button onClick={handleCall} size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Phone className="w-4 h-4 mr-1" />
                 Llamar
               </Button>
@@ -761,8 +761,8 @@ function ContactDetailPanel({
           {/* Email */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Mail className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">Email</p>
@@ -776,8 +776,8 @@ function ContactDetailPanel({
           {/* Teléfono */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Phone className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">Teléfono</p>
@@ -791,8 +791,8 @@ function ContactDetailPanel({
           {/* Dirección */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <MapPin className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">Dirección</p>
@@ -806,8 +806,8 @@ function ContactDetailPanel({
           {/* País */}
           <Card className="p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Globe className="w-5 h-5 text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">País</p>
@@ -829,8 +829,8 @@ function ContactDetailPanel({
             {contact.company_name && (
               <Card className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                    <Building className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <div className="p-2 bg-accent/10 rounded-lg">
+                    <Building className="w-5 h-5 text-accent" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Empresa</p>
