@@ -98,7 +98,7 @@ export function DocumentInfo({
           </div>
         </div>
       </div>
-      <CardContent className="flex-1 space-y-4">
+      <CardContent className="flex-1 space-y-4 pt-6">
         {/* Document Name */}
         <div>
           <h3 className="font-medium text-sm mb-1 truncate" title={document.file_name}>
@@ -154,15 +154,17 @@ export function DocumentInfo({
           )}
         </div>
 
-        <Separator />
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1">
+      </CardContent>
+      
+      {/* Footer with Action Buttons */}
+      <div className="px-4 py-3 border-t border-[var(--card-border)]">
+        <div className="flex items-center justify-center gap-2">
           <Button 
             size="sm" 
             variant="ghost" 
             onClick={onDownload}
             className="h-8 w-8 p-0"
+            title="Descargar"
           >
             <Download className="h-4 w-4" />
           </Button>
@@ -171,6 +173,7 @@ export function DocumentInfo({
             variant="ghost" 
             onClick={onShare}
             className="h-8 w-8 p-0"
+            title="Compartir"
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -179,6 +182,7 @@ export function DocumentInfo({
             variant="ghost" 
             onClick={onEdit}
             className="h-8 w-8 p-0"
+            title="Editar"
           >
             <Edit3 className="h-4 w-4" />
           </Button>
@@ -187,11 +191,12 @@ export function DocumentInfo({
             variant="ghost" 
             onClick={onDelete}
             className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }
