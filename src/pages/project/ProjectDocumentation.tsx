@@ -3,8 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
-import { PdfViewer } from '@/components/viewers/PdfViewer';
-import { ImageViewer } from '@/components/viewers/ImageViewer';
+import { UnifiedViewer } from '@/components/viewers/UnifiedViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -106,37 +105,15 @@ export default function ProjectDocumentation() {
             className="rounded-lg overflow-hidden border h-full"
           >
             {selectedDocument ? (
-              <>
-                {selectedDocument.file_type === 'application/pdf' ? (
-                  <PdfViewer 
-                    bucket="design-documents"
-                    path={selectedDocument.file_path}
-                    fileName={selectedDocument.file_name}
-                    className="w-full"
-                    onExpand={handleExpandPdf}
-                    height={520}
-                  />
-                ) : selectedDocument.file_type?.startsWith('image/') ? (
-                  <ImageViewer 
-                    bucket="design-documents"
-                    path={selectedDocument.file_path}
-                    fileName={selectedDocument.file_name}
-                    className="w-full"
-                    onExpand={handleExpandPdf}
-                    height={520}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                      <h4 className="text-lg font-medium mb-2">Vista previa no disponible</h4>
-                      <p className="text-muted-foreground mb-4">
-                        Este tipo de archivo no se puede mostrar en el navegador
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </>
+              <UnifiedViewer 
+                bucket="design-documents"
+                path={selectedDocument.file_path}
+                fileName={selectedDocument.file_name}
+                fileType={selectedDocument.file_type}
+                className="w-full"
+                onExpand={handleExpandPdf}
+                height={520}
+              />
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
