@@ -3,15 +3,23 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
 import { PdfViewer } from '@/components/viewers/PdfViewer';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { FileText, FolderPlus, File, Image } from 'lucide-react';
+import { useDesignDocuments } from '@/hooks/use-design-documents';
+import { FileText, FolderPlus, File, Image, Clock, Download, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function ProjectDocumentation() {
   const { openModal } = useGlobalModalStore();
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Get recent documents for history
+  const { data: allDocuments } = useDesignDocuments();
+  const recentDocuments = allDocuments?.slice(0, 10) || [];
 
   const headerProps = {
     icon: FileText,
@@ -72,15 +80,15 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Desktop: Two Column Layout */}
-      <div className="hidden lg:flex h-full gap-6">
-        {/* Left Column: Document Viewer */}
-        <div className="w-1/2 flex flex-col">
-          <Card className="flex-1 flex flex-col">
+      {/* Desktop: Three Panel Layout */}
+      <div className="hidden lg:flex flex-col h-full gap-4">
+        {/* Top Panel: Document Viewer - Full Width */}
+        <div className="flex-1">
+          <Card className="h-full flex flex-col">
             {selectedDocument ? (
               <>
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="p-2 rounded-lg bg-primary/10">
                         {React.createElement(getFileIcon(selectedDocument.file_type), { 
@@ -102,6 +110,25 @@ export default function ProjectDocumentation() {
                         </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <a 
+                        href={selectedDocument.file_url} 
+                        download={selectedDocument.file_name}
+                        className="p-2 rounded-lg hover:bg-muted transition-colors"
+                        title="Descargar archivo"
+                      >
+                        <Download className="h-4 w-4" />
+                      </a>
+                      <a 
+                        href={selectedDocument.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-lg hover:bg-muted transition-colors"
+                        title="Abrir en nueva pestaña"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-0">
@@ -113,20 +140,20 @@ export default function ProjectDocumentation() {
                       className="w-full h-full"
                     />
                   ) : selectedDocument.file_type?.startsWith('image/') ? (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                    <div className="w-full h-full flex items-center justify-center bg-muted/20 p-4">
                       <img 
                         src={selectedDocument.file_url} 
                         alt={selectedDocument.file_name}
-                        className="max-w-full max-h-full object-contain"
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                       />
                     </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
-                        <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">Vista previa no disponible</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Haz clic en descargar para ver el archivo
+                        <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                        <h4 className="text-lg font-medium mb-2">Vista previa no disponible</h4>
+                        <p className="text-muted-foreground mb-4">
+                          Este tipo de archivo no se puede mostrar en el navegador
                         </p>
                       </div>
                     </div>
@@ -136,10 +163,10 @@ export default function ProjectDocumentation() {
             ) : (
               <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Selecciona un documento</h3>
-                  <p className="text-muted-foreground">
-                    Haz clic en cualquier archivo para verlo aquí
+                  <FileText className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
+                  <h3 className="text-2xl font-light mb-3">Selecciona un documento</h3>
+                  <p className="text-muted-foreground text-lg">
+                    Haz clic en cualquier archivo del explorador para verlo aquí
                   </p>
                 </div>
               </CardContent>
@@ -147,9 +174,66 @@ export default function ProjectDocumentation() {
           </Card>
         </div>
 
-        {/* Right Column: Document Explorer */}
-        <div className="w-1/2">
-          <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
+        {/* Bottom Panel: Two Columns */}
+        <div className="h-80 flex gap-4">
+          {/* Left: Document Explorer */}
+          <div className="flex-1">
+            <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
+          </div>
+
+          {/* Right: Recent Documents History */}
+          <div className="w-80">
+            <Card className="h-full flex flex-col">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Documentos Recientes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 p-0">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-2">
+                    {recentDocuments.length > 0 ? (
+                      recentDocuments.map((doc) => {
+                        const FileIcon = getFileIcon(doc.file_type);
+                        return (
+                          <div 
+                            key={doc.id}
+                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                              selectedDocument?.id === doc.id ? 'bg-primary/10 border border-primary/20' : ''
+                            }`}
+                            onClick={() => handleDocumentSelect(doc)}
+                          >
+                            <div className="p-2 rounded-lg bg-muted/50">
+                              <FileIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium truncate">{doc.file_name}</h4>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs text-muted-foreground">
+                                  {formatFileSize(doc.file_size)}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-8">
+                        <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">
+                          Sin documentos recientes
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
