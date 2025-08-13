@@ -1977,14 +1977,32 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     const currentCategoryId = form.watch('category_id')
     const currentCategory = categories?.find((cat: any) => cat.id === currentCategoryId)
     const currentCategoryViewMode = (currentCategory?.view_mode ?? "normal").trim()
+    
+    // DEBUG: Log para entender qué está pasando
+    console.log("🔍 handleConfirm Debug:", {
+      currentCategoryId,
+      currentCategory: currentCategory?.name,
+      currentCategoryViewMode,
+      categoryViewMode: currentCategory?.view_mode
+    })
+    
     // Detectar tipo actual basándose en la categoría seleccionada
     const isCurrentAportes = currentCategoryViewMode === "aportes" && currentCategory?.name === "Aportes de Terceros"
-    const isCurrentAportesPropios = currentCategoryViewMode === "aportes" && currentCategory?.name === "Aportes Propios"
+    const isCurrentAportesPropios = currentCategoryViewMode === "aportes_propios" || currentCategory?.name === "Aportes Propios"
     const isCurrentRetirosPropios = currentCategoryViewMode === "retiros_propios" || currentCategory?.name?.includes('Retiro')
     const isCurrentMateriales = currentCategory?.name?.toLowerCase().includes('material')
     // Detectar subcontratos por subcategoría UUID específica  
     const currentSubcategoryId = form.watch('subcategory_id')
     const isCurrentSubcontratos = currentSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID de Subcontratos
+    
+    console.log("🎯 Movement Detection:", {
+      isCurrentAportes,
+      isCurrentAportesPropios,
+      isCurrentRetirosPropios,
+      isCurrentMateriales,
+      isCurrentSubcontratos
+    })
+    
     // Detect current movement type based on category
     
     // Usar el tipo detectado basándose en la categoría actual
