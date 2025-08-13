@@ -75,7 +75,7 @@ export async function createContactAttachment(params: {
 
     if (error) {
       // Si falla la inserción, limpiar el archivo subido
-      await removeFromBucket('contact-files', storage_path);
+      await removeFromBucket('contact-files', [storage_path]);
       throw new Error(`Error al crear registro de adjunto: ${error.message}`);
     }
 
@@ -83,7 +83,7 @@ export async function createContactAttachment(params: {
   } catch (error) {
     // Asegurar limpieza en caso de error
     try {
-      await removeFromBucket('contact-files', storage_path);
+      await removeFromBucket('contact-files', [storage_path]);
     } catch (cleanupError) {
       console.error('Error al limpiar archivo tras fallo:', cleanupError);
     }
@@ -109,7 +109,7 @@ export async function deleteContactAttachment(attachmentId: string): Promise<voi
 
   try {
     // Borrar en Storage
-    await removeFromBucket(attachment.storage_bucket, attachment.storage_path);
+    await removeFromBucket(attachment.storage_bucket, [attachment.storage_path]);
 
     // Borrar registro en base de datos
     const { error: deleteError } = await supabase

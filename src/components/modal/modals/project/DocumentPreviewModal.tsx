@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ZoomIn, ZoomOut, RotateCw, Download, ExternalLink, FileText } from 'lucide-react';
+import { PdfViewer } from '@/components/viewers/PdfViewer';
 
 interface DocumentPreviewModalProps {
   document: {
@@ -10,6 +11,7 @@ interface DocumentPreviewModalProps {
     file_name: string;
     file_url: string;
     file_type: string;
+    file_path?: string;
     file_size?: number;
     status?: string;
     created_at: string;
@@ -119,11 +121,12 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
         <div className="flex-1 min-h-0">
           <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
             {isPDF ? (
-              <iframe
-                src={document.file_url}
-                className="w-full h-full border-0"
-                title={document.file_name}
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              <PdfViewer
+                bucket="design-documents"
+                path={document.file_path || document.file_url}
+                fileName={document.file_name}
+                useSignedUrl={false}
+                className="w-full h-full"
               />
             ) : isImage ? (
               <div className="w-full h-full flex items-center justify-center p-4">

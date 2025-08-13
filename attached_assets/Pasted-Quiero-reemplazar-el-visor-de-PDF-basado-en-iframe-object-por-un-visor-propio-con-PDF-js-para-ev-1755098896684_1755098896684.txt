@@ -1,0 +1,128 @@
+Quiero reemplazar el visor de PDF basado en <iframe>/<object> por un visor propio con PDF.js para evitar bloqueos de Chrome por X-Frame-Options/CORS. Implementá lo siguiente:
+
+1) Dependencias
+Instalar: pdfjs-dist
+
+bash
+Copiar
+Editar
+npm i pdfjs-dist
+2) Utilidades Supabase (si no existen)
+Crear/actualizar src/lib/supabase/storage.ts con helpers:
+
+getPublicUrl(bucket: string, path: string): string
+
+createSignedUrl(bucket: string, path: string, expiresIn = 3600): Promise<string>
+
+downloadAsBlob(bucket: string, path: string): Promise<Blob> // usa supabase.storage.from(bucket).download(path)
+
+NOTA: Si el bucket es público, usaremos fetch(publicUrl); si es privado, usamos download() o createSignedUrl().
+
+3) Componente PdfViewer.tsx
+Crear src/components/viewers/PdfViewer.tsx que reciba:
+
+ts
+Copiar
+Editar
+type PdfViewerProps = {
+  bucket: string;
+  path: string;              // storage_path
+  fileName?: string;         // para el botón Descargar
+  useSignedUrl?: boolean;    // default: false (si el bucket es público)
+};
+Requisitos:
+
+No usar iframe. Usar pdfjs-dist para renderizar páginas en <canvas>.
+
+Configurar worker:
+
+ts
+Copiar
+Editar
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+Flujo:
+
+Mostrar skeleton/loader.
+
+Obtener archivo:
+
+Si useSignedUrl: downloadAsBlob(bucket, path).
+
+Si público: fetch(getPublicUrl(bucket, path)) → await res.blob().
+
+Convertir a ArrayBuffer y abrir con pdfjsLib.getDocument({ data: arrayBuffer }).promise.
+
+Renderizar una página a la vez en <canvas> con controles:
+
+Página actual / total, Anterior/Siguiente
+
+Zoom (+/–, 50%–300%)
+
+Descargar (crear link con URL.createObjectURL(blob) y download=fileName || 'document.pdf')
+
+Abrir en pestaña (si es público, usar publicUrl; si es privado, crear URL.createObjectURL(blob) y window.open).
+
+Manejar errores con un estado visible (“No se pudo renderizar el PDF” + botón “Abrir/Descargar”).
+
+Accesibilidad y UX:
+
+Contenedor con scroll vertical, canvas centrado, fondo neutro.
+
+Botonera fija arriba (sticky) con tooltips.
+
+Teclas ← → para paginar; Ctrl/Cmd + / Ctrl/Cmd - para zoom.
+
+Estilos con Tailwind (modo dark):
+
+Card con rounded-2xl, shadow, padding, y barra de herramientas con backdrop-blur.
+
+4) Ejemplo de uso
+En el modal de documentación (o donde corresponda), reemplazar el iframe por:
+
+tsx
+Copiar
+Editar
+<PdfViewer
+  bucket="design-documents"   // o el bucket que uses
+  path={doc.storage_path}
+  fileName={doc.file_name}
+  useSignedUrl={false}         // true si el bucket es privado
+/>
+5) Consideraciones de seguridad
+Nunca iframe a URLs que devuelvan X-Frame-Options: DENY/SAMEORIGIN.
+
+Si el bucket es privado, preferir download() (Blob) y render en cliente.
+
+Si tenés CSP, asegurate de permitir blob: en img-src/media-src/worker-src.
+
+6) Código base sugerido (resumen)
+Implementar en PdfViewer.tsx:
+
+const [blob, setBlob] = useState<Blob | null>(null)
+
+useEffect para bajar el archivo (según useSignedUrl)
+
+Estado: { loading, error, page, numPages, scale }
+
+Funciones: renderPage(pageNumber), zoomIn/zoomOut, next/prev, download, openInNewTab
+
+Canvas ref: const canvasRef = useRef<HTMLCanvasElement>(null)
+
+Al cambiar page o scale, volver a renderPage.
+
+7) Bonus (opcional)
+Miniaturas de páginas en una sidebar.
+
+Selector “Ajustar a ancho”.
+
+Manejo de documentos grandes: render diferido de páginas con requestIdleCallback.
+
+Entregar PR con el componente, helpers y la integración en la página de Documentación. Probar con:
+
+Bucket público y privado.
+
+PDFs de 1 y 20 páginas.
+
+Verificar que no haya errores de X-Frame-Options en Chrome.
