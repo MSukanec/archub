@@ -82,8 +82,8 @@ export default function ProjectDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Desktop: Three Panel Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
-        {/* Top Panel: Document Viewer - Full Width */}
-        <div className="flex-1">
+        {/* Top Panel: Document Viewer - 50% Height */}
+        <div className="h-1/2">
           <Card className="h-full flex flex-col">
             {selectedDocument ? (
               <>
@@ -174,15 +174,25 @@ export default function ProjectDocumentation() {
           </Card>
         </div>
 
-        {/* Bottom Panel: Two Columns */}
-        <div className="h-80 flex gap-4">
-          {/* Left: Document Explorer */}
-          <div className="flex-1">
-            <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
+        {/* Bottom Panel: Two Columns - 50% Height */}
+        <div className="h-1/2 flex gap-4">
+          {/* Left: Document Explorer - 50% Width */}
+          <div className="w-1/2">
+            <Card className="h-full flex flex-col">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FolderPlus className="h-4 w-4" />
+                  Explorador de Documentos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 p-0">
+                <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Right: Recent Documents History */}
-          <div className="w-80">
+          {/* Right: Recent Documents History - 50% Width */}
+          <div className="w-1/2">
             <Card className="h-full flex flex-col">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">

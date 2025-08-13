@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Folder, 
   FolderOpen, 
   ArrowLeft,
+  ChevronRight,
   FileText,
   File,
   Image
@@ -110,8 +112,9 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Breadcrumb Navigation */}
+    <ScrollArea className={`h-full ${className}`}>
+      <div className="space-y-4 p-4">
+        {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2">
         {!isRoot && (
           <Button 
@@ -142,33 +145,30 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="space-y-3">
+        {/* Content Area */}
+        <div className="space-y-3">
         {/* Show root folders */}
         {isRoot && rootFolders.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Carpetas</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="space-y-2">
               {rootFolders.map((folder) => (
-                <Card 
+                <div 
                   key={folder.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <Folder className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{folder.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(folder.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Folder className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{folder.name}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(folder.created_at)}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               ))}
             </div>
           </div>
@@ -178,27 +178,24 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
         {!isRoot && subFolders.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground">Subcarpetas</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="space-y-2">
               {subFolders.map((folder) => (
-                <Card 
+                <div 
                   key={folder.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-secondary/50">
-                        <Folder className="h-5 w-5 text-secondary-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{folder.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(folder.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
+                  <div className="p-2 rounded-lg bg-secondary/50">
+                    <Folder className="h-4 w-4 text-secondary-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{folder.name}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(folder.created_at)}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               ))}
             </div>
           </div>
@@ -212,7 +209,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <FolderOpen className="h-4 w-4" />
                   {group.name}
-                  {group.document_count > 0 && (
+                  {(group.document_count || 0) > 0 && (
                     <Badge variant="secondary" className="text-xs">
                       {group.document_count}
                     </Badge>
@@ -256,7 +253,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             ))}
 
             {/* Ungrouped documents */}
-            {documents?.filter(doc => !doc.group_id).length > 0 && (
+            {(documents?.filter(doc => !doc.group_id).length || 0) > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-muted-foreground">Documentos</h3>
                 <div className="space-y-2">
@@ -322,7 +319,8 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }
