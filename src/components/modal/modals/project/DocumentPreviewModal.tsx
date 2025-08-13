@@ -58,10 +58,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
   // Footer con botones de acción
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cerrar"
-      onLeftClick={onClose}
-      rightLabel="Descargar"
-      onRightClick={handleDownload}
+      onClose={onClose}
     />
   );
 

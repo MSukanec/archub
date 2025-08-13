@@ -286,7 +286,7 @@ export function PdfViewer({
           {/* Page navigation */}
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={prevPage}
               disabled={state.page <= 1}
@@ -301,7 +301,7 @@ export function PdfViewer({
             </div>
             
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={nextPage}
               disabled={state.page >= state.numPages}
@@ -313,7 +313,7 @@ export function PdfViewer({
           {/* Zoom and actions */}
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={zoomOut}
               disabled={state.scale <= 0.5}
@@ -330,7 +330,7 @@ export function PdfViewer({
             </Badge>
             
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={zoomIn}
               disabled={state.scale >= 3.0}
@@ -340,11 +340,11 @@ export function PdfViewer({
             
             <div className="w-px h-6 bg-border mx-2" />
             
-            <Button variant="outline" size="sm" onClick={downloadPdf}>
+            <Button variant="default" size="sm" onClick={downloadPdf}>
               <Download className="w-4 h-4" />
             </Button>
             
-            <Button variant="outline" size="sm" onClick={openInNewTab}>
+            <Button variant="default" size="sm" onClick={openInNewTab}>
               <ExternalLink className="w-4 h-4" />
             </Button>
           </div>
