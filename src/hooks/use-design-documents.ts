@@ -198,7 +198,7 @@ export function useUpdateDesignDocument() {
       const { id, ...updateData } = data;
 
       const { data: result, error } = await supabase
-        .from('design_documents')
+        .from('documents')
         .update(updateData)
         .eq('id', id)
         .select()
@@ -222,7 +222,7 @@ export function useDeleteDesignDocument() {
   return useMutation({
     mutationFn: async (documentId: string): Promise<void> => {
       const { error } = await supabase
-        .from('design_documents')
+        .from('documents')
         .delete()
         .eq('id', documentId);
 
