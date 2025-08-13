@@ -19,13 +19,28 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, File, FileText, FolderOpen } from 'lucide-react';
+import { Upload, X, File, FileText, FolderOpen, Plus } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
 const documentUploadSchema = z.object({
-  folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
+  folder_id: z.string(),
   status: z.string().min(1, 'El estado es obligatorio'),
+  new_folder_name: z.string().optional(),
+  parent_folder_id: z.string().optional(),
+}).refine((data) => {
+  // If not creating new folder, folder_id must be provided
+  // If creating new folder, new_folder_name must be provided
+  const isCreatingNew = !data.folder_id || data.folder_id === '';
+  
+  if (isCreatingNew) {
+    return data.new_folder_name && data.new_folder_name.trim().length > 0;
+  } else {
+    return data.folder_id.length > 0;
+  }
+}, {
+  message: 'Debe seleccionar una carpeta existente o crear una nueva',
+  path: ['folder_id']
 });
 
 type DocumentUploadFormData = z.infer<typeof documentUploadSchema>;
@@ -48,6 +63,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
+  const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
@@ -66,6 +82,8 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     defaultValues: {
       folder_id: defaultFolderId || '',
       status: 'pendiente',
+      new_folder_name: '',
+      parent_folder_id: '',
     },
   });
 
@@ -81,10 +99,13 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       form.reset({
         folder_id: defaultFolderId || '',
         status: 'pendiente',
+        new_folder_name: '',
+        parent_folder_id: '',
       });
       setSelectedFiles([]);
       setFileNames({});
       setUploadProgress(0);
+      setShowNewFolderInput(false);
     }
   }, [userData, organizationMembers, defaultFolderId, form]);
 
@@ -220,10 +241,11 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     setSelectedFiles([]);
     setFileNames({});
     setUploadProgress(0);
+    setShowNewFolderInput(false);
     onClose();
   };
 
-  const onSubmit = (data: DocumentUploadFormData) => {
+  const onSubmit = async (data: DocumentUploadFormData) => {
     if (selectedFiles.length === 0) {
       toast({
         title: 'Error',
@@ -233,7 +255,28 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       return;
     }
 
-    uploadMutation.mutate(data);
+    // If creating a new folder, create it first
+    let finalFolderId = data.folder_id;
+    
+    if (showNewFolderInput && data.new_folder_name?.trim()) {
+      try {
+        const newFolder = await createFolderMutation.mutateAsync({
+          name: data.new_folder_name.trim(),
+          parent_id: data.parent_folder_id || undefined,
+        });
+        finalFolderId = newFolder.id;
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Error al crear la carpeta',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    // Upload documents with the final folder ID
+    uploadMutation.mutate({ ...data, folder_id: finalFolderId });
   };
 
   const editPanel = (
@@ -247,7 +290,18 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select 
+                  onValueChange={(value) => {
+                    if (value === '__create_new__') {
+                      setShowNewFolderInput(true);
+                      field.onChange(''); // Clear the folder_id since we'll create a new one
+                    } else {
+                      setShowNewFolderInput(false);
+                      field.onChange(value);
+                    }
+                  }} 
+                  value={showNewFolderInput ? '__create_new__' : field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar o crear carpeta..." />
@@ -259,6 +313,12 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                         {folder.name}
                       </SelectItem>
                     ))}
+                    <SelectItem value="__create_new__">
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Crear nueva carpeta...
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -290,6 +350,61 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             )}
           />
         </div>
+
+        {/* New Folder Creation Fields */}
+        {showNewFolderInput && (
+          <div className="space-y-4 p-4 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Plus className="h-4 w-4" />
+              Crear Nueva Carpeta
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="new_folder_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre de la carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Ej: Planos Estructurales" 
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="parent_folder_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Carpeta padre (opcional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Carpeta raíz (sin padre)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Carpeta raíz (sin padre)</SelectItem>
+                        {folders.map((folder) => (
+                          <SelectItem key={folder.id} value={folder.id}>
+                            {folder.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
 
         {/* 4. Description Field */}
 
