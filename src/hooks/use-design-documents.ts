@@ -137,10 +137,8 @@ export function useCreateDesignDocument() {
       file_url: string;
       file_type: string;
       file_size?: number;
-      group_id: string | null;
       folder_id: string;
       status: string;
-      visibility?: string;
     }): Promise<DesignDocument> => {
       if (!projectId || !organizationId || !userId) {
         throw new Error('Missing project, organization or user data');
@@ -160,7 +158,7 @@ export function useCreateDesignDocument() {
       }
 
       const { data, error } = await supabase
-        .from('design_documents')
+        .from('documents')
         .insert({
           ...documentData,
           project_id: projectId,

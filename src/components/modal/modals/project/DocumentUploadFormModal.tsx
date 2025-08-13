@@ -178,7 +178,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           file_url: urlData.publicUrl,
           file_type: file.type,
           file_size: file.size,
-          group_id: null,
           folder_id: data.folder_id,
           status: data.status,
         });
