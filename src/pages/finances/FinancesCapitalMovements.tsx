@@ -103,9 +103,7 @@ export default function FinancesCapitalMovements() {
     c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' || c.name === 'Retiros Propios'
   )
 
-  // Log the found concepts for debugging
-  console.log('Aportes Propios Concept:', aportesPropriosConcept)
-  console.log('Retiros Propios Concept:', retirosPropriosConcept)
+  // Concepts found successfully
 
   // Get capital movements (aportes and retiros propios)
   const { data: movements = [], isLoading } = useQuery({
@@ -123,12 +121,8 @@ export default function FinancesCapitalMovements() {
         .order('movement_date', { ascending: false })
 
       if (error) {
-        console.error('Error fetching capital movements:', error)
         throw error
       }
-
-      console.log('Capital movements found:', movements?.length || 0)
-      console.log('Capital movements data:', movements)
       
       return movements || []
     },
@@ -163,7 +157,7 @@ export default function FinancesCapitalMovements() {
         .select(`
           id,
           user_id,
-          user:users!inner(
+          user:users(
             id,
             full_name,
             email
@@ -491,12 +485,15 @@ export default function FinancesCapitalMovements() {
       label: "Socio",
       width: "14.3%",
       render: (item: CapitalMovement) => {
-        if (!item.member?.user?.full_name) {
+        // Find the member from our members list using member_id
+        const member = members.find(m => m.id === item.member_id)
+        
+        if (!member?.user?.full_name) {
           return <div className="text-sm text-muted-foreground">Sin socio</div>
         }
 
-        const displayName = item.member.user.full_name
-        const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+        const displayName = member.user.full_name
+        const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
         return (
           <div className="flex items-center gap-2">
