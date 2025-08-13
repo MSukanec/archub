@@ -101,7 +101,7 @@ export default function ProjectDocumentation() {
         {/* Top: Document Viewer and Info */}
         <div className="flex-1 flex gap-4">
           {/* Left: Document Viewer (2/3) */}
-          <div className="w-2/3">
+          <div className="w-2/3 min-w-0">
           <div 
             className="rounded-lg overflow-hidden border h-full"
           >
@@ -112,7 +112,7 @@ export default function ProjectDocumentation() {
                     bucket="design-documents"
                     path={selectedDocument.file_path}
                     fileName={selectedDocument.file_name}
-                    className="w-full h-full"
+                    className="w-full h-full overflow-hidden"
                     onExpand={handleExpandPdf}
                   />
                 ) : selectedDocument.file_type?.startsWith('image/') ? (
@@ -120,7 +120,7 @@ export default function ProjectDocumentation() {
                     bucket="design-documents"
                     path={selectedDocument.file_path}
                     fileName={selectedDocument.file_name}
-                    className="w-full h-full"
+                    className="w-full h-full overflow-hidden"
                     onExpand={handleExpandPdf}
                   />
                 ) : (
