@@ -1,0 +1,212 @@
+PROMPT PARA REPLIT — UnifiedViewer (PDF + Image + DXF) con zoom sin reflow
+Quiero reemplazar los componentes actuales PdfViewer.tsx e ImageViewer.tsx por un único componente UnifiedViewer.tsx que:
+
+Visualice PDF, imágenes (png/jpg/webp/svg) y DXF.
+
+Tenga zoom con transform (CSS transform: scale(...)) sin agrandar el contenedor/card.
+
+Mantenga un lienzo base fijo (fit-to-width) y aplique zoom sobre un inner-content scrollable.
+
+Conserve toolbar unificada (zoom ±, 100%, fit, navegar páginas PDF, descargar, abrir en nueva pestaña).
+
+Use nuestros helpers de Supabase (storageHelpers) igual que ahora.
+
+Deje DWG preparado: intentar con Autodesk Viewer (si detecto dwg) mostrar mensaje + botón “Abrir con Autodesk Viewer” (más adelante conectamos token).
+
+0) Limpieza
+No borres los archivos viejos aún, pero no los uses. El nuevo componente debe importarse donde hoy se usa PdfViewer/ImageViewer.
+
+1) Crear src/components/viewers/UnifiedViewer.tsx
+Props:
+
+ts
+Copiar
+Editar
+type UnifiedViewerProps = {
+  bucket: string;
+  path: string;          // storage_path o URL completa
+  mimeType?: string;     // ej. 'application/pdf', 'image/png', 'application/dxf'
+  fileName?: string;     // para descargar
+  useSignedUrl?: boolean; // si el bucket es privado
+  className?: string;
+  onExpand?: () => void;
+  height?: number;        // alto fijo del visor (px). default 520
+};
+Comportamiento general (muy importante):
+
+El contenedor externo tiene alto fijo (por props height, default 520) y overflow: auto.
+
+Dentro, renderizar un <div class="viewer-content"> que contiene el canvas/imagen.
+
+El zoom se hace solo con transform: scale(scale) sobre .viewer-content (no cambiamos width/height del canvas o <img>).
+
+transform-origin: top left.
+
+Para PDF: renderizar página al tamaño base (fit-to-width) y luego el zoom lo maneja el transform.
+
+Para imagen: idem, base = fit-to-width.
+
+Al hacer zoom, NO debe crecer la card ni el contenedor. Solo aparece scroll horizontal/vertical dentro del visor.
+
+Toolbar unificada:
+
+Botones: ← / → (solo PDF), Zoom -, 100%, Zoom +, Fit (ajustar a ancho), Descargar, Abrir.
+
+Atajos: Ctrl/Cmd +, Ctrl/Cmd -, Ctrl/Cmd 0 (reset a 100%), flechas para páginas (PDF).
+
+Wheel con Ctrl hace zoom (opcional).
+
+2) Hook reutilizable de zoom/pan
+Crear src/components/viewers/useViewportZoom.ts:
+
+Estado: scale (0.1–3), setScale, reset(), fitToWidth(baseWidth: number, containerWidth: number).
+
+Manejadores: onWheel(e) (si e.ctrlKey → zoom centrado), pan con click+drag: si el usuario mantiene presionada barra espaciadora, activar “manito” y permitir arrastrar el scroll del contenedor (no mover el contenido con translate; solo scrollLeft/scrollTop).
+
+3) Implementación por tipo de archivo
+Detección de tipo
+Si mimeType viene, úsalo.
+
+Si no, inferí por path (extensión).
+
+Mapear:
+
+PDF: application/pdf o .pdf
+
+Imagen: image/*, .png .jpg .jpeg .webp .svg
+
+DXF: application/dxf, image/vnd.dxf, .dxf
+
+DWG: .dwg → mostrar fallback (ver punto DWG abajo).
+
+PDF (usa pdfjs-dist como hoy)
+No cambies el canvas CSS una vez seteado el “base size”.
+
+Render:
+
+Calcular containerWidth midiendo el ancho del contenedor (useRef + ResizeObserver).
+
+Cargar pdfDoc, pedir page 1 para obtener viewport.width a scale=1.
+
+baseScale = containerWidth / viewport.width.
+
+Renderizar el canvas una sola vez por cambio de página a escala base multiplicada por devicePixelRatio para nitidez (pero el CSS width del canvas debe ser viewport.width * baseScale en px, y el CSS height idem; no usés scale aquí).
+
+El zoom visible viene de .viewer-content { transform: scale(scale); }.
+
+Navegación de páginas: page, numPages. Re-renderizar a base cuando cambie page o cambie el containerWidth (resize).
+
+Importante: nuestro PdfViewer.tsx actual cambia el tamaño real del canvas al hacer zoom; eso hay que eliminarlo. El canvas solo respeta el tamaño base (fit-to-width).
+
+Imágenes
+Cargar la imagen y calcular naturalWidth.
+
+baseWidth = containerWidth, baseHeight = baseWidth * (naturalHeight/naturalWidth).
+
+<img> con style={{ width: baseWidth, height: baseHeight }} y sin usar scale en el <img>.
+
+El zoom visible lo maneja .viewer-content { transform: scale(scale) }.
+
+DXF
+Usar dxf-parser + three o un visor liviano como @tarikjabiri/dxf-viewer.
+
+Preferencia: @tarikjabiri/dxf-viewer (más directo en web).
+
+Instalar: npm i @tarikjabiri/dxf-viewer three
+
+Renderizar el DXF en un <canvas> WebGL dentro del mismo patrón de “base size fijo + transform scale”.
+
+Ajustar el “fit” para encuadrar el dibujo al ancho disponible.
+
+Controles: mismo toolbar (zoom ±, 100%, fit). Sin páginas.
+
+DWG (fallback)
+Si extensión .dwg: mostrar mensaje en el visor:
+
+“Formato DWG no soportado nativamente. Abrir en Autodesk Viewer”
+
+Botón que abre una nueva pestaña con un URL configurable (dejar helper para más adelante poner el urn/token).
+
+Dejar función openWithAutodeskViewer(fileUrl) y comentar TODO: “TODO: integrar token y carga del modelo”.
+
+4) CSS/estructura para evitar reflow
+Estructura del visor:
+
+tsx
+Copiar
+Editar
+<div className="viewer-root" style={{ height }}>
+  <div
+    ref={scrollRef}
+    className="viewer-scroll overflow-auto relative bg-muted/40 rounded-xl border"
+    onWheel={onWheelZoomIfCtrl} // opcional
+  >
+    <div
+      ref={contentRef}
+      className="viewer-content inline-block origin-top-left"
+      style={{ transform: `scale(${scale})` }}
+    >
+      {/* aquí va el canvas del PDF/imagen/DXF con tamaño base fijo */}
+    </div>
+  </div>
+  {/* toolbar flotante al centro-arriba */}
+</div>
+Tailwind claves:
+
+Contenedor fijo: h-[${height}px] w-full overflow-auto.
+
+viewer-content siempre inline-block, origin-top-left.
+
+Nada debe cambiar el width/height base de los elementos cuando hacemos zoom.
+
+5) Descarga y abrir
+Descargar: si tenemos blob, usar URL.createObjectURL; si es público, usar getPublicUrl.
+
+Abrir en nueva pestaña: idem.
+
+Mantener fileName para download.
+
+6) Tipado y helpers
+Reutilizar storageHelpers.getPublicUrl, fetchAsBlob y downloadAsBlob (si bucket privado).
+
+Si no existen, crearlos en src/lib/supabase/storage.ts.
+
+Añadir useResizeObserver (pequeño hook) para recalcular baseWidth al cambiar el tamaño del contenedor.
+
+7) Reemplazos en la app
+Donde hoy se usa PdfViewer/ImageViewer, reemplazar por:
+
+tsx
+Copiar
+Editar
+<UnifiedViewer
+  bucket="design-documents"   // o el bucket correspondiente
+  path={doc.storage_path}
+  mimeType={doc.file_mime}    // si lo tenés
+  fileName={doc.file_name}
+  useSignedUrl={false}
+  height={520}
+/>
+8) Criterios de aceptación (QA)
+✅ El zoom no altera el tamaño de la card contenedora; solo aparece scroll.
+
+✅ PDF: navegar páginas y hacer zoom mantiene nitidez (usa DPR), sin saltos de layout.
+
+✅ Imagen: zoom suave, rotación (opcional) puede quedar para después; si es simple, agregar rotate como en el viewer viejo.
+
+✅ DXF: archivo .dxf simple se renderiza, con zoom/fit funcionando.
+
+✅ DWG: muestra aviso + botón “Abrir con Autodesk Viewer”.
+
+✅ Teclado: Ctrl/Cmd +/-/0, flechas para páginas PDF.
+
+✅ Botones: Zoom ±, 100%, Fit, Descargar, Abrir (y páginas en PDF).
+
+✅ Mantener estilo dark, toolbar flotante como en los viewers actuales.
+
+9) Notas sobre los viewers actuales
+No uses PdfViewer.tsx / ImageViewer.tsx para el zoom; ahí se cambian width/height reales del canvas/imagen y por eso crece la card.
+
+El nuevo UnifiedViewer SIEMPRE hace zoom solo con transform en el contenedor interno.
+
+Con esto debería quedar un visor único, sólido y extensible. Si necesitás, luego pedimos soporte para marcadores, medidas y anotaciones sobre la misma base (agregando una capa interactiva encima del viewer-content).
