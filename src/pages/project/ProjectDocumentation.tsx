@@ -3,8 +3,8 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
-import { UnifiedViewer } from '@/components/viewers/UnifiedViewer';
 import { PdfViewer } from '@/components/viewers/PdfViewer';
+import { ImageViewer } from '@/components/viewers/ImageViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -106,25 +106,35 @@ export default function ProjectDocumentation() {
             className="rounded-lg overflow-hidden border h-full"
           >
             {selectedDocument ? (
-              selectedDocument.file_type === 'application/pdf' ? (
-                <PdfViewer
-                  bucket="design-documents"
-                  path={selectedDocument.file_url}
-                  useSignedUrl={false}
-                  className="w-full h-full"
-                />
-              ) : (
-                <UnifiedViewer
-                  bucket="design-documents"
-                  path={selectedDocument.file_url}
-                  mimeType={selectedDocument.file_type}
-                  fileName={selectedDocument.file_name}
-                  useSignedUrl={false}
-                  className="w-full h-full"
-                  height={520}
-                  onExpand={handleExpandPdf}
-                />
-              )
+              <>
+                {selectedDocument.file_type === 'application/pdf' ? (
+                  <PdfViewer 
+                    bucket="design-documents"
+                    path={selectedDocument.file_path}
+                    fileName={selectedDocument.file_name}
+                    className="w-full h-full overflow-hidden"
+                    onExpand={handleExpandPdf}
+                  />
+                ) : selectedDocument.file_type?.startsWith('image/') ? (
+                  <ImageViewer 
+                    bucket="design-documents"
+                    path={selectedDocument.file_path}
+                    fileName={selectedDocument.file_name}
+                    className="w-full h-full overflow-hidden"
+                    onExpand={handleExpandPdf}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h4 className="text-lg font-medium mb-2">Vista previa no disponible</h4>
+                      <p className="text-muted-foreground mb-4">
+                        Este tipo de archivo no se puede mostrar en el navegador
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -168,19 +178,12 @@ export default function ProjectDocumentation() {
                 </div>
               </div>
               <CardContent className="flex-1 p-0">
-                <ScrollArea className="h-full">
-                  <div className="p-4">
-                    <DocumentExplorer 
-                      onSelectDocument={handleDocumentSelect}
-                      selectedDocument={selectedDocument}
-                    />
-                  </div>
-                </ScrollArea>
+                <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Card: Recent Documents */}
+          {/* Right Card: Recent Documents History */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
               <div className="px-4 py-3 border-b border-[var(--card-border)]">
@@ -189,54 +192,36 @@ export default function ProjectDocumentation() {
                   <div className="flex-1">
                     <h2 className="text-sm font-medium text-[var(--card-fg)]">Documentos Recientes</h2>
                     <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                      Últimos archivos modificados en el proyecto
+                      Accede rápidamente a los últimos documentos visualizados
                     </p>
                   </div>
                 </div>
               </div>
               <CardContent className="flex-1 p-0">
                 <ScrollArea className="h-full">
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 space-y-1">
                     {recentDocuments.length > 0 ? (
-                      recentDocuments.map((doc: any) => {
-                        const IconComponent = getFileIcon(doc.file_mime);
-                        return (
-                          <div
-                            key={doc.id}
-                            className={cn(
-                              "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-accent/50",
-                              selectedDocument?.id === doc.id && "bg-accent/30 border-accent"
-                            )}
-                            onClick={() => handleDocumentSelect(doc)}
-                          >
-                            <IconComponent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium truncate">
-                                  {doc.file_name}
-                                </p>
-                                {doc.status && (
-                                  <Badge variant="secondary" className={cn("text-xs", getStatusColor(doc.status))}>
-                                    {getStatusText(doc.status)}
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <span>{formatFileSize(doc.file_size)}</span>
-                                <span>•</span>
-                                <span>
-                                  {doc.created_at ? format(new Date(doc.created_at), 'dd MMM yyyy', { locale: es }) : 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
+                      recentDocuments.map((doc) => (
+                        <Button
+                          key={doc.id}
+                          variant={selectedDocument?.id === doc.id ? "secondary" : "ghost"}
+                          size="sm"
+                          onClick={() => handleDocumentSelect(doc)}
+                          className={cn(
+                            "h-8 px-3 text-xs font-normal flex items-center justify-between w-full text-left",
+                            selectedDocument?.id === doc.id ? "button-secondary-pressed hover:bg-secondary" : ""
+                          )}
+                        >
+                          <span className="text-sm font-medium truncate flex-1 pr-2 text-left">{doc.file_name}</span>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
+                          </span>
+                        </Button>
+                      ))
                     ) : (
                       <div className="text-center py-8">
-                        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-sm text-muted-foreground">
-                          No hay documentos recientes
+                          Sin documentos recientes
                         </p>
                       </div>
                     )}
@@ -248,42 +233,26 @@ export default function ProjectDocumentation() {
         </div>
       </div>
 
-      {/* Mobile Layout */}
-      <div className="lg:hidden h-full flex flex-col">
-        {/* Mobile Document Explorer */}
-        <div className="flex-1">
-          <Card className="h-full flex flex-col">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <FolderPlus className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Documentos del Proyecto</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 p-0">
-              <ScrollArea className="h-full">
-                <div className="p-4">
-                  <DocumentExplorer 
-                    onSelectDocument={(doc) => {
-                      setSelectedDocument(doc);
-                      setIsPreviewOpen(true);
-                    }}
-                    selectedDocument={selectedDocument}
-                  />
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Preview Modal for Mobile */}
-      {isPreviewOpen && selectedDocument && (
-        <DocumentPreviewModal
+      {/* Mobile: Single Column Layout */}
+      <div className="lg:hidden">
+        <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
+        
+        {/* Document Preview Modal for Mobile */}
+        <DocumentPreviewModal 
+          document={selectedDocument}
           isOpen={isPreviewOpen}
           onClose={handleClosePreview}
-          document={selectedDocument}
         />
-      )}
+      </div>
+
+      {/* Document Preview Modal for Desktop (expand button) */}
+      <div className="hidden lg:block">
+        <DocumentPreviewModal 
+          document={selectedDocument}
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      </div>
     </Layout>
   );
 }

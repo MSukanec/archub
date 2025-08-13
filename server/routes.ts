@@ -958,54 +958,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Design Documents endpoint
-  app.get("/api/design-documents", async (req, res) => {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: "No authorization token provided" });
-      }
-      
-      const token = authHeader.substring(7);
-      const authenticatedSupabase = createClient(
-        process.env.VITE_SUPABASE_URL!,
-        process.env.VITE_SUPABASE_ANON_KEY!,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        }
-      );
-
-      const { data, error } = await authenticatedSupabase
-        .from('documents')
-        .select(`
-          *,
-          creator:organization_members (
-            id,
-            user:users (
-              id,
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching design documents:", error);
-        return res.status(500).json({ error: "Failed to fetch documents" });
-      }
-
-      res.json(data || []);
-    } catch (error) {
-      console.error("Error in design documents endpoint:", error);
-      res.status(500).json({ error: "Failed to fetch documents" });
-    }
-  });
-
   const httpServer = createServer(app);
 
   return httpServer;
