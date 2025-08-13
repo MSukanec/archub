@@ -118,6 +118,7 @@ export function UnifiedViewer({
         setFileType(detectedType);
         
       } catch (err) {
+        console.error('UnifiedViewer init error:', err);
         setError(err instanceof Error ? err.message : 'Error loading file');
       } finally {
         setLoading(false);
@@ -127,38 +128,49 @@ export function UnifiedViewer({
     initFile();
   }, [bucket, path, mimeType, useSignedUrl, getFileUrl]);
 
-  // PDF rendering
+  // PDF rendering - usar lógica simplificada del PdfViewer exitoso
   const renderPDFPage = useCallback(async (pageNum: number) => {
-    if (!pdfDoc || !canvasRef.current || containerDimensions.width === 0) return;
+    if (!pdfDoc || !canvasRef.current) return;
 
     try {
       const page = await pdfDoc.getPage(pageNum);
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       
-      // Calculate base scale to fit width
-      const viewport = page.getViewport({ scale: 1 });
-      const newBaseScale = containerDimensions.width / viewport.width;
-      setBaseScale(newBaseScale);
+      if (!ctx) {
+        setError('Canvas context not available');
+        return;
+      }
       
-      // Render at base scale with device pixel ratio for sharpness
-      const renderScale = newBaseScale * window.devicePixelRatio;
-      const renderViewport = page.getViewport({ scale: renderScale });
+      // Simple scaling calculation
+      const viewport = page.getViewport({ scale: 1.0 });
+      const containerWidth = containerDimensions.width || 800;
+      const scale = containerWidth / viewport.width;
+      setBaseScale(scale);
       
-      canvas.height = renderViewport.height;
-      canvas.width = renderViewport.width;
+      // Final viewport with calculated scale
+      const finalViewport = page.getViewport({ scale });
       
-      // Set CSS size to base scale (no zoom applied here)
-      canvas.style.width = `${viewport.width * newBaseScale}px`;
-      canvas.style.height = `${viewport.height * newBaseScale}px`;
+      // Set canvas dimensions
+      canvas.height = finalViewport.height;
+      canvas.width = finalViewport.width;
+      canvas.style.width = `${finalViewport.width}px`;
+      canvas.style.height = `${finalViewport.height}px`;
       
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Render PDF page
       await page.render({
         canvasContext: ctx,
-        viewport: renderViewport
+        viewport: finalViewport
       }).promise;
+      
+      // PDF rendered successfully
       
     } catch (err) {
       console.error('Error rendering PDF page:', err);
+      setError('Failed to render PDF page');
     }
   }, [pdfDoc, containerDimensions.width]);
 
@@ -173,6 +185,7 @@ export function UnifiedViewer({
         setNumPages(pdf.numPages);
         setCurrentPage(1);
       } catch (err) {
+        console.error('PDF load error:', err);
         setError('Failed to load PDF');
       }
     };
@@ -182,7 +195,7 @@ export function UnifiedViewer({
 
   // Render PDF page when dependencies change
   useEffect(() => {
-    if (fileType === 'pdf' && pdfDoc) {
+    if (fileType === 'pdf' && pdfDoc && containerDimensions.width > 0) {
       renderPDFPage(currentPage);
     }
   }, [fileType, pdfDoc, currentPage, containerDimensions.width, renderPDFPage]);
