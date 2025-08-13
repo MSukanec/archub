@@ -85,7 +85,7 @@ export default function FinancesDashboard() {
 
   return (
     <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
-      <div className="space-y-6">
+      <div>
         {/* ActionBar with view mode toggle */}
         <ActionBar>
           <div className="flex items-center gap-2">

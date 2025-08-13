@@ -143,7 +143,7 @@ export default function AdminCategories() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
+      <div>
 
         <Card>
           <CardContent className="p-6">

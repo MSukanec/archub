@@ -338,7 +338,7 @@ export default function AdminTasks() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
+      <div>
         {activeTab === 'Lista de Tareas' && (
           <Table
             data={filteredGeneratedTasks}

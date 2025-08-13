@@ -357,7 +357,7 @@ export default function ConstructionLogs() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
+      <div>
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
           icon={<FileText className="w-12 h-12 text-muted-foreground" />}
@@ -535,7 +535,10 @@ export default function ConstructionLogs() {
                                         }}
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
-                                          e.currentTarget.nextElementSibling.style.display = 'flex';
+                                          const nextElement = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                          if (nextElement) {
+                                            nextElement.style.display = 'flex';
+                                          }
                                         }}
                                       />
                                       <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>

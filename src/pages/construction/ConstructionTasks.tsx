@@ -516,7 +516,7 @@ export default function ConstructionTasks() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
+      <div>
         {/* Tab Content */}
         {activeTab === "tasks" ? (
           // Tab Tareas - Contenido actual

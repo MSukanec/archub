@@ -293,7 +293,7 @@ export default function OrganizationProjects() {
   return (
     <>
     <Layout headerProps={headerProps}>
-      <div className="space-y-6">
+      <div>
 
 
 

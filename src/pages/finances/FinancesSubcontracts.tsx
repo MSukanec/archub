@@ -474,7 +474,7 @@ export default function FinancesSubcontracts() {
       wide={false}
       headerProps={headerProps}
     >
-      <div className="space-y-6">
+      <div>
 
         {/* Contenido condicional por tab */}
         {activeTab === 'summary' && (

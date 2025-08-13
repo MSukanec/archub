@@ -246,7 +246,7 @@ export default function AdminChangelogs() {
   return (
     <Layout headerProps={headerProps} wide>
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-3">
             <div className="flex items-center space-x-2">

@@ -304,7 +304,7 @@ export default function ConstructionCostAnalysis() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
+      <div>
         {/* Data type selector for materials tab */}
         {activeTab === 'materiales' && (
           <div className="flex items-center gap-4">

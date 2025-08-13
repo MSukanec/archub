@@ -30,7 +30,7 @@ export default function DesignDashboard() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
+      <div>
 
         {/* Feature Introduction - Mobile only */}
         <FeatureIntroduction
