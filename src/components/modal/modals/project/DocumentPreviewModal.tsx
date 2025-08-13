@@ -119,24 +119,12 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
         <div className="flex-1 min-h-0">
           <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
             {isPDF ? (
-              <div className="w-full h-full flex flex-col items-center justify-center space-y-6 text-center">
-                <div className="text-muted-foreground">
-                  <FileText className="h-20 w-20 mx-auto mb-4 opacity-50" />
-                  <p className="text-xl font-medium mb-2">Vista previa de PDF</p>
-                  <p className="text-sm mb-6 max-w-md">
-                    Los PDFs se abren en una nueva pestaña por seguridad del navegador. 
-                    Esto te permitirá ver el documento completo con todas sus funcionalidades.
-                  </p>
-                </div>
-                <Button
-                  onClick={handleOpenExternal}
-                  className="flex items-center gap-2"
-                  size="lg"
-                >
-                  <ExternalLink className="h-5 w-5" />
-                  Abrir PDF en nueva pestaña
-                </Button>
-              </div>
+              <iframe
+                src={document.file_url}
+                className="w-full h-full border-0"
+                title={document.file_name}
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
             ) : isImage ? (
               <div className="w-full h-full flex items-center justify-center p-4">
                 <img
