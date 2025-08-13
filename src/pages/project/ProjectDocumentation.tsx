@@ -82,8 +82,8 @@ export default function ProjectDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Desktop: Three Panel Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
-        {/* Top Panel: Document Viewer - 50% Height */}
-        <div className="h-1/2">
+        {/* Top Panel: Document Viewer - 2/3 Height */}
+        <div className="h-2/3">
           <Card className="h-full flex flex-col">
             {selectedDocument ? (
               <>
@@ -174,8 +174,8 @@ export default function ProjectDocumentation() {
           </Card>
         </div>
 
-        {/* Bottom Panel: Two Columns - 50% Height */}
-        <div className="h-1/2 flex gap-4">
+        {/* Bottom Panel: Two Columns - 1/3 Height */}
+        <div className="h-1/3 flex gap-4">
           {/* Left: Document Explorer - 50% Width */}
           <div className="w-1/2">
             <Card className="h-full flex flex-col">

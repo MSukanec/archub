@@ -36,7 +36,7 @@ Preferred communication style: Simple, everyday language.
 - **Data Flow**: React Query for server state management, Express.js for REST APIs, Drizzle ORM for database operations. Extensive use of cache invalidation for real-time updates.
 - **Project Management Features**: Includes a custom-built React-based Gantt chart with optimistic updates, a full Kanban board system with drag & drop, and a system for generating parametric tasks.
 - **Financial Management**: Comprehensive system for tracking movements, conversions, transfers, and budgets, with multi-currency support. Budget system migrated to backend API endpoints for improved authentication and error handling.
-- **Document Management**: Hierarchical document organization with versioning and file upload capabilities. Redesigned for file explorer-style navigation, and a modal-based preview system. Desktop features a two-column layout with real-time document viewer.
+- **Document Management**: Hierarchical document organization with versioning and file upload capabilities. Redesigned for file explorer-style navigation, and a modal-based preview system. Desktop features three-panel Bluebeam Revu-style layout with fixed proportions (2/3 viewer, 1/3 navigation/history).
 - **Activity Logging**: Centralized activity tracking system for user actions.
 - **Admin Features**: Material prices management, and user/task parameter administration.
 - **Onboarding Process**: Streamlined to a single step, focusing on essential user and organization data.
