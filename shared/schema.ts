@@ -111,6 +111,28 @@ export const insertDesignDocumentSchema = createInsertSchema(design_documents).p
   created_by: true,
 });
 
+// Document Folders Table
+export const document_folders = pgTable("document_folders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  project_id: uuid("project_id").notNull(),
+  parent_id: uuid("parent_id"),
+  created_by: uuid("created_by").notNull(),
+});
+
+export const insertDocumentFolderSchema = createInsertSchema(document_folders).pick({
+  organization_id: true,
+  name: true,
+  description: true,
+  project_id: true,
+  parent_id: true,
+  created_by: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;

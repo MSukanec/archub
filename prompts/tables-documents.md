@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase para Site Logs:
 
-TABLA DOCUMENTS:
+TABLA DOCUMENTS (EX DESIGN_DOCUMENTS)
 
 [
   {
@@ -44,24 +44,12 @@ TABLA DOCUMENTS:
     "data_type": "text"
   },
   {
-    "column_name": "created_by",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "design_phase_id",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "file_size",
     "data_type": "bigint"
-  },
-  {
-    "column_name": "visibility",
-    "data_type": "text"
   },
   {
     "column_name": "folder_id",
@@ -74,55 +62,14 @@ TABLA DOCUMENTS:
   {
     "column_name": "name",
     "data_type": "text"
-  }
-]
-
-TABLA DESIGN_DOCUMENT_GROUPS:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "folder_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "description",
-    "data_type": "text"
   },
   {
     "column_name": "created_by",
     "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "is_active",
-    "data_type": "boolean"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "project_id",
-    "data_type": "uuid"
   }
 ]
 
-TABLA DESIGN_DOCUMENT_FOLDERS:
+TABLA DOCUMENT_FOLDERS:
 
 [
   {
@@ -142,20 +89,8 @@ TABLA DESIGN_DOCUMENT_FOLDERS:
     "data_type": "text"
   },
   {
-    "column_name": "color",
-    "data_type": "text"
-  },
-  {
-    "column_name": "created_by",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "is_active",
-    "data_type": "boolean"
   },
   {
     "column_name": "updated_at",
@@ -167,6 +102,10 @@ TABLA DESIGN_DOCUMENT_FOLDERS:
   },
   {
     "column_name": "parent_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_by",
     "data_type": "uuid"
   }
 ]
