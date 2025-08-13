@@ -59,7 +59,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
   const handleRotate = () => setRotation(prev => (prev + 90) % 360);
   
   const handleDownload = () => {
-    const link = document.createElement('a');
+    const link = globalThis.document.createElement('a');
     link.href = document.file_url;
     link.download = document.file_name;
     link.click();
@@ -92,7 +92,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {(isPDF || isImage) && (
+            {isImage && (
               <>
                 <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50}>
                   <ZoomOut className="w-4 h-4" />
@@ -103,11 +103,9 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
                 <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200}>
                   <ZoomIn className="w-4 h-4" />
                 </Button>
-                {isImage && (
-                  <Button variant="outline" size="sm" onClick={handleRotate}>
-                    <RotateCw className="w-4 h-4" />
-                  </Button>
-                )}
+                <Button variant="outline" size="sm" onClick={handleRotate}>
+                  <RotateCw className="w-4 h-4" />
+                </Button>
               </>
             )}
             <Button variant="outline" size="sm" onClick={handleDownload}>
@@ -125,11 +123,23 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
       <CardContent className="pt-0">
         <div className="w-full h-96 border rounded-lg overflow-hidden bg-gray-50">
           {isPDF ? (
-            <iframe
-              src={`${document.file_url}#zoom=${zoom}`}
-              className="w-full h-full border-0"
-              title={document.file_name}
-            />
+            <div className="w-full h-full flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="text-muted-foreground">
+                <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Vista previa de PDF</p>
+                <p className="text-sm mb-4">
+                  Los PDFs se abren en una nueva pestaña por seguridad del navegador
+                </p>
+              </div>
+              <Button
+                onClick={handleOpenExternal}
+                className="flex items-center gap-2"
+                size="lg"
+              >
+                <ExternalLink className="h-5 w-5" />
+                Abrir PDF en nueva pestaña
+              </Button>
+            </div>
           ) : isImage ? (
             <div className="w-full h-full flex items-center justify-center p-4">
               <img
