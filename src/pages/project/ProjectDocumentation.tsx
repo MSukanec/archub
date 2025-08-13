@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
+import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
 import { PdfViewer } from '@/components/viewers/PdfViewer';
 import { ImageViewer } from '@/components/viewers/ImageViewer';
@@ -97,8 +98,10 @@ export default function ProjectDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Desktop: Vertical Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
-        {/* Top: Document Viewer */}
-        <div className="flex-1">
+        {/* Top: Document Viewer and Info */}
+        <div className="flex-1 flex gap-4">
+          {/* Left: Document Viewer (2/3) */}
+          <div className="w-2/3">
           <div 
             className="rounded-lg overflow-hidden border h-full"
           >
@@ -143,6 +146,18 @@ export default function ProjectDocumentation() {
                 </div>
               </div>
             )}
+            </div>
+          </div>
+
+          {/* Right: Document Info (1/3) */}
+          <div className="w-1/3">
+            <DocumentInfo 
+              document={selectedDocument}
+              onDownload={() => selectedDocument && window.open(selectedDocument.file_url, '_blank')}
+              onShare={() => {/* TODO: Implement share */}}
+              onEdit={() => {/* TODO: Implement edit */}}
+              onDelete={() => {/* TODO: Implement delete */}}
+            />
           </div>
         </div>
 
