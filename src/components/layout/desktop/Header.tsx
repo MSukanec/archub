@@ -184,7 +184,7 @@ export function Header({
         <div className="flex items-center gap-8">
           {/* Page Title */}
           {(pageTitle || title) && (
-            <h1 className="text-xl font-semibold text-black dark:text-white uppercase tracking-wide">
+            <h1 className="text-xl font-light text-foreground tracking-wider">
               {pageTitle || title}
             </h1>
           )}
@@ -202,12 +202,12 @@ export function Header({
                         : onTabChange?.(tab.id)
                     }
                     disabled={tab.isDisabled}
-                    className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
+                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-3 py-2 rounded-lg ${
                       tab.isDisabled || tab.isRestricted
-                        ? "text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed"
+                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
                         : tab.isActive
-                          ? "text-[var(--layout-text)] font-medium"
-                          : "text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]"
+                          ? "text-foreground font-medium bg-accent/10 shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
                     }`}
                   >
                     {tab.label}
@@ -216,12 +216,7 @@ export function Header({
                         {tab.badge}
                       </span>
                     )}
-                    {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
-                      <div
-                        className="absolute -bottom-[12px] left-0 right-0 h-0.5"
-                        style={{ backgroundColor: "var(--accent)" }}
-                      />
-                    )}
+
                   </button>
                 );
 
