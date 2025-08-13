@@ -95,10 +95,10 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Desktop: Two Column Layout */}
-      <div className="hidden lg:flex h-full gap-4">
-        {/* Left Column: Document Viewer - 2/3 Width */}
-        <div className="w-2/3">
+      {/* Desktop: Vertical Layout */}
+      <div className="hidden lg:flex flex-col h-full gap-4">
+        {/* Top: Document Viewer */}
+        <div className="flex-1">
           <div 
             className="rounded-lg overflow-hidden border h-full"
           >
@@ -146,9 +146,9 @@ export default function ProjectDocumentation() {
           </div>
         </div>
 
-        {/* Right Column: Two Cards Stacked - 1/3 Width */}
-        <div className="w-1/3 flex flex-col gap-4">
-          {/* Top Card: Document Explorer */}
+        {/* Bottom: Two Cards Side by Side */}
+        <div className="flex gap-4 h-80">
+          {/* Left Card: Document Explorer */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
               <CardHeader className="pb-3">
@@ -163,7 +163,7 @@ export default function ProjectDocumentation() {
             </Card>
           </div>
 
-          {/* Bottom Card: Recent Documents History */}
+          {/* Right Card: Recent Documents History */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
               <CardHeader className="pb-3">
