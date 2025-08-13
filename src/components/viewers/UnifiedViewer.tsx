@@ -142,23 +142,26 @@ export function UnifiedViewer({
         return;
       }
       
-      // Simple scaling calculation
+      // Simple scaling calculation - fit to width with padding
       const viewport = page.getViewport({ scale: 1.0 });
-      const containerWidth = containerDimensions.width || 800;
-      const scale = containerWidth / viewport.width;
+      const containerWidth = (containerDimensions.width || 800) - 40; // padding
+      const scale = Math.min(containerWidth / viewport.width, 2.0); // max 2x scale
       setBaseScale(scale);
       
       // Final viewport with calculated scale
       const finalViewport = page.getViewport({ scale });
       
-      // Set canvas dimensions
-      canvas.height = finalViewport.height;
+      // Set canvas dimensions properly
       canvas.width = finalViewport.width;
+      canvas.height = finalViewport.height;
       canvas.style.width = `${finalViewport.width}px`;
       canvas.style.height = `${finalViewport.height}px`;
+      canvas.style.display = 'block';
+      canvas.style.visibility = 'visible';
       
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Clear canvas with white background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Render PDF page
       await page.render({
@@ -166,7 +169,7 @@ export function UnifiedViewer({
         viewport: finalViewport
       }).promise;
       
-      // PDF rendered successfully
+      console.log('PDF rendered successfully, canvas size:', canvas.width, 'x', canvas.height);
       
     } catch (err) {
       console.error('Error rendering PDF page:', err);
@@ -340,19 +343,21 @@ export function UnifiedViewer({
       >
         <div
           ref={contentRef}
-          className="viewer-content inline-block origin-top-left"
-          style={{ transform: `scale(${scale})` }}
+          className="viewer-content p-4 min-h-full flex items-start justify-center"
+          style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
         >
           {/* PDF Content */}
           {fileType === 'pdf' && (
-            <canvas
-              ref={canvasRef}
-              className="block"
-              style={{
-                maxWidth: 'none',
-                imageRendering: 'pixelated'
-              }}
-            />
+            <div className="w-full flex justify-center">
+              <canvas
+                ref={canvasRef}
+                className="block bg-white shadow-lg border border-gray-200 rounded"
+                style={{
+                  maxWidth: 'none',
+                  display: 'block'
+                }}
+              />
+            </div>
           )}
 
           {/* Image Content */}
