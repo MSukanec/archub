@@ -416,24 +416,23 @@ export function PdfViewer({
         </div>
       </div>
 
-      {/* PDF Canvas Container - Auto height with scroll */}
+      {/* PDF Canvas Container - Fixed size with scroll */}
       <div 
-        className="overflow-auto flex justify-center p-4"
+        className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900"
         style={{ 
-          height: '100%', 
-          maxHeight: '100%',
-          backgroundColor: 'var(--card-bg)'
+          minHeight: 0 // Important for flex child to shrink
         }}
       >
-        <div className="bg-white dark:bg-gray-800 shadow-lg rounded border flex-shrink-0">
-          <canvas 
-            ref={canvasRef}
-            className="block"
-            style={{ 
-              display: 'block',
-              maxWidth: 'none'
-            }}
-          />
+        <div className="p-4 flex justify-center">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
+            <canvas 
+              ref={canvasRef}
+              className="block"
+              style={{ 
+                display: 'block'
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
