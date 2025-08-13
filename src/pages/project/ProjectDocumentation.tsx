@@ -83,7 +83,7 @@ export default function ProjectDocumentation() {
       {/* Desktop: Three Panel Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
         {/* Top Panel: Document Viewer - 2/3 Height */}
-        <div className="h-2/3 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+        <div className="h-2/3 rounded-lg overflow-hidden">
           {selectedDocument ? (
             <>
               {selectedDocument.file_type === 'application/pdf' ? (

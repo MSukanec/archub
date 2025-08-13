@@ -282,7 +282,7 @@ export function PdfViewer({
     <div className={`relative h-full group ${className}`}>
       {/* Floating Toolbar - Only visible on hover */}
       <div className="absolute top-4 left-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <div className="flex items-center justify-between p-3 bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+        <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg shadow-lg">
           {/* Left: File name */}
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm truncate max-w-64 text-foreground">
@@ -377,7 +377,7 @@ export function PdfViewer({
       </div>
 
       {/* PDF Canvas - Full height without toolbar space */}
-      <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-900">
+      <div className="h-full overflow-auto">
         <div className="flex justify-center items-center h-full p-4">
           <canvas
             ref={canvasRef}
