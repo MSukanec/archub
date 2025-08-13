@@ -105,9 +105,13 @@ export function PdfViewer({
       const context = canvas.getContext('2d');
       if (!context) return;
 
-      // Set canvas size
+      // Set canvas size to match viewport
       canvas.height = viewport.height;
       canvas.width = viewport.width;
+      
+      // Set CSS size to match canvas size for correct scaling
+      canvas.style.height = viewport.height + 'px';
+      canvas.style.width = viewport.width + 'px';
       
       // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -376,16 +380,20 @@ export function PdfViewer({
         </div>
       </div>
 
-      {/* PDF Canvas - Full height without toolbar space */}
-      <div className="h-full overflow-auto">
-        <div className="flex justify-center items-center h-full">
-          <canvas
-            ref={canvasRef}
-            className="shadow-lg rounded-lg bg-white max-w-full max-h-full object-contain"
-            style={{
-              display: 'block'
-            }}
-          />
+      {/* PDF Canvas Container - Scrollable */}
+      <div className="h-full overflow-auto bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-full flex items-start justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 shadow-lg">
+            <canvas 
+              ref={canvasRef}
+              className="block"
+              style={{ 
+                border: '1px solid #e5e7eb',
+                borderRadius: '4px',
+                maxWidth: 'none'
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
