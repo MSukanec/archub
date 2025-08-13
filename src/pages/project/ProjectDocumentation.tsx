@@ -53,6 +53,10 @@ export default function ProjectDocumentation() {
     setSelectedDocument(null);
   };
 
+  const handleExpandPdf = () => {
+    setIsPreviewOpen(true);
+  };
+
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return 'N/A';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -104,6 +108,7 @@ export default function ProjectDocumentation() {
                   path={selectedDocument.file_path}
                   fileName={selectedDocument.file_name}
                   className="w-full h-full"
+                  onExpand={handleExpandPdf}
                 />
               ) : selectedDocument.file_type?.startsWith('image/') ? (
                 <div className="w-full h-full flex items-center justify-center bg-muted/20 p-4">

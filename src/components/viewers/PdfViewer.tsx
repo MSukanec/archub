@@ -10,7 +10,8 @@ import {
   Download, 
   ExternalLink,
   FileText,
-  AlertCircle 
+  AlertCircle,
+  Maximize2 
 } from 'lucide-react';
 import { storageHelpers } from '@/lib/supabase/storage';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -25,6 +26,7 @@ type PdfViewerProps = {
   fileName?: string;
   useSignedUrl?: boolean;
   className?: string;
+  onExpand?: () => void;
 };
 
 type PdfState = {
@@ -42,7 +44,8 @@ export function PdfViewer({
   path, 
   fileName = 'document.pdf', 
   useSignedUrl = false,
-  className = "" 
+  className = "",
+  onExpand
 }: PdfViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<PdfState>({
@@ -280,101 +283,106 @@ export function PdfViewer({
 
   return (
     <div className={`relative h-full group ${className}`}>
-      {/* Floating Toolbar - Only visible on hover */}
-      <div className="absolute top-4 left-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg shadow-lg">
-          {/* Left: File name */}
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm truncate max-w-64 text-foreground">
-              {fileName}
-            </span>
+      {/* Floating Toolbar - Centered and compact */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg shadow-lg">
+          {/* Page navigation */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={prevPage}
+            disabled={state.page <= 1}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex items-center gap-1 px-2">
+            <span className="text-sm">{state.page}</span>
+            <span className="text-xs text-muted-foreground">/</span>
+            <span className="text-sm">{state.numPages}</span>
           </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={nextPage}
+            disabled={state.page >= state.numPages}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
 
-          {/* Right: Controls */}
-          <div className="flex items-center gap-2">
-            {/* Page navigation */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevPage}
-              disabled={state.page <= 1}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            
-            <div className="flex items-center gap-2 px-2">
-              <span className="text-sm">{state.page}</span>
-              <span className="text-xs text-muted-foreground">de</span>
-              <span className="text-sm">{state.numPages}</span>
-            </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextPage}
-              disabled={state.page >= state.numPages}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+          <div className="w-px h-4 bg-border mx-1" />
 
-            <div className="w-px h-4 bg-border mx-2" />
+          {/* Zoom */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomOut}
+            disabled={state.scale <= 0.5}
+            className="h-8 w-8 p-0"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          
+          <Badge 
+            variant="outline" 
+            className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
+            onClick={resetZoom}
+          >
+            {Math.round(state.scale * 100)}%
+          </Badge>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomIn}
+            disabled={state.scale >= 3.0}
+            className="h-8 w-8 p-0"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
 
-            {/* Zoom */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomOut}
-              disabled={state.scale <= 0.5}
-              className="h-8 w-8 p-0"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            
-            <Badge 
-              variant="outline" 
-              className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
-              onClick={resetZoom}
-            >
-              {Math.round(state.scale * 100)}%
-            </Badge>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomIn}
-              disabled={state.scale >= 3.0}
-              className="h-8 w-8 p-0"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-
-            <div className="w-px h-4 bg-border mx-2" />
-            
-            {/* Actions */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={downloadPdf}
-              className="h-8 w-8 p-0"
-              title="Descargar"
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={openInNewTab}
-              className="h-8 w-8 p-0"
-              title="Abrir en nueva pestaña"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </Button>
-          </div>
+          <div className="w-px h-4 bg-border mx-1" />
+          
+          {/* Actions */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={downloadPdf}
+            className="h-8 w-8 p-0"
+            title="Descargar"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={openInNewTab}
+            className="h-8 w-8 p-0"
+            title="Compartir"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Button>
         </div>
       </div>
+
+      {/* Expand Button - Top Right */}
+      {onExpand && (
+        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onExpand}
+            className="h-8 w-8 p-0 bg-card border border-border rounded-lg shadow-lg"
+            title="Expandir"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       {/* PDF Canvas Container - Fixed height with scroll */}
       <div 
