@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { DocumentHierarchy } from '@/components/ui-custom/DocumentHierarchy';
+import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { FileText, FolderPlus } from 'lucide-react';
@@ -34,8 +34,8 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Document Hierarchy */}
-      <DocumentHierarchy onDocumentSelect={handleDocumentSelect} />
+      {/* Document Explorer */}
+      <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
       
       {/* Document Preview Modal */}
       <DocumentPreviewModal 
