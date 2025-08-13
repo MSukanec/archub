@@ -159,10 +159,10 @@ export default function ProjectDocumentation() {
                       recentDocuments.map((doc) => (
                         <div 
                           key={doc.id}
-                          className={`flex items-center justify-between py-2 px-3 rounded cursor-pointer transition-colors ${
+                          className={`flex items-center justify-between py-2 px-3 rounded-md border cursor-pointer transition-all ${
                             selectedDocument?.id === doc.id 
-                              ? 'bg-green-500 text-white' 
-                              : 'hover:bg-muted/50'
+                              ? 'bg-muted border-border shadow-sm' 
+                              : 'border-border/20 hover:border-border hover:bg-muted/50'
                           }`}
                           onClick={() => handleDocumentSelect(doc)}
                         >
