@@ -85,8 +85,7 @@ export const design_documents = pgTable("documents", {
   version_number: integer("version_number").default(1),
   project_id: uuid("project_id").notNull(),
   organization_id: uuid("organization_id").notNull(),
-  design_phase_id: uuid("design_phase_id"),
-  folder: text("folder").notNull(),
+  folder_id: uuid("folder_id"),
   status: text("status").default("pendiente"), // pendiente, en_revision, aprobado, rechazado
   visibility: text("visibility").default("public"), // public, private
   created_by: uuid("created_by").notNull(),
@@ -104,8 +103,7 @@ export const insertDesignDocumentSchema = createInsertSchema(design_documents).p
   version_number: true,
   project_id: true,
   organization_id: true,
-  design_phase_id: true,
-  folder: true,
+  folder_id: true,
   status: true,
   visibility: true,
   created_by: true,

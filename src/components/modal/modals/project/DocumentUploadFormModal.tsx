@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups, useCreateDesignDocumentGroup } from '@/hooks/use-design-document-groups';
+
 import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useCreateDesignDocument, useDesignDocuments } from '@/hooks/use-design-documents';
 import { FormModalLayout } from '../../form/FormModalLayout';
@@ -25,9 +25,7 @@ import { supabase } from '@/lib/supabase';
 
 const documentUploadSchema = z.object({
   folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
-  group_id: z.string().optional(),
   status: z.string().min(1, 'El estado es obligatorio'),
-  group_description: z.string().optional(),
 });
 
 type DocumentUploadFormData = z.infer<typeof documentUploadSchema>;
@@ -35,20 +33,12 @@ type DocumentUploadFormData = z.infer<typeof documentUploadSchema>;
 interface DocumentUploadFormModalProps {
   modalData?: {
     defaultFolderId?: string;
-    defaultGroupId?: string;
-    editingGroup?: any;
   };
   onClose: () => void;
 }
 
 export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFormModalProps) {
-  const { defaultFolderId, defaultGroupId, editingGroup } = modalData || {};
-  const isEditing = !!editingGroup;
-  
-  // Debug logging
-  console.log('DocumentUploadFormModal - modalData:', modalData);
-  console.log('DocumentUploadFormModal - editingGroup:', editingGroup);
-  console.log('DocumentUploadFormModal - isEditing:', isEditing);
+  const { defaultFolderId } = modalData || {};
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -62,11 +52,9 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
 
   const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
   const { data: folders = [] } = useDesignDocumentFolders();
-  const { data: groups = [] } = useDesignDocumentGroups(selectedFolderId);
   const { data: existingDocuments = [] } = useDesignDocuments();
   const createFolderMutation = useCreateDesignDocumentFolder();
   const createDocumentMutation = useCreateDesignDocument();
-  const createGroupMutation = useCreateDesignDocumentGroup();
 
   // Initialize panel to edit mode when modal opens
   useEffect(() => {
@@ -77,51 +65,28 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     resolver: zodResolver(documentUploadSchema),
     defaultValues: {
       folder_id: defaultFolderId || '',
-      group_id: defaultGroupId || '',
       status: 'pendiente',
-      group_description: '',
     },
   });
-
-  // Load existing group data when editing (delay until groups are loaded)
-  useEffect(() => {
-    if (isEditing && editingGroup && userData?.preferences && groups.length > 0) {
-      console.log('Setting form with editingGroup:', editingGroup);
-      console.log('Available groups:', groups);
-      setSelectedFolderId(editingGroup.folder_id || '');
-      
-      form.reset({
-        folder_id: editingGroup.folder_id || defaultFolderId || '',
-        group_id: editingGroup.id || defaultGroupId || '',
-        status: editingGroup.status || 'pendiente',
-        group_description: editingGroup.description || '',
-      });
-    }
-  }, [isEditing, editingGroup, userData, form, defaultFolderId, defaultGroupId, groups]);
 
   // Update selectedFolderId when form folder_id changes
   useEffect(() => {
     const folderId = form.watch('folder_id');
     setSelectedFolderId(folderId);
-    if (folderId !== selectedFolderId) {
-      form.setValue('group_id', ''); // Reset group when folder changes
-    }
   }, [form.watch('folder_id'), selectedFolderId, form]);
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (userData && !isEditing) {
+    if (userData) {
       form.reset({
         folder_id: defaultFolderId || '',
-        group_id: defaultGroupId || '',
         status: 'pendiente',
-        group_description: '',
       });
       setSelectedFiles([]);
       setFileNames({});
       setUploadProgress(0);
     }
-  }, [userData, organizationMembers, defaultFolderId, defaultGroupId, form, isEditing]);
+  }, [userData, organizationMembers, defaultFolderId, form]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -177,40 +142,15 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       setIsUploading(true);
       setUploadProgress(0);
 
-      // Create a group automatically if none exists using the SQL function
-      let groupId = data.group_id;
-      if (!groupId && data.folder_id) {
-        try {
-          const { data: nextName, error: nameError } = await supabase
-            .rpc('generate_next_document_group_name', { p_folder_id: data.folder_id });
-
-          if (nameError) {
-            throw new Error(`Error generating group name: ${nameError.message}`);
-          }
-
-          const newGroup = await createGroupMutation.mutateAsync({
-            name: nextName,
-            description: data.group_description || '',
-            folder_id: data.folder_id,
-          });
-
-          groupId = newGroup.id;
-          console.log('Created new group:', nextName, 'with ID:', groupId);
-          console.log('Full group data:', newGroup);
-        } catch (error) {
-          console.error('Error creating group:', error);
-          throw new Error('Error creando grupo automáticamente');
-        }
-      }
+      // Upload documents directly to folder without groups
 
       // Process each file
       const uploads = selectedFiles.map(async (file, index) => {
         const fileName = fileNames[index] || file.name.replace(/\.[^/.]+$/, '');
         
-        // Generate file path: organization_id/project_id/documents/[group_id|folder_id]/filename
+        // Generate file path: organization_id/project_id/documents/folder_id/filename
         const extension = file.name.split('.').pop() || '';
-        const folderPath = groupId || data.folder_id;
-        const filePath = `${userData.preferences?.last_organization_id}/${userData.preferences?.last_project_id}/documents/${folderPath}/${Date.now()}-${file.name}`;
+        const filePath = `${userData.preferences?.last_organization_id}/${userData.preferences?.last_project_id}/documents/${data.folder_id}/${Date.now()}-${file.name}`;
         
         // First upload file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -233,13 +173,13 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         return createDocumentMutation.mutateAsync({
           name: fileName,
           file_name: file.name,
-          description: data.group_description || '',
+          description: '',
           file_path: filePath,
           file_url: urlData.publicUrl,
           file_type: file.type,
           file_size: file.size,
-          group_id: groupId || null,
-          folder_id: data.folder_id, // Fixed: Always assign folder_id
+          group_id: null,
+          folder_id: data.folder_id,
           status: data.status,
         });
       });
@@ -256,14 +196,9 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
       queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
-      queryClient.invalidateQueries({ queryKey: ['design-document-groups'] });
+
       
-      // Force a refetch of the specific folder groups
-      if (selectedFolderId) {
-        queryClient.invalidateQueries({ 
-          queryKey: ['design-document-groups', userData?.preferences?.last_project_id, userData?.preferences?.last_organization_id, selectedFolderId]
-        });
-      }
+
       handleClose();
     },
     onError: (error) => {
@@ -279,10 +214,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     },
   });
 
-  // Filter existing documents for this group
-  const groupDocuments = existingDocuments.filter(doc => 
-    isEditing && editingGroup && doc.group_id === editingGroup.id
-  );
+
 
   const handleClose = () => {
     form.reset();
@@ -361,23 +293,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         </div>
 
         {/* 4. Description Field */}
-        <FormField
-          control={form.control}
-          name="group_description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (opcional)</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descripción de los documentos"
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         {/* 5. File Upload Section */}
         <div className="space-y-4">
@@ -447,30 +363,14 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           )}
         </div>
 
-        {/* Existing Documents Section (only in edit mode) */}
-        {isEditing && groupDocuments.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-3">Documentos Existentes</h4>
-            <div className="space-y-2">
-              {groupDocuments.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <File className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{doc.file_name}</span>
-                    <span className="text-xs text-muted-foreground">({doc.status})</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
       </form>
     </Form>
   );
 
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? "Editar Entrega de Documentos" : "Nueva Entrega de Documentos"}
+      title="Nueva Entrega de Documentos"
       icon={FolderOpen}
     />
   );
@@ -479,7 +379,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isUploading ? "Subiendo..." : (isEditing ? "Actualizar Entrega" : "Nueva Entrega de Documentos")}
+      rightLabel={isUploading ? "Subiendo..." : "Nueva Entrega de Documentos"}
       onRightClick={form.handleSubmit(onSubmit)}
       submitDisabled={selectedFiles.length === 0 || isUploading}
     />

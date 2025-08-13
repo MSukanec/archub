@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 import { Table } from '@/components/ui-custom/Table';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
+
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { 
@@ -31,7 +31,7 @@ export default function DesignDocumentation() {
 
   // Fetch data
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
-  const { data: allGroups, isLoading: groupsLoading } = useDesignDocumentGroups();
+
   const { data: allDocuments, isLoading: documentsLoading } = useDesignDocuments();
 
   // Filter data based on search term
@@ -42,12 +42,7 @@ export default function DesignDocumentation() {
     );
   }, [folders, searchTerm]);
 
-  const filteredGroups = useMemo(() => {
-    if (!allGroups) return [];
-    return allGroups.filter(group => 
-      group.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [allGroups, searchTerm]);
+
 
   // Group documents by folder for DocumentFolderCard
   const documentsByFolder = useMemo(() => {
@@ -64,18 +59,7 @@ export default function DesignDocumentation() {
 
 
 
-  const handleEditGroup = (group: any) => {
-    openModal('document-upload', { 
-      defaultFolderId: group.folder_id,
-      defaultGroupId: group.id,
-      editingGroup: group
-    });
-  };
 
-  const handleDeleteGroup = (group: any) => {
-    // TODO: Implement delete functionality
-    console.log('Delete group:', group);
-  };
 
   const headerProps = {
     title: "Documentación",
@@ -89,16 +73,13 @@ export default function DesignDocumentation() {
   // Debug logging
   console.log('DesignDocumentation - Debug data:', {
     foldersLoading,
-    groupsLoading,
     documentsLoading,
     folders,
-    allGroups,
     allDocuments,
-    filteredFolders,
-    filteredGroups
+    filteredFolders
   });
 
-  if (foldersLoading || groupsLoading || documentsLoading) {
+  if (foldersLoading || documentsLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
@@ -127,7 +108,7 @@ export default function DesignDocumentation() {
                       <FileText className="w-4 h-4 text-green-600" />
                     )}
                     <span className="text-xs font-medium">
-                      {item.type === 'folder' ? 'Carpeta' : 'Grupo'}
+                      Carpeta
                     </span>
                   </div>
                 )
@@ -166,11 +147,7 @@ export default function DesignDocumentation() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        if (item.type === 'folder') {
-                          openModal('document-upload', { defaultFolderId: item.id });
-                        } else {
-                          handleEditGroup(item);
-                        }
+                        openModal('document-upload', { defaultFolderId: item.id });
                       }}
                       className="text-xs font-normal"
                     >
@@ -180,12 +157,8 @@ export default function DesignDocumentation() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        if (item.type === 'folder') {
-                          // TODO: Edit folder functionality
-                          console.log('Edit folder:', item);
-                        } else {
-                          handleDeleteGroup(item);
-                        }
+                        // TODO: Edit folder functionality
+                        console.log('Edit folder:', item);
                       }}
                       className="text-xs font-normal text-red-600 hover:text-red-700"
                     >
@@ -195,11 +168,8 @@ export default function DesignDocumentation() {
                 )
               }
             ]}
-            data={[
-              ...filteredFolders.map(folder => ({ ...folder, type: 'folder' })),
-              ...filteredGroups.map(group => ({ ...group, type: 'group' }))
-            ]}
-            isLoading={foldersLoading || groupsLoading || documentsLoading}
+            data={filteredFolders.map(folder => ({ ...folder, type: 'folder' }))}
+            isLoading={foldersLoading || documentsLoading}
             defaultSort={{ key: 'name', direction: 'asc' }}
             topBar={{
               showSearch: true,

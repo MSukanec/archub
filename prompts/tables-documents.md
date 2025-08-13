@@ -56,10 +56,6 @@ TABLA DOCUMENTS (EX DESIGN_DOCUMENTS)
     "data_type": "uuid"
   },
   {
-    "column_name": "group_id",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "name",
     "data_type": "text"
   },

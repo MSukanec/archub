@@ -13,10 +13,37 @@ import {
   Image
 } from 'lucide-react';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
+
 import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+// Helper functions for file icons and status
+const getFileIcon = (fileType?: string) => {
+  if (!fileType) return File;
+  if (fileType.includes('image')) return Image;
+  if (fileType.includes('pdf')) return FileText;
+  return File;
+};
+
+const getStatusColor = (status?: string) => {
+  switch (status) {
+    case 'aprobado': return 'text-green-600 border-green-200';
+    case 'rechazado': return 'text-red-600 border-red-200';
+    case 'en_revision': return 'text-yellow-600 border-yellow-200';
+    default: return 'text-gray-600 border-gray-200';
+  }
+};
+
+const getStatusText = (status?: string) => {
+  switch (status) {
+    case 'aprobado': return 'Aprobado';
+    case 'rechazado': return 'Rechazado';
+    case 'en_revision': return 'En Revisión';
+    case 'pendiente': return 'Pendiente';
+    default: return 'Pendiente';
+  }
+};
 
 interface DocumentExplorerProps {
   className?: string;
@@ -57,10 +84,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
   // Obtener subcarpetas si estamos en una carpeta
   const subFolders = allFolders?.filter(folder => folder.parent_id === currentLevel.id) || [];
   
-  // Obtener grupos y documentos de la carpeta actual
-  const { data: groups } = useDesignDocumentGroups(
-    currentLevel.type === 'folder' || currentLevel.type === 'subfolder' ? currentLevel.id : undefined
-  );
+  // Obtener documentos de la carpeta actual
   const { data: documents } = useDesignDocumentsByFolder(
     currentLevel.type === 'folder' || currentLevel.type === 'subfolder' ? currentLevel.id : undefined
   );
@@ -201,63 +225,13 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
           </div>
         )}
 
-        {/* Show groups and documents */}
-        {!isRoot && (
+        {/* Show documents */}
+        {!isRoot && documents && documents.length > 0 && (
           <div className="space-y-4">
-            {groups?.map((group) => (
-              <div key={group.id} className="space-y-2">
-                <h3 className="text-sm font-medium flex items-center gap-2">
-                  <FolderOpen className="h-4 w-4" />
-                  {group.name}
-                  {(group.document_count || 0) > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {group.document_count}
-                    </Badge>
-                  )}
-                </h3>
-                
-                {/* Documents in this group */}
-                {documents?.filter(doc => doc.group_id === group.id).map((document) => {
-                  const FileIcon = getFileIcon(document.file_type);
-                  return (
-                    <Card 
-                      key={document.id}
-                      className="cursor-pointer hover:shadow-sm transition-shadow"
-                      onClick={() => onDocumentSelect?.(document)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-muted/50">
-                            <FileIcon className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium truncate">{document.file_name}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                {formatFileSize(document.file_size)}
-                              </span>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs ${getStatusColor(document.status)}`}
-                              >
-                                {getStatusText(document.status)}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ))}
-
-            {/* Ungrouped documents */}
-            {(documents?.filter(doc => !doc.group_id).length || 0) > 0 && (
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <h3 className="text-sm font-medium text-muted-foreground">Documentos</h3>
                 <div className="space-y-2">
-                  {documents?.filter(doc => !doc.group_id).map((document) => {
+                  {documents.map((document) => {
                     const FileIcon = getFileIcon(document.file_type);
                     return (
                       <Card 
@@ -290,8 +264,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                     );
                   })}
                 </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -308,7 +281,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
           </Card>
         )}
 
-        {!isRoot && (!groups || groups.length === 0) && (!documents || documents.length === 0) && (
+        {!isRoot && (!documents || documents.length === 0) && (
           <Card>
             <CardContent className="p-8 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

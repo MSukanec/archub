@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
-import { useDesignDocumentGroups } from '@/hooks/use-design-document-groups';
+
 import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useCurrentUser } from '@/hooks/use-current-user';

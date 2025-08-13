@@ -14,8 +14,7 @@ export interface DesignDocument {
   version_number: number;
   project_id: string;
   organization_id: string;
-  group_id: string | null;
-  folder_id?: string;
+  folder_id: string | null;
   status: string;
   visibility?: string;
   created_by: string;
@@ -26,20 +25,16 @@ export interface DesignDocument {
     full_name: string;
     avatar_url: string;
   };
-  group?: {
-    id: string;
-    name: string;
-    folder_id: string;
-  };
+
 }
 
-export function useDesignDocuments(groupId?: string) {
+export function useDesignDocuments(folderId?: string) {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
 
   return useQuery({
-    queryKey: ['design-documents', projectId, organizationId, groupId],
+    queryKey: ['design-documents', projectId, organizationId, folderId],
     queryFn: async (): Promise<DesignDocument[]> => {
       if (!projectId || !organizationId) return [];
 
@@ -54,18 +49,13 @@ export function useDesignDocuments(groupId?: string) {
               full_name,
               avatar_url
             )
-          ),
-          group:design_document_groups (
-            id,
-            name,
-            folder_id
           )
         `)
         .eq('project_id', projectId)
         .eq('organization_id', organizationId);
 
-      if (groupId) {
-        query = query.eq('group_id', groupId);
+      if (folderId) {
+        query = query.eq('folder_id', folderId);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -104,11 +94,6 @@ export function useDesignDocumentsByFolder(folderId?: string) {
               full_name,
               avatar_url
             )
-          ),
-          group:design_document_groups (
-            id,
-            name,
-            folder_id
           )
         `)
         .eq('project_id', projectId)
