@@ -78,7 +78,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
     <FormModalHeader 
       title={document.file_name}
       icon={FileText}
-      description={`${formatFileSize(document.file_size)} • ${getStatusText(document.status)}`}
+      description={formatFileSize(document.file_size)}
     />
   );
 
@@ -94,66 +94,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
 
   // Panel de vista con el contenido del documento
   const viewPanel = (
-    <div className="w-full h-full min-h-[600px] space-y-4">
-      {/* Controles superiores */}
-      <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-        <div className="flex items-center gap-3">
-          {document.status && (
-            <Badge 
-              variant="secondary" 
-              className={getStatusColor(document.status)}
-            >
-              {getStatusText(document.status)}
-            </Badge>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {(isPDF || isImage) && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleZoomOut}
-                disabled={zoom <= 50}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground min-w-[50px] text-center">
-                {zoom}%
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleZoomIn}
-                disabled={zoom >= 200}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-          
-          {isImage && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRotate}
-            >
-              <RotateCw className="h-4 w-4" />
-            </Button>
-          )}
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenExternal}
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Contenido del documento */}
+    <div className="w-full h-full min-h-[600px]">
       <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
         {isPDF ? (
           <PdfViewer
