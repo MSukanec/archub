@@ -27,7 +27,6 @@ const documentUploadSchema = z.object({
   folder_id: z.string().min(1, 'Debe seleccionar una carpeta'),
   group_id: z.string().optional(),
   status: z.string().min(1, 'El estado es obligatorio'),
-  visibility: z.string().min(1, 'La visibilidad es obligatoria'),
   group_description: z.string().optional(),
 });
 
@@ -80,7 +79,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       folder_id: defaultFolderId || '',
       group_id: defaultGroupId || '',
       status: 'pendiente',
-      visibility: 'public',
       group_description: '',
     },
   });
@@ -96,7 +94,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         folder_id: editingGroup.folder_id || defaultFolderId || '',
         group_id: editingGroup.id || defaultGroupId || '',
         status: editingGroup.status || 'pendiente',
-        visibility: editingGroup.visibility || 'public',
         group_description: editingGroup.description || '',
       });
     }
@@ -118,7 +115,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         folder_id: defaultFolderId || '',
         group_id: defaultGroupId || '',
         status: 'pendiente',
-        visibility: 'public',
         group_description: '',
       });
       setSelectedFiles([]);
@@ -245,7 +241,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           group_id: groupId || null,
           folder_id: data.folder_id, // Fixed: Always assign folder_id
           status: data.status,
-          visibility: data.visibility,
         });
       });
 
@@ -313,34 +308,33 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* 1. Folder Field - Full Width */}
-        <FormField
-          control={form.control}
-          name="folder_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar o crear carpeta..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {folders.map((folder) => (
-                    <SelectItem key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 3. Status and Visibility Row */}
+        {/* 1. Folder and Status Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="folder_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Carpeta <span className="text-[var(--accent)]">*</span></FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar o crear carpeta..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {folders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="status"
@@ -358,28 +352,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                     <SelectItem value="en_revision">En Revisión</SelectItem>
                     <SelectItem value="aprobado">Aprobado</SelectItem>
                     <SelectItem value="rechazado">Rechazado</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="visibility"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Visibilidad</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona la visibilidad" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="public">Público</SelectItem>
-                    <SelectItem value="private">Privado</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
