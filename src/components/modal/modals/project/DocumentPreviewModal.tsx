@@ -4,7 +4,7 @@ import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ZoomIn, ZoomOut, RotateCw, Download, ExternalLink, FileText } from 'lucide-react';
+import { Download, ExternalLink, FileText } from 'lucide-react';
 import { PdfViewer } from '@/components/viewers/PdfViewer';
 
 interface DocumentPreviewModalProps {
@@ -23,9 +23,6 @@ interface DocumentPreviewModalProps {
 }
 
 export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPreviewModalProps) {
-  const [zoom, setZoom] = useState(100);
-  const [rotation, setRotation] = useState(0);
-
   if (!document || !isOpen) return null;
 
   const isPDF = document.file_type === 'application/pdf';
@@ -37,30 +34,6 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
-
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'aprobado': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'en_revision': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'rechazado': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
-
-  const getStatusText = (status?: string) => {
-    switch (status) {
-      case 'aprobado': return 'Aprobado';
-      case 'pendiente': return 'Pendiente';
-      case 'en_revision': return 'En Revisión';
-      case 'rechazado': return 'Rechazado';
-      default: return 'Sin estado';
-    }
-  };
-
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
-  const handleRotate = () => setRotation(prev => (prev + 90) % 360);
   
   const handleDownload = () => {
     const link = globalThis.document.createElement('a');
@@ -110,9 +83,6 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
               src={document.file_url}
               alt={document.file_name}
               className="max-w-full max-h-full object-contain"
-              style={{
-                transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-              }}
             />
           </div>
         ) : (
