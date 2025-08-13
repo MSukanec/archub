@@ -113,10 +113,11 @@ export function PdfViewer({
       context.clearRect(0, 0, canvas.width, canvas.height);
 
       // Render page
-      await page.render({
+      const renderContext = {
         canvasContext: context,
         viewport: viewport
-      }).promise;
+      };
+      await page.render(renderContext).promise;
 
     } catch (error) {
       console.error('Error rendering page:', error);
@@ -376,7 +377,10 @@ export function PdfViewer({
       </div>
 
       {/* PDF Canvas Container - Fixed height with scroll */}
-      <div className="h-full overflow-auto bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div 
+        className="overflow-auto bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4"
+        style={{ height: '100%', maxHeight: '100%' }}
+      >
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
           <canvas 
             ref={canvasRef}

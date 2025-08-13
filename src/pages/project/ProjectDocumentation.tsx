@@ -91,8 +91,11 @@ export default function ProjectDocumentation() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Desktop: Three Panel Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
-        {/* Top Panel: Document Viewer - 2/3 Height */}
-        <div className="h-2/3 rounded-lg overflow-hidden">
+        {/* Top Panel: Document Viewer - Fixed Height */}
+        <div 
+          className="rounded-lg overflow-hidden border"
+          style={{ height: '480px' }}
+        >
           {selectedDocument ? (
             <>
               {selectedDocument.file_type === 'application/pdf' ? (
@@ -135,8 +138,8 @@ export default function ProjectDocumentation() {
           )}
         </div>
 
-        {/* Bottom Panel: Two Columns - 1/3 Height */}
-        <div className="h-1/3 flex gap-4">
+        {/* Bottom Panel: Two Columns - Flexible Height */}
+        <div className="flex-1 flex gap-4">
           {/* Left: Document Explorer - 50% Width */}
           <div className="w-1/2">
             <Card className="h-full flex flex-col">
