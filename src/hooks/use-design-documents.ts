@@ -4,28 +4,24 @@ import { useCurrentUser } from './use-current-user';
 
 export interface DesignDocument {
   id: string;
-  name: string;
+  name?: string;
   file_name: string;
   description?: string;
   file_path: string;
   file_url: string;
   file_type: string;
   file_size?: number;
-  version_number: number;
   project_id: string;
   organization_id: string;
   folder_id: string | null;
   status: string;
-  visibility?: string;
   created_by: string;
   created_at: string;
-  updated_at?: string;
   creator?: {
     id: string;
     full_name: string;
     avatar_url: string;
   };
-
 }
 
 export function useDesignDocuments(folderId?: string) {
@@ -164,7 +160,6 @@ export function useCreateDesignDocument() {
           project_id: projectId,
           organization_id: organizationId,
           created_by: memberData.id, // Use organization member ID
-          version_number: 1,
         })
         .select()
         .single();

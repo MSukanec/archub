@@ -74,7 +74,7 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
 });
 
 // Design Documents Table
-export const design_documents = pgTable("documents", {
+export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
   file_name: text("file_name").notNull(),
   description: text("description"),
@@ -82,30 +82,27 @@ export const design_documents = pgTable("documents", {
   file_url: text("file_url").notNull(),
   file_type: text("file_type").notNull(),
   file_size: integer("file_size"),
-  version_number: integer("version_number").default(1),
   project_id: uuid("project_id").notNull(),
   organization_id: uuid("organization_id").notNull(),
   folder_id: uuid("folder_id"),
   status: text("status").default("pendiente"), // pendiente, en_revision, aprobado, rechazado
-  visibility: text("visibility").default("public"), // public, private
+  name: text("name"),
   created_by: uuid("created_by").notNull(),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
-export const insertDesignDocumentSchema = createInsertSchema(design_documents).pick({
+export const insertDocumentSchema = createInsertSchema(documents).pick({
   file_name: true,
   description: true,
   file_path: true,
   file_url: true,
   file_type: true,
   file_size: true,
-  version_number: true,
   project_id: true,
   organization_id: true,
   folder_id: true,
   status: true,
-  visibility: true,
+  name: true,
   created_by: true,
 });
 
@@ -377,8 +374,8 @@ export const insertMovementSubcontractSchema = createInsertSchema(movement_subco
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
-export type DesignDocument = typeof design_documents.$inferSelect;
-export type InsertDesignDocument = z.infer<typeof insertDesignDocumentSchema>;
+export type DesignDocument = typeof documents.$inferSelect;
+export type InsertDesignDocument = z.infer<typeof insertDocumentSchema>;
 export type TaskParameter = typeof task_parameters.$inferSelect;
 export type TaskParameterOption = typeof task_parameter_options.$inferSelect;
 export type TaskParameterOptionGroup = typeof task_parameter_option_groups.$inferSelect;
