@@ -157,48 +157,39 @@ export function DocumentInfo({
         <Separator />
 
         {/* Action Buttons */}
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onDownload}
-              className="text-xs h-8"
-            >
-              <Download className="h-3 w-3 mr-1" />
-              Descargar
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onShare}
-              className="text-xs h-8"
-            >
-              <Share2 className="h-3 w-3 mr-1" />
-              Compartir
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onEdit}
-              className="text-xs h-8"
-            >
-              <Edit3 className="h-3 w-3 mr-1" />
-              Editar
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onDelete}
-              className="text-xs h-8 text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-3 w-3 mr-1" />
-              Eliminar
-            </Button>
-          </div>
+        <div className="flex items-center gap-1">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onDownload}
+            className="h-8 w-8 p-0"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onShare}
+            className="h-8 w-8 p-0"
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onEdit}
+            className="h-8 w-8 p-0"
+          >
+            <Edit3 className="h-4 w-4" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onDelete}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>
