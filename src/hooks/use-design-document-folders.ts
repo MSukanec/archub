@@ -24,7 +24,7 @@ export function useDesignDocumentFolders() {
       if (!projectId || !organizationId) return [];
 
       const { data, error } = await supabase
-        .from('design_document_folders')
+        .from('document_folders')
         .select('*')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
@@ -68,7 +68,7 @@ export function useCreateDesignDocumentFolder() {
       }
 
       const { data, error } = await supabase
-        .from('design_document_folders')
+        .from('document_folders')
         .insert({
           name: folderData.name,
           project_id: projectId,
@@ -97,7 +97,7 @@ export function useUpdateDesignDocumentFolder() {
   return useMutation({
     mutationFn: async (folderData: { id: string; name: string }): Promise<DesignDocumentFolder> => {
       const { data, error } = await supabase
-        .from('design_document_folders')
+        .from('document_folders')
         .update({
           name: folderData.name,
           updated_at: new Date().toISOString()
@@ -124,7 +124,7 @@ export function useDeleteDesignDocumentFolder() {
   return useMutation({
     mutationFn: async (folderId: string): Promise<void> => {
       const { error } = await supabase
-        .from('design_document_folders')
+        .from('document_folders')
         .delete()
         .eq('id', folderId);
 

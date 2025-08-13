@@ -111,8 +111,8 @@ export const insertDesignDocumentSchema = createInsertSchema(design_documents).p
   created_by: true,
 });
 
-// Document Folders Table
-export const document_folders = pgTable("document_folders", {
+// Document Folders Table (renamed from design_document_folders)
+export const design_document_folders = pgTable("document_folders", {
   id: uuid("id").primaryKey().defaultRandom(),
   organization_id: uuid("organization_id").notNull(),
   name: text("name").notNull(),
@@ -124,7 +124,7 @@ export const document_folders = pgTable("document_folders", {
   created_by: uuid("created_by").notNull(),
 });
 
-export const insertDocumentFolderSchema = createInsertSchema(document_folders).pick({
+export const insertDesignDocumentFolderSchema = createInsertSchema(design_document_folders).pick({
   organization_id: true,
   name: true,
   description: true,
