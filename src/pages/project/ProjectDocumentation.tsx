@@ -6,6 +6,8 @@ import { PdfViewer } from '@/components/viewers/PdfViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { FileText, FolderPlus, File, Image, Clock, Download, ExternalLink } from 'lucide-react';
@@ -157,20 +159,21 @@ export default function ProjectDocumentation() {
                   <div className="p-4 space-y-1">
                     {recentDocuments.length > 0 ? (
                       recentDocuments.map((doc) => (
-                        <div 
+                        <Button
                           key={doc.id}
-                          className={`flex items-center justify-between py-2 px-3 rounded-md border cursor-pointer transition-all ${
-                            selectedDocument?.id === doc.id 
-                              ? 'bg-muted border-border shadow-sm' 
-                              : 'border-border/20 hover:border-border hover:bg-muted/50'
-                          }`}
+                          variant={selectedDocument?.id === doc.id ? "secondary" : "ghost"}
+                          size="sm"
                           onClick={() => handleDocumentSelect(doc)}
+                          className={cn(
+                            "h-8 px-3 text-xs font-normal flex items-center justify-between w-full",
+                            selectedDocument?.id === doc.id ? "button-secondary-pressed" : ""
+                          )}
                         >
                           <span className="text-sm font-medium truncate flex-1 pr-2">{doc.file_name}</span>
                           <span className="text-xs text-muted-foreground flex-shrink-0">
                             {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
                           </span>
-                        </div>
+                        </Button>
                       ))
                     ) : (
                       <div className="text-center py-8">
