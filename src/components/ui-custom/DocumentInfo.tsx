@@ -17,6 +17,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useDeleteDesignDocument } from '@/hooks/use-design-documents';
 
 interface DocumentInfoProps {
   document?: any;
@@ -34,6 +35,7 @@ export function DocumentInfo({
   onDelete 
 }: DocumentInfoProps) {
   const { openModal } = useGlobalModalStore();
+  const deleteDocumentMutation = useDeleteDesignDocument();
   if (!document) {
     return (
       <Card className="h-full flex flex-col">
@@ -234,9 +236,14 @@ export function DocumentInfo({
                 description: `¿Estás seguro de que quieres eliminar "${document.file_name}"? Esta acción no se puede deshacer.`,
                 itemName: document.file_name,
                 itemType: 'documento',
-                onConfirm: () => {
-                  console.log('Deleting document:', document.id);
-                  // Here would be the delete logic
+                onConfirm: async () => {
+                  try {
+                    console.log('Deleting document:', document.id);
+                    await deleteDocumentMutation.mutateAsync(document.id);
+                    console.log('Document deleted successfully');
+                  } catch (error) {
+                    console.error('Error deleting document:', error);
+                  }
                 }
               });
             }}
