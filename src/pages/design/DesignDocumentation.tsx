@@ -64,9 +64,9 @@ export default function DesignDocumentation() {
   const headerProps = {
     title: "Documentación",
     actionButton: {
-      label: "Nueva Carpeta",
-      icon: Plus,
-      onClick: () => openModal('document-folder', {})
+      label: "Subir Documentos",
+      icon: Upload,
+      onClick: () => openModal('document-upload', {})
     }
   };
 
@@ -183,11 +183,11 @@ export default function DesignDocumentation() {
                 description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
                 action={
                   <Button 
-                    onClick={() => openModal('document-folder', {})}
+                    onClick={() => openModal('document-upload', {})}
                     className="mt-4"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nueva Carpeta
+                    <Upload className="w-4 h-4 mr-2" />
+                    Subir Documentos
                   </Button>
                 }
               />
