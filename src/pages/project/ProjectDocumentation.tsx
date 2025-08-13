@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
@@ -22,6 +22,13 @@ export default function ProjectDocumentation() {
   // Get recent documents for history
   const { data: allDocuments } = useDesignDocuments();
   const recentDocuments = allDocuments?.slice(0, 10) || [];
+
+  // Auto-select the most recent document when data loads
+  useEffect(() => {
+    if (recentDocuments.length > 0 && !selectedDocument) {
+      setSelectedDocument(recentDocuments[0]);
+    }
+  }, [recentDocuments, selectedDocument]);
 
   const headerProps = {
     icon: FileText,
