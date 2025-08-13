@@ -418,8 +418,12 @@ export function PdfViewer({
 
       {/* PDF Canvas Container - Auto height with scroll */}
       <div 
-        className="overflow-auto bg-card flex justify-center p-4"
-        style={{ height: '100%', maxHeight: '100%' }}
+        className="overflow-auto flex justify-center p-4"
+        style={{ 
+          height: '100%', 
+          maxHeight: '100%',
+          backgroundColor: 'var(--card-bg)'
+        }}
       >
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded border flex-shrink-0">
           <canvas 
