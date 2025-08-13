@@ -178,9 +178,18 @@ export default function DesignDocumentation() {
             }}
             emptyState={
               <EmptyState
-                icon={<FileText className="w-12 h-12" />}
-                title="No hay documentos de diseño"
-                description="Comienza creando tu primera carpeta para organizar los documentos del proyecto de diseño."
+                icon={<FolderOpen className="w-12 h-12" />}
+                title="No hay carpetas de documentos"
+                description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
+                action={
+                  <Button 
+                    onClick={() => openModal('document-folder', {})}
+                    className="mt-4"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nueva Carpeta
+                  </Button>
+                }
               />
             }
           />
