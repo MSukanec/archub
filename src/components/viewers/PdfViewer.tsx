@@ -58,8 +58,9 @@ export function PdfViewer({
     pdfDoc: null
   });
 
-  // Container height constraint (from parent)
-  const CONTAINER_HEIGHT = 450; // Account for padding
+  // Container dimensions for fit calculations
+  const CONTAINER_WIDTH = 800; // Available width for PDF content
+  const CONTAINER_HEIGHT = 450; // Available height for PDF content
 
   // Load PDF document
   const loadPdf = useCallback(async () => {
@@ -80,10 +81,10 @@ export function PdfViewer({
       const arrayBuffer = await blob.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-      // Calculate initial scale to fit height
+      // Calculate initial scale to fit width (common PDF viewer behavior)
       const firstPage = await pdfDoc.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1.0 });
-      const fitToHeightScale = Math.min(1.0, CONTAINER_HEIGHT / viewport.height);
+      const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / viewport.width);
 
       setState(prev => ({
         ...prev,
@@ -92,7 +93,7 @@ export function PdfViewer({
         pdfDoc,
         numPages: pdfDoc.numPages,
         page: Math.min(prev.page, pdfDoc.numPages),
-        scale: fitToHeightScale
+        scale: fitToWidthScale
       }));
 
     } catch (error) {
@@ -165,12 +166,12 @@ export function PdfViewer({
   const resetZoom = async () => {
     if (!state.pdfDoc) return;
     
-    // Recalculate fit-to-height scale
+    // Recalculate fit-to-width scale
     const firstPage = await state.pdfDoc.getPage(1);
     const viewport = firstPage.getViewport({ scale: 1.0 });
-    const fitToHeightScale = Math.min(1.0, CONTAINER_HEIGHT / viewport.height);
+    const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / viewport.width);
     
-    setState(prev => ({ ...prev, scale: fitToHeightScale }));
+    setState(prev => ({ ...prev, scale: fitToWidthScale }));
   };
 
   // Download function
@@ -399,17 +400,18 @@ export function PdfViewer({
         </div>
       </div>
 
-      {/* PDF Canvas Container - Fixed height with scroll */}
+      {/* PDF Canvas Container - Auto height with scroll */}
       <div 
-        className="overflow-auto bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4"
+        className="overflow-auto bg-gray-50 dark:bg-gray-900 flex justify-center p-4"
         style={{ height: '100%', maxHeight: '100%' }}
       >
-        <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded border flex-shrink-0">
           <canvas 
             ref={canvasRef}
-            className="block max-w-none"
+            className="block"
             style={{ 
-              display: 'block'
+              display: 'block',
+              maxWidth: 'none'
             }}
           />
         </div>
