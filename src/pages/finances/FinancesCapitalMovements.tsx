@@ -75,7 +75,7 @@ export default function FinancesCapitalMovements() {
   const organizationId = userData?.organization?.id
   const projectId = userData?.preferences?.last_project_id
 
-  // Get movement concepts to identify Aportes Propios and Retiros Propios
+  // Get all movement concepts to find aportes and retiros propios
   const { data: concepts = [] } = useQuery({
     queryKey: ['movement-concepts', organizationId],
     queryFn: async () => {
@@ -84,45 +84,55 @@ export default function FinancesCapitalMovements() {
       const { data, error } = await supabase
         .from('movement_concepts')
         .select('*')
-        .eq('organization_id', organizationId)
-        .or(`id.eq.a0429ca8-f4b9-4b91-84a2-b6603452f7fb,id.eq.c04a82f8-6fd8-439d-81f7-325c63905a1b`)
+        .or(`organization_id.eq.${organizationId},organization_id.is.null`)
         
       if (error) throw error
+      
+      console.log('Available movement concepts:', data)
       return data || []
     },
     enabled: !!organizationId && !!supabase
   })
 
-  // Get Aportes Propios concept
-  const aportesPropriosConcept = concepts.find(c => c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb')
+  // Find concepts by exact ID since we know they exist from the movement data
+  const aportesPropriosConcept = concepts.find(c => 
+    c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || c.name === 'Aportes Propios'
+  )
   
-  // Get Retiros Propios concept  
-  const retirosPropriosConcept = concepts.find(c => c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b')
+  const retirosPropriosConcept = concepts.find(c => 
+    c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' || c.name === 'Retiros Propios'
+  )
+
+  // Log the found concepts for debugging
+  console.log('Aportes Propios Concept:', aportesPropriosConcept)
+  console.log('Retiros Propios Concept:', retirosPropriosConcept)
 
   // Get capital movements (aportes and retiros propios)
   const { data: movements = [], isLoading } = useQuery({
     queryKey: ['capital-movements', organizationId, projectId, aportesPropriosConcept?.id, retirosPropriosConcept?.id],
     queryFn: async () => {
-      if (!supabase || !organizationId || !projectId || (!aportesPropriosConcept && !retirosPropriosConcept)) return []
+      if (!supabase || !organizationId || !projectId) return []
 
-      const categoryIds = [aportesPropriosConcept?.id, retirosPropriosConcept?.id].filter(Boolean)
-      
-      // Use the movement_view for simplified query with all joins
+      // Filter movements by category name since we know the exact names exist
       const { data: movements, error } = await supabase
         .from('movement_view')
         .select('*')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .in('category_id', categoryIds)
+        .in('category_name', ['Aportes Propios', 'Retiros Propios'])
         .order('movement_date', { ascending: false })
 
       if (error) {
+        console.error('Error fetching capital movements:', error)
         throw error
       }
 
+      console.log('Capital movements found:', movements?.length || 0)
+      console.log('Capital movements data:', movements)
+      
       return movements || []
     },
-    enabled: !!organizationId && !!projectId && !!(aportesPropriosConcept || retirosPropriosConcept)
+    enabled: !!organizationId && !!projectId && !!supabase
   })
 
   // Get all currencies for display
