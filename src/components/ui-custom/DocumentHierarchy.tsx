@@ -40,6 +40,7 @@ import {
 
 interface DocumentHierarchyProps {
   className?: string;
+  onDocumentSelect?: (document: any) => void;
 }
 
 interface ExpandedState {
@@ -78,7 +79,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
+export function DocumentHierarchy({ className, onDocumentSelect }: DocumentHierarchyProps) {
   const [expandedFolders, setExpandedFolders] = useState<ExpandedState>({});
   const [expandedGroups, setExpandedGroups] = useState<ExpandedState>({});
   const { openModal } = useGlobalModalStore();
@@ -160,6 +161,7 @@ export function DocumentHierarchy({ className }: DocumentHierarchyProps) {
           onToggleGroup={toggleGroup}
           onDeleteFolder={(folderId) => deleteFolderMutation.mutate(folderId)}
           isDeleting={deleteFolderMutation.isPending}
+          onDocumentSelect={onDocumentSelect}
         />
       ))}
     </div>
@@ -177,6 +179,7 @@ interface FolderItemWithSubfoldersProps {
   onToggleGroup: (groupId: string) => void;
   onDeleteFolder: (folderId: string) => void;
   isDeleting: boolean;
+  onDocumentSelect?: (document: any) => void;
 }
 
 function FolderItemWithSubfolders({ 
@@ -189,7 +192,8 @@ function FolderItemWithSubfolders({
   onToggleFolder, 
   onToggleGroup,
   onDeleteFolder,
-  isDeleting
+  isDeleting,
+  onDocumentSelect
 }: FolderItemWithSubfoldersProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
@@ -356,6 +360,7 @@ function FolderItemWithSubfolders({
                           isSubfolder={true}
                           onDeleteFolder={onDeleteFolder}
                           isDeleting={isDeleting}
+                          onDocumentSelect={onDocumentSelect}
                         />
                       </div>
                     ))}
@@ -371,6 +376,7 @@ function FolderItemWithSubfolders({
                       folderId={folder.id}
                       isExpanded={expandedGroups[group.id] || false}
                       onToggle={() => onToggleGroup(group.id)}
+                      onDocumentSelect={onDocumentSelect}
                     />
                   ))
                 ) : (
@@ -400,7 +406,7 @@ function FolderItemWithSubfolders({
                     <div className="bg-muted/30 rounded-lg border">
                       {ungroupedDocuments.map((document, index) => (
                         <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
-                          <DocumentItem document={document} />
+                          <DocumentItem document={document} onDocumentSelect={onDocumentSelect} />
                         </div>
                       ))}
                     </div>
@@ -424,9 +430,10 @@ interface FolderItemProps {
   isSubfolder?: boolean;
   onDeleteFolder: (folderId: string) => void;
   isDeleting: boolean;
+  onDocumentSelect?: (document: any) => void;
 }
 
-function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup, isSubfolder = false, onDeleteFolder, isDeleting }: FolderItemProps) {
+function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup, isSubfolder = false, onDeleteFolder, isDeleting, onDocumentSelect }: FolderItemProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
@@ -585,6 +592,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                     folderId={folder.id}
                     isExpanded={expandedGroups[group.id] || false}
                     onToggle={() => onToggleGroup(group.id)}
+                    onDocumentSelect={onDocumentSelect}
                   />
                 ))
               ) : (
@@ -614,7 +622,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                   <div className="bg-muted/30 rounded-lg border">
                     {ungroupedDocuments.map((document, index) => (
                       <div key={document.id} className={index !== ungroupedDocuments.length - 1 ? "border-b border-border/50" : ""}>
-                        <DocumentItem document={document} />
+                        <DocumentItem document={document} onDocumentSelect={onDocumentSelect} />
                       </div>
                     ))}
                   </div>
@@ -633,9 +641,10 @@ interface GroupItemProps {
   folderId: string;
   isExpanded: boolean;
   onToggle: () => void;
+  onDocumentSelect?: (document: any) => void;
 }
 
-function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
+function GroupItem({ group, folderId, isExpanded, onToggle, onDocumentSelect }: GroupItemProps) {
   const { data: groupDocuments } = useDesignDocuments(group.id);
   const { openModal } = useGlobalModalStore();
 
@@ -671,7 +680,7 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
             <div className="bg-muted/30 rounded-lg border">
               {groupDocuments.map((document, index) => (
                 <div key={document.id} className={index !== groupDocuments.length - 1 ? "border-b border-border/50" : ""}>
-                  <DocumentItem document={document} />
+                  <DocumentItem document={document} onDocumentSelect={onDocumentSelect} />
                 </div>
               ))}
             </div>
@@ -706,9 +715,10 @@ function GroupItem({ group, folderId, isExpanded, onToggle }: GroupItemProps) {
 
 interface DocumentItemProps {
   document: any;
+  onDocumentSelect?: (document: any) => void;
 }
 
-function DocumentItem({ document }: DocumentItemProps) {
+function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
   const { openModal } = useGlobalModalStore();
   const deleteDocumentMutation = useDeleteDesignDocument();
 
@@ -783,8 +793,12 @@ function DocumentItem({ document }: DocumentItemProps) {
         
         {/* Main content area */}
         <div className="flex-1 min-w-0">
-          {/* File name - always visible */}
-          <div className="font-medium truncate mb-1">
+          {/* File name - always visible and clickable */}
+          <div 
+            className="font-medium truncate mb-1 cursor-pointer hover:text-blue-600 transition-colors"
+            onClick={() => onDocumentSelect?.(document)}
+            title="Click para previsualizar"
+          >
             {document.name}
           </div>
           
