@@ -78,7 +78,7 @@ import AdminCategories from "@/pages/admin/AdminCategories";
 
 import NotFound from "@/pages/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
-import { ProjectContextInitializer } from "@/components/context/ProjectContextInitializer";
+import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
 
 function Router() {
   return (
