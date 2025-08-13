@@ -166,12 +166,17 @@ export default function ProjectDocumentation() {
           {/* Left Card: Document Explorer */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FolderPlus className="h-4 w-4" />
-                  Explorador de Documentos
-                </CardTitle>
-              </CardHeader>
+              <div className="px-4 py-3 border-b border-[var(--card-border)]">
+                <div className="flex items-center gap-2">
+                  <FolderPlus className="h-4 w-4 text-[var(--accent)]" />
+                  <div className="flex-1">
+                    <h2 className="text-sm font-medium text-[var(--card-fg)]">Explorador de Documentos</h2>
+                    <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
+                      Navega por las carpetas y archivos del proyecto
+                    </p>
+                  </div>
+                </div>
+              </div>
               <CardContent className="flex-1 p-0">
                 <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
               </CardContent>
@@ -181,12 +186,17 @@ export default function ProjectDocumentation() {
           {/* Right Card: Recent Documents History */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Documentos Recientes
-                </CardTitle>
-              </CardHeader>
+              <div className="px-4 py-3 border-b border-[var(--card-border)]">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-[var(--accent)]" />
+                  <div className="flex-1">
+                    <h2 className="text-sm font-medium text-[var(--card-fg)]">Documentos Recientes</h2>
+                    <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
+                      Accede rápidamente a los últimos documentos visualizados
+                    </p>
+                  </div>
+                </div>
+              </div>
               <CardContent className="flex-1 p-0">
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-1">
