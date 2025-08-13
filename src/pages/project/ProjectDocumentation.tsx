@@ -165,11 +165,11 @@ export default function ProjectDocumentation() {
                           size="sm"
                           onClick={() => handleDocumentSelect(doc)}
                           className={cn(
-                            "h-8 px-3 text-xs font-normal flex items-center justify-between w-full",
-                            selectedDocument?.id === doc.id ? "button-secondary-pressed" : ""
+                            "h-8 px-3 text-xs font-normal flex items-center justify-between w-full text-left",
+                            selectedDocument?.id === doc.id ? "button-secondary-pressed hover:bg-secondary" : ""
                           )}
                         >
-                          <span className="text-sm font-medium truncate flex-1 pr-2">{doc.file_name}</span>
+                          <span className="text-sm font-medium truncate flex-1 pr-2 text-left">{doc.file_name}</span>
                           <span className="text-xs text-muted-foreground flex-shrink-0">
                             {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
                           </span>

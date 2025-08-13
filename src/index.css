@@ -436,6 +436,11 @@
   transform: translateY(1px) !important;
 }
 
+/* Evitar cambio de color en hover para botones activos */
+.button-secondary-pressed:hover {
+  background-color: hsl(var(--secondary)) !important;
+}
+
 .movement-row-aportes-propios {
   background-color: rgba(107, 114, 128, 0.08) !important;
   border-left: 4px solid var(--movement-aportes-propios-border) !important;
