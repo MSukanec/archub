@@ -1,49 +1,19 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   Folder, 
-  FolderOpen, 
   ArrowLeft,
   ChevronRight,
-  FileText,
-  File,
-  Image
+  FileText
 } from 'lucide-react';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-
 import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Helper functions for file icons and status
-const getFileIcon = (fileType?: string) => {
-  if (!fileType) return File;
-  if (fileType.includes('image')) return Image;
-  if (fileType.includes('pdf')) return FileText;
-  return File;
-};
 
-const getStatusColor = (status?: string) => {
-  switch (status) {
-    case 'aprobado': return 'text-green-600 border-green-200';
-    case 'rechazado': return 'text-red-600 border-red-200';
-    case 'en_revision': return 'text-yellow-600 border-yellow-200';
-    default: return 'text-gray-600 border-gray-200';
-  }
-};
-
-const getStatusText = (status?: string) => {
-  switch (status) {
-    case 'aprobado': return 'Aprobado';
-    case 'rechazado': return 'Rechazado';
-    case 'en_revision': return 'En Revisión';
-    case 'pendiente': return 'Pendiente';
-    default: return 'Pendiente';
-  }
-};
 
 interface DocumentExplorerProps {
   className?: string;
@@ -219,43 +189,21 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
 
         {/* Show documents */}
         {!isRoot && documents && documents.length > 0 && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-                <div className="space-y-2">
-                  {documents.map((document) => {
-                    const FileIcon = getFileIcon(document.file_type);
-                    return (
-                      <Card 
-                        key={document.id}
-                        className="cursor-pointer hover:shadow-sm transition-shadow"
-                        onClick={() => onDocumentSelect?.(document)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-muted/50">
-                              <FileIcon className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">{document.file_name}</h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-muted-foreground">
-                                  {formatFileSize(document.file_size)}
-                                </span>
-                                <Badge 
-                                  variant="outline" 
-                                  className={`text-xs ${getStatusColor(document.status)}`}
-                                >
-                                  {getStatusText(document.status)}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-            </div>
+          <div className="space-y-1">
+            {documents.map((document) => (
+              <Button
+                key={document.id}
+                variant="ghost"
+                size="sm"
+                onClick={() => onDocumentSelect?.(document)}
+                className="h-8 px-3 text-xs font-normal flex items-center justify-between w-full text-left"
+              >
+                <span className="text-sm font-medium truncate flex-1 pr-2 text-left">{document.file_name}</span>
+                <span className="text-xs text-muted-foreground flex-shrink-0">
+                  {format(new Date(document.created_at), 'dd MMM', { locale: es })}
+                </span>
+              </Button>
+            ))}
           </div>
         )}
 
