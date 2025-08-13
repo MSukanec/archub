@@ -11,7 +11,8 @@ import {
   ExternalLink,
   FileText,
   AlertCircle,
-  Maximize2 
+  Maximize2,
+  Maximize 
 } from 'lucide-react';
 import { storageHelpers } from '@/lib/supabase/storage';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -148,22 +149,26 @@ export function PdfViewer({
   const nextPage = () => goToPage(state.page + 1);
   const prevPage = () => goToPage(state.page - 1);
 
-  // Zoom functions
+  // Zoom functions - 10% increments
   const zoomIn = () => {
     setState(prev => ({ 
       ...prev, 
-      scale: Math.min(prev.scale * 1.25, 3.0) 
+      scale: Math.min(prev.scale + 0.1, 3.0) 
     }));
   };
 
   const zoomOut = () => {
     setState(prev => ({ 
       ...prev, 
-      scale: Math.max(prev.scale * 0.8, 0.5) 
+      scale: Math.max(prev.scale - 0.1, 0.1) 
     }));
   };
 
-  const resetZoom = async () => {
+  const zoom100 = () => {
+    setState(prev => ({ ...prev, scale: 1.0 }));
+  };
+
+  const fitToWidth = async () => {
     if (!state.pdfDoc) return;
     
     // Recalculate fit-to-width scale
@@ -225,7 +230,7 @@ export function PdfViewer({
         case '0':
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            resetZoom();
+            fitToWidth();
           }
           break;
       }
@@ -338,7 +343,7 @@ export function PdfViewer({
             variant="ghost"
             size="sm"
             onClick={zoomOut}
-            disabled={state.scale <= 0.5}
+            disabled={state.scale <= 0.1}
             className="h-8 w-8 p-0"
           >
             <ZoomOut className="w-4 h-4" />
@@ -347,7 +352,8 @@ export function PdfViewer({
           <Badge 
             variant="outline" 
             className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
-            onClick={resetZoom}
+            onClick={zoom100}
+            title="Zoom 100%"
           >
             {Math.round(state.scale * 100)}%
           </Badge>
@@ -365,6 +371,16 @@ export function PdfViewer({
           <div className="w-px h-4 bg-border mx-1" />
           
           {/* Actions */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={fitToWidth}
+            className="h-8 w-8 p-0"
+            title="Ajustar al ancho"
+          >
+            <Maximize className="w-4 h-4" />
+          </Button>
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -402,7 +418,7 @@ export function PdfViewer({
 
       {/* PDF Canvas Container - Auto height with scroll */}
       <div 
-        className="overflow-auto bg-gray-50 dark:bg-gray-900 flex justify-center p-4"
+        className="overflow-auto bg-card flex justify-center p-4"
         style={{ height: '100%', maxHeight: '100%' }}
       >
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded border flex-shrink-0">
