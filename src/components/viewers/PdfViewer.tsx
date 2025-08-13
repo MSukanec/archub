@@ -63,7 +63,7 @@ export function PdfViewer({
   const CONTAINER_WIDTH = 800; // Available width for PDF content
   const CONTAINER_HEIGHT = 450; // Available height for PDF content
   
-  // Base scale for fit-to-width calculation
+  // Base scale for fit-to-width calculation (this is the reference scale)
   const [baseScale, setBaseScale] = useState(1.0);
 
   // Load PDF document
@@ -118,14 +118,15 @@ export function PdfViewer({
 
     try {
       const page = await state.pdfDoc.getPage(state.page);
-      // Always render at base scale for quality, zoom will be handled by CSS transform
-      const viewport = page.getViewport({ scale: baseScale });
+      // Render at the actual zoom scale for crisp quality
+      const actualScale = baseScale * state.scale;
+      const viewport = page.getViewport({ scale: actualScale });
       
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
 
-      // Set canvas size to match viewport exactly (at base scale)
+      // Set canvas size to match viewport exactly
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       
@@ -143,7 +144,7 @@ export function PdfViewer({
     } catch (error) {
       console.error('Error rendering page:', error);
     }
-  }, [state.pdfDoc, state.page, baseScale]);
+  }, [state.pdfDoc, state.page, baseScale, state.scale]);
 
   // Navigation functions
   const goToPage = (pageNum: number) => {
@@ -429,9 +430,7 @@ export function PdfViewer({
               ref={canvasRef}
               className="block"
               style={{ 
-                display: 'block',
-                transform: `scale(${state.scale})`,
-                transformOrigin: 'top left'
+                display: 'block'
               }}
             />
           </div>
