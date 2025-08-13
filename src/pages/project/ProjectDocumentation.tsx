@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDesignDocuments } from '@/hooks/use-design-documents';
-import { FileText, FolderPlus, File, Image, Clock, Download, ExternalLink } from 'lucide-react';
+import { FileText, FolderPlus, File, Image, Clock, Download, ExternalLink, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -34,10 +34,11 @@ export default function ProjectDocumentation() {
     icon: FileText,
     title: "Documentación",
     actionButton: {
-      label: "Nueva Carpeta",
-      icon: FolderPlus,
+      label: "Subir Documentos",
+      icon: Upload,
       onClick: () => {
-        openModal('document-folder', {});
+        console.log('Opening document-upload modal from ProjectDocumentation');
+        openModal('document-upload', {});
       }
     }
   };
