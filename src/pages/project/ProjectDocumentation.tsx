@@ -4,6 +4,7 @@ import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
 import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
 import { UnifiedViewer } from '@/components/viewers/UnifiedViewer';
+import { PdfViewer } from '@/components/viewers/PdfViewer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -105,16 +106,25 @@ export default function ProjectDocumentation() {
             className="rounded-lg overflow-hidden border h-full"
           >
             {selectedDocument ? (
-              <UnifiedViewer
-                bucket="design-documents"
-                path={selectedDocument.file_url}
-                mimeType={selectedDocument.file_type}
-                fileName={selectedDocument.file_name}
-                useSignedUrl={false}
-                className="w-full h-full"
-                height={520}
-                onExpand={handleExpandPdf}
-              />
+              selectedDocument.file_type === 'application/pdf' ? (
+                <PdfViewer
+                  bucket="design-documents"
+                  path={selectedDocument.file_url}
+                  useSignedUrl={false}
+                  className="w-full h-full"
+                />
+              ) : (
+                <UnifiedViewer
+                  bucket="design-documents"
+                  path={selectedDocument.file_url}
+                  mimeType={selectedDocument.file_type}
+                  fileName={selectedDocument.file_name}
+                  useSignedUrl={false}
+                  className="w-full h-full"
+                  height={520}
+                  onExpand={handleExpandPdf}
+                />
+              )
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
