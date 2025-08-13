@@ -99,15 +99,31 @@ export function PdfViewer({
 
     try {
       const page = await state.pdfDoc.getPage(state.page);
-      const viewport = page.getViewport({ scale: state.scale });
-      
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
 
-      // Set canvas size
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+      // Get the container dimensions to constrain the PDF
+      const container = canvas.parentElement;
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const maxWidth = containerRect.width * 0.95; // 95% to leave some margin
+      const maxHeight = containerRect.height * 0.95;
+
+      // Calculate scale to fit within container
+      const viewport = page.getViewport({ scale: 1 });
+      const scaleX = maxWidth / viewport.width;
+      const scaleY = maxHeight / viewport.height;
+      const containerScale = Math.min(scaleX, scaleY);
+      
+      // Apply user zoom on top of container scale
+      const finalScale = containerScale * state.scale;
+      const finalViewport = page.getViewport({ scale: finalScale });
+      
+      // Set canvas size to fit the scaled viewport
+      canvas.height = finalViewport.height;
+      canvas.width = finalViewport.width;
       
       // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -115,7 +131,7 @@ export function PdfViewer({
       // Render page
       await page.render({
         canvasContext: context,
-        viewport: viewport,
+        viewport: finalViewport,
         canvas: canvas
       }).promise;
 
@@ -376,17 +392,18 @@ export function PdfViewer({
         </div>
       </div>
 
-      {/* PDF Canvas - Full height without toolbar space */}
-      <div className="h-full overflow-auto">
-        <div className="flex justify-center items-center h-full">
-          <canvas
-            ref={canvasRef}
-            className="shadow-lg rounded-lg bg-white max-w-full max-h-full object-contain"
-            style={{
-              display: 'block'
-            }}
-          />
-        </div>
+      {/* PDF Canvas - Fixed height container */}
+      <div className="h-full overflow-hidden flex items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          className="shadow-lg rounded-lg bg-white"
+          style={{
+            display: 'block',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain'
+          }}
+        />
       </div>
     </div>
   );
