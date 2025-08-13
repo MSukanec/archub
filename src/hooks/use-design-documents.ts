@@ -47,10 +47,13 @@ export function useDesignDocuments(groupId?: string) {
         .from('design_documents')
         .select(`
           *,
-          creator:users!design_documents_created_by_fkey (
+          creator:organization_members!design_documents_created_by_fkey (
             id,
-            full_name,
-            avatar_url
+            user:users (
+              id,
+              full_name,
+              avatar_url
+            )
           ),
           group:design_document_groups!design_documents_group_id_fkey (
             id,
@@ -94,10 +97,13 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         .from('design_documents')
         .select(`
           *,
-          creator:users!design_documents_created_by_fkey (
+          creator:organization_members!design_documents_created_by_fkey (
             id,
-            full_name,
-            avatar_url
+            user:users (
+              id,
+              full_name,
+              avatar_url
+            )
           ),
           group:design_document_groups!design_documents_group_id_fkey (
             id,
@@ -135,6 +141,7 @@ export function useCreateDesignDocument() {
   const queryClient = useQueryClient();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
+  const userId = userData?.user?.id;
 
   return useMutation({
     mutationFn: async (documentData: {
@@ -150,8 +157,21 @@ export function useCreateDesignDocument() {
       status: string;
       visibility?: string;
     }): Promise<DesignDocument> => {
-      if (!projectId || !organizationId || !userData?.user?.id) {
+      if (!projectId || !organizationId || !userId) {
         throw new Error('Missing project, organization or user data');
+      }
+
+      // Get the organization member ID for the current user
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (memberError || !memberData) {
+        throw new Error('Could not find organization membership');
       }
 
       const { data, error } = await supabase
@@ -160,7 +180,7 @@ export function useCreateDesignDocument() {
           ...documentData,
           project_id: projectId,
           organization_id: organizationId,
-          created_by: userData.user.id,
+          created_by: memberData.id, // Use organization member ID
           version_number: 1,
         })
         .select()
