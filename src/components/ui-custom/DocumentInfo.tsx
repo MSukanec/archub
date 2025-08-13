@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 interface DocumentInfoProps {
   document?: any;
@@ -32,6 +33,7 @@ export function DocumentInfo({
   onEdit, 
   onDelete 
 }: DocumentInfoProps) {
+  const { openModal } = useGlobalModalStore();
   if (!document) {
     return (
       <Card className="h-full flex flex-col">
@@ -113,37 +115,39 @@ export function DocumentInfo({
 
         <Separator />
 
-        {/* File Type */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Tipo:</span>
-          <span className="text-xs">
-            {document.file_type || 'Desconocido'}
-          </span>
-        </div>
-
-        {/* File Name (original) */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Nombre:</span>
-          <span className="text-xs flex-1 text-right ml-2" title={document.original_name || document.file_name}>
-            {document.original_name || document.file_name}
-          </span>
-        </div>
-
-        {/* Status */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Estado:</span>
-          <span className="text-xs">
-            {getStatusText(document.status)}
-          </span>
-        </div>
-
-        {/* File Details */}
+        {/* Document Details - All with same spacing */}
         <div className="space-y-2">
+          {/* File Type */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Tipo:</span>
+            <span className="text-xs">
+              {document.file_type || 'Desconocido'}
+            </span>
+          </div>
+
+          {/* File Name (original) */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Nombre:</span>
+            <span className="text-xs flex-1 text-right ml-2" title={document.original_name || document.file_name}>
+              {document.original_name || document.file_name}
+            </span>
+          </div>
+
+          {/* Status */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Estado:</span>
+            <span className="text-xs">
+              {getStatusText(document.status)}
+            </span>
+          </div>
+
+          {/* File Size */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Tamaño:</span>
             <span className="text-xs">{formatFileSize(document.file_size)}</span>
           </div>
 
+          {/* Created Date */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Creado:</span>
             <span className="text-xs">
@@ -151,6 +155,7 @@ export function DocumentInfo({
             </span>
           </div>
 
+          {/* Creator */}
           {document.creator && (
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Creador:</span>
@@ -205,7 +210,13 @@ export function DocumentInfo({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={onEdit}
+            onClick={() => {
+              openModal('NewDocumentModal', { 
+                mode: 'edit',
+                documentId: document.id,
+                folderId: document.folder_id 
+              });
+            }}
             className="h-8 w-8 p-0"
             title="Editar"
           >
@@ -214,7 +225,19 @@ export function DocumentInfo({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={onDelete}
+            onClick={() => {
+              openModal('DeleteConfirmationModal', {
+                mode: 'simple',
+                title: 'Eliminar documento',
+                description: `¿Estás seguro de que quieres eliminar "${document.file_name}"? Esta acción no se puede deshacer.`,
+                itemName: document.file_name,
+                itemType: 'documento',
+                onConfirm: () => {
+                  // Here would be the delete logic
+                  console.log('Deleting document:', document.id);
+                }
+              });
+            }}
             className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
             title="Eliminar"
           >
