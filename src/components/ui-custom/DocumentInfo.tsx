@@ -211,7 +211,8 @@ export function DocumentInfo({
             size="sm" 
             variant="ghost" 
             onClick={() => {
-              openModal('NewDocumentModal', { 
+              console.log('Opening document edit modal');
+              openModal('document-upload', { 
                 mode: 'edit',
                 documentId: document.id,
                 folderId: document.folder_id 
@@ -226,15 +227,16 @@ export function DocumentInfo({
             size="sm" 
             variant="ghost" 
             onClick={() => {
-              openModal('DeleteConfirmationModal', {
+              console.log('Opening delete confirmation modal');
+              openModal('delete-confirmation', {
                 mode: 'simple',
                 title: 'Eliminar documento',
                 description: `¿Estás seguro de que quieres eliminar "${document.file_name}"? Esta acción no se puede deshacer.`,
                 itemName: document.file_name,
                 itemType: 'documento',
                 onConfirm: () => {
-                  // Here would be the delete logic
                   console.log('Deleting document:', document.id);
+                  // Here would be the delete logic
                 }
               });
             }}
