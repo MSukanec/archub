@@ -116,7 +116,7 @@ const aportesPropriosFormSchema = z.object({
   type_id: z.string().min(1, 'Tipo es requerido'),
   category_id: z.string().min(1, 'Categoría es requerida'),
   // Campos para aportes propios
-  member_id: z.string().optional(), // Campo opcional - Socio
+  member_id: z.string().min(1, 'Socio es requerido'), // Campo requerido - Socio
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -131,7 +131,7 @@ const retirosPropriosFormSchema = z.object({
   category_id: z.string().min(1, 'Categoría es requerida'),
   subcategory_id: z.string().optional(),
   // Campos para retiros propios
-  member_id: z.string().optional(), // Campo opcional - Socio
+  member_id: z.string().min(1, 'Socio es requerido'), // Campo requerido - Socio
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -499,7 +499,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       description: '',
       type_id: '',
       category_id: '',
-      member_id: '',
+      member_id: members?.find(m => m.user_id === userData?.user?.id)?.id || members?.[0]?.id || '',
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
@@ -516,7 +516,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       type_id: '',
       category_id: '',
       subcategory_id: '',
-      member_id: '',
+      member_id: members?.find(m => m.user_id === userData?.user?.id)?.id || members?.[0]?.id || '',
       currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
       wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
       amount: 0,
