@@ -325,7 +325,7 @@ export function UnifiedViewer({
           <p className="text-muted-foreground mb-4">
             Este tipo de archivo no se puede mostrar en el navegador
           </p>
-          <Button onClick={downloadFile} variant="outline">
+          <Button onClick={downloadFile}>
             <Download className="w-4 h-4 mr-2" />
             Descargar archivo
           </Button>
