@@ -164,9 +164,9 @@ export function Header({
     isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
   
-  // Solo una fila con altura fija
+  // Solo una fila con altura fija coincidiendo con botones del sidebar
   const getHeaderHeight = () => {
-    return "h-14"; // Una fila más alta para acomodar título y tabs
+    return "h-12"; // Altura que coincide con los botones del sidebar
   };
 
   return (
@@ -179,7 +179,7 @@ export function Header({
       }`}
     >
       {/* Fila única: Título de página + Tabs + Botones de acción + Selector de proyecto */}
-      <div className="w-full h-14 px-12 flex items-center justify-between">
+      <div className="w-full h-12 px-12 flex items-center justify-between">
         {/* Left: Page Title + Tabs */}
         <div className="flex items-center gap-8">
           {/* Page Title */}
@@ -218,7 +218,7 @@ export function Header({
                     )}
                     {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
                       <div
-                        className="absolute -bottom-[14px] left-0 right-0 h-0.5"
+                        className="absolute -bottom-[12px] left-0 right-0 h-0.5"
                         style={{ backgroundColor: "var(--accent)" }}
                       />
                     )}
