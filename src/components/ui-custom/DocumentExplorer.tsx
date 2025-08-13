@@ -178,17 +178,14 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
               {rootFolders.map((folder) => (
                 <div 
                   key={folder.id} 
-                  className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
+                  className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
-                  <div className="p-2 rounded-lg bg-primary/10">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
                     <Folder className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{folder.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(folder.created_at)}
-                    </p>
+                    <h4 className="font-medium truncate text-sm">{folder.name}</h4>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>
@@ -204,17 +201,14 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
               {subFolders.map((folder) => (
                 <div 
                   key={folder.id} 
-                  className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
+                  className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
-                  <div className="p-2 rounded-lg bg-secondary/50">
+                  <div className="p-1.5 rounded-lg bg-secondary/50">
                     <Folder className="h-4 w-4 text-secondary-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{folder.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(folder.created_at)}
-                    </p>
+                    <h4 className="font-medium truncate text-sm">{folder.name}</h4>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>
