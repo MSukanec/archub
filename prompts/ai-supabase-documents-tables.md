@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase Generales:
 
-TABLA DESIGN_DOCUMENTS:
+TABLA DOCUMENTS:
 
 [
   {

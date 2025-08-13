@@ -106,7 +106,7 @@ export const ACTIVITY_ACTIONS = {
 export const TARGET_TABLES = {
   MOVEMENTS: 'movements',
   SITE_LOGS: 'site_logs',
-  DESIGN_DOCUMENTS: 'design_documents',
+  DESIGN_DOCUMENTS: 'documents',
   TASKS: 'tasks',
   KANBAN_CARDS: 'kanban_cards',
   CONTACTS: 'contacts',

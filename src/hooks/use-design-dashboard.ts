@@ -11,7 +11,7 @@ export function useDesignSummary(organizationId?: string, projectId?: string) {
 
       // Get design documents count
       const { data: documents, error: docsError } = await supabase
-        .from('design_documents')
+        .from('documents')
         .select('id, status')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)

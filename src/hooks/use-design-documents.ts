@@ -44,10 +44,10 @@ export function useDesignDocuments(groupId?: string) {
       if (!projectId || !organizationId) return [];
 
       let query = supabase
-        .from('design_documents')
+        .from('documents')
         .select(`
           *,
-          creator:organization_members!design_documents_created_by_fkey (
+          creator:organization_members (
             id,
             user:users (
               id,
@@ -55,7 +55,7 @@ export function useDesignDocuments(groupId?: string) {
               avatar_url
             )
           ),
-          group:design_document_groups!design_documents_group_id_fkey (
+          group:design_document_groups (
             id,
             name,
             folder_id
@@ -94,10 +94,10 @@ export function useDesignDocumentsByFolder(folderId?: string) {
 
       // Get documents directly assigned to folder (folder_id matches)
       const { data, error } = await supabase
-        .from('design_documents')
+        .from('documents')
         .select(`
           *,
-          creator:organization_members!design_documents_created_by_fkey (
+          creator:organization_members (
             id,
             user:users (
               id,
@@ -105,7 +105,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
               avatar_url
             )
           ),
-          group:design_document_groups!design_documents_group_id_fkey (
+          group:design_document_groups (
             id,
             name,
             folder_id
@@ -122,7 +122,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         organizationId,
         data: data,
         error: error,
-        query: 'design_documents with folder_id OR group.folder_id filter'
+        query: 'documents with folder_id OR group.folder_id filter'
       });
 
       if (error) {

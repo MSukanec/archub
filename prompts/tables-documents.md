@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase para Site Logs:
 
-TABLA DESIGN_DOCUMENTS:
+TABLA DOCUMENTS:
 
 [
   {
