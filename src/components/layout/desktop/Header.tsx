@@ -42,7 +42,7 @@ interface Tab {
 interface HeaderProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
-  // 🆕 NUEVA PROP: Título de página grande
+  // Título de página que se mostrará en el lado izquierdo
   pageTitle?: string;
   showSearch?: boolean;
   searchValue?: string;
@@ -55,7 +55,7 @@ interface HeaderProps {
   // Props para sistema de tabs
   tabs?: Tab[];
   onTabChange?: (tabId: string) => void;
-  // 🆕 NUEVA PROP: Botón de acción principal
+  // Botón de acción principal
   actionButton?: {
     label: string;
     icon?: React.ComponentType<any>;
@@ -163,14 +163,10 @@ export function Header({
   const isSecondaryExpanded =
     isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
-  const hasPageTitle = !!pageTitle;
   
-  // Calculate header height based on content
+  // Solo una fila con altura fija
   const getHeaderHeight = () => {
-    if (hasPageTitle && hasTabs) return "h-36"; // breadcrumb + page title + tabs
-    if (hasPageTitle) return "h-26"; // breadcrumb + page title
-    if (hasTabs) return "h-20"; // breadcrumb + tabs  
-    return "h-10"; // just breadcrumb
+    return "h-14"; // Una fila más alta para acomodar título y tabs
   };
 
   return (
@@ -182,10 +178,67 @@ export function Header({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Primera fila: Lado izquierdo vacío y Botones de acción + Selector de proyecto */}
-      <div className="w-full h-10 px-12 flex items-center justify-between">
-        {/* Left: Vacío */}
-        <div></div>
+      {/* Fila única: Título de página + Tabs + Botones de acción + Selector de proyecto */}
+      <div className="w-full h-14 px-12 flex items-center justify-between">
+        {/* Left: Page Title + Tabs */}
+        <div className="flex items-center gap-8">
+          {/* Page Title */}
+          {(pageTitle || title) && (
+            <h1 className="text-xl font-semibold text-black dark:text-white uppercase tracking-wide">
+              {pageTitle || title}
+            </h1>
+          )}
+          
+          {/* Tabs */}
+          {hasTabs && (
+            <div className="flex items-center space-x-6">
+              {tabs.map((tab) => {
+                const tabContent = (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      tab.isDisabled || tab.isRestricted
+                        ? undefined
+                        : onTabChange?.(tab.id)
+                    }
+                    disabled={tab.isDisabled}
+                    className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
+                      tab.isDisabled || tab.isRestricted
+                        ? "text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed"
+                        : tab.isActive
+                          ? "text-[var(--layout-text)] font-medium"
+                          : "text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.badge && (
+                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                        {tab.badge}
+                      </span>
+                    )}
+                    {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
+                      <div
+                        className="absolute -bottom-[14px] left-0 right-0 h-0.5"
+                        style={{ backgroundColor: "var(--accent)" }}
+                      />
+                    )}
+                  </button>
+                );
+
+                // Si la tab está restringida, envolverla con CustomRestricted
+                if (tab.isRestricted && tab.restrictionReason) {
+                  return (
+                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                      {tabContent}
+                    </CustomRestricted>
+                  );
+                }
+
+                return tabContent;
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Right: Action Buttons + Project Selector */}
         <div className="flex items-center gap-2">
@@ -288,67 +341,6 @@ export function Header({
           )}
         </div>
       </div>
-
-      {/* Segunda fila: Título de página grande (solo si se proporciona pageTitle) */}
-      {hasPageTitle && (
-        <div className="w-full h-16 px-12 flex items-end pb-0">
-          <h1 className="text-5xl font-semibold text-black dark:text-white uppercase tracking-wide">
-            {pageTitle}
-          </h1>
-        </div>
-      )}
-
-      {/* Tercera fila: Tabs (solo si hay tabs) */}
-      {hasTabs && (
-        <div className="w-full h-10 px-12 flex items-center">
-          <div className="flex items-center space-x-6">
-            {tabs.map((tab) => {
-              const tabContent = (
-                <button
-                  key={tab.id}
-                  onClick={() =>
-                    tab.isDisabled || tab.isRestricted
-                      ? undefined
-                      : onTabChange?.(tab.id)
-                  }
-                  disabled={tab.isDisabled}
-                  className={`relative text-sm transition-colors duration-200 flex items-center gap-2 ${
-                    tab.isDisabled || tab.isRestricted
-                      ? "text-[var(--layout-text-muted)] opacity-60 cursor-not-allowed"
-                      : tab.isActive
-                        ? "text-[var(--layout-text)] font-medium"
-                        : "text-[var(--layout-text-muted)] hover:text-[var(--layout-text)]"
-                  }`}
-                >
-                  {tab.label}
-                  {tab.badge && (
-                    <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                      {tab.badge}
-                    </span>
-                  )}
-                  {tab.isActive && !tab.isDisabled && !tab.isRestricted && (
-                    <div
-                      className="absolute -bottom-[10px] left-0 right-0 h-0.5"
-                      style={{ backgroundColor: "var(--accent)" }}
-                    />
-                  )}
-                </button>
-              );
-
-              // Si la tab está restringida, envolverla con CustomRestricted
-              if (tab.isRestricted && tab.restrictionReason) {
-                return (
-                  <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
-                    {tabContent}
-                  </CustomRestricted>
-                );
-              }
-
-              return tabContent;
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
