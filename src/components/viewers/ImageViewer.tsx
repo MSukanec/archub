@@ -60,30 +60,42 @@ export function ImageViewer({
 
   // Load image
   useEffect(() => {
+    let isMounted = true;
+    let currentImageUrl: string | null = null;
+    
     const loadImage = async () => {
       try {
+        if (!isMounted) return;
         setState(prev => ({ ...prev, loading: true, error: null }));
 
-        let blob: Blob;
+        // For images, try to use the direct URL first
+        let imageUrl: string;
         
-        if (useSignedUrl) {
-          blob = await storageHelpers.downloadAsBlob(bucket, path);
+        if (useSignedUrl || !path.startsWith('http')) {
+          // Use storage helpers for bucket files
+          try {
+            const publicUrl = storageHelpers.getPublicUrl(bucket, path);
+            imageUrl = publicUrl;
+          } catch (error) {
+            console.error('Error getting public URL:', error);
+            throw new Error('No se pudo obtener la URL de la imagen');
+          }
         } else {
-          const publicUrl = storageHelpers.getPublicUrl(bucket, path);
-          blob = await storageHelpers.fetchAsBlob(publicUrl);
+          // Use direct URL if path is already a URL
+          imageUrl = path;
         }
-
-        const imageUrl = URL.createObjectURL(blob);
 
         // Load image to get natural dimensions
         const img = new Image();
         img.onload = () => {
+          if (!isMounted) return;
+          
           const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / img.naturalWidth);
           
           setState(prev => ({
             ...prev,
             loading: false,
-            blob,
+            blob: null, // No blob needed for direct URL
             imageUrl,
             naturalWidth: img.naturalWidth,
             naturalHeight: img.naturalHeight,
@@ -92,6 +104,8 @@ export function ImageViewer({
         };
         
         img.onerror = () => {
+          if (!isMounted) return;
+          
           setState(prev => ({
             ...prev,
             loading: false,
@@ -102,6 +116,8 @@ export function ImageViewer({
         img.src = imageUrl;
 
       } catch (error) {
+        if (!isMounted) return;
+        
         console.error('Error loading image:', error);
         setState(prev => ({
           ...prev,
@@ -115,8 +131,9 @@ export function ImageViewer({
 
     // Cleanup on unmount
     return () => {
-      if (state.imageUrl) {
-        URL.revokeObjectURL(state.imageUrl);
+      isMounted = false;
+      if (currentImageUrl) {
+        URL.revokeObjectURL(currentImageUrl);
       }
     };
   }, [bucket, path, useSignedUrl]);
@@ -161,14 +178,12 @@ export function ImageViewer({
   };
 
   const downloadImage = () => {
-    if (!state.blob) return;
+    if (!state.imageUrl) return;
     
-    const url = URL.createObjectURL(state.blob);
     const link = document.createElement('a');
-    link.href = url;
+    link.href = state.imageUrl;
     link.download = fileName;
     link.click();
-    URL.revokeObjectURL(url);
   };
 
   const openInNewTab = () => {
