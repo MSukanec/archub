@@ -216,6 +216,15 @@ export default function ProjectDocumentation() {
           onClose={handleClosePreview}
         />
       </div>
+
+      {/* Document Preview Modal for Desktop (expand button) */}
+      <div className="hidden lg:block">
+        <DocumentPreviewModal 
+          document={selectedDocument}
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      </div>
     </Layout>
   );
 }

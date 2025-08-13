@@ -366,23 +366,21 @@ export function PdfViewer({
           >
             <ExternalLink className="w-4 h-4" />
           </Button>
+
+          {/* Expand Button - Inside action bar */}
+          {onExpand && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onExpand}
+              className="h-8 w-8 p-0"
+              title="Expandir"
+            >
+              <Maximize2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
-
-      {/* Expand Button - Top Right */}
-      {onExpand && (
-        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onExpand}
-            className="h-8 w-8 p-0 bg-card border border-border rounded-lg shadow-lg"
-            title="Expandir"
-          >
-            <Maximize2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
 
       {/* PDF Canvas Container - Fixed height with scroll */}
       <div 
