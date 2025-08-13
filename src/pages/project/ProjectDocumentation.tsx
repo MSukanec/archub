@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentHierarchy } from '@/components/ui-custom/DocumentHierarchy';
-import { DocumentPreview } from '@/components/ui-custom/DocumentPreview';
+import { DocumentPreviewModal } from '@/components/modal/modals/project/DocumentPreviewModal';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { FileText, FolderPlus } from 'lucide-react';
 
 export default function ProjectDocumentation() {
   const { openModal } = useGlobalModalStore();
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const headerProps = {
     icon: FileText,
@@ -21,18 +22,27 @@ export default function ProjectDocumentation() {
     }
   };
 
+  const handleDocumentSelect = (document: any) => {
+    setSelectedDocument(document);
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setSelectedDocument(null);
+  };
+
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
-        {/* Document Preview Card */}
-        <DocumentPreview 
-          document={selectedDocument} 
-          onClose={() => setSelectedDocument(null)} 
-        />
-        
-        {/* Document Hierarchy */}
-        <DocumentHierarchy onDocumentSelect={setSelectedDocument} />
-      </div>
+      {/* Document Hierarchy */}
+      <DocumentHierarchy onDocumentSelect={handleDocumentSelect} />
+      
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal 
+        document={selectedDocument}
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+      />
     </Layout>
   );
 }
