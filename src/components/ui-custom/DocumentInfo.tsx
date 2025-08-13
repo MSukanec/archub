@@ -67,11 +67,11 @@ export function DocumentInfo({
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'aprobado': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'en_revision': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'rechazado': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+      case 'aprobado': return 'green';
+      case 'pendiente': return 'yellow';
+      case 'en_revision': return 'blue';
+      case 'rechazado': return 'red';
+      default: return 'gray';
     }
   };
 
@@ -101,7 +101,7 @@ export function DocumentInfo({
       <CardContent className="flex-1 space-y-4 pt-6">
         {/* Document Name */}
         <div>
-          <h3 className="font-medium text-sm mb-1 truncate" title={document.file_name}>
+          <h3 className="font-medium text-sm mb-1" title={document.file_name}>
             {document.file_name}
           </h3>
           {document.description && (
@@ -119,25 +119,31 @@ export function DocumentInfo({
             <FileText className="h-3 w-3" />
             Tipo:
           </span>
-          <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-xs">
+          <span className="text-xs">
             {document.file_type || 'Desconocido'}
           </span>
         </div>
 
         {/* File Name (original) */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Nombre:</span>
-          <span className="text-xs truncate max-w-32" title={document.original_name || document.file_name}>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <FileText className="h-3 w-3" />
+            Nombre:
+          </span>
+          <span className="text-xs flex-1 text-right ml-2" title={document.original_name || document.file_name}>
             {document.original_name || document.file_name}
           </span>
         </div>
 
         {/* Status */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Estado:</span>
-          <Badge className={`text-xs ${getStatusColor(document.status)}`}>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: getStatusColor(document.status).includes('green') ? '#10b981' : getStatusColor(document.status).includes('yellow') ? '#f59e0b' : getStatusColor(document.status).includes('blue') ? '#3b82f6' : getStatusColor(document.status).includes('red') ? '#ef4444' : '#6b7280' }} />
+            Estado:
+          </span>
+          <span className="text-xs">
             {getStatusText(document.status)}
-          </Badge>
+          </span>
         </div>
 
         {/* File Details */}
@@ -175,7 +181,12 @@ export function DocumentInfo({
           {/* Version if available */}
           {document.version && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Versión:</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="h-3 w-3 rounded border border-muted-foreground/30 flex items-center justify-center">
+                  <span className="text-[8px] font-mono">v</span>
+                </div>
+                Versión:
+              </span>
               <span className="text-xs">v{document.version}</span>
             </div>
           )}
@@ -183,8 +194,11 @@ export function DocumentInfo({
           {/* Folder path if available */}
           {document.folder && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Carpeta:</span>
-              <span className="text-xs truncate max-w-24" title={document.folder.name}>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="h-3 w-3 border border-muted-foreground/30 rounded-sm" />
+                Carpeta:
+              </span>
+              <span className="text-xs flex-1 text-right ml-2" title={document.folder.name}>
                 {document.folder.name}
               </span>
             </div>
