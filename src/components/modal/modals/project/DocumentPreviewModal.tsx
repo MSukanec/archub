@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
+import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
+import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ZoomIn, ZoomOut, RotateCw, Download, ExternalLink, FileText } from 'lucide-react';
@@ -24,7 +26,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
 
-  if (!document) return null;
+  if (!document || !isOpen) return null;
 
   const isPDF = document.file_type === 'application/pdf';
   const isImage = document.file_type?.startsWith('image/');
@@ -71,98 +73,148 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
     window.open(document.file_url, '_blank');
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-full h-[90vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="min-w-0">
-                <DialogTitle className="text-lg truncate">{document.file_name}</DialogTitle>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-sm text-muted-foreground">
-                    {formatFileSize(document.file_size)}
-                  </span>
-                  {document.status && (
-                    <Badge variant="outline" className={getStatusColor(document.status)}>
-                      {getStatusText(document.status)}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {isImage && (
-                <>
-                  <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50}>
-                    <ZoomOut className="w-4 h-4" />
-                  </Button>
-                  <span className="text-sm text-muted-foreground min-w-12 text-center">
-                    {zoom}%
-                  </span>
-                  <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200}>
-                    <ZoomIn className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleRotate}>
-                    <RotateCw className="w-4 h-4" />
-                  </Button>
-                </>
-              )}
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleOpenExternal}>
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
-        
-        <div className="flex-1 min-h-0">
-          <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
-            {isPDF ? (
-              <PdfViewer
-                bucket="design-documents"
-                path={document.file_path || document.file_url}
-                fileName={document.file_name}
-                useSignedUrl={false}
-                className="w-full h-full"
-              />
-            ) : isImage ? (
-              <div className="w-full h-full flex items-center justify-center p-4">
-                <img
-                  src={document.file_url}
-                  alt={document.file_name}
-                  className="max-w-full max-h-full object-contain transition-transform duration-200"
-                  style={{
-                    transform: `scale(${zoom / 100}) rotate(${rotation}deg)`
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <FileText className="w-20 h-20 mx-auto mb-4 opacity-50" />
-                  <p className="text-xl font-medium mb-2">Vista previa no disponible</p>
-                  <p className="text-sm mb-6 max-w-md">
-                    Este tipo de archivo ({document.file_type}) no se puede previsualizar directamente
-                  </p>
-                  <div className="flex gap-3 justify-center">
-                    <Button variant="outline" size="lg" onClick={handleDownload}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Descargar archivo
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={handleOpenExternal}>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Abrir archivo
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+  // Header con información del documento
+  const headerContent = (
+    <FormModalHeader 
+      title={document.file_name}
+      icon={FileText}
+      description={`${formatFileSize(document.file_size)} • ${getStatusText(document.status)}`}
+    />
+  );
+
+  // Footer con botones de acción
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cerrar"
+      onLeftClick={onClose}
+      rightLabel="Descargar"
+      onRightClick={handleDownload}
+    />
+  );
+
+  // Panel de vista con el contenido del documento
+  const viewPanel = (
+    <div className="w-full h-full min-h-[600px] space-y-4">
+      {/* Controles superiores */}
+      <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+        <div className="flex items-center gap-3">
+          {document.status && (
+            <Badge 
+              variant="secondary" 
+              className={getStatusColor(document.status)}
+            >
+              {getStatusText(document.status)}
+            </Badge>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+        
+        <div className="flex items-center gap-2">
+          {(isPDF || isImage) && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomOut}
+                disabled={zoom <= 50}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground min-w-[50px] text-center">
+                {zoom}%
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomIn}
+                disabled={zoom >= 200}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          
+          {isImage && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRotate}
+            >
+              <RotateCw className="h-4 w-4" />
+            </Button>
+          )}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenExternal}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Contenido del documento */}
+      <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
+        {isPDF ? (
+          <PdfViewer
+            bucket="design-documents"
+            path={document.file_path || document.file_url}
+            fileName={document.file_name}
+            useSignedUrl={false}
+            className="w-full h-full"
+          />
+        ) : isImage ? (
+          <div className="w-full h-full flex items-center justify-center p-4">
+            <img
+              src={document.file_url}
+              alt={document.file_name}
+              className="max-w-full max-h-full object-contain"
+              style={{
+                transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+              }}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
+            <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">Vista previa no disponible</h3>
+            <p className="text-muted-foreground mb-4">
+              Este tipo de archivo no se puede previsualizar en el navegador.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleDownload}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Descargar
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleOpenExternal}
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Abrir en nueva pestaña
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <FormModalLayout
+      wide={true}
+      columns={1}
+      viewPanel={viewPanel}
+      editPanel={null}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      onClose={onClose}
+      isEditing={false}
+    />
   );
 }
