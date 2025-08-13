@@ -83,49 +83,47 @@ export default function ProjectDocumentation() {
       {/* Desktop: Three Panel Layout */}
       <div className="hidden lg:flex flex-col h-full gap-4">
         {/* Top Panel: Document Viewer - 2/3 Height */}
-        <div className="h-2/3">
-          <Card className="h-full flex flex-col">
-            {selectedDocument ? (
-              <CardContent className="flex-1 p-0">
-                  {selectedDocument.file_type === 'application/pdf' ? (
-                    <PdfViewer 
-                      bucket="design-documents"
-                      path={selectedDocument.file_path}
-                      fileName={selectedDocument.file_name}
-                      className="w-full h-full"
-                    />
-                  ) : selectedDocument.file_type?.startsWith('image/') ? (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/20 p-4">
-                      <img 
-                        src={selectedDocument.file_url} 
-                        alt={selectedDocument.file_name}
-                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="text-center">
-                        <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                        <h4 className="text-lg font-medium mb-2">Vista previa no disponible</h4>
-                        <p className="text-muted-foreground mb-4">
-                          Este tipo de archivo no se puede mostrar en el navegador
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-            ) : (
-              <CardContent className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <FileText className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
-                  <h3 className="text-2xl font-light mb-3">Selecciona un documento</h3>
-                  <p className="text-muted-foreground text-lg">
-                    Haz clic en cualquier archivo del explorador para verlo aquí
-                  </p>
+        <div className="h-2/3 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+          {selectedDocument ? (
+            <>
+              {selectedDocument.file_type === 'application/pdf' ? (
+                <PdfViewer 
+                  bucket="design-documents"
+                  path={selectedDocument.file_path}
+                  fileName={selectedDocument.file_name}
+                  className="w-full h-full"
+                />
+              ) : selectedDocument.file_type?.startsWith('image/') ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted/20 p-4">
+                  <img 
+                    src={selectedDocument.file_url} 
+                    alt={selectedDocument.file_name}
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  />
                 </div>
-              </CardContent>
-            )}
-          </Card>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <File className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h4 className="text-lg font-medium mb-2">Vista previa no disponible</h4>
+                    <p className="text-muted-foreground mb-4">
+                      Este tipo de archivo no se puede mostrar en el navegador
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <FileText className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
+                <h3 className="text-2xl font-light mb-3">Selecciona un documento</h3>
+                <p className="text-muted-foreground text-lg">
+                  Haz clic en cualquier archivo del explorador para verlo aquí
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Panel: Two Columns - 1/3 Height */}
