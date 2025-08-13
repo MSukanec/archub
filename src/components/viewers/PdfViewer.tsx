@@ -28,6 +28,7 @@ type PdfViewerProps = {
   useSignedUrl?: boolean;
   className?: string;
   onExpand?: () => void;
+  height?: number;
 };
 
 type PdfState = {
@@ -46,7 +47,8 @@ export function PdfViewer({
   fileName = 'document.pdf', 
   useSignedUrl = false,
   className = "",
-  onExpand
+  onExpand,
+  height = 520
 }: PdfViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<PdfState>({
@@ -306,7 +308,10 @@ export function PdfViewer({
   }
 
   return (
-    <div className={`relative h-full group ${className}`}>
+    <div 
+      className={`relative group overflow-auto ${className}`}
+      style={{ height: `${height}px` }}
+    >
       {/* Floating Toolbar - Centered and compact */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg shadow-lg">

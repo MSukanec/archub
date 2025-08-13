@@ -112,16 +112,18 @@ export default function ProjectDocumentation() {
                     bucket="design-documents"
                     path={selectedDocument.file_path}
                     fileName={selectedDocument.file_name}
-                    className="w-full h-full overflow-hidden"
+                    className="w-full"
                     onExpand={handleExpandPdf}
+                    height={520}
                   />
                 ) : selectedDocument.file_type?.startsWith('image/') ? (
                   <ImageViewer 
                     bucket="design-documents"
                     path={selectedDocument.file_path}
                     fileName={selectedDocument.file_name}
-                    className="w-full h-full overflow-hidden"
+                    className="w-full"
                     onExpand={handleExpandPdf}
+                    height={520}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

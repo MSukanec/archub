@@ -21,6 +21,7 @@ type ImageViewerProps = {
   useSignedUrl?: boolean;
   className?: string;
   onExpand?: () => void;
+  height?: number;
 };
 
 type ImageState = {
@@ -40,7 +41,8 @@ export function ImageViewer({
   fileName = 'image', 
   useSignedUrl = false,
   className = "",
-  onExpand
+  onExpand,
+  height = 520
 }: ImageViewerProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const [state, setState] = useState<ImageState>({
@@ -193,7 +195,10 @@ export function ImageViewer({
 
   if (state.loading) {
     return (
-      <div className={`relative h-full bg-muted/50 ${className}`}>
+      <div 
+        className={`relative bg-muted/50 overflow-auto ${className}`}
+        style={{ height: `${height}px` }}
+      >
         <Skeleton className="h-full w-full" />
         <div className="absolute inset-0 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Cargando imagen...</p>
@@ -204,7 +209,10 @@ export function ImageViewer({
 
   if (state.error) {
     return (
-      <div className={`relative h-full bg-muted/50 flex items-center justify-center ${className}`}>
+      <div 
+        className={`relative bg-muted/50 flex items-center justify-center overflow-auto ${className}`}
+        style={{ height: `${height}px` }}
+      >
         <div className="text-center p-6">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h4 className="text-lg font-medium mb-2">Error al cargar imagen</h4>
@@ -215,7 +223,10 @@ export function ImageViewer({
   }
 
   return (
-    <div className={`relative h-full bg-muted/50 group ${className}`}>
+    <div 
+      className={`relative group bg-muted/50 overflow-auto ${className}`}
+      style={{ height: `${height}px` }}
+    >
       <div className="h-full overflow-auto flex items-center justify-center p-4">
         {state.imageUrl && (
           <img
