@@ -107,7 +107,7 @@ export default function ProjectDocumentation() {
             {selectedDocument ? (
               <UnifiedViewer
                 bucket="design-documents"
-                path={selectedDocument.file_path}
+                path={selectedDocument.file_url}
                 mimeType={selectedDocument.file_type}
                 fileName={selectedDocument.file_name}
                 useSignedUrl={false}

@@ -5,6 +5,7 @@ import { storageHelpers } from '@/lib/supabase/storage';
 import { useViewportZoom } from './useViewportZoom';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { 
   ZoomIn, 
   ZoomOut, 
@@ -16,8 +17,8 @@ import {
   Maximize
 } from 'lucide-react';
 
-// Configure PDF.js worker - use a more stable version
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+// Configure PDF.js worker - usar la misma configuración exitosa del PdfViewer
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export type UnifiedViewerProps = {
   bucket: string;
@@ -88,6 +89,11 @@ export function UnifiedViewer({
   // Get file URL based on bucket type
   const getFileUrl = useCallback(async () => {
     try {
+      // Si path ya es una URL completa, usarla directamente
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+      }
+      
       if (useSignedUrl) {
         return await storageHelpers.createSignedUrl(bucket, path);
       } else {
