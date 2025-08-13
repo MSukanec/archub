@@ -154,38 +154,24 @@ export default function ProjectDocumentation() {
               </CardHeader>
               <CardContent className="flex-1 p-0">
                 <ScrollArea className="h-full">
-                  <div className="p-4 space-y-2">
+                  <div className="p-4 space-y-1">
                     {recentDocuments.length > 0 ? (
-                      recentDocuments.map((doc) => {
-                        const FileIcon = getFileIcon(doc.file_type);
-                        return (
-                          <div 
-                            key={doc.id}
-                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
-                              selectedDocument?.id === doc.id ? 'bg-primary/10 border border-primary/20' : ''
-                            }`}
-                            onClick={() => handleDocumentSelect(doc)}
-                          >
-                            <div className="p-2 rounded-lg bg-muted/50">
-                              <FileIcon className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium truncate">{doc.file_name}</h4>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-xs text-muted-foreground">
-                                  {formatFileSize(doc.file_size)}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
+                      recentDocuments.map((doc) => (
+                        <div 
+                          key={doc.id}
+                          className={`flex items-center justify-between py-2 px-3 rounded cursor-pointer transition-colors hover:bg-muted/50 ${
+                            selectedDocument?.id === doc.id ? 'bg-primary/10' : ''
+                          }`}
+                          onClick={() => handleDocumentSelect(doc)}
+                        >
+                          <span className="text-sm font-medium truncate flex-1 pr-2">{doc.file_name}</span>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {format(new Date(doc.created_at), 'dd MMM', { locale: es })}
+                          </span>
+                        </div>
+                      ))
                     ) : (
                       <div className="text-center py-8">
-                        <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
                         <p className="text-sm text-muted-foreground">
                           Sin documentos recientes
                         </p>
