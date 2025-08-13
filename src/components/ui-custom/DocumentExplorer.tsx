@@ -174,7 +174,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
         {/* Show root folders */}
         {isRoot && rootFolders.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Carpetas</h3>
             <div className="space-y-2">
               {rootFolders.map((folder) => (
                 <div 
@@ -201,7 +200,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
         {/* Show subfolders if any */}
         {!isRoot && subFolders.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Subcarpetas</h3>
             <div className="space-y-2">
               {subFolders.map((folder) => (
                 <div 
@@ -229,7 +227,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
         {!isRoot && documents && documents.length > 0 && (
           <div className="space-y-4">
             <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">Documentos</h3>
                 <div className="space-y-2">
                   {documents.map((document) => {
                     const FileIcon = getFileIcon(document.file_type);
