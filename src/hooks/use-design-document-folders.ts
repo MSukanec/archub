@@ -46,16 +46,25 @@ export function useCreateDesignDocumentFolder() {
   const queryClient = useQueryClient();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
-  // Find current membership for this organization
-  const currentMembership = userData?.memberships?.find(
-    membership => membership.organization_id === organizationId
-  );
-  const membershipId = currentMembership?.id;
+  const userId = userData?.user?.id;
 
   return useMutation({
     mutationFn: async (folderData: { name: string; parent_id?: string }): Promise<DesignDocumentFolder> => {
-      if (!projectId || !organizationId || !membershipId) {
-        throw new Error('Missing project, organization, or membership data');
+      if (!projectId || !organizationId || !userId) {
+        throw new Error('Missing project, organization, or user data');
+      }
+
+      // First, get the organization member ID for the current user
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (memberError || !memberData) {
+        throw new Error('Could not find organization membership');
       }
 
       const { data, error } = await supabase
@@ -64,7 +73,7 @@ export function useCreateDesignDocumentFolder() {
           name: folderData.name,
           project_id: projectId,
           organization_id: organizationId,
-          created_by: membershipId, // Now uses organization member ID
+          created_by: memberData.id, // Use organization member ID
           parent_id: folderData.parent_id || null,
         })
         .select()
