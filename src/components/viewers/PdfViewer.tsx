@@ -353,12 +353,14 @@ export function PdfViewer({
 
       {/* PDF Canvas */}
       <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900">
-        <div className="flex justify-center p-8">
+        <div className="flex justify-center items-start p-4" style={{ minHeight: 'fit-content' }}>
           <canvas
             ref={canvasRef}
-            className="shadow-lg rounded-lg bg-white max-w-full h-auto"
+            className="shadow-lg rounded-lg bg-white"
             style={{
-              maxWidth: '100%',
+              display: 'block',
+              maxWidth: 'none', // Permite que el canvas se expanda más allá del contenedor
+              width: 'auto',
               height: 'auto'
             }}
           />

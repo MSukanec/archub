@@ -67,52 +67,50 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
 
   // Panel de vista con el contenido del documento
   const viewPanel = (
-    <div className="w-full h-full min-h-[600px]">
-      <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
-        {isPDF ? (
-          <PdfViewer
-            bucket="design-documents"
-            path={document.file_path || document.file_url}
-            fileName={document.file_name}
-            useSignedUrl={false}
-            className="w-full h-full"
+    <div className="w-full" style={{ height: 'calc(100vh - 200px)' }}>
+      {isPDF ? (
+        <PdfViewer
+          bucket="design-documents"
+          path={document.file_path || document.file_url}
+          fileName={document.file_name}
+          useSignedUrl={false}
+          className="w-full h-full border rounded-lg bg-white"
+        />
+      ) : isImage ? (
+        <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+          <img
+            src={document.file_url}
+            alt={document.file_name}
+            className="max-w-full max-h-full object-contain"
           />
-        ) : isImage ? (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            <img
-              src={document.file_url}
-              alt={document.file_name}
-              className="max-w-full max-h-full object-contain"
-            />
+        </div>
+      ) : (
+        <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-8 text-center">
+          <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Vista previa no disponible</h3>
+          <p className="text-muted-foreground mb-4">
+            Este tipo de archivo no se puede previsualizar en el navegador.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleDownload}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Descargar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleOpenExternal}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Abrir en nueva pestaña
+            </Button>
           </div>
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
-            <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Vista previa no disponible</h3>
-            <p className="text-muted-foreground mb-4">
-              Este tipo de archivo no se puede previsualizar en el navegador.
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleDownload}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Descargar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleOpenExternal}
-                className="flex items-center gap-2"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Abrir en nueva pestaña
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 
