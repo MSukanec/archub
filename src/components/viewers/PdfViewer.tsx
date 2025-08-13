@@ -62,6 +62,9 @@ export function PdfViewer({
   // Container dimensions for fit calculations
   const CONTAINER_WIDTH = 800; // Available width for PDF content
   const CONTAINER_HEIGHT = 450; // Available height for PDF content
+  
+  // Base scale for fit-to-width calculation
+  const [baseScale, setBaseScale] = useState(1.0);
 
   // Load PDF document
   const loadPdf = useCallback(async () => {
@@ -82,10 +85,12 @@ export function PdfViewer({
       const arrayBuffer = await blob.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-      // Calculate initial scale to fit width (common PDF viewer behavior)
+      // Calculate base scale to fit width (this will be the rendering scale)
       const firstPage = await pdfDoc.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1.0 });
       const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / viewport.width);
+      
+      setBaseScale(fitToWidthScale);
 
       setState(prev => ({
         ...prev,
@@ -94,7 +99,7 @@ export function PdfViewer({
         pdfDoc,
         numPages: pdfDoc.numPages,
         page: Math.min(prev.page, pdfDoc.numPages),
-        scale: fitToWidthScale
+        scale: 1.0 // Start with 100% zoom for display
       }));
 
     } catch (error) {
@@ -113,13 +118,14 @@ export function PdfViewer({
 
     try {
       const page = await state.pdfDoc.getPage(state.page);
-      const viewport = page.getViewport({ scale: state.scale });
+      // Always render at base scale for quality, zoom will be handled by CSS transform
+      const viewport = page.getViewport({ scale: baseScale });
       
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
 
-      // Set canvas size to match viewport exactly
+      // Set canvas size to match viewport exactly (at base scale)
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       
@@ -137,7 +143,7 @@ export function PdfViewer({
     } catch (error) {
       console.error('Error rendering page:', error);
     }
-  }, [state.pdfDoc, state.page, state.scale]);
+  }, [state.pdfDoc, state.page, baseScale]);
 
   // Navigation functions
   const goToPage = (pageNum: number) => {
@@ -168,15 +174,9 @@ export function PdfViewer({
     setState(prev => ({ ...prev, scale: 1.0 }));
   };
 
-  const fitToWidth = async () => {
-    if (!state.pdfDoc) return;
-    
-    // Recalculate fit-to-width scale
-    const firstPage = await state.pdfDoc.getPage(1);
-    const viewport = firstPage.getViewport({ scale: 1.0 });
-    const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / viewport.width);
-    
-    setState(prev => ({ ...prev, scale: fitToWidthScale }));
+  const fitToWidth = () => {
+    // Reset to 100% zoom (fit to width is already handled by baseScale)
+    setState(prev => ({ ...prev, scale: 1.0 }));
   };
 
   // Download function
@@ -429,7 +429,9 @@ export function PdfViewer({
               ref={canvasRef}
               className="block"
               style={{ 
-                display: 'block'
+                display: 'block',
+                transform: `scale(${state.scale})`,
+                transformOrigin: 'top left'
               }}
             />
           </div>
