@@ -1,0 +1,316 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  ZoomIn, 
+  ZoomOut, 
+  Download, 
+  ExternalLink,
+  AlertCircle,
+  Maximize,
+  RotateCw,
+  RotateCcw
+} from 'lucide-react';
+import { storageHelpers } from '@/lib/supabase/storage';
+
+type ImageViewerProps = {
+  bucket: string;
+  path: string;
+  fileName?: string;
+  useSignedUrl?: boolean;
+  className?: string;
+  onExpand?: () => void;
+};
+
+type ImageState = {
+  loading: boolean;
+  error: string | null;
+  scale: number;
+  rotation: number;
+  blob: Blob | null;
+  imageUrl: string | null;
+  naturalWidth: number;
+  naturalHeight: number;
+};
+
+export function ImageViewer({ 
+  bucket, 
+  path, 
+  fileName = 'image', 
+  useSignedUrl = false,
+  className = "",
+  onExpand
+}: ImageViewerProps) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [state, setState] = useState<ImageState>({
+    loading: true,
+    error: null,
+    scale: 1.0,
+    rotation: 0,
+    blob: null,
+    imageUrl: null,
+    naturalWidth: 0,
+    naturalHeight: 0
+  });
+
+  // Container dimensions for fit calculations
+  const CONTAINER_WIDTH = 800;
+  const CONTAINER_HEIGHT = 450;
+
+  // Load image
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        setState(prev => ({ ...prev, loading: true, error: null }));
+
+        let blob: Blob;
+        
+        if (useSignedUrl) {
+          blob = await storageHelpers.downloadAsBlob(bucket, path);
+        } else {
+          const publicUrl = storageHelpers.getPublicUrl(bucket, path);
+          blob = await storageHelpers.fetchAsBlob(publicUrl);
+        }
+
+        const imageUrl = URL.createObjectURL(blob);
+
+        // Load image to get natural dimensions
+        const img = new Image();
+        img.onload = () => {
+          const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / img.naturalWidth);
+          
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            blob,
+            imageUrl,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight,
+            scale: fitToWidthScale
+          }));
+        };
+        
+        img.onerror = () => {
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error: 'Error al cargar la imagen'
+          }));
+        };
+        
+        img.src = imageUrl;
+
+      } catch (error) {
+        console.error('Error loading image:', error);
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Error desconocido al cargar imagen'
+        }));
+      }
+    };
+
+    loadImage();
+
+    // Cleanup on unmount
+    return () => {
+      if (state.imageUrl) {
+        URL.revokeObjectURL(state.imageUrl);
+      }
+    };
+  }, [bucket, path, useSignedUrl]);
+
+  // Zoom functions - 10% increments
+  const zoomIn = () => {
+    setState(prev => ({ 
+      ...prev, 
+      scale: Math.min(prev.scale + 0.1, 3.0) 
+    }));
+  };
+
+  const zoomOut = () => {
+    setState(prev => ({ 
+      ...prev, 
+      scale: Math.max(prev.scale - 0.1, 0.1) 
+    }));
+  };
+
+  const zoom100 = () => {
+    setState(prev => ({ ...prev, scale: 1.0 }));
+  };
+
+  const fitToWidth = () => {
+    if (state.naturalWidth === 0) return;
+    const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / state.naturalWidth);
+    setState(prev => ({ ...prev, scale: fitToWidthScale }));
+  };
+
+  const rotateLeft = () => {
+    setState(prev => ({ 
+      ...prev, 
+      rotation: (prev.rotation - 90) % 360 
+    }));
+  };
+
+  const rotateRight = () => {
+    setState(prev => ({ 
+      ...prev, 
+      rotation: (prev.rotation + 90) % 360 
+    }));
+  };
+
+  const downloadImage = () => {
+    if (!state.blob) return;
+    
+    const url = URL.createObjectURL(state.blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const openInNewTab = () => {
+    if (!state.imageUrl) return;
+    window.open(state.imageUrl, '_blank');
+  };
+
+  if (state.loading) {
+    return (
+      <div className={`relative h-full bg-muted/50 ${className}`}>
+        <Skeleton className="h-full w-full" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">Cargando imagen...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className={`relative h-full bg-muted/50 flex items-center justify-center ${className}`}>
+        <div className="text-center p-6">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h4 className="text-lg font-medium mb-2">Error al cargar imagen</h4>
+          <p className="text-muted-foreground text-sm">{state.error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative h-full bg-muted/50 group ${className}`}>
+      <div className="h-full overflow-auto flex items-center justify-center p-4">
+        {state.imageUrl && (
+          <img
+            ref={imageRef}
+            src={state.imageUrl}
+            alt={fileName}
+            className="max-w-none"
+            style={{
+              transform: `scale(${state.scale}) rotate(${state.rotation}deg)`,
+              transformOrigin: 'center',
+              transition: 'transform 0.2s ease-in-out'
+            }}
+          />
+        )}
+      </div>
+
+      {/* Floating toolbar - appears on hover like PDF viewer */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg shadow-lg">
+          {/* Zoom controls */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomOut}
+            disabled={state.scale <= 0.1}
+            className="h-8 w-8 p-0"
+            title="Reducir zoom"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          
+          <Badge 
+            variant="outline" 
+            className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
+            onClick={zoom100}
+            title="Zoom 100%"
+          >
+            {Math.round(state.scale * 100)}%
+          </Badge>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomIn}
+            disabled={state.scale >= 3.0}
+            className="h-8 w-8 p-0"
+            title="Aumentar zoom"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+
+          <div className="w-px h-4 bg-border mx-1" />
+
+          {/* Rotation controls */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={rotateLeft}
+            className="h-8 w-8 p-0"
+            title="Rotar izquierda"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={rotateRight}
+            className="h-8 w-8 p-0"
+            title="Rotar derecha"
+          >
+            <RotateCw className="w-4 h-4" />
+          </Button>
+
+          <div className="w-px h-4 bg-border mx-1" />
+          
+          {/* Actions */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={fitToWidth}
+            className="h-8 w-8 p-0"
+            title="Ajustar al ancho"
+          >
+            <Maximize className="w-4 h-4" />
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={downloadImage}
+            className="h-8 w-8 p-0"
+            title="Descargar"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+
+          {onExpand && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onExpand}
+              className="h-8 w-8 p-0"
+              title="Expandir"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

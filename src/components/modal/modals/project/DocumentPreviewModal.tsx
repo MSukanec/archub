@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import { PdfViewer } from '@/components/viewers/PdfViewer';
+import { ImageViewer } from '@/components/viewers/ImageViewer';
 
 interface DocumentPreviewModalProps {
   document: {
@@ -76,13 +77,13 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
           className="w-full h-full border rounded-lg bg-white"
         />
       ) : isImage ? (
-        <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-          <img
-            src={document.file_url}
-            alt={document.file_name}
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
+        <ImageViewer
+          bucket="design-documents"
+          path={document.file_path || document.file_url}
+          fileName={document.file_name}
+          useSignedUrl={false}
+          className="w-full h-full border rounded-lg"
+        />
       ) : (
         <div className="w-full h-full border rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-8 text-center">
           <FileText className="h-16 w-16 text-muted-foreground mb-4" />

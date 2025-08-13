@@ -28,10 +28,6 @@ TABLA DOCUMENTS (EX DESIGN_DOCUMENTS)
     "data_type": "text"
   },
   {
-    "column_name": "version_number",
-    "data_type": "integer"
-  },
-  {
     "column_name": "project_id",
     "data_type": "uuid"
   },
