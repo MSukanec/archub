@@ -86,52 +86,7 @@ export default function ProjectDocumentation() {
         <div className="h-2/3">
           <Card className="h-full flex flex-col">
             {selectedDocument ? (
-              <>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        {React.createElement(getFileIcon(selectedDocument.file_type), { 
-                          className: "h-5 w-5 text-primary" 
-                        })}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium truncate">{selectedDocument.file_name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-muted-foreground">
-                            {formatFileSize(selectedDocument.file_size)}
-                          </span>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${getStatusColor(selectedDocument.status)}`}
-                          >
-                            {getStatusText(selectedDocument.status)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <a 
-                        href={selectedDocument.file_url} 
-                        download={selectedDocument.file_name}
-                        className="p-2 rounded-lg hover:bg-muted transition-colors"
-                        title="Descargar archivo"
-                      >
-                        <Download className="h-4 w-4" />
-                      </a>
-                      <a 
-                        href={selectedDocument.file_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-lg hover:bg-muted transition-colors"
-                        title="Abrir en nueva pestaña"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 p-0">
+              <CardContent className="flex-1 p-0">
                   {selectedDocument.file_type === 'application/pdf' ? (
                     <PdfViewer 
                       bucket="design-documents"
@@ -159,7 +114,6 @@ export default function ProjectDocumentation() {
                     </div>
                   )}
                 </CardContent>
-              </>
             ) : (
               <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
