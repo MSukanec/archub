@@ -98,15 +98,13 @@ export function UnifiedViewer({
       let mimeType: string;
 
       if (useSignedUrl) {
-        const signedUrl = await storageHelpers.getSignedUrl(bucket, path, 3600);
+        const signedUrl = await storageHelpers.createSignedUrl(bucket, path, 3600);
         const response = await fetch(signedUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         blob = await response.blob();
         mimeType = response.headers.get('Content-Type') || fileType || 'application/octet-stream';
       } else {
-        const { data, error } = await storageHelpers.downloadFile(bucket, path);
-        if (error) throw new Error(error.message);
-        blob = data;
+        blob = await storageHelpers.downloadAsBlob(bucket, path);
         mimeType = fileType || blob.type || 'application/octet-stream';
       }
 
@@ -210,7 +208,8 @@ export function UnifiedViewer({
       
       const renderContext = {
         canvasContext: context,
-        viewport: scaledViewport
+        viewport: scaledViewport,
+        canvas: canvas
       };
 
       await page.render(renderContext).promise;
