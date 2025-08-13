@@ -378,7 +378,7 @@ export function PdfViewer({
 
       {/* PDF Canvas - Full height without toolbar space */}
       <div className="h-full overflow-auto">
-        <div className="flex justify-center items-center h-full p-4">
+        <div className="flex justify-center items-center h-full">
           <canvas
             ref={canvasRef}
             className="shadow-lg rounded-lg bg-white max-w-full max-h-full object-contain"
