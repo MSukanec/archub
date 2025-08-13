@@ -58,6 +58,9 @@ export function PdfViewer({
     pdfDoc: null
   });
 
+  // Container height constraint (from parent)
+  const CONTAINER_HEIGHT = 450; // Account for padding
+
   // Load PDF document
   const loadPdf = useCallback(async () => {
     try {
@@ -77,13 +80,19 @@ export function PdfViewer({
       const arrayBuffer = await blob.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
+      // Calculate initial scale to fit height
+      const firstPage = await pdfDoc.getPage(1);
+      const viewport = firstPage.getViewport({ scale: 1.0 });
+      const fitToHeightScale = Math.min(1.0, CONTAINER_HEIGHT / viewport.height);
+
       setState(prev => ({
         ...prev,
         loading: false,
         blob,
         pdfDoc,
         numPages: pdfDoc.numPages,
-        page: Math.min(prev.page, pdfDoc.numPages)
+        page: Math.min(prev.page, pdfDoc.numPages),
+        scale: fitToHeightScale
       }));
 
     } catch (error) {
@@ -118,7 +127,8 @@ export function PdfViewer({
       // Render page
       const renderContext = {
         canvasContext: context,
-        viewport: viewport
+        viewport: viewport,
+        canvas: canvas
       };
       await page.render(renderContext).promise;
 
@@ -152,8 +162,15 @@ export function PdfViewer({
     }));
   };
 
-  const resetZoom = () => {
-    setState(prev => ({ ...prev, scale: 1.0 }));
+  const resetZoom = async () => {
+    if (!state.pdfDoc) return;
+    
+    // Recalculate fit-to-height scale
+    const firstPage = await state.pdfDoc.getPage(1);
+    const viewport = firstPage.getViewport({ scale: 1.0 });
+    const fitToHeightScale = Math.min(1.0, CONTAINER_HEIGHT / viewport.height);
+    
+    setState(prev => ({ ...prev, scale: fitToHeightScale }));
   };
 
   // Download function
