@@ -248,10 +248,10 @@ export function PdfViewer({
 
   // Render page when page or scale changes
   useEffect(() => {
-    if (state.pdfDoc && !state.loading) {
+    if (state.pdfDoc && !state.loading && baseScale > 0) {
       renderPage();
     }
-  }, [renderPage, state.pdfDoc, state.loading]);
+  }, [renderPage, state.pdfDoc, state.loading, baseScale]);
 
   if (state.loading) {
     return (
