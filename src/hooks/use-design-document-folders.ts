@@ -46,11 +46,16 @@ export function useCreateDesignDocumentFolder() {
   const queryClient = useQueryClient();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
+  // Find current membership for this organization
+  const currentMembership = userData?.memberships?.find(
+    membership => membership.organization_id === organizationId
+  );
+  const membershipId = currentMembership?.id;
 
   return useMutation({
-    mutationFn: async (folderData: { name: string; created_by: string; parent_id?: string }): Promise<DesignDocumentFolder> => {
-      if (!projectId || !organizationId) {
-        throw new Error('Missing project or organization data');
+    mutationFn: async (folderData: { name: string; parent_id?: string }): Promise<DesignDocumentFolder> => {
+      if (!projectId || !organizationId || !membershipId) {
+        throw new Error('Missing project, organization, or membership data');
       }
 
       const { data, error } = await supabase
@@ -59,7 +64,7 @@ export function useCreateDesignDocumentFolder() {
           name: folderData.name,
           project_id: projectId,
           organization_id: organizationId,
-          created_by: folderData.created_by,
+          created_by: membershipId, // Now uses organization member ID
           parent_id: folderData.parent_id || null,
         })
         .select()
@@ -81,12 +86,11 @@ export function useUpdateDesignDocumentFolder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (folderData: { id: string; name: string; created_by: string }): Promise<DesignDocumentFolder> => {
+    mutationFn: async (folderData: { id: string; name: string }): Promise<DesignDocumentFolder> => {
       const { data, error } = await supabase
         .from('design_document_folders')
         .update({
           name: folderData.name,
-          created_by: folderData.created_by,
           updated_at: new Date().toISOString()
         })
         .eq('id', folderData.id)

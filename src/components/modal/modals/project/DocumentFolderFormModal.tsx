@@ -82,15 +82,13 @@ export function DocumentFolderFormModal({ modalData, onClose }: DocumentFolderFo
 
       const folderData = {
         name: data.name,
-        created_by: userData.user.id, // Use current user ID automatically
-        organization_id: organizationId,
         parent_id: parentId || undefined,
       };
 
       if (isEditing && editingFolder) {
         return updateFolderMutation.mutateAsync({
           id: editingFolder.id,
-          ...folderData,
+          name: folderData.name,
         });
       } else {
         return createFolderMutation.mutateAsync(folderData);
