@@ -66,7 +66,10 @@ export default function DesignDocumentation() {
     actionButton: {
       label: "Subir Documentos",
       icon: Upload,
-      onClick: () => openModal('document-upload', {})
+      onClick: () => {
+        console.log('Opening document-upload modal');
+        openModal('document-upload', {});
+      }
     }
   };
 
@@ -183,7 +186,10 @@ export default function DesignDocumentation() {
                 description="Comienza creando tu primera carpeta para organizar los documentos del proyecto."
                 action={
                   <Button 
-                    onClick={() => openModal('document-upload', {})}
+                    onClick={() => {
+                      console.log('Opening document-upload modal from EmptyState');
+                      openModal('document-upload', {});
+                    }}
                     className="mt-4"
                   >
                     <Upload className="w-4 h-4 mr-2" />
