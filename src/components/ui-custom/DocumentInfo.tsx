@@ -115,10 +115,7 @@ export function DocumentInfo({
 
         {/* File Type */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <FileText className="h-3 w-3" />
-            Tipo:
-          </span>
+          <span className="text-xs text-muted-foreground">Tipo:</span>
           <span className="text-xs">
             {document.file_type || 'Desconocido'}
           </span>
@@ -126,10 +123,7 @@ export function DocumentInfo({
 
         {/* File Name (original) */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <FileText className="h-3 w-3" />
-            Nombre:
-          </span>
+          <span className="text-xs text-muted-foreground">Nombre:</span>
           <span className="text-xs flex-1 text-right ml-2" title={document.original_name || document.file_name}>
             {document.original_name || document.file_name}
           </span>
@@ -137,10 +131,7 @@ export function DocumentInfo({
 
         {/* Status */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: getStatusColor(document.status).includes('green') ? '#10b981' : getStatusColor(document.status).includes('yellow') ? '#f59e0b' : getStatusColor(document.status).includes('blue') ? '#3b82f6' : getStatusColor(document.status).includes('red') ? '#ef4444' : '#6b7280' }} />
-            Estado:
-          </span>
+          <span className="text-xs text-muted-foreground">Estado:</span>
           <span className="text-xs">
             {getStatusText(document.status)}
           </span>
@@ -149,18 +140,12 @@ export function DocumentInfo({
         {/* File Details */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <HardDrive className="h-3 w-3" />
-              Tamaño:
-            </span>
+            <span className="text-xs text-muted-foreground">Tamaño:</span>
             <span className="text-xs">{formatFileSize(document.file_size)}</span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Creado:
-            </span>
+            <span className="text-xs text-muted-foreground">Creado:</span>
             <span className="text-xs">
               {format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}
             </span>
@@ -168,11 +153,8 @@ export function DocumentInfo({
 
           {document.creator && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <User className="h-3 w-3" />
-                Creador:
-              </span>
-              <span className="text-xs truncate max-w-24" title={document.creator.user?.full_name}>
+              <span className="text-xs text-muted-foreground">Creador:</span>
+              <span className="text-xs flex-1 text-right ml-2" title={document.creator.user?.full_name}>
                 {document.creator.user?.full_name || 'Usuario'}
               </span>
             </div>
@@ -181,12 +163,7 @@ export function DocumentInfo({
           {/* Version if available */}
           {document.version && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <div className="h-3 w-3 rounded border border-muted-foreground/30 flex items-center justify-center">
-                  <span className="text-[8px] font-mono">v</span>
-                </div>
-                Versión:
-              </span>
+              <span className="text-xs text-muted-foreground">Versión:</span>
               <span className="text-xs">v{document.version}</span>
             </div>
           )}
@@ -194,10 +171,7 @@ export function DocumentInfo({
           {/* Folder path if available */}
           {document.folder && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <div className="h-3 w-3 border border-muted-foreground/30 rounded-sm" />
-                Carpeta:
-              </span>
+              <span className="text-xs text-muted-foreground">Carpeta:</span>
               <span className="text-xs flex-1 text-right ml-2" title={document.folder.name}>
                 {document.folder.name}
               </span>
