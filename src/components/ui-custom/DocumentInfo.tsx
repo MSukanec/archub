@@ -105,13 +105,32 @@ export function DocumentInfo({
             {document.file_name}
           </h3>
           {document.description && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               {document.description}
             </p>
           )}
         </div>
 
         <Separator />
+
+        {/* File Type */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <FileText className="h-3 w-3" />
+            Tipo:
+          </span>
+          <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-xs">
+            {document.file_type || 'Desconocido'}
+          </span>
+        </div>
+
+        {/* File Name (original) */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Nombre:</span>
+          <span className="text-xs truncate max-w-32" title={document.original_name || document.file_name}>
+            {document.original_name || document.file_name}
+          </span>
+        </div>
 
         {/* Status */}
         <div className="flex items-center justify-between">
@@ -149,6 +168,24 @@ export function DocumentInfo({
               </span>
               <span className="text-xs truncate max-w-24" title={document.creator.user?.full_name}>
                 {document.creator.user?.full_name || 'Usuario'}
+              </span>
+            </div>
+          )}
+
+          {/* Version if available */}
+          {document.version && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Versión:</span>
+              <span className="text-xs">v{document.version}</span>
+            </div>
+          )}
+
+          {/* Folder path if available */}
+          {document.folder && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Carpeta:</span>
+              <span className="text-xs truncate max-w-24" title={document.folder.name}>
+                {document.folder.name}
               </span>
             </div>
           )}
