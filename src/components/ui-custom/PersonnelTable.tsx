@@ -197,6 +197,7 @@ export function PersonnelTable({
         data={personnel}
         columns={columns}
         formatCellData={formatCellData}
+        keyExtractor={(record) => record.id}
       />
 
       <AlertDialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>

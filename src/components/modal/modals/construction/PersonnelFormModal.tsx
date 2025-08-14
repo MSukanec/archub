@@ -44,7 +44,7 @@ interface Contact {
   id: string;
   first_name: string;
   last_name: string;
-  contact_type_links: Array<{
+  contact_type_links?: Array<{
     contact_type: {
       name: string;
     };
@@ -83,7 +83,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
         .order('first_name');
 
       if (error) throw error;
-      return data as Contact[];
+      return (data || []) as Contact[];
     },
     enabled: !!userData?.organization?.id
   });
@@ -117,7 +117,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       }
 
       const personnelRecords = data.contact_ids.map(contactId => ({
-        project_id: userData.preferences.last_project_id,
+        project_id: userData.preferences!.last_project_id,
         contact_id: contactId
       }));
 
@@ -161,8 +161,9 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
   };
 
   useEffect(() => {
-    setSelectedContacts(form.watch('contact_ids') || []);
-  }, [form.watch('contact_ids')]);
+    const contactIds = form.getValues('contact_ids') || [];
+    setSelectedContacts(contactIds);
+  }, []);
 
   const editPanel = (
     <Form {...form}>
@@ -194,7 +195,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
                         <div className="flex items-center gap-3">
                           <Checkbox
                             checked={isSelected}
-                            onChange={() => handleContactToggle(contact.id)}
+                            onCheckedChange={() => handleContactToggle(contact.id)}
                           />
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">
@@ -244,7 +245,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       onLeftClick={onClose}
       rightLabel="Agregar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={createPersonnelMutation.isPending}
+      loading={createPersonnelMutation.isPending}
       rightDisabled={selectedContacts.length === 0}
     />
   );
