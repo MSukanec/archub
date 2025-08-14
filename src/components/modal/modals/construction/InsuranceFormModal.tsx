@@ -153,7 +153,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       const payload = {
         organization_id: currentUser?.organization?.id!,
         project_id: projectId,
-        personnel_id: data.personnel_id,
+        contact_id: data.personnel_id,
         insurance_type: data.insurance_type,
         policy_number: data.policy_number || null,
         provider: data.provider || null,

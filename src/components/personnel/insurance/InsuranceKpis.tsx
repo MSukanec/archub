@@ -1,6 +1,6 @@
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { Shield, ShieldAlert, ShieldX } from 'lucide-react'
 import { InsuranceStatusRow } from '@/services/insurances'
 
 interface InsuranceKpisProps {
@@ -16,48 +16,52 @@ export function InsuranceKpis({ data, activeFilter, onFilterChange }: InsuranceK
     vencido: data.filter(item => item.status === 'vencido').length
   }
 
-  const kpis = [
-    {
-      key: 'vigente',
-      label: 'Vigentes',
-      count: counts.vigente,
-      variant: 'default' as const,
-      className: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-950 dark:text-green-400 dark:border-green-800'
-    },
-    {
-      key: 'por_vencer',
-      label: 'Por vencer',
-      count: counts.por_vencer,
-      variant: 'secondary' as const,
-      className: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-950 dark:text-yellow-400 dark:border-yellow-800'
-    },
-    {
-      key: 'vencido',
-      label: 'Vencidos',
-      count: counts.vencido,
-      variant: 'destructive' as const,
-      className: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-950 dark:text-red-400 dark:border-red-800'
-    }
-  ]
-
   return (
-    <div className="flex flex-wrap gap-4 mb-6">
-      {kpis.map(({ key, label, count, className }) => (
-        <Card
-          key={key}
-          className={`p-4 cursor-pointer transition-all duration-200 ${className} ${
-            activeFilter === key ? 'ring-2 ring-offset-2 ring-primary' : ''
-          }`}
-          onClick={() => onFilterChange(activeFilter === key ? null : key)}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">{label}</p>
-              <p className="text-2xl font-bold">{count}</p>
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <Card 
+        className={`p-3 cursor-pointer transition-all duration-200 ${
+          activeFilter === 'vigente' ? 'ring-2 ring-green-500' : 'hover:shadow-md'
+        }`}
+        onClick={() => onFilterChange(activeFilter === 'vigente' ? null : 'vigente')}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">Vigentes</p>
+            <p className="text-lg font-semibold">{counts.vigente}</p>
           </div>
-        </Card>
-      ))}
+          <Shield className="h-4 w-4 text-green-600" />
+        </div>
+      </Card>
+
+      <Card 
+        className={`p-3 cursor-pointer transition-all duration-200 ${
+          activeFilter === 'por_vencer' ? 'ring-2 ring-yellow-500' : 'hover:shadow-md'
+        }`}
+        onClick={() => onFilterChange(activeFilter === 'por_vencer' ? null : 'por_vencer')}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">Por vencer</p>
+            <p className="text-lg font-semibold">{counts.por_vencer}</p>
+          </div>
+          <ShieldAlert className="h-4 w-4 text-yellow-600" />
+        </div>
+      </Card>
+
+      <Card 
+        className={`p-3 cursor-pointer transition-all duration-200 ${
+          activeFilter === 'vencido' ? 'ring-2 ring-red-500' : 'hover:shadow-md'
+        }`}
+        onClick={() => onFilterChange(activeFilter === 'vencido' ? null : 'vencido')}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">Vencidos</p>
+            <p className="text-lg font-semibold">{counts.vencido}</p>
+          </div>
+          <ShieldX className="h-4 w-4 text-red-600" />
+        </div>
+      </Card>
     </div>
   )
 }
