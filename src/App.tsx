@@ -40,15 +40,12 @@ import ConstructionAttendance from "@/pages/construction/ConstructionAttendance"
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import ConstructionCostAnalysis from "@/pages/construction/ConstructionCostAnalysis";
-import ProjectGallery from "@/pages/project/ProjectGallery";
 import ConstructionTasks from "@/pages/construction/ConstructionTasks";
 import ConstructionLabor from "@/pages/construction/ConstructionLabor";
 import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import ConstructionSubcontracts from "@/pages/construction/ConstructionSubcontracts";
 import DesignDashboard from "@/pages/design/DesignDashboard";
-
-
-import ProjectDocumentation from "@/pages/project/ProjectDocumentation";
+import Library from "@/pages/Library";
 import OrganizationBoard from "@/pages/organization/OrganizationBoard";
 import ProfileOrganizations from "@/pages/profile/ProfileOrganizations";
 
@@ -174,14 +171,11 @@ function Router() {
             <ProjectClients />
           </ProtectedRoute>
         </Route>
-        <Route path="/project/documentation">
+        
+        {/* Library Route */}
+        <Route path="/library">
           <ProtectedRoute>
-            <ProjectDocumentation />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/project/gallery">
-          <ProtectedRoute>
-            <ProjectGallery />
+            <Library />
           </ProtectedRoute>
         </Route>
 

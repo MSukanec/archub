@@ -49,7 +49,8 @@ import {
   Brush,
   HardHat,
   NotebookPen,
-  FileImage
+  FileImage,
+  BookOpen
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -315,6 +316,13 @@ export function Sidebar() {
       label: 'Finanzas', 
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
+    },
+    { 
+      id: 'biblioteca', 
+      icon: BookOpen, 
+      label: 'Biblioteca', 
+      defaultRoute: '/library',
+      isActive: activeSidebarSection === 'biblioteca' || location.startsWith('/library')
     },
     // Administración movida al footer
   ];

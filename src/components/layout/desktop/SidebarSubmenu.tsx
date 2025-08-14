@@ -116,8 +116,6 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard', requiresProject: true },
       { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data', requiresProject: true },
       { icon: Users, label: 'Clientes', href: '/project/clients', requiresProject: true },
-      { icon: FileImage, label: 'Documentación', href: '/project/documentation', requiresProject: true },
-      { icon: Images, label: 'Galería Multimedia', href: '/project/gallery', requiresProject: true },
     ],
 
     'diseno': [
