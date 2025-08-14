@@ -174,7 +174,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
           
           {/* Nueva Carpeta Button */}
           <Button 
-            variant="outline" 
+            variant="default" 
             size="sm" 
             onClick={openNewFolderModal}
             className="h-8 px-3 text-xs"
