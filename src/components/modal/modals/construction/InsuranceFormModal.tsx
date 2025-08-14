@@ -173,8 +173,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const editPanel = (
     <Form {...form}>
       <div className="space-y-6">
-        {/* Selección de persona */}
-        <div className="grid grid-cols-1 gap-4">
+        {/* Persona y Tipo de Seguro inline */}
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="contact_id"
@@ -267,10 +267,10 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
               <FormItem>
                 <FormLabel>Fecha de Inicio *</FormLabel>
                 <FormControl>
-                  <DatePicker
-                    date={field.value}
-                    onDateChange={field.onChange}
-                    placeholder="Seleccionar fecha..."
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -285,35 +285,16 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
               <FormItem>
                 <FormLabel>Fecha de Vencimiento *</FormLabel>
                 <FormControl>
-                  <DatePicker
-                    date={field.value}
-                    onDateChange={field.onChange}
-                    placeholder="Seleccionar fecha..."
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                    onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-
-        {/* Recordatorios */}
-        <div>
-          <FormLabel>Recordatorios de Vencimiento</FormLabel>
-          <div className="mt-2 space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {[7, 15, 30, 60, 90].map((days) => (
-                <Badge
-                  key={days}
-                  variant={reminderDays.includes(days) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => handleReminderToggle(days)}
-                >
-                  {days} días antes
-                </Badge>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Notas */}
@@ -364,6 +345,25 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                 Archivo seleccionado: {selectedFile.name}
               </p>
             )}
+          </div>
+        </div>
+
+        {/* Recordatorios - Movidos al final */}
+        <div>
+          <FormLabel>Recordatorios de Vencimiento</FormLabel>
+          <div className="mt-2 space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {[7, 15, 30, 60, 90].map((days) => (
+                <Badge
+                  key={days}
+                  variant={reminderDays.includes(days) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => handleReminderToggle(days)}
+                >
+                  {days} días antes
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       </div>
