@@ -312,6 +312,21 @@ export default function Library() {
       {/* Documentation Tab */}
       {activeTab === 'documentation' && (
         <>
+          {/* Check if there are any documents in the system */}
+          {!allDocuments || allDocuments.length === 0 ? (
+            <EmptyState
+              icon={<BookOpen />}
+              title="No hay documentos disponibles"
+              description="Sube tus primeros documentos para comenzar a organizar tu biblioteca de proyectos"
+              action={
+                <Button onClick={() => openModal('gallery', {})}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Subir Documento
+                </Button>
+              }
+            />
+          ) : (
+            <>
           {/* Desktop: Vertical Layout */}
           <div className="hidden lg:flex flex-col h-full gap-4">
             {/* Top: Document Viewer and Info */}
@@ -438,6 +453,8 @@ export default function Library() {
               onClose={() => setIsPreviewOpen(false)}
             />
           </div>
+            </>
+          )}
         </>
       )}
 
@@ -453,7 +470,7 @@ export default function Library() {
             </div>
           ) : galleryError ? (
             <EmptyState
-              icon={Images}
+              icon={<Images />}
               title="Error al cargar la galería"
               description="Hubo un problema al cargar los archivos de la galería"
               action={
@@ -464,7 +481,7 @@ export default function Library() {
             />
           ) : galleryFiles.length === 0 ? (
             <EmptyState
-              icon={Images}
+              icon={<Images />}
               title="No hay archivos en la galería"
               description="Sube imágenes y videos para comenzar a construir tu galería de proyecto"
               action={
