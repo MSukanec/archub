@@ -493,8 +493,8 @@ export function UnifiedViewer({
         style={{ paddingTop: '60px' }} // Account for floating toolbar
       >
         {state.fileType === 'pdf' && (
-          <div className="p-4 min-h-full">
-            <div className="bg-white dark:bg-gray-800 shadow-lg rounded border inline-block">
+          <div className="p-4 min-h-full flex justify-center items-center">
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
               <canvas 
                 ref={canvasRef}
                 className="block"
