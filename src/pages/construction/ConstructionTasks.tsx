@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
+import { format } from 'date-fns'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
 import { Plus, Edit, Trash2, CheckSquare, Settings } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -28,6 +30,7 @@ export default function ConstructionTasks() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("tasks")
   const [groupingType, setGroupingType] = useState('phases')
+  const [isExporting, setIsExporting] = useState(false)
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -253,6 +256,26 @@ export default function ConstructionTasks() {
       projectId,
       phases: reorderedPhases
     })
+  }
+
+  // Handle Excel export
+  const handleExportToExcel = async () => {
+    if (finalTasks.length === 0) return
+
+    setIsExporting(true)
+    try {
+      const exportColumns = createExportColumns(columns)
+      await exportToExcel({
+        filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+        sheetName: 'Tareas de Construcción',
+        columns: exportColumns,
+        data: finalTasks
+      })
+    } catch (error) {
+      console.error('Error exportando a Excel:', error)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // Definir columnas base para la tabla
@@ -547,7 +570,10 @@ export default function ConstructionTasks() {
                   else if (tab === 'Por Tareas') setGroupingType('tasks')
                   else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
                   else setGroupingType('phases-rubros')
-                }
+                },
+                showExport: true,
+                onExport: handleExportToExcel,
+                isExporting: isExporting
               }}
               renderCard={(task: any) => (
                 <ConstructionTaskCard

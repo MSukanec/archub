@@ -25,7 +25,7 @@ export default function AdminTasks() {
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
-  const [isExporting, setIsExporting] = useState(false)
+
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
 
@@ -73,25 +73,7 @@ export default function AdminTasks() {
     setTypeFilter('all')
   }
 
-  // Handle Excel export
-  const handleExportToExcel = async () => {
-    if (filteredGeneratedTasks.length === 0) return
 
-    setIsExporting(true)
-    try {
-      const exportColumns = createExportColumns(columns)
-      await exportToExcel({
-        filename: `tareas-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
-        sheetName: 'Tareas',
-        columns: exportColumns,
-        data: filteredGeneratedTasks
-      })
-    } catch (error) {
-      console.error('Error exportando a Excel:', error)
-    } finally {
-      setIsExporting(false)
-    }
-  }
 
   // Tree functionality for parameters
   const toggleParameterExpanded = (parameterId: string) => {
@@ -391,9 +373,7 @@ export default function AdminTasks() {
               ),
               showClearFilters: typeFilter !== 'all',
               onClearFilters: clearFilters,
-              showExport: true,
-              onExport: handleExportToExcel,
-              isExporting: isExporting
+
             }}
             emptyState={
               <div className="text-center py-8">
