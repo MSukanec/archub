@@ -322,11 +322,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     perfil: [
       { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
       { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
+      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/profile/projects' },
       { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
     organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
-      { icon: FolderOpen, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },

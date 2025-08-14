@@ -19,7 +19,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 // Protected Pages
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationBasicData from "@/pages/organization/OrganizationBasicData";
-import OrganizationProjects from "@/pages/organization/OrganizationProjects";
+import ProfileProjects from "@/pages/profile/ProfileProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
@@ -114,9 +114,9 @@ function Router() {
             <OrganizationBasicData />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/projects">
+        <Route path="/profile/projects">
           <ProtectedRoute>
-            <OrganizationProjects />
+            <ProfileProjects />
           </ProtectedRoute>
         </Route>
         <Route path="/organization/contacts">
@@ -153,7 +153,7 @@ function Router() {
         {/* Projects Routes */}
         <Route path="/projects">
           <ProtectedRoute>
-            <OrganizationProjects />
+            <ProfileProjects />
           </ProtectedRoute>
         </Route>
         <Route path="/project/dashboard">

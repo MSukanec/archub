@@ -41,6 +41,7 @@ Preferred communication style: Simple, everyday language.
 - **Admin Features**: Material prices management, and user/task parameter administration.
 - **Onboarding Process**: Streamlined to a single step, focusing on essential user and organization data.
 - **UI/UX Enhancements**: Redesigned projects page, improved header component with dynamic height and aesthetic refinements for a clean, professional appearance. Consistent UI architecture with modern header system.
+- **Navigation Restructure**: Moved project management from organization to profile section - "Gestión de Proyectos" now located in profile sidebar above "Gestión de Organizaciones" (August 2025).
 
 ## External Dependencies
 

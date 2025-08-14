@@ -319,7 +319,7 @@ export function Header({
                       <Button
                         size="sm"
                         onClick={() => {
-                          navigate("/organization/projects");
+                          navigate("/profile/projects");
                         }}
                         className="h-7 px-3 text-xs"
                       >

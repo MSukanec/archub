@@ -29,7 +29,7 @@ import { ActionBar } from '@/components/layout/desktop/ActionBar'
 
 
 
-export default function OrganizationProjects() {
+export default function ProfileProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
@@ -264,10 +264,10 @@ export default function OrganizationProjects() {
 
 
   const headerProps = {
-    title: "Proyectos",
+    title: "Gestión de Proyectos",
     breadcrumb: [
-      { name: "Organización", href: "/organization/dashboard" },
-      { name: "Proyectos", href: "/organization/projects" }
+      { name: "Perfil", href: "/profile/data" },
+      { name: "Gestión de Proyectos", href: "/profile/projects" }
     ],
     actionButton: {
       label: "Nuevo Proyecto",
