@@ -94,7 +94,7 @@ TABLA PERSONNEL_INSURANCES
     "data_type": "uuid"
   },
   {
-    "column_name": "contact_id",
+    "column_name": "personnnel_id",
     "data_type": "uuid"
   },
   {

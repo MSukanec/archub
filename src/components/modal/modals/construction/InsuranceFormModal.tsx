@@ -22,7 +22,7 @@ import { supabase } from '@/lib/supabase'
 import { Insurance } from '@/services/insurances'
 
 const insuranceSchema = z.object({
-  contact_id: z.string().uuid('Selecciona una persona'),
+  personnel_id: z.string().uuid('Selecciona una persona'),
   insurance_type: z.enum(['ART', 'vida', 'accidentes', 'responsabilidad_civil', 'salud', 'otro'], {
     required_error: 'Selecciona el tipo de seguro'
   }),
@@ -97,7 +97,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const form = useForm<InsuranceForm>({
     resolver: zodResolver(insuranceSchema),
     defaultValues: {
-      contact_id: modalData?.defaultContactId || modalData?.insurance?.contact_id || '',
+      personnel_id: modalData?.defaultContactId || modalData?.insurance?.personnel_id || '',
       insurance_type: modalData?.insurance?.insurance_type || 'ART',
       policy_number: modalData?.insurance?.policy_number || '',
       provider: modalData?.insurance?.provider || '',
@@ -121,7 +121,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       // Upload certificate if a new file was selected
       if (selectedFile) {
         certificateAttachmentId = await uploadCertificate.mutateAsync({
-          contactId: data.contact_id,
+          contactId: data.personnel_id,
           file: selectedFile
         })
       }
@@ -129,7 +129,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       const payload = {
         organization_id: currentUser?.organization?.id!,
         project_id: projectId,
-        contact_id: data.contact_id,
+        personnnel_id: data.personnel_id,
         insurance_type: data.insurance_type,
         policy_number: data.policy_number || null,
         provider: data.provider || null,
@@ -177,7 +177,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="contact_id"
+            name="personnel_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Persona *</FormLabel>
@@ -189,7 +189,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                   </FormControl>
                   <SelectContent>
                     {projectPersonnel.map((personnel) => (
-                      <SelectItem key={personnel.contact.id} value={personnel.contact.id}>
+                      <SelectItem key={personnel.id} value={personnel.id}>
                         {personnel.contact.first_name} {personnel.contact.last_name}
                       </SelectItem>
                     ))}
