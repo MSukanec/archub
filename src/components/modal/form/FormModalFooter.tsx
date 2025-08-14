@@ -6,6 +6,11 @@ interface FormModalFooterProps {
   onLeftClick?: () => void;
   rightLabel?: string;     // Texto del botón derecho o único
   onRightClick?: () => void;
+  // Botón del medio (para eliminar, etc.)
+  middleLabel?: string;
+  onMiddleClick?: () => void;
+  middleVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  middleDisabled?: boolean;
   // Nueva API simplificada para casos comunes
   cancelText?: string;
   submitText?: string;
@@ -20,6 +25,11 @@ export function FormModalFooter({
   onLeftClick,
   rightLabel,
   onRightClick,
+  // Botón del medio
+  middleLabel,
+  onMiddleClick,
+  middleVariant = "destructive",
+  middleDisabled = false,
   // Nueva API
   cancelText,
   submitText,
@@ -42,15 +52,26 @@ export function FormModalFooter({
               type="button"
               variant="secondary"
               onClick={finalOnLeftClick}
-              className="w-1/4"
+              className={middleLabel && onMiddleClick ? "w-1/4" : "w-1/4"}
             >
               {finalLeftLabel}
             </Button>
+            {middleLabel && onMiddleClick && (
+              <Button
+                type="button"
+                variant={middleVariant}
+                onClick={onMiddleClick}
+                className="w-2/4"
+                disabled={middleDisabled}
+              >
+                {middleLabel}
+              </Button>
+            )}
             <Button
               type="button"
               variant={submitVariant}
               onClick={finalOnRightClick}
-              className="w-3/4"
+              className={middleLabel && onMiddleClick ? "w-1/4" : "w-3/4"}
               disabled={submitDisabled}
             >
               {showLoadingSpinner ? 'Cargando...' : finalRightLabel}

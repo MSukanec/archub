@@ -118,17 +118,21 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   React.useEffect(() => {
     if (isEditing && attendance) {
       // Map the attendance data based on its structure
+      const personnelId = modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || ''
       const mappedData = {
         attendance_date: attendance.day ? new Date(attendance.day) : (attendance.created_at ? new Date(attendance.created_at) : new Date()),
-        personnel_id: modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || '',
+        personnel_id: personnelId,
         attendance_type: attendance.status || attendance.attendance_type || 'full',
         hours_worked: attendance.hours_worked || (attendance.status === 'half' ? 4 : 8),
         description: attendance.description || ''
       }
       
+      console.log('Form reset - personnelId:', personnelId)
+      console.log('Available personnel options:', projectPersonnel.map(p => ({ id: p.id, name: `${p.contact?.first_name} ${p.contact?.last_name}` })))
+      
       form.reset(mappedData)
     }
-  }, [attendance, isEditing, form, modalData])
+  }, [attendance, isEditing, form, modalData, projectPersonnel])
 
   const createAttendanceMutation = useMutation({
     mutationFn: async (data: AttendanceForm) => {
@@ -424,29 +428,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           )}
         />
 
-        {/* Botón de eliminar solo en modo edición */}
-        {isEditing && attendance && (
-          <>
-            <Separator className="my-6" />
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-destructive">Zona de Peligro</h4>
-              <p className="text-xs text-muted-foreground">
-                Eliminar esta asistencia la quitará permanentemente del sistema.
-              </p>
-              <Button 
-                type="button"
-                variant="destructive" 
-                size="sm"
-                onClick={handleDelete}
-                disabled={deleteAttendanceMutation.isPending}
-                className="w-full"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {deleteAttendanceMutation.isPending ? 'Eliminando...' : 'Eliminar Asistencia'}
-              </Button>
-            </div>
-          </>
-        )}
+
           </>
         )}
       </form>
@@ -464,8 +446,14 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
+      middleLabel={isEditing && attendance ? "Eliminar" : undefined}
+      onMiddleClick={isEditing && attendance ? handleDelete : undefined}
+      middleVariant="destructive"
+      middleDisabled={deleteAttendanceMutation.isPending}
       rightLabel={isEditing ? "Guardar Cambios" : "Registrar Asistencia"}
       onRightClick={form.handleSubmit(handleSubmit)}
+      submitDisabled={isLoading}
+      showLoadingSpinner={isLoading}
     />
   )
 
