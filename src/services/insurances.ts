@@ -94,14 +94,12 @@ export const getInsurance = async (id: string) => {
 }
 
 export const createInsurance = async (payload: Omit<Insurance, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data: { user } } = await supabase.auth.getUser()
-  
   const { data, error } = await supabase
     .from('personnel_insurances')
     .insert({
       ...payload,
-      reminder_days: payload.reminder_days || [30, 15, 7],
-      created_by: user?.id
+      reminder_days: payload.reminder_days || [30, 15, 7]
+      // No sobrescribir created_by - usar el que viene del payload
     })
     .select()
     .single()
