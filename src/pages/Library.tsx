@@ -363,17 +363,11 @@ export default function Library() {
               {/* Left: Document Explorer (2/3) */}
               <div className="w-2/3">
                 <Card className="h-full flex flex-col">
-                  <div className="px-4 py-3 border-b border-[var(--card-border)]">
-                    <div className="flex items-center gap-2">
-                      <FolderOpen className="h-4 w-4 text-[var(--accent)]" />
-                      <div className="flex-1">
-                        <h2 className="text-sm font-medium text-[var(--card-fg)]">Explorador de Documentos</h2>
-                        <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                          Navega por las carpetas y archivos de documentación
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <CardHeader 
+                    icon={FolderOpen}
+                    title="Explorador de Documentos"
+                    description="Navega por las carpetas y archivos de documentación"
+                  />
                   <CardContent className="flex-1 p-0 min-h-0">
                     <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
                   </CardContent>
@@ -383,17 +377,11 @@ export default function Library() {
               {/* Right: Recent Files History (1/3) */}
               <div className="w-1/3">
                 <Card className="h-full flex flex-col">
-                  <div className="px-4 py-3 border-b border-[var(--card-border)]">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-[var(--accent)]" />
-                      <div className="flex-1">
-                        <h2 className="text-sm font-medium text-[var(--card-fg)]">Historial</h2>
-                        <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                          Accede rápidamente a los últimos documentos visualizados
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <CardHeader 
+                    icon={Clock}
+                    title="Historial"
+                    description="Accede rápidamente a los últimos documentos visualizados"
+                  />
                   <CardContent className="flex-1 p-0">
                     <ScrollArea className="h-full">
                       <div className="p-4 space-y-1">
