@@ -94,22 +94,12 @@ export function PersonnelTable({
     {
       key: "contact" as const,
       label: "Personal",
-      className: "w-2/5"
-    },
-    {
-      key: "contact_type" as const,
-      label: "Tipo de Contacto",
-      className: "w-1/4"
+      className: "w-1/2"
     },
     {
       key: "notes" as const,
       label: "Notas",
-      className: "w-1/4"
-    },
-    {
-      key: "created_at" as const,
-      label: "Fecha de Ingreso",
-      className: "w-1/6"
+      className: "w-1/3"
     },
     {
       key: "actions" as const,
