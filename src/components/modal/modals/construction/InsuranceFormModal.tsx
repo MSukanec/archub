@@ -134,21 +134,15 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
   const onSubmit = async (data: InsuranceForm) => {
     try {
-      // Get current member ID for created_by field
-      const currentMember = organizationMembers.find(m => m.user_id === currentUser?.user?.id)
-      if (!currentMember) {
-        throw new Error('No se pudo encontrar el member de la organización')
-      }
-
       let certificateAttachmentId: string | null = modalData?.insurance?.certificate_attachment_id || null
 
-      // Upload certificate if a new file was selected
-      if (selectedFile) {
-        certificateAttachmentId = await uploadCertificate.mutateAsync({
-          contactId: data.personnel_id,
-          file: selectedFile
-        })
-      }
+      // Upload certificate if a new file was selected (skip for now to debug created_by)
+      // if (selectedFile) {
+      //   certificateAttachmentId = await uploadCertificate.mutateAsync({
+      //     contactId: data.personnel_id,
+      //     file: selectedFile
+      //   })
+      // }
 
       const payload = {
         organization_id: currentUser?.organization?.id!,
@@ -161,8 +155,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         coverage_end: data.coverage_end.toISOString().split('T')[0],
         reminder_days: reminderDays,
         certificate_attachment_id: certificateAttachmentId,
-        notes: data.notes || null,
-        created_by: currentMember.id
+        notes: data.notes || null
+        // Skip created_by field for now - let the database handle it
       }
 
       if (isEdit) {
