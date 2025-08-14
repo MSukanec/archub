@@ -661,7 +661,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           />
         ) : (
         projectPersonnel?.map((personnel: any) => {
-          const contact = personnel.contacts;
+          const contact = personnel.contact;
           const isPresent = attendees.some(a => a.personnel_id === personnel.id);
           const attendeeData = attendees.find(a => a.personnel_id === personnel.id);
           
