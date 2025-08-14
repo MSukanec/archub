@@ -117,18 +117,26 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   // Reset form when attendance data changes (for editing)
   React.useEffect(() => {
     if (isEditing && attendance) {
-      // Map the attendance data based on its structure
-      const personnelId = modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || ''
+      // The workerId from the gradebook is actually a contact_id, we need to find the corresponding project_personnel id
+      const workerContactId = modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || ''
+      
+      // Find the project_personnel record that matches this contact_id
+      const matchingPersonnel = projectPersonnel.find(p => p.contact?.id === workerContactId)
+      const actualPersonnelId = matchingPersonnel?.id || ''
+      
+      // Fix date handling - ensure we use the correct date
+      const attendanceDate = attendance.day ? new Date(attendance.day + 'T00:00:00') : 
+                             (attendance.created_at ? new Date(attendance.created_at) : new Date())
+      
       const mappedData = {
-        attendance_date: attendance.day ? new Date(attendance.day) : (attendance.created_at ? new Date(attendance.created_at) : new Date()),
-        personnel_id: personnelId,
+        attendance_date: attendanceDate,
+        personnel_id: actualPersonnelId, // Use the correct project_personnel ID
         attendance_type: attendance.status || attendance.attendance_type || 'full',
         hours_worked: attendance.hours_worked || (attendance.status === 'half' ? 4 : 8),
         description: attendance.description || ''
       }
       
-      console.log('Form reset - personnelId:', personnelId)
-      console.log('Available personnel options:', projectPersonnel.map(p => ({ id: p.id, name: `${p.contact?.first_name} ${p.contact?.last_name}` })))
+
       
       form.reset(mappedData)
     }
@@ -180,6 +188,19 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     mutationFn: async (data: AttendanceForm) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
+      // Ensure personnel_id is valid
+      if (!data.personnel_id || data.personnel_id === 'undefined') {
+        throw new Error('ID de personal requerido')
+      }
+      
+      // Use the correct record identification - for gradebook we need to find by date and personnel
+      const workerContactId = modalData?.editingData?.personnelId || attendance.workerId
+      const attendanceDate = attendance.day || attendance.created_at?.split('T')[0]
+      
+      if (!workerContactId || !attendanceDate) {
+        throw new Error('No se puede identificar la asistencia a actualizar')
+      }
+      
       const { error } = await supabase
         .from('attendees')
         .update({
@@ -189,7 +210,9 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
           description: data.description,
           updated_at: new Date().toISOString()
         })
-        .eq('id', attendance.id)
+        .eq('personnel_id', workerContactId)
+        .gte('created_at', attendanceDate)
+        .lt('created_at', new Date(new Date(attendanceDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0])
 
       if (error) throw error
     },
