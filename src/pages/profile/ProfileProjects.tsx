@@ -461,85 +461,93 @@ export default function ProfileProjects() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Gestión de Proyectos</h1>
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-4">
-            <TabsList>
-              <TabsTrigger value="proyectos">Proyectos</TabsTrigger>
-              <TabsTrigger value="datos-basicos">Datos Básicos</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <h1 className="text-2xl font-bold">Gestión de Proyectos</h1>
         <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Nuevo Proyecto
         </Button>
       </div>
 
-      <TabsContent value="proyectos" className="space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Buscar proyectos..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <select
-            value={filterByStatus}
-            onChange={(e) => setFilterByStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="active">Activos</option>
-            <option value="planning">En planificación</option>
-            <option value="completed">Completados</option>
-          </select>
-        </div>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="proyectos">Proyectos</TabsTrigger>
+          <TabsTrigger value="datos-basicos">Datos Básicos</TabsTrigger>
+        </TabsList>
 
-        {isLoadingProjects ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                </CardContent>
-              </Card>
-            ))}
+        <TabsContent value="proyectos" className="space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Buscar proyectos..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <select
+              value={filterByStatus}
+              onChange={(e) => setFilterByStatus(e.target.value)}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+            >
+              <option value="all">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="planning">En planificación</option>
+              <option value="completed">Completados</option>
+            </select>
           </div>
-        ) : filteredProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map(renderProjectCard)}
+
+          {isLoadingProjects ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-2"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map(renderProjectCard)}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-8">
+                <div className="text-center">
+                  <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No se encontraron proyectos
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    {searchValue || filterByStatus !== 'all' 
+                      ? 'No hay proyectos que coincidan con los filtros seleccionados.'
+                      : 'Aún no tienes proyectos creados. Crea tu primer proyecto para comenzar.'
+                    }
+                  </p>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Crear Proyecto
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="datos-basicos" className="space-y-6">
+          <div className="text-center py-8">
+            <h3 className="text-lg font-semibold mb-2">Selecciona un proyecto</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Haz clic en "Editar" en cualquier proyecto para ver y editar sus datos básicos.
+            </p>
           </div>
-        ) : (
-          <Card>
-            <CardContent className="py-8">
-              <div className="text-center">
-                <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No se encontraron proyectos
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  {searchValue || filterByStatus !== 'all' 
-                    ? 'No hay proyectos que coincidan con los filtros seleccionados.'
-                    : 'Aún no tienes proyectos creados. Crea tu primer proyecto para comenzar.'
-                  }
-                </p>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Crear Proyecto
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </TabsContent>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
