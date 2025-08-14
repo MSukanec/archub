@@ -63,26 +63,27 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "contact",
           label: "Persona",
-          width: "25%",
+          width: "14.28%", // 100% / 7 columnas = 14.28%
           render: (record: InsuranceStatusRow) => (
-            <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-8 w-8 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 flex-shrink-0">
                 <AvatarFallback className="text-xs">
-                  {record.contact?.first_name?.charAt(0) || ''}{record.contact?.last_name?.charAt(0) || ''}
+                  {record.contact?.first_name?.charAt(0) || 'N'}{record.contact?.last_name?.charAt(0) || 'A'}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-sm truncate">
-                  {record.contact?.first_name || ''} {record.contact?.last_name || ''}
-                </p>
-              </div>
+              <span className="text-sm font-medium truncate">
+                {record.contact?.first_name && record.contact?.last_name 
+                  ? `${record.contact.first_name} ${record.contact.last_name}`
+                  : 'Sin nombre'
+                }
+              </span>
             </div>
           )
         },
         {
           key: "insurance_type",
           label: "Tipo",
-          width: "12%",
+          width: "14.28%",
           render: (record: InsuranceStatusRow) => (
             <span className="text-sm">
               {INSURANCE_TYPE_LABELS[record.insurance_type]}
@@ -92,7 +93,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "policy_number",
           label: "Nº de póliza",
-          width: "13%",
+          width: "14.28%",
           render: (record: InsuranceStatusRow) => (
             <span className="text-sm text-muted-foreground">
               {record.policy_number || 'Sin número'}
@@ -102,7 +103,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "provider",
           label: "Aseguradora",
-          width: "15%",
+          width: "14.28%",
           render: (record: InsuranceStatusRow) => (
             <span className="text-sm">
               {record.provider || 'No especificada'}
@@ -112,7 +113,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "coverage",
           label: "Vigencia",
-          width: "15%",
+          width: "14.28%",
           render: (record: InsuranceStatusRow) => (
             <div className="text-sm">
               <div>
@@ -127,23 +128,13 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "status",
           label: "Estado",
-          width: "10%",
+          width: "14.28%",
           render: (record: InsuranceStatusRow) => getStatusBadge(record.status, record.days_to_expiry)
         },
         {
-          key: "certificate",
-          label: "Certificado",
-          width: "8%",
-          render: (record: InsuranceStatusRow) => record.certificate_attachment_id ? (
-            <AttachmentBadge attachmentId={record.certificate_attachment_id} />
-          ) : (
-            <span className="text-xs text-muted-foreground">-</span>
-          )
-        },
-        {
           key: "actions",
-          label: "",
-          width: "2%",
+          label: "Acciones",
+          width: "14.36%", // Resto para llegar a 100%
           sortable: false,
           render: (record: InsuranceStatusRow) => (
             <InsuranceActions insurance={record} />
