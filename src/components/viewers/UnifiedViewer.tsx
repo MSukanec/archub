@@ -52,6 +52,7 @@ type ViewerState = {
   
   // Common
   scale: number;
+  baseScale: number; // Base scale for fit-to-width calculation
   blob: Blob | null;
 };
 
@@ -79,6 +80,7 @@ export function UnifiedViewer({
     naturalHeight: 0,
     rotation: 0,
     scale: 1.0,
+    baseScale: 1.0,
     blob: null
   });
 
@@ -140,11 +142,19 @@ export function UnifiedViewer({
       const arrayBuffer = await blob.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
+      // Calculate base scale for fit-to-width
+      const firstPage = await pdfDoc.getPage(1);
+      const viewport = firstPage.getViewport({ scale: 1 });
+      const containerWidth = 560; // Available width
+      const baseScale = containerWidth / viewport.width;
+      
       setState(prev => ({
         ...prev,
         pdfDoc,
         numPages: pdfDoc.numPages,
-        page: 1
+        page: 1,
+        baseScale: baseScale,
+        scale: 1.0 // This represents the relative zoom from the fit-to-width base
       }));
     } catch (error) {
       console.error('Error loading PDF:', error);
@@ -195,11 +205,8 @@ export function UnifiedViewer({
       
       if (!context) return;
 
-      // Calculate scale to fit width
-      const containerWidth = 560; // Available width
-      const viewport = page.getViewport({ scale: 1 });
-      const baseScale = containerWidth / viewport.width;
-      const finalScale = baseScale * state.scale;
+      // Use stored base scale and current zoom level
+      const finalScale = state.baseScale * state.scale;
       
       const scaledViewport = page.getViewport({ scale: finalScale });
       
@@ -393,7 +400,7 @@ export function UnifiedViewer({
             onClick={zoom100}
             title="Zoom 100%"
           >
-            {Math.round(state.scale * 100)}%
+            {Math.round(state.scale * state.baseScale * 100)}%
           </Badge>
           
           <Button
