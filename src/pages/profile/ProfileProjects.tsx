@@ -349,18 +349,15 @@ export default function ProfileProjects() {
       {
         id: 'projects',
         label: 'Proyectos',
-        icon: Folder,
-        isActive: activeTab === 'projects',
-        onClick: () => setActiveTab('projects')
+        isActive: activeTab === 'projects'
       },
       {
         id: 'basic-data',
         label: 'Datos Básicos',
-        icon: Settings,
-        isActive: activeTab === 'basic-data',
-        onClick: () => setActiveTab('basic-data')
+        isActive: activeTab === 'basic-data'
       }
     ],
+    onTabChange: (tabId: string) => setActiveTab(tabId),
     actionButton: activeTab === 'projects' ? {
       label: "Nuevo Proyecto",
       icon: Plus,
