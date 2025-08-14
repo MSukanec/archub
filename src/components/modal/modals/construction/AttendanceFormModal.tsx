@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { addDays } from 'date-fns'
-import { Calendar, Users } from 'lucide-react'
+import { Calendar, Users, Trash2 } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -13,6 +13,8 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -68,7 +70,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
         .select(`
           id,
           contact_id,
-          contacts (
+          contact:contacts (
             id,
             first_name,
             last_name
@@ -187,6 +189,44 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     }
   })
 
+  // Delete attendance mutation
+  const deleteAttendanceMutation = useMutation({
+    mutationFn: async () => {
+      if (!supabase || !attendance?.id) throw new Error('No se puede eliminar la asistencia')
+      
+      const { error } = await supabase
+        .from('attendees')
+        .delete()
+        .eq('id', attendance.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendances'] })
+      queryClient.invalidateQueries({ queryKey: ['project-attendances'] })
+      queryClient.invalidateQueries({ queryKey: ['project-personnel-attendances'] })
+      toast({
+        title: 'Asistencia eliminada',
+        description: 'La asistencia se ha eliminado correctamente'
+      })
+      onClose()
+    },
+    onError: (error) => {
+      console.error('Error deleting attendance:', error)
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la asistencia',
+        variant: 'destructive'
+      })
+    }
+  })
+
+  const handleDelete = () => {
+    if (confirm('¿Estás seguro de que quieres eliminar esta asistencia? Esta acción no se puede deshacer.')) {
+      deleteAttendanceMutation.mutate()
+    }
+  }
+
   const handleSubmit = (data: AttendanceForm) => {
     if (isEditing) {
       updateAttendanceMutation.mutate(data)
@@ -269,7 +309,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
                     <SelectContent>
                       {projectPersonnel.map((personnel) => (
                         <SelectItem key={personnel.id} value={personnel.id}>
-                          {personnel.contacts?.first_name || 'Sin nombre'} {personnel.contacts?.last_name || ''}
+                          {personnel.contact?.first_name || 'Sin nombre'} {personnel.contact?.last_name || ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -356,6 +396,30 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
             </FormItem>
           )}
         />
+
+        {/* Botón de eliminar solo en modo edición */}
+        {isEditing && attendance?.id && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-destructive">Zona de Peligro</h4>
+              <p className="text-xs text-muted-foreground">
+                Eliminar esta asistencia la quitará permanentemente del sistema.
+              </p>
+              <Button 
+                type="button"
+                variant="destructive" 
+                size="sm"
+                onClick={handleDelete}
+                disabled={deleteAttendanceMutation.isPending}
+                className="w-full"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {deleteAttendanceMutation.isPending ? 'Eliminando...' : 'Eliminar Asistencia'}
+              </Button>
+            </div>
+          </>
+        )}
           </>
         )}
       </form>
