@@ -12,9 +12,8 @@ import { format } from 'date-fns'
 import { Table } from "@/components/ui-custom/Table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, UserX } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -278,30 +277,28 @@ export default function ConstructionPersonnel() {
                   },
                   {
                     key: "actions",
-                    label: "",
+                    label: "Acciones",
                     width: "17%",
                     sortable: false,
                     render: (record: any) => (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => console.log('Edit:', record)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar notas
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => console.log('Delete:', record)}
-                            className="text-red-600 dark:text-red-400"
-                          >
-                            <UserX className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => console.log('Edit:', record)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => console.log('Delete:', record)}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )
                   }
                 ]}
