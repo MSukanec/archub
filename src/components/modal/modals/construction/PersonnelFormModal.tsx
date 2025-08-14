@@ -83,7 +83,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
         .order('first_name');
 
       if (error) throw error;
-      return (data || []) as Contact[];
+      return data || [];
     },
     enabled: !!userData?.organization?.id
   });
@@ -245,7 +245,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       onLeftClick={onClose}
       rightLabel="Agregar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
-      loading={createPersonnelMutation.isPending}
+      isLoading={createPersonnelMutation.isPending}
       rightDisabled={selectedContacts.length === 0}
     />
   );
