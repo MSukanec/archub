@@ -24,7 +24,7 @@ import OrganizationContacts from "@/pages/organization/OrganizationContacts";
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 import ProjectDashboard from "@/pages/project/ProjectDashboard";
-
+import ProjectBasicData from "@/pages/project/ProjectBasicData";
 import ProjectClients from "@/pages/project/ProjectClients";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
 import FinancesMovements from "@/pages/finances/FinancesMovements";
@@ -161,7 +161,11 @@ function Router() {
             <ProjectDashboard />
           </ProtectedRoute>
         </Route>
-
+        <Route path="/project/basic-data">
+          <ProtectedRoute>
+            <ProjectBasicData />
+          </ProtectedRoute>
+        </Route>
         <Route path="/project/clients">
           <ProtectedRoute>
             <ProjectClients />
