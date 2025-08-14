@@ -119,10 +119,14 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
         .from('attendees')
         .select(`
           *,
-          contact:contacts(
+          personnel:project_personnel(
             id,
-            first_name,
-            last_name
+            notes,
+            contact:contacts(
+              id,
+              first_name,
+              last_name
+            )
           )
         `)
         .in('site_log_id', logIds);

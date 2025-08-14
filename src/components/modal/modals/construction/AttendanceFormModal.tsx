@@ -26,7 +26,7 @@ const attendanceSchema = z.object({
   attendance_date: z.date({
     required_error: 'La fecha es requerida'
   }),
-  contact_id: z.string().uuid('Selecciona un contacto'),
+  personnel_id: z.string().uuid('Selecciona personal'),
   attendance_type: z.string().min(1, 'Selecciona el tipo de horario'),
   hours_worked: z.number().min(0.5, 'Las horas deben ser al menos 0.5').max(24, 'Las horas no pueden ser más de 24'),
   description: z.string().optional()
@@ -40,7 +40,7 @@ interface AttendanceFormModalProps {
     mode?: 'create' | 'edit'
     isEditing?: boolean
     editingData?: {
-      contactId: string
+      personnelId: string
       contactName: string
       attendanceDate: Date
       existingRecord?: any
@@ -78,7 +78,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
       attendance_date: modalData?.editingData?.attendanceDate || (isEditing ? new Date(attendance?.created_at) : new Date()),
-      contact_id: modalData?.editingData?.contactId || attendance?.contact_id || '',
+      personnel_id: modalData?.editingData?.personnelId || attendance?.personnel_id || '',
       attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
       hours_worked: attendance?.hours_worked || 8,
       description: attendance?.description || ''
@@ -97,7 +97,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
         .from('attendees')
         .insert({
           site_log_id: null, // Como especificaste, esto es null
-          contact_id: data.contact_id,
+          personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
@@ -134,7 +134,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
       const { error } = await supabase
         .from('attendees')
         .update({
-          contact_id: data.contact_id,
+          personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,

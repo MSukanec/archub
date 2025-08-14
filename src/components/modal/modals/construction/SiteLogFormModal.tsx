@@ -159,7 +159,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         // Insertar nuevos attendees en tabla ATTENDEES
         const attendeesToInsert = formData.attendees.map((attendee: any) => ({
           site_log_id: savedSiteLog.id,
-          contact_id: attendee.contact_id,
+          personnel_id: attendee.personnel_id,
           attendance_type: attendee.attendance_type || 'full',
           hours_worked: attendee.hours_worked || 8,
           description: attendee.description || attendee.notes || '',

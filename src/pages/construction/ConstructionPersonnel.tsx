@@ -24,20 +24,24 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
 
 
 
-      // Query the new attendees table structure
+      // Query the attendees table with personnel relationship
       const { data: attendanceData, error } = await supabase
         .from('attendees')
         .select(`
           *,
-          contact:contacts(
+          personnel:project_personnel(
             id,
-            first_name,
-            last_name,
-            organization_id,
-            contact_type_links(
-              contact_type:contact_types(
-                id,
-                name
+            notes,
+            contact:contacts(
+              id,
+              first_name,
+              last_name,
+              organization_id,
+              contact_type_links(
+                contact_type:contact_types(
+                  id,
+                  name
+                )
               )
             )
           )
@@ -51,7 +55,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
 
       // Filter to ensure contacts belong to the same organization
       const filteredData = (attendanceData || []).filter(item => 
-        item.contact?.organization_id === organizationId
+        item.personnel?.contact?.organization_id === organizationId
       )
 
 
@@ -68,14 +72,15 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
 function transformAttendanceData(attendanceData: any[]) {
   if (!attendanceData || attendanceData.length === 0) return { workers: [], attendance: [] }
 
-  // Get unique workers (no filtering here, filtering will be done later)
+  // Get unique workers from personnel data
   const workersMap = new Map()
   attendanceData.forEach(attendance => {
-    if (attendance.contact) {
-      const workerId = attendance.contact.id
-      const workerName = `${attendance.contact.first_name || ''} ${attendance.contact.last_name || ''}`.trim()
-      const contactTypeName = attendance.contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
-      const contactTypeId = attendance.contact.contact_type_links?.[0]?.contact_type?.id
+    if (attendance.personnel?.contact) {
+      const contact = attendance.personnel.contact
+      const workerId = contact.id
+      const workerName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+      const contactTypeName = contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
+      const contactTypeId = contact.contact_type_links?.[0]?.contact_type?.id
       
       workersMap.set(workerId, {
         id: workerId,
@@ -92,8 +97,8 @@ function transformAttendanceData(attendanceData: any[]) {
   const attendance: any[] = []
 
   attendanceData.forEach(attendanceRecord => {
-    if (attendanceRecord.contact) {
-      const workerId = attendanceRecord.contact.id
+    if (attendanceRecord.personnel?.contact) {
+      const workerId = attendanceRecord.personnel.contact.id
       const logDate = new Date(attendanceRecord.created_at)
       const day = format(logDate, 'yyyy-MM-dd') // Use full date format for matching
       
@@ -251,11 +256,11 @@ export default function ConstructionPersonnel() {
               </div>
             ) : personnelData.length === 0 ? (
               <EmptyState
-                icon={Users}
+                icon={<Users className="h-8 w-8" />}
                 title="Sin personal asignado"
                 description="No hay personal asignado a este proyecto"
                 actionLabel="Agregar Personal"
-                onAction={() => openModal('personnel')}
+                onAction={() => openModal('construction-personnel')}
               />
             ) : (
               <Table
