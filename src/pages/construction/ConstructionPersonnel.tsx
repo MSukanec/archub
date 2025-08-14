@@ -259,8 +259,12 @@ export default function ConstructionPersonnel() {
                 icon={<Users className="h-8 w-8" />}
                 title="Sin personal asignado"
                 description="No hay personal asignado a este proyecto"
-                actionLabel="Agregar Personal"
-                onAction={() => openModal('personnel', {})}
+                action={
+                  <Button onClick={() => openModal('personnel', {})}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Personal
+                  </Button>
+                }
               />
             ) : (
               <Table
@@ -351,6 +355,12 @@ export default function ConstructionPersonnel() {
                 icon={<UserCheck className="h-12 w-12" />}
                 title="Sin registros de asistencia"
                 description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+                action={
+                  <Button onClick={() => openModal('attendance', {})}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Registrar Asistencia
+                  </Button>
+                }
               />
             )}
           </>
