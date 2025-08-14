@@ -512,8 +512,10 @@ export default function OrganizationContacts() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-1 overflow-hidden">
-          {/* Lista de contactos agrupada por letra */}
-          <div className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+          <Card className="h-full">
+            <CardContent className="p-4 h-full overflow-hidden">
+              {/* Lista de contactos agrupada por letra */}
+              <div className="h-full overflow-y-auto scrollbar-hide">
             {/* Contenido para la tab de Personas */}
             {activeTab === "personas" && (
               <>
@@ -576,7 +578,9 @@ export default function OrganizationContacts() {
                 </div>
               </CustomRestricted>
             )}
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Columna derecha - Detalles del contacto - Solo visible en desktop */}
