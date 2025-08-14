@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ChevronDown, Folder } from "lucide-react";
+import { ChevronDown, Folder, Search, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,6 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
@@ -55,6 +61,15 @@ interface HeaderProps {
   // Props para sistema de tabs
   tabs?: Tab[];
   onTabChange?: (tabId: string) => void;
+  // Botones de acción adicionales (búsqueda, filtro, limpiar filtros)
+  showHeaderSearch?: boolean;
+  headerSearchValue?: string;
+  onHeaderSearchChange?: (value: string) => void;
+  showHeaderFilter?: boolean;
+  renderHeaderFilterContent?: () => React.ReactNode;
+  isHeaderFilterActive?: boolean;
+  showHeaderClearFilters?: boolean;
+  onHeaderClearFilters?: () => void;
   // Botón de acción principal
   actionButton?: {
     label: string;
@@ -83,10 +98,26 @@ export function Header({
   actions = [],
   tabs = [],
   onTabChange,
+  showHeaderSearch = false,
+  headerSearchValue = "",
+  onHeaderSearchChange,
+  showHeaderFilter = false,
+  renderHeaderFilterContent,
+  isHeaderFilterActive = false,
+  showHeaderClearFilters = false,
+  onHeaderClearFilters,
   actionButton,
 }: HeaderProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchInputValue, setSearchInputValue] = useState(headerSearchValue);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const { openModal } = useGlobalModalStore();
+
+  const handleHeaderSearchChange = (value: string) => {
+    setSearchInputValue(value);
+    onHeaderSearchChange?.(value);
+  };
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -306,8 +337,103 @@ export function Header({
       {/* Segunda fila: Solo botones de acción */}
       <div className="w-full h-10 px-12 flex items-center justify-end">
 
-        {/* Right: Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Right: Header Action Buttons + Main Action Buttons */}
+        <div className="flex items-center gap-1">
+          {/* Header Search Button (expandible) */}
+          {showHeaderSearch && (
+            <div 
+              className="relative flex items-center"
+              onMouseLeave={() => {
+                if (isSearchExpanded && !searchFocused) {
+                  setIsSearchExpanded(false);
+                  setSearchFocused(false);
+                }
+              }}
+            >
+              <div className={`
+                absolute right-0 transition-all duration-300 overflow-hidden
+                ${isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"}
+              `}>
+                <div className={`
+                  relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all
+                  ${isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"}
+                `}>
+                  <Input
+                    placeholder="Buscar..."
+                    value={searchInputValue}
+                    onChange={(e) => handleHeaderSearchChange(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => {
+                      setSearchFocused(false);
+                      setTimeout(() => {
+                        if (!searchFocused) {
+                          setIsSearchExpanded(false);
+                        }
+                      }, 150);
+                    }}
+                    className={`
+                      flex-1 h-full text-xs border-0 bg-transparent font-normal
+                      placeholder:text-[var(--muted-foreground)]
+                      focus:ring-0 focus:outline-none
+                      ${isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"}
+                    `}
+                    autoFocus={isSearchExpanded}
+                  />
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 h-8 w-8 p-0 hover:bg-transparent"
+                    onClick={() => {
+                      setIsSearchExpanded(!isSearchExpanded);
+                      if (!isSearchExpanded) {
+                        setTimeout(() => setSearchFocused(true), 100);
+                      }
+                    }}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Header Filter Button */}
+          {showHeaderFilter && renderHeaderFilterContent && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 ${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                {renderHeaderFilterContent()}
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {/* Header Clear Filters Button */}
+          {showHeaderClearFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={onHeaderClearFilters}
+              title="Limpiar filtros"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+
+          {/* Separator if there are header actions and main action buttons */}
+          {(showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton) && (
+            <div className="w-px h-6 bg-[var(--card-border)] mx-2" />
+          )}
+
           {/* Additional Button (appears first/left) */}
           {actionButton?.additionalButton && (
             <Button
