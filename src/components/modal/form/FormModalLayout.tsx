@@ -103,6 +103,12 @@ export function FormModalLayout({
   return (
     <div 
       className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+      onClick={(e) => {
+        // Close modal if clicking on backdrop
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
     >
       <div
         data-modal-content

@@ -191,19 +191,13 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
                           isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                         }`}
                         onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
                           handleContactToggle(contact.id);
                         }}
                       >
                         <div className="flex items-center gap-3">
                           <Checkbox
                             checked={isSelected}
-                            onCheckedChange={(checked) => {
-                              if (checked !== isSelected) {
-                                handleContactToggle(contact.id);
-                              }
-                            }}
+                            onCheckedChange={() => handleContactToggle(contact.id)}
                           />
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">
