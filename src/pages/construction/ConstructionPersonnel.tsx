@@ -9,7 +9,12 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Users, Plus, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
-import { PersonnelTable } from '@/components/ui-custom/PersonnelTable'
+import { Table } from "@/components/ui-custom/Table";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Edit, UserX } from "lucide-react";
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -130,13 +135,10 @@ export default function ConstructionPersonnel() {
           id,
           notes,
           created_at,
-          contact:contacts!inner(
+          contact:contacts(
             id,
             first_name,
-            last_name,
-            contact_type_links!inner(
-              contact_type:contact_types!inner(name)
-            )
+            last_name
           )
         `)
         .eq('project_id', userData.preferences.last_project_id)
@@ -222,18 +224,100 @@ export default function ConstructionPersonnel() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {activeTab === 'active' && (
-          <PersonnelTable 
-            personnel={personnelData}
-            isLoading={isPersonnelLoading}
-            onEdit={(record) => {
-              // TODO: Implementar edición de notas
-              console.log('Edit personnel:', record);
-            }}
-            onDeactivate={(record) => {
-              // TODO: Implementar eliminación
-              console.log('Delete personnel:', record);
-            }}
-          />
+          <>
+            {isPersonnelLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-muted-foreground">Cargando personal...</div>
+              </div>
+            ) : personnelData.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title="Sin personal asignado"
+                description="No hay personal asignado a este proyecto"
+                actionLabel="Agregar Personal"
+                onAction={() => openModal('personnel')}
+              />
+            ) : (
+              <Table
+                data={personnelData}
+                columns={[
+                  {
+                    key: "contact",
+                    label: "Personal",
+                    className: "w-1/2"
+                  },
+                  {
+                    key: "notes",
+                    label: "Notas",
+                    className: "w-1/3"
+                  },
+                  {
+                    key: "actions",
+                    label: "",
+                    className: "w-16"
+                  }
+                ]}
+                formatCellData={(record, key) => {
+                  switch (key) {
+                    case "contact":
+                      const contact = record.contact;
+                      if (!contact) {
+                        return <span className="text-muted-foreground">Sin datos</span>;
+                      }
+                      return (
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs">
+                              {contact.first_name?.charAt(0) || ''}{contact.last_name?.charAt(0) || ''}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">
+                              {contact.first_name || ''} {contact.last_name || ''}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    
+                    case "notes":
+                      return (
+                        <span className="text-sm text-muted-foreground">
+                          {record.notes || 'Sin notas'}
+                        </span>
+                      );
+
+                    case "actions":
+                      return (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => console.log('Edit:', record)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar notas
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => console.log('Delete:', record)}
+                              className="text-red-600 dark:text-red-400"
+                            >
+                              <UserX className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
+
+                    default:
+                      return <span>{String(record[key] || '')}</span>;
+                  }
+                }}
+                keyExtractor={(record) => record.id}
+              />
+            )}
+          </>
         )}
 
         {activeTab === 'attendance' && (
