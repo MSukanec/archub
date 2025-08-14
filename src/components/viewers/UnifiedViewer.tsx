@@ -52,7 +52,6 @@ type ViewerState = {
   
   // Common
   scale: number;
-  baseScale: number; // Base scale for fit-to-width calculation
   blob: Blob | null;
 };
 
@@ -79,8 +78,7 @@ export function UnifiedViewer({
     naturalWidth: 0,
     naturalHeight: 0,
     rotation: 0,
-    scale: 1.0,
-    baseScale: 1.0,
+    scale: 0.6, // Start at 60% for better initial view
     blob: null
   });
 
@@ -205,10 +203,8 @@ export function UnifiedViewer({
       
       if (!context) return;
 
-      // Use stored base scale and current zoom level
-      const finalScale = state.baseScale * state.scale;
-      
-      const scaledViewport = page.getViewport({ scale: finalScale });
+      // Use the user's scale directly (1.0 = 100% natural size)
+      const scaledViewport = page.getViewport({ scale: state.scale });
       
       canvas.width = scaledViewport.width;
       canvas.height = scaledViewport.height;
@@ -224,7 +220,7 @@ export function UnifiedViewer({
     } catch (error) {
       console.error('Error rendering PDF page:', error);
     }
-  }, [state.pdfDoc, state.page, state.scale, state.loading]);
+  }, [state.pdfDoc, state.page, state.scale]);
 
   // Navigation functions
   const nextPage = () => {
@@ -240,8 +236,8 @@ export function UnifiedViewer({
   };
 
   // Zoom functions - increment by 10% each time
-  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.1, 3.0) }));
-  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.1, 0.1) }));
+  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.1, 5.0) }));
+  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.1, 0.2) }));
   const zoom100 = () => setState(prev => ({ ...prev, scale: 1.0 }));
 
   // Image rotation
