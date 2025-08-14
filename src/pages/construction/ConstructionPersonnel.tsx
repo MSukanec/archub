@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Users, Plus, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PersonnelTable } from '@/components/ui-custom/PersonnelTable'
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -117,6 +117,38 @@ export default function ConstructionPersonnel() {
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
+
+  // Fetch project personnel
+  const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
+    queryKey: ['project-personnel', userData?.preferences?.last_project_id],
+    queryFn: async () => {
+      if (!userData?.preferences?.last_project_id) return []
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          role,
+          is_active,
+          created_at,
+          contact:contacts(
+            id,
+            first_name,
+            last_name,
+            contact_type_links(
+              contact_type:contact_types(name)
+            )
+          )
+        `)
+        .eq('project_id', userData.preferences.last_project_id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data
+    },
+    enabled: !!userData?.preferences?.last_project_id
+  })
   const { setSidebarContext } = useNavigationStore()
   const [activeTab, setActiveTab] = useState('active')
 
@@ -171,6 +203,10 @@ export default function ConstructionPersonnel() {
       label: 'Registrar Asistencia',
       icon: Plus,
       onClick: () => openModal('attendance', {})
+    } : activeTab === 'active' ? {
+      label: 'Agregar Personal',
+      icon: Plus,
+      onClick: () => openModal('personnel', {})
     } : undefined
   }
 
@@ -188,10 +224,17 @@ export default function ConstructionPersonnel() {
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {activeTab === 'active' && (
-          <EmptyState
-            icon={<Users className="h-12 w-12" />}
-            title="Personal Activo"
-            description="Esta sección mostrará el personal actualmente asignado al proyecto."
+          <PersonnelTable 
+            personnel={personnelData}
+            isLoading={isPersonnelLoading}
+            onEdit={(record) => {
+              // TODO: Implementar edición de rol
+              console.log('Edit personnel:', record);
+            }}
+            onDeactivate={(record) => {
+              // TODO: Implementar desactivación
+              console.log('Deactivate personnel:', record);
+            }}
           />
         )}
 

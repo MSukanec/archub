@@ -44,6 +44,7 @@ import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizat
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
+import { PersonnelFormModal } from '../modals/construction/PersonnelFormModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
@@ -157,6 +158,8 @@ export function ModalFactory() {
       return <SiteLogFormModal data={data} />;
     case 'attendance':
       return <AttendanceFormModal modalData={data} onClose={closeModal} />;
+    case 'personnel':
+      return <PersonnelFormModal modalData={data} onClose={closeModal} />;
     case 'parameter-visibility-config':
       return <ParameterVisibilityConfigModal />;
     case 'add-parameter-to-canvas':
