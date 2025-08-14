@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ChevronDown, Folder } from "lucide-react";
+import { ChevronDown, Folder, Search, Filter, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -67,6 +68,15 @@ interface HeaderProps {
       variant?: "ghost" | "default" | "secondary";
     };
   };
+  // Botones de herramientas ghost
+  showSearch?: boolean;
+  showFilters?: boolean;
+  showClearFilters?: boolean;
+  onSearch?: (value: string) => void;
+  onFiltersOpen?: () => void;
+  onClearFilters?: () => void;
+  filtersContent?: React.ReactNode;
+  activeFiltersCount?: number;
 }
 
 export function Header({
@@ -84,8 +94,18 @@ export function Header({
   tabs = [],
   onTabChange,
   actionButton,
+  showSearch: showSearchButton = false,
+  showFilters: showFiltersButton = false,
+  showClearFilters = false,
+  onSearch,
+  onFiltersOpen,
+  onClearFilters: onClearFiltersAction,
+  filtersContent,
+  activeFiltersCount = 0,
 }: HeaderProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const { openModal } = useGlobalModalStore();
 
   const [location, navigate] = useLocation();
@@ -164,9 +184,9 @@ export function Header({
     isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
   
-  // Solo una fila con altura fija coincidiendo con botones del sidebar
+  // Dos filas con altura fija
   const getHeaderHeight = () => {
-    return "h-12"; // Altura que coincide con los botones del sidebar
+    return "h-24"; // Dos filas de 12 cada una
   };
 
   return (
@@ -178,60 +198,14 @@ export function Header({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Fila única: Título de página + Tabs + Botones de acción + Selector de proyecto */}
-      <div className="w-full h-12 px-12 flex items-center justify-between">
-        {/* Left: Page Title + Tabs */}
-        <div className="flex items-center gap-8">
-          {/* Page Title */}
+      {/* Primera fila: Título de página + Selector de proyecto */}
+      <div className="w-full h-12 px-12 flex items-center justify-between border-b border-[var(--menues-border)]">
+        {/* Left: Page Title */}
+        <div className="flex items-center">
           {(pageTitle || title) && (
             <h1 className="text-xl font-light text-foreground tracking-wider">
               {pageTitle || title}
             </h1>
-          )}
-          
-          {/* Tabs */}
-          {hasTabs && (
-            <div className="flex items-center space-x-6">
-              {tabs.map((tab) => {
-                const tabContent = (
-                  <button
-                    key={tab.id}
-                    onClick={() =>
-                      tab.isDisabled || tab.isRestricted
-                        ? undefined
-                        : onTabChange?.(tab.id)
-                    }
-                    disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-3 py-2 rounded-lg ${
-                      tab.isDisabled || tab.isRestricted
-                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                        : tab.isActive
-                          ? "text-primary font-semibold bg-primary/10 shadow-md border border-primary/20"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                        {tab.badge}
-                      </span>
-                    )}
-
-                  </button>
-                );
-
-                // Si la tab está restringida, envolverla con CustomRestricted
-                if (tab.isRestricted && tab.restrictionReason) {
-                  return (
-                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
-                      {tabContent}
-                    </CustomRestricted>
-                  );
-                }
-
-                return tabContent;
-              })}
-            </div>
           )}
         </div>
 
@@ -333,6 +307,156 @@ export function Header({
                 </DropdownMenuContent>
               </DropdownMenu>
             </CustomRestricted>
+          )}
+        </div>
+      </div>
+
+      {/* Segunda fila: Tabs + Botones de herramientas + Botón de acción */}
+      <div className="w-full h-12 px-12 flex items-center justify-between">
+        {/* Left: Tabs */}
+        <div className="flex items-center">
+          {hasTabs && (
+            <div className="flex items-center space-x-6">
+              {tabs.map((tab) => {
+                const tabContent = (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      tab.isDisabled || tab.isRestricted
+                        ? undefined
+                        : onTabChange?.(tab.id)
+                    }
+                    disabled={tab.isDisabled}
+                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-3 py-2 rounded-lg ${
+                      tab.isDisabled || tab.isRestricted
+                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                        : tab.isActive
+                          ? "text-primary font-semibold bg-primary/10 shadow-md border border-primary/20"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.badge && (
+                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+
+                // Si la tab está restringida, envolverla con CustomRestricted
+                if (tab.isRestricted && tab.restrictionReason) {
+                  return (
+                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                      {tabContent}
+                    </CustomRestricted>
+                  );
+                }
+
+                return tabContent;
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Botones de herramientas + Botón de acción */}
+        <div className="flex items-center gap-2">
+          {/* Botones de herramientas ghost */}
+          {showSearchButton && (
+            <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                >
+                  <Search className="mr-1 h-3 w-3" />
+                  Buscar
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3" align="end">
+                <Input
+                  placeholder="Buscar..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    onSearch?.(e.target.value);
+                  }}
+                  className="h-8"
+                  autoFocus
+                />
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {showFiltersButton && (
+            <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 px-3 text-xs ${
+                    activeFiltersCount > 0 ? "bg-secondary text-secondary-foreground" : ""
+                  }`}
+                  onClick={onFiltersOpen}
+                >
+                  <Filter className="mr-1 h-3 w-3" />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              {filtersContent && (
+                <PopoverContent className="w-80 p-4" align="end">
+                  {filtersContent}
+                </PopoverContent>
+              )}
+            </Popover>
+          )}
+
+          {showClearFilters && activeFiltersCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFiltersAction}
+              className="h-8 px-3 text-xs"
+            >
+              <FilterX className="mr-1 h-3 w-3" />
+              Limpiar
+            </Button>
+          )}
+
+          {/* Botón de acción principal */}
+          {actionButton && (
+            <div className="flex items-center gap-2 ml-2">
+              {actionButton.additionalButton && (
+                <Button
+                  variant={actionButton.additionalButton.variant || "ghost"}
+                  size="sm"
+                  onClick={actionButton.additionalButton.onClick}
+                  className="h-8 text-xs"
+                >
+                  {actionButton.additionalButton.icon && (
+                    <actionButton.additionalButton.icon className="mr-1.5 h-3 w-3" />
+                  )}
+                  {actionButton.additionalButton.label}
+                </Button>
+              )}
+              <Button
+                variant="default"
+                size="sm"
+                onClick={actionButton.onClick}
+                className="h-8 text-xs"
+              >
+                {actionButton.icon && (
+                  <actionButton.icon className="mr-1.5 h-3 w-3" />
+                )}
+                {actionButton.label}
+              </Button>
+            </div>
           )}
         </div>
       </div>

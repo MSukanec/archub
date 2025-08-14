@@ -43,6 +43,7 @@ interface GalleryProps {
   onDelete?: (file: GalleryFile) => void;
   onDownload?: (file: GalleryFile) => void;
   showProjectName?: boolean;
+  hideFilters?: boolean;
 }
 
 export function Gallery({ 
@@ -50,7 +51,8 @@ export function Gallery({
   onEdit, 
   onDelete, 
   onDownload, 
-  showProjectName = false 
+  showProjectName = false,
+  hideFilters = false
 }: GalleryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
@@ -140,9 +142,10 @@ export function Gallery({
 
   return (
     <div className="space-y-6">
-      {/* Filter Buttons - Always show when we have any files */}
-      <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
-        <div className="flex items-center justify-between px-4 py-3">
+      {/* Filter Buttons - Only show when hideFilters is false and we have files */}
+      {!hideFilters && (
+        <div className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
+          <div className="flex items-center justify-between px-4 py-3">
           {/* Filter buttons on the left - Using same style as TableTopBar tabs */}
           <div className="flex items-center gap-1">
             <Button
@@ -279,7 +282,7 @@ export function Gallery({
             )}
           </div>
         </div>
-      </div>
+      )}
 
 
 
