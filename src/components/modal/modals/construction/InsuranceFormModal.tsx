@@ -171,6 +171,11 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         notes: data.notes || null,
         created_by: currentMember.id  // Usar exactamente el mismo patrón que SiteLogFormModal
       }
+      
+      console.log('=== FINAL PAYLOAD ===')
+      console.log('payload.created_by:', payload.created_by)
+      console.log('currentMember.id:', currentMember.id)
+      console.log('full payload:', payload)
 
       if (isEdit) {
         await updateInsurance.mutateAsync({
