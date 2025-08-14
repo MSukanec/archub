@@ -208,7 +208,7 @@ export default function ConstructionPersonnel() {
     openModal('attendance', {
       isEditing: true,
       editingData: {
-        contactId: workerId,
+        personnelId: workerId, // Cambiar de contactId a personnelId
         contactName: worker.name,
         attendanceDate: date,
         existingRecord: existingAttendance

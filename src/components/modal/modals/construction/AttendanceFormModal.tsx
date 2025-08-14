@@ -101,16 +101,34 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && modalData?.attendance)
   const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
 
+
+
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      attendance_date: modalData?.editingData?.attendanceDate || (isEditing ? new Date(attendance?.created_at) : new Date()),
+      attendance_date: modalData?.editingData?.attendanceDate || (isEditing && attendance?.created_at ? new Date(attendance.created_at) : new Date()),
       personnel_id: modalData?.editingData?.personnelId || attendance?.personnel_id || '',
       attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
       hours_worked: attendance?.hours_worked || 8,
       description: attendance?.description || ''
     }
   })
+
+  // Reset form when attendance data changes (for editing)
+  React.useEffect(() => {
+    if (isEditing && attendance) {
+      // Map the attendance data based on its structure
+      const mappedData = {
+        attendance_date: attendance.day ? new Date(attendance.day) : (attendance.created_at ? new Date(attendance.created_at) : new Date()),
+        personnel_id: modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || '',
+        attendance_type: attendance.status || attendance.attendance_type || 'full',
+        hours_worked: attendance.hours_worked || (attendance.status === 'half' ? 4 : 8),
+        description: attendance.description || ''
+      }
+      
+      form.reset(mappedData)
+    }
+  }, [attendance, isEditing, form, modalData])
 
   const createAttendanceMutation = useMutation({
     mutationFn: async (data: AttendanceForm) => {
@@ -192,12 +210,19 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   // Delete attendance mutation
   const deleteAttendanceMutation = useMutation({
     mutationFn: async () => {
-      if (!supabase || !attendance?.id) throw new Error('No se puede eliminar la asistencia')
+      if (!supabase) throw new Error('Supabase no inicializado')
+      
+      // For the gradebook structure, we need to find and delete the actual attendance record
+      const personnelId = modalData?.editingData?.personnelId || attendance?.workerId
+      const attendanceDate = modalData?.editingData?.attendanceDate || attendance?.day
+      
+      if (!personnelId || !attendanceDate) throw new Error('No se puede identificar la asistencia a eliminar')
       
       const { error } = await supabase
         .from('attendees')
         .delete()
-        .eq('id', attendance.id)
+        .eq('personnel_id', personnelId)
+        .eq('created_at', new Date(attendanceDate).toISOString().split('T')[0])
       
       if (error) throw error
     },
@@ -307,9 +332,11 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {projectPersonnel.map((personnel) => (
+                      {projectPersonnel
+                        .filter(personnel => personnel.contact && !Array.isArray(personnel.contact))
+                        .map((personnel) => (
                         <SelectItem key={personnel.id} value={personnel.id}>
-                          {personnel.contact?.first_name || 'Sin nombre'} {personnel.contact?.last_name || ''}
+                          {personnel.contact.first_name || 'Sin nombre'} {personnel.contact.last_name || ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -398,7 +425,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
         />
 
         {/* Botón de eliminar solo en modo edición */}
-        {isEditing && attendance?.id && (
+        {isEditing && attendance && (
           <>
             <Separator className="my-6" />
             <div className="space-y-2">
