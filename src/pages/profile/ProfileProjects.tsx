@@ -279,7 +279,8 @@ export default function ProfileProjects() {
 
   const handleNavigateToBasicData = (project: any) => {
     selectProjectMutation.mutate(project.id)
-    navigate('/project/basic-data')
+    // Los datos básicos ahora se manejan en la tab "Datos Básicos" de esta misma página
+    setActiveTab('basic-data')
   }
 
   // Mutación para eliminar proyecto

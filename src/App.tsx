@@ -23,7 +23,7 @@ import ProfileProjects from "@/pages/profile/ProfileProjects";
 import OrganizationContacts from "@/pages/organization/OrganizationContacts";
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
-import ProjectDashboard from "@/pages/project/ProjectDashboard";
+
 
 import ProjectClients from "@/pages/project/ProjectClients";
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
@@ -156,11 +156,7 @@ function Router() {
             <ProfileProjects />
           </ProtectedRoute>
         </Route>
-        <Route path="/project/dashboard">
-          <ProtectedRoute>
-            <ProjectDashboard />
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/project/clients">
           <ProtectedRoute>

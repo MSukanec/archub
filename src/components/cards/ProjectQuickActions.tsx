@@ -46,7 +46,7 @@ export function ProjectQuickActions() {
       icon: Settings,
       label: "Configuración",
       description: "Datos básicos del proyecto",
-      onClick: () => navigate('/project/basic-data'),
+      onClick: () => navigate('/profile/projects'), // Datos básicos ahora en perfil
       color: "text-gray-600"
     }
   ]

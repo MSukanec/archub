@@ -283,7 +283,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       id: 'proyecto', 
       icon: FolderOpen, 
       label: 'Proyecto', 
-      defaultRoute: '/project/dashboard',
+      defaultRoute: '/project/clients',
       isActive: currentSidebarContext === 'project' || location.startsWith('/project')
     },
     { 
@@ -335,8 +335,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     proyecto: [
-      { icon: Home, label: 'Resumen del Proyecto', href: '/project/dashboard' },
-      { icon: NotebookPen, label: 'Datos Básicos', href: '/project/basic-data' },
       { icon: Users, label: 'Clientes', href: '/project/clients' },
       { icon: FileImage, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería Multimedia', href: '/project/gallery' },
