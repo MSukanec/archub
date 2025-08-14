@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -44,11 +44,6 @@ interface Contact {
   id: string;
   first_name: string;
   last_name: string;
-  contact_type_links?: Array<{
-    contact_type: {
-      name: string;
-    };
-  }>;
 }
 
 export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; onClose: () => void }) {
@@ -74,10 +69,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
         .select(`
           id,
           first_name,
-          last_name,
-          contact_type_links(
-            contact_type:contact_types(name)
-          )
+          last_name
         `)
         .eq('organization_id', userData.organization.id)
         .order('first_name');
@@ -182,7 +174,6 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
                 ) : (
                   availableContacts.map((contact) => {
                     const isSelected = selectedContacts.includes(contact.id);
-                    const contactType = contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo';
                     
                     return (
                       <div
@@ -206,9 +197,6 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
                             <p className="font-medium">
                               {contact.first_name} {contact.last_name}
                             </p>
-                            <Badge variant="secondary" className="text-xs">
-                              {contactType}
-                            </Badge>
                           </div>
                         </div>
                         {isSelected && (
