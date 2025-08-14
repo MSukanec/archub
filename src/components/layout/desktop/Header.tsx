@@ -206,7 +206,7 @@ export function Header({
                       tab.isDisabled || tab.isRestricted
                         ? "text-muted-foreground opacity-60 cursor-not-allowed"
                         : tab.isActive
-                          ? "text-foreground font-medium bg-accent/10 shadow-sm"
+                          ? "text-primary font-semibold bg-primary/10 shadow-md border border-primary/20"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
                     }`}
                   >
