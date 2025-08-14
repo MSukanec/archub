@@ -699,7 +699,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               {/* Nombre del contacto */}
               <div className="col-span-4">
                 <span className={`text-sm ${isPresent ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
-                  {contact.first_name} {contact.last_name}
+                  {contact?.first_name || ''} {contact?.last_name || ''}
                 </span>
               </div>
 

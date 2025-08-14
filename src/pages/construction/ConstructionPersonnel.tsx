@@ -260,7 +260,7 @@ export default function ConstructionPersonnel() {
                 title="Sin personal asignado"
                 description="Vincula contactos de tu organización como mano de obra del proyecto para gestionar asistencias y seguimiento de personal."
                 actionLabel="Agregar Personal"
-                onAction={() => openModal('construction-personnel')}
+                onAction={() => openModal('construction-personnel', {})}
               />
             ) : (
               <Table
@@ -351,6 +351,8 @@ export default function ConstructionPersonnel() {
                 icon={<UserCheck className="h-12 w-12" />}
                 title="Sin registros de asistencia"
                 description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+                actionLabel="Registrar Asistencia"
+                onAction={() => openModal('attendance', {})}
               />
             )}
           </>
