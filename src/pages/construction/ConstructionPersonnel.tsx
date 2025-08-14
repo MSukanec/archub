@@ -258,7 +258,7 @@ export default function ConstructionPersonnel() {
               <EmptyState
                 icon={<Users className="h-8 w-8" />}
                 title="Sin personal asignado"
-                description="No hay personal asignado a este proyecto"
+                description="Vincula contactos de tu organización como mano de obra del proyecto para gestionar asistencias y seguimiento de personal."
                 actionLabel="Agregar Personal"
                 onAction={() => openModal('construction-personnel')}
               />

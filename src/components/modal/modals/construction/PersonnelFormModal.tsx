@@ -165,8 +165,8 @@ export function PersonnelFormModal({ data }: PersonnelFormModalProps) {
       onLeftClick={closeModal}
       rightLabel="Asignar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
-      rightLoading={addPersonnelMutation.isPending}
-      rightDisabled={selectedContacts.length === 0}
+      submitDisabled={selectedContacts.length === 0}
+      showLoadingSpinner={addPersonnelMutation.isPending}
     />
   );
 
