@@ -363,16 +363,14 @@ export default function Library() {
               {/* Left: Document Explorer (2/3) */}
               <div className="w-2/3">
                 <Card className="h-full flex flex-col">
-                  <CardHeader className="flex-shrink-0 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                        <CardTitle className="text-sm font-medium">Explorador de Documentos</CardTitle>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Navega por las carpetas y archivos de documentación
-                      </div>
+                  <CardHeader className="flex-shrink-0 pb-3">
+                    <div className="flex items-center space-x-2">
+                      <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">Explorador de Documentos</CardTitle>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Navega por las carpetas y archivos de documentación
+                    </p>
                   </CardHeader>
                   <CardContent className="flex-1 p-0 min-h-0">
                     <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
@@ -383,16 +381,14 @@ export default function Library() {
               {/* Right: Recent Files History (1/3) */}
               <div className="w-1/3">
                 <Card className="h-full flex flex-col">
-                  <CardHeader className="flex-shrink-0 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <CardTitle className="text-sm font-medium">Historial</CardTitle>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Accede rápidamente a los últimos documentos visualizados
-                      </div>
+                  <CardHeader className="flex-shrink-0 pb-3">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">Historial</CardTitle>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Accede rápidamente a los últimos documentos visualizados
+                    </p>
                   </CardHeader>
                   <CardContent className="flex-1 p-0">
                     <ScrollArea className="h-full">
