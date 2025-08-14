@@ -92,12 +92,19 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
         // Filter and ensure data integrity
         const validPersonnel = data
-          .filter(item => 
-            item && 
-            item.contact && 
-            item.contact.first_name && 
-            item.contact.organization_id === currentUser?.organization?.id
-          )
+          .filter(item => {
+            if (!item || !item.contact) return false
+            
+            // Handle array case (shouldn't happen with proper query but just in case)
+            const contact = Array.isArray(item.contact) ? item.contact[0] : item.contact
+            return contact && 
+                   contact.first_name && 
+                   contact.organization_id === currentUser?.organization?.id
+          })
+          .map(item => ({
+            ...item,
+            contact: Array.isArray(item.contact) ? item.contact[0] : item.contact
+          }))
         
         return validPersonnel
       } catch (error) {
@@ -115,7 +122,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const form = useForm<InsuranceForm>({
     resolver: zodResolver(insuranceSchema),
     defaultValues: {
-      personnel_id: modalData?.defaultContactId || modalData?.insurance?.contact_id || '',
+      personnel_id: modalData?.defaultContactId || (modalData?.insurance as any)?.personnel_id || '',
       insurance_type: modalData?.insurance?.insurance_type || 'ART',
       policy_number: modalData?.insurance?.policy_number || '',
       provider: modalData?.insurance?.provider || '',
@@ -153,7 +160,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       const payload = {
         organization_id: currentUser?.organization?.id!,
         project_id: projectId,
-        contact_id: data.personnel_id,
+        personnnel_id: data.personnel_id,
         insurance_type: data.insurance_type,
         policy_number: data.policy_number || null,
         provider: data.provider || null,
@@ -167,7 +174,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
       if (isEdit) {
         await updateInsurance.mutateAsync({
-          id: modalData.insurance.id,
+          id: modalData?.insurance?.id || '',
           payload
         })
       } else {
@@ -414,8 +421,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       onLeftClick={onClose}
       rightLabel={isEdit ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightDisabled={createInsurance.isPending || updateInsurance.isPending}
-      isRightLoading={createInsurance.isPending || updateInsurance.isPending}
+      rightDisabled={createInsurance.isPending || updateInsurance.isPending}
+      rightLoading={createInsurance.isPending || updateInsurance.isPending}
     />
   )
 

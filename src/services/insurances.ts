@@ -4,7 +4,7 @@ export type Insurance = {
   id: string;
   organization_id: string;
   project_id?: string | null;
-  contact_id: string;
+  personnnel_id: string; // Note the typo in the DB column name  
   insurance_type: 'ART' | 'vida' | 'accidentes' | 'responsabilidad_civil' | 'salud' | 'otro';
   policy_number?: string | null;
   provider?: string | null;
@@ -21,6 +21,7 @@ export type Insurance = {
 export type InsuranceStatusRow = Insurance & {
   days_to_expiry: number;
   status: 'vigente' | 'por_vencer' | 'vencido';
+  contact_id: string;
   contact: { 
     id: string; 
     full_name: string; 
@@ -42,8 +43,17 @@ export type InsuranceFilters = {
 
 export const listInsurances = async (filters: InsuranceFilters = {}) => {
   let query = supabase
-    .from('v_personnel_insurance_status')
-    .select('*')
+    .from('personnel_insurance_view')
+    .select(`
+      *,
+      contact:contact_id (
+        id,
+        first_name,
+        last_name,
+        full_name,
+        avatar_attachment_id
+      )
+    `)
 
   if (filters.status?.length) {
     query = query.in('status', filters.status)
@@ -147,7 +157,7 @@ export const renewInsurance = async (
   const newInsurance = await createInsurance({
     organization_id: previous.organization_id,
     project_id: previous.project_id,
-    contact_id: previous.contact_id,
+    personnnel_id: previous.personnnel_id,
     insurance_type: previous.insurance_type,
     policy_number: payload.policy_number || previous.policy_number,
     provider: payload.provider || previous.provider,
