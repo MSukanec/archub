@@ -179,10 +179,20 @@ export default function ConstructionPersonnel() {
   const { setSidebarContext } = useNavigationStore()
   const [activeTab, setActiveTab] = useState('active')
 
+  // Check if there's personnel assigned to determine if other tabs should be enabled
+  const hasPersonnel = personnelData.length > 0
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
+
+  // Force active tab to be 'active' if no personnel and currently on disabled tab
+  useEffect(() => {
+    if (!hasPersonnel && (activeTab === 'attendance' || activeTab === 'insurance')) {
+      setActiveTab('active')
+    }
+  }, [hasPersonnel, activeTab])
 
   const { workers, attendance } = useMemo(() => {
     return transformAttendanceData(attendanceData)
@@ -205,7 +215,7 @@ export default function ConstructionPersonnel() {
       }
     });
   }
-
+  
   const headerProps = {
     icon: Users,
     title: "Personal",
@@ -222,15 +232,25 @@ export default function ConstructionPersonnel() {
       {
         id: 'attendance',
         label: 'Asistencia',
-        isActive: activeTab === 'attendance'
+        isActive: activeTab === 'attendance',
+        disabled: !hasPersonnel
       },
       {
         id: 'insurance',
         label: 'Seguros',
-        isActive: activeTab === 'insurance'
+        isActive: activeTab === 'insurance',
+        disabled: !hasPersonnel
       }
     ],
-    onTabChange: setActiveTab,
+    onTabChange: (tabId: string) => {
+      // Only allow tab change if tab is not disabled
+      if (tabId === 'attendance' || tabId === 'insurance') {
+        if (!hasPersonnel) {
+          return // Don't change tab if no personnel
+        }
+      }
+      setActiveTab(tabId)
+    },
     actionButton: activeTab === 'attendance' ? {
       label: 'Registrar Asistencia',
       icon: Plus,
