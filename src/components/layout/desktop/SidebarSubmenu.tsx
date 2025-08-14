@@ -123,11 +123,11 @@ export function SidebarSubmenu() {
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
 
       { icon: Calendar, label: 'Cronograma', href: '/construction/schedule', requiresProject: true },
+      { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
       { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
-      { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis', requiresProject: true },
     ],
 
