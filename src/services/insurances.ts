@@ -179,11 +179,12 @@ export const uploadCertificate = async (contactId: string, file: File) => {
     .from('contact_attachments')
     .insert({
       contact_id: contactId,
-      category: 'insurance_certificate',
+      storage_bucket: 'contact-files',
+      storage_path: filePath,
       file_name: file.name,
-      file_path: filePath,
-      file_size: file.size,
-      mime_type: file.type
+      size_bytes: file.size,
+      mime_type: file.type,
+      category: 'document'
     })
     .select()
     .single()
@@ -196,7 +197,7 @@ export const uploadCertificate = async (contactId: string, file: File) => {
 export const getCertificatePublicUrl = async (attachmentId: string) => {
   const { data: attachment, error } = await supabase
     .from('contact_attachments')
-    .select('file_path')
+    .select('storage_path')
     .eq('id', attachmentId)
     .single()
 
@@ -204,7 +205,7 @@ export const getCertificatePublicUrl = async (attachmentId: string) => {
 
   const { data } = supabase.storage
     .from('contact-files')
-    .getPublicUrl(attachment.file_path)
+    .getPublicUrl(attachment.storage_path)
 
   return data.publicUrl
 }

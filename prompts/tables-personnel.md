@@ -146,3 +146,52 @@ TABLA PERSONNEL_INSURANCES
     "data_type": "daterange"
   }
 ]
+
+TABLA CONTACT_ATTACHMENTS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "contact_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "storage_bucket",
+    "data_type": "text"
+  },
+  {
+    "column_name": "storage_path",
+    "data_type": "text"
+  },
+  {
+    "column_name": "file_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "mime_type",
+    "data_type": "text"
+  },
+  {
+    "column_name": "size_bytes",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "category",
+    "data_type": "text"
+  },
+  {
+    "column_name": "metadata",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "created_by",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  }
+]
