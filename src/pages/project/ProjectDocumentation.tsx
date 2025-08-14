@@ -95,12 +95,30 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Desktop: Vertical Layout */}
-      <div className="hidden lg:flex flex-col h-full gap-4">
-        {/* Top: Document Viewer and Info */}
-        <div className="flex-1 flex gap-4">
-          {/* Left: Document Viewer (2/3) */}
-          <div className="w-2/3 min-w-0">
+      {/* Desktop: Three Column Layout */}
+      <div className="hidden lg:flex h-full gap-4">
+        {/* Left Column: Document Explorer (15%) */}
+        <div className="w-[15%] flex flex-col">
+          <Card className="h-full flex flex-col">
+            <div className="px-4 py-3 border-b border-[var(--card-border)]">
+              <div className="flex items-center gap-2">
+                <FolderPlus className="h-4 w-4 text-[var(--accent)]" />
+                <div className="flex-1">
+                  <h2 className="text-sm font-medium text-[var(--card-fg)]">Explorador</h2>
+                  <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
+                    Carpetas y archivos
+                  </p>
+                </div>
+              </div>
+            </div>
+            <CardContent className="flex-1 p-0">
+              <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Center Column: Document Viewer (70%) */}
+        <div className="w-[70%] min-w-0">
           <div 
             className="rounded-lg overflow-hidden border-2 border-dashed h-full"
             style={{ borderColor: 'var(--accent)' }}
@@ -126,11 +144,13 @@ export default function ProjectDocumentation() {
                 </div>
               </div>
             )}
-            </div>
           </div>
+        </div>
 
-          {/* Right: Document Info (1/3) */}
-          <div className="w-1/3">
+        {/* Right Column: Document Info + Recent Documents (15%) */}
+        <div className="w-[15%] flex flex-col gap-4">
+          {/* Document Info - Top Half */}
+          <div className="flex-1">
             <DocumentInfo 
               document={selectedDocument}
               onDownload={() => selectedDocument && window.open(selectedDocument.file_url, '_blank')}
@@ -139,40 +159,17 @@ export default function ProjectDocumentation() {
               onDelete={() => {/* TODO: Implement delete */}}
             />
           </div>
-        </div>
 
-        {/* Bottom: Two Cards Side by Side */}
-        <div className="flex gap-4 h-80">
-          {/* Left Card: Document Explorer */}
-          <div className="flex-1">
-            <Card className="h-full flex flex-col">
-              <div className="px-4 py-3 border-b border-[var(--card-border)]">
-                <div className="flex items-center gap-2">
-                  <FolderPlus className="h-4 w-4 text-[var(--accent)]" />
-                  <div className="flex-1">
-                    <h2 className="text-sm font-medium text-[var(--card-fg)]">Explorador de Documentos</h2>
-                    <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                      Navega por las carpetas y archivos del proyecto
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <CardContent className="flex-1 p-0">
-                <DocumentExplorer onDocumentSelect={handleDocumentSelect} className="h-full" />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Card: Recent Documents History */}
+          {/* Recent Documents - Bottom Half */}
           <div className="flex-1">
             <Card className="h-full flex flex-col">
               <div className="px-4 py-3 border-b border-[var(--card-border)]">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-[var(--accent)]" />
                   <div className="flex-1">
-                    <h2 className="text-sm font-medium text-[var(--card-fg)]">Documentos Recientes</h2>
+                    <h2 className="text-sm font-medium text-[var(--card-fg)]">Recientes</h2>
                     <p className="text-xs text-[var(--text-muted)] leading-tight mt-0.5">
-                      Accede rápidamente a los últimos documentos visualizados
+                      Últimos documentos
                     </p>
                   </div>
                 </div>
