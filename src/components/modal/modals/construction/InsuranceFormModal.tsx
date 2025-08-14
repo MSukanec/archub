@@ -134,10 +134,17 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
   const onSubmit = async (data: InsuranceForm) => {
     try {
+      console.log('=== DEBUG INSURANCE MODAL ===')
+      console.log('currentUser?.user?.id:', currentUser?.user?.id)
+      console.log('organizationMembers:', organizationMembers)
+      console.log('currentUser?.organization?.id:', currentUser?.organization?.id)
+      
       // Obtener el organization_member.id del usuario actual - mismo patrón que SiteLogFormModal
       const currentMember = organizationMembers.find((m: any) => m.user_id === currentUser?.user?.id)
+      console.log('currentMember found:', currentMember)
+      
       if (!currentMember) {
-        throw new Error('No se encontró el miembro de la organización para el usuario actual')
+        throw new Error(`No se encontró el miembro de la organización para el usuario actual. User ID: ${currentUser?.user?.id}`)
       }
 
       let certificateAttachmentId: string | null = modalData?.insurance?.certificate_attachment_id || null
