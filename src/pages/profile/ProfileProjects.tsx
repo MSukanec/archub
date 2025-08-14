@@ -1,9 +1,10 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus } from 'lucide-react'
+import { Folder, Plus, Settings } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -16,6 +17,7 @@ import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 
 export default function ProfileProjects() {
   const { openModal } = useGlobalModalStore()
+  const [activeTab, setActiveTab] = useState('projects')
   
   const { data: userData, isLoading } = useCurrentUser()
   const organizationId = userData?.organization?.id
@@ -171,11 +173,27 @@ export default function ProfileProjects() {
       { name: "Perfil", href: "/profile/data" },
       { name: "Gestión de Proyectos", href: "/profile/projects" }
     ],
-    actionButton: {
+    tabs: [
+      {
+        id: 'projects',
+        label: 'Proyectos',
+        icon: Folder,
+        isActive: activeTab === 'projects',
+        onClick: () => setActiveTab('projects')
+      },
+      {
+        id: 'basic-data',
+        label: 'Datos Básicos',
+        icon: Settings,
+        isActive: activeTab === 'basic-data',
+        onClick: () => setActiveTab('basic-data')
+      }
+    ],
+    actionButton: activeTab === 'projects' ? {
       label: "Nuevo Proyecto",
       icon: Plus,
       onClick: () => openModal('project', {})
-    }
+    } : undefined
   }
 
   if (isLoading || projectsLoading) {
@@ -191,43 +209,57 @@ export default function ProfileProjects() {
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
-        {/* ProjectHeroCard - Show for active project */}
-        {activeProjectId && (
-          <ProjectHeroCard 
-            project={sortedProjects.find(p => p.id === activeProjectId)}
-            organizationId={organizationId}
-          />
+        {/* Tab: Proyectos */}
+        {activeTab === 'projects' && (
+          <>
+            {/* ProjectHeroCard - Show for active project */}
+            {activeProjectId && (
+              <ProjectHeroCard 
+                project={sortedProjects.find(p => p.id === activeProjectId)}
+                organizationId={organizationId}
+              />
+            )}
+
+            {/* Projects List */}
+            {sortedProjects.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {sortedProjects.map((project) => (
+                  <ProjectItem
+                    key={project.id}
+                    project={project}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onSelect={(project) => handleSelectProject(project.id)}
+                    onNavigateToBasicData={handleNavigateToBasicData}
+                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Folder className="w-12 h-12" />}
+                title="No hay proyectos creados"
+                description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+                action={
+                  <Button
+                    onClick={() => openModal('project', {})}
+                    className="mt-4"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuevo Proyecto
+                  </Button>
+                }
+              />
+            )}
+          </>
         )}
 
-        {/* Projects List */}
-        {sortedProjects.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {sortedProjects.map((project) => (
-              <ProjectItem
-                key={project.id}
-                project={project}
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
-                onSelect={(project) => handleSelectProject(project.id)}
-                onNavigateToBasicData={handleNavigateToBasicData}
-                isActiveProject={project.id === userOrgPrefs?.last_project_id}
-              />
-            ))}
-          </div>
-        ) : (
+        {/* Tab: Datos Básicos */}
+        {activeTab === 'basic-data' && (
           <EmptyState
-            icon={<Folder className="w-12 h-12" />}
-            title="No hay proyectos creados"
-            description="Comienza creando tu primer proyecto para gestionar tu trabajo"
-            action={
-              <Button
-                onClick={() => openModal('project', {})}
-                className="mt-4"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Proyecto
-              </Button>
-            }
+            icon={<Settings className="w-12 h-12" />}
+            title="Datos Básicos"
+            description="Esta sección estará disponible próximamente para gestionar la configuración básica del perfil y organización"
           />
         )}
       </div>
