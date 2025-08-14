@@ -260,7 +260,7 @@ export default function ConstructionPersonnel() {
                 title="Sin personal asignado"
                 description="No hay personal asignado a este proyecto"
                 actionLabel="Agregar Personal"
-                onAction={() => openModal('construction-personnel')}
+                onAction={() => openModal('construction-personnel', {})}
               />
             ) : (
               <Table
