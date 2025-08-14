@@ -231,7 +231,7 @@ export default function ConstructionPersonnel() {
     } : activeTab === 'active' ? {
       label: 'Agregar Personal',
       icon: Plus,
-      onClick: () => openModal('personnel', {})
+      onClick: () => openModal('construction-personnel', {})
     } : undefined
   }
 
@@ -258,13 +258,9 @@ export default function ConstructionPersonnel() {
               <EmptyState
                 icon={<Users className="h-8 w-8" />}
                 title="Sin personal asignado"
-                description="No hay personal asignado a este proyecto. Aquí se asignan contactos como mano de obra al proyecto actual para su gestión y seguimiento."
-                action={
-                  <Button onClick={() => openModal('personnel', {})}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Personal
-                  </Button>
-                }
+                description="No hay personal asignado a este proyecto"
+                actionLabel="Agregar Personal"
+                onAction={() => openModal('construction-personnel')}
               />
             ) : (
               <Table
@@ -355,12 +351,6 @@ export default function ConstructionPersonnel() {
                 icon={<UserCheck className="h-12 w-12" />}
                 title="Sin registros de asistencia"
                 description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-                action={
-                  <Button onClick={() => openModal('attendance', {})}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Registrar Asistencia
-                  </Button>
-                }
               />
             )}
           </>
