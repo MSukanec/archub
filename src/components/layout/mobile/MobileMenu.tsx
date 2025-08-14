@@ -283,7 +283,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       id: 'proyecto', 
       icon: FolderOpen, 
       label: 'Proyecto', 
-      defaultRoute: '/project/clients',
+      defaultRoute: '/project/documentation',
       isActive: currentSidebarContext === 'project' || location.startsWith('/project')
     },
     { 
@@ -335,7 +335,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     proyecto: [
-      { icon: Users, label: 'Clientes', href: '/project/clients' },
       { icon: FileImage, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería Multimedia', href: '/project/gallery' },
     ],
@@ -354,6 +353,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments' },
+      { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts' },
+      { icon: Users, label: 'Clientes', href: '/finances/clients' },
     ],
     diseno: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },

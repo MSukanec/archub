@@ -19,7 +19,7 @@ export function MobileActionBar() {
     id: 'project-dashboard',
     icon: <Home className="h-5 w-5" />,
     label: 'Proyectos',
-    onClick: () => navigate('/project/clients'),
+    onClick: () => navigate('/project/documentation'),
     variant: 'secondary' as const
   }
 

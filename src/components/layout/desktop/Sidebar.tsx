@@ -291,7 +291,7 @@ export function Sidebar() {
       id: 'proyecto', 
       icon: FolderOpen, 
       label: 'Proyecto', 
-      defaultRoute: '/project/clients',
+      defaultRoute: '/project/documentation',
       isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project'),
       generalModeRestricted: true
     },

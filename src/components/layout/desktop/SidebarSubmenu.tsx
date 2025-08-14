@@ -113,7 +113,6 @@ export function SidebarSubmenu() {
     ],
     
     'proyecto': [
-      { icon: Users, label: 'Clientes', href: '/project/clients', requiresProject: true },
     ],
 
     'diseno': [
@@ -140,6 +139,7 @@ export function SidebarSubmenu() {
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
       { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
       { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts', requiresProject: true },
+      { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
     ],
 
 

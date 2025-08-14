@@ -1,4 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -36,10 +38,15 @@ interface ProjectClient {
   contact: Contact
 }
 
-export default function ProjectClients() {
+export default function FinancesClients() {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
+  const { setSidebarContext } = useNavigationStore()
+
+  useEffect(() => {
+    setSidebarContext('finances');
+  }, [setSidebarContext]);
 
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -131,6 +138,10 @@ export default function ProjectClients() {
         headerProps={{
           icon: Handshake,
           title: "Clientes",
+          breadcrumb: [
+            { name: "Finanzas", href: "/finances/dashboard" },
+            { name: "Clientes", href: "/finances/clients" }
+          ],
           actionButton: {
             label: 'Agregar Cliente',
             icon: Plus,
@@ -150,6 +161,10 @@ export default function ProjectClients() {
       headerProps={{
         icon: Handshake,
         title: "Clientes",
+        breadcrumb: [
+          { name: "Finanzas", href: "/finances/dashboard" },
+          { name: "Clientes", href: "/finances/clients" }
+        ],
         actionButton: {
           label: 'Agregar Cliente',
           icon: Plus,
