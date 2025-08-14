@@ -204,7 +204,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
   const editPanel = (
     <Form {...form}>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Persona y Tipo de Seguro inline */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
