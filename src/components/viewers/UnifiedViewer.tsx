@@ -343,7 +343,7 @@ export function UnifiedViewer({
 
   return (
     <div 
-      className={`relative group bg-muted/50 overflow-auto ${className}`}
+      className={`relative group bg-muted/50 ${className}`}
       style={{ height: `${height}px` }}
     >
       {/* Floating Toolbar */}
@@ -488,9 +488,9 @@ export function UnifiedViewer({
       </div>
 
       {/* Content Area */}
-      <div className="h-full overflow-auto p-4">
+      <div className="absolute inset-0 overflow-auto p-4">
         {state.fileType === 'pdf' && (
-          <div className="flex items-center justify-center min-h-full">
+          <div className="flex items-start justify-center w-full">
             <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
               <canvas 
                 ref={canvasRef}
