@@ -179,7 +179,7 @@ export function Header({
       }`}
     >
       {/* Primera fila: Título + Tabs + Selector de proyectos */}
-      <div className="w-full h-10 px-12 flex items-center justify-between border-b border-[var(--menues-border)]">
+      <div className="w-full h-10 px-12 flex items-center justify-between">
         {/* Left: Page Title + Tabs */}
         <div className="flex items-center gap-8">
           {(pageTitle || title) && (
