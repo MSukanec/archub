@@ -137,8 +137,9 @@ export default function ConstructionPersonnel() {
         return
       }
 
-      // Invalidate and refetch the personnel data
+      // Invalidate and refetch the personnel and attendance data
       queryClient.invalidateQueries({ queryKey: ['project-personnel', userData?.preferences?.last_project_id] })
+      queryClient.invalidateQueries({ queryKey: ['attendance-data'] })
     } catch (error) {
       console.error('Error deleting personnel:', error)
     }
@@ -231,7 +232,7 @@ export default function ConstructionPersonnel() {
     } : activeTab === 'active' ? {
       label: 'Agregar Personal',
       icon: Plus,
-      onClick: () => openModal('construction-personnel', {})
+      onClick: () => openModal('personnel')
     } : undefined
   }
 
@@ -259,8 +260,11 @@ export default function ConstructionPersonnel() {
                 icon={<Users className="h-8 w-8" />}
                 title="Sin personal asignado"
                 description="Vincula contactos de tu organización como mano de obra del proyecto para gestionar asistencias y seguimiento de personal."
-                actionLabel="Agregar Personal"
-                onAction={() => openModal('construction-personnel', {})}
+                action={
+                  <Button onClick={() => openModal('personnel')}>
+                    Agregar Personal
+                  </Button>
+                }
               />
             ) : (
               <Table
@@ -311,7 +315,7 @@ export default function ConstructionPersonnel() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openModal('construction-personnel', { personnel: record })}
+                          onClick={() => openModal('personnel', { personnel: record })}
                           className="h-8 w-8 p-0"
                         >
                           <Edit className="h-4 w-4" />
@@ -351,8 +355,11 @@ export default function ConstructionPersonnel() {
                 icon={<UserCheck className="h-12 w-12" />}
                 title="Sin registros de asistencia"
                 description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-                actionLabel="Registrar Asistencia"
-                onAction={() => openModal('attendance', {})}
+                action={
+                  <Button onClick={() => openModal('attendance', {})}>
+                    Registrar Asistencia
+                  </Button>
+                }
               />
             )}
           </>

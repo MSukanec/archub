@@ -260,6 +260,8 @@ export default function ConstructionLogs() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
+      queryClient.invalidateQueries({ queryKey: ['attendance-data'] });
+      queryClient.invalidateQueries({ queryKey: ['project-personnel'] });
       toast({
         title: "Entrada eliminada",
         description: "La entrada de bitácora ha sido eliminada correctamente",
