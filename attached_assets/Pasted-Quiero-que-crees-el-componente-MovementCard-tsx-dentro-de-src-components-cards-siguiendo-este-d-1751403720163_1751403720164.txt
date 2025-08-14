@@ -1,0 +1,82 @@
+Quiero que crees el componente `MovementCard.tsx` dentro de `src/components/cards`, siguiendo este diseño y lógica visual tipo MercadoLibre mobile (ver imagen de referencia).
+
+🎯 OBJETIVO
+
+Mostrar un movimiento económico de manera compacta, clara y visualmente profesional, similar al ejemplo que mostré.
+
+📐 DISEÑO VISUAL
+
+- Fondo blanco, borde suave (`rounded-lg shadow-sm border`), padding (`p-3`), margen inferior (`mb-2`).
+- Disposición en horizontal: izquierda → avatar, derecha → datos, derecha final → monto.
+- Usar Tailwind.
+- El componente debe tener `flex items-center justify-between gap-3`.
+
+📦 CONTENIDO (estructura interna)
+
+1. **IZQUIERDA: Avatar**
+   - Circular (`rounded-full`) con imagen del creador si existe, o inicial del nombre como fallback.
+   - Tamaño fijo: `w-10 h-10`.
+
+2. **CENTRO: Datos**
+   - Encabezado: tipo (`Ingreso` o `Egreso`) + categoría + subcategoría → en una línea. (`text-sm text-gray-600`)
+   - Descripción: texto de máximo 30 caracteres con `truncate`. (`text-gray-900 font-medium text-sm mt-1`)
+   - Si hay espacio o en hover, puede mostrar tooltip completo.
+
+3. **DERECHA: Cantidad + moneda**
+   - Monto: `+ $1.000` o `- $1.000`, color:
+     - Ingreso → `text-green-600`
+     - Egreso → `text-red-600`
+   - Moneda (ej. `ARS`, `USD`) abajo en texto pequeño (`text-xs text-gray-500`), alineado a la derecha.
+
+📘 INTERFAZ DEL COMPONENTE
+
+```tsx
+type MovementCardProps = {
+  movement: {
+    id: string;
+    date: string;
+    creator?: {
+      name: string;
+      avatar_url?: string;
+    };
+    type: 'Ingreso' | 'Egreso';
+    category: string;
+    subcategory?: string;
+    description?: string;
+    wallet: string;
+    currency: string;
+    amount: number;
+  };
+};
+🎨 FORMATO ESPECIAL
+
+Si el tipo es Ingreso, el monto debe tener signo + y ser text-green-600
+
+Si el tipo es Egreso, el monto debe tener signo – y ser text-red-600
+
+El número debe estar formateado con separadores de miles (ej. $ 119.390,68) según la moneda.
+
+📤 EJEMPLO DE DISPOSICIÓN FINAL
+
+bash
+Copiar
+Editar
+[🧔🏻‍♂️]     Ingreso / Mano de Obra
+            Adelanto a Oscar Aq...
+                            +$83.550
+                               ARS
+📦 UBICACIÓN Y USO
+
+Guardar el archivo en src/components/cards/MovementCard.tsx
+
+Se usará desde CustomTable en modo mobile:
+
+tsx
+Copiar
+Editar
+renderCard={(item) => <MovementCard movement={item} />}
+🧠 EXTRA (si hay tiempo)
+
+Añadir tooltip para descripción completa al hacer hover.
+
+Si creator.avatar_url no existe, usar inicial del nombre (M de Matías).

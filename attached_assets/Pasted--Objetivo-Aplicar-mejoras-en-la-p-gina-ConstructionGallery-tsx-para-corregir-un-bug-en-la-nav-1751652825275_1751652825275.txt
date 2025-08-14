@@ -1,0 +1,71 @@
+## Objetivo
+
+Aplicar mejoras en la página `ConstructionGallery.tsx` para corregir un bug en la navegación de imágenes y refinar algunos aspectos visuales y de datos.
+
+---
+
+## 1. 🐞 Corregir bug de navegación en el lightbox (`prev` / `next`)
+
+Actualmente, al navegar entre archivos en el modal, se usa `filteredFiles[currentIndex]` **antes** de actualizar el índice, lo que causa un error visual.
+
+🔧 Reemplazar la función `navigateImage` por esta:
+
+```ts
+const navigateImage = (direction: 'prev' | 'next') => {
+  const newIndex = direction === 'prev'
+    ? (currentIndex > 0 ? currentIndex - 1 : filteredFiles.length - 1)
+    : (currentIndex < filteredFiles.length - 1 ? currentIndex + 1 : 0);
+
+  setCurrentIndex(newIndex);
+  setSelectedFile(filteredFiles[newIndex]);
+};
+2. 🧍 Mostrar correctamente el avatar del creador en la galería y en el modal
+Actualmente se renderiza un círculo gris. Si file.site_log.creator.avatar_url existe, debe usarse para mostrar el avatar.
+
+🔧 Reemplazar:
+
+tsx
+Copiar
+Editar
+<div className="w-4 h-4 rounded-full bg-muted flex-shrink-0"></div>
+por:
+
+tsx
+Copiar
+Editar
+<img
+  src={file.site_log.creator.avatar_url || '/placeholder.svg'}
+  alt={file.site_log.creator.full_name}
+  className="w-4 h-4 rounded-full object-cover"
+/>
+También aplicarlo en el modal (donde ahora también se ve vacío).
+
+3. 📁 Usar file.original_name directamente
+En la transformación de datos, ya se guarda file_name en la tabla site_log_files. Entonces no hace falta extraerlo de file_url.
+
+🔧 Asegurate de usar file.original_name directamente para:
+
+Mostrar nombre del archivo (si se hace en algún lugar)
+
+Usarlo como download name en el botón de descarga
+
+4. (opcional) Mejorar UX al cambiar de proyecto
+Agregar un useEffect que resetea los filtros filterType y filterDate cuando cambia projectId, para evitar filtros obsoletos.
+
+Ejemplo:
+
+ts
+Copiar
+Editar
+useEffect(() => {
+  setFilterType('all');
+  setFilterDate('all');
+}, [projectId]);
+Resultado esperado
+El modal de galería permite navegar correctamente entre archivos.
+
+Los avatares de los usuarios se muestran cuando están disponibles.
+
+La información del archivo es más precisa.
+
+UX general más coherente y fluida.

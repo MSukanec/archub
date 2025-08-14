@@ -1,0 +1,72 @@
+Quiero que edites el modal de edición de parámetros llamado `TaskParameterEditorModal.tsx` (o crees uno si no existe) dentro de `src/modals/admin/tasks`, usado para crear o editar registros de la tabla `task_parameters`.
+
+El objetivo es mejorar la interfaz para que además de editar los campos actuales, el admin pueda:
+
+---
+
+### 🔧 1. Agregar los campos que faltan al formulario principal:
+
+- `Rol semántico` (campo `role`): tipo `select`, con estas opciones iniciales:
+  - `material`
+  - `ubicacion`
+  - `espesor`
+  - `terminacion`
+  - `uso`
+  - `otro`
+
+- `Plantilla de expresión` (campo `expression_template`): tipo `text`, por ejemplo: `"de {value}"`
+
+- Agregá debajo una vista previa de cómo se vería la frase final, reemplazando `{value}` por un ejemplo (`Preview: "de Ladrillo hueco"`)
+
+---
+
+### 🔁 2. Solo si `type = 'select'`, mostrar una nueva sección debajo:
+
+#### Sección: “Grupos de opciones”
+
+Consulta `task_parameter_option_groups` filtrado por `parameter_id`.
+
+Mostrá en tabla:
+
+- `name` del grupo
+- Cantidad de opciones (contar desde `task_parameter_option_group_items`)
+- Acciones:
+  - ✏️ Editar nombre
+  - 🗑️ Eliminar grupo
+  - 🔗 Ver/editar opciones incluidas
+
+Agregá botón: `+ Nuevo grupo de opciones`, que permita:
+
+- Crear nuevo grupo (`name`, `parameter_id`)
+- Inmediatamente editar qué opciones (`task_parameter_values`) pertenecen a ese grupo (por checkboxes o dual list)
+
+---
+
+### 🧩 3. En la parte de Opciones generales:
+
+Mostrá las opciones (`task_parameter_values`) cargadas para este parámetro:
+
+- Lista simple con:
+  - `value`
+  - ✏️ Editar
+  - 🗑️ Eliminar
+
+Agregá botón: `+ Agregar opción`, que permite crear nuevos valores (`value`) para ese parámetro.
+
+---
+
+### 💾 Guardado
+
+Usá Supabase y React Query para:
+
+- Actualizar los campos de `task_parameters`
+- Insertar o editar `task_parameter_values`
+- Crear, editar y eliminar `task_parameter_option_groups`
+- Insertar o eliminar registros en `task_parameter_option_group_items`
+
+---
+
+### 🧪 Extras opcionales
+
+- Validar que `{value}` esté presente en `expression_template`
+- Que los grupos de opciones y opciones se puedan reordenar visualmente en el futuro

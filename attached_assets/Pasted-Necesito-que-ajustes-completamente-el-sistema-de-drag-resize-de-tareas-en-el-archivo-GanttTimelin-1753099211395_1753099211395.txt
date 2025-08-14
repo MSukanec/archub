@@ -1,0 +1,66 @@
+Necesito que ajustes completamente el sistema de drag & resize de tareas en el archivo `GanttTimelineBar.tsx` y relacionados.
+
+### 1. CORREGIR BUG AL RESIZE
+
+Actualmente, cuando hago resize de una tarea (estirando un borde), la barra se va al inicio del timeline y pasa a medir solo 1 día. Esto está mal. Lo que debe pasar es:
+
+✅ Al soltar el mouse (`onMouseUp`), debe tomar el `clientX` del mouse y convertirlo correctamente a un número de día visible en el timeline.
+
+✅ Para eso, usá este cálculo:
+
+```ts
+const timelineContainer = document.getElementById('timeline-content-scroll') as HTMLElement;
+const containerRect = timelineContainer.getBoundingClientRect();
+const scrollLeft = timelineContainer.scrollLeft || 0;
+const adjustedX = e.clientX - containerRect.left + scrollLeft;
+const dayWidth = timelineWidth / totalDays;
+const newDay = Math.round(adjustedX / dayWidth);
+Ese newDay debe usarse para calcular newStartDate o newEndDate, según sea resize izquierdo o derecho.
+
+✅ Esto debe ocurrir SOLO cuando se suelta el mouse (onMouseUp), no mientras se estira, para que no se vea errático el comportamiento.
+
+2. AJUSTAR POSICIÓN DE LOS "CÍRCULOS" PARA CONECTAR DEPENDENCIAS
+Actualmente, los pequeños círculos (connector dots) para crear dependencias entre tareas aparecen dentro de la barra y se confunden con los handlers de resize. Quiero que:
+
+✅ Los círculos estén claramente afuera de la barra (como se ve en el Gantt de React que tengo abajo en mi pantalla).
+
+✅ El círculo izquierdo esté a la izquierda de la barra con un margin-left o translateX negativo (por ejemplo -8px o lo que sea necesario).
+
+✅ El círculo derecho esté a la derecha de la barra (por ejemplo con translateX(+100%) o right: -8px).
+
+✅ Asegurate de que no se superpongan con el cursor de resize y que ambos funcionen correctamente para crear dependencias con onMouseDown.
+
+3. (OPCIONAL) SI NECESITÁS AJUSTAR ESTILOS
+Podés usar este esquema:
+
+tsx
+Copiar
+Editar
+<div className="gantt-bar-wrapper">
+  <div className="connector-dot left" />
+  <div className="gantt-bar" />
+  <div className="connector-dot right" />
+</div>
+Y en CSS:
+
+css
+Copiar
+Editar
+.connector-dot {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ccc;
+  transform: translateY(-50%);
+}
+
+.connector-dot.left {
+  left: -8px;
+}
+
+.connector-dot.right {
+  right: -8px;
+}
+Por favor corregí ambas cosas en TODO el flujo: comportamiento de resize, cálculo de fechas y posición visual de los puntos de dependencia.

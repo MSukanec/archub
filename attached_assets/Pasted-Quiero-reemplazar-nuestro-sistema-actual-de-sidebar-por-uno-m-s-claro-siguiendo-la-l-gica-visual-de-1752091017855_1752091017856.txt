@@ -1,0 +1,75 @@
+Quiero reemplazar nuestro sistema actual de sidebar por uno más claro, siguiendo la lógica visual del menú que te muestro a continuación.
+
+## 🧭 Qué quiero lograr
+
+- Tener **un único sidebar vertical** (lado izquierdo).
+- Al hacer clic en cualquier ícono del sidebar, quiero que:
+  - Aparezca una **columna lateral derecha** (pegada al sidebar) con los subítems correspondientes a ese botón.
+  - Esta subcolumna debe tener títulos y subtítulos, como se ve en la referencia visual.
+
+## 🎯 Ejemplo funcional
+
+- Al hacer clic en el botón "📊 Finanzas":
+  - Se despliega a la derecha una columna con:
+    - **Resumen Financiero**
+    - **Movimientos**
+    - **Billeteras**
+    - **Presupuestos**
+
+- Al hacer clic en el botón "🏗️ Obra":
+  - Se despliega:
+    - **Bitácora**
+    - **Avances**
+    - **Fotos y Documentos**
+    - **Contratistas**
+
+Solo debe haber **una sección abierta a la vez**. Al hacer clic en otro ícono, se cierra la sección anterior.
+
+## 🧱 Estructura de navegación actual (ejemplo)
+
+```ts
+[
+  {
+    id: 'dashboard',
+    icon: <HomeIcon />,
+    title: 'Dashboard',
+    subItems: [],
+  },
+  {
+    id: 'finanzas',
+    icon: <CoinIcon />,
+    title: 'Finanzas',
+    subItems: [
+      { title: 'Resumen', path: '/finances/overview' },
+      { title: 'Movimientos', path: '/finances/movements' },
+      { title: 'Presupuestos', path: '/finances/budgets' },
+      { title: 'Billeteras', path: '/finances/wallets' },
+    ],
+  },
+  {
+    id: 'obra',
+    icon: <BuildingIcon />,
+    title: 'Obra',
+    subItems: [
+      { title: 'Bitácora', path: '/construction/log' },
+      { title: 'Tareas', path: '/construction/tasks' },
+      { title: 'Proveedores', path: '/construction/vendors' },
+    ],
+  },
+  // ...
+]
+🧠 UX esperada
+El sidebar solo muestra íconos (compacto).
+
+Al hacer clic, se muestra una segunda columna a la derecha con submenú.
+
+Esta columna se cierra automáticamente al hacer clic en otro ícono.
+
+El comportamiento es igual al sidebar de la app Notion o Linear (te adjunto una imagen de ejemplo visual).
+
+🛠️ Consideraciones técnicas
+Usamos Zustand para navegación actual.
+
+Queremos mantener navegación SPA.
+
+Se puede guardar el ítem activo en el store de navegación (navigationStore) como activeSidebarSection.

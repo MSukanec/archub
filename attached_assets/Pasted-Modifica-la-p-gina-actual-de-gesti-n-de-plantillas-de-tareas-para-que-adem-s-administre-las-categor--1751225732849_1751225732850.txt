@@ -1,0 +1,65 @@
+Modifica la página actual de gestión de plantillas de tareas para que además administre las categorías.
+
+**OBJETIVO GENERAL**
+Unificar la gestión de categorías (`task_categories`) y plantillas (`task_templates`) en una sola interfaz jerárquica, con la capacidad de crear y editar ambas cosas desde esta vista.
+
+---
+
+**📦 ESTRUCTURA GENERAL DE LA PÁGINA**
+
+1. Reemplaza la tabla actual por una estructura jerárquica (tipo árbol) que muestre todas las categorías ordenadas alfabéticamente por nivel y parentesco.
+   - Usa el campo `parent_id` para construir el árbol.
+   - El campo `name` es el nombre de la categoría.
+
+2. Cada fila de categoría debe incluir:
+   - 🏷️ `Nombre de la categoría`
+   - 🔠 `Código`
+   - 🧩 Un indicador visual:
+     - ✅ si tiene una plantilla asociada (`task_templates.category_id = esta categoría`)
+     - ❌ si no la tiene
+   - ✏️ Botón “Editar Categoría”
+   - 📄 Botón “Editar Plantilla” o “Crear Plantilla” según corresponda
+
+---
+
+**📥 MODALES**
+
+1. **EditCategoryModal.tsx (crear si no existe)**
+   - Campos:
+     - Nombre (`name`)
+     - Código (`code`)
+     - Categoría padre (`parent_id`, dropdown jerárquico con búsqueda)
+   - Este modal se abre desde el botón “Editar Categoría”
+   - También permite crear nuevas categorías si no existe aún
+
+2. **EditTemplateModal.tsx (ya existe, probablemente se llame `NewTaskTemplateModal.tsx`)**
+   - Se reutiliza pero asegúrate de pasarle el `category_id` correctamente cuando se edita o se crea
+
+---
+
+**📦 LÓGICA DE DATOS**
+- Consulta ambas tablas:
+  - `task_categories` (con campos: `id`, `name`, `code`, `parent_id`)
+  - `task_templates` (con campo `category_id`)
+- Mapea la relación para saber si una categoría tiene plantilla asociada.
+- Usa un árbol visual o una estructura de lista anidada (como `ul > li` o acordeones jerárquicos) para representar la jerarquía.
+
+---
+
+**📐 ESTILO**
+- Las filas de categorías deben poder expandirse o colapsarse si tienen subcategorías.
+- El botón de “Crear Plantilla” debe estar visible solo si no tiene plantilla.
+- El botón de “Editar Plantilla” aparece si ya tiene.
+
+---
+
+**📌 EXTRAS (si posible)**
+- Mostrar un resumen arriba: cantidad de categorías, cuántas tienen plantilla, cuántas no.
+- Agregar un buscador de categorías por nombre.
+
+---
+
+**⚠️ IMPORTANTE**
+- Elimina cualquier lógica antigua que sólo mostraba las plantillas. Todo parte ahora desde la jerarquía de categorías.
+- Asegúrate de que al crear una plantilla, se asigne correctamente a la categoría correspondiente.
+- No incluir columnas como `parent_category_id` en `task_templates`, ya que esa relación ya está en `task_categories`.

@@ -1,0 +1,76 @@
+## Objetivo
+Mejorar el sistema de importación de Excel para que no solo vincule correctamente las **columnas** del Excel con los **campos** internos, sino que también pueda **normalizar y mapear automáticamente los valores** que vienen en cada celda, especialmente en campos como `type_id`, `category_id`, `currency_id`, etc.
+
+---
+
+## Problema actual
+- El sistema ya permite vincular columnas del Excel con campos internos.
+- Pero si en el Excel el valor es "INGRESOS" y en nuestro sistema es "INGRESO", no se importa nada.
+- El usuario queda obligado a corregir miles de filas a mano en el Excel o después de importar.
+
+---
+
+## Qué debe hacer el nuevo sistema
+
+1. **Agregar una capa de normalización de texto** para valores comunes, por ejemplo:
+   - Convertir a minúsculas
+   - Eliminar tildes y espacios
+   - Recortar espacios
+   - Ejemplo: `" INGRESOS "` → `"ingresos"`
+
+2. **Permitir definir un `valueMap` por campo**
+   - Asociar valores del Excel con los valores internos esperados
+   - Ejemplo:
+     ```ts
+     const valueMap = {
+       type_id: {
+         "ingresos": "INGRESO",
+         "egresos": "EGRESO"
+       },
+       category_id: {
+         "mano de obra": "Mano de Obra",
+         "materiales": "Materiales"
+       }
+     }
+     ```
+
+3. **Aplicar esta normalización al procesar cada fila**
+   - Antes de insertar los datos, si existe un `valueMap[field]`, usarlo.
+   - Si no hay coincidencia, dejar el valor original o lanzar advertencia.
+
+4. **(Opcional pero ideal): Mostrar una UI para validar los valores detectados**
+   - Por ejemplo: si en el Excel vienen `"Ingresos"`, `"INGRESOS"` y `"ingresos"`, mostrar una tabla y permitir al usuario vincularlos manualmente con el valor real: `INGRESO`.
+
+---
+
+## Código base sugerido
+
+Agregar una función genérica en el procesador:
+
+```ts
+const normalizeText = (text: string) =>
+  text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+const normalizeValue = (field: string, value: string) => {
+  const normalized = normalizeText(value);
+  return valueMap[field]?.[normalized] ?? value;
+};
+Usarla al momento de transformar los valores en cada fila:
+
+ts
+Copiar
+Editar
+const parsedRow = {
+  type_id: normalizeValue('type_id', excelRow['Tipo']),
+  ...
+};
+Resultado esperado
+Se puedan importar miles de filas aunque el texto del Excel no coincida exactamente.
+
+Se reduzcan los errores por diferencias mínimas de escritura.
+
+La UX de importación se vuelva mucho más robusta y tolerante.
+
+yaml
+Copiar
+Editar

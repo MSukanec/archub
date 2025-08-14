@@ -1,0 +1,87 @@
+## Objetivo
+
+Modificar la sección actual de onboarding (paso 2 de 3), ubicada en `Step2Discovery.tsx` o equivalente, que actualmente solo pregunta “¿Cómo conociste Archub?”, para convertirla en un formulario más completo y valioso para personalización y segmentación.
+
+---
+
+## Cambios generales
+
+- Cambiar el título principal actual `"¿Cómo conociste Archub?"` por:
+  ```tsx
+  "Queremos conocerte mejor"
+Cambiar subtítulo por:
+
+tsx
+Copiar
+Editar
+"Esta información nos ayuda a personalizar tu experiencia en Archub y mejorar nuestra plataforma."
+Mantener el ícono superior (lupa verde), o reemplazarlo por uno más representativo si lo deseás.
+
+Nuevos campos a mostrar (además del existente):
+1. Fuente de descubrimiento discovered_by (ya existente, mantener)
+Tipo: Select obligatorio
+
+Fuente: Enum discovery_source
+
+Si elige "Otro", mostrar input adicional: discovered_by_other_text (texto libre)
+
+2. Uso principal de Archub main_use
+Tipo: Select opcional (Enum main_use)
+
+Placeholder: "¿Para qué vas a usar principalmente Archub?"
+
+3. Rol profesional user_role
+Tipo: Select opcional (Enum user_role)
+
+Placeholder: "¿Cuál es tu rol profesional?"
+
+Si elige "Otro", mostrar input adicional user_role_other (texto libre)
+
+4. Tamaño de equipo team_size
+Tipo: Select opcional (Enum team_size)
+
+Placeholder: "¿Cuántas personas trabajan con vos?"
+
+Interacción
+Si discovered_by es "Otro" → mostrar campo discovered_by_other_text
+
+Si user_role es "Otro" → mostrar campo user_role_other
+
+Validación
+Solo discovered_by es obligatorio
+
+Mostrar mensaje de error si no está completo
+
+Botones
+Botón “Volver” (mantener)
+
+Botón “Siguiente”:
+
+Al hacer clic, guardar los valores en Supabase:
+
+Tabla user_data: discovered_by, discovered_by_other_text, main_use, user_role, user_role_other, team_size
+
+Luego avanzar al paso 3 (selección de modo)
+
+Extras visuales
+Mantener estilo actual (tarjeta centrada, bordes redondeados, esquema oscuro)
+
+Respetar animaciones o diseño de pasos (paso 2 de 3 con barra superior)
+
+Separar los campos con margen (gap-y-4 o similar)
+
+Alineación clara entre labels y selects
+
+Archivos afectados
+Actualizar el archivo correspondiente a esta pantalla (probablemente):
+
+swift
+Copiar
+Editar
+/src/components/onboarding/Step2Discovery.tsx
+O /src/pages/others/SelectMode.tsx si todo está unificado.
+
+Consideraciones
+Usar Supabase JS para el update en user_data
+
+Si no existe alguna columna, ignorarla (se asume que ya se creó vía SQL)

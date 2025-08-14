@@ -1,0 +1,72 @@
+Necesito refinar el componente Gantt para que funcione como en Jira, con conexión a Supabase y mejoras visuales. Todo está en `src/components/ui-custom/gantt`.
+
+🎯 OBJETIVOS
+
+1. ✅ Scroll horizontal *solo* en el timeline:
+   - La columna izquierda (texto de fases y tareas) debe quedar fija.
+   - Solo el timeline (GanttGrid y GanttBar) debe scrollear horizontalmente.
+   - Para eso:
+     - Hacé que la columna izquierda sea un `div` fijo con `min-w-[250px]`, `sticky left-0 z-10 bg-white`.
+     - El timeline debe estar en un `overflow-x-auto` separado con `min-w-fit`.
+
+2. ✅ Eliminar data mock:
+   - Eliminá cualquier uso de `mockData.ts`.
+   - En su lugar, usá Supabase.
+   - Traé las fases desde la tabla `design_project_phases`, filtrando por `project_id` (por ahora puede estar hardcodeado).
+   - Traé las tareas relacionadas desde `design_phase_tasks`, unidas por `design_phase_id`.
+
+3. ✅ Timeline dinámico según fechas:
+   - El inicio y fin del timeline debe ajustarse automáticamente según el `start_date` y `end_date` de las fases del proyecto.
+   - Calculá la fecha mínima y máxima entre todas las fases para renderizar el rango del Gantt.
+   - Mostrá días desde la fecha más temprana a la más lejana, sin limitarse al mes actual.
+
+4. ✅ Día completo y visual marcado:
+   - Cada celda de día debe tener el número + el día de la semana arriba.
+     - Ejemplo: “LUN” + “1”
+   - Encima, mostrará el **mes** solo cuando cambia.
+     - Ejemplo:
+       ```
+       JUNIO
+       LUN 24 | MAR 25 | MIE 26 ...
+       JULIO
+       LUN 1 | MAR 2 ...
+       ```
+
+5. ✅ Día actual destacado:
+   - La columna del día actual debe ocupar toda la altura del timeline, no solo el número.
+   - Agregá una línea azul vertical o fondo claro en esa celda completa (`bg-blue-100` o línea de 2px `bg-blue-600 absolute`).
+   - Usá `new Date()` para detectar el día de hoy.
+
+📦 ARCHIVOS A MODIFICAR
+- `Gantt.tsx`: debe obtener los datos desde Supabase (`design_project_phases` y `design_phase_tasks`) y calcular el rango total de fechas.
+- `GanttGrid.tsx`: renderiza encabezado dinámico según fecha mínima y máxima (mes, día, número).
+- `GanttRow.tsx`: renderiza cada fase y sus tareas.
+- `GanttBar.tsx`: usa `startDate` y `endDate` reales para calcular `left` y `width`.
+- Eliminá `mockData.ts`.
+
+📘 FUNCIONES UTILES A CREAR
+```ts
+// Calcula el rango de días entre fecha mínima y máxima
+const getTimelineRange = (phases: Phase[]): { start: string, end: string }
+
+// Devuelve array de fechas entre dos fechas
+const getDateArray = (start: string, end: string): string[]
+
+// Devuelve el día de la semana en formato corto
+const getWeekday = (date: string): string => {
+  return new Date(date).toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase()
+}
+🗂 Ejemplo de cómo debe renderizarse la cabecera de fechas:
+
+nginx
+Copiar
+Editar
+JUNIO
+| LUN 24 | MAR 25 | MIE 26 | ...
+JULIO
+| LUN 1  | MAR 2  | ...
+🎯 BONUS SI HAY TIEMPO
+
+Permitir seleccionar manualmente el rango de fechas desde un datepicker en la UI.
+
+Opción "Ir a HOY" para centrar el scroll automáticamente en la fecha actual.

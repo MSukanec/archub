@@ -63,7 +63,7 @@ export function UnifiedViewer({
   useSignedUrl = false,
   className = "",
   onExpand,
-  height
+  height = 520
 }: UnifiedViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -277,8 +277,8 @@ export function UnifiedViewer({
   if (state.loading) {
     return (
       <div 
-        className={`relative bg-muted/50 overflow-auto h-full ${className}`}
-        style={height ? { height: `${height}px` } : {}}
+        className={`relative bg-muted/50 overflow-auto ${className}`}
+        style={{ height: `${height}px` }}
       >
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
@@ -294,8 +294,8 @@ export function UnifiedViewer({
   if (state.error) {
     return (
       <div 
-        className={`relative bg-muted/50 flex items-center justify-center overflow-auto h-full ${className}`}
-        style={height ? { height: `${height}px` } : {}}
+        className={`relative bg-muted/50 flex items-center justify-center overflow-auto ${className}`}
+        style={{ height: `${height}px` }}
       >
         <div className="text-center p-6">
           <AlertCircle className="h-16 w-16 text-red-500 mb-4 mx-auto" />
@@ -319,8 +319,8 @@ export function UnifiedViewer({
   if (state.fileType === 'unknown') {
     return (
       <div 
-        className={`relative bg-muted/50 flex items-center justify-center overflow-auto h-full ${className}`}
-        style={height ? { height: `${height}px` } : {}}
+        className={`relative bg-muted/50 flex items-center justify-center overflow-auto ${className}`}
+        style={{ height: `${height}px` }}
       >
         <div className="text-center">
           <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -339,8 +339,8 @@ export function UnifiedViewer({
 
   return (
     <div 
-      className={`relative group bg-muted/50 h-full ${className}`}
-      style={height ? { height: `${height}px` } : {}}
+      className={`relative group bg-muted/50 ${className}`}
+      style={{ height: `${height}px` }}
     >
       {/* Floating Toolbar */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

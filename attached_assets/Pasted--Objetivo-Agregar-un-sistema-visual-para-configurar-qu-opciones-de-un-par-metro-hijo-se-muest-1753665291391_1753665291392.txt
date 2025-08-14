@@ -1,0 +1,68 @@
+# 🎯 Objetivo:
+Agregar un sistema visual para configurar qué opciones de un parámetro hijo se muestran dependiendo de la opción seleccionada en un parámetro padre.
+
+## ✅ Contexto:
+- Ya existen nodos (parámetros) conectados entre sí en un canvas tipo flow.
+- La tabla `task_parameter_dependencies` define qué parámetro es padre y cuál es hijo.
+- La tabla `task_parameter_dependency_options` (VACÍA actualmente) tiene:
+  - `dependency_id` → ID de la dependencia entre dos parámetros.
+  - `child_option_id` → opción que se habilita en el parámetro hijo si se cumple la condición.
+- Queremos que el usuario (creador de template) pueda configurar estas condiciones visualmente.
+
+---
+
+## 🧩 Qué hacer:
+
+### 1. Cuando el usuario conecta un parámetro a otro:
+- Ya se genera una entrada en `task_parameter_dependencies` (mantener esto como está).
+
+### 2. Agregar botón en cada nodo hijo:
+- Si ese nodo tiene parámetros padre conectados, mostrar un ícono tipo ⚙️ o una opción llamada **"Configurar visibilidad por opción"**.
+- Al hacer clic, abrir un modal o panel lateral.
+
+---
+
+## 🔧 Modal: “Configurar Visibilidad por Opción”
+
+Este modal debe:
+
+1. Leer la `dependency_id` correspondiente (de `task_parameter_dependencies`).
+2. Obtener:
+   - Las opciones del parámetro padre (`parent_parameter_id`) → desde `task_parameter_options`.
+   - Las opciones del parámetro hijo (`child_parameter_id`) → también desde `task_parameter_options`.
+
+3. Renderizar una tabla o matriz así:
+
+| Opción del Padre        | Opciones del Hijo (checkboxes)                   |
+|-------------------------|--------------------------------------------------|
+| Ejecución de Muro       | [ ] Mortero A  [x] Mortero B  [ ] Pegamento      |
+| Ejecución de Cielorraso | [x] Mortero A  [x] Mortero B  [x] Pegamento      |
+
+4. Cada checkbox marca si esa opción del hijo debe estar disponible cuando se elige esa opción del padre.
+
+5. Guardar los datos en la tabla `task_parameter_dependency_options`:
+   - Por cada combinación permitida → una fila con:
+     - `dependency_id`
+     - `child_option_id`
+
+---
+
+## 💾 Comportamiento posterior:
+
+Cuando se renderiza el parámetro hijo:
+- Solo deben mostrarse las `child_option_id` asociadas al `dependency_id` según la opción actual del padre.
+
+---
+
+## 🎨 Estética:
+- Seguir estilo actual de los modales.
+- Usar `react-hook-form` o el sistema de forms existente.
+- Preferiblemente usar un componente visual como tabla o `Accordion` para cada opción del padre, con sus checkboxes del hijo.
+
+---
+
+## 🧪 Testing:
+- Probar conectando Tipo de Tarea → Tipo de Mortero.
+- Configurar visibilidad condicional.
+- Verificar que las opciones del hijo se actualicen dinámicamente al cambiar el valor del padre.
+

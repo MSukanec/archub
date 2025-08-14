@@ -1,0 +1,58 @@
+Necesito reemplazar el sistema actual de nodos (tipo React Flow) que usamos para gestionar los parámetros de tareas (`task_parameters`) por una **interfaz tipo tabla editable**, más clara, escalable y robusta.
+
+🎯 Objetivo: visualizar, editar y reordenar todos los parámetros, su jerarquía (`parent_id`) y su orden relativo (`order`) de forma simple.
+
+---
+
+🧱 Estructura base de la tabla `task_parameters`:
+- `id` (uuid)
+- `name` (texto visible del parámetro)
+- `slug` (identificador único)
+- `parent_id` (uuid o null)
+- `order` (entero)
+- `type` (opcional, ej. selector, texto, etc.)
+
+---
+
+🖥️ Crear un componente de **gestión de parámetros** con las siguientes características:
+
+1. **Tabla editable** con las siguientes columnas:
+   - `Nombre del Parámetro`
+   - `Slug`
+   - `Parent` (editable con un select desplegable de los otros parámetros)
+   - `Orden` (número editable)
+   - `Acciones`: editar, duplicar, eliminar
+
+2. **Jerarquía visual**: mostrar los parámetros como árbol (indentado según profundidad por `parent_id`), como hace Notion o Airtable en sus tablas jerárquicas.
+
+3. **Edición Inline**:
+   - Que se pueda cambiar el `parent_id` desde un `<select>` sin loops (ej: no se puede asignar un parámetro como hijo de su descendiente).
+   - Que se pueda reordenar (`order`) manualmente dentro de cada nivel (drag & drop opcional).
+
+4. **Validaciones automáticas**:
+   - No permitir loops entre padres/hijos.
+   - Mostrar si hay parámetros huérfanos (sin padre pero que deberían tenerlo).
+   - Avisar si hay parámetros duplicados por `slug`.
+
+5. **Botón 'Nuevo Parámetro'** arriba a la derecha:
+   - Abre modal para crear un nuevo parámetro con: `name`, `slug`, `type`, `parent_id`, `order`
+
+6. **Guardado**:
+   - Cada cambio (parent, orden, nombre) debe guardarse automáticamente en Supabase usando `update()`.
+
+7. **Carga inicial**:
+   - Consultar todos los parámetros desde Supabase, ordenados por `order`.
+   - Construir la jerarquía de padres/hijos localmente.
+
+8. **Diseño UI**:
+   - Dark mode, estilo consistente con el resto de la app (tipo Supabase).
+   - Usar íconos claros para acciones (editar, eliminar, duplicar).
+   - Mostrar una línea vertical o indentación para los hijos (tipo árbol).
+
+---
+
+💡 Bonus (opcional):
+- Agregar búsqueda por nombre o slug.
+- Permitir expandir/colapsar nodos hijos para mejorar la navegación si hay muchos parámetros.
+
+Este componente debe reemplazar el sistema visual de nodos (React Flow) que usamos actualmente. Queremos más control, menor error y una experiencia más ordenada.

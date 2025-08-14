@@ -1,0 +1,123 @@
+🚨 Necesito que refactorices completamente `ModalFactory.tsx` y TODOS los archivos de modales (`BoardFormModal.tsx`, `CardFormModal.tsx`, `GalleryFormModal.tsx`, `MemberFormModal.tsx`) con la siguiente estructura UNIFICADA. Esto es crítico para evitar duplicación de layouts, estilos inconsistentes y bugs visuales.
+
+---
+
+🎯 OBJETIVO:
+
+✅ Todos los modales deben retornar un OBJETO con la siguiente estructura:
+
+```ts
+{
+  viewPanel: JSX.Element,
+  editPanel: JSX.Element,
+  headerContent: JSX.Element,
+  footerContent: JSX.Element
+}
+❌ NO deben renderizar FormModalLayout adentro.
+✅ Solo ModalFactory.tsx debe usar FormModalLayout.
+
+🧱 ESTRUCTURA DE CADA MODAL:
+
+Por ejemplo, GalleryFormModal.tsx debería verse así:
+
+tsx
+Copiar
+Editar
+export function GalleryFormModal({ modalData, onClose }: Props) {
+  const { currentPanel } = useModalPanelStore();
+
+  const headerContent = (
+    <FormModalHeader title="Galería" onClose={onClose} />
+  );
+
+  const footerContent = (
+    <FormModalFooter
+      primaryButtonText="Guardar"
+      onPrimary={() => console.log("Guardar galería")}
+    />
+  );
+
+  const viewPanel = (
+    <div>Contenido de vista</div>
+  );
+
+  const editPanel = (
+    <div>Contenido de edición</div>
+  );
+
+  return {
+    viewPanel,
+    editPanel,
+    headerContent,
+    footerContent,
+  };
+}
+🧠 LÓGICA CENTRAL EN ModalFactory.tsx:
+
+Debe hacer el switch de tipo de modal, invocar los componentes como función, y renderizar un único FormModalLayout con los valores retornados:
+
+tsx
+Copiar
+Editar
+import { useGlobalModalStore } from './useGlobalModalStore';
+import { FormModalLayout } from './FormModalLayout';
+import { MemberFormModal } from '../modals/MemberFormModal';
+import { GalleryFormModal } from '../modals/GalleryFormModal';
+import { BoardFormModal } from '../modals/BoardFormModal';
+import { CardFormModal } from '../modals/CardFormModal';
+
+export function ModalFactory() {
+  const { open, type, data, closeModal } = useGlobalModalStore();
+
+  if (!open) return null;
+
+  const getModalData = () => {
+    switch (type) {
+      case 'member':
+        return MemberFormModal({ editingMember: data?.editingMember, onClose: closeModal });
+      case 'gallery':
+        return GalleryFormModal({ modalData: data, onClose: closeModal });
+      case 'board':
+        return BoardFormModal({ modalData: data, onClose: closeModal });
+      case 'card':
+        return CardFormModal({ modalData: data, onClose: closeModal });
+      default:
+        return null;
+    }
+  };
+
+  const modalData = getModalData();
+
+  if (!modalData || !modalData.editPanel) return null;
+
+  return (
+    <FormModalLayout
+      viewPanel={modalData.viewPanel}
+      editPanel={modalData.editPanel}
+      headerContent={modalData.headerContent}
+      footerContent={modalData.footerContent}
+      onClose={closeModal}
+    />
+  );
+}
+🧼 Asegurate de:
+
+Usar useModalPanelStore() para detectar si se está en modo 'edit' o 'view'.
+
+No tener FormModalLayout duplicado dentro de cada modal.
+
+No aplicar padding, borde o scroll directamente a los paneles. Todo eso ya está resuelto dentro de FormModalBody.
+
+📁 Modificá los siguientes archivos:
+
+BoardFormModal.tsx
+
+CardFormModal.tsx
+
+GalleryFormModal.tsx
+
+MemberFormModal.tsx
+
+ModalFactory.tsx
+
+✅ ¡Dejame todo funcionando bien con esta arquitectura!

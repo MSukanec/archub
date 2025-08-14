@@ -1,0 +1,77 @@
+## Objetivo
+
+Corregir el envío de datos al guardar la configuración de onboarding en Archub, ya que los valores que estamos mandando a Supabase para los campos de tipo ENUM no coinciden exactamente con los que espera el backend.
+
+---
+
+## Problema actual
+
+Estamos recibiendo el siguiente error al intentar hacer PATCH a Supabase:
+
+400 (Bad Request)
+invalid input value for enum team_size: "6-15 personas"
+
+yaml
+Copiar
+Editar
+
+Esto ocurre porque el valor que se está enviando **no coincide exactamente** con el valor definido en el ENUM de Supabase. Por ejemplo:
+
+- Supabase espera `"6–15 personas"` (con EN DASH, `–`)
+- El frontend está enviando `"6-15 personas"` (con guion ASCII simple `-`)
+
+---
+
+## Solución
+
+1. Crear una función que **mapee las opciones del frontend a los valores exactos del ENUM** antes de enviarlos a Supabase.
+
+2. Usar **objetos de opciones** con claves internas (`value`) que coincidan al 100% con el ENUM, y etiquetas (`label`) solo para mostrar al usuario.
+
+---
+
+## Ejemplo para `team_size`
+
+Reemplazar el array plano por:
+
+```ts
+export const teamSizeOptions = [
+  { label: "Trabajo solo/a", value: "Trabajo solo/a" },
+  { label: "2–5 personas", value: "2–5 personas" },
+  { label: "6–15 personas", value: "6–15 personas" }, // usar EN DASH correcto
+  { label: "Más de 15 personas", value: "Más de 15 personas" }
+]
+Hacer lo mismo con:
+
+user_role
+
+main_use
+
+discovered_by
+
+En el formulario
+Asegurarse de que lo que se guarda en la base sea siempre value, no label.
+
+Ejemplo con React Hook Form:
+
+tsx
+Copiar
+Editar
+<Select
+  {...register("team_size")}
+  options={teamSizeOptions}
+  getOptionLabel={(opt) => opt.label}
+  getOptionValue={(opt) => opt.value}
+/>
+O si es un componente custom:
+
+ts
+Copiar
+Editar
+onChange={(option) => setValue("team_size", option.value)}
+Validación final
+Antes de hacer el .update() en Supabase, verificar que:
+
+Los campos de tipo ENUM contienen solo strings exactas
+
+No haya espacios de más, guiones incorrectos, tildes mal escritas

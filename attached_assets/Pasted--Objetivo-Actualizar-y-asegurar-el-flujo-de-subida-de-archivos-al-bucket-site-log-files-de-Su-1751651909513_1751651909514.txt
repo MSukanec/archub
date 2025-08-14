@@ -1,0 +1,88 @@
+## Objetivo
+
+Actualizar y asegurar el flujo de subida de archivos al bucket `site-log-files` de Supabase Storage, para que respete las políticas RLS basadas en la tabla `site_log_files`.
+
+---
+
+## Contexto técnico
+
+- El sistema usa una tabla llamada `site_log_files` que almacena metadata sobre cada archivo subido (nombre, ruta, tipo, visibilidad, etc.).
+- Las reglas RLS en Supabase **solo permiten acceso a archivos si existe una fila correspondiente en `site_log_files`, y el `user_id` está asociado al usuario autenticado.**
+- Importante: el campo `site_log_files.user_id` es una foreign key a `users.id`, y no directamente a `auth.uid()`.
+
+Por eso, en el frontend ya tenemos una función (como `archub_get_user()`) que al iniciar sesión carga el `user.id` real del sistema (no el `auth_id`), y lo guarda en el contexto de usuario.
+
+---
+
+## Qué debe hacer el código
+
+### 1. Subir archivo al bucket `site-log-files`
+
+Generar un nombre único para el archivo:
+
+```ts
+const extension = file.name.split('.').pop();
+const filePath = `${crypto.randomUUID()}.${extension}`;
+Subir el archivo:
+
+ts
+Copiar
+Editar
+const { error: uploadError } = await supabase.storage
+  .from('site-log-files')
+  .upload(filePath, file, {
+    upsert: true, // evita error si el nombre se repite
+  });
+
+if (uploadError) {
+  console.error('Error al subir archivo', uploadError);
+  return;
+}
+2. Insertar fila en site_log_files
+ts
+Copiar
+Editar
+const { data: { publicUrl } } = supabase
+  .storage
+  .from('site-log-files')
+  .getPublicUrl(filePath);
+
+await supabase.from('site_log_files').insert({
+  file_path: filePath,
+  file_name: file.name,
+  file_type: file.type,
+  file_url: publicUrl,
+  site_log_id, // ID del registro de bitácora
+  user_id: currentUser.user.id, // obtenido desde el contexto, no auth.uid()
+  organization_id: currentUser.organization.id, // también desde el contexto
+  visibility: 'organization' // o 'private' según lo que se defina en el modal
+});
+Validaciones necesarias
+Antes de subir, verificar:
+
+ts
+Copiar
+Editar
+if (!file || file.size === 0) {
+  console.error('Archivo vacío o inválido');
+  return;
+}
+Y loguear:
+
+ts
+Copiar
+Editar
+console.log('Subiendo archivo:', filePath, file);
+Resultado esperado
+El archivo se sube correctamente a Supabase Storage.
+
+La fila correspondiente se guarda en site_log_files.
+
+Las RLS permiten acceder al archivo si:
+
+El user_id de la fila coincide con el usuario autenticado (auth.uid() === users.auth_id)
+
+O la visibilidad es 'organization' y la organization_id coincide
+
+Reglas RLS activas
+Las reglas de seguridad en Supabase usan EXISTS + JOIN con users para verificar que auth.uid() coincida con users.auth_id. Por eso es fundamental guardar user_id correctamente desde el contexto.

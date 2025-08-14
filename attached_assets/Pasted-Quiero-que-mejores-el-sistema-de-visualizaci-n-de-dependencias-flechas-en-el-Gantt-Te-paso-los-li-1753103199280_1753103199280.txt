@@ -1,0 +1,73 @@
+Quiero que mejores el sistema de visualización de dependencias (flechas) en el Gantt. Te paso los lineamientos clave que deben cumplirse sí o sí para que el resultado sea profesional, legible y usable como en el ejemplo mostrado:
+
+🎯 OBJETIVO
+Implementar un sistema visual de flechas SVG para mostrar las dependencias entre tareas del Gantt. Las flechas deben ser:
+
+Totalmente vectoriales (SVG)
+
+Perfectamente rectas, con segmentos verticales y horizontales bien definidos.
+
+Con solo una pequeña curva de giro si es necesario (como en el ejemplo adjunto).
+
+
+Responsivas: al mover tareas, las flechas deben re-renderizarse automáticamente.
+
+Multi-target: una misma tarea puede tener varias dependencias entrantes y salientes.
+
+🧠 LÓGICA GENERAL
+Para cada dependencia:
+
+for each dependency in dependencies:
+  draw SVG path from output connector of predecessor_task_id
+                     to input connector of successor_task_id
+🧩 CÓMO DIBUJAR CADA FLECHA
+La flecha debe tener la siguiente estructura:
+
+Línea horizontal desde el centro del conector de salida (output) hacia la derecha unos 8–16px.
+
+Línea vertical hasta alinearse con el conector de entrada (input) de la tarea sucesora.
+
+Línea horizontal izquierda hasta llegar al conector de entrada.
+
+Flechita final (marker-end) para indicar dirección.
+
+💡 Solo se permite una curva sutil en el punto de quiebre entre dirección horizontal y vertical.
+
+🧷 EJEMPLO DE CÓDIGO
+tsx
+Copiar
+Editar
+<svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+  {dependencies.map(dep => {
+    const from = getCoords(dep.predecessor_task_id, "output")
+    const to = getCoords(dep.successor_task_id, "input")
+
+    const path = generatePath(from, to) // devuelve un string tipo "M x1 y1 H x2 V y2 H x3"
+
+    return (
+      <path
+        key={dep.id}
+        d={path}
+        stroke="#aaa"
+        strokeWidth="2"
+        fill="none"
+        markerEnd="url(#arrowhead)"
+        onClick={() => openDependencyModal(dep)}
+        className="pointer-events-auto hover:stroke-red-400 cursor-pointer transition-colors duration-200"
+      />
+    )
+  })}
+</svg>
+📐 NOTAS DE ESTILO
+Las flechas deben dibujarse en un <svg> que cubra toda la grilla (posición absolute, pointer-events: none, salvo los <path>).
+
+Los conectores (círculos) deben estar por fuera del rectángulo de tarea, claramente visibles y no confundibles con los de resize.
+
+Las flechas no deben superponerse con las barras de tareas.
+
+✨ EXTRAS (si querés ir más allá)
+Agregar un efecto hover que cambie el color o aumente el grosor de la flecha.
+
+Mostrar tooltip con el tipo de dependencia o ID.
+
+Permitir que las dependencias se creen arrastrando desde el conector (drag to connect), aunque esto es opcional por ahora.

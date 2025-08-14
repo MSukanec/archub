@@ -1,0 +1,42 @@
+Quiero que crees una nueva página en el panel de administración llamada `Parámetros de Tarea`, dentro de la sección de "Administrador" de mi app (igual que otras secciones del admin). Esta página debe permitir trabajar sobre dos tablas de Supabase:
+
+- `task_parameters`
+- `task_template_parameter_options`
+
+### ESTRUCTURA DE LA INTERFAZ:
+
+La interfaz debe tener una vista tipo **acordeón**. Cada acordeón representa un parámetro (`task_parameters`). Al hacer clic, se despliegan las opciones disponibles vinculadas a ese parámetro (`task_template_parameter_options`), ordenadas por `position`.
+
+### FUNCIONALIDADES:
+
+1. **Listar Parámetros (`task_parameters`)**
+   - Mostrar: `label`, `name`, `type`, `unit_id`
+   - Botón “Agregar Parámetro” arriba del listado
+   - Cada parámetro debe tener botones de: Editar 🖊️ / Eliminar 🗑️
+
+2. **Dentro de cada parámetro (acordeón expandido): listar sus opciones (`task_template_parameter_options`)**
+   - Mostrar: `label`, `value`, `position`
+   - Botón “Agregar Opción”
+   - Cada opción debe tener botones de: Editar 🖊️ / Eliminar 🗑️
+
+3. **Agregar Parámetro** (modal o inline form):
+   - Campos requeridos: `label`, `name`, `type` (select o number), `unit_id` (opcional)
+   - Al guardar, crear una fila en `task_parameters`.
+
+4. **Agregar Opción** (dentro del acordeón abierto):
+   - Campos requeridos: `label`, `value`, `position`
+   - Al guardar, crear una fila en `task_template_parameter_options` con `parameter_id` correspondiente.
+
+5. **Edición y eliminación**:
+   - Debe permitir editar y eliminar tanto parámetros como opciones.
+   - Confirmar con modal antes de eliminar.
+
+### ESTILO:
+- Usar el mismo estilo y componentes del sistema actual.
+- Debe ser responsive.
+- Los acordeones deben tener el mismo tamaño de fuente y padding que el resto del sistema.
+
+### NOTAS:
+- Usar React, Zustand y React Query como en el resto del sistema.
+- Usar una tabla virtualizada si hay muchos parámetros/opciones.
+- Todas las relaciones ya están definidas por foreign keys en Supabase.
