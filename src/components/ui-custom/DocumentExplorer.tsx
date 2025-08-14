@@ -6,8 +6,12 @@ import {
   Folder, 
   ArrowLeft,
   ChevronRight,
-  FileText
+  FileText,
+  FolderPlus,
+  Edit,
+  Trash2
 } from 'lucide-react';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { format } from 'date-fns';
@@ -78,11 +82,39 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
     setNavigation(navigation.slice(0, index + 1));
   };
 
-  const getFileIcon = (fileType?: string) => {
-    if (!fileType) return FileText;
-    if (fileType.startsWith('image/')) return Image;
-    if (fileType === 'application/pdf') return FileText;
-    return File;
+  // Modal functions
+  const { openModal } = useGlobalModalStore();
+  
+  const openNewFolderModal = () => {
+    const parentId = currentLevel.type !== 'root' ? currentLevel.id : undefined;
+    const parentName = currentLevel.type !== 'root' ? currentLevel.name : undefined;
+    
+    openModal('document-folder', {
+      parentId,
+      parentName
+    });
+  };
+  
+  const openEditFolderModal = (folder: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    openModal('document-folder', {
+      editingFolder: {
+        id: folder.id,
+        name: folder.name
+      }
+    });
+  };
+  
+  const openDeleteFolderModal = (folder: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    openModal('delete-confirmation', {
+      itemType: 'carpeta',
+      itemName: folder.name,
+      onConfirm: () => {
+        // TODO: Implement delete folder logic
+        console.log('Delete folder:', folder.id);
+      }
+    });
   };
 
   const getStatusColor = (status?: string) => {
@@ -108,36 +140,49 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
   return (
     <ScrollArea className={`h-full ${className}`}>
       <div className="space-y-4 p-4">
-        {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2">
-        {!isRoot && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={navigateBack}
-            className="p-1 h-8 w-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        )}
-        
-        <div className="flex items-center gap-2">
-          {navigation.map((item, index) => (
-            <React.Fragment key={item.id}>
-              {index > 0 && <span className="text-muted-foreground">/</span>}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigateTo(index)}
-                className="h-8 px-2 font-medium"
-                disabled={index === navigation.length - 1}
+        {/* Header with Navigation and Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {!isRoot && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={navigateBack}
+                className="p-1 h-8 w-8"
               >
-                {item.name}
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-            </React.Fragment>
-          ))}
+            )}
+            
+            <div className="flex items-center gap-2">
+              {navigation.map((item, index) => (
+                <React.Fragment key={item.id}>
+                  {index > 0 && <span className="text-muted-foreground">/</span>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigateTo(index)}
+                    className="h-8 px-2 font-medium"
+                    disabled={index === navigation.length - 1}
+                  >
+                    {item.name}
+                  </Button>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          
+          {/* Nueva Carpeta Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={openNewFolderModal}
+            className="h-8 px-3 text-xs"
+          >
+            <FolderPlus className="h-3 w-3 mr-1" />
+            Nueva carpeta
+          </Button>
         </div>
-      </div>
 
         {/* Content Area */}
         <div className="space-y-3">
@@ -148,7 +193,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
               {rootFolders.map((folder) => (
                 <div 
                   key={folder.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
+                  className="group flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
                   <div className="p-1.5 rounded-lg bg-primary/10">
@@ -157,7 +202,28 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate text-sm">{folder.name}</h4>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  
+                  {/* Hover Actions */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-primary/10"
+                      onClick={(e) => openEditFolderModal(folder, e)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-destructive/10"
+                      onClick={(e) => openDeleteFolderModal(folder, e)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:opacity-50" />
                 </div>
               ))}
             </div>
@@ -171,12 +237,37 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
               {subFolders.map((folder) => (
                 <div 
                   key={folder.id} 
-                  className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
+                  className="group flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors border border-border/50"
                   onClick={() => navigateToFolder(folder)}
                 >
                   <div className="p-1.5 rounded-lg bg-secondary/50">
                     <Folder className="h-4 w-4 text-secondary-foreground" />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate text-sm">{folder.name}</h4>
+                  </div>
+                  
+                  {/* Hover Actions */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-primary/10"
+                      onClick={(e) => openEditFolderModal(folder, e)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-destructive/10"
+                      onClick={(e) => openDeleteFolderModal(folder, e)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:opacity-50" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate text-sm">{folder.name}</h4>
                   </div>
