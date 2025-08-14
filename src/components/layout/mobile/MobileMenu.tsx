@@ -337,7 +337,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
-      { icon: Users, label: 'Asistencia', href: '/construction/personnel' },
+      { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis' },
     ],
     finanzas: [

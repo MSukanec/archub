@@ -127,7 +127,7 @@ export function SidebarSubmenu() {
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
-      { icon: Users, label: 'Asistencia', href: '/construction/personnel', requiresProject: true },
+      { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis', requiresProject: true },
     ],
 

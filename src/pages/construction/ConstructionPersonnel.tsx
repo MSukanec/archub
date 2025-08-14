@@ -1,5 +1,5 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -7,8 +7,9 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { Users, Plus } from 'lucide-react'
+import { Users, Plus, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -109,7 +110,7 @@ function transformAttendanceData(attendanceData: any[]) {
   return { workers, attendance }
 }
 
-export default function ConstructionAttendance() {
+export default function ConstructionPersonnel() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const { data: attendanceData = [], isLoading } = useAttendanceData(
@@ -117,6 +118,7 @@ export default function ConstructionAttendance() {
     userData?.organization?.id
   )
   const { setSidebarContext } = useNavigationStore()
+  const [activeTab, setActiveTab] = useState('active')
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -147,16 +149,16 @@ export default function ConstructionAttendance() {
 
   const headerProps = {
     icon: Users,
-    title: "Asistencia",
+    title: "Personal",
     breadcrumb: [
-      { name: "Construcción", href: "/construction" },
-      { name: "Asistencia", href: "/construction/attendance" }
+      { name: "Construcción", href: "/construction/dashboard" },
+      { name: "Personal", href: "/construction/personnel" }
     ],
-    actionButton: {
+    actionButton: activeTab === 'attendance' ? {
       label: 'Registrar Asistencia',
       icon: Plus,
       onClick: () => openModal('attendance', {})
-    }
+    } : undefined
   }
 
   if (isLoading) {
@@ -171,19 +173,42 @@ export default function ConstructionAttendance() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      {workers.length > 0 ? (
-        <CustomGradebook 
-          workers={workers}
-          attendance={attendance}
-          onEditAttendance={handleEditAttendance}
-        />
-      ) : (
-        <EmptyState
-          icon={<Users className="h-12 w-12" />}
-          title="Sin personal registrado"
-          description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-        />
-      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="active" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Activos
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Asistencia
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active" className="space-y-6">
+          <EmptyState
+            icon={<Users className="h-12 w-12" />}
+            title="Personal Activo"
+            description="Esta sección mostrará el personal actualmente asignado al proyecto."
+          />
+        </TabsContent>
+
+        <TabsContent value="attendance" className="space-y-6">
+          {workers.length > 0 ? (
+            <CustomGradebook 
+              workers={workers}
+              attendance={attendance}
+              onEditAttendance={handleEditAttendance}
+            />
+          ) : (
+            <EmptyState
+              icon={<UserCheck className="h-12 w-12" />}
+              title="Sin registros de asistencia"
+              description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+            />
+          )}
+        </TabsContent>
+      </Tabs>
     </Layout>
   )
 }
