@@ -488,13 +488,13 @@ export function UnifiedViewer({
       </div>
 
       {/* Content Area */}
-      <div className="absolute inset-0 overflow-auto p-4">
+      <div className="absolute inset-0 overflow-auto">
         {state.fileType === 'pdf' && (
-          <div className="flex items-start justify-center w-full">
+          <div className="p-4 flex justify-center">
             <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
               <canvas 
                 ref={canvasRef}
-                className="block"
+                className="block max-w-none"
                 style={{ display: 'block' }}
               />
             </div>
@@ -502,17 +502,19 @@ export function UnifiedViewer({
         )}
 
         {state.fileType === 'image' && state.imageUrl && (
-          <img
-            ref={imageRef}
-            src={state.imageUrl}
-            alt={fileName}
-            className="max-w-none"
-            style={{
-              transform: `scale(${state.scale}) rotate(${state.rotation}deg)`,
-              transformOrigin: 'center',
-              transition: 'transform 0.2s ease-in-out'
-            }}
-          />
+          <div className="p-4 flex justify-center">
+            <img
+              ref={imageRef}
+              src={state.imageUrl}
+              alt={fileName}
+              className="max-w-none"
+              style={{
+                transform: `scale(${state.scale}) rotate(${state.rotation}deg)`,
+                transformOrigin: 'center',
+                transition: 'transform 0.2s ease-in-out'
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
