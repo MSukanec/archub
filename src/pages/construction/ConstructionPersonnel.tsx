@@ -130,12 +130,12 @@ export default function ConstructionPersonnel() {
           id,
           notes,
           created_at,
-          contact:contacts(
+          contact:contacts!inner(
             id,
             first_name,
             last_name,
-            contact_type_links(
-              contact_type:contact_types(name)
+            contact_type_links!inner(
+              contact_type:contact_types!inner(name)
             )
           )
         `)

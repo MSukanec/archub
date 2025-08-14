@@ -121,16 +121,20 @@ export function PersonnelTable({
   const formatCellData = (record: PersonnelRecord, key: string) => {
     switch (key) {
       case "contact":
+        const contact = record.contact;
+        if (!contact || typeof contact !== 'object') {
+          return <span className="text-muted-foreground">Sin datos de contacto</span>;
+        }
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="text-xs">
-                {record.contact.first_name?.charAt(0)}{record.contact.last_name?.charAt(0)}
+                {contact.first_name?.charAt(0) || ''}{contact.last_name?.charAt(0) || ''}
               </AvatarFallback>
             </Avatar>
             <div>
               <p className="font-medium">
-                {record.contact.first_name} {record.contact.last_name}
+                {contact.first_name || ''} {contact.last_name || ''}
               </p>
             </div>
           </div>
@@ -144,7 +148,8 @@ export function PersonnelTable({
         );
 
       case "contact_type":
-        const contactType = record.contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo';
+        const contactForType = record.contact;
+        const contactType = contactForType?.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo';
         return (
           <Badge variant="outline">
             {contactType}
@@ -207,7 +212,7 @@ export function PersonnelTable({
             <AlertDialogDescription>
               Esta acción eliminará a{' '}
               <strong>
-                {selectedRecord?.contact.first_name} {selectedRecord?.contact.last_name}
+                {selectedRecord?.contact?.first_name || ''} {selectedRecord?.contact?.last_name || ''}
               </strong>{' '}
               del proyecto. Esta acción no se puede deshacer.
             </AlertDialogDescription>
