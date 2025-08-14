@@ -49,6 +49,8 @@ import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibil
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
 import { SubcontractBidFormModal } from '../modals/construction/SubcontractBidFormModal';
+import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
+import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -168,6 +170,10 @@ export function ModalFactory() {
       return <SubcontractFormModal modalData={data} onClose={closeModal} />;
     case 'subcontract-bid':
       return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
+    case 'insurance':
+      return <InsuranceFormModal modalData={data} onClose={closeModal} />;
+    case 'renew-insurance':
+      return <RenewInsuranceFormModal modalData={data} onClose={closeModal} />;
     default:
       return null;
   }

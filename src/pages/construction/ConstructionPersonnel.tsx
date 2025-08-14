@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
+import { InsuranceTab } from '@/components/personnel/insurance/InsuranceTab';
 
 // Hook to fetch attendance data from new attendees table
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
@@ -222,6 +223,11 @@ export default function ConstructionPersonnel() {
         id: 'attendance',
         label: 'Asistencia',
         isActive: activeTab === 'attendance'
+      },
+      {
+        id: 'insurance',
+        label: 'Seguros',
+        isActive: activeTab === 'insurance'
       }
     ],
     onTabChange: setActiveTab,
@@ -233,6 +239,13 @@ export default function ConstructionPersonnel() {
       label: 'Agregar Personal',
       icon: Plus,
       onClick: () => openModal('personnel')
+    } : activeTab === 'insurance' ? {
+      label: 'Nuevo Seguro',
+      icon: Plus,
+      onClick: () => openModal('insurance', { 
+        mode: 'create', 
+        projectId: userData?.preferences?.last_project_id 
+      })
     } : undefined
   }
 
@@ -364,6 +377,8 @@ export default function ConstructionPersonnel() {
             )}
           </>
         )}
+
+        {activeTab === 'insurance' && <InsuranceTab />}
       </div>
     </Layout>
   )
