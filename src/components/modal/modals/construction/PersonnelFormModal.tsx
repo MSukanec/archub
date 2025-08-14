@@ -35,18 +35,10 @@ import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 
 const PersonnelFormSchema = z.object({
-  contact_ids: z.array(z.string()).min(1, "Selecciona al menos un contacto"),
-  role: z.string().min(1, "Selecciona un rol")
+  contact_ids: z.array(z.string()).min(1, "Selecciona al menos un contacto")
 });
 
 type PersonnelFormData = z.infer<typeof PersonnelFormSchema>;
-
-const PERSONNEL_ROLES = [
-  { value: "supervisor", label: "Supervisor" },
-  { value: "worker", label: "Trabajador" },
-  { value: "specialist", label: "Especialista" },
-  { value: "foreman", label: "Capataz" }
-];
 
 interface Contact {
   id: string;
@@ -67,8 +59,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
   const form = useForm<PersonnelFormData>({
     resolver: zodResolver(PersonnelFormSchema),
     defaultValues: {
-      contact_ids: [],
-      role: ""
+      contact_ids: []
     }
   });
 
@@ -106,8 +97,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       const { data, error } = await supabase
         .from('project_personnel')
         .select('contact_id')
-        .eq('project_id', userData.preferences.last_project_id)
-        .eq('is_active', true);
+        .eq('project_id', userData.preferences.last_project_id);
 
       if (error) throw error;
       return data.map(p => p.contact_id);
@@ -128,9 +118,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
 
       const personnelRecords = data.contact_ids.map(contactId => ({
         project_id: userData.preferences.last_project_id,
-        contact_id: contactId,
-        role: data.role,
-        is_active: true
+        contact_id: contactId
       }));
 
       const { error } = await supabase
@@ -179,31 +167,6 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rol del Personal</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un rol..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {PERSONNEL_ROLES.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="contact_ids"
@@ -282,7 +245,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       rightLabel="Agregar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
       rightLoading={createPersonnelMutation.isPending}
-      rightDisabled={selectedContacts.length === 0 || !form.watch('role')}
+      rightDisabled={selectedContacts.length === 0}
     />
   );
 

@@ -128,8 +128,7 @@ export default function ConstructionPersonnel() {
         .from('project_personnel')
         .select(`
           id,
-          role,
-          is_active,
+          notes,
           created_at,
           contact:contacts(
             id,
@@ -141,7 +140,6 @@ export default function ConstructionPersonnel() {
           )
         `)
         .eq('project_id', userData.preferences.last_project_id)
-        .eq('is_active', true)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -228,12 +226,12 @@ export default function ConstructionPersonnel() {
             personnel={personnelData}
             isLoading={isPersonnelLoading}
             onEdit={(record) => {
-              // TODO: Implementar edición de rol
+              // TODO: Implementar edición de notas
               console.log('Edit personnel:', record);
             }}
             onDeactivate={(record) => {
-              // TODO: Implementar desactivación
-              console.log('Deactivate personnel:', record);
+              // TODO: Implementar eliminación
+              console.log('Delete personnel:', record);
             }}
           />
         )}

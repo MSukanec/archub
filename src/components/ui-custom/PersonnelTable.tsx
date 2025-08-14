@@ -27,8 +27,7 @@ import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 interface PersonnelRecord {
   id: string;
-  role: string;
-  is_active: boolean;
+  notes?: string;
   created_at: string;
   contact: {
     id: string;
@@ -49,19 +48,7 @@ interface PersonnelTableProps {
   onDeactivate?: (record: PersonnelRecord) => void;
 }
 
-const ROLE_LABELS = {
-  supervisor: "Supervisor",
-  worker: "Trabajador", 
-  specialist: "Especialista",
-  foreman: "Capataz"
-};
 
-const ROLE_COLORS = {
-  supervisor: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  worker: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  specialist: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  foreman: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
-};
 
 export function PersonnelTable({ 
   personnel, 
@@ -107,16 +94,16 @@ export function PersonnelTable({
     {
       key: "contact" as const,
       label: "Personal",
-      className: "w-1/3"
-    },
-    {
-      key: "role" as const,
-      label: "Rol",
-      className: "w-1/4"
+      className: "w-2/5"
     },
     {
       key: "contact_type" as const,
       label: "Tipo de Contacto",
+      className: "w-1/4"
+    },
+    {
+      key: "notes" as const,
+      label: "Notas",
       className: "w-1/4"
     },
     {
@@ -149,13 +136,11 @@ export function PersonnelTable({
           </div>
         );
       
-      case "role":
-        const roleLabel = ROLE_LABELS[record.role as keyof typeof ROLE_LABELS] || record.role;
-        const roleColor = ROLE_COLORS[record.role as keyof typeof ROLE_COLORS] || "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
+      case "notes":
         return (
-          <Badge className={roleColor}>
-            {roleLabel}
-          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {record.notes || 'Sin notas'}
+          </span>
         );
 
       case "contact_type":
@@ -185,7 +170,7 @@ export function PersonnelTable({
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(record)}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Editar rol
+                  Editar notas
                 </DropdownMenuItem>
               )}
               {onDeactivate && (
@@ -194,7 +179,7 @@ export function PersonnelTable({
                   className="text-red-600 dark:text-red-400"
                 >
                   <UserX className="h-4 w-4 mr-2" />
-                  Desactivar
+                  Eliminar
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -217,13 +202,13 @@ export function PersonnelTable({
       <AlertDialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Desactivar personal?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar personal?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción desactivará a{' '}
+              Esta acción eliminará a{' '}
               <strong>
                 {selectedRecord?.contact.first_name} {selectedRecord?.contact.last_name}
               </strong>{' '}
-              del proyecto. La persona ya no aparecerá como personal activo, pero se mantendrán todos los registros históricos.
+              del proyecto. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -232,7 +217,7 @@ export function PersonnelTable({
               onClick={handleConfirmDeactivate}
               className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
             >
-              Desactivar
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
