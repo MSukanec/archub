@@ -206,7 +206,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
     <Form {...form}>
       <div className="space-y-4">
         {/* Persona y Tipo de Seguro inline */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="personnel_id"
@@ -266,7 +266,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         </div>
 
         {/* Información de la póliza */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="policy_number"
@@ -297,7 +297,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         </div>
 
         {/* Fechas de cobertura */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="coverage_start"
