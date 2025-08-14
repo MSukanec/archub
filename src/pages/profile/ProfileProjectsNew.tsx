@@ -33,8 +33,6 @@ import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarCo
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import { ActionBar } from '@/components/layout/desktop/ActionBar'
 
-
-
 export default function ProfileProjects() {
   const [activeTab, setActiveTab] = useState("proyectos")
   const [searchValue, setSearchValue] = useState("")
@@ -280,47 +278,35 @@ export default function ProfileProjects() {
         .upsert({
           user_id: userData.user.id,
           organization_id: organizationId,
-          last_project_id: projectId,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,organization_id'
-        })
+          last_project_id: projectId
+        });
       
-      if (error) throw error
-      
-      return projectId;
+      if (error) throw error;
     },
-    onSuccess: (projectId) => {
-      // Update project context immediately
-      setSelectedProject(projectId, organizationId);
-      
-      // Invalidar cache de user organization preferences
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
-      });
+    onSuccess: (_, projectId) => {
+      setSelectedProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
       toast({
         title: "Proyecto seleccionado",
-        description: "El proyecto se ha seleccionado correctamente"
-      })
+        description: "El proyecto se ha marcado como activo"
+      });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "No se pudo seleccionar el proyecto",
+        description: error.message || "No se pudo seleccionar el proyecto",
         variant: "destructive"
-      })
+      });
     }
-  })
+  });
 
   const handleSelectProject = (projectId: string) => {
     selectProjectMutation.mutate(projectId)
-    // Only update header, no navigation
   }
 
-
-
+  // Modal handlers
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
   }
@@ -340,8 +326,7 @@ export default function ProfileProjects() {
   // Function to navigate to basic data after setting project as active
   const handleNavigateToBasicData = (project: any) => {
     selectProjectMutation.mutate(project.id)
-    // Navigate to basic data page
-    navigate('/project/basic-data')
+    setActiveTab("datos-basicos")
   }
 
   // Mutación para eliminar proyecto usando el endpoint del servidor
@@ -416,10 +401,6 @@ export default function ProfileProjects() {
     setFilterByStatus('all')
   }
 
-
-
-
-
   const headerProps = {
     title: "Gestión de Proyectos",
     breadcrumb: [
@@ -443,108 +424,285 @@ export default function ProfileProjects() {
     )
   }
 
+  const renderProjectsTab = () => (
+    <div>
+      {/* ProjectHeroCard - Show for active project */}
+      {activeProjectId && (
+        <ProjectHeroCard 
+          project={filteredProjects.find(p => p.id === activeProjectId)}
+          organizationId={organizationId}
+        />
+      )}
 
+      {/* Mostrar contenido solo si hay proyectos */}
+      {filteredProjects.length > 0 ? (
+        <>
+          {/* ActionBar - Show only when there are projects */}
+          <ActionBar 
+            filters={[]}
+            actions={[
+              {
+                label: "Buscar",
+                icon: Search,
+                onClick: () => {
+                  console.log("Search clicked");
+                },
+                variant: "ghost"
+              },
+              {
+                label: "Filtros", 
+                icon: Filter,
+                onClick: () => {
+                  console.log("Filters clicked");
+                },
+                variant: "ghost"
+              },
+              {
+                label: "Limpiar",
+                icon: X,
+                onClick: () => {
+                  setSearchValue("")
+                  setFilterByStatus("all")
+                  setSortBy("date_recent")
+                },
+                variant: "ghost"
+              }
+            ]}
+          />
+          {/* Single column layout for all screen sizes - full width */}
+          <div className="grid grid-cols-1 gap-4 w-full">
+            {filteredProjects.map((project) => (
+              <ProjectItem
+                key={project.id}
+                project={project}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+                onSelect={(project) => handleSelectProject(project.id)}
+                onNavigateToBasicData={handleNavigateToBasicData}
+                isActiveProject={project.id === userOrgPrefs?.last_project_id}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <EmptyState
+          icon={<Folder className="w-12 h-12" />}
+          title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
+          description={searchValue || filterByStatus !== 'all' 
+            ? 'Prueba ajustando los filtros de búsqueda' 
+            : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
+          }
+          action={
+            <Button
+              onClick={() => openModal('project', {})}
+              className="mt-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Proyecto
+            </Button>
+          }
+        />
+      )}
+    </div>
+  );
 
+  const renderBasicDataTab = () => {
+    if (!projectId) {
+      return (
+        <EmptyState
+          icon={<FileText className="w-12 h-12" />}
+          title="No hay proyecto seleccionado"
+          description="Selecciona un proyecto activo desde la tab de Proyectos para editar sus datos básicos"
+        />
+      );
+    }
 
+    return (
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Project Image Section */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <ImageIcon className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">Imagen del Proyecto</h3>
+            </div>
+            
+            <ProjectHeroImage 
+              projectId={projectId}
+              currentImageUrl={projectImageUrl}
+              onImageUpdate={(newUrl) => setProjectImageUrl(newUrl)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Project Information */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <FileText className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">Información del Proyecto</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="project-name">Nombre del Proyecto</Label>
+                <Input
+                  id="project-name"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Ingresa el nombre del proyecto"
+                />
+              </div>
+              
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe el proyecto..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="internal-notes">Notas Internas</Label>
+                <Textarea
+                  id="internal-notes"
+                  value={internalNotes}
+                  onChange={(e) => setInternalNotes(e.target.value)}
+                  placeholder="Notas internas del proyecto..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Client Information */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Users className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">Información del Cliente</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="client-name">Nombre del Cliente</Label>
+                <Input
+                  id="client-name"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Nombre del cliente"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="contact-phone">Teléfono de Contacto</Label>
+                <Input
+                  id="contact-phone"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder="Teléfono de contacto"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@ejemplo.com"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Location Information */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <MapPin className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">Ubicación del Proyecto</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Dirección</Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Dirección completa"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="city">Ciudad</Label>
+                <Input
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Ciudad"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="state">Estado/Provincia</Label>
+                <Input
+                  id="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="Estado o Provincia"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="country">País</Label>
+                <Input
+                  id="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="País"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="zip-code">Código Postal</Label>
+                <Input
+                  id="zip-code"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  placeholder="Código postal"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
   return (
-    <>
     <Layout headerProps={headerProps}>
-      <div>
-
-
-
-
-
-
-        {/* ProjectHeroCard - Show for active project */}
-        {activeProjectId && (
-          <ProjectHeroCard 
-            project={filteredProjects.find(p => p.id === activeProjectId)}
-            organizationId={organizationId}
-          />
-        )}
-
-        {/* Mostrar contenido solo si hay proyectos */}
-        {filteredProjects.length > 0 ? (
-          <>
-            {/* ActionBar - Show only when there are projects */}
-            <ActionBar 
-              filters={[]}
-              actions={[
-                {
-                  label: "Buscar",
-                  icon: Search,
-                  onClick: () => {
-                    // Placeholder for search functionality
-                    console.log("Search clicked");
-                  },
-                  variant: "ghost"
-                },
-                {
-                  label: "Filtros", 
-                  icon: Filter,
-                  onClick: () => {
-                    // Placeholder for filters functionality
-                    console.log("Filters clicked");
-                  },
-                  variant: "ghost"
-                },
-                {
-                  label: "Limpiar",
-                  icon: X,
-                  onClick: () => {
-                    setSearchValue("")
-                    setFilterByStatus("all")
-                    setSortBy("date_recent")
-                  },
-                  variant: "ghost"
-                }
-              ]}
-            />
-            {/* Single column layout for all screen sizes - full width */}
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {filteredProjects.map((project) => (
-                <ProjectItem
-                  key={project.id}
-                  project={project}
-                  onEdit={handleEdit}
-                  onDelete={handleDeleteClick}
-                  onSelect={(project) => handleSelectProject(project.id)}
-                  onNavigateToBasicData={handleNavigateToBasicData}
-                  isActiveProject={project.id === userOrgPrefs?.last_project_id}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <EmptyState
-            icon={<Folder className="w-12 h-12" />}
-            title={searchValue || filterByStatus !== 'all' ? "No se encontraron proyectos" : "No hay proyectos creados"}
-            description={searchValue || filterByStatus !== 'all' 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primer proyecto para gestionar tu trabajo'
-            }
-            action={
-              <Button
-                onClick={() => openModal('project', {})}
-                className="mt-4"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Proyecto
-              </Button>
-            }
-          />
-        )}
-
-
-
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="proyectos">Proyectos</TabsTrigger>
+          <TabsTrigger value="datos-basicos">Datos Básicos</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="proyectos" className="space-y-6">
+          {renderProjectsTab()}
+        </TabsContent>
+        
+        <TabsContent value="datos-basicos" className="space-y-6">
+          {renderBasicDataTab()}
+        </TabsContent>
+      </Tabs>
     </Layout>
-
-
-
-
-  </>
   )
 }
