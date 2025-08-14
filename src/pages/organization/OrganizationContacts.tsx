@@ -457,6 +457,51 @@ export default function OrganizationContacts() {
           }
           setActiveTab(tabId);
         },
+        // Botones de acción del header
+        showHeaderSearch: true,
+        headerSearchValue: searchValue,
+        onHeaderSearchChange: setSearchValue,
+        showHeaderFilter: true,
+        renderHeaderFilterContent: () => (
+          <div className="space-y-3 p-3">
+            <div>
+              <Label className="text-xs font-medium mb-2 block">Ordenar</Label>
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Ordenar por..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
+                  <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs font-medium mb-2 block">Tipo</Label>
+              <Select value={filterByType} onValueChange={setFilterByType}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Filtrar por tipo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {contactTypes?.map((type) => (
+                    <SelectItem key={type.id} value={type.name.toLowerCase()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        ),
+        isHeaderFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
+        showHeaderClearFilters: sortBy !== 'name_asc' || filterByType !== 'all' || searchValue !== '',
+        onHeaderClearFilters: () => {
+          setSearchValue("");
+          setSortBy('name_asc');
+          setFilterByType('all');
+          setShowSearch(false);
+        },
         actionButton: activeTab === "personas" ? {
           label: 'Crear Contacto',
           icon: UserPlus,
