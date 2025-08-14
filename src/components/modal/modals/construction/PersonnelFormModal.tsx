@@ -174,7 +174,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
           render={() => (
             <FormItem>
               <FormLabel>Seleccionar Contactos</FormLabel>
-              <div className="border rounded-lg p-4 max-h-64 overflow-y-auto space-y-3">
+              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-3">
                 {availableContacts.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground">
                     No hay contactos disponibles para agregar
@@ -190,12 +190,20 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
                         className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
                           isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                         }`}
-                        onClick={() => handleContactToggle(contact.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleContactToggle(contact.id);
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <Checkbox
                             checked={isSelected}
-                            onCheckedChange={() => handleContactToggle(contact.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked !== isSelected) {
+                                handleContactToggle(contact.id);
+                              }
+                            }}
                           />
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">
