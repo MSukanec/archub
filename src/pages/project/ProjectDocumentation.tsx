@@ -95,10 +95,10 @@ export default function ProjectDocumentation() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {/* Desktop: Three Column Layout */}
-      <div className="hidden lg:flex h-full gap-4">
-        {/* Left Column: Document Explorer (15%) */}
-        <div className="w-[15%] flex flex-col">
+      {/* Desktop: Three Column Layout - Full Height */}
+      <div className="hidden lg:flex gap-4" style={{ height: 'calc(100vh - 160px)' }}>
+        {/* Left Column: Document Explorer (20%) */}
+        <div className="w-[20%] flex flex-col">
           <Card className="h-full flex flex-col">
             <div className="px-4 py-3 border-b border-[var(--card-border)]">
               <div className="flex items-center gap-2">
@@ -117,8 +117,8 @@ export default function ProjectDocumentation() {
           </Card>
         </div>
 
-        {/* Center Column: Document Viewer (70%) */}
-        <div className="w-[70%] min-w-0">
+        {/* Center Column: Document Viewer (60%) */}
+        <div className="w-[60%] min-w-0">
           <div 
             className="rounded-lg overflow-hidden border-2 border-dashed h-full"
             style={{ borderColor: 'var(--accent)' }}
@@ -129,9 +129,8 @@ export default function ProjectDocumentation() {
                 path={selectedDocument.file_path}
                 fileName={selectedDocument.file_name}
                 fileType={selectedDocument.file_type}
-                className="w-full"
+                className="w-full h-full"
                 onExpand={handleExpandPdf}
-                height={520}
               />
             ) : (
               <div className="flex items-center justify-center h-full">
@@ -147,8 +146,8 @@ export default function ProjectDocumentation() {
           </div>
         </div>
 
-        {/* Right Column: Document Info + Recent Documents (15%) */}
-        <div className="w-[15%] flex flex-col gap-4">
+        {/* Right Column: Document Info + Recent Documents (20%) */}
+        <div className="w-[20%] flex flex-col gap-4">
           {/* Document Info - Top Half */}
           <div className="flex-1">
             <DocumentInfo 
