@@ -488,14 +488,16 @@ export function UnifiedViewer({
       </div>
 
       {/* Content Area */}
-      <div className="h-full overflow-auto flex items-center justify-center p-4">
+      <div className="h-full overflow-auto p-4">
         {state.fileType === 'pdf' && (
-          <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
-            <canvas 
-              ref={canvasRef}
-              className="block"
-              style={{ display: 'block' }}
-            />
+          <div className="flex items-center justify-center min-h-full">
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
+              <canvas 
+                ref={canvasRef}
+                className="block"
+                style={{ display: 'block' }}
+              />
+            </div>
           </div>
         )}
 
