@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { RotateCcw, Upload } from 'lucide-react'
-import { addDays } from 'date-fns'
+import { RefreshCw, Shield, Upload, Calendar } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -11,92 +10,84 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import DatePicker from '@/components/ui-custom/DatePicker'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { Insurance } from '@/services/insurances'
 
 const renewInsuranceSchema = z.object({
-  coverage_start: z.date({
-    required_error: 'La fecha de inicio es requerida'
+  new_coverage_end: z.date({
+    required_error: 'La nueva fecha de vencimiento es requerida'
   }),
-  coverage_end: z.date({
-    required_error: 'La fecha de fin es requerida'
-  }),
-  policy_number: z.string().optional(),
-  provider: z.string().optional(),
+  new_policy_number: z.string().optional(),
+  new_provider: z.string().optional(),
+  reminder_days: z.array(z.number()).optional(),
   notes: z.string().optional()
-}).refine(data => data.coverage_end >= data.coverage_start, {
-  message: "La fecha de fin debe ser posterior a la de inicio",
-  path: ["coverage_end"]
 })
 
 type RenewInsuranceForm = z.infer<typeof renewInsuranceSchema>
 
 interface RenewInsuranceFormModalProps {
   modalData?: {
-    previous: Insurance
+    insurance: Insurance
   }
   onClose: () => void
 }
 
-const INSURANCE_TYPE_LABELS = {
-  'ART': 'ART (Aseguradora de Riesgos del Trabajo)',
-  'vida': 'Seguro de Vida',
-  'accidentes': 'Seguro de Accidentes', 
-  'responsabilidad_civil': 'Responsabilidad Civil',
-  'salud': 'Seguro de Salud',
-  'otro': 'Otro'
-} as const
+const DEFAULT_REMINDER_DAYS = [30, 15, 7]
 
 export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFormModalProps) {
+  const [reminderDays, setReminderDays] = useState<number[]>(modalData?.insurance?.reminder_days || DEFAULT_REMINDER_DAYS)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const renewInsurance = useRenewInsurance()
   const uploadCertificate = useUploadCertificate()
-  
-  const [certificateFile, setCertificateFile] = useState<File | null>(null)
-  
-  const previous = modalData?.previous
-  if (!previous) {
+
+  if (!modalData?.insurance) {
     return null
   }
 
-  // Calculate default new start date (day after previous end)
-  const defaultStartDate = addDays(new Date(previous.coverage_end), 1)
+  const { insurance } = modalData
 
   const form = useForm<RenewInsuranceForm>({
     resolver: zodResolver(renewInsuranceSchema),
     defaultValues: {
-      coverage_start: defaultStartDate,
-      coverage_end: addDays(defaultStartDate, 365), // Default 1 year
-      policy_number: previous.policy_number || '',
-      provider: previous.provider || '',
+      new_coverage_end: new Date(new Date(insurance.coverage_end).getTime() + 365 * 24 * 60 * 60 * 1000), // +1 año
+      new_policy_number: insurance.policy_number || '',
+      new_provider: insurance.provider || '',
+      reminder_days: insurance.reminder_days || DEFAULT_REMINDER_DAYS,
       notes: ''
     }
   })
 
   const onSubmit = async (data: RenewInsuranceForm) => {
     try {
-      let certificateAttachmentId: string | null = null
+      let newCertificateAttachmentId: string | null = null
 
-      // Upload certificate if a new file was selected
-      if (certificateFile) {
-        certificateAttachmentId = await uploadCertificate.mutateAsync({
-          contactId: previous.contact_id,
-          file: certificateFile
+      // Upload new certificate if provided
+      if (selectedFile) {
+        newCertificateAttachmentId = await uploadCertificate.mutateAsync({
+          contactId: insurance.contact_id,
+          file: selectedFile
         })
       }
 
+      const payload = {
+        new_coverage_start: insurance.coverage_end, // El nuevo inicio es el final del anterior
+        new_coverage_end: data.new_coverage_end.toISOString().split('T')[0],
+        new_policy_number: data.new_policy_number || null,
+        new_provider: data.new_provider || null,
+        reminder_days: reminderDays,
+        new_certificate_attachment_id: newCertificateAttachmentId,
+        notes: data.notes || null
+      }
+
       await renewInsurance.mutateAsync({
-        prevId: previous.id,
-        payload: {
-          coverage_start: data.coverage_start.toISOString().split('T')[0],
-          coverage_end: data.coverage_end.toISOString().split('T')[0],
-          policy_number: data.policy_number || undefined,
-          provider: data.provider || undefined,
-          certificate_attachment_id: certificateAttachmentId,
-          notes: data.notes || undefined
-        }
+        insuranceId: insurance.id,
+        payload
       })
 
       onClose()
@@ -105,172 +96,213 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
     }
   }
 
-  return (
-    <FormModalLayout>
-      <FormModalHeader
-        icon={RotateCcw}
-        title="Renovar Seguro"
-        onClose={onClose}
-      />
-      
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Previous Insurance Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Seguro Anterior
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="font-medium">Tipo:</p>
-                <p className="text-muted-foreground">
-                  {INSURANCE_TYPE_LABELS[previous.insurance_type]}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">Póliza:</p>
-                <p className="text-muted-foreground">
-                  {previous.policy_number || 'Sin número'}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">Aseguradora:</p>
-                <p className="text-muted-foreground">
-                  {previous.provider || 'No especificada'}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">Vigencia anterior:</p>
-                <p className="text-muted-foreground">
-                  {new Date(previous.coverage_start).toLocaleDateString()} - {new Date(previous.coverage_end).toLocaleDateString()}
-                </p>
-              </div>
+  const handleReminderToggle = (days: number) => {
+    if (reminderDays.includes(days)) {
+      setReminderDays(reminderDays.filter(d => d !== days))
+    } else {
+      setReminderDays([...reminderDays, days].sort((a, b) => b - a))
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
+  }
+
+  const getInsuranceTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'ART': 'ART',
+      'vida': 'Seguro de Vida',
+      'accidentes': 'Seguro de Accidentes',
+      'responsabilidad_civil': 'Responsabilidad Civil',
+      'salud': 'Seguro de Salud',
+      'otro': 'Otro'
+    }
+    return types[type] || type
+  }
+
+  const editPanel = (
+    <Form {...form}>
+      <div className="space-y-6">
+        {/* Información actual del seguro */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Seguro Actual</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Tipo:</span>
+              <p className="font-medium">{getInsuranceTypeLabel(insurance.insurance_type)}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* New Insurance Form */}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="coverage_start"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nueva Fecha de Inicio *</FormLabel>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={field.onChange}
-                      placeholder="Selecciona fecha de inicio"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="coverage_end"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nueva Fecha de Fin *</FormLabel>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={field.onChange}
-                      placeholder="Selecciona fecha de fin"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div>
+              <span className="text-gray-500">Vencimiento:</span>
+              <p className="font-medium">{new Date(insurance.coverage_end).toLocaleDateString()}</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="policy_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nuevo Número de Póliza (opcional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Dejar vacío para mantener el anterior" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="provider"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nueva Aseguradora (opcional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Dejar vacío para mantener la anterior" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <FormLabel>Nuevo Certificado (opcional)</FormLabel>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <Input
-                    type="file"
-                    accept="image/*,.pdf,application/pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) setCertificateFile(file)
-                    }}
-                    className="text-center"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    PDF o imagen (máx. 10MB)
-                  </p>
-                </div>
+            {insurance.policy_number && (
+              <div>
+                <span className="text-gray-500">Póliza:</span>
+                <p className="font-medium">{insurance.policy_number}</p>
               </div>
-              {certificateFile && (
-                <p className="text-sm text-muted-foreground">
-                  Archivo seleccionado: {certificateFile.name}
-                </p>
-              )}
-            </div>
+            )}
+            {insurance.provider && (
+              <div>
+                <span className="text-gray-500">Aseguradora:</span>
+                <p className="font-medium">{insurance.provider}</p>
+              </div>
+            )}
+          </div>
+        </div>
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas de Renovación</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Observaciones sobre la renovación..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        {/* Nueva fecha de vencimiento */}
+        <FormField
+          control={form.control}
+          name="new_coverage_end"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nueva Fecha de Vencimiento *</FormLabel>
+              <FormControl>
+                <DatePicker
+                  date={field.value}
+                  onDateChange={field.onChange}
+                  placeholder="Seleccionar nueva fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Información actualizada */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="new_policy_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nuevo Número de Póliza</FormLabel>
+                <FormControl>
+                  <Input placeholder="Dejar vacío si no cambió" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="new_provider"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nueva Aseguradora</FormLabel>
+                <FormControl>
+                  <Input placeholder="Dejar vacío si no cambió" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Recordatorios */}
+        <div>
+          <FormLabel>Recordatorios de Vencimiento</FormLabel>
+          <div className="mt-2 space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {[7, 15, 30, 60, 90].map((days) => (
+                <Badge
+                  key={days}
+                  variant={reminderDays.includes(days) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => handleReminderToggle(days)}
+                >
+                  {days} días antes
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Notas */}
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas de la Renovación</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Comentarios sobre la renovación..."
+                  className="min-h-[80px]"
+                  {...field}
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Nuevo certificado */}
+        <div>
+          <FormLabel>Nuevo Certificado de Cobertura</FormLabel>
+          <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600 mb-2">
+              Arrastra el nuevo certificado aquí o haz clic para seleccionar
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Seleccionar archivo
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handleFileSelect}
             />
-          </form>
-        </Form>
+            {selectedFile && (
+              <p className="text-sm text-green-600 mt-2">
+                Nuevo archivo seleccionado: {selectedFile.name}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
+    </Form>
+  )
 
-      <FormModalFooter
-        onCancel={onClose}
-        onSubmit={form.handleSubmit(onSubmit)}
-        submitText="Renovar Seguro"
-        isSubmitting={renewInsurance.isPending}
-      />
-    </FormModalLayout>
+  const headerContent = (
+    <FormModalHeader 
+      title="Renovar Seguro"
+      icon={RefreshCw}
+    />
+  )
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel="Renovar"
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightDisabled={renewInsurance.isPending}
+      rightLoading={renewInsurance.isPending}
+    />
+  )
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={null}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      isEditing={true}
+      onClose={onClose}
+    />
   )
 }

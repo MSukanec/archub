@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -47,59 +47,31 @@ interface InsuranceFormModalProps {
   modalData?: {
     insurance?: Insurance
     mode?: 'create' | 'edit'
-    projectId?: string
     defaultContactId?: string
   }
   onClose: () => void
 }
 
-const INSURANCE_TYPE_OPTIONS = [
-  { value: 'ART', label: 'ART (Aseguradora de Riesgos del Trabajo)' },
-  { value: 'vida', label: 'Seguro de Vida' },
-  { value: 'accidentes', label: 'Seguro de Accidentes' },
-  { value: 'responsabilidad_civil', label: 'Responsabilidad Civil' },
-  { value: 'salud', label: 'Seguro de Salud' },
-  { value: 'otro', label: 'Otro' }
-]
-
 const DEFAULT_REMINDER_DAYS = [30, 15, 7]
 
 export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalProps) {
   const { data: currentUser } = useCurrentUser()
+  const [reminderDays, setReminderDays] = useState<number[]>(DEFAULT_REMINDER_DAYS)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const isEdit = modalData?.mode === 'edit' && modalData?.insurance
+  const projectId = currentUser?.preferences?.last_project_id
+
+  // Get project personnel
+  const { data: projectPersonnel = [] } = useQuery({
+    queryKey: ['/api/project-personnel', projectId],
+    enabled: !!projectId
+  })
+
   const createInsurance = useCreateInsurance()
   const updateInsurance = useUpdateInsurance()
   const uploadCertificate = useUploadCertificate()
-  
-  const [certificateFile, setCertificateFile] = useState<File | null>(null)
-  const [reminderDays, setReminderDays] = useState<number[]>(DEFAULT_REMINDER_DAYS)
-
-  const isEdit = modalData?.mode === 'edit' && modalData?.insurance
-  const projectId = modalData?.projectId || currentUser?.preferences?.last_project_id
-
-  // Get project personnel for contact selection
-  const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
-    queryKey: ['project-personnel', projectId],
-    queryFn: async () => {
-      if (!projectId) return []
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          contact_id,
-          contact:contacts(
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', projectId)
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!projectId
-  })
 
   const form = useForm<InsuranceForm>({
     resolver: zodResolver(insuranceSchema),
@@ -126,10 +98,10 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       let certificateAttachmentId: string | null = modalData?.insurance?.certificate_attachment_id || null
 
       // Upload certificate if a new file was selected
-      if (certificateFile) {
+      if (selectedFile) {
         certificateAttachmentId = await uploadCertificate.mutateAsync({
           contactId: data.contact_id,
-          file: certificateFile
+          file: selectedFile
         })
       }
 
@@ -162,238 +134,248 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
     }
   }
 
-  const addReminderDay = (days: number) => {
-    if (!reminderDays.includes(days)) {
+  const handleReminderToggle = (days: number) => {
+    if (reminderDays.includes(days)) {
+      setReminderDays(reminderDays.filter(d => d !== days))
+    } else {
       setReminderDays([...reminderDays, days].sort((a, b) => b - a))
     }
   }
 
-  const removeReminderDay = (days: number) => {
-    setReminderDays(reminderDays.filter(d => d !== days))
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
   }
 
-  return (
-    <FormModalLayout>
-      <FormModalHeader
-        icon={Shield}
-        title={isEdit ? 'Editar Seguro' : 'Nuevo Seguro'}
-        onClose={onClose}
-      />
-      
-      <div className="flex-1 overflow-y-auto p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="contact_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Persona *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una persona" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {projectPersonnel.map((personnel) => (
-                          <SelectItem key={personnel.contact_id} value={personnel.contact_id}>
-                            {personnel.contact.first_name} {personnel.contact.last_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="insurance_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Seguro *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {INSURANCE_TYPE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="policy_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de Póliza</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej: POL-123456" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="provider"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Aseguradora</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej: La Segunda ART" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="coverage_start"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Inicio *</FormLabel>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={field.onChange}
-                      placeholder="Selecciona fecha de inicio"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="coverage_end"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Fin *</FormLabel>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={field.onChange}
-                      placeholder="Selecciona fecha de fin"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <FormLabel>Recordatorios (días antes del vencimiento)</FormLabel>
-              <div className="flex flex-wrap gap-2">
-                {reminderDays.map((days) => (
-                  <Badge 
-                    key={days}
-                    variant="secondary"
-                    className="cursor-pointer"
-                    onClick={() => removeReminderDay(days)}
-                  >
-                    {days} días ×
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addReminderDay(30)}
-                >
-                  30 días
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addReminderDay(15)}
-                >
-                  15 días
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addReminderDay(7)}
-                >
-                  7 días
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <FormLabel>Certificado</FormLabel>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <Input
-                    type="file"
-                    accept="image/*,.pdf,application/pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) setCertificateFile(file)
-                    }}
-                    className="text-center"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    PDF o imagen (máx. 10MB)
-                  </p>
-                </div>
-              </div>
-              {certificateFile && (
-                <p className="text-sm text-muted-foreground">
-                  Archivo seleccionado: {certificateFile.name}
-                </p>
-              )}
-            </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas</FormLabel>
+  const editPanel = (
+    <Form {...form}>
+      <div className="space-y-6">
+        {/* Selección de persona */}
+        <div className="grid grid-cols-1 gap-4">
+          <FormField
+            control={form.control}
+            name="contact_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Persona *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Observaciones adicionales..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar persona..." />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </div>
+                  <SelectContent>
+                    {projectPersonnel.map((personnel) => (
+                      <SelectItem key={personnel.contact_id} value={personnel.contact_id}>
+                        {personnel.contact.first_name} {personnel.contact.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <FormModalFooter
-        onCancel={onClose}
-        onSubmit={form.handleSubmit(onSubmit)}
-        submitText={isEdit ? 'Actualizar' : 'Crear Seguro'}
-        isSubmitting={createInsurance.isPending || updateInsurance.isPending}
-      />
-    </FormModalLayout>
+          <FormField
+            control={form.control}
+            name="insurance_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Seguro *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ART">ART</SelectItem>
+                    <SelectItem value="vida">Seguro de Vida</SelectItem>
+                    <SelectItem value="accidentes">Seguro de Accidentes</SelectItem>
+                    <SelectItem value="responsabilidad_civil">Responsabilidad Civil</SelectItem>
+                    <SelectItem value="salud">Seguro de Salud</SelectItem>
+                    <SelectItem value="otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Información de la póliza */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="policy_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número de Póliza</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej: POL-123456" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="provider"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Aseguradora</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej: La Caja ART" {...field} value={field.value || ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Fechas de cobertura */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="coverage_start"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de Inicio *</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value}
+                    onDateChange={field.onChange}
+                    placeholder="Seleccionar fecha..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="coverage_end"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de Vencimiento *</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value}
+                    onDateChange={field.onChange}
+                    placeholder="Seleccionar fecha..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Recordatorios */}
+        <div>
+          <FormLabel>Recordatorios de Vencimiento</FormLabel>
+          <div className="mt-2 space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {[7, 15, 30, 60, 90].map((days) => (
+                <Badge
+                  key={days}
+                  variant={reminderDays.includes(days) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => handleReminderToggle(days)}
+                >
+                  {days} días antes
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Notas */}
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Notas adicionales sobre el seguro..."
+                  className="min-h-[80px]"
+                  {...field}
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Subir certificado */}
+        <div>
+          <FormLabel>Certificado de Cobertura</FormLabel>
+          <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600 mb-2">
+              Arrastra el certificado aquí o haz clic para seleccionar
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Seleccionar archivo
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handleFileSelect}
+            />
+            {selectedFile && (
+              <p className="text-sm text-green-600 mt-2">
+                Archivo seleccionado: {selectedFile.name}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </Form>
+  )
+
+  const headerContent = (
+    <FormModalHeader 
+      title={isEdit ? 'Editar Seguro' : 'Nuevo Seguro'}
+      icon={Shield}
+    />
+  )
+
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={isEdit ? 'Actualizar' : 'Crear'}
+      onRightClick={form.handleSubmit(onSubmit)}
+      rightDisabled={createInsurance.isPending || updateInsurance.isPending}
+      rightLoading={createInsurance.isPending || updateInsurance.isPending}
+    />
+  )
+
+  return (
+    <FormModalLayout
+      columns={1}
+      viewPanel={null}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
+      isEditing={true}
+      onClose={onClose}
+    />
   )
 }
