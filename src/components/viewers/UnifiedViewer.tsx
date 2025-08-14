@@ -239,9 +239,9 @@ export function UnifiedViewer({
     }
   };
 
-  // Zoom functions - increment by 25% each time for more noticeable changes
-  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.25, 3.0) }));
-  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.25, 0.1) }));
+  // Zoom functions - increment by 10% each time
+  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.1, 3.0) }));
+  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.1, 0.1) }));
   const zoom100 = () => setState(prev => ({ ...prev, scale: 1.0 }));
 
   // Image rotation
@@ -487,14 +487,17 @@ export function UnifiedViewer({
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="absolute inset-0 overflow-auto">
+      {/* Content Area - Fixed height scrollable area */}
+      <div 
+        className="absolute inset-0 overflow-auto"
+        style={{ paddingTop: '60px' }} // Account for floating toolbar
+      >
         {state.fileType === 'pdf' && (
-          <div className="p-4 flex justify-center">
-            <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
+          <div className="p-4 min-h-full">
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded border inline-block">
               <canvas 
                 ref={canvasRef}
-                className="block max-w-none"
+                className="block"
                 style={{ display: 'block' }}
               />
             </div>
@@ -502,7 +505,7 @@ export function UnifiedViewer({
         )}
 
         {state.fileType === 'image' && state.imageUrl && (
-          <div className="p-4 flex justify-center">
+          <div className="p-4 min-h-full flex justify-center items-start">
             <img
               ref={imageRef}
               src={state.imageUrl}
