@@ -154,6 +154,19 @@ export default function ConstructionPersonnel() {
       { name: "Construcción", href: "/construction/dashboard" },
       { name: "Personal", href: "/construction/personnel" }
     ],
+    tabs: [
+      {
+        id: 'active',
+        label: 'Activos',
+        isActive: activeTab === 'active'
+      },
+      {
+        id: 'attendance',
+        label: 'Asistencia',
+        isActive: activeTab === 'attendance'
+      }
+    ],
+    onTabChange: setActiveTab,
     actionButton: activeTab === 'attendance' ? {
       label: 'Registrar Asistencia',
       icon: Plus,
@@ -173,42 +186,33 @@ export default function ConstructionPersonnel() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="active" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Activos
-          </TabsTrigger>
-          <TabsTrigger value="attendance" className="flex items-center gap-2">
-            <UserCheck className="h-4 w-4" />
-            Asistencia
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="space-y-6">
+      <div className="space-y-6">
+        {activeTab === 'active' && (
           <EmptyState
             icon={<Users className="h-12 w-12" />}
             title="Personal Activo"
             description="Esta sección mostrará el personal actualmente asignado al proyecto."
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="attendance" className="space-y-6">
-          {workers.length > 0 ? (
-            <CustomGradebook 
-              workers={workers}
-              attendance={attendance}
-              onEditAttendance={handleEditAttendance}
-            />
-          ) : (
-            <EmptyState
-              icon={<UserCheck className="h-12 w-12" />}
-              title="Sin registros de asistencia"
-              description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+        {activeTab === 'attendance' && (
+          <>
+            {workers.length > 0 ? (
+              <CustomGradebook 
+                workers={workers}
+                attendance={attendance}
+                onEditAttendance={handleEditAttendance}
+              />
+            ) : (
+              <EmptyState
+                icon={<UserCheck className="h-12 w-12" />}
+                title="Sin registros de asistencia"
+                description="No hay registros de asistencia para este proyecto. El personal aparecerá aquí cuando se registren entradas de bitácora con asistencia."
+              />
+            )}
+          </>
+        )}
+      </div>
     </Layout>
   )
 }
