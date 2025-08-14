@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
 import { useState, useEffect } from 'react'
@@ -34,7 +33,6 @@ export default function ProfileProjects() {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('date_recent')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [activeTab, setActiveTab] = useState('proyectos')
   
   const { openModal } = useGlobalModalStore()
   const [isMobile, setIsMobile] = useState(false)
@@ -271,19 +269,11 @@ export default function ProfileProjects() {
       { name: "Perfil", href: "/profile/data" },
       { name: "Gestión de Proyectos", href: "/profile/projects" }
     ],
-    actionButton: activeTab === 'proyectos' ? {
+    actionButton: {
       label: "Nuevo Proyecto",
       icon: Plus,
       onClick: () => openModal('project', {})
-    } : undefined,
-    tabs: (
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="proyectos">Proyectos</TabsTrigger>
-          <TabsTrigger value="datos-basicos">Datos Básicos</TabsTrigger>
-        </TabsList>
-      </Tabs>
-    )
+    }
   }
 
   if (isLoading || projectsLoading) {
@@ -301,10 +291,9 @@ export default function ProfileProjects() {
 
 
   return (
+    <>
     <Layout headerProps={headerProps}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-        <TabsContent value="proyectos" className="h-full p-0">
-          <div>
+      <div>
 
 
 
