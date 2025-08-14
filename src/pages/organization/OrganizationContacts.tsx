@@ -31,7 +31,7 @@ import ContactCardMobile from '@/components/cards/contacts/ContactCardMobile'
 import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
 import { useMobile } from '@/hooks/use-mobile'
 
-import { ActionBar } from '@/components/layout/desktop/ActionBar'
+
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
@@ -511,93 +511,7 @@ export default function OrganizationContacts() {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
         {/* Columna izquierda - Lista de contactos */}
-        <div className="col-span-1 space-y-4 overflow-hidden">
-          {/* ActionBar con botones ghost simples */}
-          <ActionBar>
-            <div className="flex items-center gap-2 w-full">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                <Search className="h-4 w-4" />
-                Buscar
-              </Button>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Filter className="h-4 w-4" />
-                    Filtros
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-[200px]">
-                  <div className="space-y-3 p-3">
-                    <div>
-                      <Label className="text-xs font-medium mb-2 block">Ordenar</Label>
-                      <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Ordenar por..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                          <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs font-medium mb-2 block">Tipo</Label>
-                      <Select value={filterByType} onValueChange={setFilterByType}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Filtrar por tipo..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos los tipos</SelectItem>
-                          {contactTypes?.map((type) => (
-                            <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                              {type.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {(sortBy !== 'name_asc' || filterByType !== 'all' || searchValue || showSearch) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => {
-                    setSearchValue("");
-                    setSortBy('name_asc');
-                    setFilterByType('all');
-                    setShowSearch(false);
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                  Limpiar
-                </Button>
-              )}
-            </div>
-          </ActionBar>
-          
-          {/* Campo de búsqueda expandible */}
-          {showSearch && (
-            <div className="bg-card border border-border rounded-lg p-3">
-              <Input
-                placeholder="Buscar contactos..."
-                value={searchValue}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
-                className="h-9"
-                autoFocus
-              />
-            </div>
-          )}
-
+        <div className="col-span-1 overflow-hidden">
           {/* Lista de contactos agrupada por letra */}
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
             {/* Contenido para la tab de Personas */}
