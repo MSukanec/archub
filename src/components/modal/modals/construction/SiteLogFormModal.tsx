@@ -21,7 +21,7 @@ import { useContacts } from "@/hooks/use-contacts";
 import { useGlobalModalStore } from "../../form/useGlobalModalStore";
 import { useModalPanelStore } from "../../form/modalPanelStore";
 import { supabase } from "@/lib/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 
 // Schema basado en el modal original con valores exactos del enum
@@ -77,6 +77,32 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const { data: currentUser } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(currentUser?.organization?.id);
   const { data: contacts = [] } = useContacts();
+  
+  // Get project personnel only
+  const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
+    queryKey: ['project-personnel', currentUser?.preferences?.last_project_id],
+    queryFn: async () => {
+      const projectId = currentUser?.preferences?.last_project_id;
+      if (!projectId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          contact_id,
+          contacts (
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq('project_id', projectId);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentUser?.preferences?.last_project_id
+  })
   
   const [events, setEvents] = useState<any[]>([]);
   const [attendees, setAttendees] = useState<any[]>([]);
@@ -612,14 +638,35 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         <div className="col-span-4">Descripción</div>
       </div>
 
-      {/* Lista completa de contactos */}
+      {/* Lista completa de personal del proyecto */}
       <div className="space-y-1 max-h-96 overflow-y-auto">
-        {contacts?.map((contact: any) => {
-          const isPresent = attendees.some(a => a.contact_id === contact.id);
-          const attendeeData = attendees.find(a => a.contact_id === contact.id);
+        {projectPersonnel.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-lg">
+            <Users className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No hay personal asignado</h3>
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Necesitas asignar personal al proyecto antes de registrar en la bitácora
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                closeModal();
+                // Navigate to personnel page
+                window.location.href = '/construction/personnel';
+              }}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              Gestionar Personal
+            </button>
+          </div>
+        ) : (
+        projectPersonnel?.map((personnel: any) => {
+          const contact = personnel.contacts;
+          const isPresent = attendees.some(a => a.personnel_id === personnel.id);
+          const attendeeData = attendees.find(a => a.personnel_id === personnel.id);
           
           return (
-            <div key={contact.id} className="grid grid-cols-12 gap-1 items-center py-1 border-b border-muted/20">
+            <div key={personnel.id} className="grid grid-cols-12 gap-1 items-center py-1 border-b border-muted/20">
               {/* Checkbox */}
               <div className="col-span-1">
                 <input
@@ -630,7 +677,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                       // Agregar personal
                       setAttendees([...attendees, {
                         id: Date.now().toString(),
-                        contact_id: contact.id,
+                        personnel_id: personnel.id,
                         contact_type: '',
                         attendance_type: 'full',
                         hours_worked: 8,
@@ -642,7 +689,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                       }]);
                     } else {
                       // Quitar personal
-                      setAttendees(attendees.filter(a => a.contact_id !== contact.id));
+                      setAttendees(attendees.filter(a => a.personnel_id !== personnel.id));
                     }
                   }}
                   className="h-4 w-4 rounded checkbox-accent"
@@ -663,7 +710,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   onValueChange={(value) => {
                     if (isPresent) {
                       const newAttendees = attendees.map((a: any) => 
-                        a.contact_id === contact.id 
+                        a.personnel_id === personnel.id 
                           ? { ...a, attendance_type: value as 'full' | 'half' }
                           : a
                       );
@@ -690,7 +737,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                   onChange={(e) => {
                     if (isPresent) {
                       const newAttendees = attendees.map((a: any) => 
-                        a.contact_id === contact.id 
+                        a.personnel_id === personnel.id 
                           ? { ...a, description: e.target.value }
                           : a
                       );
@@ -703,7 +750,8 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Contador de personal presente */}
@@ -713,14 +761,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
         </div>
       )}
 
-      {/* Empty state si no hay contactos */}
-      {!contacts || contacts.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No hay contactos disponibles</p>
-          <p className="text-xs">Agrega contactos en la sección de Contactos</p>
-        </div>
-      )}
+
     </div>
   );
 
