@@ -269,7 +269,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
                     <SelectContent>
                       {projectPersonnel.map((personnel) => (
                         <SelectItem key={personnel.id} value={personnel.id}>
-                          {personnel.contacts.first_name} {personnel.contacts.last_name}
+                          {personnel.contacts?.first_name || 'Sin nombre'} {personnel.contacts?.last_name || ''}
                         </SelectItem>
                       ))}
                     </SelectContent>

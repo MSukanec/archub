@@ -63,31 +63,47 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const isEdit = modalData?.mode === 'edit' && modalData?.insurance
   const projectId = currentUser?.preferences?.last_project_id
 
-  // Get project personnel - using same logic as ConstructionPersonnel page
+  // Get project personnel for insurance
   const { data: projectPersonnel = [] } = useQuery({
-    queryKey: ['project-personnel', projectId],
+    queryKey: ['project-personnel-for-insurance', projectId],
     queryFn: async () => {
-      if (!projectId) return []
+      if (!projectId || !currentUser?.organization?.id) return []
       
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          notes,
-          created_at,
-          contact:contacts(
+      try {
+        const { data, error } = await supabase
+          .from('project_personnel')
+          .select(`
             id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+            contact:contacts(
+              id,
+              first_name,
+              last_name,
+              organization_id
+            )
+          `)
+          .eq('project_id', projectId)
 
-      if (error) throw error
-      return data
+        if (error) {
+          console.error('Error fetching project personnel:', error)
+          return []
+        }
+
+        // Filter and ensure data integrity
+        const validPersonnel = data
+          .filter(item => 
+            item && 
+            item.contact && 
+            item.contact.first_name && 
+            item.contact.organization_id === currentUser?.organization?.id
+          )
+        
+        return validPersonnel
+      } catch (error) {
+        console.error('Error in personnel query:', error)
+        return []
+      }
     },
-    enabled: !!projectId
+    enabled: !!projectId && !!currentUser?.organization?.id
   })
 
   const createInsurance = useCreateInsurance()
@@ -97,7 +113,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const form = useForm<InsuranceForm>({
     resolver: zodResolver(insuranceSchema),
     defaultValues: {
-      personnel_id: modalData?.defaultContactId || modalData?.insurance?.personnel_id || '',
+      personnel_id: modalData?.defaultContactId || modalData?.insurance?.contact_id || '',
       insurance_type: modalData?.insurance?.insurance_type || 'ART',
       policy_number: modalData?.insurance?.policy_number || '',
       provider: modalData?.insurance?.provider || '',
@@ -188,11 +204,17 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {projectPersonnel.map((personnel) => (
-                      <SelectItem key={personnel.id} value={personnel.id}>
-                        {personnel.contact.first_name} {personnel.contact.last_name}
+                    {projectPersonnel.length === 0 ? (
+                      <SelectItem value="" disabled>
+                        No hay personal asignado al proyecto
                       </SelectItem>
-                    ))}
+                    ) : (
+                      projectPersonnel.map((personnel) => (
+                        <SelectItem key={personnel.id} value={personnel.id}>
+                          {personnel.contact?.first_name || 'Sin nombre'} {personnel.contact?.last_name || ''}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -383,8 +405,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       onLeftClick={onClose}
       rightLabel={isEdit ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightDisabled={createInsurance.isPending || updateInsurance.isPending}
-      rightLoading={createInsurance.isPending || updateInsurance.isPending}
+      isRightDisabled={createInsurance.isPending || updateInsurance.isPending}
+      isRightLoading={createInsurance.isPending || updateInsurance.isPending}
     />
   )
 
