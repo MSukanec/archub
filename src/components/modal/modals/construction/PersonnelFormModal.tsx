@@ -245,8 +245,8 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
       onLeftClick={onClose}
       rightLabel="Agregar Personal"
       onRightClick={form.handleSubmit(handleSubmit)}
-      isLoading={createPersonnelMutation.isPending}
-      rightDisabled={selectedContacts.length === 0}
+      submitDisabled={selectedContacts.length === 0 || createPersonnelMutation.isPending}
+      showLoadingSpinner={createPersonnelMutation.isPending}
     />
   );
 
