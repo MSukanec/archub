@@ -161,7 +161,7 @@ export function ModalFactory() {
     case 'attendance':
       return <AttendanceFormModal modalData={data} onClose={closeModal} />;
     case 'personnel':
-      return <PersonnelFormModal modalData={data} onClose={closeModal} />;
+      return <PersonnelFormModal data={data} />;
     case 'parameter-visibility-config':
       return <ParameterVisibilityConfigModal />;
     case 'add-parameter-to-canvas':
