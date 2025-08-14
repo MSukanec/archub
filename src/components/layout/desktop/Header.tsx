@@ -164,9 +164,9 @@ export function Header({
     isSecondaryDocked || isSecondaryHovered || isMainHovered;
   const hasTabs = tabs.length > 0;
   
-  // Solo una fila con altura fija coincidiendo con botones del sidebar
+  // Doble fila: primera fila titulo + selector, segunda fila tabs + botones
   const getHeaderHeight = () => {
-    return "h-12"; // Altura que coincide con los botones del sidebar
+    return "h-20"; // Altura para dos filas (10 + 10)
   };
 
   return (
@@ -178,18 +178,91 @@ export function Header({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Fila única: Título de página + Tabs + Botones de acción + Selector de proyecto */}
-      <div className="w-full h-12 px-12 flex items-center justify-between">
-        {/* Left: Page Title + Tabs */}
-        <div className="flex items-center gap-8">
-          {/* Page Title */}
+      {/* Primera fila: Título + Selector de proyectos */}
+      <div className="w-full h-10 px-12 flex items-center justify-between border-b border-[var(--menues-border)]">
+        {/* Left: Page Title */}
+        <div className="flex items-center">
           {(pageTitle || title) && (
             <h1 className="text-xl font-light text-foreground tracking-wider">
               {pageTitle || title}
             </h1>
           )}
-          
-          {/* Tabs */}
+        </div>
+
+        {/* Right: Project Selector - SIEMPRE VISIBLE */}
+        <div className="flex items-center">
+          <CustomRestricted feature="project_management">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-xs font-normal flex items-center gap-1"
+                >
+                  <Folder className="w-4 h-4" />
+                  <span className="max-w-32 truncate">
+                    {projects.length === 0
+                      ? "No hay proyectos"
+                      : projects.find((p) => p.id === userOrgPrefs?.last_project_id)
+                          ?.name || "Sin proyecto"}
+                  </span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {projects.length > 0 ? (
+                  projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() =>
+                        updateProjectMutation.mutate(project.id)
+                      }
+                      className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
+                    >
+                      <div className="flex items-center w-full">
+                        <Folder className="w-4 h-4 mr-2" />
+                        <span className="truncate">{project.name}</span>
+                      </div>
+                      {userOrgPrefs?.last_project_id === project.id && (
+                        <div
+                          className="w-2 h-2 rounded-full ml-auto"
+                          style={{ backgroundColor: "var(--accent)" }}
+                        />
+                      )}
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <div className="px-3 py-4 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Folder className="w-8 h-8 text-[var(--layout-text-muted)]" />
+                      <div className="text-sm text-[var(--layout-text)]">
+                        No hay proyectos
+                      </div>
+                      <div className="text-xs text-[var(--layout-text-muted)] mb-2">
+                        Crea tu primer proyecto para comenzar
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          navigate("/organization/projects");
+                        }}
+                        className="h-7 px-3 text-xs"
+                      >
+                        Crear proyecto
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CustomRestricted>
+        </div>
+      </div>
+
+      {/* Segunda fila: Tabs + Botones de acción */}
+      <div className="w-full h-10 px-12 flex items-center justify-between">
+        {/* Left: Tabs */}
+        <div className="flex items-center">
           {hasTabs && (
             <div className="flex items-center space-x-6">
               {tabs.map((tab) => {
@@ -216,7 +289,6 @@ export function Header({
                         {tab.badge}
                       </span>
                     )}
-
                   </button>
                 );
 
@@ -235,7 +307,7 @@ export function Header({
           )}
         </div>
 
-        {/* Right: Action Buttons + Project Selector */}
+        {/* Right: Action Buttons */}
         <div className="flex items-center gap-2">
           {/* Additional Button (appears first/left) */}
           {actionButton?.additionalButton && (
@@ -264,75 +336,6 @@ export function Header({
               )}
               {actionButton.label}
             </Button>
-          )}
-          
-          {/* Project Selector - Solo para secciones basadas en proyecto */}
-          {isProjectBasedSection && (
-            <CustomRestricted feature="project_management">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-3 text-xs font-normal flex items-center gap-1"
-                  >
-                    <Folder className="w-4 h-4" />
-                    <span className="max-w-32 truncate">
-                      {projects.length === 0
-                        ? "No hay proyectos"
-                        : projects.find((p) => p.id === userOrgPrefs?.last_project_id)
-                            ?.name || "Sin proyecto"}
-                    </span>
-                    <ChevronDown className="w-3 h-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  {projects.length > 0 ? (
-                    projects.map((project) => (
-                      <DropdownMenuItem
-                        key={project.id}
-                        onClick={() =>
-                          updateProjectMutation.mutate(project.id)
-                        }
-                        className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
-                      >
-                        <div className="flex items-center w-full">
-                          <Folder className="w-4 h-4 mr-2" />
-                          <span className="truncate">{project.name}</span>
-                        </div>
-                        {userOrgPrefs?.last_project_id === project.id && (
-                          <div
-                            className="w-2 h-2 rounded-full ml-auto"
-                            style={{ backgroundColor: "var(--accent)" }}
-                          />
-                        )}
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <div className="px-3 py-4 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <Folder className="w-8 h-8 text-[var(--layout-text-muted)]" />
-                        <div className="text-sm text-[var(--layout-text)]">
-                          No hay proyectos
-                        </div>
-                        <div className="text-xs text-[var(--layout-text-muted)] mb-2">
-                          Crea tu primer proyecto para comenzar
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            navigate("/organization/projects");
-                          }}
-                          className="h-7 px-3 text-xs"
-                        >
-                          Crear proyecto
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CustomRestricted>
           )}
         </div>
       </div>
