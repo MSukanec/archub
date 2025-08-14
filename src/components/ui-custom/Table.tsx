@@ -68,6 +68,9 @@ interface TableProps<T = any> {
     isSortActive?: boolean;
     showClearFilters?: boolean;
     onClearFilters?: () => void;
+    showExport?: boolean;
+    onExport?: () => void;
+    isExporting?: boolean;
   };
   // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
   headerActions?: {
@@ -360,6 +363,9 @@ export function Table<T = any>({
           isSortActive={topBar?.isSortActive}
           showClearFilters={topBar?.showClearFilters}
           onClearFilters={topBar?.onClearFilters}
+          showExport={topBar?.showExport}
+          onExport={topBar?.onExport}
+          isExporting={topBar?.isExporting}
         />
         
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}

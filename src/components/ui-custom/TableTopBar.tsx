@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from "react";
-import { Search, Filter, ArrowUpDown, X } from "lucide-react";
+import { Search, Filter, ArrowUpDown, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,9 @@ interface TableTopBarProps {
   isSortActive?: boolean;
   showClearFilters?: boolean;
   onClearFilters?: () => void;
+  showExport?: boolean;
+  onExport?: () => void;
+  isExporting?: boolean;
 }
 
 export function TableTopBar({
@@ -41,13 +44,16 @@ export function TableTopBar({
   isSortActive = false,
   showClearFilters = false,
   onClearFilters,
+  showExport = false,
+  onExport,
+  isExporting = false,
 }: TableTopBarProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(searchValue);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // No renderizar nada si no hay configuración
-  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters;
+  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || showExport;
 
   if (!hasContent) return null;
 
@@ -192,6 +198,20 @@ export function TableTopBar({
               title="Limpiar filtros"
             >
               <X className="h-4 w-4" />
+            </Button>
+          )}
+
+          {/* Botón de exportar a Excel (solo icono) */}
+          {showExport && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={onExport}
+              disabled={isExporting}
+              title="Exportar a Excel"
+            >
+              <Download className="h-4 w-4" />
             </Button>
           )}
         </div>

@@ -17,6 +17,7 @@ import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
 import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
+import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 
 export default function AdminTasks() {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
@@ -24,6 +25,7 @@ export default function AdminTasks() {
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
+  const [isExporting, setIsExporting] = useState(false)
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
 
@@ -69,6 +71,26 @@ export default function AdminTasks() {
     setSearchValue('')
     setSortBy('created_at')
     setTypeFilter('all')
+  }
+
+  // Handle Excel export
+  const handleExportToExcel = async () => {
+    if (filteredGeneratedTasks.length === 0) return
+
+    setIsExporting(true)
+    try {
+      const exportColumns = createExportColumns(columns)
+      await exportToExcel({
+        filename: `tareas-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+        sheetName: 'Tareas',
+        columns: exportColumns,
+        data: filteredGeneratedTasks
+      })
+    } catch (error) {
+      console.error('Error exportando a Excel:', error)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // Tree functionality for parameters
@@ -368,7 +390,10 @@ export default function AdminTasks() {
                 </div>
               ),
               showClearFilters: typeFilter !== 'all',
-              onClearFilters: clearFilters
+              onClearFilters: clearFilters,
+              showExport: true,
+              onExport: handleExportToExcel,
+              isExporting: isExporting
             }}
             emptyState={
               <div className="text-center py-8">
