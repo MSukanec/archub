@@ -63,16 +63,16 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "contact",
           label: "Persona",
-          width: "20%",
+          width: "25%",
           render: (record: InsuranceStatusRow) => (
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-8 w-8 flex-shrink-0">
                 <AvatarFallback className="text-xs">
                   {record.contact?.first_name?.charAt(0) || ''}{record.contact?.last_name?.charAt(0) || ''}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">
                   {record.contact?.first_name || ''} {record.contact?.last_name || ''}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "policy_number",
           label: "Nº de póliza",
-          width: "15%",
+          width: "13%",
           render: (record: InsuranceStatusRow) => (
             <span className="text-sm text-muted-foreground">
               {record.policy_number || 'Sin número'}
@@ -112,7 +112,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "coverage",
           label: "Vigencia",
-          width: "18%",
+          width: "15%",
           render: (record: InsuranceStatusRow) => (
             <div className="text-sm">
               <div>
@@ -127,7 +127,7 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
         {
           key: "status",
           label: "Estado",
-          width: "12%",
+          width: "10%",
           render: (record: InsuranceStatusRow) => getStatusBadge(record.status, record.days_to_expiry)
         },
         {
@@ -137,13 +137,13 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
           render: (record: InsuranceStatusRow) => record.certificate_attachment_id ? (
             <AttachmentBadge attachmentId={record.certificate_attachment_id} />
           ) : (
-            <span className="text-xs text-muted-foreground">Sin certificado</span>
+            <span className="text-xs text-muted-foreground">-</span>
           )
         },
         {
           key: "actions",
-          label: "Acciones",
-          width: "10%",
+          label: "",
+          width: "2%",
           sortable: false,
           render: (record: InsuranceStatusRow) => (
             <InsuranceActions insurance={record} />
