@@ -98,7 +98,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
 
       <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-5 py-5 md:px-12 md:py-6 pb-12 ${
+        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 md:px-12 md:py-6 pb-12 ${
           // Calculate top padding based on new single-row header (h-12)
           "md:pt-16" // h-12 header + 4 units padding
         } ${
