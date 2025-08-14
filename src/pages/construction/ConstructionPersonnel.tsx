@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useMemo, useEffect, useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useNavigationStore } from '@/stores/navigationStore'
 import CustomGradebook from '@/components/ui-custom/CustomGradebook'
@@ -117,6 +117,27 @@ function transformAttendanceData(attendanceData: any[]) {
 export default function ConstructionPersonnel() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const queryClient = useQueryClient()
+
+  // Function to handle personnel deletion
+  const handleDeletePersonnel = async (personnelId: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_personnel')
+        .delete()
+        .eq('id', personnelId)
+
+      if (error) {
+        console.error('Error deleting personnel:', error)
+        return
+      }
+
+      // Invalidate and refetch the personnel data
+      queryClient.invalidateQueries({ queryKey: ['project-personnel', userData?.preferences?.last_project_id] })
+    } catch (error) {
+      console.error('Error deleting personnel:', error)
+    }
+  }
   const { data: attendanceData = [], isLoading } = useAttendanceData(
     userData?.preferences?.last_project_id,
     userData?.organization?.id
@@ -285,7 +306,7 @@ export default function ConstructionPersonnel() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => console.log('Edit:', record)}
+                          onClick={() => openModal('construction-personnel', { personnel: record })}
                           className="h-8 w-8 p-0"
                         >
                           <Edit className="h-4 w-4" />
@@ -293,7 +314,11 @@ export default function ConstructionPersonnel() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => console.log('Delete:', record)}
+                          onClick={() => openModal('delete-confirmation', {
+                            title: 'Eliminar Personal',
+                            message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
+                            onConfirm: () => handleDeletePersonnel(record.id)
+                          })}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
