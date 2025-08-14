@@ -643,7 +643,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       <div className="space-y-1 max-h-96 overflow-y-auto">
         {projectPersonnel.length === 0 ? (
           <EmptyState
-            icon={Users}
+            icon={<Users />}
             title="No hay personal asignado"
             description="Necesitas asignar personal al proyecto antes de registrar en la bitácora"
             action={
