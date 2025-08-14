@@ -20,7 +20,7 @@ import DatePicker from '@/components/ui-custom/DatePicker'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
-import { useContacts } from '@/hooks/use-contacts'
+import { useLocation } from 'wouter'
 
 const attendanceSchema = z.object({
   attendance_date: z.date({
@@ -55,10 +55,35 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
   const organizationId = currentUser?.organization?.id
   const projectId = currentUser?.preferences?.last_project_id
   const queryClient = useQueryClient()
+  const [, navigate] = useLocation()
 
-  // Get organization members and contacts - skip if no organizationId
+  // Get project personnel only
+  const { data: projectPersonnel = [], isLoading: personnelLoading } = useQuery({
+    queryKey: ['project-personnel', projectId],
+    queryFn: async () => {
+      if (!projectId || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          contact_id,
+          contacts (
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq('project_id', projectId);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!projectId
+  })
+
+  // Get organization members - skip if no organizationId
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId || '')
-  const { data: contacts = [] } = useContacts()
 
   // Convert members to users format for UserSelector (siguiendo patrón de MovementFormModal)
   const users = organizationMembers.map(member => ({
@@ -97,7 +122,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
         .from('attendees')
         .insert({
           site_log_id: null, // Como especificaste, esto es null
-          personnel_id: data.personnel_id,
+          personnel_id: data.personnel_id, // Ahora usa el ID de project_personnel
           attendance_type: data.attendance_type,
           hours_worked: data.hours_worked,
           description: data.description,
@@ -212,30 +237,53 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
 
           <FormField
             control={form.control}
-            name="contact_id"
+            name="personnel_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Personal</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar personal..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {contacts.map((contact) => (
-                      <SelectItem key={contact.id} value={contact.id}>
-                        {contact.first_name} {contact.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {projectPersonnel.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-lg">
+                    <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No hay personal asignado</h3>
+                    <p className="text-sm text-muted-foreground text-center mb-4">
+                      Necesitas asignar personal al proyecto antes de registrar asistencia
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        navigate('/construction/personnel');
+                      }}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                    >
+                      Gestionar Personal
+                    </button>
+                  </div>
+                ) : (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar personal..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {projectPersonnel.map((personnel) => (
+                        <SelectItem key={personnel.id} value={personnel.id}>
+                          {personnel.contacts.first_name} {personnel.contacts.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
+        {/* Solo mostrar el resto del formulario si hay personal disponible */}
+        {projectPersonnel.length > 0 && (
+          <>
         {/* Horario */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -308,6 +356,8 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
             </FormItem>
           )}
         />
+          </>
+        )}
       </form>
     </Form>
   )
