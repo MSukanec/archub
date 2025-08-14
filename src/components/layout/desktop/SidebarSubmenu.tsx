@@ -69,7 +69,7 @@ export function SidebarSubmenu() {
   const getDefaultSection = () => {
     if (location.startsWith('/profile')) return 'perfil';
     if (location.startsWith('/organization')) return 'organizacion';
-    if (location.startsWith('/project')) return 'proyecto';
+
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
@@ -112,8 +112,7 @@ export function SidebarSubmenu() {
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
-    'proyecto': [
-    ],
+
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
@@ -185,7 +184,7 @@ export function SidebarSubmenu() {
     const sectionInfo = {
       'perfil': { title: 'Mi Perfil', icon: UserCircle },
       'organizacion': { title: 'Organización', icon: Building },
-      'proyecto': { title: 'Proyecto', icon: FolderOpen },
+
       'diseno': { title: 'Diseño', icon: Brush },
       'obra': { title: 'Obra', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },

@@ -8,7 +8,7 @@ import { CardFormModal } from '../modals/organizations/CardFormModal';
 import { ListFormModal } from '../modals/organizations/ListFormModal';
 import { ContactFormModal } from '../modals/organizations/ContactFormModal';
 import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
-import ProjectClientFormModal from '../modals/project/ProjectClientFormModal';
+import ProjectClientFormModal from '../modals/finances/ProjectClientFormModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
 import MovementFormModal from '../modals/finances/MovementFormModal';

@@ -279,13 +279,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       defaultRoute: '/organization/dashboard',
       isActive: currentSidebarContext === 'organization' || location.startsWith('/organization') || location === '/dashboard' || location === '/tasks'
     },
-    { 
-      id: 'proyecto', 
-      icon: FolderOpen, 
-      label: 'Proyecto', 
-      defaultRoute: '/project/documentation',
-      isActive: currentSidebarContext === 'project' || location.startsWith('/project')
-    },
+
     { 
       id: 'diseno', 
       icon: Brush, 
@@ -334,10 +328,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
-    proyecto: [
-      { icon: FileImage, label: 'Documentación', href: '/project/documentation' },
-      { icon: Images, label: 'Galería Multimedia', href: '/project/gallery' },
-    ],
+
     construccion: [
       { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },

@@ -287,14 +287,7 @@ export function Sidebar() {
       defaultRoute: '/organization/dashboard',
       isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization') || location === '/dashboard'
     },
-    { 
-      id: 'proyecto', 
-      icon: FolderOpen, 
-      label: 'Proyecto', 
-      defaultRoute: '/project/documentation',
-      isActive: activeSidebarSection === 'proyecto' || location.startsWith('/project'),
-      generalModeRestricted: true
-    },
+
     { 
       id: 'diseno', 
       icon: Brush, 

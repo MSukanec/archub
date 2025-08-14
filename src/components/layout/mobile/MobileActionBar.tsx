@@ -14,12 +14,12 @@ export function MobileActionBar() {
     return null
   }
 
-  // Slot 1 siempre es el dashboard de proyectos
+  // Slot 1 siempre es el dashboard de organización
   const defaultSlot1 = {
-    id: 'project-dashboard',
+    id: 'organization-dashboard',
     icon: <Home className="h-5 w-5" />,
-    label: 'Proyectos',
-    onClick: () => navigate('/project/documentation'),
+    label: 'Organización',
+    onClick: () => navigate('/organization/dashboard'),
     variant: 'secondary' as const
   }
 
@@ -32,7 +32,7 @@ export function MobileActionBar() {
       }}
     >
       <div className="flex items-center justify-around px-4 py-3">
-        {/* Slot 1 - Dashboard de Proyectos (fijo) */}
+        {/* Slot 1 - Dashboard de Organización (fijo) */}
         <Button
           variant="ghost"
           className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
