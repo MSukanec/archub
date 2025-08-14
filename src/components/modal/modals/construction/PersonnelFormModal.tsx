@@ -1,31 +1,16 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Users, Plus, Check } from "lucide-react";
+import { Users } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -40,18 +25,12 @@ const PersonnelFormSchema = z.object({
 
 type PersonnelFormData = z.infer<typeof PersonnelFormSchema>;
 
-interface Contact {
-  id: string;
-  first_name: string;
-  last_name: string;
-  contact_type_links?: Array<{
-    contact_type: {
-      name: string;
-    };
-  }>;
+interface PersonnelFormModalProps {
+  modalData?: any;
+  onClose: () => void;
 }
 
-export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; onClose: () => void }) {
+export function PersonnelFormModal({ modalData, onClose }: PersonnelFormModalProps) {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
@@ -64,7 +43,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
   });
 
   // Fetch contacts
-  const { data: contacts = [] } = useQuery({
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
     queryKey: ['contacts', userData?.organization?.id],
     queryFn: async () => {
       if (!userData?.organization?.id) return [];
@@ -83,12 +62,12 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
         .order('first_name');
 
       if (error) throw error;
-      return (data || []) as any[];
+      return data || [];
     },
     enabled: !!userData?.organization?.id
   });
 
-  // Fetch existing project personnel to filter out already assigned contacts
+  // Fetch existing project personnel
   const { data: existingPersonnel = [] } = useQuery({
     queryKey: ['project-personnel', userData?.preferences?.last_project_id],
     queryFn: async () => {
@@ -105,49 +84,52 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
     enabled: !!userData?.preferences?.last_project_id
   });
 
-  // Filter available contacts (not already assigned)
+  // Filter available contacts
   const availableContacts = contacts.filter(contact => 
     !existingPersonnel.includes(contact.id)
   );
 
+  // Create personnel mutation
   const createPersonnelMutation = useMutation({
     mutationFn: async (data: PersonnelFormData) => {
       if (!userData?.preferences?.last_project_id) {
-        throw new Error('No hay proyecto seleccionado');
+        throw new Error('No se ha seleccionado un proyecto');
       }
 
-      const personnelRecords = data.contact_ids.map(contactId => ({
-        project_id: userData.preferences!.last_project_id,
-        contact_id: contactId
+      const personnelToInsert = data.contact_ids.map(contactId => ({
+        project_id: userData.preferences.last_project_id,
+        contact_id: contactId,
+        organization_id: userData.organization.id,
+        assigned_by: userData.user.id,
+        is_active: true
       }));
 
-      const { error } = await supabase
+      const { data: result, error } = await supabase
         .from('project_personnel')
-        .insert(personnelRecords);
+        .insert(personnelToInsert)
+        .select();
 
       if (error) throw error;
+      return result;
     },
     onSuccess: () => {
       toast({
-        title: 'Éxito',
-        description: 'Personal agregado al proyecto correctamente',
+        title: "Personal agregado",
+        description: `Se agregaron ${selectedContacts.length} persona(s) al proyecto.`
       });
+      
       queryClient.invalidateQueries({ queryKey: ['project-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['construction-personnel'] });
       onClose();
     },
-    onError: (error) => {
-      console.error('Error creating personnel:', error);
+    onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: 'No se pudo agregar el personal al proyecto',
-        variant: 'destructive',
+        title: "Error al agregar personal",
+        description: error.message,
+        variant: "destructive"
       });
-    },
+    }
   });
-
-  const handleSubmit = (data: PersonnelFormData) => {
-    createPersonnelMutation.mutate(data);
-  };
 
   const handleContactToggle = (contactId: string) => {
     setSelectedContacts(prev => {
@@ -160,67 +142,60 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
     });
   };
 
-  useEffect(() => {
-    const contactIds = form.getValues('contact_ids') || [];
-    setSelectedContacts(contactIds);
-  }, []);
+  const handleSubmit = (data: PersonnelFormData) => {
+    createPersonnelMutation.mutate(data);
+  };
 
+  // Edit Panel Content
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="contact_ids"
           render={() => (
             <FormItem>
               <FormLabel>Seleccionar Contactos</FormLabel>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-3">
-                {availableContacts.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No hay contactos disponibles para agregar
-                  </div>
-                ) : (
-                  availableContacts.map((contact) => {
-                    const isSelected = selectedContacts.includes(contact.id);
-                    const contactType = contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo';
-                    
-                    return (
-                      <div
-                        key={contact.id}
-                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
-                          isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`}
-                        onClick={(e) => {
-                          handleContactToggle(contact.id);
-                        }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => handleContactToggle(contact.id)}
-                          />
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">
-                              {contact.first_name} {contact.last_name}
-                            </p>
-                            <Badge variant="secondary" className="text-xs">
-                              {contactType}
-                            </Badge>
+              <FormControl>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {contactsLoading ? (
+                    <p className="text-sm text-muted-foreground">Cargando contactos...</p>
+                  ) : availableContacts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No hay contactos disponibles</p>
+                  ) : (
+                    availableContacts.map((contact) => {
+                      const isSelected = selectedContacts.includes(contact.id);
+                      return (
+                        <div
+                          key={contact.id}
+                          className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                            isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                          }`}
+                          onClick={() => handleContactToggle(contact.id)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => handleContactToggle(contact.id)}
+                            />
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="text-xs">
+                                {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{contact.first_name} {contact.last_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {contact.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                        {isSelected && (
-                          <Check className="h-4 w-4 text-primary" />
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+                      );
+                    })
+                  )}
+                </div>
+              </FormControl>
               <FormMessage />
               {selectedContacts.length > 0 && (
                 <p className="text-sm text-muted-foreground">
@@ -234,6 +209,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
     </Form>
   );
 
+  // Header Content
   const headerContent = (
     <FormModalHeader 
       title="Agregar Personal al Proyecto"
@@ -241,6 +217,7 @@ export function PersonnelFormModal({ modalData, onClose }: { modalData?: any; on
     />
   );
 
+  // Footer Content
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
