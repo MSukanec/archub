@@ -63,9 +63,30 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const isEdit = modalData?.mode === 'edit' && modalData?.insurance
   const projectId = currentUser?.preferences?.last_project_id
 
-  // Get project personnel
+  // Get project personnel - using same logic as ConstructionPersonnel page
   const { data: projectPersonnel = [] } = useQuery({
-    queryKey: ['/api/project-personnel', projectId],
+    queryKey: ['project-personnel', projectId],
+    queryFn: async () => {
+      if (!projectId) return []
+      
+      const { data, error } = await supabase
+        .from('project_personnel')
+        .select(`
+          id,
+          notes,
+          created_at,
+          contact:contacts(
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data
+    },
     enabled: !!projectId
   })
 
@@ -168,7 +189,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
                   </FormControl>
                   <SelectContent>
                     {projectPersonnel.map((personnel) => (
-                      <SelectItem key={personnel.contact_id} value={personnel.contact_id}>
+                      <SelectItem key={personnel.contact.id} value={personnel.contact.id}>
                         {personnel.contact.first_name} {personnel.contact.last_name}
                       </SelectItem>
                     ))}
