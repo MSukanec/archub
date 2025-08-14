@@ -239,9 +239,9 @@ export function UnifiedViewer({
     }
   };
 
-  // Zoom functions
-  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.1, 3.0) }));
-  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.1, 0.1) }));
+  // Zoom functions - increment by 25% each time for more noticeable changes
+  const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.25, 3.0) }));
+  const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.25, 0.1) }));
   const zoom100 = () => setState(prev => ({ ...prev, scale: 1.0 }));
 
   // Image rotation
