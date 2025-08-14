@@ -102,7 +102,8 @@ export default function ProjectDocumentation() {
           {/* Left: Document Viewer (2/3) */}
           <div className="w-2/3 min-w-0">
           <div 
-            className="rounded-lg overflow-hidden border h-full"
+            className="rounded-lg overflow-hidden border-2 border-dashed h-full"
+            style={{ borderColor: 'var(--accent)' }}
           >
             {selectedDocument ? (
               <UnifiedViewer 
