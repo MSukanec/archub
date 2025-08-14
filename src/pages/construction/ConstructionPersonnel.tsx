@@ -206,7 +206,7 @@ export default function ConstructionPersonnel() {
     } : activeTab === 'active' ? {
       label: 'Agregar Personal',
       icon: Plus,
-      onClick: () => openModal('personnel', {})
+      onClick: () => openModal('construction-personnel', {})
     } : undefined
   }
 
@@ -244,22 +244,8 @@ export default function ConstructionPersonnel() {
                   {
                     key: "contact",
                     label: "Personal",
-                    className: "w-1/2"
-                  },
-                  {
-                    key: "notes",
-                    label: "Notas",
-                    className: "w-1/3"
-                  },
-                  {
-                    key: "actions",
-                    label: "",
-                    className: "w-16"
-                  }
-                ]}
-                formatCellData={(record, key) => {
-                  switch (key) {
-                    case "contact":
+                    width: "50%",
+                    render: (record: any) => {
                       const contact = record.contact;
                       if (!contact) {
                         return <span className="text-muted-foreground">Sin datos</span>;
@@ -278,43 +264,48 @@ export default function ConstructionPersonnel() {
                           </div>
                         </div>
                       );
-                    
-                    case "notes":
-                      return (
-                        <span className="text-sm text-muted-foreground">
-                          {record.notes || 'Sin notas'}
-                        </span>
-                      );
-
-                    case "actions":
-                      return (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => console.log('Edit:', record)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar notas
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => console.log('Delete:', record)}
-                              className="text-red-600 dark:text-red-400"
-                            >
-                              <UserX className="h-4 w-4 mr-2" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      );
-
-                    default:
-                      return <span>{String(record[key] || '')}</span>;
+                    }
+                  },
+                  {
+                    key: "notes",
+                    label: "Notas", 
+                    width: "33%",
+                    render: (record: any) => (
+                      <span className="text-sm text-muted-foreground">
+                        {record.notes || 'Sin notas'}
+                      </span>
+                    )
+                  },
+                  {
+                    key: "actions",
+                    label: "",
+                    width: "17%",
+                    sortable: false,
+                    render: (record: any) => (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => console.log('Edit:', record)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar notas
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => console.log('Delete:', record)}
+                            className="text-red-600 dark:text-red-400"
+                          >
+                            <UserX className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )
                   }
-                }}
-                keyExtractor={(record) => record.id}
+                ]}
+                getItemId={(record: any) => record.id}
               />
             )}
           </>
