@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import DatePicker from '@/components/ui-custom/DatePicker'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -56,6 +57,7 @@ const DEFAULT_REMINDER_DAYS = [30, 15, 7]
 
 export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalProps) {
   const { data: currentUser } = useCurrentUser()
+  const { data: organizationMembers = [] } = useOrganizationMembers(currentUser?.organization?.id)
   const [reminderDays, setReminderDays] = useState<number[]>(DEFAULT_REMINDER_DAYS)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -132,6 +134,12 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
 
   const onSubmit = async (data: InsuranceForm) => {
     try {
+      // Get current member ID for created_by field
+      const currentMember = organizationMembers.find(m => m.user_id === currentUser?.user?.id)
+      if (!currentMember) {
+        throw new Error('No se pudo encontrar el member de la organización')
+      }
+
       let certificateAttachmentId: string | null = modalData?.insurance?.certificate_attachment_id || null
 
       // Upload certificate if a new file was selected
@@ -153,7 +161,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         coverage_end: data.coverage_end.toISOString().split('T')[0],
         reminder_days: reminderDays,
         certificate_attachment_id: certificateAttachmentId,
-        notes: data.notes || null
+        notes: data.notes || null,
+        created_by: currentMember.id
       }
 
       if (isEdit) {
