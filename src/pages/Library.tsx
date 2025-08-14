@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
 import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
@@ -18,7 +18,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { FileText, FolderPlus, File, Image, Clock, Download, ExternalLink, Upload, Images, Plus, BookOpen, FolderOpen } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -33,7 +32,6 @@ interface GalleryFile {
   project_id?: string;
   project_name?: string;
   visibility: 'organization' | 'project';
-  site_log_id?: string | null;
 }
 
 export default function Library() {
@@ -41,11 +39,6 @@ export default function Library() {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('documentation');
-  
-  // Gallery filter states
-  const [gallerySearchTerm, setGallerySearchTerm] = useState('');
-  const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'standalone' | 'sitelog'>('all');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
@@ -212,61 +205,6 @@ export default function Library() {
     },
   });
 
-  // Gallery filter logic
-  const clearGalleryFilters = () => {
-    setGallerySearchTerm('');
-    setFileTypeFilter('Todo');
-    setSourceFilter('all');
-  };
-
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (gallerySearchTerm) count++;
-    if (fileTypeFilter !== 'Todo') count++;
-    if (sourceFilter !== 'all') count++;
-    return count;
-  }, [gallerySearchTerm, fileTypeFilter, sourceFilter]);
-
-  const filtersContent = (
-    <div className="space-y-3">
-      {/* Filtro por Tipo de Archivo */}
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Tipo de Archivo</label>
-        <Select
-          value={fileTypeFilter}
-          onValueChange={(value: 'Todo' | 'Imágenes' | 'Videos') => setFileTypeFilter(value)}
-        >
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Todo">Todos los archivos</SelectItem>
-            <SelectItem value="Imágenes">Solo imágenes</SelectItem>
-            <SelectItem value="Videos">Solo videos</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Filtro por Fuente */}
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Fuente del Archivo</label>
-        <Select
-          value={sourceFilter}
-          onValueChange={(value: 'all' | 'standalone' | 'sitelog') => setSourceFilter(value)}
-        >
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los archivos</SelectItem>
-            <SelectItem value="standalone">Archivos independientes</SelectItem>
-            <SelectItem value="sitelog">Archivos de bitácora</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-
   // Tabs configuration
   const tabs = [
     {
@@ -297,15 +235,7 @@ export default function Library() {
       label: 'Subir Archivo',
       icon: Plus,
       onClick: () => openModal('gallery', {})
-    },
-    // Gallery tool buttons - only show in gallery tab
-    showSearch: activeTab === 'gallery',
-    showFilters: activeTab === 'gallery',
-    showClearFilters: activeTab === 'gallery',
-    onSearch: (value: string) => setGallerySearchTerm(value),
-    onClearFilters: clearGalleryFilters,
-    filtersContent,
-    activeFiltersCount
+    }
   };
 
   const handleDocumentSelect = (document: any) => {
@@ -341,38 +271,6 @@ export default function Library() {
   const handleDelete = (file: GalleryFile) => {
     deleteFileMutation.mutate(file.id);
   };
-
-  // Filter gallery files based on header controls
-  const filteredGalleryFiles = useMemo(() => {
-    let filtered = galleryFiles;
-
-    // Search filter
-    if (gallerySearchTerm) {
-      filtered = filtered.filter(file => 
-        file.file_name?.toLowerCase().includes(gallerySearchTerm.toLowerCase())
-      );
-    }
-
-    // File type filter
-    if (fileTypeFilter !== 'Todo') {
-      filtered = filtered.filter(file => 
-        fileTypeFilter === 'Imágenes'
-          ? file.file_type === 'image' || file.file_type?.startsWith('image/')
-          : file.file_type === 'video' || file.file_type?.startsWith('video/')
-      );
-    }
-
-    // Source filter (site_log_id)
-    if (sourceFilter !== 'all') {
-      filtered = filtered.filter(file => 
-        sourceFilter === 'standalone' 
-          ? (!file.site_log_id || file.site_log_id === null)
-          : (file.site_log_id && file.site_log_id !== null)
-      );
-    }
-
-    return filtered;
-  }, [galleryFiles, gallerySearchTerm, fileTypeFilter, sourceFilter]);
 
   // Helper functions
   const formatFileSize = (bytes?: number) => {
@@ -578,11 +476,10 @@ export default function Library() {
             />
           ) : (
             <Gallery
-              files={filteredGalleryFiles}
+              files={galleryFiles}
               onEdit={handleEdit}
               onDownload={handleDownload}
               onDelete={handleDelete}
-              hideFilters={true}
             />
           )}
         </>
