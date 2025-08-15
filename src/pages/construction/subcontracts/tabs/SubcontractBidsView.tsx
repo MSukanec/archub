@@ -186,6 +186,22 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     };
   }, [subcontractBids, subcontract?.winner_bid_id]);
 
+  // Ordenar ofertas: ganadora primero, luego por monto
+  const sortedBids = useMemo(() => {
+    if (!subcontractBids.length) return [];
+    
+    return [...subcontractBids].sort((a, b) => {
+      // Si hay ganadora, ponerla primera
+      if (subcontract?.winner_bid_id === a.id) return -1;
+      if (subcontract?.winner_bid_id === b.id) return 1;
+      
+      // Luego ordenar por monto (menor a mayor)
+      const amountA = a.amount || 0;
+      const amountB = b.amount || 0;
+      return amountA - amountB;
+    });
+  }, [subcontractBids, subcontract?.winner_bid_id]);
+
   const columns = [
     {
       key: 'supplier_name',
@@ -478,7 +494,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           {/* KPIs adicionales si hay ganadora */}
           {kpiData.winningBid && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card style={{ borderColor: 'var(--accent)' }}>
+              <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -519,7 +535,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </CardContent>
               </Card>
 
-              <Card style={{ borderColor: 'var(--accent)' }}>
+              <Card >
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -567,7 +583,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </CardContent>
               </Card>
 
-              <Card style={{ borderColor: 'var(--accent)' }}>
+              <Card >
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -624,7 +640,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       )}
 
       {/* Tabla de ofertas */}
-      {subcontractBids.length === 0 ? (
+      {sortedBids.length === 0 ? (
         <EmptyState
           icon={<Plus />}
           title="Sin ofertas recibidas"
@@ -638,7 +654,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         />
       ) : (
         <Table
-          data={subcontractBids}
+          data={sortedBids}
           columns={columns}
         />
       )}
