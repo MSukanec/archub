@@ -43,7 +43,7 @@ import ConstructionCostAnalysis from "@/pages/construction/ConstructionCostAnaly
 import ConstructionTasks from "@/pages/construction/ConstructionTasks";
 
 import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
-import ConstructionSubcontracts from "@/pages/construction/subcontracts/ConstructionSubcontracts";
+import ConstructionSubcontracts from "@/pages/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/design/DesignDashboard";
 import Library from "@/pages/Library";
