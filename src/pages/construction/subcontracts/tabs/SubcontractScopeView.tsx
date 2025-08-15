@@ -60,17 +60,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       )
     },
     {
-      key: 'amount',
-      label: 'Cantidad',
-      width: '10%',
-      className: 'w-[10%]',
-      render: (item: any) => (
-        <span className="text-xs font-medium">
-          {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
-        </span>
-      )
-    },
-    {
       key: 'unit',
       label: 'Unidad',
       width: '10%',
@@ -79,6 +68,17 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
         <Badge variant="outline" className="text-xs">
           {item.unit || item.unit_symbol || 'Sin unidad'}
         </Badge>
+      )
+    },
+    {
+      key: 'amount',
+      label: 'Cantidad',
+      width: '10%',
+      className: 'w-[10%]',
+      render: (item: any) => (
+        <span className="text-xs font-medium">
+          {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
+        </span>
       )
     },
     {
@@ -151,6 +151,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
           columns={columns}
           searchKey="task_name"
           searchPlaceholder="Buscar tareas..."
+          groupBy={groupBy !== 'none' ? groupBy : undefined}
           topBar={{
             tabs: groupOptions.map(opt => opt.label),
             activeTab: groupOptions.find(opt => opt.value === groupBy)?.label || 'Sin Agrupar',
