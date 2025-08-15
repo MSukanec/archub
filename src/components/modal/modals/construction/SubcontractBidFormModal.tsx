@@ -10,20 +10,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
+import DatePicker from '@/components/ui-custom/DatePicker';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, FileText } from 'lucide-react';
 import { z } from 'zod';
+import { useContacts } from '@/hooks/use-contacts';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const bidFormSchema = z.object({
-  supplier_name: z.string().min(1, 'El nombre del proveedor es requerido'),
-  supplier_email: z.string().email('Email inválido').optional().or(z.literal('')),
-  supplier_phone: z.string().optional(),
-  status: z.string(),
+  contact_id: z.string().min(1, 'El proveedor es requerido'),
   total_amount: z.string().optional(),
   currency_code: z.string(),
-  is_lump_sum: z.boolean(),
-  received_at: z.string().optional(),
+  received_at: z.date().optional(),
   notes: z.string().optional()
 });
 
@@ -44,20 +43,18 @@ export function SubcontractBidFormModal({
   const mode = modalData?.isEditing ? 'edit' : 'create';
   const initialData = modalData?.initialData;
   const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const { data: contacts, isLoading: isContactsLoading } = useContacts();
   
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<BidFormData>({
     resolver: zodResolver(bidFormSchema),
     defaultValues: {
-      supplier_name: initialData?.supplier_name || '',
-      supplier_email: initialData?.supplier_email || '',
-      supplier_phone: initialData?.supplier_phone || '',
-      status: initialData?.status || 'pending',
+      contact_id: initialData?.contact_id || '',
       total_amount: initialData?.total_amount?.toString() || '',
       currency_code: initialData?.currency_code || 'ARS',
-      is_lump_sum: initialData?.is_lump_sum ?? true,
-      received_at: initialData?.received_at ? new Date(initialData.received_at).toISOString().slice(0, 16) : '',
+      received_at: initialData?.received_at ? new Date(initialData.received_at) : undefined,
       notes: initialData?.notes || ''
     }
   });
@@ -91,108 +88,56 @@ export function SubcontractBidFormModal({
     }
   };
 
+  // Preparar opciones de contactos
+  const contactOptions = contacts?.map(contact => ({
+    value: contact.id,
+    label: contact.company_name || contact.full_name || `${contact.first_name} ${contact.last_name}`.trim()
+  })) || [];
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="contact_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proveedor *</FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={contactOptions}
+                  placeholder="Seleccionar proveedor..."
+                  searchPlaceholder="Buscar proveedor..."
+                  emptyMessage="No se encontraron proveedores."
+                  disabled={isContactsLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="received_at"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha de Recepción</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="supplier_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre del Proveedor *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ej: Constructora ABC S.A."
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="supplier_email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="contacto@constructora.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="supplier_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="+54 11 1234-5678"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estado</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="received">Recibida</SelectItem>
-                    <SelectItem value="withdrawn">Retirada</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="total_amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Monto Total</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="currency_code"
@@ -217,13 +162,15 @@ export function SubcontractBidFormModal({
 
           <FormField
             control={form.control}
-            name="received_at"
+            name="total_amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fecha de Recepción</FormLabel>
+                <FormLabel>Monto Total</FormLabel>
                 <FormControl>
                   <Input
-                    type="datetime-local"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
                     {...field}
                   />
                 </FormControl>
