@@ -73,7 +73,8 @@ export function SubcontractBidFormModal({
         currency_id: data.currency_id,
         exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : 1,
         submitted_at: data.submitted_at ? data.submitted_at.toISOString().split('T')[0] : null,
-        notes: data.notes || null
+        notes: data.notes || null,
+        created_by: userData?.user?.id
       };
 
       console.log('Saving bid:', bidData);

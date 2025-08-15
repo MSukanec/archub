@@ -185,5 +185,9 @@ TABLA SUBCONTRACT_BIDS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "created_by",
+    "data_type": "uuid"
   }
 ]

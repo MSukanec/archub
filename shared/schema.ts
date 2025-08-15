@@ -438,6 +438,7 @@ export const subcontract_bids = pgTable("subcontract_bids", {
   notes: text("notes"), // Detalles adicionales de la oferta
   submitted_at: text("submitted_at"), // Fecha de envío de la oferta
   status: text("status").default("pendiente"), // pendiente, aceptada, rechazada
+  created_by: uuid("created_by"), // Usuario que creó la oferta
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
