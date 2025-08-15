@@ -56,6 +56,12 @@ export function SubcontractBidFormModal({
   // Estado de modal panel store como en el modal de bitácora
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   
+  // Reset panel state when modal opens
+  useEffect(() => {
+    setPanel('edit');
+    setCurrentSubform(null);
+  }, [setPanel, setCurrentSubform]);
+  
   // Obtener miembros de la organización para el created_by - usando el mismo hook que MovementFormModal
   const { data: members } = useOrganizationMembers(userData?.organization?.id);
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
@@ -396,7 +402,7 @@ export function SubcontractBidFormModal({
     <div className="space-y-4">
       {/* Debug temporal */}
       <div className="text-xs bg-muted p-2 rounded">
-        Debug: Tareas={subcontractTasks?.length || 0}, Selected={Object.keys(selectedTasks).length}, Prices={Object.keys(taskPrices).length}
+        Debug: Tareas={subcontractTasks?.length || 0}, Selected={Object.keys(selectedTasks).length}, Prices={Object.keys(taskPrices).length}, Panel={currentPanel}, Subform={currentSubform}
       </div>
       
       {(!subcontractTasks || subcontractTasks.length === 0) ? (
