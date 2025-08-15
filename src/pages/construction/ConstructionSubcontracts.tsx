@@ -220,25 +220,30 @@ export default function ConstructionSubcontracts() {
     }
   ];
 
+  if (!isLoading && !isLoadingAnalysis && filteredSubcontracts.length === 0) {
+    return (
+      <Layout wide={true} headerProps={headerProps}>
+        <EmptyState
+          icon={<Package />}
+          title="Sin subcontratos creados"
+          description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos"
+          action={
+            <Button onClick={handleCreateSubcontract}>
+              <Plus className="w-4 h-4 mr-2" />
+              Crear Subcontrato
+            </Button>
+          }
+        />
+      </Layout>
+    );
+  }
+
   return (
     <Layout wide={true} headerProps={headerProps}>
       <Table
         columns={columns}
         data={filteredSubcontracts}
         isLoading={isLoading || isLoadingAnalysis}
-        emptyState={
-          <EmptyState
-            icon={<Package />}
-            title="Sin subcontratos creados"
-            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos"
-            action={
-              <Button onClick={handleCreateSubcontract}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Subcontrato
-              </Button>
-            }
-          />
-        }
       />
     </Layout>
   );
