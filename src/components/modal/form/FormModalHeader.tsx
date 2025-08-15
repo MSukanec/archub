@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FormModalHeaderProps {
   title?: string;
@@ -9,6 +10,8 @@ interface FormModalHeaderProps {
   leftActions?: ReactNode;
   rightActions?: ReactNode;
   className?: string;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
 }
 
 export function FormModalHeader({
@@ -18,10 +21,23 @@ export function FormModalHeader({
   leftActions,
   rightActions,
   className,
+  showBackButton,
+  onBackClick,
 }: FormModalHeaderProps) {
   return (
     <div className={cn("px-3 py-3 flex items-center justify-between border-b border-[var(--card-border)]", className)}>
       <div className="flex items-center gap-2 flex-1">
+        {showBackButton && onBackClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBackClick}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        )}
         {leftActions}
         {title && (
           <div className="flex items-center gap-2 flex-1 pr-2">
