@@ -115,7 +115,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
         <EmptyState
           icon={<Plus />}
           title="Sin tareas definidas"
-          description="Agrega las tareas que formarán parte de este subcontrato para definir el alcance de trabajo"
+          description="Agrega las tareas que formarán parte de este subcontrato para definir el alcance de trabajo. No es obligatorio, pero puede ser útil si quieres definirlas o desglosarlas."
           action={
             <Button onClick={handleAddTask}>
               <Plus className="w-4 h-4 mr-2" />
