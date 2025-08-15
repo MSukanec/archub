@@ -174,14 +174,16 @@ export default function ConstructionSubcontracts() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
+            className="h-8 w-8 p-0"
             onClick={() => navigate(`/construction/subcontracts/${subcontract.id}`)}
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
+            className="h-8 w-8 p-0"
             onClick={() => {
               openModal('subcontract', {
                 projectId: userData?.preferences?.last_project_id,
@@ -192,11 +194,12 @@ export default function ConstructionSubcontracts() {
               });
             }}
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Subcontrato',
@@ -209,7 +212,7 @@ export default function ConstructionSubcontracts() {
               });
             }}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )
