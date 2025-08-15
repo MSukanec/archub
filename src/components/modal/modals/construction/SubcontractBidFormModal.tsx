@@ -44,6 +44,7 @@ export function SubcontractBidFormModal({
   const bid_id = modalData?.bidId;
   const mode = modalData?.isEditing ? 'edit' : 'create';
   const initialData = modalData?.initialData;
+  const onSuccess = modalData?.onSuccess;
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
@@ -99,10 +100,9 @@ export function SubcontractBidFormModal({
         description: 'Los cambios se han guardado correctamente'
       });
 
-      // Refresh the parent component to show new bid
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      if (onSuccess) {
+        onSuccess();
+      }
       onClose();
     } catch (error) {
       console.error('Error saving bid:', error);

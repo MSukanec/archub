@@ -49,7 +49,10 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const handleAddBid = () => {
     openModal('subcontract-bid', {
       subcontractId: subcontract.id,
-      isEditing: false
+      isEditing: false,
+      onSuccess: () => {
+        loadBids(); // Refresh the list after creating
+      }
     });
   };
 
@@ -58,7 +61,10 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       subcontractId: subcontract.id,
       bidId: bid.id,
       isEditing: true,
-      initialData: bid
+      initialData: bid,
+      onSuccess: () => {
+        loadBids(); // Refresh the list after editing
+      }
     });
   };
 
