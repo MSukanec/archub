@@ -1094,6 +1094,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get subcontract info to find organization
+      const { data: subcontractInfo, error: subcontractInfoError } = await authenticatedSupabase
+        .from('subcontracts')
+        .select('organization_id')
+        .eq('id', id)
+        .single();
+
+      if (subcontractInfoError) {
+        return res.status(500).json({ 
+          error: "Failed to get subcontract info", 
+          details: subcontractInfoError 
+        });
+      }
+
+      // Find the organization_currency_id for this currency
+      const { data: orgCurrency, error: orgCurrencyError } = await authenticatedSupabase
+        .from('organization_currencies')
+        .select('id')
+        .eq('organization_id', subcontractInfo.organization_id)
+        .eq('currency_id', currency_id)
+        .single();
+
+      if (orgCurrencyError) {
+        console.error("Organization currency not found:", orgCurrencyError);
+        return res.status(400).json({ 
+          error: "Currency not available for this organization", 
+          details: orgCurrencyError 
+        });
+      }
+
       // Perform all updates in sequence for the award process
       
       // 1. Update the subcontract with award details
@@ -1102,7 +1132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .update({ 
           winner_bid_id,
           amount_total,
-          currency_id,
+          currency_id: orgCurrency.id,  // Use organization_currency_id
           status: 'awarded'
         })
         .eq('id', id)
