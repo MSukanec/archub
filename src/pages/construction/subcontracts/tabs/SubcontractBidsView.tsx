@@ -323,79 +323,149 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           )}
 
           {/* Grid de KPIs Comparativos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Total de Ofertas */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Total Ofertas</p>
+                    <Users className="h-6 w-6 text-[hsl(var(--accent))]" />
+                  </div>
+                  
+                  {/* Mini Chart - Bar chart simple */}
+                  <div className="flex items-end gap-1 h-8">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-[hsl(var(--accent))] rounded-sm flex-1"
+                        style={{
+                          height: `${Math.max(20, Math.random() * 100)}%`,
+                          opacity: i < kpiData.validBids ? 1 : 0.3
+                        }}
+                      />
+                    ))}
+                  </div>
+                  
+                  <div>
                     <p className="text-2xl font-bold">{kpiData.totalBids}</p>
                     <p className="text-xs text-muted-foreground">
                       {kpiData.validBids} con monto válido
                     </p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Oferta Más Baja */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Oferta Más Baja</p>
-                    <p className="text-xl font-bold text-green-600">
+                    <TrendingDown className="h-6 w-6 text-[hsl(var(--accent))]" />
+                  </div>
+                  
+                  {/* Mini Chart - Trend line */}
+                  <div className="h-8 relative">
+                    <svg className="w-full h-full" viewBox="0 0 100 32">
+                      <path
+                        d="M 0,20 Q 25,10 50,15 T 100,8"
+                        stroke="hsl(var(--accent))"
+                        strokeWidth="2"
+                        fill="none"
+                        className="opacity-80"
+                      />
+                      <circle cx="100" cy="8" r="2" fill="hsl(var(--accent))" />
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
                       {formatCurrency(kpiData.lowestAmount, 'ARS')}
                     </p>
-                    {kpiData.winnerVsLowest && (
-                      <p className="text-xs text-muted-foreground">
-                        {kpiData.winnerVsLowest.amount > 0 ? '+' : ''}
-                        {kpiData.winnerVsLowest.percentage.toFixed(1)}% vs ganadora
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.winnerVsLowest ? 
+                        `${kpiData.winnerVsLowest.percentage.toFixed(1)}% vs ganadora` :
+                        'Mejor oferta disponible'
+                      }
+                    </p>
                   </div>
-                  <TrendingDown className="h-8 w-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Promedio */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Promedio</p>
-                    <p className="text-xl font-bold text-blue-600">
+                    <Target className="h-6 w-6 text-[hsl(var(--accent))]" />
+                  </div>
+                  
+                  {/* Mini Chart - Area chart */}
+                  <div className="h-8 relative">
+                    <svg className="w-full h-full" viewBox="0 0 100 32">
+                      <path
+                        d="M 0,25 Q 20,15 40,18 T 80,12 L 100,10 L 100,32 L 0,32 Z"
+                        fill="hsl(var(--accent))"
+                        className="opacity-20"
+                      />
+                      <path
+                        d="M 0,25 Q 20,15 40,18 T 80,12 L 100,10"
+                        stroke="hsl(var(--accent))"
+                        strokeWidth="2"
+                        fill="none"
+                      />
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
                       {formatCurrency(kpiData.averageAmount, 'ARS')}
                     </p>
-                    {kpiData.winnerVsAverage && (
-                      <p className="text-xs text-muted-foreground">
-                        {kpiData.winnerVsAverage.amount > 0 ? '+' : ''}
-                        {kpiData.winnerVsAverage.percentage.toFixed(1)}% vs ganadora
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.winnerVsAverage ? 
+                        `${kpiData.winnerVsAverage.percentage.toFixed(1)}% vs ganadora` :
+                        'Promedio de todas las ofertas'
+                      }
+                    </p>
                   </div>
-                  <Target className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Diferencia Mayor-Menor */}
+            {/* Rango de Ofertas */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Rango de Ofertas</p>
-                    <p className="text-xl font-bold text-orange-600">
+                    <BarChart3 className="h-6 w-6 text-[hsl(var(--accent))]" />
+                  </div>
+                  
+                  {/* Mini Chart - Range indicator */}
+                  <div className="h-8 flex items-center">
+                    <div className="w-full bg-gray-200 rounded-full h-2 relative">
+                      <div 
+                        className="bg-[hsl(var(--accent))] h-2 rounded-full relative"
+                        style={{ width: '100%' }}
+                      >
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[hsl(var(--accent))] rounded-full border-2 border-white"></div>
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[hsl(var(--accent))] rounded-full border-2 border-white"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
                       {formatCurrency(kpiData.spread, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {kpiData.spreadPercentage.toFixed(1)}% diferencia
+                      {kpiData.spreadPercentage.toFixed(1)}% diferencia total
                     </p>
                   </div>
-                  <BarChart3 className="h-8 w-8 text-orange-500" />
                 </div>
               </CardContent>
             </Card>
@@ -403,13 +473,31 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
 
           {/* KPIs adicionales si hay ganadora */}
           {kpiData.winningBid && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="border-green-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-[hsl(var(--accent))]">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Ahorro vs Más Alta</p>
-                      <p className="text-xl font-bold text-green-600">
+                      <DollarSign className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    </div>
+                    
+                    {/* Mini Chart - Savings indicator */}
+                    <div className="h-8 flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-[hsl(var(--accent))] h-2 rounded-full"
+                          style={{ 
+                            width: kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0 
+                              ? `${Math.min(100, Math.abs(kpiData.winnerVsHighest.percentage) * 2)}%` 
+                              : '5%' 
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
                         {kpiData.winnerVsHighest && kpiData.winnerVsHighest.amount < 0 
                           ? formatCurrency(Math.abs(kpiData.winnerVsHighest.amount), 'ARS')
                           : '$ 0'
@@ -417,26 +505,44 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0
-                          ? `${Math.abs(kpiData.winnerVsHighest.percentage).toFixed(1)}% menos`
-                          : 'Sin ahorro'
+                          ? `${Math.abs(kpiData.winnerVsHighest.percentage).toFixed(1)}% de ahorro total`
+                          : 'Sin ahorro disponible'
                         }
                       </p>
                     </div>
-                    <DollarSign className="h-8 w-8 text-green-500" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-blue-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+              <Card className="border-[hsl(var(--accent))]">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">vs Promedio</p>
-                      <p className={`text-xl font-bold ${
-                        kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
+                      <TrendingUp className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    </div>
+                    
+                    {/* Mini Chart - Comparison line */}
+                    <div className="h-8 relative">
+                      <svg className="w-full h-full" viewBox="0 0 100 32">
+                        <line x1="50" y1="0" x2="50" y2="32" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.3" />
+                        <line 
+                          x1="0" y1="16" x2="100" y2="16" 
+                          stroke="hsl(var(--accent))" 
+                          strokeWidth="2" 
+                          opacity="0.5"
+                        />
+                        <circle 
+                          cx={kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 ? "30" : "70"} 
+                          cy="16" 
+                          r="3" 
+                          fill="hsl(var(--accent))" 
+                        />
+                      </svg>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
                         {kpiData.winnerVsAverage 
                           ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
                             formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
@@ -445,28 +551,53 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {kpiData.winnerVsAverage 
-                          ? `${kpiData.winnerVsAverage.percentage.toFixed(1)}% ${
-                              kpiData.winnerVsAverage.amount < 0 ? 'menor' : 'mayor'
-                            }`
-                          : 'Igual al promedio'
+                          ? `${Math.abs(kpiData.winnerVsAverage.percentage).toFixed(1)}% ${
+                              kpiData.winnerVsAverage.amount < 0 ? 'por debajo' : 'por encima'
+                            } del promedio`
+                          : 'Exactamente en el promedio'
                         }
                       </p>
                     </div>
-                    <TrendingUp className={`h-8 w-8 ${
-                      kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 
-                        ? 'text-green-500' 
-                        : 'text-red-500'
-                    }`} />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-yellow-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card className="border-[hsl(var(--accent))]">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Posición en Ranking</p>
+                      <Trophy className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    </div>
+                    
+                    {/* Mini Chart - Ranking visualization */}
+                    <div className="h-8 flex items-center justify-center">
+                      <div className="flex gap-1">
+                        {Array.from({ length: kpiData.validBids }).map((_, i) => {
+                          const position = subcontractBids
+                            .filter((bid: any) => bid.amount && bid.amount > 0)
+                            .sort((a: any, b: any) => a.amount - b.amount)
+                            .findIndex((bid: any) => bid.id === kpiData.winningBid.id);
+                          
+                          return (
+                            <div
+                              key={i}
+                              className={`w-3 h-6 rounded ${
+                                i === position 
+                                  ? 'bg-[hsl(var(--accent))]' 
+                                  : 'bg-gray-300'
+                              }`}
+                              style={{
+                                height: i === position ? '24px' : `${16 + Math.random() * 8}px`
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
                     <div>
-                      <p className="text-sm text-muted-foreground">Posición</p>
-                      <p className="text-xl font-bold text-yellow-600">
+                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
                         #{subcontractBids
                           .filter((bid: any) => bid.amount && bid.amount > 0)
                           .sort((a: any, b: any) => a.amount - b.amount)
@@ -475,12 +606,11 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {kpiData.winningBid.amount === kpiData.lowestAmount 
-                          ? 'Oferta más económica' 
-                          : 'No es la más baja'
+                          ? 'Oferta más económica del ranking' 
+                          : 'Posición en el ranking de ofertas'
                         }
                       </p>
                     </div>
-                    <Trophy className="h-8 w-8 text-yellow-500" />
                   </div>
                 </CardContent>
               </Card>
