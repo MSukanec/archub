@@ -32,11 +32,11 @@ export function Callout({
         {Icon && (
           <Icon className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
         )}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-left">
           {title && (
-            <h4 className="font-medium text-foreground mb-1">{title}</h4>
+            <h4 className="font-medium text-foreground mb-1 text-left">{title}</h4>
           )}
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground text-left">
             {children}
           </div>
         </div>
