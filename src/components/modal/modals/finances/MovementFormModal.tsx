@@ -40,6 +40,7 @@ import { useCreateMovementTasks, useMovementTasks } from '@/hooks/use-movement-t
 import { useConstructionTasks } from '@/hooks/use-construction-tasks'
 import { useSubcontracts } from '@/hooks/use-subcontracts'
 import { useCreateMovementSubcontract, useDeleteMovementSubcontractsByMovement, useMovementSubcontractsByMovement } from '@/hooks/use-movement-subcontracts'
+import { useProjectPersonnel } from '@/hooks/use-project-personnel'
 import { ComboBox as ComboBoxWrite } from '@/components/ui-custom/ComboBoxWrite'
 import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 import { Button } from '@/components/ui/button'
@@ -207,6 +208,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     if (!editingMovement) {
       setSelectedSubcontractId('')
       setSelectedTaskId('')
+      setSelectedPersonnelId('')
     }
   }, [setPanel, editingMovement])
   const { data: userData, isLoading: isUserDataLoading } = useCurrentUser()
@@ -260,11 +262,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   })
   
   // Estado centralizado para el tipo de movimiento
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'subcontratos'>('normal')
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer' | 'aportes' | 'aportes_propios' | 'retiros_propios' | 'materiales' | 'subcontratos' | 'personal'>('normal')
   
   // Estado para la tarea seleccionada (usado para Materiales y Mano de Obra)
   const [selectedTaskId, setSelectedTaskId] = React.useState<string>('')
   const [selectedSubcontractId, setSelectedSubcontractId] = React.useState<string>('')
+  const [selectedPersonnelId, setSelectedPersonnelId] = React.useState<string>('')
   
   // Estado para el subform actual
   const [currentSubform, setCurrentSubform] = React.useState<'tasks' | null>(null)
@@ -298,6 +301,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     userData?.preferences?.last_project_id,
     userData?.organization?.id
   )
+
+  // Hook para cargar el personal del proyecto
+  const { data: projectPersonnel } = useProjectPersonnel(
+    userData?.preferences?.last_project_id
+  )
   
   // Transform construction tasks to match ComboBox interface
   const constructionTaskOptions = React.useMemo(() => {
@@ -320,6 +328,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }))
       .sort((a, b) => a.label.localeCompare(b.label)) // Ordenamiento alfabético
   }, [subcontracts])
+
+  // Transform project personnel to match ComboBox interface
+  const personnelOptions = React.useMemo(() => {
+    if (!projectPersonnel) return []
+    
+    return projectPersonnel
+      .map((personnel: any) => ({
+        value: personnel.id,
+        label: `${personnel.contact.first_name} ${personnel.contact.last_name}`.trim()
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)) // Ordenamiento alfabético
+  }, [projectPersonnel])
   
   // Cargar tarea existente cuando estamos editando
   React.useEffect(() => {
@@ -730,18 +750,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isAportesPropiosCategory = viewMode === "aportes_propios"
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
-      // Detectar subcontratos por subcategoría UUID específica - usar estado directo para evitar timing issues
-      const isSubcontratosCategory = selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
+      // Detectar personal por subcategoría UUID específica - usar estado directo para evitar timing issues
+      const isPersonalCategory = selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID de Personal
+      // Por ahora mantener subcontratos con UUID diferente temporal hasta que se defina el UUID correcto
+      const isSubcontratosCategory = false // selectedSubcategoryId === 'OTRO_UUID_SUBCONTRATOS'
       
       // DEBUG: Log detection
-      console.log('🎯 SubcontratosFields Detection:', { 
+      console.log('🎯 PersonalFields Detection:', { 
         selectedSubcategoryId, 
         formSubcategoryId: form.watch('subcategory_id'),
-        isSubcontratosCategory, 
-        UUID_CORRECTO: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
+        isPersonalCategory, 
+        UUID_PERSONAL: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
       })
       
-      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory) {
+      if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory || isPersonalCategory) {
         // Establecer el estado correcto
         if (isAportesCategory) {
           setMovementType('aportes')
@@ -753,6 +775,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           setMovementType('materiales')
         } else if (isSubcontratosCategory) {
           setMovementType('subcontratos')
+        } else if (isPersonalCategory) {
+          setMovementType('personal')
         }
         
         // Sincronizar valores tanto en modo nuevo como en edición
