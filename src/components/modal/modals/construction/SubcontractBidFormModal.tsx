@@ -21,10 +21,10 @@ import { useCurrencies } from '@/hooks/use-currencies';
 
 const bidFormSchema = z.object({
   contact_id: z.string().min(1, 'El proveedor es requerido'),
-  title: z.string().min(1, 'El título es requerido'),
   amount: z.string().min(1, 'El monto es requerido'),
   currency_id: z.string().min(1, 'La moneda es requerida'),
   exchange_rate: z.string().optional(),
+  submitted_at: z.date().optional(),
   notes: z.string().optional()
 });
 
@@ -55,10 +55,10 @@ export function SubcontractBidFormModal({
     resolver: zodResolver(bidFormSchema),
     defaultValues: {
       contact_id: initialData?.contact_id || '',
-      title: initialData?.title || '',
       amount: initialData?.amount?.toString() || '',
       currency_id: initialData?.currency_id || '',
       exchange_rate: initialData?.exchange_rate?.toString() || '',
+      submitted_at: initialData?.submitted_at ? new Date(initialData.submitted_at) : undefined,
       notes: initialData?.notes || ''
     }
   });
@@ -70,7 +70,7 @@ export function SubcontractBidFormModal({
       const bidData = {
         subcontract_id,
         contact_id: data.contact_id,
-        title: data.title,
+        title: `Oferta de ${contacts?.find(c => c.id === data.contact_id)?.company_name || 'Proveedor'}`,
         amount: parseFloat(data.amount),
         currency_id: data.currency_id,
         exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : 1,
@@ -124,46 +124,48 @@ export function SubcontractBidFormModal({
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Título de la oferta */}
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título de la Oferta *</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Oferta para trabajos de plomería"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Fecha de Cotización - Proveedor */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="submitted_at"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de Cotización</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar fecha..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Proveedor */}
-        <FormField
-          control={form.control}
-          name="contact_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proveedor *</FormLabel>
-              <FormControl>
-                <ComboBox
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  options={contactOptions}
-                  placeholder="Seleccionar proveedor..."
-                  searchPlaceholder="Buscar proveedor..."
-                  emptyMessage="No se encontraron proveedores."
-                  disabled={isContactsLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="contact_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proveedor *</FormLabel>
+                <FormControl>
+                  <ComboBox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={contactOptions}
+                    placeholder="Seleccionar proveedor..."
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontraron proveedores."
+                    disabled={isContactsLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Moneda - Monto Total */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -264,7 +266,7 @@ export function SubcontractBidFormModal({
       onLeftClick={onClose}
       rightLabel={mode === 'create' ? 'Crear Oferta' : 'Actualizar Oferta'}
       onRightClick={form.handleSubmit(onSubmit)}
-      rightLoading={isLoading}
+      isLoading={isLoading}
     />
   );
 
