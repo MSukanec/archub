@@ -503,7 +503,7 @@ export function Header({
           )}
 
           {/* Separator if there are header actions and main action buttons */}
-          {(showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton) && (
+          {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton) && (
             <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
           )}
 
