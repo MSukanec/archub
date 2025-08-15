@@ -311,48 +311,50 @@ export function Header({
       {/* Segunda fila: Tabs a la izquierda + Botones de acción a la derecha */}
       <div className="w-full h-10 px-12 flex items-center justify-between">
         {/* Left: Tabs */}
-        {hasTabs && (
-          <div className="flex items-center space-x-6">
-            {tabs.map((tab) => {
-              const tabContent = (
-                <button
-                  key={tab.id}
-                  onClick={() =>
-                    tab.isDisabled || tab.isRestricted
-                      ? undefined
-                      : onTabChange?.(tab.id)
-                  }
-                  disabled={tab.isDisabled}
-                  className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
-                    tab.isDisabled || tab.isRestricted
-                      ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                      : tab.isActive
-                        ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
-                        : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.label}
-                  {tab.badge && (
-                    <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-
-              // Si la tab está restringida, envolverla con CustomRestricted
-              if (tab.isRestricted && tab.restrictionReason) {
-                return (
-                  <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
-                    {tabContent}
-                  </CustomRestricted>
+        <div className="flex items-center">
+          {hasTabs && (
+            <div className="flex items-center space-x-6">
+              {tabs.map((tab) => {
+                const tabContent = (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      tab.isDisabled || tab.isRestricted
+                        ? undefined
+                        : onTabChange?.(tab.id)
+                    }
+                    disabled={tab.isDisabled}
+                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
+                      tab.isDisabled || tab.isRestricted
+                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                        : tab.isActive
+                          ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
+                          : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.badge && (
+                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
                 );
-              }
 
-              return tabContent;
-            })}
-          </div>
-        )}
+                // Si la tab está restringida, envolverla con CustomRestricted
+                if (tab.isRestricted && tab.restrictionReason) {
+                  return (
+                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                      {tabContent}
+                    </CustomRestricted>
+                  );
+                }
+
+                return tabContent;
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Right: Header Action Buttons + Main Action Buttons */}
         <div className="flex items-center gap-1">
