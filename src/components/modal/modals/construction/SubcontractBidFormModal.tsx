@@ -307,11 +307,13 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
+      subformPanel={null}
       headerContent={headerContent}
       footerContent={footerContent}
-      isEditing={true} // Siempre en modo edición
+      isEditing={true}
       onClose={onClose}
     />
   )
