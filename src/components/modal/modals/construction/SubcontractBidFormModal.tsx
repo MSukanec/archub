@@ -22,7 +22,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useModalPanelStore } from '@/components/modal/form/modalPanelStore';
+
 
 
 const bidFormSchema = z.object({
@@ -53,14 +53,9 @@ export function SubcontractBidFormModal({
   const onSuccess = modalData?.onSuccess;
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  // Estado de modal panel store como en el modal de bitácora
-  const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
-  
-  // Reset panel state when modal opens
-  useEffect(() => {
-    setPanel('edit');
-    setCurrentSubform(null);
-  }, [setPanel, setCurrentSubform]);
+  // Estado local para manejar paneles del modal
+  const [currentPanel, setCurrentPanel] = useState<'edit' | 'subform'>('edit');
+  const [currentSubform, setCurrentSubform] = useState<string | null>(null);
   
   // Obtener miembros de la organización para el created_by - usando el mismo hook que MovementFormModal
   const { data: members } = useOrganizationMembers(userData?.organization?.id);
@@ -357,7 +352,7 @@ export function SubcontractBidFormModal({
           description="Seleccionar tareas y definir precios unitarios"
           onClick={() => {
             setCurrentSubform('tasks');
-            setPanel('subform');
+            setCurrentPanel('subform');
           }}
         />
 
@@ -371,7 +366,7 @@ export function SubcontractBidFormModal({
       title="Tareas del Subcontrato"
       icon={CheckSquare}
       showBackButton={true}
-      onBackClick={() => setPanel('edit')}
+      onBackClick={() => setCurrentPanel('edit')}
     />
   ) : (
     <FormModalHeader 
@@ -384,9 +379,9 @@ export function SubcontractBidFormModal({
   const footerContent = currentPanel === 'subform' && currentSubform === 'tasks' ? (
     <FormModalFooter
       leftLabel="Volver"
-      onLeftClick={() => setPanel('edit')}
+      onLeftClick={() => setCurrentPanel('edit')}
       rightLabel="Confirmar Tareas"
-      onRightClick={() => setPanel('edit')}
+      onRightClick={() => setCurrentPanel('edit')}
     />
   ) : (
     <FormModalFooter
