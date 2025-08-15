@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Trophy } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { supabase } from '@/lib/supabase';
 
 interface SubcontractBidsViewProps {
   subcontract: any;
@@ -94,6 +95,45 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     console.log('View bid:', bid.id);
   };
 
+  const handleSelectWinner = (bid: any) => {
+    openModal('confirm', {
+      title: 'Seleccionar Oferta Ganadora',
+      message: `¿Confirmas que la oferta de ${bid.contacts?.company_name || bid.contacts?.full_name || 'este proveedor'} es la ganadora del subcontrato?`,
+      leftLabel: 'Cancelar',
+      rightLabel: 'Confirmar',
+      onConfirm: async () => {
+        try {
+          // Obtener token de autenticación
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session?.access_token) {
+            throw new Error('No hay sesión activa');
+          }
+
+          const response = await fetch(`/api/subcontracts/${subcontract.id}/select-winner`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({
+              winner_bid_id: bid.id
+            })
+          });
+          
+          if (response.ok) {
+            invalidateBids(); // Refresh the list
+            // También invalidar el subcontrato para actualizar el estado
+            queryClient.invalidateQueries({ queryKey: ['subcontract', subcontract.id] });
+          } else {
+            console.error('Error selecting winner bid');
+          }
+        } catch (error) {
+          console.error('Error selecting winner bid:', error);
+        }
+      }
+    });
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: 'Pendiente', variant: 'secondary' as const },
@@ -176,6 +216,23 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       label: 'Acciones',
       render: (item: any) => (
         <div className="flex items-center gap-1">
+          {/* Mostrar si es ganadora */}
+          {subcontract?.winner_bid_id === item.id ? (
+            <Badge variant="default" className="text-xs bg-yellow-500 hover:bg-yellow-600">
+              <Trophy className="h-3 w-3 mr-1" />
+              Ganadora
+            </Badge>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700"
+              onClick={() => handleSelectWinner(item)}
+              title="Seleccionar como ganadora"
+            >
+              <Trophy className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

@@ -1064,6 +1064,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PUT /api/subcontracts/:id/select-winner - Select winning bid for subcontract
+  app.put("/api/subcontracts/:id/select-winner", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const token = authHeader.substring(7);
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { id } = req.params;
+      const { winner_bid_id } = req.body;
+
+      if (!winner_bid_id) {
+        return res.status(400).json({ error: "winner_bid_id is required" });
+      }
+
+      // Update the subcontract with the winning bid
+      const { data, error } = await authenticatedSupabase
+        .from('subcontracts')
+        .update({ winner_bid_id })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error selecting winner bid:", error);
+        return res.status(500).json({ error: "Failed to select winner bid", details: error });
+      }
+
+      res.json({ success: true, data });
+
+    } catch (error) {
+      console.error("Error in select-winner endpoint:", error);
+      res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+  });
+
   // POST /api/subcontract-bid-tasks - Save tasks for a subcontract bid
   app.post("/api/subcontract-bid-tasks", async (req, res) => {
     try {
