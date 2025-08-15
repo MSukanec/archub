@@ -104,6 +104,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         invalidateBids(); // Refresh the list
         // También invalidar el subcontrato para actualizar el estado
         queryClient.invalidateQueries({ queryKey: ['subcontract', subcontract.id] });
+        // Invalidar también la lista de subcontratos del proyecto
+        queryClient.invalidateQueries({ queryKey: ['subcontracts', subcontract.project_id] });
       }
     });
   };

@@ -34,6 +34,7 @@ export function SubcontractDashboardView({
     const statusConfig = {
       'draft': { variant: 'secondary' as const, label: 'Borrador' },
       'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
+      'awarded': { variant: 'default' as const, label: 'Adjudicado' },
       'en_proceso': { variant: 'default' as const, label: 'En Proceso' },
       'completado': { variant: 'default' as const, label: 'Completado' },
       'cancelado': { variant: 'destructive' as const, label: 'Cancelado' }
@@ -104,6 +105,7 @@ export function SubcontractDashboardView({
                       const statusConfig = {
                         'draft': 'Borrador',
                         'pendiente': 'Pendiente',
+                        'awarded': 'Adjudicado',
                         'en_proceso': 'En Proceso',
                         'completado': 'Completado',
                         'cancelado': 'Cancelado'
