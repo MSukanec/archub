@@ -11,21 +11,48 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 interface SubcontractAwardedViewProps {
   subcontract: any;
+  onTabChange?: (tab: string) => void;
 }
 
-export function SubcontractAwardedView({ subcontract }: SubcontractAwardedViewProps) {
+export function SubcontractAwardedView({ subcontract, onTabChange }: SubcontractAwardedViewProps) {
   const { openModal } = useGlobalModalStore();
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTasks, setEditedTasks] = useState<any[]>([]);
   
-  // Mock data - TODO: Replace with real data from subcontract_bid_tasks
+  // Determinar si hay adjudicación
+  const isAwarded = subcontract?.winner_bid_id && subcontract?.status === 'awarded';
+  
+  // Mock data para tareas - TODO: Replace with real data from subcontract_bid_tasks
   const [awardedTasks, setAwardedTasks] = useState<any[]>([]);
   
   useEffect(() => {
     // TODO: Fetch subcontract_bid_tasks from the awarded bid
-    // For now, we'll show empty state
-    setAwardedTasks([]);
-  }, [subcontract.id]);
+    // For now, when awarded, show mock tasks
+    if (isAwarded) {
+      setAwardedTasks([
+        {
+          id: '1',
+          task_name: 'Excavación general',
+          task_description: 'Excavación para fundaciones',
+          amount: 100,
+          unit: 'm³',
+          unit_price: 1500,
+          notes: 'Incluye retiro de material'
+        },
+        {
+          id: '2', 
+          task_name: 'Hormigón armado',
+          task_description: 'Fundaciones y columnas',
+          amount: 50,
+          unit: 'm³',
+          unit_price: 8500,
+          notes: 'H-25 con aditivo'
+        }
+      ]);
+    } else {
+      setAwardedTasks([]);
+    }
+  }, [subcontract.id, isAwarded]);
 
   const handleEditTask = (taskId: string) => {
     setEditingTaskId(taskId);
@@ -193,16 +220,16 @@ export function SubcontractAwardedView({ subcontract }: SubcontractAwardedViewPr
     }
   ];
 
-  if (awardedTasks.length === 0) {
+  if (!isAwarded) {
     return (
       <EmptyState
         icon={<FileText />}
         title="Sin adjudicación"
         description="Este subcontrato aún no ha sido adjudicado. Una vez adjudicado, podrás ver y editar los detalles del contrato aquí."
         action={
-          <Button disabled className="opacity-50">
+          <Button onClick={() => onTabChange?.('Ofertas')}>
             <FileText className="w-4 h-4 mr-2" />
-            Subir Contrato
+            Ir a Ofertas
           </Button>
         }
       />

@@ -159,6 +159,7 @@ export default function SubcontractView() {
         return (
           <SubcontractAwardedView 
             subcontract={subcontract}
+            onTabChange={setActiveTab}
           />
         );
       default:
