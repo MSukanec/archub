@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
+import { Plus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
+import { SubcontractScopeView } from './tabs/SubcontractScopeView';
 import { useSubcontract } from "@/hooks/use-subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function SubcontractView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Resumen');
+  const { openModal } = useGlobalModalStore();
   
   const { data: userData } = useCurrentUser();
   const { data: subcontract, isLoading } = useSubcontract(id || '');
@@ -48,7 +52,20 @@ export default function SubcontractView() {
     showBackButton: true,
     onBackClick: () => navigate('/construction/subcontracts'),
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actionButton: activeTab === 'Alcance' ? {
+      label: "Agregar Tareas",
+      icon: Plus,
+      onClick: () => {
+        openModal('subcontract-task', {
+          subcontractId: id,
+          projectId: subcontract?.project_id,
+          onSuccess: () => {
+            // Refrescar datos si es necesario
+          }
+        });
+      }
+    } : undefined
   };
 
   if (isLoading) {
@@ -90,12 +107,10 @@ export default function SubcontractView() {
         );
       case 'Alcance':
         return (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-muted-foreground">Alcance</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Vista de alcance en construcción
-            </p>
-          </div>
+          <SubcontractScopeView 
+            subcontract={subcontract}
+            project={mockProject}
+          />
         );
       case 'Ofertas':
         return (

@@ -60,3 +60,48 @@ TABLA SUBCONTRACTS:
     "data_type": "uuid"
   }
 ]
+
+TABLA SUBCONTRACT_BID_TASKS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "bid_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "quantity",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "notes",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
