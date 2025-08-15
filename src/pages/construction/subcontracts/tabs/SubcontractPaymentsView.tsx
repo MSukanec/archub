@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DollarSign, Wallet } from 'lucide-react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -18,7 +18,35 @@ interface SubcontractPaymentsViewProps {
 
 export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsViewProps) {
   const { data: userData } = useCurrentUser();
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('dolarizado');
+  
+  // Obtener la moneda por defecto de la organización
+  const { data: defaultCurrency } = useQuery({
+    queryKey: ['default-currency', userData?.organization?.id],
+    queryFn: async () => {
+      if (!userData?.organization?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('currencies')
+        .select('*')
+        .eq('id', userData.preferences?.default_currency)
+        .single();
+        
+      if (error) return null;
+      return data;
+    },
+    enabled: !!userData?.organization?.id && !!userData?.preferences?.default_currency
+  });
+  
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+  
+  // Actualizar la vista de moneda cuando se cargue la moneda por defecto
+  useEffect(() => {
+    if (defaultCurrency) {
+      // Si la moneda por defecto es USD, mostrar en dólares, si no, en pesos/moneda local
+      const newView = defaultCurrency.code === 'USD' ? 'dolarizado' : 'pesificado';
+      setCurrencyView(newView);
+    }
+  }, [defaultCurrency]);
 
   // Query para obtener los pagos específicos de este subcontrato
   const { data: subcontractPayments = [], isLoading: isLoadingPayments } = useQuery({
@@ -126,8 +154,8 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         };
       }
       
-      // Convertir a la moneda de vista seleccionada
-      const amount = currencyView === 'dolarizado' 
+      // Convertir a la moneda por defecto de la organización
+      const amount = defaultCurrency?.code === 'USD' 
         ? payment.amount / payment.exchange_rate
         : payment.amount;
         
@@ -272,7 +300,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       <SubcontractPaymentsChart
         data={paymentsChartData}
         isLoading={isLoadingPayments}
-        currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
+        currencySymbol={defaultCurrency?.symbol || '$'}
         title={`Pagos del Subcontrato: ${subcontract.title}`}
       />
 
