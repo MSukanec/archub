@@ -5,8 +5,7 @@ import { es } from "date-fns/locale";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from "@/components/ui-custom/EmptyState";
-import { Table } from "@/components/ui-custom/Table";
-import { Badge } from "@/components/ui/badge";
+import { Subcontract } from "@/components/ui-custom/Subcontract";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,64 +39,7 @@ export default function ConstructionSubcontracts() {
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
-      'en_proceso': { variant: 'default' as const, label: 'En Proceso' },
-      'completado': { variant: 'default' as const, label: 'Completado' },
-      'cancelado': { variant: 'destructive' as const, label: 'Cancelado' }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendiente;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
 
-  const formatCurrency = (amount: number, symbol: string = '$') => {
-    return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
-  };
-
-  // Función para convertir montos según la vista de moneda
-  const convertAmount = (amountARS: number, amountUSD: number, currencyCode: string) => {
-    if (currencyView === 'discriminado') {
-      return currencyCode === 'USD' ? amountUSD : amountARS;
-    } else if (currencyView === 'pesificado') {
-      return amountARS; // Siempre mostrar en ARS
-    } else if (currencyView === 'dolarizado') {
-      return amountUSD; // Siempre mostrar en USD
-    }
-    return amountARS;
-  };
-
-  const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
-    const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
-    
-    if (currencyView === 'discriminado') {
-      const symbol = originalCurrency === 'USD' ? 'USD' : 'ARS';
-      return (
-        <div className="text-left">
-          <div className="font-medium">
-            {symbol} {convertedAmount.toLocaleString('es-AR')}
-          </div>
-        </div>
-      );
-    } else if (currencyView === 'pesificado') {
-      return (
-        <div className="text-left">
-          <div className="font-medium">
-            ARS {convertedAmount.toLocaleString('es-AR')}
-          </div>
-        </div>
-      );
-    } else { // dolarizado
-      return (
-        <div className="text-left">
-          <div className="font-medium">
-            USD {Math.round(convertedAmount).toLocaleString('es-AR')}
-          </div>
-        </div>
-      );
-    }
-  };
 
   // Combinar datos de subcontratos con análisis de pagos
   const enrichedSubcontracts = subcontracts.map(subcontract => {
@@ -113,133 +55,7 @@ export default function ConstructionSubcontracts() {
     };
   });
 
-  const columns = [
-    {
-      key: 'title',
-      label: 'Título',
-      width: '12.5%',
-      render: (subcontract: any) => (
-        <div className="font-medium">{subcontract.title}</div>
-      )
-    },
-    {
-      key: 'date',
-      label: 'Fecha',
-      width: '12.5%',
-      render: (subcontract: any) => {
-        try {
-          return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
-        } catch {
-          return subcontract.date;
-        }
-      }
-    },
-    {
-      key: 'contact',
-      label: 'Proveedor',
-      width: '12.5%',
-      render: (subcontract: any) => {
-        const contact = subcontract.contact;
-        if (!contact) {
-          return <span className="text-muted-foreground">Sin proveedor</span>;
-        }
-        
-        // Usar full_name si existe, sino construir con first_name y last_name
-        const contactName = contact.full_name || 
-          `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
-          'Nombre no disponible';
-        
-        return (
-          <div>
-            <div className="font-medium">{contactName}</div>
-            {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
-          </div>
-        );
-      }
-    },
-    {
-      key: 'amount_total',
-      label: 'Monto Total',
-      width: '12.5%',
-      render: (subcontract: any) => {
-        const amountARS = subcontract.amount_total || 0;
-        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
-        // Determinar la moneda original del subcontrato
-        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
-        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
-      }
-    },
-    {
-      key: 'pago_fecha',
-      label: 'Pago a la Fecha',
-      width: '12.5%',
-      render: (subcontract: any) => {
-        const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
-        const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
-        return formatSingleCurrency(pagoARS, pagoUSD, 'ARS'); // Los pagos siempre en moneda mixta
-      }
-    },
-    {
-      key: 'saldo',
-      label: 'Saldo',
-      width: '12.5%',
-      render: (subcontract: any) => {
-        const saldoARS = subcontract.analysis?.saldo || 0;
-        const saldoUSD = subcontract.analysis?.saldoUSD || 0;
-        return formatSingleCurrency(saldoARS, saldoUSD, 'ARS'); // Los saldos siempre en moneda mixta
-      }
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      width: '12.5%',
-      render: (subcontract: any) => getStatusBadge(subcontract.status)
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      width: '12.5%',
-      sortable: false,
-      render: (subcontract: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => {
-              openModal('subcontract', {
-                projectId: userData?.preferences?.last_project_id,
-                organizationId: userData?.organization?.id,
-                userId: userData?.user?.id,
-                subcontractId: subcontract.id,
-                isEditing: true
-              });
-            }}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => {
-              openModal('delete-confirmation', {
-                title: 'Eliminar Subcontrato',
-                description: `¿Estás seguro de que deseas eliminar el subcontrato "${subcontract.title}"?`,
-                confirmText: 'Eliminar',
-                mode: 'dangerous',
-                onConfirm: () => {
-                  deleteSubcontract.mutate(subcontract.id);
-                }
-              });
-            }}
-          >
-            <Trash2 className="w-4 h-4 text-destructive" />
-          </Button>
-        </div>
-      )
-    }
-  ];
+
 
   // Filtrar subcontratos por búsqueda
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
@@ -265,38 +81,43 @@ export default function ConstructionSubcontracts() {
     }
   }
 
-  const tableTopBar = {
-    showSearch: true,
-    searchValue: searchQuery,
-    onSearchChange: setSearchQuery,
-    searchPlaceholder: "Buscar subcontratos...",
-    showFilter: true,
-    isFilterActive: currencyView !== 'discriminado',
-    renderFilterContent: () => (
-      <div className="space-y-3 p-2 min-w-[200px]">
-        <div>
-          <Label className="text-xs font-medium mb-1 block">Moneda</Label>
-          <Select 
-            value={currencyView} 
-            onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
-          >
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Seleccionar moneda" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="discriminado">Todo</SelectItem>
-              <SelectItem value="pesificado">Peso Argentino</SelectItem>
-              <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const renderTopControls = () => (
+    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar subcontratos..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
       </div>
-    ),
-    showClearFilters: true,
-    onClearFilters: () => {
-      setCurrencyView('discriminado')
-    }
-  }
+      <div className="flex gap-2">
+        <Select 
+          value={currencyView} 
+          onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Seleccionar moneda" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="discriminado">Todo</SelectItem>
+            <SelectItem value="pesificado">Peso Argentino</SelectItem>
+            <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
+          </SelectContent>
+        </Select>
+        {currencyView !== 'discriminado' && (
+          <Button
+            variant="outline"
+            onClick={() => setCurrencyView('discriminado')}
+            size="sm"
+          >
+            Limpiar filtros
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <Layout wide={true} headerProps={headerProps}>
@@ -307,13 +128,46 @@ export default function ConstructionSubcontracts() {
           description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
         />
       ) : (
-        <Table
-          columns={columns}
-          data={filteredSubcontracts}
-          isLoading={isLoading || isLoadingAnalysis}
-          defaultSort={{ key: 'title', direction: 'asc' }}
-          topBar={tableTopBar}
-        />
+        <div>
+          {renderTopControls()}
+          <div className="space-y-4">
+            {(isLoading || isLoadingAnalysis) ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 bg-muted/20 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              filteredSubcontracts.map((subcontract) => (
+                <Subcontract
+                  key={subcontract.id}
+                  subcontract={subcontract}
+                  currencyView={currencyView}
+                  onEdit={() => {
+                    openModal('subcontract', {
+                      projectId: userData?.preferences?.last_project_id,
+                      organizationId: userData?.organization?.id,
+                      userId: userData?.user?.id,
+                      subcontractId: subcontract.id,
+                      isEditing: true
+                    });
+                  }}
+                  onDelete={() => {
+                    openModal('delete-confirmation', {
+                      title: 'Eliminar Subcontrato',
+                      description: `¿Estás seguro de que deseas eliminar el subcontrato "${subcontract.title}"?`,
+                      confirmText: 'Eliminar',
+                      mode: 'dangerous',
+                      onConfirm: () => {
+                        deleteSubcontract.mutate(subcontract.id);
+                      }
+                    });
+                  }}
+                />
+              ))
+            )}
+          </div>
+        </div>
       )}
     </Layout>
   );
