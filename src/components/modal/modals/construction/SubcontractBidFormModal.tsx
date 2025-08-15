@@ -22,6 +22,7 @@ const bidFormSchema = z.object({
   contact_id: z.string().min(1, 'El proveedor es requerido'),
   total_amount: z.string().optional(),
   currency_code: z.string(),
+  exchange_rate: z.string().optional(),
   received_at: z.date().optional(),
   notes: z.string().optional()
 });
@@ -54,6 +55,7 @@ export function SubcontractBidFormModal({
       contact_id: initialData?.contact_id || '',
       total_amount: initialData?.total_amount?.toString() || '',
       currency_code: initialData?.currency_code || 'ARS',
+      exchange_rate: initialData?.exchange_rate?.toString() || '',
       received_at: initialData?.received_at ? new Date(initialData.received_at) : undefined,
       notes: initialData?.notes || ''
     }
@@ -63,12 +65,29 @@ export function SubcontractBidFormModal({
     setIsLoading(true);
 
     try {
-      // TODO: Implementar guardado de oferta
-      console.log('Saving bid:', {
-        ...data,
+      const bidData = {
         subcontract_id,
-        total_amount: data.total_amount ? parseFloat(data.total_amount) : null
+        contact_id: data.contact_id,
+        total_amount: data.total_amount ? parseFloat(data.total_amount) : null,
+        currency_code: data.currency_code,
+        exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : null,
+        received_at: data.received_at ? data.received_at.toISOString() : null,
+        notes: data.notes || null
+      };
+
+      console.log('Saving bid:', bidData);
+
+      const response = await fetch('/api/subcontract-bids', {
+        method: mode === 'create' ? 'POST' : 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mode === 'edit' ? { ...bidData, id: bid_id } : bidData),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to save bid');
+      }
 
       toast({
         title: mode === 'create' ? 'Oferta creada' : 'Oferta actualizada',
@@ -97,46 +116,50 @@ export function SubcontractBidFormModal({
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="contact_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proveedor *</FormLabel>
-              <FormControl>
-                <ComboBox
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  options={contactOptions}
-                  placeholder="Seleccionar proveedor..."
-                  searchPlaceholder="Buscar proveedor..."
-                  emptyMessage="No se encontraron proveedores."
-                  disabled={isContactsLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Fecha de Recepcion - Proveedor */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="received_at"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de Recepción</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar fecha..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="received_at"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha de Recepción</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="contact_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proveedor *</FormLabel>
+                <FormControl>
+                  <ComboBox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={contactOptions}
+                    placeholder="Seleccionar proveedor..."
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyMessage="No se encontraron proveedores."
+                    disabled={isContactsLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        {/* Moneda - Monto Total */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -180,6 +203,27 @@ export function SubcontractBidFormModal({
           />
         </div>
 
+        {/* Cotización */}
+        <FormField
+          control={form.control}
+          name="exchange_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cotización (Opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  placeholder="Ej: 1.0000"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Notas */}
         <FormField
           control={form.control}
           name="notes"
