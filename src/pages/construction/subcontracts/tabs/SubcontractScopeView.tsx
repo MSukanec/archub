@@ -47,10 +47,10 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       render: (item: any) => (
         <div>
           <p className="font-medium text-sm">
-            {item.task_instances?.task_templates?.name || item.task_instances?.name || 'Sin nombre'}
+            {item.task_name || 'Sin nombre'}
           </p>
-          {item.task_instances?.task_templates?.description && (
-            <p className="text-xs text-muted-foreground">{item.task_instances.task_templates.description}</p>
+          {item.task_description && (
+            <p className="text-xs text-muted-foreground">{item.task_description}</p>
           )}
         </div>
       )
@@ -69,7 +69,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       title: 'Unidad',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
-          {item.unit || item.task_instances?.unit || item.task_instances?.task_templates?.unit || 'Sin unidad'}
+          {item.unit || item.unit_symbol || 'Sin unidad'}
         </Badge>
       )
     },

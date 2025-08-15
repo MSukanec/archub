@@ -40,63 +40,34 @@ export function useSubcontractTasks(subcontractId: string) {
         return [];
       }
 
-      // Obtener información adicional de las tareas por separado
+      // Obtener información de las tareas usando construction_tasks_view
       const taskIds = data.map(item => item.task_id);
       
-      const { data: taskInstances, error: taskError } = await supabase
-        .from('task_instances')
+      const { data: constructionTasks, error: taskError } = await supabase
+        .from('construction_tasks_view')
         .select(`
-          id,
-          name,
-          description,
-          unit,
-          task_template_id
+          task_instance_id,
+          task_name,
+          task_description,
+          unit_symbol,
+          rubro_name
         `)
-        .in('id', taskIds);
+        .in('task_instance_id', taskIds);
 
       if (taskError) {
-        console.error('Error fetching task instances:', taskError);
-      }
-
-      // Si hay task instances, también obtener los task templates
-      let taskTemplates = [];
-      if (taskInstances && taskInstances.length > 0) {
-        const templateIds = taskInstances
-          .map(task => task.task_template_id)
-          .filter(id => id);
-        
-        if (templateIds.length > 0) {
-          const { data: templates, error: templateError } = await supabase
-            .from('task_templates')
-            .select(`
-              id,
-              name,
-              description,
-              unit
-            `)
-            .in('id', templateIds);
-
-          if (templateError) {
-            console.error('Error fetching task templates:', templateError);
-          } else {
-            taskTemplates = templates || [];
-          }
-        }
+        console.error('Error fetching construction tasks:', taskError);
       }
 
       // Combinar los datos
       const combinedData = data.map(subcontractTask => {
-        const taskInstance = taskInstances?.find(task => task.id === subcontractTask.task_id);
-        const taskTemplate = taskInstance ? 
-          taskTemplates.find(template => template.id === taskInstance.task_template_id) : 
-          null;
-
+        const constructionTask = constructionTasks?.find(task => task.task_instance_id === subcontractTask.task_id);
+        
         return {
           ...subcontractTask,
-          task_instances: taskInstance ? {
-            ...taskInstance,
-            task_templates: taskTemplate
-          } : null
+          task_name: constructionTask?.task_name || 'Sin nombre',
+          task_description: constructionTask?.task_description || '',
+          unit_symbol: constructionTask?.unit_symbol || 'Sin unidad',
+          rubro_name: constructionTask?.rubro_name || 'Sin rubro'
         };
       });
 
