@@ -83,6 +83,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
   const headerContent = (
     <FormModalHeader 
       title="Agregar Tareas al Subcontrato"
+      description="Selecciona las tareas del proyecto que deseas incluir en el alcance del subcontrato"
       icon={Plus}
     />
   );
@@ -101,7 +102,6 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
   return (
     <FormModalLayout
       columns={1}
-      wide={true}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
