@@ -20,11 +20,11 @@ export default function SubcontractView() {
   const { data: userData } = useCurrentUser();
   const { data: subcontract, isLoading } = useSubcontract(id || '');
 
-  // Datos simulados para el desarrollo - TODO: reemplazar con datos reales
-  const mockProject = { name: 'Proyecto Demo' };
-  const mockBids: any[] = [];
-  const mockWinnerBid = null;
-  const mockProvider = null;
+  // TODO: Implementar queries para obtener datos reales
+  const project = null; // Conectar con subcontract.project_id
+  const bids: any[] = [];
+  const winnerBid = null;
+  const provider = null;
 
   const headerTabs = [
     {
@@ -119,10 +119,10 @@ export default function SubcontractView() {
         return (
           <SubcontractDashboardView
             subcontract={subcontract}
-            project={mockProject}
-            bids={mockBids}
-            winnerBid={mockWinnerBid}
-            provider={mockProvider}
+            project={project}
+            bids={bids}
+            winnerBid={winnerBid}
+            provider={provider}
             onTabChange={setActiveTab}
           />
         );
@@ -130,7 +130,7 @@ export default function SubcontractView() {
         return (
           <SubcontractScopeView 
             subcontract={subcontract}
-            project={mockProject}
+            project={project}
           />
         );
       case 'Ofertas':

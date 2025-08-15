@@ -85,13 +85,13 @@ export function SubcontractDashboardView({
             title="Ficha del Subcontrato"
             description="Información general y detalles del subcontrato"
           />
-          <CardContent className="flex-1 space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+          <CardContent className="flex-1 space-y-3 pt-4">
+            <div className="grid grid-cols-1 gap-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Proyecto</p>
-                  <p className="text-sm text-muted-foreground">{project?.name || 'Sin proyecto'}</p>
+                  <p className="text-sm text-muted-foreground">{project?.name || 'Sin proyecto asignado'}</p>
                 </div>
               </div>
 
