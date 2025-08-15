@@ -8,6 +8,7 @@ import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
 import { SubcontractScopeView } from './tabs/SubcontractScopeView';
 import { SubcontractBidsView } from './tabs/SubcontractBidsView';
 import { SubcontractAwardedView } from './tabs/SubcontractAwardedView';
+import { SubcontractPaymentsView } from './tabs/SubcontractPaymentsView';
 import { useSubcontract } from "@/hooks/use-subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -62,6 +63,11 @@ export default function SubcontractView() {
       id: 'Contratado',
       label: 'Contratado',
       isActive: activeTab === 'Contratado'
+    },
+    {
+      id: 'Pagos',
+      label: 'Pagos',
+      isActive: activeTab === 'Pagos'
     }
   ];
 
@@ -160,6 +166,12 @@ export default function SubcontractView() {
           <SubcontractAwardedView 
             subcontract={subcontract}
             onTabChange={setActiveTab}
+          />
+        );
+      case 'Pagos':
+        return (
+          <SubcontractPaymentsView 
+            subcontract={subcontract}
           />
         );
       default:
