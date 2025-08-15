@@ -165,7 +165,7 @@ export function SubcontractDashboardView({
             title="Acciones Rápidas"
             description="Accesos directos para gestionar el subcontrato"
           />
-          <CardContent className="flex-1 space-y-3">
+          <CardContent className="flex-1 space-y-3 pt-4">
             <FormSubsectionButton
               icon={<Plus className="h-4 w-4" />}
               title="Definir alcance"
