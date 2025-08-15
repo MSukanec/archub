@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-import { Plus, Edit, Trash2, FileText, Trophy } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Edit, Trash2, FileText, Trophy, TrendingUp, TrendingDown, DollarSign, Users, Target, BarChart3, Award } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -136,6 +137,55 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     return formatter.format(amount);
   };
 
+  // Cálculos para KPIs
+  const kpiData = useMemo(() => {
+    if (subcontractBids.length === 0) return null;
+
+    const winningBid = subcontractBids.find((bid: any) => bid.id === subcontract?.winner_bid_id);
+    const validBids = subcontractBids.filter((bid: any) => bid.amount && bid.amount > 0);
+    
+    if (validBids.length === 0) return null;
+
+    const amounts = validBids.map((bid: any) => bid.amount);
+    const lowestAmount = Math.min(...amounts);
+    const highestAmount = Math.max(...amounts);
+    const averageAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
+    
+    // Calcular diferencias si hay oferta ganadora
+    let winnerVsLowest = null;
+    let winnerVsAverage = null;
+    let winnerVsHighest = null;
+    
+    if (winningBid && winningBid.amount) {
+      winnerVsLowest = {
+        amount: winningBid.amount - lowestAmount,
+        percentage: ((winningBid.amount - lowestAmount) / lowestAmount) * 100
+      };
+      winnerVsAverage = {
+        amount: winningBid.amount - averageAmount,
+        percentage: ((winningBid.amount - averageAmount) / averageAmount) * 100
+      };
+      winnerVsHighest = {
+        amount: winningBid.amount - highestAmount,
+        percentage: ((winningBid.amount - highestAmount) / highestAmount) * 100
+      };
+    }
+
+    return {
+      winningBid,
+      totalBids: subcontractBids.length,
+      validBids: validBids.length,
+      lowestAmount,
+      highestAmount,
+      averageAmount,
+      spread: highestAmount - lowestAmount,
+      spreadPercentage: ((highestAmount - lowestAmount) / lowestAmount) * 100,
+      winnerVsLowest,
+      winnerVsAverage,
+      winnerVsHighest
+    };
+  }, [subcontractBids, subcontract?.winner_bid_id]);
+
   const columns = [
     {
       key: 'supplier_name',
@@ -231,6 +281,214 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
 
   return (
     <div className="space-y-6">
+      {/* KPI Cards - Solo mostrar si hay ofertas */}
+      {subcontractBids.length > 0 && kpiData && (
+        <>
+          {/* Card de Oferta Ganadora */}
+          {kpiData.winningBid && (
+            <Card className="border-yellow-200 bg-yellow-50/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Award className="h-5 w-5 text-yellow-600" />
+                  Oferta Ganadora
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Subcontratista</p>
+                    <p className="font-medium">
+                      {kpiData.winningBid.contacts?.company_name || 
+                       kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Monto</p>
+                    <p className="font-bold text-lg text-yellow-700">
+                      {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Fecha</p>
+                    <p className="font-medium">
+                      {kpiData.winningBid.submitted_at 
+                        ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
+                        : '—'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Grid de KPIs Comparativos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total de Ofertas */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Ofertas</p>
+                    <p className="text-2xl font-bold">{kpiData.totalBids}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.validBids} con monto válido
+                    </p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Oferta Más Baja */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Oferta Más Baja</p>
+                    <p className="text-xl font-bold text-green-600">
+                      {formatCurrency(kpiData.lowestAmount, 'ARS')}
+                    </p>
+                    {kpiData.winnerVsLowest && (
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsLowest.amount > 0 ? '+' : ''}
+                        {kpiData.winnerVsLowest.percentage.toFixed(1)}% vs ganadora
+                      </p>
+                    )}
+                  </div>
+                  <TrendingDown className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Promedio */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Promedio</p>
+                    <p className="text-xl font-bold text-blue-600">
+                      {formatCurrency(kpiData.averageAmount, 'ARS')}
+                    </p>
+                    {kpiData.winnerVsAverage && (
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsAverage.amount > 0 ? '+' : ''}
+                        {kpiData.winnerVsAverage.percentage.toFixed(1)}% vs ganadora
+                      </p>
+                    )}
+                  </div>
+                  <Target className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Diferencia Mayor-Menor */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Rango de Ofertas</p>
+                    <p className="text-xl font-bold text-orange-600">
+                      {formatCurrency(kpiData.spread, 'ARS')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.spreadPercentage.toFixed(1)}% diferencia
+                    </p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* KPIs adicionales si hay ganadora */}
+          {kpiData.winningBid && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border-green-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Ahorro vs Más Alta</p>
+                      <p className="text-xl font-bold text-green-600">
+                        {kpiData.winnerVsHighest && kpiData.winnerVsHighest.amount < 0 
+                          ? formatCurrency(Math.abs(kpiData.winnerVsHighest.amount), 'ARS')
+                          : '$ 0'
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0
+                          ? `${Math.abs(kpiData.winnerVsHighest.percentage).toFixed(1)}% menos`
+                          : 'Sin ahorro'
+                        }
+                      </p>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">vs Promedio</p>
+                      <p className={`text-xl font-bold ${
+                        kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 
+                          ? 'text-green-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {kpiData.winnerVsAverage 
+                          ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
+                            formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
+                          : '$ 0'
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsAverage 
+                          ? `${kpiData.winnerVsAverage.percentage.toFixed(1)}% ${
+                              kpiData.winnerVsAverage.amount < 0 ? 'menor' : 'mayor'
+                            }`
+                          : 'Igual al promedio'
+                        }
+                      </p>
+                    </div>
+                    <TrendingUp className={`h-8 w-8 ${
+                      kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 
+                        ? 'text-green-500' 
+                        : 'text-red-500'
+                    }`} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-yellow-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Posición</p>
+                      <p className="text-xl font-bold text-yellow-600">
+                        #{subcontractBids
+                          .filter((bid: any) => bid.amount && bid.amount > 0)
+                          .sort((a: any, b: any) => a.amount - b.amount)
+                          .findIndex((bid: any) => bid.id === kpiData.winningBid.id) + 1
+                        } de {kpiData.validBids}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winningBid.amount === kpiData.lowestAmount 
+                          ? 'Oferta más económica' 
+                          : 'No es la más baja'
+                        }
+                      </p>
+                    </div>
+                    <Trophy className="h-8 w-8 text-yellow-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Tabla de ofertas */}
       {subcontractBids.length === 0 ? (
         <EmptyState
