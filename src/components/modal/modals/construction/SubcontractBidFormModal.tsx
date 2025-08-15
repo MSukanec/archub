@@ -54,20 +54,6 @@ export function SubcontractBidFormModal({
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
 
-  // Efecto para establecer valores por defecto cuando los datos estén disponibles (modo crear)
-  useEffect(() => {
-    if (mode === 'create' && !initialData && userData?.organization_preferences?.default_currency) {
-      // Solo establecer si no hay un valor ya
-      if (!form.watch('currency_id')) {
-        form.setValue('currency_id', userData.organization_preferences.default_currency);
-      }
-      // Establecer fecha de hoy si no hay fecha
-      if (!form.watch('submitted_at')) {
-        form.setValue('submitted_at', new Date());
-      }
-    }
-  }, [mode, initialData, userData?.organization_preferences?.default_currency, form]);
-  
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<BidFormData>({
@@ -81,6 +67,20 @@ export function SubcontractBidFormModal({
       notes: initialData?.notes || ''
     }
   });
+
+  // Efecto para establecer valores por defecto cuando los datos estén disponibles (modo crear)
+  useEffect(() => {
+    if (mode === 'create' && !initialData && userData?.organization_preferences?.default_currency) {
+      // Solo establecer si no hay un valor ya
+      if (!form.watch('currency_id')) {
+        form.setValue('currency_id', userData.organization_preferences.default_currency);
+      }
+      // Establecer fecha de hoy si no hay fecha
+      if (!form.watch('submitted_at')) {
+        form.setValue('submitted_at', new Date());
+      }
+    }
+  }, [mode, initialData, userData?.organization_preferences?.default_currency, form]);
 
   const onSubmit = async (data: BidFormData) => {
     setIsLoading(true);
