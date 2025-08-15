@@ -703,9 +703,9 @@ export function GanttContainer({
                     
                     {/* Columna Cantidad - 75px fijo */}
                     <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
-                      {item.type === 'task' && item.quantity && (
+                      {item.type === 'task' && (
                         <span className="text-xs text-[var(--table-row-fg)]">
-                          {item.quantity}
+                          -
                         </span>
                       )}
                     </div>
@@ -799,11 +799,12 @@ export function GanttContainer({
             ))}
             
             {/* Filas vacías adicionales para sincronizar con timeline */}
-            {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-left-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
-                {/* Fila vacía para mantener altura sincronizada */}
-              </div>
-            ))}
+            <div className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
+              {/* Fila vacía para mantener altura sincronizada */}
+            </div>
+            <div className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
+              {/* Fila vacía para mantener altura sincronizada */}
+            </div>
           </div>
 
         </div>
@@ -1032,60 +1033,53 @@ export function GanttContainer({
               </div>
             ))}
             
-            {/* Filas vacías adicionales para más espacio */}
-            {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`empty-timeline-${index}`} className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
-                <div 
-                  className="relative h-full w-full"
-                  style={{ width: timelineWidth }}
-                >
-                  {/* Grilla de semanas SIN LÍNEAS VERTICALES */}
-                  <div className="absolute inset-0 flex">
-                    {calendarStructure.weeks.map((week) => (
-                      <div 
-                        key={`empty-${index}-${week.key}`}
-                        className="h-full"
-                        style={{ width: weekWidth }}
-                      />
-                    ))}
-                  </div>
+            {/* Filas vacías adicionales para más espacio - OPTIMIZADAS */}
+            <div className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
+              <div 
+                className="relative h-full w-full"
+                style={{ width: timelineWidth }}
+              >
+                {/* Línea del día de hoy simplificada */}
+                {(() => {
+                  const today = new Date();
+                  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
                   
-                  {/* Línea del día de hoy en filas vacías */}
-                  {(() => {
-                    const today = new Date();
-                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    
-                    // Buscar el día exacto en la estructura del calendario
-                    let todayDayIndex = -1;
-                    let currentDayIndex = 0;
-                    
-                    for (const week of calendarStructure.weeks) {
-                      for (const day of week.days) {
-                        if (day.date.getTime() === todayStart.getTime()) {
-                          todayDayIndex = currentDayIndex;
-                          break;
-                        }
-                        currentDayIndex++;
+                  let todayDayIndex = -1;
+                  let currentDayIndex = 0;
+                  
+                  for (const week of calendarStructure.weeks) {
+                    for (const day of week.days) {
+                      if (day.date.getTime() === todayStart.getTime()) {
+                        todayDayIndex = currentDayIndex;
+                        break;
                       }
-                      if (todayDayIndex !== -1) break;
+                      currentDayIndex++;
                     }
+                    if (todayDayIndex !== -1) break;
+                  }
+                  
+                  if (todayDayIndex !== -1) {
+                    const dayWidth = timelineWidth / calendarStructure.totalDays;
+                    const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1;
                     
-                    if (todayDayIndex !== -1) {
-                      const dayWidth = timelineWidth / calendarStructure.totalDays;
-                      const todayPosition = todayDayIndex * dayWidth + (dayWidth / 2) - 1; // -1px para centrar mejor
-                      
-                      return (
-                        <div 
-                          className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
-                          style={{ left: `${todayPosition}px` }}
-                        />
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
+                    return (
+                      <div 
+                        className="absolute top-0 bottom-0 w-0.5 bg-[var(--accent)] z-10"
+                        style={{ left: `${todayPosition}px` }}
+                      />
+                    );
+                  }
+                  return null;
+                })()}
               </div>
-            ))}
+            </div>
+            
+            <div className="border-b border-[var(--table-row-border)] h-12 flex items-center bg-[var(--table-row-bg)]">
+              <div 
+                className="relative h-full w-full"
+                style={{ width: timelineWidth }}
+              />
+            </div>
           </div>
           
           {/* Dependencias overlay vectoriales profesionales estilo DHTMLX */}
