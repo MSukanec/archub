@@ -300,42 +300,134 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       {/* KPI Cards - Solo mostrar si hay ofertas */}
       {subcontractBids.length > 0 && kpiData && (
         <>
-          {/* Card de Oferta Ganadora */}
+          {/* Primera fila: Oferta Ganadora (2 cols) + Ahorro vs Más Alta + vs Promedio */}
           {kpiData.winningBid && (
-            <Card className="border-yellow-200 bg-yellow-50/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Award className="h-5 w-5 text-yellow-600" />
-                  Oferta Ganadora
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Subcontratista</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.contacts?.company_name || 
-                       kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* Oferta Ganadora - 2 columnas */}
+              <Card className="border-yellow-200 bg-yellow-50/50 md:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    Oferta Ganadora
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Subcontratista</p>
+                      <p className="font-medium">
+                        {kpiData.winningBid.contacts?.company_name || 
+                         kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Monto</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
+                        {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fecha</p>
+                      <p className="font-medium">
+                        {kpiData.winningBid.submitted_at 
+                          ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
+                          : '—'
+                        }
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Monto</p>
-                    <p className="font-bold text-lg text-yellow-700">
-                      {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
-                    </p>
+                </CardContent>
+              </Card>
+
+              {/* Ahorro vs Más Alta - 1 columna */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Ahorro vs Más Alta</p>
+                      <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    
+                    <div className="h-8 flex items-center">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="h-2 rounded-full"
+                          style={{ 
+                            backgroundColor: 'var(--accent)',
+                            width: kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0 
+                              ? `${Math.min(100, Math.abs(kpiData.winnerVsHighest.percentage) * 2)}%` 
+                              : '5%' 
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xl font-bold">
+                        {kpiData.winnerVsHighest && kpiData.winnerVsHighest.amount < 0 
+                          ? formatCurrency(Math.abs(kpiData.winnerVsHighest.amount), 'ARS')
+                          : '$ 0'
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0
+                          ? `${Math.abs(kpiData.winnerVsHighest.percentage).toFixed(1)}% de ahorro total`
+                          : 'Sin ahorro disponible'
+                        }
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.submitted_at 
-                        ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
-                        : '—'
-                      }
-                    </p>
+                </CardContent>
+              </Card>
+
+              {/* vs Promedio - 1 columna */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">vs Promedio</p>
+                      <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    
+                    <div className="h-8 relative">
+                      <svg className="w-full h-full" viewBox="0 0 100 32">
+                        <line x1="50" y1="0" x2="50" y2="32" stroke="hsl(var(--muted-foreground))" strokeWidth="1" opacity="0.3" />
+                        <line 
+                          x1="0" y1="16" x2="100" y2="16" 
+                          stroke="var(--accent)" 
+                          strokeWidth="2" 
+                          opacity="0.5"
+                        />
+                        <circle 
+                          cx={kpiData.winnerVsAverage && kpiData.winnerVsAverage.amount < 0 ? "30" : "70"} 
+                          cy="16" 
+                          r="3" 
+                          fill="var(--accent)" 
+                        />
+                      </svg>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xl font-bold">
+                        {kpiData.winnerVsAverage 
+                          ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
+                            formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
+                          : '$ 0'
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {kpiData.winnerVsAverage 
+                          ? `${Math.abs(kpiData.winnerVsAverage.percentage).toFixed(1)}% ${
+                              kpiData.winnerVsAverage.amount < 0 ? 'por debajo' : 'por encima'
+                            } del promedio`
+                          : 'Igual al promedio'
+                        }
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {/* Grid de KPIs Comparativos */}
