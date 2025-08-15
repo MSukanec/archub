@@ -6,6 +6,7 @@ import { Table } from '@/components/ui-custom/Table';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 
 interface SubcontractScopeViewProps {
   subcontract: any;
@@ -15,8 +16,8 @@ interface SubcontractScopeViewProps {
 export function SubcontractScopeView({ subcontract, project }: SubcontractScopeViewProps) {
   const { openModal } = useGlobalModalStore();
   
-  // Mock data - replace with real data later
-  const subcontractTasks = []; // TODO: Fetch from SUBCONTRACT_BID_TASKS table
+  // Obtener tareas del subcontrato
+  const { subcontractTasks, isLoading, deleteSubcontractTask } = useSubcontractTasks(subcontract?.id || '');
   
   const handleAddTask = () => {
     openModal('subcontract-task', {
@@ -36,8 +37,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
   };
 
   const handleDeleteTask = (task: any) => {
-    // TODO: Implement delete functionality
-    console.log('Delete task:', task.id);
+    deleteSubcontractTask.mutate(task.id);
   };
 
   const columns = [
@@ -46,9 +46,11 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       title: 'Tarea',
       render: (item: any) => (
         <div>
-          <p className="font-medium text-sm">{item.task_name}</p>
-          {item.task_description && (
-            <p className="text-xs text-muted-foreground">{item.task_description}</p>
+          <p className="font-medium text-sm">
+            {item.task_instances?.task_templates?.name || item.task_instances?.name || 'Sin nombre'}
+          </p>
+          {item.task_instances?.task_templates?.description && (
+            <p className="text-xs text-muted-foreground">{item.task_instances.task_templates.description}</p>
           )}
         </div>
       )
@@ -67,7 +69,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       title: 'Unidad',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
-          {item.unit || 'Sin unidad'}
+          {item.unit || item.task_instances?.unit || item.task_instances?.task_templates?.unit || 'Sin unidad'}
         </Badge>
       )
     },
