@@ -38,12 +38,24 @@ interface LayoutProps {
     actions?: React.ReactNode[];
     tabs?: Tab[];
     onTabChange?: (tabId: string) => void;
+    // Header system props
+    showHeaderSearch?: boolean;
+    headerSearchValue?: string;
+    onHeaderSearchChange?: (value: string) => void;
+    action?: {
+      icon?: React.ComponentType<any>;
+      label: string;
+      onClick: () => void;
+    };
     actionButton?: {
       label: string;
       icon?: React.ComponentType<any>;
       onClick: () => void;
     };
     breadcrumb?: { name: string; href: string }[];
+    showCurrencySelector?: boolean;
+    currencyView?: 'discriminado' | 'pesificado' | 'dolarizado';
+    onCurrencyViewChange?: (view: 'discriminado' | 'pesificado' | 'dolarizado') => void;
   };
 }
 

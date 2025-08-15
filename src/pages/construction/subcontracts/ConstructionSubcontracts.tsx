@@ -9,8 +9,7 @@ import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -73,6 +72,9 @@ export default function ConstructionSubcontracts() {
     showHeaderSearch: true,
     headerSearchValue: searchQuery,
     onHeaderSearchChange: setSearchQuery,
+    showCurrencySelector: true,
+    currencyView: currencyView,
+    onCurrencyViewChange: setCurrencyView,
     action: {
       icon: Plus,
       label: "Nuevo Subcontrato",
@@ -296,28 +298,12 @@ export default function ConstructionSubcontracts() {
             }
           />
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 max-w-xs">
-              <Label htmlFor="currency-view" className="text-sm">Vista:</Label>
-              <Select value={currencyView} onValueChange={(value: any) => setCurrencyView(value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="discriminado">Discriminado</SelectItem>
-                  <SelectItem value="pesificado">Pesificado</SelectItem>
-                  <SelectItem value="dolarizado">Dolarizado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Table
-              columns={columns}
-              data={filteredSubcontracts}
-              isLoading={isLoading}
-              className="bg-card"
-            />
-          </div>
+          <Table
+            columns={columns}
+            data={filteredSubcontracts}
+            isLoading={isLoading}
+            className="bg-card"
+          />
         )}
       </div>
     </Layout>
