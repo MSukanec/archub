@@ -14,7 +14,7 @@ export function useSubcontracts(projectId: string | null) {
         .from('subcontracts')
         .select(`
           *,
-          subcontract_bids(
+          subcontract_bids!subcontract_bids_subcontract_id_fkey(
             id,
             contact_id,
             amount,
