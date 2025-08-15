@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { useContacts } from '@/hooks/use-contacts';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies } from '@/hooks/use-currencies';
-import { useQuery } from '@tanstack/react-query';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 const bidFormSchema = z.object({
   contact_id: z.string().min(1, 'El proveedor es requerido'),
@@ -49,16 +49,8 @@ export function SubcontractBidFormModal({
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   
-  // Obtener miembros de la organización para el created_by
-  const { data: members } = useQuery({
-    queryKey: ['organization-members', userData?.organization?.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/organization-members?organization_id=${userData?.organization?.id}`);
-      if (!response.ok) throw new Error('Failed to fetch members');
-      return response.json();
-    },
-    enabled: !!userData?.organization?.id
-  });
+  // Obtener miembros de la organización para el created_by - usando el mismo hook que MovementFormModal
+  const { data: members } = useOrganizationMembers(userData?.organization?.id);
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
   
@@ -96,6 +88,7 @@ export function SubcontractBidFormModal({
 
       console.log('Saving bid:', bidData);
       console.log('UserData:', userData?.user?.id);
+      console.log('Members available:', members);
       console.log('Member found:', members?.find((m: any) => m.user_id === userData?.user?.id));
 
       const response = await fetch('/api/subcontract-bids', {
