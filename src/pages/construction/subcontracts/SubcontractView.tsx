@@ -90,7 +90,7 @@ export default function SubcontractView() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-32 bg-muted/20 rounded-lg animate-pulse" />
@@ -102,7 +102,7 @@ export default function SubcontractView() {
 
   if (!subcontract) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide>
         <div className="text-center py-8">
           <h3 className="text-lg font-medium text-muted-foreground">Subcontrato no encontrado</h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -151,7 +151,7 @@ export default function SubcontractView() {
   };
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide>
       {renderTabContent()}
     </Layout>
   );
