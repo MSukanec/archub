@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Table } from '@/components/ui-custom/Table';
+import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -226,13 +227,17 @@ export default function ConstructionSubcontracts() {
         data={filteredSubcontracts}
         isLoading={isLoading || isLoadingAnalysis}
         emptyState={
-          <div className="text-center py-8">
-            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground">Aún no tienes subcontratos creados</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Package />}
+            title="Sin subcontratos creados"
+            description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos"
+            action={
+              <Button onClick={handleCreateSubcontract}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Subcontrato
+              </Button>
+            }
+          />
         }
       />
     </Layout>
