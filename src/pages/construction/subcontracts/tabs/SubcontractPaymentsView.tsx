@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { SubcontractPaymentsChart } from '@/components/charts/SubcontractPaymentsChart';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter";
@@ -106,6 +107,40 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     }
     return formatCurrency(convertedAmount, '$');
   };
+
+  // Generar datos para el gráfico de pagos por mes
+  const generatePaymentsChartData = () => {
+    if (!subcontractPayments || subcontractPayments.length === 0) return [];
+    
+    // Agrupar pagos por mes
+    const paymentsByMonth = subcontractPayments.reduce((acc, payment) => {
+      const date = new Date(payment.movement_date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const formattedMonth = format(date, 'MMM-yy', { locale: es });
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          month: monthKey,
+          formattedMonth,
+          amount: 0
+        };
+      }
+      
+      // Convertir a la moneda de vista seleccionada
+      const amount = currencyView === 'dolarizado' 
+        ? payment.amount / payment.exchange_rate
+        : payment.amount;
+        
+      acc[monthKey].amount += amount;
+      return acc;
+    }, {} as Record<string, { month: string; formattedMonth: string; amount: number }>);
+    
+    // Convertir a array y ordenar por fecha
+    return Object.values(paymentsByMonth)
+      .sort((a, b) => a.month.localeCompare(b.month));
+  };
+
+  const paymentsChartData = generatePaymentsChartData();
 
   // Calcular el total acumulado hasta cada pago
   const paymentsWithProgress = useMemo(() => {
@@ -233,6 +268,14 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
 
   return (
     <div className="space-y-6">
+      {/* Gráfico de pagos por mes */}
+      <SubcontractPaymentsChart
+        data={paymentsChartData}
+        isLoading={isLoadingPayments}
+        currencySymbol={currencyView === 'dolarizado' ? 'US$' : '$'}
+        title={`Pagos del Subcontrato: ${subcontract.title}`}
+      />
+
       {/* Tabla de pagos del subcontrato */}
       <Table
         columns={paymentsColumns}
