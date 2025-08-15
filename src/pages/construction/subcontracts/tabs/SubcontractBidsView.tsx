@@ -330,7 +330,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Total Ofertas</p>
-                    <Users className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    <Users className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                   </div>
                   
                   {/* Mini Chart - Bar chart simple */}
@@ -338,8 +338,9 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     {Array.from({ length: 8 }).map((_, i) => (
                       <div
                         key={i}
-                        className="bg-[hsl(var(--accent))] rounded-sm flex-1"
+                        className="rounded-sm flex-1"
                         style={{
+                          backgroundColor: 'hsl(var(--accent))',
                           height: `${Math.max(20, Math.random() * 100)}%`,
                           opacity: i < kpiData.validBids ? 1 : 0.3
                         }}
@@ -363,7 +364,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Oferta Más Baja</p>
-                    <TrendingDown className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    <TrendingDown className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                   </div>
                   
                   {/* Mini Chart - Trend line */}
@@ -381,7 +382,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                    <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                       {formatCurrency(kpiData.lowestAmount, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -401,7 +402,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Promedio</p>
-                    <Target className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    <Target className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                   </div>
                   
                   {/* Mini Chart - Area chart */}
@@ -422,7 +423,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                    <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                       {formatCurrency(kpiData.averageAmount, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -442,24 +443,27 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Rango de Ofertas</p>
-                    <BarChart3 className="h-6 w-6 text-[hsl(var(--accent))]" />
+                    <BarChart3 className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                   </div>
                   
                   {/* Mini Chart - Range indicator */}
                   <div className="h-8 flex items-center">
                     <div className="w-full bg-gray-200 rounded-full h-2 relative">
                       <div 
-                        className="bg-[hsl(var(--accent))] h-2 rounded-full relative"
-                        style={{ width: '100%' }}
+                        className="h-2 rounded-full relative"
+                        style={{ 
+                          backgroundColor: 'hsl(var(--accent))', 
+                          width: '100%' 
+                        }}
                       >
-                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[hsl(var(--accent))] rounded-full border-2 border-white"></div>
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[hsl(var(--accent))] rounded-full border-2 border-white"></div>
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'hsl(var(--accent))' }}></div>
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'hsl(var(--accent))' }}></div>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                    <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                       {formatCurrency(kpiData.spread, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -474,20 +478,21 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           {/* KPIs adicionales si hay ganadora */}
           {kpiData.winningBid && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-[hsl(var(--accent))]">
+              <Card style={{ borderColor: 'hsl(var(--accent))' }}>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Ahorro vs Más Alta</p>
-                      <DollarSign className="h-6 w-6 text-[hsl(var(--accent))]" />
+                      <DollarSign className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                     </div>
                     
                     {/* Mini Chart - Savings indicator */}
                     <div className="h-8 flex items-center">
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-[hsl(var(--accent))] h-2 rounded-full"
+                          className="h-2 rounded-full"
                           style={{ 
+                            backgroundColor: 'hsl(var(--accent))',
                             width: kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0 
                               ? `${Math.min(100, Math.abs(kpiData.winnerVsHighest.percentage) * 2)}%` 
                               : '5%' 
@@ -497,7 +502,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                      <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                         {kpiData.winnerVsHighest && kpiData.winnerVsHighest.amount < 0 
                           ? formatCurrency(Math.abs(kpiData.winnerVsHighest.amount), 'ARS')
                           : '$ 0'
@@ -514,12 +519,12 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </CardContent>
               </Card>
 
-              <Card className="border-[hsl(var(--accent))]">
+              <Card style={{ borderColor: 'hsl(var(--accent))' }}>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">vs Promedio</p>
-                      <TrendingUp className="h-6 w-6 text-[hsl(var(--accent))]" />
+                      <TrendingUp className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                     </div>
                     
                     {/* Mini Chart - Comparison line */}
@@ -542,7 +547,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                      <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                         {kpiData.winnerVsAverage 
                           ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
                             formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
@@ -562,12 +567,12 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </CardContent>
               </Card>
 
-              <Card className="border-[hsl(var(--accent))]">
+              <Card style={{ borderColor: 'hsl(var(--accent))' }}>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Posición en Ranking</p>
-                      <Trophy className="h-6 w-6 text-[hsl(var(--accent))]" />
+                      <Trophy className="h-6 w-6" style={{ color: 'hsl(var(--accent))' }} />
                     </div>
                     
                     {/* Mini Chart - Ranking visualization */}
@@ -582,14 +587,13 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                           return (
                             <div
                               key={i}
-                              className={`w-3 h-6 rounded ${
-                                i === position 
-                                  ? 'bg-[hsl(var(--accent))]' 
-                                  : 'bg-gray-300'
-                              }`}
-                              style={{
-                                height: i === position ? '24px' : `${16 + Math.random() * 8}px`
-                              }}
+                              className="w-3 h-6 rounded"
+                            style={{
+                              backgroundColor: i === position 
+                                ? 'hsl(var(--accent))' 
+                                : '#d1d5db',
+                              height: i === position ? '24px' : `${16 + Math.random() * 8}px`
+                            }}
                             />
                           );
                         })}
@@ -597,7 +601,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold text-[hsl(var(--accent))]">
+                      <p className="text-xl font-bold" style={{ color: 'hsl(var(--accent))' }}>
                         #{subcontractBids
                           .filter((bid: any) => bid.amount && bid.amount > 0)
                           .sort((a: any, b: any) => a.amount - b.amount)
