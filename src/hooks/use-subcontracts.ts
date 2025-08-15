@@ -39,7 +39,10 @@ export function useSubcontract(subcontractId: string | null) {
       
       const { data, error } = await supabase
         .from('subcontracts')
-        .select('*')
+        .select(`
+          *,
+          contact:contacts(id, first_name, last_name, full_name, company_name, email)
+        `)
         .eq('id', subcontractId)
         .single();
 
