@@ -170,26 +170,7 @@ export function SubcontractAwardModal({
         </div>
       </div>
 
-      {/* Información del subcontrato */}
-      <div className="bg-background border rounded-lg p-4">
-        <h4 className="font-medium mb-3">Información del subcontrato</h4>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Código:</span>
-            <span className="font-medium">{subcontract?.code || '—'}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Título:</span>
-            <span className="font-medium">{subcontract?.title || '—'}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Estado actual:</span>
-            <Badge variant="outline" className="text-xs">
-              {subcontract?.status || 'Sin estado'}
-            </Badge>
-          </div>
-        </div>
-      </div>
+
 
       {/* Advertencia */}
       <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
