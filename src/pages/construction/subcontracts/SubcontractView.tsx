@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { Plus, FileText } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
@@ -20,11 +21,26 @@ export default function SubcontractView() {
   const { data: userData } = useCurrentUser();
   const { data: subcontract, isLoading } = useSubcontract(id || '');
 
-  // TODO: Implementar queries para obtener datos reales
+  // Obtener ofertas del subcontrato
+  const { data: subcontractBids = [] } = useQuery({
+    queryKey: ['subcontract-bids', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/subcontract-bids/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch bids');
+      return response.json();
+    },
+    enabled: !!id
+  });
+
+  // Calcular datos derivados
+  const winnerBid = useMemo(() => {
+    if (!subcontract?.winner_bid_id) return null;
+    return subcontractBids.find((bid: any) => bid.id === subcontract.winner_bid_id) || null;
+  }, [subcontractBids, subcontract?.winner_bid_id]);
+
+  // TODO: Implementar query para obtener proyecto
   const project = null; // Conectar con subcontract.project_id
-  const bids: any[] = [];
-  const winnerBid = null;
-  const provider = null;
+  const provider = winnerBid?.contacts || null;
 
   const headerTabs = [
     {
@@ -120,7 +136,7 @@ export default function SubcontractView() {
           <SubcontractDashboardView
             subcontract={subcontract}
             project={project}
-            bids={bids}
+            bids={subcontractBids}
             winnerBid={winnerBid}
             provider={provider}
             onTabChange={setActiveTab}

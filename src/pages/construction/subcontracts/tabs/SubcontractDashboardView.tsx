@@ -119,8 +119,16 @@ export function SubcontractDashboardView({
                 <div>
                   <p className="text-sm font-medium">Monto Total</p>
                   <p className="text-sm text-muted-foreground">
-                    {winnerBid && subcontract.amount_total 
-                      ? `$${subcontract.amount_total.toLocaleString('es-AR')}`
+                    {winnerBid && winnerBid.amount 
+                      ? (() => {
+                          const formatter = new Intl.NumberFormat('es-AR', {
+                            style: 'currency',
+                            currency: winnerBid.currencies?.code === 'ARS' ? 'ARS' : 'USD',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          });
+                          return formatter.format(winnerBid.amount);
+                        })()
                       : 'Sin adjudicar'
                     }
                   </p>
@@ -132,8 +140,11 @@ export function SubcontractDashboardView({
                 <div>
                   <p className="text-sm font-medium">Contratista Adjudicado</p>
                   <p className="text-sm text-muted-foreground">
-                    {provider 
-                      ? (provider.company_name || `${provider.first_name} ${provider.last_name}`)
+                    {winnerBid && winnerBid.contacts
+                      ? (winnerBid.contacts.company_name || 
+                         winnerBid.contacts.full_name || 
+                         `${winnerBid.contacts.first_name || ''} ${winnerBid.contacts.last_name || ''}`.trim() || 
+                         'Sin nombre')
                       : 'Sin adjudicar'
                     }
                   </p>
