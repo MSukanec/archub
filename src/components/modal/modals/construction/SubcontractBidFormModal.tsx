@@ -372,13 +372,70 @@ export function SubcontractBidFormModal({
     />
   );
 
+  // Función para guardar tareas seleccionadas
+  const saveBidTasks = async () => {
+    if (!modalData?.initialData?.id) {
+      toast({
+        title: "Error",
+        description: "No se encontró el ID de la oferta",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Preparar datos de tareas seleccionadas
+      const bidTasksData = subcontractTasks
+        .filter((task: any) => selectedTasks[task.id])
+        .map((task: any) => ({
+          subcontract_bid_id: modalData.initialData.id,
+          subcontract_task_id: task.id,
+          quantity: task.amount || 0,
+          unit: task.unit || task.unit_symbol || '',
+          unit_price: taskPrices[task.id] || 0,
+          amount: (task.amount || 0) * (taskPrices[task.id] || 0),
+          notes: ''
+        }));
+
+      // Enviar al backend
+      const response = await fetch('/api/subcontract-bid-tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bidId: modalData.initialData.id,
+          tasks: bidTasksData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al guardar las tareas');
+      }
+
+      toast({
+        title: "Tareas guardadas",
+        description: "Las tareas de la oferta se guardaron correctamente"
+      });
+
+      setCurrentPanel('edit');
+    } catch (error) {
+      console.error('Error saving bid tasks:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron guardar las tareas",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Footer dinámico según el panel
   const footerContent = currentPanel === 'subform' && currentSubform === 'tasks' ? (
     <FormModalFooter
       leftLabel="Volver"
       onLeftClick={() => setCurrentPanel('edit')}
       rightLabel="Confirmar Tareas"
-      onRightClick={() => setCurrentPanel('edit')}
+      onRightClick={saveBidTasks}
     />
   ) : (
     <FormModalFooter
@@ -401,8 +458,8 @@ export function SubcontractBidFormModal({
         </div>
       ) : (
         <div className="space-y-3">
-          {/* Header de la tabla - más compacto */}
-          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+          {/* Header de la tabla - distribuido uniformemente */}
+          <div className="grid grid-cols-10 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
             <div className="col-span-1">
               <Checkbox
                 checked={subcontractTasks.length > 0 && subcontractTasks.every((task: any) => selectedTasks[task.id])}
@@ -416,10 +473,10 @@ export function SubcontractBidFormModal({
                 className="h-4 w-4"
               />
             </div>
-            <div className="col-span-5">Tarea</div>
+            <div className="col-span-4">Tarea</div>
             <div className="col-span-1">Cant.</div>
             <div className="col-span-2">Precio Unit.</div>
-            <div className="col-span-3">Importe</div>
+            <div className="col-span-2">Importe</div>
           </div>
           
           {/* Lista de tareas - más compacta */}
@@ -433,7 +490,7 @@ export function SubcontractBidFormModal({
               return (
                 <div 
                   key={task.id} 
-                  className="grid grid-cols-12 gap-2 items-start py-1.5 border-b border-muted/20"
+                  className="grid grid-cols-10 gap-2 items-start py-1.5 border-b border-muted/20"
                 >
                   {/* Checkbox */}
                   <div className="col-span-1 pt-1">
@@ -444,8 +501,8 @@ export function SubcontractBidFormModal({
                     />
                   </div>
                   
-                  {/* Tarea - más espacio, texto más pequeño */}
-                  <div className="col-span-5">
+                  {/* Tarea */}
+                  <div className="col-span-4">
                     <div className={isSelected ? 'text-foreground' : 'text-muted-foreground'}>
                       <p className="text-xs font-medium leading-tight">
                         {task.task_name || 'Sin nombre'}
@@ -474,7 +531,7 @@ export function SubcontractBidFormModal({
                   </div>
                   
                   {/* Importe */}
-                  <div className="col-span-3 pt-1">
+                  <div className="col-span-2 pt-1">
                     <span className={`text-xs font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                       ${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>

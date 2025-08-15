@@ -1064,6 +1064,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/subcontract-bid-tasks - Save tasks for a subcontract bid
+  app.post("/api/subcontract-bid-tasks", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const token = authHeader.substring(7);
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { bidId, tasks } = req.body;
+
+      if (!bidId || !Array.isArray(tasks)) {
+        return res.status(400).json({ error: "bidId and tasks array are required" });
+      }
+
+      // First, delete existing tasks for this bid
+      const { error: deleteError } = await authenticatedSupabase
+        .from('subcontract_bid_tasks')
+        .delete()
+        .eq('subcontract_bid_id', bidId);
+
+      if (deleteError) {
+        console.error("Error deleting existing bid tasks:", deleteError);
+        return res.status(500).json({ error: "Failed to clear existing tasks", details: deleteError });
+      }
+
+      // Then insert new tasks if any
+      if (tasks.length > 0) {
+        const { data, error: insertError } = await authenticatedSupabase
+          .from('subcontract_bid_tasks')
+          .insert(tasks)
+          .select();
+
+        if (insertError) {
+          console.error("Error inserting bid tasks:", insertError);
+          return res.status(500).json({ error: "Failed to save bid tasks", details: insertError });
+        }
+
+        res.json({ success: true, data });
+      } else {
+        res.json({ success: true, data: [] });
+      }
+
+    } catch (error) {
+      console.error("Error in subcontract-bid-tasks endpoint:", error);
+      res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
