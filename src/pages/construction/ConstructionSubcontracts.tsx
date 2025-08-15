@@ -61,14 +61,9 @@ export default function ConstructionSubcontracts() {
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
     const searchLower = searchQuery.toLowerCase();
     const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
+    const codeMatch = subcontract.code?.toLowerCase().includes(searchLower);
     
-    // Buscar en el nombre del contacto usando la misma lógica de renderizado
-    const contact = subcontract.contact;
-    const contactName = contact?.full_name || 
-      `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-    const contactMatch = contactName?.toLowerCase().includes(searchLower);
-    
-    return titleMatch || contactMatch;
+    return titleMatch || codeMatch;
   });
 
   const headerProps = {

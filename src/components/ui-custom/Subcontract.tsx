@@ -11,13 +11,7 @@ interface SubcontractProps {
     id: string;
     title: string;
     date: string;
-    contact?: {
-      id: string;
-      full_name?: string;
-      first_name?: string;
-      last_name?: string;
-      email?: string;
-    };
+    code?: string;
     amount_total?: number;
     currency_id?: string;
     exchange_rate?: number;
@@ -72,14 +66,9 @@ export function Subcontract({ subcontract, currencyView, onEdit, onDelete, onNew
     }
   };
 
-  // Obtener el nombre del contacto
-  const getContactName = () => {
-    const contact = subcontract.contact;
-    if (!contact) return 'Sin proveedor';
-    
-    return contact.full_name || 
-      `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
-      'Nombre no disponible';
+  // Obtener código del subcontrato
+  const getSubcontractCode = () => {
+    return subcontract.code || 'Sin código';
   };
 
   // Calcular montos
@@ -112,21 +101,16 @@ export function Subcontract({ subcontract, currencyView, onEdit, onDelete, onNew
               </div>
             </div>
             
-            {/* Fila 2: Fecha y proveedor */}
+            {/* Fila 2: Fecha y código */}
             <div className="pl-11 space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 <span>{format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="h-3 w-3" />
-                <span className="truncate">{getContactName()}</span>
+                <FileText className="h-3 w-3" />
+                <span className="truncate">{getSubcontractCode()}</span>
               </div>
-              {subcontract.contact?.email && (
-                <div className="text-xs text-muted-foreground truncate">
-                  {subcontract.contact.email}
-                </div>
-              )}
             </div>
           </div>
 

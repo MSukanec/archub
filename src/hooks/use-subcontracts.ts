@@ -12,10 +12,7 @@ export function useSubcontracts(projectId: string | null) {
       
       const { data, error } = await supabase
         .from('subcontracts')
-        .select(`
-          *,
-          contact:contacts(id, first_name, last_name, full_name, email)
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
@@ -39,10 +36,7 @@ export function useSubcontract(subcontractId: string | null) {
       
       const { data, error } = await supabase
         .from('subcontracts')
-        .select(`
-          *,
-          contact:contacts(id, first_name, last_name, full_name, email)
-        `)
+        .select('*')
         .eq('id', subcontractId)
         .single();
 
