@@ -41,36 +41,8 @@ export default function ConstructionSubcontracts() {
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
 
-  // Hook para obtener contactos ganadores de ofertas
-  const useWinnerContacts = (subcontracts: any[]) => {
-    return useQuery({
-      queryKey: ['winner-contacts', subcontracts.map(s => s.winner_bid_id).filter(Boolean)],
-      queryFn: async () => {
-        const winnerBidIds = subcontracts.map(s => s.winner_bid_id).filter(Boolean);
-        if (winnerBidIds.length === 0) return {};
-        
-        const response = await fetch(`/api/subcontract-bids/contacts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bidIds: winnerBidIds })
-        });
-        
-        if (!response.ok) return {};
-        const contacts = await response.json();
-        
-        // Crear un mapa de bid_id -> contact
-        const contactMap: any = {};
-        contacts.forEach((contact: any) => {
-          contactMap[contact.bid_id] = contact;
-        });
-        
-        return contactMap;
-      },
-      enabled: subcontracts.length > 0,
-    });
-  };
-
-  const { data: winnerContacts = {} } = useWinnerContacts(subcontracts);
+  // Ya no necesitamos un hook separado para contactos ganadores
+  // porque ahora usamos la relación directa contact_id en subcontracts
 
   // Cálculos para KPIs de subcontratos
   const kpiData = useMemo(() => {
@@ -286,19 +258,17 @@ export default function ConstructionSubcontracts() {
       key: 'contact',
       label: 'Subcontratista',
       render: (subcontract: any) => {
-        // Si el subcontrato está adjudicado y tiene oferta ganadora
-        if (subcontract.status === 'awarded' && subcontract.winner_bid_id) {
-          const winnerContact = winnerContacts[subcontract.winner_bid_id];
-          if (winnerContact) {
-            const contactName = winnerContact.full_name || 
-              `${winnerContact.first_name || ''} ${winnerContact.last_name || ''}`.trim();
-            return (
-              <div>
-                <div className="font-medium">{contactName}</div>
-                {winnerContact.email && <div className="text-xs text-muted-foreground">{winnerContact.email}</div>}
-              </div>
-            );
-          }
+        // Si el subcontrato está adjudicado y tiene contacto
+        if (subcontract.status === 'awarded' && subcontract.contact) {
+          const contactName = subcontract.contact.full_name || 
+            subcontract.contact.company_name ||
+            `${subcontract.contact.first_name || ''} ${subcontract.contact.last_name || ''}`.trim();
+          return (
+            <div>
+              <div className="font-medium">{contactName}</div>
+              {subcontract.contact.email && <div className="text-xs text-muted-foreground">{subcontract.contact.email}</div>}
+            </div>
+          );
         }
         
         // Si no está adjudicado, mostrar "Sin adjudicar"

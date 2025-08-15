@@ -1169,15 +1169,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get the contact_id from the winning bid
+      const { data: winningBidData, error: winningBidError } = await authenticatedSupabase
+        .from('subcontract_bids')
+        .select('contact_id')
+        .eq('id', winner_bid_id)
+        .single();
+
+      if (winningBidError) {
+        console.error("Error getting winning bid contact:", winningBidError);
+        return res.status(500).json({ 
+          error: "Failed to get winning bid contact", 
+          details: winningBidError 
+        });
+      }
+
       // Perform all updates in sequence for the award process
       
-      // 1. Update the subcontract with award details
+      // 1. Update the subcontract with award details including contact_id
       const { data: subcontractData, error: subcontractError } = await authenticatedSupabase
         .from('subcontracts')
         .update({ 
           winner_bid_id,
           amount_total,
           currency_id: orgCurrency.id,  // Use organization_currency_id
+          contact_id: winningBidData.contact_id, // Save the contact from winning bid
           status: 'awarded'
         })
         .eq('id', id)
@@ -1193,16 +1209,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 2. Update the winning bid status
-      const { error: winningBidError } = await authenticatedSupabase
+      const { error: winningBidUpdateError } = await authenticatedSupabase
         .from('subcontract_bids')
         .update({ status: 'awarded' })
         .eq('id', winner_bid_id);
 
-      if (winningBidError) {
-        console.error("Error updating winning bid:", winningBidError);
+      if (winningBidUpdateError) {
+        console.error("Error updating winning bid:", winningBidUpdateError);
         return res.status(500).json({ 
           error: "Failed to update winning bid status", 
-          details: winningBidError 
+          details: winningBidUpdateError 
         });
       }
 

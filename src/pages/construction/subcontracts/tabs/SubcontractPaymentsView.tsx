@@ -43,7 +43,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
           subcontract:subcontracts!inner(
             id,
             title,
-            winner_bid_id
+            contact:contacts(id, first_name, last_name, full_name, company_name)
           )
         `)
         .eq('subcontract_id', subcontract.id)
@@ -55,29 +55,10 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         return [];
       }
 
-      // Obtener contactos de ofertas ganadoras si existen
-      const winnerBidIds = data?.map(item => item.subcontract.winner_bid_id).filter(Boolean) || [];
-      let winnerContacts: any = {};
-      
-      if (winnerBidIds.length > 0) {
-        const contactsResponse = await fetch(`/api/subcontract-bids/contacts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bidIds: winnerBidIds })
-        });
-        
-        if (contactsResponse.ok) {
-          const contacts = await contactsResponse.json();
-          contacts.forEach((contact: any) => {
-            winnerContacts[contact.bid_id] = contact;
-          });
-        }
-      }
-
       return (data || []).map((item: any) => {
-        const winnerContact = winnerContacts[item.subcontract.winner_bid_id];
-        const contactName = winnerContact 
-          ? (winnerContact.full_name || `${winnerContact.first_name || ''} ${winnerContact.last_name || ''}`.trim())
+        const contact = item.subcontract.contact;
+        const contactName = contact 
+          ? (contact.full_name || contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim())
           : 'Sin adjudicar';
 
         return {
