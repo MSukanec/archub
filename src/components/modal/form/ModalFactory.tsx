@@ -49,6 +49,7 @@ import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibil
 import { AddParameterToCanvasModal } from '../modals/admin/AddParameterToCanvasModal';
 import { SubcontractFormModal } from '../modals/construction/SubcontractFormModal';
 import { SubcontractBidFormModal } from '../modals/construction/SubcontractBidFormModal';
+import { SubcontractAwardModal } from '../modals/construction/SubcontractAwardModal';
 import { SubcontractTaskFormModal } from '../modals/construction/SubcontractTaskFormModal';
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
@@ -171,6 +172,8 @@ export function ModalFactory() {
       return <SubcontractFormModal modalData={data} onClose={closeModal} />;
     case 'subcontract-bid':
       return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
+    case 'subcontract-award':
+      return <SubcontractAwardModal modalData={data} onClose={closeModal} />;
     case 'subcontract-task':
       return <SubcontractTaskFormModal modalData={data} onClose={closeModal} />;
 

@@ -96,40 +96,13 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   };
 
   const handleSelectWinner = (bid: any) => {
-    openModal('confirm', {
-      title: 'Seleccionar Oferta Ganadora',
-      message: `¿Confirmas que la oferta de ${bid.contacts?.company_name || bid.contacts?.full_name || 'este proveedor'} es la ganadora del subcontrato?`,
-      leftLabel: 'Cancelar',
-      rightLabel: 'Confirmar',
-      onConfirm: async () => {
-        try {
-          // Obtener token de autenticación
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session?.access_token) {
-            throw new Error('No hay sesión activa');
-          }
-
-          const response = await fetch(`/api/subcontracts/${subcontract.id}/select-winner`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`
-            },
-            body: JSON.stringify({
-              winner_bid_id: bid.id
-            })
-          });
-          
-          if (response.ok) {
-            invalidateBids(); // Refresh the list
-            // También invalidar el subcontrato para actualizar el estado
-            queryClient.invalidateQueries({ queryKey: ['subcontract', subcontract.id] });
-          } else {
-            console.error('Error selecting winner bid');
-          }
-        } catch (error) {
-          console.error('Error selecting winner bid:', error);
-        }
+    openModal('subcontract-award', {
+      subcontract,
+      winningBid: bid,
+      onSuccess: () => {
+        invalidateBids(); // Refresh the list
+        // También invalidar el subcontrato para actualizar el estado
+        queryClient.invalidateQueries({ queryKey: ['subcontract', subcontract.id] });
       }
     });
   };

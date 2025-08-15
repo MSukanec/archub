@@ -1064,8 +1064,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PUT /api/subcontracts/:id/select-winner - Select winning bid for subcontract
-  app.put("/api/subcontracts/:id/select-winner", async (req, res) => {
+  // PUT /api/subcontracts/:id/award - Complete subcontract award process
+  app.put("/api/subcontracts/:id/award", async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -1086,29 +1086,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       const { id } = req.params;
-      const { winner_bid_id } = req.body;
+      const { winner_bid_id, amount_total, currency_id } = req.body;
 
-      if (!winner_bid_id) {
-        return res.status(400).json({ error: "winner_bid_id is required" });
+      if (!winner_bid_id || !amount_total || !currency_id) {
+        return res.status(400).json({ 
+          error: "winner_bid_id, amount_total, and currency_id are required" 
+        });
       }
 
-      // Update the subcontract with the winning bid
-      const { data, error } = await authenticatedSupabase
+      // Perform all updates in sequence for the award process
+      
+      // 1. Update the subcontract with award details
+      const { data: subcontractData, error: subcontractError } = await authenticatedSupabase
         .from('subcontracts')
-        .update({ winner_bid_id })
+        .update({ 
+          winner_bid_id,
+          amount_total,
+          currency_id,
+          status: 'awarded'
+        })
         .eq('id', id)
         .select()
         .single();
 
-      if (error) {
-        console.error("Error selecting winner bid:", error);
-        return res.status(500).json({ error: "Failed to select winner bid", details: error });
+      if (subcontractError) {
+        console.error("Error updating subcontract:", subcontractError);
+        return res.status(500).json({ 
+          error: "Failed to update subcontract", 
+          details: subcontractError 
+        });
       }
 
-      res.json({ success: true, data });
+      // 2. Update the winning bid status
+      const { error: winningBidError } = await authenticatedSupabase
+        .from('subcontract_bids')
+        .update({ status: 'awarded' })
+        .eq('id', winner_bid_id);
+
+      if (winningBidError) {
+        console.error("Error updating winning bid:", winningBidError);
+        return res.status(500).json({ 
+          error: "Failed to update winning bid status", 
+          details: winningBidError 
+        });
+      }
+
+      // 3. Update other bids status to 'rejected'
+      const { error: otherBidsError } = await authenticatedSupabase
+        .from('subcontract_bids')
+        .update({ status: 'rejected' })
+        .eq('subcontract_id', id)
+        .neq('id', winner_bid_id);
+
+      if (otherBidsError) {
+        console.error("Error updating other bids:", otherBidsError);
+        // Don't fail the whole operation for this
+      }
+
+      res.json({ 
+        success: true, 
+        data: subcontractData,
+        message: "Subcontract awarded successfully"
+      });
 
     } catch (error) {
-      console.error("Error in select-winner endpoint:", error);
+      console.error("Error in award endpoint:", error);
       res.status(500).json({ error: "Internal server error", details: error.message });
     }
   });
