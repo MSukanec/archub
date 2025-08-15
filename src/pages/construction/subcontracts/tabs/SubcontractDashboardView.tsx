@@ -116,9 +116,18 @@ export function SubcontractDashboardView({
                 <Flag className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Estado</p>
-                  <div className="text-sm text-muted-foreground">
-                    {getStatusBadge(subcontract.status)}
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {(() => {
+                      const statusConfig = {
+                        'draft': 'Borrador',
+                        'pendiente': 'Pendiente',
+                        'en_proceso': 'En Proceso',
+                        'completado': 'Completado',
+                        'cancelado': 'Cancelado'
+                      };
+                      return statusConfig[subcontract.status as keyof typeof statusConfig] || 'Borrador';
+                    })()}
+                  </p>
                 </div>
               </div>
 
@@ -138,7 +147,7 @@ export function SubcontractDashboardView({
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Proveedor</p>
+                  <p className="text-sm font-medium">Contratista Adjudicado</p>
                   <p className="text-sm text-muted-foreground">
                     {provider 
                       ? (provider.company_name || `${provider.first_name} ${provider.last_name}`)
