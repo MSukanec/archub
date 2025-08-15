@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Package, Plus, Edit, Trash2, FileText } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useLocation } from "wouter";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Table } from '@/components/ui-custom/Table';
@@ -118,12 +119,14 @@ export default function ConstructionSubcontracts() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const [, navigate] = useLocation();
+
   // Definir columnas con ancho uniforme
   const columns = [
     {
       key: 'title',
       label: 'Título',
-      width: '25%',
+      width: '20%',
       render: (subcontract: any) => (
         <div className="font-medium">{subcontract.title}</div>
       )
@@ -131,7 +134,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'code',
       label: 'Código',
-      width: '15%',
+      width: '20%',
       render: (subcontract: any) => (
         <span className="text-muted-foreground">{subcontract.code || 'Sin código'}</span>
       )
@@ -139,7 +142,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'date',
       label: 'Fecha',
-      width: '15%',
+      width: '20%',
       render: (subcontract: any) => (
         <span>{format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}</span>
       )
@@ -147,13 +150,13 @@ export default function ConstructionSubcontracts() {
     {
       key: 'status',
       label: 'Estado',
-      width: '15%',
+      width: '20%',
       render: (subcontract: any) => getStatusBadge(subcontract.status)
     },
     {
       key: 'amount_total',
       label: 'Monto Total',
-      width: '15%',
+      width: '20%',
       render: (subcontract: any) => {
         const amount = subcontract.amount_total || 0;
         return (
@@ -166,26 +169,19 @@ export default function ConstructionSubcontracts() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '15%',
+      width: '20%',
       render: (subcontract: any) => (
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => {
-              openModal('subcontract-bid', {
-                subcontractId: subcontract.id,
-                projectId: userData?.preferences?.last_project_id,
-                organizationId: userData?.organization?.id,
-                isEditing: false
-              });
-            }}
+            size="default"
+            onClick={() => navigate(`/construction/subcontracts/${subcontract.id}`)}
           >
-            <FileText className="w-4 h-4" />
+            <Eye className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="default"
             onClick={() => {
               openModal('subcontract', {
                 projectId: userData?.preferences?.last_project_id,
@@ -200,7 +196,7 @@ export default function ConstructionSubcontracts() {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="default"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Subcontrato',
