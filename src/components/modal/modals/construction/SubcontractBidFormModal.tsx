@@ -90,13 +90,13 @@ export function SubcontractBidFormModal({
         notes: data.notes || null,
         status: 'pending',
         ...(mode === 'create' && { 
-          created_by: members?.find(m => m.user_id === userData?.user?.id)?.id || null 
+          created_by: members?.find((m: any) => m.user_id === userData?.user?.id)?.id || null 
         })
       };
 
       console.log('Saving bid:', bidData);
       console.log('UserData:', userData?.user?.id);
-      console.log('Member found:', members?.find(m => m.user_id === userData?.user?.id));
+      console.log('Member found:', members?.find((m: any) => m.user_id === userData?.user?.id));
 
       const response = await fetch('/api/subcontract-bids', {
         method: mode === 'create' ? 'POST' : 'PUT',
@@ -288,7 +288,6 @@ export function SubcontractBidFormModal({
       onLeftClick={onClose}
       rightLabel={mode === 'create' ? 'Crear Oferta' : 'Actualizar Oferta'}
       onRightClick={form.handleSubmit(onSubmit)}
-      disabled={isLoading}
     />
   );
 

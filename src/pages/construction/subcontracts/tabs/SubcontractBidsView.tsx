@@ -129,16 +129,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       )
     },
     {
-      key: 'status',
-      label: 'Estado',
-      render: (item: any) => getStatusBadge(item.status)
-    },
-    {
-      key: 'total_amount',
-      label: 'Total',
+      key: 'received_at',
+      label: 'Fecha',
       render: (item: any) => (
-        <span className="text-sm font-medium">
-          {item.amount ? formatCurrency(item.amount, item.currencies?.code) : '—'}
+        <span className="text-sm text-muted-foreground">
+          {item.submitted_at 
+            ? format(new Date(item.submitted_at), 'dd/MM/yyyy', { locale: es })
+            : '—'
+          }
         </span>
       )
     },
@@ -152,16 +150,18 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       )
     },
     {
-      key: 'received_at',
-      label: 'Fecha de Recepción',
+      key: 'total_amount',
+      label: 'Total',
       render: (item: any) => (
-        <span className="text-sm text-muted-foreground">
-          {item.submitted_at 
-            ? format(new Date(item.submitted_at), 'dd/MM/yyyy', { locale: es })
-            : '—'
-          }
+        <span className="text-sm font-medium">
+          {item.amount ? formatCurrency(item.amount, item.currencies?.code) : '—'}
         </span>
       )
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      render: (item: any) => getStatusBadge(item.status)
     },
     {
       key: 'actions',
