@@ -491,42 +491,10 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
             </Card>
           </div>
 
-          {/* Primera fila: Oferta Ganadora + 3 KPIs adicionales en una sola fila */}
+          {/* Primera fila: 3 KPIs adicionales si hay ganadora */}
           {kpiData.winningBid && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Card de Oferta Ganadora actualizada */}
-              <Card className="border-yellow-200 bg-yellow-50/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                    Oferta Ganadora
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Subcontratista</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.contacts?.company_name || 
-                       kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Monto</p>
-                    <p className="text-lg font-bold" >
-                      {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.submitted_at 
-                        ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
-                        : '—'
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Ahorro vs Más Alta */}
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
@@ -616,51 +584,40 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </CardContent>
               </Card>
 
-              <Card >
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">Posición en Ranking</p>
-                      <Trophy className="h-6 w-6" style={{ color: 'var(--accent)' }} />
-                    </div>
-                    
-                    {/* Mini Chart - Ranking visualization */}
-                    <div className="h-8 flex items-center justify-center">
-                      <div className="flex gap-1">
-                        {Array.from({ length: kpiData.validBids }).map((_, i) => {
-                          const position = subcontractBids
-                            .filter((bid: any) => bid.amount && bid.amount > 0)
-                            .sort((a: any, b: any) => a.amount - b.amount)
-                            .findIndex((bid: any) => bid.id === kpiData.winningBid.id);
-                          
-                          return (
-                            <div
-                              key={i}
-                              className="w-3 h-6 rounded"
-                            style={{
-                              backgroundColor: i === position 
-                                ? 'var(--accent)' 
-                                : '#d1d5db',
-                              height: i === position ? '24px' : `${16 + Math.random() * 8}px`
-                            }}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
+            </div>
+          )}
+
+          {/* Segunda fila: Oferta Ganadora (2 columnas) */}
+          {kpiData.winningBid && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="border-yellow-200 bg-yellow-50/50 md:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    Oferta Ganadora
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xl font-bold" >
-                        #{subcontractBids
-                          .filter((bid: any) => bid.amount && bid.amount > 0)
-                          .sort((a: any, b: any) => a.amount - b.amount)
-                          .findIndex((bid: any) => bid.id === kpiData.winningBid.id) + 1
-                        } de {kpiData.validBids}
+                      <p className="text-sm text-muted-foreground">Subcontratista</p>
+                      <p className="font-medium">
+                        {kpiData.winningBid.contacts?.company_name || 
+                         kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {kpiData.winningBid.amount === kpiData.lowestAmount 
-                          ? 'Oferta más económica del ranking' 
-                          : 'Posición en el ranking de ofertas'
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Monto</p>
+                      <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
+                        {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fecha</p>
+                      <p className="font-medium">
+                        {kpiData.winningBid.submitted_at 
+                          ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
+                          : '—'
                         }
                       </p>
                     </div>
