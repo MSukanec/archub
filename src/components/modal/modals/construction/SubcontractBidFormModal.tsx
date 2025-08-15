@@ -360,6 +360,7 @@ export function SubcontractBidFormModal({
   const headerContent = currentPanel === 'subform' && currentSubform === 'tasks' ? (
     <FormModalHeader 
       title="Tareas del Subcontrato"
+      description="Seleccionar tareas y definir precios unitarios"
       icon={CheckSquare}
       showBackButton={true}
       onBackClick={() => setCurrentPanel('edit')}
@@ -401,8 +402,20 @@ export function SubcontractBidFormModal({
       ) : (
         <div className="space-y-3">
           {/* Header de la tabla - más compacto */}
-          <div className="grid grid-cols-12 gap-1 text-xs font-medium text-muted-foreground border-b pb-2">
-            <div className="col-span-1">✓</div>
+          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
+            <div className="col-span-1">
+              <Checkbox
+                checked={subcontractTasks.length > 0 && subcontractTasks.every((task: any) => selectedTasks[task.id])}
+                onCheckedChange={(checked) => {
+                  const newSelected: {[key: string]: boolean} = {};
+                  subcontractTasks.forEach((task: any) => {
+                    newSelected[task.id] = !!checked;
+                  });
+                  setSelectedTasks(newSelected);
+                }}
+                className="h-4 w-4"
+              />
+            </div>
             <div className="col-span-5">Tarea</div>
             <div className="col-span-1">Cant.</div>
             <div className="col-span-2">Precio Unit.</div>
@@ -420,7 +433,7 @@ export function SubcontractBidFormModal({
               return (
                 <div 
                   key={task.id} 
-                  className="grid grid-cols-12 gap-1 items-start py-1.5 border-b border-muted/20"
+                  className="grid grid-cols-12 gap-2 items-start py-1.5 border-b border-muted/20"
                 >
                   {/* Checkbox */}
                   <div className="col-span-1 pt-1">
