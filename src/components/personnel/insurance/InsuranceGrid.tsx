@@ -68,13 +68,13 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
             <div className="flex items-center gap-2">
               <Avatar className="h-6 w-6 flex-shrink-0">
                 <AvatarFallback className="text-xs">
-                  {record.contact?.first_name?.charAt(0) || 'N'}{record.contact?.last_name?.charAt(0) || 'A'}
+                  {record.first_name?.charAt(0) || 'N'}{record.last_name?.charAt(0) || 'A'}
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium truncate">
-                {record.contact?.first_name && record.contact?.last_name 
-                  ? `${record.contact.first_name} ${record.contact.last_name}`
-                  : 'Sin nombre'
+                {record.first_name && record.last_name 
+                  ? `${record.first_name} ${record.last_name}`
+                  : record.full_name || 'Sin nombre'
                 }
               </span>
             </div>

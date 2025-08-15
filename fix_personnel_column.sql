@@ -23,7 +23,7 @@ END $$;
 -- Update the view if it exists
 DROP VIEW IF EXISTS personnel_insurance_view;
 
--- Recreate the view with correct column name
+-- Recreate the view with correct column name and better contact relationship
 CREATE OR REPLACE VIEW personnel_insurance_view AS
 SELECT 
     pi.*,
@@ -33,6 +33,11 @@ SELECT
         WHEN pi.coverage_end <= CURRENT_DATE + INTERVAL '30 days' THEN 'por_vencer'
         ELSE 'vigente'
     END as status,
-    (pi.coverage_end - CURRENT_DATE) as days_to_expiry
+    (pi.coverage_end - CURRENT_DATE) as days_to_expiry,
+    c.first_name,
+    c.last_name,
+    c.full_name,
+    c.avatar_attachment_id
 FROM personnel_insurances pi
-LEFT JOIN project_personnel pp ON pi.personnel_id = pp.id;
+LEFT JOIN project_personnel pp ON pi.personnel_id = pp.id
+LEFT JOIN contacts c ON pp.contact_id = c.id;

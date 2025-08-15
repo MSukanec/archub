@@ -22,13 +22,10 @@ export type InsuranceStatusRow = Insurance & {
   days_to_expiry: number;
   status: 'vigente' | 'por_vencer' | 'vencido';
   contact_id: string;
-  contact: { 
-    id: string; 
-    full_name: string; 
-    first_name: string;
-    last_name: string;
-    avatar_attachment_id?: string | null;
-  };
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  avatar_attachment_id?: string | null;
 }
 
 export type InsuranceFilters = {
@@ -44,16 +41,7 @@ export type InsuranceFilters = {
 export const listInsurances = async (filters: InsuranceFilters = {}) => {
   let query = supabase
     .from('personnel_insurance_view')
-    .select(`
-      *,
-      contact:contact_id (
-        id,
-        first_name,
-        last_name,
-        full_name,
-        avatar_attachment_id
-      )
-    `)
+    .select('*')
 
   if (filters.status?.length) {
     query = query.in('status', filters.status)
@@ -81,7 +69,7 @@ export const listInsurances = async (filters: InsuranceFilters = {}) => {
 
   if (filters.text_search) {
     // Search across contact name, provider, and policy number
-    query = query.or(`contact->full_name.ilike.%${filters.text_search}%,provider.ilike.%${filters.text_search}%,policy_number.ilike.%${filters.text_search}%`)
+    query = query.or(`full_name.ilike.%${filters.text_search}%,provider.ilike.%${filters.text_search}%,policy_number.ilike.%${filters.text_search}%`)
   }
 
   query = query.order('coverage_end', { ascending: true })
