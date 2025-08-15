@@ -110,15 +110,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
 
   return (
     <div className="space-y-6">
-      {/* Estado para draft sin alcance */}
-      {subcontract.status === 'draft' && subcontractTasks.length === 0 && (
-        <Alert>
-          <AlertDescription>
-            Define el alcance del subcontrato agregando las tareas que deseas incluir en la licitación.
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Tabla de tareas */}
       {subcontractTasks.length === 0 ? (
         <EmptyState
