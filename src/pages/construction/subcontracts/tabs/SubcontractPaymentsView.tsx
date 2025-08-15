@@ -29,6 +29,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         .from('movement_subcontracts')
         .select(`
           id,
+          amount,
           movement:movements!inner(
             id,
             movement_date,
@@ -42,7 +43,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
           subcontract:subcontracts!inner(
             id,
             title,
-            contact:contacts!inner(id, first_name, last_name, full_name)
+            winner_bid_id
           )
         `)
         .eq('subcontract_id', subcontract.id)
@@ -54,19 +55,44 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         return [];
       }
 
-      return (data || []).map((item: any) => ({
-        id: item.id,
-        movement_date: item.movement.movement_date,
-        amount: item.movement.amount,
-        exchange_rate: item.movement.exchange_rate || 1,
-        subcontract_title: item.subcontract.title,
-        contact_name: item.subcontract.contact?.full_name || 
-          `${item.subcontract.contact?.first_name || ''} ${item.subcontract.contact?.last_name || ''}`.trim(),
-        wallet_name: item.movement.wallet?.wallets?.name || 'Sin billetera',
-        currency_name: item.movement.currency.name,
-        currency_symbol: item.movement.currency.symbol,
-        currency_code: item.movement.currency.code
-      }));
+      // Obtener contactos de ofertas ganadoras si existen
+      const winnerBidIds = data?.map(item => item.subcontract.winner_bid_id).filter(Boolean) || [];
+      let winnerContacts: any = {};
+      
+      if (winnerBidIds.length > 0) {
+        const contactsResponse = await fetch(`/api/subcontract-bids/contacts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bidIds: winnerBidIds })
+        });
+        
+        if (contactsResponse.ok) {
+          const contacts = await contactsResponse.json();
+          contacts.forEach((contact: any) => {
+            winnerContacts[contact.bid_id] = contact;
+          });
+        }
+      }
+
+      return (data || []).map((item: any) => {
+        const winnerContact = winnerContacts[item.subcontract.winner_bid_id];
+        const contactName = winnerContact 
+          ? (winnerContact.full_name || `${winnerContact.first_name || ''} ${winnerContact.last_name || ''}`.trim())
+          : 'Sin adjudicar';
+
+        return {
+          id: item.id,
+          movement_date: item.movement.movement_date,
+          amount: item.amount || item.movement.amount, // Usar amount del movement_subcontract si está disponible
+          exchange_rate: item.movement.exchange_rate || 1,
+          subcontract_title: item.subcontract.title,
+          contact_name: contactName,
+          wallet_name: item.movement.wallet?.wallets?.name || 'Sin billetera',
+          currency_name: item.movement.currency.name,
+          currency_symbol: item.movement.currency.symbol,
+          currency_code: item.movement.currency.code
+        };
+      });
     },
     enabled: !!subcontract.id && !!userData?.organization?.id
   });
