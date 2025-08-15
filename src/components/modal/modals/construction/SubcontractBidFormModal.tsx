@@ -22,6 +22,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/lib/supabase';
 
 
 
@@ -397,11 +398,18 @@ export function SubcontractBidFormModal({
           notes: ''
         }));
 
+      // Obtener token de autenticación
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No hay sesión activa');
+      }
+
       // Enviar al backend
       const response = await fetch('/api/subcontract-bid-tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           bidId: modalData.initialData.id,
