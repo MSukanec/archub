@@ -1,4 +1,4 @@
-import { AlertCircle, Users, FileCheck, Award, Plus, FileText, Zap, FolderOpen, Calendar, DollarSign, User } from "lucide-react";
+import { AlertCircle, Users, FileCheck, Award, Plus, FileText, Zap, FolderOpen, Calendar, DollarSign, User, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -113,12 +113,12 @@ export function SubcontractDashboardView({
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <div className="h-4 w-4 flex items-center justify-center">
-                  {getStatusBadge(subcontract.status)}
-                </div>
+                <Flag className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Estado</p>
-                  <p className="text-sm text-muted-foreground">Estado actual del subcontrato</p>
+                  <div className="text-sm text-muted-foreground">
+                    {getStatusBadge(subcontract.status)}
+                  </div>
                 </div>
               </div>
 
