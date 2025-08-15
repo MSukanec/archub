@@ -1,6 +1,7 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { TrendingUp } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -25,10 +26,12 @@ export function SubcontractPaymentsChart({
 }: SubcontractPaymentsChartProps) {
   if (isLoading) {
     return (
-      <Card className="col-span-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-        </CardHeader>
+      <Card>
+        <CardHeader 
+          icon={TrendingUp}
+          title={title}
+          description="Análisis de pagos realizados agrupados por mes"
+        />
         <CardContent>
           <div className="h-64 bg-muted/20 rounded animate-pulse" />
         </CardContent>
@@ -38,10 +41,12 @@ export function SubcontractPaymentsChart({
 
   if (!data || data.length === 0) {
     return (
-      <Card className="col-span-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-        </CardHeader>
+      <Card>
+        <CardHeader 
+          icon={TrendingUp}
+          title={title}
+          description="Análisis de pagos realizados agrupados por mes"
+        />
         <CardContent>
           <div className="h-64 flex items-center justify-center">
             <div className="text-sm text-muted-foreground">No hay datos de pagos disponibles</div>
@@ -76,8 +81,13 @@ export function SubcontractPaymentsChart({
   }
 
   return (
-    <Card className="col-span-4">
-      <CardContent className="p-4">
+    <Card>
+      <CardHeader 
+        icon={TrendingUp}
+        title={title}
+        description="Análisis de pagos realizados agrupados por mes"
+      />
+      <CardContent className="pt-4">
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
