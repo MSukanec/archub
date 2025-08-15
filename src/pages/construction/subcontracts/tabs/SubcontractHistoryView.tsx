@@ -27,9 +27,28 @@ interface SubcontractHistoryViewProps {
 export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewProps) {
   const { data: userData } = useCurrentUser();
 
+  // Query para obtener pagos del subcontrato
+  const { data: subcontractPayments = [] } = useQuery({
+    queryKey: ['subcontract-payments', subcontract?.id],
+    queryFn: async () => {
+      if (!subcontract?.id || !userData?.organization?.id) return [];
+      
+      const response = await fetch(`/api/subcontract-payments/${subcontract.id}?organizationId=${userData.organization.id}`);
+      if (!response.ok) return [];
+      
+      const data = await response.json();
+      return data.map((payment: any) => ({
+        ...payment,
+        currency_symbol: payment.currency_name === 'Peso Argentino' ? '$' : 
+                        payment.currency_name === 'Dólar Estadounidense' ? 'US$' : '$'
+      }));
+    },
+    enabled: !!subcontract?.id && !!userData?.organization?.id
+  });
+
   // Query para obtener el historial del subcontrato
   const { data: historyData = [], isLoading } = useQuery({
-    queryKey: ['subcontract-history', subcontract?.id],
+    queryKey: ['subcontract-history', subcontract?.id, subcontractPayments],
     queryFn: async () => {
       // Por ahora crear datos de prueba basados en la información del subcontrato
       const events = [];
@@ -91,7 +110,24 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         });
       }
 
-      // 5. Firma de contrato (pendiente)
+      // 5. Pagos (basado en datos reales)
+      if (subcontractPayments && subcontractPayments.length > 0) {
+        subcontractPayments.forEach((payment: any, index: number) => {
+          events.push({
+            id: `payment_${payment.id || index}`,
+            type: 'payment',
+            action: 'Pago Registrado',
+            description: `Pago de ${payment.currency_symbol}${payment.amount?.toLocaleString()} registrado`,
+            created_at: payment.movement_date,
+            user_name: userData?.user?.full_name || 'Usuario',
+            user_avatar: userData?.user?.avatar_url,
+            icon: DollarSign,
+            status: 'completed'
+          });
+        });
+      }
+
+      // 6. Firma de contrato (pendiente)
       events.push({
         id: 'contract_signing',
         type: 'contract',
@@ -104,13 +140,10 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         status: 'pending'
       });
 
-      // 6. Pagos (si existen)
-      // Este se agregará dinámicamente cuando tengamos pagos reales
-
       return events.sort((a, b) => {
-        if (!a.created_at) return 1;
+        if (!a.created_at) return 1; // Pendientes van al final
         if (!b.created_at) return -1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime(); // Más reciente primero
       });
     },
     enabled: !!subcontract?.id
