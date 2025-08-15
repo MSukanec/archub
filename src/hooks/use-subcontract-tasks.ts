@@ -50,26 +50,53 @@ export function useSubcontractTasks(subcontractId: string) {
           name,
           description,
           unit,
-          task_template_id,
-          task_templates (
-            name,
-            description,
-            unit
-          )
+          task_template_id
         `)
         .in('id', taskIds);
 
       if (taskError) {
         console.error('Error fetching task instances:', taskError);
-        // Continue without task details if there's an error
+      }
+
+      // Si hay task instances, también obtener los task templates
+      let taskTemplates = [];
+      if (taskInstances && taskInstances.length > 0) {
+        const templateIds = taskInstances
+          .map(task => task.task_template_id)
+          .filter(id => id);
+        
+        if (templateIds.length > 0) {
+          const { data: templates, error: templateError } = await supabase
+            .from('task_templates')
+            .select(`
+              id,
+              name,
+              description,
+              unit
+            `)
+            .in('id', templateIds);
+
+          if (templateError) {
+            console.error('Error fetching task templates:', templateError);
+          } else {
+            taskTemplates = templates || [];
+          }
+        }
       }
 
       // Combinar los datos
       const combinedData = data.map(subcontractTask => {
         const taskInstance = taskInstances?.find(task => task.id === subcontractTask.task_id);
+        const taskTemplate = taskInstance ? 
+          taskTemplates.find(template => template.id === taskInstance.task_template_id) : 
+          null;
+
         return {
           ...subcontractTask,
-          task_instances: taskInstance
+          task_instances: taskInstance ? {
+            ...taskInstance,
+            task_templates: taskTemplate
+          } : null
         };
       });
 
