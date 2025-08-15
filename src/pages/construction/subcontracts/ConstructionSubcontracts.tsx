@@ -188,32 +188,48 @@ export default function ConstructionSubcontracts() {
       key: 'contact',
       label: 'Subcontratista',
       render: (subcontract: any) => {
-        // Buscar la oferta ganadora si el subcontrato está adjudicado
-        if (subcontract.status === 'awarded' && subcontract.subcontract_bids) {
-          const winningBid = subcontract.subcontract_bids.find((bid: any) => bid.is_winner);
-          if (winningBid && winningBid.contact) {
-            const contactName = winningBid.contact.full_name || 
-              `${winningBid.contact.first_name || ''} ${winningBid.contact.last_name || ''}`.trim();
+        // Si el subcontrato está adjudicado, buscar el contacto de la oferta ganadora
+        if (subcontract.status === 'awarded' && subcontract.winner_bid_id) {
+          // Buscar la oferta ganadora en subcontract_bids usando winner_bid_id
+          const winningBid = subcontract.subcontract_bids?.find((bid: any) => bid.id === subcontract.winner_bid_id);
+          if (winningBid && winningBid.contacts) {
+            const contactName = winningBid.contacts.full_name || 
+              `${winningBid.contacts.first_name || ''} ${winningBid.contacts.last_name || ''}`.trim();
             return (
               <div>
                 <div className="font-medium">{contactName}</div>
-                {winningBid.contact.email && <div className="text-xs text-muted-foreground">{winningBid.contact.email}</div>}
+                {winningBid.contacts.email && <div className="text-xs text-muted-foreground">{winningBid.contacts.email}</div>}
               </div>
             );
           }
         }
         
-        // Mostrar contacto original si no hay oferta ganadora
-        const contact = subcontract.contact;
-        if (!contact) return '-';
+        // Si no está adjudicado, mostrar "Sin adjudicar"
+        if (subcontract.status !== 'awarded') {
+          return (
+            <div className="text-muted-foreground">
+              Sin adjudicar
+            </div>
+          );
+        }
         
-        const contactName = contact.full_name || 
-          `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+        // Fallback: mostrar contacto original si existe
+        const contact = subcontract.contact;
+        if (contact) {
+          const contactName = contact.full_name || 
+            `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+          
+          return (
+            <div>
+              <div className="font-medium">{contactName}</div>
+              {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
+            </div>
+          );
+        }
         
         return (
-          <div>
-            <div className="font-medium">{contactName}</div>
-            {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
+          <div className="text-muted-foreground">
+            Sin adjudicar
           </div>
         );
       }
