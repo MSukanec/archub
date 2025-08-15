@@ -108,11 +108,33 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     });
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, bidId?: string) => {
+    // Si es la oferta ganadora, mostrar badge especial
+    if (bidId && subcontract?.winner_bid_id === bidId) {
+      return (
+        <Badge variant="default" className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+          <Trophy className="h-3 w-3 mr-1" />
+          Ganadora
+        </Badge>
+      );
+    }
+    
+    // Si hay una oferta ganadora y esta no es la ganadora, mostrar como rechazada
+    if (subcontract?.winner_bid_id && bidId && subcontract.winner_bid_id !== bidId) {
+      return (
+        <Badge variant="secondary" className="text-xs">
+          No seleccionada
+        </Badge>
+      );
+    }
+    
+    // Estados normales cuando no hay ganadora aún
     const statusConfig = {
       pending: { label: 'Pendiente', variant: 'secondary' as const },
       received: { label: 'Recibida', variant: 'default' as const },
-      withdrawn: { label: 'Retirada', variant: 'destructive' as const }
+      withdrawn: { label: 'Retirada', variant: 'destructive' as const },
+      rejected: { label: 'Rechazada', variant: 'destructive' as const },
+      awarded: { label: 'Adjudicada', variant: 'default' as const }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -248,18 +270,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     {
       key: 'status',
       label: 'Estado',
-      render: (item: any) => (
-        <div className="flex items-center gap-2">
-          {getStatusBadge(item.status)}
-          {/* Mostrar si es ganadora */}
-          {subcontract?.winner_bid_id === item.id && (
-            <Badge variant="default" className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-              <Trophy className="h-3 w-3 mr-1" />
-              Ganadora
-            </Badge>
-          )}
-        </div>
-      )
+      render: (item: any) => getStatusBadge(item.status, item.id)
     },
     {
       key: 'actions',
