@@ -52,6 +52,7 @@ export default function SubcontractView() {
     title: subcontract?.title || "Subcontrato",
     showBackButton: true,
     onBackClick: () => navigate('/construction/subcontracts'),
+    isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === 'Alcance' ? {

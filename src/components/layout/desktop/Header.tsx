@@ -86,6 +86,8 @@ interface HeaderProps {
   showBackButton?: boolean;
   onBackClick?: () => void;
   backButtonText?: string;
+  // Mostrar "Viendo:" en páginas de vista
+  isViewMode?: boolean;
 }
 
 export function Header({
@@ -114,6 +116,7 @@ export function Header({
   showBackButton = false,
   onBackClick,
   backButtonText = "Volver",
+  isViewMode = false,
 }: HeaderProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -233,7 +236,7 @@ export function Header({
           )}
           {(pageTitle || title) && (
             <h1 className="text-xl font-light text-foreground tracking-wider">
-              {pageTitle || title}
+              {isViewMode && showBackButton ? `Viendo: ${pageTitle || title}` : (pageTitle || title)}
             </h1>
           )}
         </div>
