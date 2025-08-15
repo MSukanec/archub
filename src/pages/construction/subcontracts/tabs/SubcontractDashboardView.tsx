@@ -65,24 +65,15 @@ export function SubcontractDashboardView({
       )}
 
       {isTendering && receivedBids.length === 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Este subcontrato está en licitación pero no hay ofertas recibidas.{' '}
-            <Button 
-              variant="link" 
-              className="p-0 h-auto font-medium"
-              onClick={() => {
-                openModal('subcontract-bid', {
-                  subcontractId: subcontract.id,
-                  isEditing: false
-                });
-              }}
-            >
-              Invitar oferentes
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <Callout 
+          icon={AlertCircle}
+          onClick={() => onTabChange?.('Ofertas')}
+        >
+          Este subcontrato está en licitación pero no hay ofertas recibidas.{' '}
+          <span className="font-medium text-accent cursor-pointer hover:underline">
+            Invitar oferentes
+          </span>
+        </Callout>
       )}
 
       {/* Cards principales */}
