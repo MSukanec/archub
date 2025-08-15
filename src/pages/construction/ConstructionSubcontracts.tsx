@@ -164,8 +164,12 @@ export default function ConstructionSubcontracts() {
                     });
                   }}
                   onNewProposal={() => {
-                    // TODO: Implementar modal de nueva propuesta
-                    console.log('Nueva propuesta para subcontrato:', subcontract.id);
+                    openModal('subcontract-bid', {
+                      subcontractId: subcontract.id,
+                      projectId: userData?.preferences?.last_project_id,
+                      organizationId: userData?.organization?.id,
+                      isEditing: false
+                    });
                   }}
                 />
               ))
