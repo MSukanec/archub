@@ -106,16 +106,17 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
     <div className="space-y-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Título y Subcontratista - Inline */}
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título de la Oferta *</FormLabel>
+                  <FormLabel className="text-xs font-medium">Título de la Oferta *</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ej: Oferta para trabajo de albañilería"
+                      placeholder="Ej: Oferta para trabajos..."
                       {...field}
                     />
                   </FormControl>
@@ -129,7 +130,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
               name="contact_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subcontratista (Opcional)</FormLabel>
+                  <FormLabel className="text-xs font-medium">Subcontratista (Opcional)</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
@@ -139,7 +140,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
                     <SelectContent>
                       {contacts.map((contact) => (
                         <SelectItem key={contact.id} value={contact.id}>
-                          {contact.name}
+                          {contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -150,17 +151,19 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Monto, Moneda y Tasa de Cambio - Inline */}
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Monto *</FormLabel>
+                  <FormLabel className="text-xs font-medium">Monto *</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       step="0.01"
+                      min="0"
                       placeholder="0"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
@@ -176,7 +179,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
               name="currency_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Moneda (Opcional)</FormLabel>
+                  <FormLabel className="text-xs font-medium">Moneda (Opcional)</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
@@ -201,7 +204,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
               name="exchange_rate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tasa de Cambio</FormLabel>
+                  <FormLabel className="text-xs font-medium">Tasa de Cambio</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -217,13 +220,14 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Estado y Válida Hasta - Inline */}
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Estado *</FormLabel>
+                  <FormLabel className="text-xs font-medium">Estado *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
@@ -246,7 +250,7 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
               name="valid_until"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Válida Hasta (Opcional)</FormLabel>
+                  <FormLabel className="text-xs font-medium">Válida Hasta (Opcional)</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
@@ -260,16 +264,17 @@ export function SubcontractBidFormModal({ modalData, onClose }: SubcontractBidFo
             />
           </div>
 
+          {/* Notas */}
           <FormField
             control={form.control}
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notas Adicionales (Opcional)</FormLabel>
+                <FormLabel className="text-xs font-medium">Notas Adicionales (Opcional)</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Detalles adicionales sobre la oferta..."
-                    className="min-h-[100px]"
+                    className="min-h-[120px] resize-none"
                     {...field}
                     value={field.value || ""}
                   />
