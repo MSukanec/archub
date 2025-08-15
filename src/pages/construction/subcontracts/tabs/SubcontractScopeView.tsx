@@ -43,7 +43,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
   const columns = [
     {
       key: 'task_name',
-      title: 'Tarea',
+      label: 'Tarea',
       render: (item: any) => (
         <div>
           <p className="font-medium text-sm">
@@ -57,7 +57,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     },
     {
       key: 'amount',
-      title: 'Cantidad',
+      label: 'Cantidad',
       render: (item: any) => (
         <span className="text-sm font-medium">
           {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
@@ -66,7 +66,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     },
     {
       key: 'unit',
-      title: 'Unidad',
+      label: 'Unidad',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
           {item.unit || item.unit_symbol || 'Sin unidad'}
@@ -75,7 +75,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     },
     {
       key: 'notes',
-      title: 'Notas',
+      label: 'Notas',
       render: (item: any) => (
         <span className="text-sm text-muted-foreground">
           {item.notes || '—'}
@@ -84,7 +84,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     },
     {
       key: 'actions',
-      title: 'Acciones',
+      label: 'Acciones',
       render: (item: any) => (
         <div className="flex items-center gap-1">
           <Button

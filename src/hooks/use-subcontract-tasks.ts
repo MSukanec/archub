@@ -45,14 +45,8 @@ export function useSubcontractTasks(subcontractId: string) {
       
       const { data: constructionTasks, error: taskError } = await supabase
         .from('construction_tasks_view')
-        .select(`
-          task_instance_id,
-          task_name,
-          task_description,
-          unit_symbol,
-          rubro_name
-        `)
-        .in('task_instance_id', taskIds);
+        .select('*')
+        .in('id', taskIds);
 
       if (taskError) {
         console.error('Error fetching construction tasks:', taskError);
@@ -60,13 +54,13 @@ export function useSubcontractTasks(subcontractId: string) {
 
       // Combinar los datos
       const combinedData = data.map(subcontractTask => {
-        const constructionTask = constructionTasks?.find(task => task.task_instance_id === subcontractTask.task_id);
+        const constructionTask = constructionTasks?.find(task => task.id === subcontractTask.task_id);
         
         return {
           ...subcontractTask,
-          task_name: constructionTask?.task_name || 'Sin nombre',
-          task_description: constructionTask?.task_description || '',
-          unit_symbol: constructionTask?.unit_symbol || 'Sin unidad',
+          task_name: constructionTask?.display_name || constructionTask?.name_rendered || constructionTask?.name || 'Sin nombre',
+          task_description: constructionTask?.description || '',
+          unit_symbol: constructionTask?.unit_symbol || constructionTask?.unit || 'Sin unidad',
           rubro_name: constructionTask?.rubro_name || 'Sin rubro'
         };
       });
