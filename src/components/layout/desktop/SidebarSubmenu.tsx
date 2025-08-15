@@ -137,7 +137,7 @@ export function SidebarSubmenu() {
       { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
       { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
-      { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts', requiresProject: true },
+
       { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
     ],
 

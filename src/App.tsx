@@ -31,7 +31,7 @@ import FinancesMovements from "@/pages/finances/FinancesMovements";
 import FinancesAnalysis from "@/pages/finances/FinancesAnalysis";
 import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
-import FinancesSubcontracts from "@/pages/finances/FinancesSubcontracts";
+
 
 import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
@@ -267,11 +267,7 @@ function Router() {
             <FinancesCapitalMovements />
           </ProtectedRoute>
         </Route>
-        <Route path="/finances/subcontracts">
-          <ProtectedRoute>
-            <FinancesSubcontracts />
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/organization/preferences">
           <ProtectedRoute>
