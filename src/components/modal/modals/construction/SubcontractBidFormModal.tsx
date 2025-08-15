@@ -68,12 +68,14 @@ export function SubcontractBidFormModal({
 
     try {
       const bidData = {
+        subcontract_id: subcontract_id,
         contact_id: data.contact_id,
         amount: parseFloat(data.amount),
         currency_id: data.currency_id,
         exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : 1,
         submitted_at: data.submitted_at ? data.submitted_at.toISOString().split('T')[0] : null,
         notes: data.notes || null,
+        status: 'pending',
         created_by: userData?.member?.id
       };
 
@@ -97,8 +99,7 @@ export function SubcontractBidFormModal({
         description: 'Los cambios se han guardado correctamente'
       });
 
-      // Refresh the bids list after creating
-      window.location.reload(); // Temporary solution to refresh the view
+      // TODO: Refresh the bids list properly instead of page reload
       onClose();
     } catch (error) {
       console.error('Error saving bid:', error);

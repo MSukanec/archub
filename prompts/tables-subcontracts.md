@@ -189,5 +189,9 @@ TABLA SUBCONTRACT_BIDS:
   {
     "column_name": "created_by",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "subcontract_id",
+    "data_type": "uuid"
   }
 ]

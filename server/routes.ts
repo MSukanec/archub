@@ -876,8 +876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           contacts:contact_id(id, company_name, full_name, first_name, last_name),
           currencies:currency_id(id, code, name)
         `)
-        // Note: subcontract_bids table doesn't have subcontract_id per real schema
-        // For now, get all bids - need to clarify relationship
+        .eq('subcontract_id', subcontractId)
         .order('created_at', { ascending: false });
 
       if (error) {
