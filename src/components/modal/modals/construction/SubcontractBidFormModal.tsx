@@ -17,13 +17,14 @@ import { Plus, Trash2, FileText } from 'lucide-react';
 import { z } from 'zod';
 import { useContacts } from '@/hooks/use-contacts';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrencies } from '@/hooks/use-currencies';
 
 const bidFormSchema = z.object({
   contact_id: z.string().min(1, 'El proveedor es requerido'),
-  total_amount: z.string().optional(),
-  currency_code: z.string(),
+  title: z.string().min(1, 'El título es requerido'),
+  amount: z.string().min(1, 'El monto es requerido'),
+  currency_id: z.string().min(1, 'La moneda es requerida'),
   exchange_rate: z.string().optional(),
-  received_at: z.date().optional(),
   notes: z.string().optional()
 });
 
@@ -46,6 +47,7 @@ export function SubcontractBidFormModal({
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
+  const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
   
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,10 +55,10 @@ export function SubcontractBidFormModal({
     resolver: zodResolver(bidFormSchema),
     defaultValues: {
       contact_id: initialData?.contact_id || '',
-      total_amount: initialData?.total_amount?.toString() || '',
-      currency_code: initialData?.currency_code || 'ARS',
+      title: initialData?.title || '',
+      amount: initialData?.amount?.toString() || '',
+      currency_id: initialData?.currency_id || '',
       exchange_rate: initialData?.exchange_rate?.toString() || '',
-      received_at: initialData?.received_at ? new Date(initialData.received_at) : undefined,
       notes: initialData?.notes || ''
     }
   });
@@ -68,10 +70,10 @@ export function SubcontractBidFormModal({
       const bidData = {
         subcontract_id,
         contact_id: data.contact_id,
-        total_amount: data.total_amount ? parseFloat(data.total_amount) : null,
-        currency_code: data.currency_code,
-        exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : null,
-        received_at: data.received_at ? data.received_at.toISOString() : null,
+        title: data.title,
+        amount: parseFloat(data.amount),
+        currency_id: data.currency_id,
+        exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : 1,
         notes: data.notes || null
       };
 
@@ -113,71 +115,75 @@ export function SubcontractBidFormModal({
     label: contact.company_name || contact.full_name || `${contact.first_name} ${contact.last_name}`.trim()
   })) || [];
 
+  // Preparar opciones de monedas
+  const currencyOptions = currencies?.map(currency => ({
+    value: currency.id,
+    label: `${currency.name} (${currency.code})`
+  })) || [];
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Fecha de Recepcion - Proveedor */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="received_at"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Recepción</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Seleccionar fecha..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Título de la oferta */}
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Título de la Oferta *</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Oferta para trabajos de plomería"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="contact_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Proveedor *</FormLabel>
-                <FormControl>
-                  <ComboBox
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={contactOptions}
-                    placeholder="Seleccionar proveedor..."
-                    searchPlaceholder="Buscar proveedor..."
-                    emptyMessage="No se encontraron proveedores."
-                    disabled={isContactsLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* Proveedor */}
+        <FormField
+          control={form.control}
+          name="contact_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proveedor *</FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={contactOptions}
+                  placeholder="Seleccionar proveedor..."
+                  searchPlaceholder="Buscar proveedor..."
+                  emptyMessage="No se encontraron proveedores."
+                  disabled={isContactsLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Moneda - Monto Total */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="currency_code"
+            name="currency_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Moneda</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="ARS">Peso Argentino (ARS)</SelectItem>
-                    <SelectItem value="USD">Dólar Estadounidense (USD)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Moneda *</FormLabel>
+                <FormControl>
+                  <ComboBox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={currencyOptions}
+                    placeholder="Seleccionar moneda..."
+                    searchPlaceholder="Buscar moneda..."
+                    emptyMessage="No se encontraron monedas."
+                    disabled={isCurrenciesLoading}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -185,10 +191,10 @@ export function SubcontractBidFormModal({
 
           <FormField
             control={form.control}
-            name="total_amount"
+            name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Monto Total</FormLabel>
+                <FormLabel>Monto Total *</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
