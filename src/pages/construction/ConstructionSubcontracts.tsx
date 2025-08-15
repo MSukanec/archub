@@ -74,6 +74,35 @@ export default function ConstructionSubcontracts() {
   const headerProps = {
     icon: Package,
     title: "Subcontratos",
+    searchConfig: {
+      value: searchQuery,
+      placeholder: "Buscar subcontratos...",
+      onChange: setSearchQuery
+    },
+    filterConfig: {
+      isActive: currencyView !== 'discriminado',
+      content: (
+        <div className="space-y-3 p-2 min-w-[200px]">
+          <div>
+            <Label className="text-xs font-medium mb-1 block">Moneda</Label>
+            <Select 
+              value={currencyView} 
+              onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Seleccionar moneda" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="discriminado">Todo</SelectItem>
+                <SelectItem value="pesificado">Peso Argentino</SelectItem>
+                <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ),
+      onClear: () => setCurrencyView('discriminado')
+    },
     actionButton: {
       label: 'Crear Subcontrato',
       icon: Plus,
@@ -81,43 +110,7 @@ export default function ConstructionSubcontracts() {
     }
   }
 
-  const renderTopControls = () => (
-    <div className="flex flex-col sm:flex-row gap-4 mb-6">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar subcontratos..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-      <div className="flex gap-2">
-        <Select 
-          value={currencyView} 
-          onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Seleccionar moneda" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="discriminado">Todo</SelectItem>
-            <SelectItem value="pesificado">Peso Argentino</SelectItem>
-            <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
-          </SelectContent>
-        </Select>
-        {currencyView !== 'discriminado' && (
-          <Button
-            variant="outline"
-            onClick={() => setCurrencyView('discriminado')}
-            size="sm"
-          >
-            Limpiar filtros
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+
 
   return (
     <Layout wide={true} headerProps={headerProps}>
@@ -128,9 +121,7 @@ export default function ConstructionSubcontracts() {
           description="Los subcontratos te permiten gestionar trabajos especializados que requieren contratistas externos. Puedes controlar estados, fechas y presupuestos."
         />
       ) : (
-        <div>
-          {renderTopControls()}
-          <div className="space-y-4">
+        <div className="space-y-4">
             {(isLoading || isLoadingAnalysis) ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -174,7 +165,6 @@ export default function ConstructionSubcontracts() {
                 />
               ))
             )}
-          </div>
         </div>
       )}
     </Layout>
