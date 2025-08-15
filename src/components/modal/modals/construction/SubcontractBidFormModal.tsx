@@ -94,164 +94,34 @@ export function SubcontractBidFormModal({
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Información del Proveedor */}
-        <div className="space-y-4">
-          <h3 className="text-md font-medium">Información del Proveedor</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="supplier_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Proveedor *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: Constructora ABC S.A."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="supplier_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="contacto@constructora.com"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="supplier_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teléfono</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="+54 11 1234-5678"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Estado</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pending">Pendiente</SelectItem>
-                      <SelectItem value="received">Recibida</SelectItem>
-                      <SelectItem value="withdrawn">Retirada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Información de la Oferta */}
-        <div className="space-y-4">
-          <h3 className="text-md font-medium">Información de la Oferta</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="total_amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monto Total</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="currency_code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="ARS">Peso Argentino (ARS)</SelectItem>
-                      <SelectItem value="USD">Dólar Estadounidense (USD)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="received_at"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha de Recepción</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="supplier_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del Proveedor *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ej: Constructora ABC S.A."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
-            name="notes"
+            name="supplier_email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notas</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Comentarios adicionales sobre la oferta..."
-                    rows={3}
+                  <Input
+                    type="email"
+                    placeholder="contacto@constructora.com"
                     {...field}
                   />
                 </FormControl>
@@ -260,6 +130,126 @@ export function SubcontractBidFormModal({
             )}
           />
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="supplier_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Teléfono</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="+54 11 1234-5678"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendiente</SelectItem>
+                    <SelectItem value="received">Recibida</SelectItem>
+                    <SelectItem value="withdrawn">Retirada</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="total_amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Monto Total</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="currency_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moneda</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ARS">Peso Argentino (ARS)</SelectItem>
+                    <SelectItem value="USD">Dólar Estadounidense (USD)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="received_at"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de Recepción</FormLabel>
+                <FormControl>
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Comentarios adicionales sobre la oferta..."
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
   );
@@ -283,6 +273,7 @@ export function SubcontractBidFormModal({
 
   return (
     <FormModalLayout
+      columns={1}
       viewPanel={null}
       editPanel={editPanel}
       headerContent={headerContent}
