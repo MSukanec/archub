@@ -1291,6 +1291,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DELETE /api/subcontracts/:id - Delete subcontract with all dependencies
+  app.delete("/api/subcontracts/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      console.log("Attempting to delete subcontract:", id);
+
+      // Primero obtener las ofertas del subcontrato
+      const { data: bids, error: getBidsError } = await supabase
+        .from('subcontract_bids')
+        .select('id')
+        .eq('subcontract_id', id);
+
+      if (getBidsError) {
+        console.error("Error getting bids:", getBidsError);
+        return res.status(500).json({ error: "Failed to get bids" });
+      }
+
+      // Eliminar las tareas de las ofertas si existen ofertas
+      if (bids && bids.length > 0) {
+        const bidIds = bids.map(bid => bid.id);
+        const { error: bidTasksError } = await supabase
+          .from('subcontract_bid_tasks')
+          .delete()
+          .in('subcontract_bid_id', bidIds);
+
+        if (bidTasksError) {
+          console.error("Error deleting bid tasks:", bidTasksError);
+          return res.status(500).json({ error: "Failed to delete bid tasks" });
+        }
+      }
+
+      // Luego eliminar todas las ofertas (subcontract_bids)
+      const { error: bidsError } = await supabase
+        .from('subcontract_bids')
+        .delete()
+        .eq('subcontract_id', id);
+
+      if (bidsError) {
+        console.error("Error deleting bids:", bidsError);
+        return res.status(500).json({ error: "Failed to delete bids" });
+      }
+
+      // Eliminar las tareas del subcontrato (subcontract_tasks)
+      const { error: tasksError } = await supabase
+        .from('subcontract_tasks')
+        .delete()
+        .eq('subcontract_id', id);
+
+      if (tasksError) {
+        console.error("Error deleting subcontract tasks:", tasksError);
+        return res.status(500).json({ error: "Failed to delete subcontract tasks" });
+      }
+
+      // Finalmente eliminar el subcontrato
+      const { error } = await supabase
+        .from('subcontracts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting subcontract:", error);
+        return res.status(500).json({ error: "Failed to delete subcontract" });
+      }
+
+      console.log("Successfully deleted subcontract:", id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting subcontract:", error);
+      res.status(500).json({ error: "Failed to delete subcontract" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

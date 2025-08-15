@@ -143,10 +143,15 @@ export default function ConstructionSubcontracts() {
   };
 
   // Función para eliminar subcontrato
-  const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este subcontrato?')) {
-      deleteSubcontract.mutate(id);
-    }
+  const handleDelete = (subcontract: any) => {
+    openModal('delete-confirmation', {
+      title: 'Eliminar Subcontrato',
+      message: `¿Estás seguro de que quieres eliminar el subcontrato "${subcontract.title}"? Esta acción no se puede deshacer y eliminará todas las ofertas y datos relacionados.`,
+      mode: 'dangerous',
+      onConfirm: () => {
+        deleteSubcontract.mutate(subcontract.id);
+      }
+    });
   };
 
   // Función para ver detalle
@@ -362,7 +367,7 @@ export default function ConstructionSubcontracts() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => handleDelete(subcontract.id)}
+            onClick={() => handleDelete(subcontract)}
             className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
