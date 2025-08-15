@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { Plus } from 'lucide-react';
+import { Plus, FileText } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
 import { SubcontractScopeView } from './tabs/SubcontractScopeView';
 import { SubcontractBidsView } from './tabs/SubcontractBidsView';
+import { SubcontractAwardedView } from './tabs/SubcontractAwardedView';
 import { useSubcontract } from "@/hooks/use-subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -42,9 +43,9 @@ export default function SubcontractView() {
       isActive: activeTab === 'Ofertas'
     },
     {
-      id: 'Documentos',
-      label: 'Documentos',
-      isActive: activeTab === 'Documentos'
+      id: 'Contratado',
+      label: 'Contratado',
+      isActive: activeTab === 'Contratado'
     }
   ];
 
@@ -76,6 +77,14 @@ export default function SubcontractView() {
           isEditing: false
         });
       }
+    } : activeTab === 'Contratado' ? {
+      label: "Subir Contrato",
+      icon: FileText,
+      onClick: () => {
+        // TODO: Implement contract upload functionality
+        console.log('Upload contract functionality to be implemented');
+      },
+      disabled: true
     } : undefined
   };
 
@@ -130,14 +139,11 @@ export default function SubcontractView() {
             subcontract={subcontract}
           />
         );
-      case 'Documentos':
+      case 'Contratado':
         return (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-muted-foreground">Documentos</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Vista de documentos en construcción
-            </p>
-          </div>
+          <SubcontractAwardedView 
+            subcontract={subcontract}
+          />
         );
       default:
         return null;

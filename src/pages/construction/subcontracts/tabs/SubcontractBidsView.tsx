@@ -236,7 +236,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         <EmptyState
           icon={<Plus />}
           title="Sin ofertas recibidas"
-          description="Las ofertas de los proveedores aparecerán aquí una vez que sean enviadas o registradas manualmente"
+          description="Las ofertas de los proveedores aparecerán aquí una vez que sean enviadas o registradas manualmente."
           action={
             <Button onClick={handleAddBid}>
               <Plus className="w-4 h-4 mr-2" />
