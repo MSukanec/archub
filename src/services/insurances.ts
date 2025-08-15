@@ -4,7 +4,7 @@ export type Insurance = {
   id: string;
   organization_id: string;
   project_id?: string | null;
-  personnnel_id: string; // Note the typo in the DB column name  
+  personnel_id: string;  
   insurance_type: 'ART' | 'vida' | 'accidentes' | 'responsabilidad_civil' | 'salud' | 'otro';
   policy_number?: string | null;
   provider?: string | null;
@@ -157,7 +157,7 @@ export const renewInsurance = async (
   const newInsurance = await createInsurance({
     organization_id: previous.organization_id,
     project_id: previous.project_id,
-    personnnel_id: previous.personnnel_id,
+    personnel_id: previous.personnel_id,
     insurance_type: previous.insurance_type,
     policy_number: payload.policy_number || previous.policy_number,
     provider: payload.provider || previous.provider,
