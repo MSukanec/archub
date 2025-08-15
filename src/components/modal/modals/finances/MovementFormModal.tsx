@@ -193,6 +193,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     setCurrentSubform('tasks')
     setPanel('subform')
   }
+
+  // Función para abrir el subform de personal
+  const openPersonnelSubform = () => {
+    setCurrentSubform('personnel')
+    setPanel('subform')
+  }
   
   // Función para cerrar el subform y volver al panel principal
   const closeSubform = () => {
@@ -270,7 +276,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedPersonnelId, setSelectedPersonnelId] = React.useState<string>('')
   
   // Estado para el subform actual
-  const [currentSubform, setCurrentSubform] = React.useState<'tasks' | null>(null)
+  const [currentSubform, setCurrentSubform] = React.useState<'tasks' | 'personnel' | null>(null)
   
   // Hook para crear/actualizar relaciones de tareas con movimientos
   const createMovementTasksMutation = useCreateMovementTasks()
@@ -751,16 +757,18 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isRetirosPropiosCategory = viewMode === "retiros_propios"
       const isMaterialesCategory = viewMode === "materiales" || selectedCategory?.name?.toLowerCase().includes('material')
       // Detectar personal por subcategoría UUID específica - usar estado directo para evitar timing issues
-      const isPersonalCategory = selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID de Personal
-      // Por ahora mantener subcontratos con UUID diferente temporal hasta que se defina el UUID correcto
-      const isSubcontratosCategory = false // selectedSubcategoryId === 'OTRO_UUID_SUBCONTRATOS'
+      const isPersonalCategory = selectedSubcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff' // UUID de Personal
+      // Detectar subcontratos por subcategoría UUID específica 
+      const isSubcontratosCategory = selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID de Subcontratos
       
       // DEBUG: Log detection
       console.log('🎯 PersonalFields Detection:', { 
         selectedSubcategoryId, 
         formSubcategoryId: form.watch('subcategory_id'),
         isPersonalCategory, 
-        UUID_PERSONAL: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
+        isSubcontratosCategory,
+        UUID_PERSONAL: '7ef27d3f-ef17-49c3-a392-55282b3576ff',
+        UUID_SUBCONTRATOS: 'f40a8fda-69e6-4e81-bc8a-464359cd8498'
       })
       
       if (isAportesCategory || isAportesPropiosCategory || isRetirosPropiosCategory || isMaterialesCategory || isSubcontratosCategory || isPersonalCategory) {
@@ -937,6 +945,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       const isRetirosPropriosMovement = categoryViewMode === "retiros_propios" || selectedCategory?.name?.includes('Retiro')
       // Detectar subcontratos por subcategoría UUID específica en modo edición
       const isSubcontratosMovement = editingMovement.subcategory_id === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
+      // Detectar personal por subcategoría UUID específica en modo edición
+      const isPersonalMovement = editingMovement.subcategory_id === '7ef27d3f-ef17-49c3-a392-55282b3576ff' // UUID de Personal
       
       // Establecer el tipo de formulario correcto
       if (isConversionMovement) {
@@ -967,6 +977,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           amount: Math.abs(editingMovement.amount),
           exchange_rate: editingMovement.exchange_rate || undefined
         })
+      } else if (isPersonalMovement) {
+        setMovementType('personal')
+        
+        // Por ahora solo establecer el tipo, la lógica completa se implementará después
+        console.log('🧑‍💼 Personal movement detected in edit mode')
       } else {
         setMovementType('normal')
       }
@@ -2580,6 +2595,26 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
+      ) : movementType === 'personal' ? (
+        // FORMULARIO DE PERSONAL
+        <div className="space-y-4">
+          {/* Personal Selection Button */}
+          <FormSubsectionButton
+            title="Personal del Proyecto"
+            description={
+              selectedPersonnelId && personnelOptions.find(p => p.value === selectedPersonnelId)
+                ? `${personnelOptions.find(p => p.value === selectedPersonnelId)?.label}`
+                : "Seleccionar persona para el pago"
+            }
+            isConfigured={!!selectedPersonnelId}
+            onClick={openPersonnelSubform}
+          />
+
+          {/* Fields similares a otros formularios - por ahora solo lo básico */}
+          <div className="text-xs text-muted-foreground">
+            Configuración de pago de personal en desarrollo. Por ahora solo se puede seleccionar el personal.
+          </div>
+        </div>
       ) : isMateriales ? (
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
@@ -2789,6 +2824,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           isRetirosPropios ? "Registrar Retiro Propio" :
           isMateriales ? "Registrar Compra de Materiales" :
           isSubcontratos ? "Registrar Pago de Subcontrato" :
+          movementType === 'personal' ? "Registrar Pago de Personal" :
           "Guardar"
         )
       }
@@ -2838,11 +2874,39 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </div>
   )
 
+  // Subform para selección de personal
+  const personnelSubform = (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        {/* Campo de Personal */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-foreground">
+            Personal
+          </label>
+          <ComboBoxWrite
+            value={selectedPersonnelId || ""}
+            onValueChange={setSelectedPersonnelId}
+            options={personnelOptions}
+            placeholder="Seleccionar personal..."
+            searchPlaceholder="Buscar personal..."
+            emptyMessage="No se encontró personal del proyecto."
+          />
+        </div>
+        
+        <p className="text-xs text-muted-foreground">
+          Selecciona la persona del proyecto a quien se efectúa el pago
+        </p>
+      </div>
+    </div>
+  )
+
   // Función para obtener el subform actual
   const getSubform = () => {
     switch (currentSubform) {
       case 'tasks':
         return tasksSubform
+      case 'personnel':
+        return personnelSubform
       default:
         return null
     }
