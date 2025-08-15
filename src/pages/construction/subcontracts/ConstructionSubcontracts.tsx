@@ -72,36 +72,9 @@ export default function ConstructionSubcontracts() {
     showHeaderSearch: true,
     headerSearchValue: searchQuery,
     onHeaderSearchChange: setSearchQuery,
-    showHeaderFilter: true,
-    renderHeaderFilterContent: () => (
-      <div className="space-y-1">
-        <Button
-          variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
-          size="sm"
-          className="w-full justify-start h-8"
-          onClick={() => setCurrencyView('discriminado')}
-        >
-          Discriminado
-        </Button>
-        <Button
-          variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
-          size="sm"
-          className="w-full justify-start h-8"
-          onClick={() => setCurrencyView('pesificado')}
-        >
-          Pesificado
-        </Button>
-        <Button
-          variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
-          size="sm"
-          className="w-full justify-start h-8"
-          onClick={() => setCurrencyView('dolarizado')}
-        >
-          Dolarizado
-        </Button>
-      </div>
-    ),
-    isHeaderFilterActive: currencyView !== 'discriminado',
+    showCurrencySelector: true,
+    currencyView: currencyView,
+    onCurrencyViewChange: setCurrencyView,
     actionButton: {
       icon: Plus,
       label: "Nuevo Subcontrato",

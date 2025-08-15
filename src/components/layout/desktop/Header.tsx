@@ -424,7 +424,7 @@ export function Header({
               }}
             >
               <div className={`
-                absolute right-0 transition-all duration-300 overflow-hidden
+                transition-all duration-300 overflow-hidden
                 ${isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"}
               `}>
                 <div className={`
@@ -456,7 +456,7 @@ export function Header({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 h-8 w-8 p-0 hover:bg-transparent"
+                    className="h-8 w-8 p-0 hover:bg-transparent flex-shrink-0"
                     onClick={() => {
                       setIsSearchExpanded(!isSearchExpanded);
                       if (!isSearchExpanded) {
