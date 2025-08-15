@@ -913,6 +913,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/subcontract-bids", async (req, res) => {
+    try {
+      const bidData = req.body;
+      const { id, ...updateData } = bidData;
+
+      const { data: bid, error } = await supabase
+        .from('subcontract_bids')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating subcontract bid:", error);
+        return res.status(500).json({ error: "Failed to update subcontract bid" });
+      }
+
+      res.json(bid);
+    } catch (error) {
+      console.error("Error updating subcontract bid:", error);
+      res.status(500).json({ error: "Failed to update subcontract bid" });
+    }
+  });
+
   app.delete("/api/subcontract-bids/:bidId", async (req, res) => {
     try {
       const { bidId } = req.params;
