@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
 import { SubcontractScopeView } from './tabs/SubcontractScopeView';
+import { SubcontractBidsView } from './tabs/SubcontractBidsView';
 import { useSubcontract } from "@/hooks/use-subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -65,6 +66,15 @@ export default function SubcontractView() {
           }
         });
       }
+    } : activeTab === 'Ofertas' ? {
+      label: "Nueva Oferta",
+      icon: Plus,
+      onClick: () => {
+        openModal('subcontract-bid-form', {
+          subcontract_id: id,
+          mode: 'create'
+        });
+      }
     } : undefined
   };
 
@@ -114,12 +124,9 @@ export default function SubcontractView() {
         );
       case 'Ofertas':
         return (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-muted-foreground">Ofertas</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Vista de ofertas en construcción
-            </p>
-          </div>
+          <SubcontractBidsView 
+            subcontract={subcontract}
+          />
         );
       case 'Documentos':
         return (

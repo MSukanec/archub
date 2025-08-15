@@ -173,6 +173,14 @@ export function ModalFactory() {
       return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
     case 'subcontract-task':
       return <SubcontractTaskFormModal modalData={data} onClose={closeModal} />;
+    case 'subcontract-bid-form':
+      return <SubcontractBidFormModal 
+        subcontract_id={data?.subcontract_id} 
+        bid_id={data?.bid_id}
+        mode={data?.mode || 'create'}
+        initialData={data?.initialData}
+        onClose={closeModal} 
+      />;
     case 'insurance':
       return <InsuranceFormModal modalData={data} onClose={closeModal} />;
     case 'renew-insurance':
