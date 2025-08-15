@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, Folder, Search, Filter, X } from "lucide-react";
+import { ChevronDown, Folder, Search, Filter, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -82,6 +82,10 @@ interface HeaderProps {
       variant?: "ghost" | "default" | "secondary";
     };
   };
+  // Botón "Volver" para páginas de vista/detalle
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+  backButtonText?: string;
 }
 
 export function Header({
@@ -107,6 +111,9 @@ export function Header({
   showHeaderClearFilters = false,
   onHeaderClearFilters,
   actionButton,
+  showBackButton = false,
+  onBackClick,
+  backButtonText = "Volver",
 }: HeaderProps = {}) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -209,58 +216,25 @@ export function Header({
           : "left-[80px]" // 40px main + 40px secondary
       }`}
     >
-      {/* Primera fila: Título + Tabs + Selector de proyectos */}
+      {/* Primera fila: Botón Volver + Título + Selector de proyectos */}
       <div className="w-full h-10 px-12 flex items-center justify-between">
-        {/* Left: Page Title + Tabs */}
-        <div className="flex items-center gap-8">
+        {/* Left: Back Button + Page Title */}
+        <div className="flex items-center gap-4">
+          {showBackButton && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackClick}
+              className="h-8 px-2 text-sm font-normal text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {backButtonText}
+            </Button>
+          )}
           {(pageTitle || title) && (
             <h1 className="text-xl font-light text-foreground tracking-wider">
               {pageTitle || title}
             </h1>
-          )}
-          
-          {/* Tabs */}
-          {hasTabs && (
-            <div className="flex items-center space-x-6">
-              {tabs.map((tab) => {
-                const tabContent = (
-                  <button
-                    key={tab.id}
-                    onClick={() =>
-                      tab.isDisabled || tab.isRestricted
-                        ? undefined
-                        : onTabChange?.(tab.id)
-                    }
-                    disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-3 py-2 rounded-lg ${
-                      tab.isDisabled || tab.isRestricted
-                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                        : tab.isActive
-                          ? "text-primary font-semibold bg-primary/10 shadow-md border border-primary/20"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-
-                // Si la tab está restringida, envolverla con CustomRestricted
-                if (tab.isRestricted && tab.restrictionReason) {
-                  return (
-                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
-                      {tabContent}
-                    </CustomRestricted>
-                  );
-                }
-
-                return tabContent;
-              })}
-            </div>
           )}
         </div>
 
@@ -334,8 +308,51 @@ export function Header({
         </div>
       </div>
 
-      {/* Segunda fila: Solo botones de acción */}
-      <div className="w-full h-10 px-12 flex items-center justify-end">
+      {/* Segunda fila: Tabs a la izquierda + Botones de acción a la derecha */}
+      <div className="w-full h-10 px-12 flex items-center justify-between">
+        {/* Left: Tabs */}
+        {hasTabs && (
+          <div className="flex items-center space-x-6">
+            {tabs.map((tab) => {
+              const tabContent = (
+                <button
+                  key={tab.id}
+                  onClick={() =>
+                    tab.isDisabled || tab.isRestricted
+                      ? undefined
+                      : onTabChange?.(tab.id)
+                  }
+                  disabled={tab.isDisabled}
+                  className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
+                    tab.isDisabled || tab.isRestricted
+                      ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                      : tab.isActive
+                        ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
+                        : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+
+              // Si la tab está restringida, envolverla con CustomRestricted
+              if (tab.isRestricted && tab.restrictionReason) {
+                return (
+                  <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                    {tabContent}
+                  </CustomRestricted>
+                );
+              }
+
+              return tabContent;
+            })}
+          </div>
+        )}
 
         {/* Right: Header Action Buttons + Main Action Buttons */}
         <div className="flex items-center gap-1">
