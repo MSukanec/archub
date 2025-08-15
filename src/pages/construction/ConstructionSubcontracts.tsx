@@ -163,6 +163,10 @@ export default function ConstructionSubcontracts() {
                       }
                     });
                   }}
+                  onNewProposal={() => {
+                    // TODO: Implementar modal de nueva propuesta
+                    console.log('Nueva propuesta para subcontrato:', subcontract.id);
+                  }}
                 />
               ))
             )}

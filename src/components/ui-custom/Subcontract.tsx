@@ -1,9 +1,10 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Edit, Trash2, DollarSign, Calendar, User, Package } from "lucide-react";
+import { Edit, Trash2, DollarSign, Calendar, User, Package, MoreVertical, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface SubcontractProps {
   subcontract: {
@@ -31,9 +32,10 @@ interface SubcontractProps {
   currencyView: 'discriminado' | 'pesificado' | 'dolarizado';
   onEdit: () => void;
   onDelete: () => void;
+  onNewProposal: () => void;
 }
 
-export function Subcontract({ subcontract, currencyView, onEdit, onDelete }: SubcontractProps) {
+export function Subcontract({ subcontract, currencyView, onEdit, onDelete, onNewProposal }: SubcontractProps) {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
@@ -93,92 +95,103 @@ export function Subcontract({ subcontract, currencyView, onEdit, onDelete }: Sub
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+      <CardContent className="p-6">
+        <div className="grid grid-cols-2 gap-6">
+          {/* Columna izquierda - Información principal */}
+          <div className="space-y-3">
+            {/* Fila 1: Título con ícono y estado */}
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                 <Package className="h-4 w-4 text-primary" />
               </div>
-              <div>
-                <h3 className="font-semibold text-lg">{subcontract.title}</h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    {getContactName()}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg leading-tight">{subcontract.title}</h3>
+                <div className="mt-1">
+                  {getStatusBadge(subcontract.status)}
                 </div>
               </div>
             </div>
+            
+            {/* Fila 2: Fecha y proveedor */}
+            <div className="pl-11 space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>{format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-3 w-3" />
+                <span className="truncate">{getContactName()}</span>
+              </div>
+              {subcontract.contact?.email && (
+                <div className="text-xs text-muted-foreground truncate">
+                  {subcontract.contact.email}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 ml-4">
-            {getStatusBadge(subcontract.status)}
-            <div className="flex gap-1">
+
+          {/* Columna derecha - Botones y montos */}
+          <div className="space-y-3">
+            {/* Fila 1: Botones de acción */}
+            <div className="flex items-center justify-end gap-2">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={onEdit}
+                variant="default"
+                size="sm"
+                onClick={onNewProposal}
+                className="h-8"
               >
-                <Edit className="w-4 h-4" />
+                <FileText className="w-4 h-4 mr-2" />
+                Nueva Propuesta
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={onDelete}
-              >
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onEdit}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            {/* Fila 2: Montos optimizados */}
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="text-sm font-semibold">
+                  {formatSingleCurrency(amountARS, amountUSD, originalCurrency)}
+                </p>
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Pagado</p>
+                <p className="text-sm font-semibold text-green-600">
+                  {formatSingleCurrency(pagoARS, pagoUSD, 'ARS')}
+                </p>
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Saldo</p>
+                <p className="text-sm font-semibold text-orange-600">
+                  {formatSingleCurrency(saldoARS, saldoUSD, 'ARS')}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-3 gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Monto Total</span>
-            </div>
-            <p className="text-lg font-semibold">
-              {formatSingleCurrency(amountARS, amountUSD, originalCurrency)}
-            </p>
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Pago a la Fecha</span>
-            </div>
-            <p className="text-lg font-semibold text-green-600">
-              {formatSingleCurrency(pagoARS, pagoUSD, 'ARS')}
-            </p>
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Saldo</span>
-            </div>
-            <p className="text-lg font-semibold text-orange-600">
-              {formatSingleCurrency(saldoARS, saldoUSD, 'ARS')}
-            </p>
-          </div>
-        </div>
-        
-        {subcontract.contact?.email && (
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              Contacto: {subcontract.contact.email}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
