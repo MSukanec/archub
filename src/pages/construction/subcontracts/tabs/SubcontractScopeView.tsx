@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
+import { TableTopBar } from '@/components/ui-custom/TableTopBar';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -15,6 +16,7 @@ interface SubcontractScopeViewProps {
 
 export function SubcontractScopeView({ subcontract, project }: SubcontractScopeViewProps) {
   const { openModal } = useGlobalModalStore();
+  const [groupBy, setGroupBy] = useState<string>('none');
   
   // Obtener tareas del subcontrato
   const { subcontractTasks, isLoading, deleteSubcontractTask } = useSubcontractTasks(subcontract?.id || '');
@@ -44,6 +46,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'task_name',
       label: 'Tarea',
+      width: 'flex-1',
       render: (item: any) => (
         <div>
           <p className="font-medium text-xs">
@@ -58,6 +61,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'amount',
       label: 'Cantidad',
+      width: 'w-[10%]',
       render: (item: any) => (
         <span className="text-xs font-medium">
           {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
@@ -67,6 +71,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'unit',
       label: 'Unidad',
+      width: 'w-[10%]',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
           {item.unit || item.unit_symbol || 'Sin unidad'}
@@ -76,6 +81,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'notes',
       label: 'Notas',
+      width: 'w-[10%]',
       render: (item: any) => (
         <span className="text-xs text-muted-foreground">
           {item.notes || '—'}
@@ -85,6 +91,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'actions',
       label: 'Acciones',
+      width: 'w-[10%]',
       render: (item: any) => (
         <div className="flex items-center gap-1">
           <Button
@@ -108,8 +115,28 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     }
   ];
 
+  // Grupos disponibles para el TableTopBar
+  const groupOptions = [
+    { value: 'none', label: 'Sin Agrupar' },
+    { value: 'phase', label: 'Por Fases' },
+    { value: 'item', label: 'Por Rubros' },
+    { value: 'task', label: 'Por Tareas' },
+    { value: 'phase_item', label: 'Por Fases y Rubros' },
+    { value: 'item_task', label: 'Por Rubros y Tareas' }
+  ];
+
   return (
     <div className="space-y-6">
+      {/* TableTopBar con opciones de agrupación */}
+      <TableTopBar 
+        tabs={groupOptions.map(opt => opt.label)}
+        activeTab={groupOptions.find(opt => opt.value === groupBy)?.label || 'Sin Agrupar'}
+        onTabChange={(label) => {
+          const option = groupOptions.find(opt => opt.label === label);
+          if (option) setGroupBy(option.value);
+        }}
+      />
+
       {/* Tabla de tareas */}
       {subcontractTasks.length === 0 ? (
         <EmptyState
