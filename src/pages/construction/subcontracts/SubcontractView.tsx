@@ -70,9 +70,9 @@ export default function SubcontractView() {
       label: "Nueva Oferta",
       icon: Plus,
       onClick: () => {
-        openModal('subcontract-bid-form', {
-          subcontract_id: id,
-          mode: 'create'
+        openModal('subcontract-bid', {
+          subcontractId: id,
+          isEditing: false
         });
       }
     } : undefined

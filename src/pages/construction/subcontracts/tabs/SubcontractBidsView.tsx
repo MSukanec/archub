@@ -19,17 +19,17 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const subcontractBids = []; // Placeholder hasta implementar el hook
 
   const handleAddBid = () => {
-    openModal('subcontract-bid-form', {
-      subcontract_id: subcontract.id,
-      mode: 'create'
+    openModal('subcontract-bid', {
+      subcontractId: subcontract.id,
+      isEditing: false
     });
   };
 
   const handleEditBid = (bid: any) => {
-    openModal('subcontract-bid-form', {
-      subcontract_id: subcontract.id,
-      bid_id: bid.id,
-      mode: 'edit',
+    openModal('subcontract-bid', {
+      subcontractId: subcontract.id,
+      bidId: bid.id,
+      isEditing: true,
       initialData: bid
     });
   };
