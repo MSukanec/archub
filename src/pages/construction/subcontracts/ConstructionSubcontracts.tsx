@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Package, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Users } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
@@ -9,6 +9,7 @@ import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -70,6 +71,66 @@ export default function ConstructionSubcontracts() {
   };
 
   const { data: winnerContacts = {} } = useWinnerContacts(subcontracts);
+
+  // Cálculos para KPIs de subcontratos
+  const kpiData = useMemo(() => {
+    if (subcontracts.length === 0) return null;
+
+    const totalSubcontracts = subcontracts.length;
+    const awardedSubcontracts = subcontracts.filter(s => s.status === 'awarded');
+    const pendingSubcontracts = subcontracts.filter(s => s.status === 'pending');
+    const inProgressSubcontracts = subcontracts.filter(s => s.status === 'in_progress');
+
+    // Calcular valores totales
+    const totalAwardedValueARS = awardedSubcontracts.reduce((sum, s) => sum + (s.amount_ars || 0), 0);
+    const totalAwardedValueUSD = awardedSubcontracts.reduce((sum, s) => sum + (s.amount_usd || 0), 0);
+    
+    // Valor total según vista de moneda
+    const getTotalValue = () => {
+      if (currencyView === 'discriminado') {
+        return { ars: totalAwardedValueARS, usd: totalAwardedValueUSD };
+      } else if (currencyView === 'pesificado') {
+        const exchangeRate = subcontracts[0]?.exchange_rate || 1;
+        return { 
+          ars: totalAwardedValueARS + (totalAwardedValueUSD * exchangeRate), 
+          usd: 0 
+        };
+      } else if (currencyView === 'dolarizado') {
+        const exchangeRate = subcontracts[0]?.exchange_rate || 1;
+        return { 
+          ars: 0, 
+          usd: totalAwardedValueUSD + (totalAwardedValueARS / exchangeRate) 
+        };
+      }
+      return { ars: totalAwardedValueARS, usd: totalAwardedValueUSD };
+    };
+
+    const totalValues = getTotalValue();
+
+    // Calcular promedio de adjudicación
+    const averageAwardValue = awardedSubcontracts.length > 0 
+      ? totalAwardedValueARS / awardedSubcontracts.length 
+      : 0;
+
+    // Distribución por estado
+    const statusDistribution = {
+      awarded: awardedSubcontracts.length,
+      pending: pendingSubcontracts.length,
+      inProgress: inProgressSubcontracts.length,
+      other: totalSubcontracts - awardedSubcontracts.length - pendingSubcontracts.length - inProgressSubcontracts.length
+    };
+
+    return {
+      totalSubcontracts,
+      awardedCount: awardedSubcontracts.length,
+      pendingCount: pendingSubcontracts.length,
+      inProgressCount: inProgressSubcontracts.length,
+      totalValues,
+      averageAwardValue,
+      statusDistribution,
+      awardedPercentage: (awardedSubcontracts.length / totalSubcontracts) * 100
+    };
+  }, [subcontracts, currencyView]);
 
   // Función para convertir montos según la vista seleccionada
   const convertAmount = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
@@ -407,7 +468,179 @@ export default function ConstructionSubcontracts() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div>
+      <div className="space-y-6">
+        {/* KPI Cards */}
+        {kpiData && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Subcontratos */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Total Subcontratos</p>
+                    <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  
+                  {/* Mini Chart - Distribución por estado */}
+                  <div className="flex items-end gap-1 h-8">
+                    {Object.entries(kpiData.statusDistribution).map(([status, count], i) => (
+                      <div
+                        key={status}
+                        className="rounded-sm flex-1"
+                        style={{
+                          backgroundColor: status === 'awarded' ? 'var(--accent)' : 
+                                         status === 'pending' ? 'hsl(var(--muted-foreground))' : 
+                                         'hsl(var(--border))',
+                          height: `${Math.max(20, (count / kpiData.totalSubcontracts) * 100)}%`,
+                          opacity: count > 0 ? 1 : 0.3
+                        }}
+                      />
+                    ))}
+                  </div>
+                  
+                  <div>
+                    <p className="text-2xl font-bold">{kpiData.totalSubcontracts}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.awardedCount} adjudicados, {kpiData.pendingCount} pendientes
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Valor Total Adjudicado */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Valor Adjudicado</p>
+                    <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  
+                  {/* Progress bar de adjudicación */}
+                  <div className="h-8 flex items-center">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full"
+                        style={{ 
+                          backgroundColor: 'var(--accent)',
+                          width: `${Math.min(100, kpiData.awardedPercentage)}%`
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
+                      {currencyView === 'discriminado' ? (
+                        kpiData.totalValues.ars > 0 && kpiData.totalValues.usd > 0 ? (
+                          <span>
+                            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(kpiData.totalValues.ars)}
+                            <br />
+                            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(kpiData.totalValues.usd)}
+                          </span>
+                        ) : kpiData.totalValues.ars > 0 ? (
+                          new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(kpiData.totalValues.ars)
+                        ) : (
+                          new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(kpiData.totalValues.usd)
+                        )
+                      ) : currencyView === 'pesificado' ? (
+                        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(kpiData.totalValues.ars)
+                      ) : (
+                        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(kpiData.totalValues.usd)
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.awardedPercentage.toFixed(1)}% del total adjudicado
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Promedio por Subcontrato */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Promedio Adjudicado</p>
+                    <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  
+                  {/* Mini chart de tendencia */}
+                  <div className="h-8 relative">
+                    <svg className="w-full h-full" viewBox="0 0 100 32">
+                      <polyline 
+                        points="0,20 25,15 50,18 75,12 100,10" 
+                        fill="none" 
+                        stroke="var(--accent)" 
+                        strokeWidth="2"
+                        opacity="0.7"
+                      />
+                      <circle cx="100" cy="10" r="3" fill="var(--accent)" />
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold">
+                      {new Intl.NumberFormat('es-AR', { 
+                        style: 'currency', 
+                        currency: 'ARS', 
+                        minimumFractionDigits: 0 
+                      }).format(kpiData.averageAwardValue)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Por subcontrato adjudicado
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estado de Adjudicación */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Estado Global</p>
+                    <Award className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  
+                  {/* Donut chart simple */}
+                  <div className="h-8 flex items-center justify-center">
+                    <div className="relative w-8 h-8">
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
+                        <circle
+                          cx="16" cy="16" r="12"
+                          fill="transparent"
+                          stroke="hsl(var(--border))"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx="16" cy="16" r="12"
+                          fill="transparent"
+                          stroke="var(--accent)"
+                          strokeWidth="4"
+                          strokeDasharray={`${(kpiData.awardedPercentage / 100) * 75.4} 75.4`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xl font-bold">{kpiData.awardedPercentage.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground">
+                      {kpiData.pendingCount > 0 ? `${kpiData.pendingCount} pendientes` : 'Todos adjudicados'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Tabla de Subcontratos */}
         {filteredSubcontracts.length === 0 ? (
           <EmptyState
             icon={<Package className="w-12 h-12 text-muted-foreground" />}
