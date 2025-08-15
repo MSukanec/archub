@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ interface SubcontractScopeViewProps {
 
 export function SubcontractScopeView({ subcontract, project }: SubcontractScopeViewProps) {
   const { openModal } = useGlobalModalStore();
-  const [groupBy, setGroupBy] = useState<string>('none');
+  const [groupBy, setGroupBy] = useState<string>('rubros');
   
   // Obtener tareas del subcontrato
   const { subcontractTasks, isLoading, deleteSubcontractTask } = useSubcontractTasks(subcontract?.id || '');
@@ -123,12 +123,36 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
   // Grupos disponibles para el TableTopBar
   const groupOptions = [
     { value: 'none', label: 'Sin Agrupar' },
-    { value: 'phase', label: 'Por Fases' },
-    { value: 'item', label: 'Por Rubros' },
-    { value: 'task', label: 'Por Tareas' },
-    { value: 'phase_item', label: 'Por Fases y Rubros' },
-    { value: 'item_task', label: 'Por Rubros y Tareas' }
+    { value: 'phases', label: 'Por Fases' },
+    { value: 'rubros', label: 'Por Rubros' },
+    { value: 'tasks', label: 'Por Tareas' },
+    { value: 'rubros-phases', label: 'Por Fases y Rubros' },
+    { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
   ];
+
+  // Procesar datos para agrupación (igual que en ConstructionTasks)
+  const processedTasks = useMemo(() => {
+    return subcontractTasks.map((task: any) => {
+      let groupKey = '';
+      
+      if (groupBy === 'phases') {
+        groupKey = task.phase_name || 'Sin Fase';
+      } else if (groupBy === 'rubros') {
+        groupKey = task.rubro_name || 'Sin Rubro';
+      } else if (groupBy === 'tasks') {
+        groupKey = task.task_name || 'Sin Tarea';
+      } else if (groupBy === 'rubros-phases') {
+        groupKey = `${task.rubro_name || 'Sin Rubro'} - ${task.phase_name || 'Sin Fase'}`;
+      } else if (groupBy === 'phases-rubros') {
+        groupKey = `${task.phase_name || 'Sin Fase'} - ${task.rubro_name || 'Sin Rubro'}`;
+      }
+      
+      return {
+        ...task,
+        groupKey
+      };
+    });
+  }, [subcontractTasks, groupBy]);
 
   return (
     <div className="space-y-6">
@@ -147,19 +171,27 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
         />
       ) : (
         <Table
-          data={subcontractTasks}
+          data={processedTasks}
           columns={columns}
-          searchKey="task_name"
-          searchPlaceholder="Buscar tareas..."
-          groupBy={groupBy !== 'none' ? groupBy : undefined}
+          groupBy={groupBy === 'none' ? undefined : 'groupKey'}
           topBar={{
             tabs: groupOptions.map(opt => opt.label),
-            activeTab: groupOptions.find(opt => opt.value === groupBy)?.label || 'Sin Agrupar',
+            activeTab: groupOptions.find(opt => opt.value === groupBy)?.label || 'Por Rubros',
             onTabChange: (label) => {
               const option = groupOptions.find(opt => opt.label === label);
               if (option) setGroupBy(option.value);
-            }
+            },
+            showSearch: true,
+            searchValue: '',
+            onSearchChange: () => {}
           }}
+          renderGroupHeader={groupBy === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+            <>
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+              </div>
+            </>
+          )}
         />
       )}
     </div>
