@@ -16,10 +16,6 @@ TABLA SUBCONTRACTS:
     "data_type": "uuid"
   },
   {
-    "column_name": "contact_id",
-    "data_type": "uuid"
-  },
-  {
     "column_name": "code",
     "data_type": "text"
   },
