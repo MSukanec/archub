@@ -940,7 +940,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/subcontract-bids/:bidId", async (req, res) => {
     try {
       const { bidId } = req.params;
+      
+      console.log("Attempting to delete bid:", bidId);
 
+      // Primero, obtener información sobre el subcontrato relacionado
+      const { data: bid, error: bidError } = await supabase
+        .from('subcontract_bids')
+        .select('subcontract_id')
+        .eq('id', bidId)
+        .single();
+
+      if (bidError || !bid) {
+        console.error("Error finding bid:", bidError);
+        return res.status(404).json({ error: "Bid not found" });
+      }
+
+      // Verificar si este bid es el ganador del subcontrato
+      const { data: subcontract, error: subcontractError } = await supabase
+        .from('subcontracts')
+        .select('winner_bid_id')
+        .eq('id', bid.subcontract_id)
+        .single();
+
+      if (subcontractError) {
+        console.error("Error finding subcontract:", subcontractError);
+        return res.status(500).json({ error: "Failed to check subcontract" });
+      }
+
+      // Si es la oferta ganadora, limpiar la referencia primero
+      if (subcontract.winner_bid_id === bidId) {
+        console.log("Cleaning winner reference for bid:", bidId);
+        const { error: updateError } = await supabase
+          .from('subcontracts')
+          .update({ 
+            winner_bid_id: null,
+            status: 'active'
+          })
+          .eq('id', bid.subcontract_id);
+
+        if (updateError) {
+          console.error("Error updating subcontract:", updateError);
+          return res.status(500).json({ error: "Failed to update subcontract" });
+        }
+      }
+
+      // Ahora eliminar la oferta
       const { error } = await supabase
         .from('subcontract_bids')
         .delete()
@@ -951,6 +995,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to delete subcontract bid" });
       }
 
+      console.log("Successfully deleted bid:", bidId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting subcontract bid:", error);
