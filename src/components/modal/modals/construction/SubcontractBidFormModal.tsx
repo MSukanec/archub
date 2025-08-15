@@ -99,11 +99,7 @@ export function SubcontractBidFormModal({
 
   // Inicializar tareas seleccionadas cuando se cargan las tareas
   useEffect(() => {
-    console.log('useEffect triggered:', { 
-      tasksLength: subcontractTasks?.length, 
-      selectedTasksKeys: Object.keys(selectedTasks).length,
-      tasks: subcontractTasks
-    });
+
     
     if (subcontractTasks && subcontractTasks.length > 0 && Object.keys(selectedTasks).length === 0) {
       const initialSelected: {[key: string]: boolean} = {};
@@ -114,7 +110,7 @@ export function SubcontractBidFormModal({
         initialPrices[task.id] = 0; // Precio inicial 0
       });
       
-      console.log('Setting initial state:', { initialSelected, initialPrices });
+
       setSelectedTasks(initialSelected);
       setTaskPrices(initialPrices);
     }
@@ -395,10 +391,7 @@ export function SubcontractBidFormModal({
   // Panel de tareas (subform)
   const tasksSubform = (
     <div className="space-y-4">
-      {/* Debug temporal */}
-      <div className="text-xs bg-muted p-2 rounded">
-        Debug: Tareas={subcontractTasks?.length || 0}, Selected={Object.keys(selectedTasks).length}, Prices={Object.keys(taskPrices).length}, Panel={currentPanel}, Subform={currentSubform}
-      </div>
+
       
       {(!subcontractTasks || subcontractTasks.length === 0) ? (
         <div className="text-center py-8 text-muted-foreground">
@@ -406,32 +399,18 @@ export function SubcontractBidFormModal({
           <p className="text-sm mt-1">Ve a la pestaña "Alcance" para agregar tareas.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* Resumen total */}
-          <div className="bg-background border rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Total de la Oferta:</span>
-              <span className="text-lg font-bold">
-                ${calculateTotalAmount().toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Calculado automáticamente según las tareas seleccionadas
-            </p>
-          </div>
-
-          {/* Header de la tabla */}
-          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground border-b pb-2">
-            <div className="col-span-1">Check</div>
-            <div className="col-span-4">Tarea</div>
-            <div className="col-span-1">Unidad</div>
-            <div className="col-span-2">Cantidad</div>
+        <div className="space-y-3">
+          {/* Header de la tabla - más compacto */}
+          <div className="grid grid-cols-12 gap-1 text-xs font-medium text-muted-foreground border-b pb-2">
+            <div className="col-span-1">✓</div>
+            <div className="col-span-5">Tarea</div>
+            <div className="col-span-1">Cant.</div>
             <div className="col-span-2">Precio Unit.</div>
-            <div className="col-span-2">Importe</div>
+            <div className="col-span-3">Importe</div>
           </div>
           
-          {/* Lista de tareas */}
-          <div className="space-y-1 max-h-96 overflow-y-auto">
+          {/* Lista de tareas - más compacta */}
+          <div className="space-y-1 max-h-80 overflow-y-auto">
             {subcontractTasks.map((task: any) => {
               const quantity = task.amount || 0;
               const unitPrice = taskPrices[task.id] || 0;
@@ -441,41 +420,30 @@ export function SubcontractBidFormModal({
               return (
                 <div 
                   key={task.id} 
-                  className="grid grid-cols-12 gap-2 items-center py-2 border-b border-muted/20"
+                  className="grid grid-cols-12 gap-1 items-start py-1.5 border-b border-muted/20"
                 >
                   {/* Checkbox */}
-                  <div className="col-span-1">
+                  <div className="col-span-1 pt-1">
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={() => toggleTaskSelection(task.id)}
+                      className="h-4 w-4"
                     />
                   </div>
                   
-                  {/* Tarea */}
-                  <div className="col-span-4">
+                  {/* Tarea - más espacio, texto más pequeño */}
+                  <div className="col-span-5">
                     <div className={isSelected ? 'text-foreground' : 'text-muted-foreground'}>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs font-medium leading-tight">
                         {task.task_name || 'Sin nombre'}
                       </p>
-                      {task.task_description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {task.task_description}
-                        </p>
-                      )}
                     </div>
                   </div>
                   
-                  {/* Unidad */}
-                  <div className="col-span-1">
-                    <span className={`text-xs ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {task.unit || task.unit_symbol || '—'}
-                    </span>
-                  </div>
-                  
                   {/* Cantidad */}
-                  <div className="col-span-2">
-                    <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {quantity.toLocaleString('es-AR')}
+                  <div className="col-span-1 pt-1">
+                    <span className={`text-xs ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {quantity}
                     </span>
                   </div>
                   
@@ -488,13 +456,13 @@ export function SubcontractBidFormModal({
                       value={unitPrice || ''}
                       onChange={(e) => updateTaskPrice(task.id, parseFloat(e.target.value) || 0)}
                       disabled={!isSelected}
-                      className="h-8 text-xs"
+                      className="h-7 text-xs"
                     />
                   </div>
                   
                   {/* Importe */}
-                  <div className="col-span-2">
-                    <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <div className="col-span-3 pt-1">
+                    <span className={`text-xs font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                       ${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
