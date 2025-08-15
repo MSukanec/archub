@@ -75,7 +75,7 @@ export default function ConstructionSubcontracts() {
     showCurrencySelector: true,
     currencyView: currencyView,
     onCurrencyViewChange: setCurrencyView,
-    action: {
+    actionButton: {
       icon: Plus,
       label: "Nuevo Subcontrato",
       onClick: handleCreateSubcontract
