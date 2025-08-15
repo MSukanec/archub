@@ -174,7 +174,7 @@ export default function ConstructionSubcontracts() {
   const columns = [
     {
       key: 'title',
-      label: 'Título',
+      label: 'Subcontrato',
       render: (subcontract: any) => (
         <div>
           <div className="font-medium">{subcontract.title}</div>
@@ -186,8 +186,24 @@ export default function ConstructionSubcontracts() {
     },
     {
       key: 'contact',
-      label: 'Proveedor',
+      label: 'Subcontratista',
       render: (subcontract: any) => {
+        // Buscar la oferta ganadora si el subcontrato está adjudicado
+        if (subcontract.status === 'awarded' && subcontract.subcontract_bids) {
+          const winningBid = subcontract.subcontract_bids.find((bid: any) => bid.is_winner);
+          if (winningBid && winningBid.contact) {
+            const contactName = winningBid.contact.full_name || 
+              `${winningBid.contact.first_name || ''} ${winningBid.contact.last_name || ''}`.trim();
+            return (
+              <div>
+                <div className="font-medium">{contactName}</div>
+                {winningBid.contact.email && <div className="text-xs text-muted-foreground">{winningBid.contact.email}</div>}
+              </div>
+            );
+          }
+        }
+        
+        // Mostrar contacto original si no hay oferta ganadora
         const contact = subcontract.contact;
         if (!contact) return '-';
         
@@ -200,17 +216,6 @@ export default function ConstructionSubcontracts() {
             {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
           </div>
         );
-      }
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      render: (subcontract: any) => {
-        const amountARS = subcontract.amount_total || 0;
-        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
-        // Determinar la moneda original del subcontrato
-        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
-        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
     },
     {
@@ -240,7 +245,7 @@ export default function ConstructionSubcontracts() {
             break;
           case 'awarded':
             badgeStyle = { 
-              backgroundColor: '#22c55e', // Verde
+              backgroundColor: 'var(--accent)', // Verde accent
               color: 'white',
               border: 'none'
             };
@@ -279,11 +284,42 @@ export default function ConstructionSubcontracts() {
       }
     },
     {
-      key: 'due_date',
-      label: 'Fecha Entrega',
+      key: 'amount',
+      label: 'Monto Total',
       render: (subcontract: any) => {
-        if (!subcontract.due_date) return '-';
-        return format(new Date(subcontract.due_date), 'dd/MM/yyyy', { locale: es });
+        const amountARS = subcontract.amount_total || 0;
+        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
+        // Determinar la moneda original del subcontrato
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
+      }
+    },
+    {
+      key: 'paid_amount',
+      label: 'A la Fecha',
+      render: (subcontract: any) => {
+        const analysis = subcontract.analysis;
+        if (!analysis) return '-';
+        
+        const paidARS = analysis.pagoALaFecha || 0;
+        const paidUSD = analysis.pagoALaFechaUSD || 0;
+        // Usar la misma moneda original que el monto total
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(paidARS, paidUSD, originalCurrency);
+      }
+    },
+    {
+      key: 'balance',
+      label: 'Saldo',
+      render: (subcontract: any) => {
+        const analysis = subcontract.analysis;
+        if (!analysis) return '-';
+        
+        const balanceARS = analysis.saldo || 0;
+        const balanceUSD = analysis.saldoUSD || 0;
+        // Usar la misma moneda original que el monto total
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(balanceARS, balanceUSD, originalCurrency);
       }
     },
     {
@@ -311,7 +347,7 @@ export default function ConstructionSubcontracts() {
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(subcontract.id)}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
