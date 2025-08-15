@@ -74,35 +74,33 @@ export default function ConstructionSubcontracts() {
   const headerProps = {
     icon: Package,
     title: "Subcontratos",
-    searchConfig: {
-      value: searchQuery,
-      placeholder: "Buscar subcontratos...",
-      onChange: setSearchQuery
-    },
-    filterConfig: {
-      isActive: currencyView !== 'discriminado',
-      content: (
-        <div className="space-y-3 p-2 min-w-[200px]">
-          <div>
-            <Label className="text-xs font-medium mb-1 block">Moneda</Label>
-            <Select 
-              value={currencyView} 
-              onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
-            >
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="Seleccionar moneda" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="discriminado">Todo</SelectItem>
-                <SelectItem value="pesificado">Peso Argentino</SelectItem>
-                <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    showHeaderSearch: true,
+    headerSearchValue: searchQuery,
+    onHeaderSearchChange: setSearchQuery,
+    showHeaderFilter: true,
+    renderHeaderFilterContent: () => (
+      <div className="space-y-3 p-2 min-w-[200px]">
+        <div>
+          <Label className="text-xs font-medium mb-1 block">Moneda</Label>
+          <Select 
+            value={currencyView} 
+            onValueChange={(value: string) => setCurrencyView(value as 'discriminado' | 'pesificado' | 'dolarizado')}
+          >
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Seleccionar moneda" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="discriminado">Todo</SelectItem>
+              <SelectItem value="pesificado">Peso Argentino</SelectItem>
+              <SelectItem value="dolarizado">Dólar Estadounidense</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      ),
-      onClear: () => setCurrencyView('discriminado')
-    },
+      </div>
+    ),
+    isHeaderFilterActive: currencyView !== 'discriminado',
+    showHeaderClearFilters: currencyView !== 'discriminado',
+    onHeaderClearFilters: () => setCurrencyView('discriminado'),
     actionButton: {
       label: 'Crear Subcontrato',
       icon: Plus,
