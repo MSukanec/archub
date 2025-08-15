@@ -39,6 +39,52 @@ export default function ConstructionSubcontracts() {
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
 
+  // Función para convertir montos según la vista seleccionada
+  const convertAmount = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
+    if (currencyView === 'discriminado') {
+      return originalCurrency === 'USD' ? amountUSD : amountARS;
+    } else if (currencyView === 'pesificado') {
+      return originalCurrency === 'USD' ? amountUSD * (subcontracts[0]?.exchange_rate || 1) : amountARS;
+    } else if (currencyView === 'dolarizado') {
+      return originalCurrency === 'ARS' ? amountARS / (subcontracts[0]?.exchange_rate || 1) : amountUSD;
+    }
+    return amountARS;
+  };
+
+  // Función para formatear montos con el símbolo correcto
+  const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
+    const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
+    
+    if (currencyView === 'discriminado') {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: originalCurrency === 'USD' ? 'USD' : 'ARS',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(convertedAmount);
+    } else if (currencyView === 'pesificado') {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(convertedAmount);
+    } else if (currencyView === 'dolarizado') {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(convertedAmount);
+    }
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(convertedAmount);
+  };
+
 
 
   // Combinar datos de subcontratos con análisis de pagos
@@ -160,9 +206,11 @@ export default function ConstructionSubcontracts() {
       key: 'amount',
       label: 'Monto',
       render: (subcontract: any) => {
-        const amount = subcontract.amount_total || 0;
-        const exchangeRate = subcontract.exchange_rate || 1;
-        return formatCurrency(amount, 'ARS', exchangeRate);
+        const amountARS = subcontract.amount_total || 0;
+        const amountUSD = amountARS / (subcontract.exchange_rate || 1);
+        // Determinar la moneda original del subcontrato
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
+        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
     },
     {

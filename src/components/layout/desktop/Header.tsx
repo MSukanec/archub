@@ -368,50 +368,6 @@ export function Header({
 
         {/* Right: Header Action Buttons + Main Action Buttons */}
         <div className="flex items-center gap-1">
-          {/* Currency Selector */}
-          {showCurrencySelector && onCurrencyViewChange && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  title="Vista de moneda"
-                >
-                  <DollarSign className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40" align="end">
-                <div className="space-y-1">
-                  <Button
-                    variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="w-full justify-start h-8"
-                    onClick={() => onCurrencyViewChange('discriminado')}
-                  >
-                    Discriminado
-                  </Button>
-                  <Button
-                    variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="w-full justify-start h-8"
-                    onClick={() => onCurrencyViewChange('pesificado')}
-                  >
-                    Pesificado
-                  </Button>
-                  <Button
-                    variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="w-full justify-start h-8"
-                    onClick={() => onCurrencyViewChange('dolarizado')}
-                  >
-                    Dolarizado
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
-
           {/* Header Search Button (expandible) */}
           {showHeaderSearch && (
             <div 
@@ -469,6 +425,50 @@ export function Header({
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Currency Selector */}
+          {showCurrencySelector && onCurrencyViewChange && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  title="Vista de moneda"
+                >
+                  <DollarSign className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40" align="end">
+                <div className="space-y-1">
+                  <Button
+                    variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start h-8"
+                    onClick={() => onCurrencyViewChange('discriminado')}
+                  >
+                    Discriminado
+                  </Button>
+                  <Button
+                    variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start h-8"
+                    onClick={() => onCurrencyViewChange('pesificado')}
+                  >
+                    Pesificado
+                  </Button>
+                  <Button
+                    variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start h-8"
+                    onClick={() => onCurrencyViewChange('dolarizado')}
+                  >
+                    Dolarizado
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
 
           {/* Header Filter Button */}
