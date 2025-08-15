@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { DollarSign, Wallet } from 'lucide-react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -107,47 +107,47 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     return formatCurrency(convertedAmount, '$');
   };
 
-  // Columnas para la tabla de pagos
+  // Calcular el total acumulado hasta cada pago
+  const paymentsWithProgress = useMemo(() => {
+    if (subcontractPayments.length === 0 || !subcontract.amount_total) return [];
+    
+    let accumulatedAmount = 0;
+    return subcontractPayments.map((payment, index) => {
+      accumulatedAmount += payment.amount || 0;
+      const progressPercentage = (accumulatedAmount / subcontract.amount_total) * 100;
+      
+      return {
+        ...payment,
+        accumulatedAmount,
+        progressPercentage: Math.min(progressPercentage, 100) // No puede ser más del 100%
+      };
+    });
+  }, [subcontractPayments, subcontract.amount_total]);
+
+  // Columnas para la tabla de pagos con el orden correcto
   const paymentsColumns = [
-    {
-      key: 'subcontract_title',
-      label: 'Subcontrato',
-      width: '20%',
-      render: (payment: any) => (
-        <div className="font-medium">{payment.subcontract_title}</div>
-      )
-    },
     {
       key: 'movement_date',
       label: 'Fecha',
-      width: '12%',
+      width: '15%',
       render: (payment: any) => {
         return format(new Date(payment.movement_date), 'dd/MM/yyyy', { locale: es });
       }
     },
     {
-      key: 'contact_name',
-      label: 'Proveedor',
-      width: '16%',
+      key: 'currency',
+      label: 'Moneda',
+      width: '15%',
       render: (payment: any) => (
-        <div className="font-medium">{payment.contact_name}</div>
+        <Badge variant="outline">
+          {payment.currency_symbol} {payment.currency_name}
+        </Badge>
       )
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      width: '12%',
-      render: (payment: any) => {
-        const amountARS = payment.amount;
-        const amountUSD = payment.amount / payment.exchange_rate;
-        const originalCurrency = payment.currency_code === 'USD' ? 'USD' : 'ARS';
-        return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
-      }
     },
     {
       key: 'wallet_name',
       label: 'Billetera',
-      width: '12%',
+      width: '15%',
       render: (payment: any) => (
         <div className="flex items-center gap-2">
           <Wallet className="w-4 h-4 text-muted-foreground" />
@@ -156,22 +156,48 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       )
     },
     {
-      key: 'currency',
-      label: 'Moneda',
-      width: '10%',
-      render: (payment: any) => (
-        <Badge variant="outline">
-          {payment.currency_symbol} {payment.currency_name}
-        </Badge>
-      )
+      key: 'amount',
+      label: 'Monto',
+      width: '15%',
+      render: (payment: any) => {
+        const amountARS = payment.amount;
+        const amountUSD = payment.amount / payment.exchange_rate;
+        const originalCurrency = payment.currency_code === 'USD' ? 'USD' : 'ARS';
+        return (
+          <div className="font-medium">
+            {formatSingleCurrency(amountARS, amountUSD, originalCurrency)}
+          </div>
+        );
+      }
     },
     {
       key: 'exchange_rate',
-      label: 'T.C.',
-      width: '8%',
+      label: 'Cotización',
+      width: '10%',
       render: (payment: any) => (
         <div className="text-sm text-muted-foreground">
-          {payment.exchange_rate.toFixed(2)}
+          {payment.exchange_rate ? payment.exchange_rate.toFixed(2) : '1.00'}
+        </div>
+      )
+    },
+    {
+      key: 'progress',
+      label: 'Avance Total',
+      width: '20%',
+      render: (payment: any) => (
+        <div className="space-y-1">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="h-2 rounded-full transition-all duration-300"
+              style={{ 
+                backgroundColor: 'var(--accent)',
+                width: `${payment.progressPercentage}%`
+              }}
+            />
+          </div>
+          <div className="text-xs text-center text-muted-foreground">
+            {payment.progressPercentage.toFixed(1)}%
+          </div>
         </div>
       )
     }
@@ -199,7 +225,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       {/* Tabla de pagos del subcontrato */}
       <Table
         columns={paymentsColumns}
-        data={subcontractPayments}
+        data={paymentsWithProgress}
         isLoading={isLoadingPayments}
         className="bg-card"
       />
