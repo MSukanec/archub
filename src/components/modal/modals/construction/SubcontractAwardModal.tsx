@@ -104,7 +104,7 @@ export function SubcontractAwardModal({
       {/* Resumen de adjudicación */}
       <div className="bg-muted/30 border rounded-lg p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5 text-yellow-600" />
+          <Trophy className="h-5 w-5" style={{ color: 'var(--accent)' }} />
           <h3 className="font-semibold">Resumen de Adjudicación</h3>
         </div>
         
@@ -125,7 +125,7 @@ export function SubcontractAwardModal({
             <DollarSign className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
               <p className="text-sm font-medium">Monto total</p>
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
                 {formatCurrency(winningBid?.amount, winningBid?.currencies?.code)}
               </p>
               <div className="flex items-center gap-2 mt-1">
@@ -192,9 +192,12 @@ export function SubcontractAwardModal({
       </div>
 
       {/* Advertencia */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="font-medium text-yellow-800 mb-2">⚠️ Importante</h4>
-        <p className="text-sm text-yellow-700">
+      <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Trophy className="h-4 w-4 text-destructive flex-shrink-0" />
+          <h4 className="font-medium text-destructive">Importante</h4>
+        </div>
+        <p className="text-sm text-muted-foreground">
           Al confirmar la adjudicación, el subcontrato cambiará su estado a "Adjudicado" y 
           no podrá ser modificado. Esta acción es irreversible.
         </p>
