@@ -121,12 +121,12 @@ export default function ConstructionSubcontracts() {
 
   const [, navigate] = useLocation();
 
-  // Definir columnas con ancho uniforme
+  // Definir columnas con ancho uniforme (6 columnas)
   const columns = [
     {
       key: 'title',
       label: 'Título',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => (
         <div className="font-medium">{subcontract.title}</div>
       )
@@ -134,7 +134,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'code',
       label: 'Código',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => (
         <span className="text-muted-foreground">{subcontract.code || 'Sin código'}</span>
       )
@@ -142,7 +142,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'date',
       label: 'Fecha',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => (
         <span>{format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}</span>
       )
@@ -150,13 +150,13 @@ export default function ConstructionSubcontracts() {
     {
       key: 'status',
       label: 'Estado',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => getStatusBadge(subcontract.status)
     },
     {
       key: 'amount_total',
       label: 'Monto Total',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => {
         const amount = subcontract.amount_total || 0;
         return (
@@ -169,7 +169,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '20%',
+      width: '16.66%',
       render: (subcontract: any) => (
         <div className="flex items-center gap-1">
           <Button
