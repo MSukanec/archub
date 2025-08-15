@@ -8,73 +8,23 @@ export function useSubcontractTasks(subcontractId: string) {
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
 
-  // Query para obtener las tareas del subcontrato
+  // Query para obtener las tareas del subcontrato usando el endpoint del backend
   const { data: subcontractTasks = [], isLoading, error } = useQuery({
     queryKey: ['subcontract-tasks', subcontractId],
     queryFn: async () => {
-      if (!subcontractId || !userData?.organization?.id) {
+      if (!subcontractId) {
         return [];
       }
 
-      // Obtener las tareas directamente de SUBCONTRACT_TASKS
-      const { data, error } = await supabase
-        .from('subcontract_tasks')
-        .select(`
-          id,
-          subcontract_id,
-          task_id,
-          unit,
-          amount,
-          notes,
-          created_at
-        `)
-        .eq('subcontract_id', subcontractId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching subcontract tasks:', error);
-        throw error;
+      const response = await fetch(`/api/subcontract-tasks/${subcontractId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch subcontract tasks');
       }
-
-      if (!data || data.length === 0) {
-        return [];
-      }
-
-      // Obtener información de las tareas usando construction_tasks_view
-      const taskIds = data.map(item => item.task_id);
       
-      const { data: constructionTasks, error: taskError } = await supabase
-        .from('construction_tasks_view')
-        .select('*')
-        .in('id', taskIds);
-
-      if (taskError) {
-        console.error('Error fetching construction tasks:', taskError);
-      }
-
-      // Combinar los datos
-      const combinedData = data.map(subcontractTask => {
-        const constructionTask = constructionTasks?.find(task => task.id === subcontractTask.task_id);
-        
-        return {
-          ...subcontractTask,
-          task_name: constructionTask?.display_name || constructionTask?.name_rendered || constructionTask?.name || 'Sin nombre',
-          task_description: constructionTask?.description || '',
-          unit_symbol: constructionTask?.unit_symbol || constructionTask?.unit || 'Sin unidad',
-          rubro_name: constructionTask?.rubro_name || 'Sin rubro'
-        };
-      });
-
-      return combinedData;
-
-      if (error) {
-        console.error('Error fetching subcontract tasks:', error);
-        throw error;
-      }
-
+      const data = await response.json();
       return data || [];
     },
-    enabled: !!subcontractId && !!userData?.organization?.id
+    enabled: !!subcontractId
   });
 
   // Mutation para crear múltiples tareas del subcontrato

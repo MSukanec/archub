@@ -387,7 +387,7 @@ export function SubcontractBidFormModal({
   // Panel de tareas (subform)
   const tasksSubform = (
     <div className="space-y-4">
-      {subcontractTasks.length === 0 ? (
+      {(!subcontractTasks || subcontractTasks.length === 0) ? (
         <div className="text-center py-8 text-muted-foreground">
           <p>No hay tareas definidas en el alcance del subcontrato.</p>
           <p className="text-sm mt-1">Ve a la pestaña "Alcance" para agregar tareas.</p>

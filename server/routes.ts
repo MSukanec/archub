@@ -958,6 +958,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subcontract Tasks Routes
+  app.get("/api/subcontract-tasks/:subcontractId", async (req, res) => {
+    try {
+      const { subcontractId } = req.params;
+
+      // Obtener las tareas del subcontrato
+      const { data: subcontractTasks, error } = await supabase
+        .from('subcontract_tasks')
+        .select(`
+          id,
+          subcontract_id,
+          task_id,
+          unit,
+          amount,
+          notes,
+          created_at
+        `)
+        .eq('subcontract_id', subcontractId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching subcontract tasks:", error);
+        return res.status(500).json({ error: "Failed to fetch subcontract tasks" });
+      }
+
+      if (!subcontractTasks || subcontractTasks.length === 0) {
+        return res.json([]);
+      }
+
+      // Obtener información de las tareas usando construction_tasks_view
+      const taskIds = subcontractTasks.map(item => item.task_id);
+      
+      const { data: constructionTasks, error: taskError } = await supabase
+        .from('construction_tasks_view')
+        .select('*')
+        .in('id', taskIds);
+
+      if (taskError) {
+        console.error('Error fetching construction tasks:', taskError);
+      }
+
+      // Combinar los datos
+      const combinedData = subcontractTasks.map(subcontractTask => {
+        const constructionTask = constructionTasks?.find(task => task.id === subcontractTask.task_id);
+        
+        return {
+          ...subcontractTask,
+          task_name: constructionTask?.display_name || constructionTask?.name_rendered || constructionTask?.name || 'Sin nombre',
+          task_description: constructionTask?.description || '',
+          unit_symbol: constructionTask?.unit_symbol || constructionTask?.unit || 'Sin unidad',
+          rubro_name: constructionTask?.rubro_name || 'Sin rubro'
+        };
+      });
+
+      res.json(combinedData);
+    } catch (error) {
+      console.error("Error fetching subcontract tasks:", error);
+      res.status(500).json({ error: "Failed to fetch subcontract tasks" });
+    }
+  });
+
   app.patch("/api/subcontract-bids/:id", async (req, res) => {
     try {
       const { id } = req.params;
