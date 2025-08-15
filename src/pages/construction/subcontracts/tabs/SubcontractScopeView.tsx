@@ -46,7 +46,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       label: 'Tarea',
       render: (item: any) => (
         <div>
-          <p className="font-medium text-sm">
+          <p className="font-medium text-xs">
             {item.task_name || 'Sin nombre'}
           </p>
           {item.task_description && (
@@ -59,7 +59,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       key: 'amount',
       label: 'Cantidad',
       render: (item: any) => (
-        <span className="text-sm font-medium">
+        <span className="text-xs font-medium">
           {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
         </span>
       )
@@ -77,7 +77,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       key: 'notes',
       label: 'Notas',
       render: (item: any) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {item.notes || '—'}
         </span>
       )
