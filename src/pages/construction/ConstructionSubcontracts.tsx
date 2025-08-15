@@ -117,7 +117,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'title',
       label: 'Título',
-      width: '15%',
+      width: '12.5%',
       render: (subcontract: any) => (
         <div className="font-medium">{subcontract.title}</div>
       )
@@ -125,7 +125,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'date',
       label: 'Fecha',
-      width: '10%',
+      width: '12.5%',
       render: (subcontract: any) => {
         try {
           return format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es });
@@ -137,7 +137,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'contact',
       label: 'Proveedor',
-      width: '15%',
+      width: '12.5%',
       render: (subcontract: any) => {
         const contact = subcontract.contact;
         if (!contact) {
@@ -160,7 +160,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'amount_total',
       label: 'Monto Total',
-      width: '12%',
+      width: '12.5%',
       render: (subcontract: any) => {
         const amountARS = subcontract.amount_total || 0;
         const amountUSD = amountARS / (subcontract.exchange_rate || 1);
@@ -172,7 +172,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'pago_fecha',
       label: 'Pago a la Fecha',
-      width: '12%',
+      width: '12.5%',
       render: (subcontract: any) => {
         const pagoARS = subcontract.analysis?.pagoALaFecha || 0;
         const pagoUSD = subcontract.analysis?.pagoALaFechaUSD || 0;
@@ -182,7 +182,7 @@ export default function ConstructionSubcontracts() {
     {
       key: 'saldo',
       label: 'Saldo',
-      width: '12%',
+      width: '12.5%',
       render: (subcontract: any) => {
         const saldoARS = subcontract.analysis?.saldo || 0;
         const saldoUSD = subcontract.analysis?.saldoUSD || 0;
@@ -192,13 +192,13 @@ export default function ConstructionSubcontracts() {
     {
       key: 'status',
       label: 'Estado',
-      width: '10%',
+      width: '12.5%',
       render: (subcontract: any) => getStatusBadge(subcontract.status)
     },
     {
       key: 'actions',
       label: 'Acciones',
-      width: '14%',
+      width: '12.5%',
       sortable: false,
       render: (subcontract: any) => (
         <div className="flex items-center gap-2">
