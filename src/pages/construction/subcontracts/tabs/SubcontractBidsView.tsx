@@ -248,24 +248,31 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     {
       key: 'status',
       label: 'Estado',
-      render: (item: any) => getStatusBadge(item.status)
+      render: (item: any) => (
+        <div className="flex items-center gap-2">
+          {getStatusBadge(item.status)}
+          {/* Mostrar si es ganadora */}
+          {subcontract?.winner_bid_id === item.id && (
+            <Badge variant="default" className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+              <Trophy className="h-3 w-3 mr-1" />
+              Ganadora
+            </Badge>
+          )}
+        </div>
+      )
     },
     {
       key: 'actions',
       label: 'Acciones',
       render: (item: any) => (
         <div className="flex items-center gap-1">
-          {/* Mostrar si es ganadora */}
-          {subcontract?.winner_bid_id === item.id ? (
-            <Badge variant="default" className="text-xs bg-yellow-500 hover:bg-yellow-600">
-              <Trophy className="h-3 w-3 mr-1" />
-              Ganadora
-            </Badge>
-          ) : (
+          {/* Botón para seleccionar ganadora solo si no es ganadora */}
+          {subcontract?.winner_bid_id !== item.id && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-yellow-600 hover:text-yellow-700"
+              className="h-8 w-8 p-0"
+              style={{ color: 'var(--accent)' }}
               onClick={() => handleSelectWinner(item)}
               title="Seleccionar como ganadora"
             >
