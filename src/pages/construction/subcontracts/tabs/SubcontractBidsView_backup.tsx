@@ -398,7 +398,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold" >
+                    <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                       {formatCurrency(kpiData.lowestAmount, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -439,7 +439,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold" >
+                    <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                       {formatCurrency(kpiData.averageAmount, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -479,7 +479,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                   
                   <div>
-                    <p className="text-xl font-bold" >
+                    <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                       {formatCurrency(kpiData.spread, 'ARS')}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -491,42 +491,9 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
             </Card>
           </div>
 
-          {/* Primera fila: Oferta Ganadora + 3 KPIs adicionales en una sola fila */}
+          {/* KPIs adicionales si hay ganadora */}
           {kpiData.winningBid && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Card de Oferta Ganadora actualizada */}
-              <Card className="border-yellow-200 bg-yellow-50/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                    Oferta Ganadora
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Subcontratista</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.contacts?.company_name || 
-                       kpiData.winningBid.contacts?.full_name || 'Sin nombre'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Monto</p>
-                    <p className="text-lg font-bold" >
-                      {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha</p>
-                    <p className="font-medium">
-                      {kpiData.winningBid.submitted_at 
-                        ? format(new Date(kpiData.winningBid.submitted_at), 'dd/MM/yyyy', { locale: es })
-                        : '—'
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
@@ -551,7 +518,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold" >
+                      <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                         {kpiData.winnerVsHighest && kpiData.winnerVsHighest.amount < 0 
                           ? formatCurrency(Math.abs(kpiData.winnerVsHighest.amount), 'ARS')
                           : '$ 0'
@@ -596,7 +563,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold" >
+                      <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                         {kpiData.winnerVsAverage 
                           ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
                             formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
@@ -650,7 +617,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     
                     <div>
-                      <p className="text-xl font-bold" >
+                      <p className="text-xl font-bold" style={{ color: 'var(--accent)' }}>
                         #{subcontractBids
                           .filter((bid: any) => bid.amount && bid.amount > 0)
                           .sort((a: any, b: any) => a.amount - b.amount)
