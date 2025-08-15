@@ -46,7 +46,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'task_name',
       label: 'Tarea',
-      width: 'flex-1',
+      width: '60%',
       render: (item: any) => (
         <div>
           <p className="font-medium text-xs">
@@ -61,7 +61,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'amount',
       label: 'Cantidad',
-      width: 'w-[10%]',
+      width: '10%',
       render: (item: any) => (
         <span className="text-xs font-medium">
           {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
@@ -71,7 +71,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'unit',
       label: 'Unidad',
-      width: 'w-[10%]',
+      width: '10%',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
           {item.unit || item.unit_symbol || 'Sin unidad'}
@@ -81,7 +81,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'notes',
       label: 'Notas',
-      width: 'w-[10%]',
+      width: '10%',
       render: (item: any) => (
         <span className="text-xs text-muted-foreground">
           {item.notes || '—'}
@@ -91,7 +91,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
     {
       key: 'actions',
       label: 'Acciones',
-      width: 'w-[10%]',
+      width: '10%',
       render: (item: any) => (
         <div className="flex items-center gap-1">
           <Button
@@ -127,16 +127,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
 
   return (
     <div className="space-y-6">
-      {/* TableTopBar con opciones de agrupación */}
-      <TableTopBar 
-        tabs={groupOptions.map(opt => opt.label)}
-        activeTab={groupOptions.find(opt => opt.value === groupBy)?.label || 'Sin Agrupar'}
-        onTabChange={(label) => {
-          const option = groupOptions.find(opt => opt.label === label);
-          if (option) setGroupBy(option.value);
-        }}
-      />
-
       {/* Tabla de tareas */}
       {subcontractTasks.length === 0 ? (
         <EmptyState
@@ -156,6 +146,14 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
           columns={columns}
           searchKey="task_name"
           searchPlaceholder="Buscar tareas..."
+          topBar={{
+            tabs: groupOptions.map(opt => opt.label),
+            activeTab: groupOptions.find(opt => opt.value === groupBy)?.label || 'Sin Agrupar',
+            onTabChange: (label) => {
+              const option = groupOptions.find(opt => opt.label === label);
+              if (option) setGroupBy(option.value);
+            }
+          }}
         />
       )}
     </div>
