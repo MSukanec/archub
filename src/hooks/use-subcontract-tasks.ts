@@ -26,22 +26,54 @@ export function useSubcontractTasks(subcontractId: string) {
           unit,
           amount,
           notes,
-          created_at,
-          task_instances!inner (
-            id,
-            name,
-            description,
-            unit,
-            task_template_id,
-            task_templates (
-              name,
-              description,
-              unit
-            )
-          )
+          created_at
         `)
         .eq('subcontract_id', subcontractId)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching subcontract tasks:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      // Obtener información adicional de las tareas por separado
+      const taskIds = data.map(item => item.task_id);
+      
+      const { data: taskInstances, error: taskError } = await supabase
+        .from('task_instances')
+        .select(`
+          id,
+          name,
+          description,
+          unit,
+          task_template_id,
+          task_templates (
+            name,
+            description,
+            unit
+          )
+        `)
+        .in('id', taskIds);
+
+      if (taskError) {
+        console.error('Error fetching task instances:', taskError);
+        // Continue without task details if there's an error
+      }
+
+      // Combinar los datos
+      const combinedData = data.map(subcontractTask => {
+        const taskInstance = taskInstances?.find(task => task.id === subcontractTask.task_id);
+        return {
+          ...subcontractTask,
+          task_instances: taskInstance
+        };
+      });
+
+      return combinedData;
 
       if (error) {
         console.error('Error fetching subcontract tasks:', error);
