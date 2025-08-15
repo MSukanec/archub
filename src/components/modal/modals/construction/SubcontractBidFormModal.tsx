@@ -68,12 +68,11 @@ export function SubcontractBidFormModal({
 
     try {
       const bidData = {
-        subcontract_id,
         contact_id: data.contact_id,
-        title: `Oferta de ${contacts?.find(c => c.id === data.contact_id)?.company_name || 'Proveedor'}`,
         amount: parseFloat(data.amount),
         currency_id: data.currency_id,
         exchange_rate: data.exchange_rate ? parseFloat(data.exchange_rate) : 1,
+        submitted_at: data.submitted_at ? data.submitted_at.toISOString().split('T')[0] : null,
         notes: data.notes || null
       };
 

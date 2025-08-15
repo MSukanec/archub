@@ -172,7 +172,7 @@ TABLA SUBCONTRACT_BIDS:
   },
   {
     "column_name": "submitted_at",
-    "data_type": "timestamp with time zone"
+    "data_type": "date"
   },
   {
     "column_name": "status",

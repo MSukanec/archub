@@ -428,18 +428,16 @@ export const subcontract_tasks = pgTable("subcontract_tasks", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Subcontract Bids/Offers table
+// Subcontract Bids/Offers table - Based on actual Supabase structure
 export const subcontract_bids = pgTable("subcontract_bids", {
   id: uuid("id").primaryKey().defaultRandom(),
-  subcontract_id: uuid("subcontract_id").notNull(),
   contact_id: uuid("contact_id"), // El subcontratista que hace la oferta
-  title: text("title").notNull(), // Título de la oferta
   amount: real("amount").notNull(), // Monto de la oferta
   currency_id: uuid("currency_id"),
-  exchange_rate: real("exchange_rate").default(1),
+  exchange_rate: real("exchange_rate"),
   notes: text("notes"), // Detalles adicionales de la oferta
+  submitted_at: text("submitted_at"), // Fecha de envío de la oferta
   status: text("status").default("pendiente"), // pendiente, aceptada, rechazada
-  valid_until: text("valid_until"), // Fecha de vencimiento de la oferta
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
