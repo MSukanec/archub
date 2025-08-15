@@ -1291,6 +1291,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/subcontract-bids/contacts - Get contacts for specific bid IDs
+  app.post("/api/subcontract-bids/contacts", async (req, res) => {
+    try {
+      const { bidIds } = req.body;
+      
+      if (!bidIds || !Array.isArray(bidIds) || bidIds.length === 0) {
+        return res.json([]);
+      }
+
+      const { data: contacts, error } = await supabase
+        .from('subcontract_bids')
+        .select(`
+          id,
+          contacts:contact_id (
+            id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            company_name
+          )
+        `)
+        .in('id', bidIds);
+
+      if (error) {
+        console.error("Error fetching winner contacts:", error);
+        return res.status(500).json({ error: "Failed to fetch winner contacts" });
+      }
+
+      // Transformar los datos para incluir bid_id
+      const transformedContacts = contacts?.map(bid => ({
+        bid_id: bid.id,
+        ...bid.contacts
+      })) || [];
+
+      res.json(transformedContacts);
+    } catch (error) {
+      console.error("Error fetching winner contacts:", error);
+      res.status(500).json({ error: "Failed to fetch winner contacts" });
+    }
+  });
+
   // DELETE /api/subcontracts/:id - Delete subcontract with all dependencies
   app.delete("/api/subcontracts/:id", async (req, res) => {
     try {

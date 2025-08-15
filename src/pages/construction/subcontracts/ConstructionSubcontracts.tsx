@@ -15,6 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
+import { useQuery } from '@tanstack/react-query';
 
 export default function ConstructionSubcontracts() {
   const { data: userData } = useCurrentUser();
@@ -38,6 +39,37 @@ export default function ConstructionSubcontracts() {
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
+
+  // Hook para obtener contactos ganadores de ofertas
+  const useWinnerContacts = (subcontracts: any[]) => {
+    return useQuery({
+      queryKey: ['winner-contacts', subcontracts.map(s => s.winner_bid_id).filter(Boolean)],
+      queryFn: async () => {
+        const winnerBidIds = subcontracts.map(s => s.winner_bid_id).filter(Boolean);
+        if (winnerBidIds.length === 0) return {};
+        
+        const response = await fetch(`/api/subcontract-bids/contacts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bidIds: winnerBidIds })
+        });
+        
+        if (!response.ok) return {};
+        const contacts = await response.json();
+        
+        // Crear un mapa de bid_id -> contact
+        const contactMap: any = {};
+        contacts.forEach((contact: any) => {
+          contactMap[contact.bid_id] = contact;
+        });
+        
+        return contactMap;
+      },
+      enabled: subcontracts.length > 0,
+    });
+  };
+
+  const { data: winnerContacts = {} } = useWinnerContacts(subcontracts);
 
   // Función para convertir montos según la vista seleccionada
   const convertAmount = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
@@ -193,17 +225,16 @@ export default function ConstructionSubcontracts() {
       key: 'contact',
       label: 'Subcontratista',
       render: (subcontract: any) => {
-        // Si el subcontrato está adjudicado, buscar el contacto de la oferta ganadora
+        // Si el subcontrato está adjudicado y tiene oferta ganadora
         if (subcontract.status === 'awarded' && subcontract.winner_bid_id) {
-          // Buscar la oferta ganadora en subcontract_bids usando winner_bid_id
-          const winningBid = subcontract.subcontract_bids?.find((bid: any) => bid.id === subcontract.winner_bid_id);
-          if (winningBid && winningBid.contacts) {
-            const contactName = winningBid.contacts.full_name || 
-              `${winningBid.contacts.first_name || ''} ${winningBid.contacts.last_name || ''}`.trim();
+          const winnerContact = winnerContacts[subcontract.winner_bid_id];
+          if (winnerContact) {
+            const contactName = winnerContact.full_name || 
+              `${winnerContact.first_name || ''} ${winnerContact.last_name || ''}`.trim();
             return (
               <div>
                 <div className="font-medium">{contactName}</div>
-                {winningBid.contacts.email && <div className="text-xs text-muted-foreground">{winningBid.contacts.email}</div>}
+                {winnerContact.email && <div className="text-xs text-muted-foreground">{winnerContact.email}</div>}
               </div>
             );
           }
@@ -218,23 +249,10 @@ export default function ConstructionSubcontracts() {
           );
         }
         
-        // Fallback: mostrar contacto original si existe
-        const contact = subcontract.contact;
-        if (contact) {
-          const contactName = contact.full_name || 
-            `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
-          
-          return (
-            <div>
-              <div className="font-medium">{contactName}</div>
-              {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
-            </div>
-          );
-        }
-        
+        // Fallback para subcontratos adjudicados sin datos de contacto
         return (
           <div className="text-muted-foreground">
-            Sin adjudicar
+            Sin información de contacto
           </div>
         );
       }
