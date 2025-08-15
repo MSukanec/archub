@@ -160,12 +160,10 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       label: 'Monto',
       width: '15%',
       render: (payment: any) => {
-        const amountARS = payment.amount;
-        const amountUSD = payment.amount / payment.exchange_rate;
-        const originalCurrency = payment.currency_code === 'USD' ? 'USD' : 'ARS';
+        // Mostrar siempre en la moneda original del pago
         return (
           <div className="font-medium">
-            {formatSingleCurrency(amountARS, amountUSD, originalCurrency)}
+            {formatCurrency(payment.amount, payment.currency_symbol)}
           </div>
         );
       }
@@ -184,22 +182,35 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       key: 'progress',
       label: 'Avance Total',
       width: '20%',
-      render: (payment: any) => (
-        <div className="space-y-1">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="h-2 rounded-full transition-all duration-300"
-              style={{ 
-                backgroundColor: 'var(--accent)',
-                width: `${payment.progressPercentage}%`
-              }}
-            />
+      render: (payment: any) => {
+        const percentage = payment.progressPercentage;
+        // Color gradient de rojo a verde
+        const getColor = (percent: number) => {
+          if (percent <= 25) return '#ef4444'; // rojo
+          if (percent <= 50) return '#f97316'; // naranja
+          if (percent <= 75) return '#eab308'; // amarillo
+          return '#22c55e'; // verde
+        };
+        
+        return (
+          <div className="space-y-1">
+            <div className="relative w-full bg-gray-200 rounded-full h-6 flex items-center">
+              <div 
+                className="h-6 rounded-full transition-all duration-300 flex items-center justify-center"
+                style={{ 
+                  backgroundColor: getColor(percentage),
+                  width: `${Math.max(percentage, 15)}%`, // Mínimo 15% para mostrar el texto
+                  minWidth: '40px'
+                }}
+              >
+                <span className="text-xs font-medium text-white px-1">
+                  {percentage.toFixed(1)}%
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="text-xs text-center text-muted-foreground">
-            {payment.progressPercentage.toFixed(1)}%
-          </div>
-        </div>
-      )
+        );
+      }
     }
   ];
 
