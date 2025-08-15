@@ -114,6 +114,7 @@ export default function SubcontractView() {
             bids={mockBids}
             winnerBid={mockWinnerBid}
             provider={mockProvider}
+            onTabChange={setActiveTab}
           />
         );
       case 'Alcance':

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Callout } from '@/components/ui-custom/Callout';
+import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 interface SubcontractDashboardViewProps {
@@ -14,6 +16,7 @@ interface SubcontractDashboardViewProps {
   bids: any[];
   winnerBid: any;
   provider: any;
+  onTabChange?: (tab: string) => void;
 }
 
 export function SubcontractDashboardView({ 
@@ -21,7 +24,8 @@ export function SubcontractDashboardView({
   project, 
   bids = [], 
   winnerBid, 
-  provider 
+  provider,
+  onTabChange 
 }: SubcontractDashboardViewProps) {
   const { openModal } = useGlobalModalStore();
 
@@ -49,22 +53,15 @@ export function SubcontractDashboardView({
     <div className="space-y-6">
       {/* Estados vacíos */}
       {isDraft && !hasScope && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Este subcontrato está en borrador y no tiene alcance definido.{' '}
-            <Button 
-              variant="link" 
-              className="p-0 h-auto font-medium"
-              onClick={() => {
-                // TODO: Abrir modal de agregar tareas
-                console.log('Abrir modal de agregar tareas');
-              }}
-            >
-              Agregar tareas al alcance
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <Callout 
+          icon={AlertCircle}
+          onClick={() => onTabChange?.('Alcance')}
+        >
+          Este subcontrato está en borrador y no tiene alcance definido.{' '}
+          <span className="font-medium text-accent cursor-pointer hover:underline">
+            Agregar tareas al alcance
+          </span>
+        </Callout>
       )}
 
       {isTendering && receivedBids.length === 0 && (
@@ -169,86 +166,36 @@ export function SubcontractDashboardView({
             description="Accesos directos para gestionar el subcontrato"
           />
           <CardContent className="flex-1 space-y-3">
-            <Button 
-              variant="default" 
-              className="w-full h-auto p-4 justify-start"
-              onClick={() => {
-                // TODO: Abrir modal de agregar tareas (Tab Alcance)
-                console.log('Definir alcance');
-              }}
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Plus className="h-5 w-5 text-primary" />
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-sm">Definir alcance</p>
-                  <p className="text-xs text-muted-foreground">Agregar tareas al subcontrato</p>
-                </div>
-              </div>
-            </Button>
+            <FormSubsectionButton
+              icon={<Plus className="h-4 w-4" />}
+              title="Definir alcance"
+              description="Agregar tareas al subcontrato"
+              onClick={() => onTabChange?.('Alcance')}
+            />
 
-            <Button 
-              variant="default" 
-              className="w-full h-auto p-4 justify-start"
-              onClick={() => {
-                openModal('subcontract-bid', {
-                  subcontractId: subcontract.id,
-                  isEditing: false
-                });
-              }}
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Users className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-sm">Invitar oferentes</p>
-                  <p className="text-xs text-muted-foreground">Enviar RFQ a proveedores</p>
-                </div>
-              </div>
-            </Button>
+            <FormSubsectionButton
+              icon={<Users className="h-4 w-4" />}
+              title="Invitar oferentes"
+              description="Enviar RFQ a proveedores"
+              onClick={() => onTabChange?.('Ofertas')}
+            />
 
             {receivedBids.length >= 2 && (
-              <Button 
-                variant="default" 
-                className="w-full h-auto p-4 justify-start"
-                onClick={() => {
-                  // TODO: Implementar comparación de ofertas
-                  console.log('Comparar ofertas');
-                }}
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <FileCheck className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="font-medium text-sm">Comparar ofertas</p>
-                    <p className="text-xs text-muted-foreground">{receivedBids.length} ofertas recibidas</p>
-                  </div>
-                </div>
-              </Button>
+              <FormSubsectionButton
+                icon={<FileCheck className="h-4 w-4" />}
+                title="Comparar ofertas"
+                description={`${receivedBids.length} ofertas recibidas`}
+                onClick={() => onTabChange?.('Ofertas')}
+              />
             )}
 
             {receivedBids.length >= 1 && (
-              <Button 
-                variant="default" 
-                className="w-full h-auto p-4 justify-start"
-                onClick={() => {
-                  // TODO: Implementar adjudicación
-                  console.log('Adjudicar');
-                }}
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                    <Award className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="font-medium text-sm">Adjudicar</p>
-                    <p className="text-xs text-muted-foreground">Seleccionar proveedor ganador</p>
-                  </div>
-                </div>
-              </Button>
+              <FormSubsectionButton
+                icon={<Award className="h-4 w-4" />}
+                title="Adjudicar"
+                description="Seleccionar proveedor ganador"
+                onClick={() => onTabChange?.('Ofertas')}
+              />
             )}
           </CardContent>
         </Card>
