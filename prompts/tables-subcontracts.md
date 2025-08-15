@@ -106,7 +106,7 @@ TABLA SUBCONTRACT_BID_TASKS:
   }
 ]
 
-TABLA SUBCONTRACT_BIDS:
+TABLA SUBCONTRACT_TASKS:
 
 [
   {
@@ -114,31 +114,23 @@ TABLA SUBCONTRACT_BIDS:
     "data_type": "uuid"
   },
   {
-    "column_name": "contact_id",
+    "column_name": "subcontract_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
   },
   {
     "column_name": "amount",
     "data_type": "numeric"
   },
   {
-    "column_name": "currency_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "exchange_rate",
-    "data_type": "numeric"
-  },
-  {
     "column_name": "notes",
-    "data_type": "text"
-  },
-  {
-    "column_name": "submitted_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "status",
     "data_type": "text"
   },
   {

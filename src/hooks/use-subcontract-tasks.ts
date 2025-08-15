@@ -16,27 +16,15 @@ export function useSubcontractTasks(subcontractId: string) {
         return [];
       }
 
-      // Buscar el subcontrato y su bid ganadora (alcance)
-      const { data: subcontract, error: subcontractError } = await supabase
-        .from('subcontracts')
-        .select('winner_bid_id')
-        .eq('id', subcontractId)
-        .single();
-
-      if (subcontractError || !subcontract?.winner_bid_id) {
-        // No hay bid de alcance definida, retornar array vacío
-        return [];
-      }
-
-      // Obtener las tareas de la bid ganadora
+      // Obtener las tareas directamente de SUBCONTRACT_TASKS
       const { data, error } = await supabase
-        .from('subcontract_bid_tasks')
+        .from('subcontract_tasks')
         .select(`
           id,
-          bid_id,
+          subcontract_id,
           task_id,
-          quantity,
           unit,
+          amount,
           notes,
           created_at,
           task_instances!inner (
@@ -52,7 +40,7 @@ export function useSubcontractTasks(subcontractId: string) {
             )
           )
         `)
-        .eq('bid_id', subcontract.winner_bid_id)
+        .eq('subcontract_id', subcontractId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -72,46 +60,20 @@ export function useSubcontractTasks(subcontractId: string) {
         throw new Error('No organization found');
       }
 
-      // Crear una bid interna por defecto para almacenar las tareas del alcance
-      const { data: newBid, error: createBidError } = await supabase
-        .from('subcontract_bids')
-        .insert({
-          contact_id: null, // Bid interna para definir alcance
-          amount: 0,
-          currency_id: null,
-          exchange_rate: 1,
-          status: 'scope_definition',
-          notes: `Alcance del subcontrato - ${tasks.length} tareas`
-        })
-        .select('id')
-        .single();
-
-      if (createBidError) throw createBidError;
-      const bidId = newBid.id;
-
-      // Insertar las tareas en SUBCONTRACT_BID_TASKS
+      // Insertar las tareas directamente en SUBCONTRACT_TASKS
       const tasksToInsert = tasks.map(task => ({
-        bid_id: bidId,
+        subcontract_id: subcontractId,
         task_id: task.task_id,
-        quantity: task.quantity || 1,
         unit: task.unit || '',
+        amount: task.quantity || 1,
         notes: task.notes || ''
       }));
 
       const { data, error } = await supabase
-        .from('subcontract_bid_tasks')
+        .from('subcontract_tasks')
         .insert(tasksToInsert);
 
       if (error) throw error;
-
-      // Actualizar el subcontrato para que referencie esta bid como la ganadora (alcance)
-      const { error: updateError } = await supabase
-        .from('subcontracts')
-        .update({ winner_bid_id: bidId })
-        .eq('id', subcontractId);
-
-      if (updateError) console.warn('No se pudo actualizar winner_bid_id:', updateError);
-
       return data;
     },
     onSuccess: () => {
@@ -135,7 +97,7 @@ export function useSubcontractTasks(subcontractId: string) {
   const deleteSubcontractTask = useMutation({
     mutationFn: async (taskId: string) => {
       const { error } = await supabase
-        .from('subcontract_bid_tasks')
+        .from('subcontract_tasks')
         .delete()
         .eq('id', taskId);
 

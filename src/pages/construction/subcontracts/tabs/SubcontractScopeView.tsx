@@ -56,11 +56,11 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       )
     },
     {
-      key: 'quantity',
+      key: 'amount',
       title: 'Cantidad',
       render: (item: any) => (
         <span className="text-sm font-medium">
-          {item.quantity ? item.quantity.toLocaleString('es-AR') : '—'}
+          {item.amount ? item.amount.toLocaleString('es-AR') : '—'}
         </span>
       )
     },
