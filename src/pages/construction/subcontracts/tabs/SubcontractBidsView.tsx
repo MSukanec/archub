@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
@@ -14,44 +15,33 @@ interface SubcontractBidsViewProps {
 
 export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const { openModal } = useGlobalModalStore();
+  const queryClient = useQueryClient();
   
-  // Obtener ofertas del subcontrato
-  const [subcontractBids, setSubcontractBids] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Cargar ofertas
-  const loadBids = async () => {
-    try {
-      setIsLoading(true);
+  // Obtener ofertas del subcontrato usando React Query
+  const { data: subcontractBids = [], isLoading } = useQuery({
+    queryKey: ['subcontract-bids', subcontract?.id],
+    queryFn: async () => {
       const response = await fetch(`/api/subcontract-bids/${subcontract.id}`);
-      if (response.ok) {
-        const bids = await response.json();
-        setSubcontractBids(bids || []);
-      } else {
-        console.error('Error fetching bids:', response.statusText);
-        setSubcontractBids([]);
+      if (!response.ok) {
+        throw new Error('Failed to fetch bids');
       }
-    } catch (error) {
-      console.error('Error fetching bids:', error);
-      setSubcontractBids([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return response.json();
+    },
+    enabled: !!subcontract?.id,
+    staleTime: 0 // Always fetch fresh data
+  });
 
-  // Cargar ofertas al montar el componente
-  useEffect(() => {
-    if (subcontract?.id) {
-      loadBids();
-    }
-  }, [subcontract?.id]);
+  // Invalidar cache después de cambios
+  const invalidateBids = () => {
+    queryClient.invalidateQueries({ queryKey: ['subcontract-bids', subcontract?.id] });
+  };
 
   const handleAddBid = () => {
     openModal('subcontract-bid', {
       subcontractId: subcontract.id,
       isEditing: false,
       onSuccess: () => {
-        loadBids(); // Refresh the list after creating
+        invalidateBids(); // Refresh the list after creating
       }
     });
   };
@@ -63,7 +53,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       isEditing: true,
       initialData: bid,
       onSuccess: () => {
-        loadBids(); // Refresh the list after editing
+        invalidateBids(); // Refresh the list after editing
       }
     });
   };
@@ -80,7 +70,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           });
           
           if (response.ok) {
-            loadBids(); // Refresh the list
+            invalidateBids(); // Refresh the list
           } else {
             console.error('Error deleting bid');
           }
