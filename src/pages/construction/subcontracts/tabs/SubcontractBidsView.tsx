@@ -18,22 +18,30 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const queryClient = useQueryClient();
   
   // Obtener ofertas del subcontrato usando React Query
-  const { data: subcontractBids = [], isLoading } = useQuery({
+  const { data: subcontractBids = [], isLoading, refetch } = useQuery({
     queryKey: ['subcontract-bids', subcontract?.id],
     queryFn: async () => {
+      console.log('Fetching bids for subcontract:', subcontract.id);
       const response = await fetch(`/api/subcontract-bids/${subcontract.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch bids');
       }
-      return response.json();
+      const data = await response.json();
+      console.log('Bids fetched:', data);
+      return data;
     },
     enabled: !!subcontract?.id,
-    staleTime: 0 // Always fetch fresh data
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 
   // Invalidar cache después de cambios
   const invalidateBids = () => {
+    console.log('Invalidating bids cache for:', subcontract?.id);
     queryClient.invalidateQueries({ queryKey: ['subcontract-bids', subcontract?.id] });
+    // También forzar refetch inmediato
+    refetch();
   };
 
   const handleAddBid = () => {
