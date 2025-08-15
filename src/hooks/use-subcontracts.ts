@@ -21,7 +21,6 @@ export function useSubcontracts(projectId: string | null) {
             currency_id,
             exchange_rate,
             status,
-            is_winner,
             contacts(
               id,
               first_name,
