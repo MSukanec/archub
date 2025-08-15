@@ -18,6 +18,7 @@ import DatePicker from '@/components/ui-custom/DatePicker';
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   title: z.string().min(1, "El título es obligatorio"),
+  code: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -48,6 +49,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       title: '',
+      code: '',
       notes: '',
     }
   });
@@ -58,6 +60,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       form.reset({
         date: existingSubcontract.date,
         title: existingSubcontract.title,
+        code: existingSubcontract.code || '',
         notes: existingSubcontract.notes || '',
       });
     }
@@ -74,12 +77,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           subcontract: {
             date: data.date,
             title: data.title,
+            code: data.code || null,
             notes: data.notes || null,
-            status: existingSubcontract?.status || 'pendiente',
-            contact_id: existingSubcontract?.contact_id || null,
+            status: existingSubcontract?.status || 'draft',
             currency_id: existingSubcontract?.currency_id || null,
-            amount_total: existingSubcontract?.amount_total || 0,
-            exchange_rate: existingSubcontract?.exchange_rate || 1
+            amount_total: existingSubcontract?.amount_total || null,
+            exchange_rate: existingSubcontract?.exchange_rate || null,
+            winner_bid_id: existingSubcontract?.winner_bid_id || null
           },
           taskIds: [] // Sin tareas
         });
@@ -91,12 +95,13 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             organization_id: modalData.organizationId,
             date: data.date,
             title: data.title,
+            code: data.code || null,
             notes: data.notes || null,
-            status: 'pendiente',
-            contact_id: null,
+            status: 'draft',
             currency_id: null,
-            amount_total: 0,
-            exchange_rate: 1
+            amount_total: null,
+            exchange_rate: null,
+            winner_bid_id: null
           },
           taskIds: [] // Sin tareas
         });
@@ -138,19 +143,35 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
         )}
       </div>
 
-      {/* Título */}
-      <div className="space-y-1">
-        <Label htmlFor="title" className="text-xs font-medium">
-          Título *
-        </Label>
-        <Input
-          id="title"
-          placeholder="Ej: Trabajos de albañilería"
-          {...form.register('title')}
-        />
-        {form.formState.errors.title && (
-          <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
-        )}
+      {/* Título y Código - Inline */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="title" className="text-xs font-medium">
+            Título *
+          </Label>
+          <Input
+            id="title"
+            placeholder="Ej: Trabajos de albañilería"
+            {...form.register('title')}
+          />
+          {form.formState.errors.title && (
+            <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="code" className="text-xs font-medium">
+            Código <span className="text-muted-foreground">(Opcional)</span>
+          </Label>
+          <Input
+            id="code"
+            placeholder="Ej: SC-001"
+            {...form.register('code')}
+          />
+          {form.formState.errors.code && (
+            <p className="text-xs text-destructive">{form.formState.errors.code.message}</p>
+          )}
+        </div>
       </div>
 
       {/* Notas */}
