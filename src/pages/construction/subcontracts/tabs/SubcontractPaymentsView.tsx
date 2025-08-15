@@ -164,7 +164,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'movement_date',
       label: 'Fecha',
-      width: '15%',
+      width: '16.66%',
       render: (payment: any) => {
         return format(new Date(payment.movement_date), 'dd/MM/yyyy', { locale: es });
       }
@@ -172,7 +172,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'currency',
       label: 'Moneda',
-      width: '15%',
+      width: '16.66%',
       render: (payment: any) => (
         <Badge variant="outline">
           {payment.currency_symbol} {payment.currency_name}
@@ -182,7 +182,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'wallet_name',
       label: 'Billetera',
-      width: '15%',
+      width: '16.66%',
       render: (payment: any) => (
         <div className="flex items-center gap-2">
           <Wallet className="w-4 h-4 text-muted-foreground" />
@@ -193,7 +193,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'amount',
       label: 'Monto',
-      width: '15%',
+      width: '16.66%',
       render: (payment: any) => {
         // Mostrar siempre en la moneda original del pago
         return (
@@ -206,7 +206,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'exchange_rate',
       label: 'Cotización',
-      width: '10%',
+      width: '16.66%',
       render: (payment: any) => (
         <div className="text-sm text-muted-foreground">
           {payment.exchange_rate ? payment.exchange_rate.toFixed(2) : '1.00'}
@@ -216,7 +216,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     {
       key: 'progress',
       label: 'Avance Total',
-      width: '20%',
+      width: '16.66%',
       render: (payment: any) => {
         const percentage = payment.progressPercentage;
         // Color gradient de rojo a verde
