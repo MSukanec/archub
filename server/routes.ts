@@ -916,7 +916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/subcontract-bids", async (req, res) => {
     try {
       const bidData = req.body;
-      const { id, ...updateData } = bidData;
+      const { id, created_by, created_at, updated_at, ...updateData } = bidData;
 
       const { data: bid, error } = await supabase
         .from('subcontract_bids')

@@ -77,7 +77,7 @@ export function SubcontractBidFormModal({
         submitted_at: data.submitted_at ? data.submitted_at.toISOString().split('T')[0] : null,
         notes: data.notes || null,
         status: 'pending',
-        created_by: userData?.user?.id
+        ...(mode === 'create' && { created_by: userData?.user?.id })
       };
 
       console.log('Saving bid:', bidData);
