@@ -69,11 +69,11 @@ TABLA SUBCONTRACT_BID_TASKS:
     "data_type": "uuid"
   },
   {
-    "column_name": "bid_id",
+    "column_name": "subcontract_bid_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "task_id",
+    "column_name": "subcontract_task_id",
     "data_type": "uuid"
   },
   {
