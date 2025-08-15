@@ -124,38 +124,23 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   // Panel principal
   const editPanel = (
     <div className="space-y-4">
-      {/* Fecha */}
-      <div className="space-y-1">
-        <Label htmlFor="date" className="text-xs font-medium">
-          Fecha *
-        </Label>
-        <DatePicker
-          value={form.watch('date') ? new Date(form.watch('date')) : undefined}
-          onChange={(date) => {
-            if (date) {
-              form.setValue('date', date.toISOString().split('T')[0]);
-            }
-          }}
-          placeholder="Seleccionar fecha..."
-        />
-        {form.formState.errors.date && (
-          <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
-        )}
-      </div>
-
-      {/* Título y Código - Inline */}
+      {/* Fecha y Código - Inline */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label htmlFor="title" className="text-xs font-medium">
-            Título *
+          <Label htmlFor="date" className="text-xs font-medium">
+            Fecha *
           </Label>
-          <Input
-            id="title"
-            placeholder="Ej: Trabajos de albañilería"
-            {...form.register('title')}
+          <DatePicker
+            value={form.watch('date') ? new Date(form.watch('date')) : undefined}
+            onChange={(date) => {
+              if (date) {
+                form.setValue('date', date.toISOString().split('T')[0]);
+              }
+            }}
+            placeholder="Seleccionar fecha..."
           />
-          {form.formState.errors.title && (
-            <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+          {form.formState.errors.date && (
+            <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
           )}
         </div>
 
@@ -172,6 +157,21 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <p className="text-xs text-destructive">{form.formState.errors.code.message}</p>
           )}
         </div>
+      </div>
+
+      {/* Título */}
+      <div className="space-y-1">
+        <Label htmlFor="title" className="text-xs font-medium">
+          Título *
+        </Label>
+        <Input
+          id="title"
+          placeholder="Ej: Trabajos de albañilería"
+          {...form.register('title')}
+        />
+        {form.formState.errors.title && (
+          <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+        )}
       </div>
 
       {/* Notas */}
