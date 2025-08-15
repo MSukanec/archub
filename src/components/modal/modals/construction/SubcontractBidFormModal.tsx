@@ -9,20 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface SubcontractBidFormModalProps {
-  subcontract_id: string;
-  bid_id?: string;
-  mode: 'create' | 'edit';
-  initialData?: any;
+  modalData?: any;
   onClose: () => void;
 }
 
 export function SubcontractBidFormModal({
-  subcontract_id,
-  bid_id,
-  mode,
-  initialData,
+  modalData,
   onClose
 }: SubcontractBidFormModalProps) {
+  // Extraer datos de modalData
+  const subcontract_id = modalData?.subcontractId;
+  const bid_id = modalData?.bidId;
+  const mode = modalData?.isEditing ? 'edit' : 'create';
+  const initialData = modalData?.initialData;
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({

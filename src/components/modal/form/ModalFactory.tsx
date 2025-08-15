@@ -170,13 +170,7 @@ export function ModalFactory() {
     case 'subcontract':
       return <SubcontractFormModal modalData={data} onClose={closeModal} />;
     case 'subcontract-bid':
-      return <SubcontractBidFormModal 
-        subcontract_id={data?.subcontractId} 
-        bid_id={data?.bidId}
-        mode={data?.isEditing ? 'edit' : 'create'}
-        initialData={data?.initialData}
-        onClose={closeModal} 
-      />;
+      return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
     case 'subcontract-task':
       return <SubcontractTaskFormModal modalData={data} onClose={closeModal} />;
 
