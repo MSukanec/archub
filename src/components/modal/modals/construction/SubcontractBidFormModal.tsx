@@ -98,7 +98,13 @@ export function SubcontractBidFormModal({
 
   // Inicializar tareas seleccionadas cuando se cargan las tareas
   useEffect(() => {
-    if (subcontractTasks.length > 0 && Object.keys(selectedTasks).length === 0) {
+    console.log('useEffect triggered:', { 
+      tasksLength: subcontractTasks?.length, 
+      selectedTasksKeys: Object.keys(selectedTasks).length,
+      tasks: subcontractTasks
+    });
+    
+    if (subcontractTasks && subcontractTasks.length > 0 && Object.keys(selectedTasks).length === 0) {
       const initialSelected: {[key: string]: boolean} = {};
       const initialPrices: {[key: string]: number} = {};
       
@@ -107,10 +113,11 @@ export function SubcontractBidFormModal({
         initialPrices[task.id] = 0; // Precio inicial 0
       });
       
+      console.log('Setting initial state:', { initialSelected, initialPrices });
       setSelectedTasks(initialSelected);
       setTaskPrices(initialPrices);
     }
-  }, [subcontractTasks, selectedTasks]);
+  }, [subcontractTasks]);
 
   // Función para alternar selección de tarea
   const toggleTaskSelection = (taskId: string) => {
@@ -387,6 +394,11 @@ export function SubcontractBidFormModal({
   // Panel de tareas (subform)
   const tasksSubform = (
     <div className="space-y-4">
+      {/* Debug temporal */}
+      <div className="text-xs bg-muted p-2 rounded">
+        Debug: Tareas={subcontractTasks?.length || 0}, Selected={Object.keys(selectedTasks).length}, Prices={Object.keys(taskPrices).length}
+      </div>
+      
       {(!subcontractTasks || subcontractTasks.length === 0) ? (
         <div className="text-center py-8 text-muted-foreground">
           <p>No hay tareas definidas en el alcance del subcontrato.</p>
