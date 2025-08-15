@@ -88,14 +88,6 @@ export function SubcontractDashboardView({
           <CardContent className="flex-1 space-y-3 pt-4">
             <div className="grid grid-cols-1 gap-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Proyecto</p>
-                  <p className="text-sm text-muted-foreground">{project?.name || 'Sin proyecto asignado'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Fecha</p>
