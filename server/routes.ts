@@ -913,6 +913,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/subcontract-bids/:bidId", async (req, res) => {
+    try {
+      const { bidId } = req.params;
+
+      const { error } = await supabase
+        .from('subcontract_bids')
+        .delete()
+        .eq('id', bidId);
+
+      if (error) {
+        console.error("Error deleting subcontract bid:", error);
+        return res.status(500).json({ error: "Failed to delete subcontract bid" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting subcontract bid:", error);
+      res.status(500).json({ error: "Failed to delete subcontract bid" });
+    }
+  });
+
   app.patch("/api/subcontract-bids/:id", async (req, res) => {
     try {
       const { id } = req.params;

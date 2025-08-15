@@ -76,11 +76,11 @@ export function SubcontractBidFormModal({
         submitted_at: data.submitted_at ? data.submitted_at.toISOString().split('T')[0] : null,
         notes: data.notes || null,
         status: 'pending',
-        created_by: userData?.member?.id
+        created_by: userData?.user?.id
       };
 
       console.log('Saving bid:', bidData);
-      console.log('UserData member:', userData?.member);
+      console.log('UserData:', userData?.user?.id);
 
       const response = await fetch('/api/subcontract-bids', {
         method: mode === 'create' ? 'POST' : 'PUT',
@@ -99,7 +99,10 @@ export function SubcontractBidFormModal({
         description: 'Los cambios se han guardado correctamente'
       });
 
-      // TODO: Refresh the bids list properly instead of page reload
+      // Refresh the parent component to show new bid
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
       onClose();
     } catch (error) {
       console.error('Error saving bid:', error);
@@ -135,7 +138,7 @@ export function SubcontractBidFormModal({
             name="submitted_at"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fecha de Cotización</FormLabel>
+                <FormLabel>Fecha de Recepción</FormLabel>
                 <FormControl>
                   <DatePicker
                     value={field.value}
@@ -153,7 +156,7 @@ export function SubcontractBidFormModal({
             name="contact_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Proveedor *</FormLabel>
+                <FormLabel>Subcontratista *</FormLabel>
                 <FormControl>
                   <ComboBox
                     value={field.value}
@@ -270,7 +273,7 @@ export function SubcontractBidFormModal({
       onLeftClick={onClose}
       rightLabel={mode === 'create' ? 'Crear Oferta' : 'Actualizar Oferta'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isLoading={isLoading}
+      disabled={isLoading}
     />
   );
 

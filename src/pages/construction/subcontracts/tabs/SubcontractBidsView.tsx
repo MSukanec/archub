@@ -63,8 +63,26 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   };
 
   const handleDeleteBid = (bid: any) => {
-    // TODO: Implementar eliminación de oferta
-    console.log('Delete bid:', bid.id);
+    openModal('delete-confirmation', {
+      title: 'Eliminar Oferta',
+      message: `¿Estás seguro de que quieres eliminar la oferta de ${bid.contacts?.company_name || bid.contacts?.full_name || 'este proveedor'}?`,
+      mode: 'dangerous',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/subcontract-bids/${bid.id}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            loadBids(); // Refresh the list
+          } else {
+            console.error('Error deleting bid');
+          }
+        } catch (error) {
+          console.error('Error deleting bid:', error);
+        }
+      }
+    });
   };
 
   const handleViewBid = (bid: any) => {
@@ -104,15 +122,13 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const columns = [
     {
       key: 'supplier_name',
-      label: 'Proveedor',
+      label: 'Subcontratista',
       render: (item: any) => (
         <div>
           <p className="font-medium text-sm">
-            {item.supplier_name || 'Sin nombre'}
+            {item.contacts?.company_name || item.contacts?.full_name || 
+             `${item.contacts?.first_name || ''} ${item.contacts?.last_name || ''}`.trim() || 'Sin nombre'}
           </p>
-          {item.supplier_email && (
-            <p className="text-xs text-muted-foreground">{item.supplier_email}</p>
-          )}
         </div>
       )
     },
@@ -126,7 +142,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       label: 'Total',
       render: (item: any) => (
         <span className="text-sm font-medium">
-          {item.total_amount ? formatCurrency(item.total_amount, item.currency_code) : '—'}
+          {item.amount ? formatCurrency(item.amount, item.currencies?.code) : '—'}
         </span>
       )
     },
@@ -135,7 +151,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       label: 'Moneda',
       render: (item: any) => (
         <Badge variant="outline" className="text-xs">
-          {item.currency_code || 'Sin moneda'}
+          {item.currencies?.code || 'Sin moneda'}
         </Badge>
       )
     },
@@ -144,8 +160,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       label: 'Fecha de Recepción',
       render: (item: any) => (
         <span className="text-sm text-muted-foreground">
-          {item.received_at 
-            ? format(new Date(item.received_at), 'dd/MM/yyyy HH:mm', { locale: es })
+          {item.submitted_at 
+            ? format(new Date(item.submitted_at), 'dd/MM/yyyy', { locale: es })
             : '—'
           }
         </span>
@@ -156,15 +172,6 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       label: 'Acciones',
       render: (item: any) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            onClick={() => handleViewBid(item)}
-            title="Ver detalle"
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -207,8 +214,6 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         <Table
           data={subcontractBids}
           columns={columns}
-          searchKey="supplier_name"
-          searchPlaceholder="Buscar por proveedor..."
         />
       )}
     </div>
