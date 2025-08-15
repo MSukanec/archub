@@ -54,20 +54,6 @@ export function SubcontractBidFormModal({
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<BidFormData>({
-    resolver: zodResolver(bidFormSchema),
-    defaultValues: {
-      contact_id: initialData?.contact_id || '',
-      amount: initialData?.amount?.toString() || '',
-      currency_id: initialData?.currency_id || userData?.organization_preferences?.default_currency || '',
-      exchange_rate: initialData?.exchange_rate?.toString() || '',
-      submitted_at: initialData?.submitted_at ? new Date(initialData.submitted_at) : (mode === 'create' ? new Date() : undefined),
-      notes: initialData?.notes || ''
-    }
-  });
-
   // Efecto para establecer valores por defecto cuando los datos estén disponibles (modo crear)
   useEffect(() => {
     if (mode === 'create' && !initialData && userData?.organization_preferences?.default_currency) {
@@ -81,6 +67,20 @@ export function SubcontractBidFormModal({
       }
     }
   }, [mode, initialData, userData?.organization_preferences?.default_currency, form]);
+  
+  const [isLoading, setIsLoading] = useState(false);
+
+  const form = useForm<BidFormData>({
+    resolver: zodResolver(bidFormSchema),
+    defaultValues: {
+      contact_id: initialData?.contact_id || '',
+      amount: initialData?.amount?.toString() || '',
+      currency_id: initialData?.currency_id || userData?.organization_preferences?.default_currency || '',
+      exchange_rate: initialData?.exchange_rate?.toString() || '',
+      submitted_at: initialData?.submitted_at ? new Date(initialData.submitted_at) : (mode === 'create' ? new Date() : undefined),
+      notes: initialData?.notes || ''
+    }
+  });
 
   const onSubmit = async (data: BidFormData) => {
     setIsLoading(true);
