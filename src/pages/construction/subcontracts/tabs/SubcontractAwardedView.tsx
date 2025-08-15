@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, FileText, Calculator } from 'lucide-react';
+import { Edit, FileText, Calculator, Plus, Package, DollarSign, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
@@ -22,37 +22,25 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
   // Determinar si hay adjudicación
   const isAwarded = subcontract?.winner_bid_id && subcontract?.status === 'awarded';
   
-  // Mock data para tareas - TODO: Replace with real data from subcontract_bid_tasks
+  // TODO: Conectar con datos reales de subcontract_tasks
   const [awardedTasks, setAwardedTasks] = useState<any[]>([]);
   
   useEffect(() => {
-    // TODO: Fetch subcontract_bid_tasks from the awarded bid
-    // For now, when awarded, show mock tasks
-    if (isAwarded) {
-      setAwardedTasks([
-        {
-          id: '1',
-          task_name: 'Excavación general',
-          task_description: 'Excavación para fundaciones',
-          amount: 100,
-          unit: 'm³',
-          unit_price: 1500,
-          notes: 'Incluye retiro de material'
-        },
-        {
-          id: '2', 
-          task_name: 'Hormigón armado',
-          task_description: 'Fundaciones y columnas',
-          amount: 50,
-          unit: 'm³',
-          unit_price: 8500,
-          notes: 'H-25 con aditivo'
-        }
-      ]);
-    } else {
-      setAwardedTasks([]);
-    }
-  }, [subcontract.id, isAwarded]);
+    // TODO: Fetch real subcontract_tasks from the database
+    // For now, always show empty array - no hardcoded data
+    setAwardedTasks([]);
+  }, [subcontract.id]);
+
+  // Calcular KPIs basados en datos reales del subcontrato adjudicado
+  const formatCurrency = (amount: number, currency: string = 'ARS') => {
+    const formatter = new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: currency === 'ARS' ? 'ARS' : 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+    return formatter.format(amount);
+  };
 
   const handleEditTask = (taskId: string) => {
     setEditingTaskId(taskId);
@@ -236,8 +224,191 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
     );
   }
 
+  // Si está adjudicado pero no hay tareas, mostrar empty state específico
+  if (isAwarded && awardedTasks.length === 0) {
+    return (
+      <div className="space-y-6">
+        {/* KPIs del contrato adjudicado */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Monto Adjudicado</p>
+                  <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
+                    {subcontract.amount_total 
+                      ? formatCurrency(subcontract.amount_total, 'ARS')
+                      : 'Sin definir'
+                    }
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Valor total del contrato
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Contratista</p>
+                  <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">
+                    Adjudicado
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Contrato en ejecución
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Tareas</p>
+                  <Package className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-muted-foreground">
+                    0
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Sin tareas definidas
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Progreso</p>
+                  <TrendingUp className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-muted-foreground">
+                    0%
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Sin avance registrado
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <EmptyState
+          icon={<Package />}
+          title="Sin tareas definidas"
+          description="Este subcontrato está adjudicado pero no tiene tareas específicas definidas. Agrega tareas al alcance del subcontrato para ver los detalles del contrato aquí."
+          action={
+            <Button onClick={() => onTabChange?.('Alcance')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Definir Alcance
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* KPIs del contrato adjudicado */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Monto Adjudicado</p>
+                <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
+                  {subcontract.amount_total 
+                    ? formatCurrency(subcontract.amount_total, 'ARS')
+                    : formatCurrency(calculateTotal(), 'ARS')
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Valor total del contrato
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Tareas</p>
+                <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
+                  {awardedTasks.length}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tareas del contrato
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Estado</p>
+                <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
+                  Adjudicado
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Contrato en ejecución
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Progreso</p>
+                <Calculator className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
+                  0%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sin avance registrado
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Tabla de tareas adjudicadas */}
       <Table
         data={awardedTasks}
@@ -245,41 +416,6 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
         searchKey="task_name"
         searchPlaceholder="Buscar tareas adjudicadas..."
       />
-
-      {/* Card de totales */}
-      <Card>
-        <CardHeader 
-          icon={Calculator}
-          title="Totales del Contrato"
-          description="Resumen financiero del subcontrato adjudicado"
-        />
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <div>
-                <p className="text-sm font-medium">Cantidad de Tareas</p>
-                <p className="text-lg font-bold">{awardedTasks.length}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <div>
-                <p className="text-sm font-medium">Total del Contrato</p>
-                <p className="text-lg font-bold text-primary">
-                  ${calculateTotal().toLocaleString('es-AR')}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <div>
-                <p className="text-sm font-medium">Estado</p>
-                <Badge variant="default">Adjudicado</Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
