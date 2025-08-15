@@ -110,7 +110,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       return events.sort((a, b) => {
         if (!a.created_at) return 1;
         if (!b.created_at) return -1;
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
     },
     enabled: !!subcontract?.id
@@ -150,7 +150,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
     {
       key: 'icon',
       label: '',
-      width: '8%',
+      width: '5%',
       render: (event: any) => (
         <div className="flex justify-center">
           {getIcon(event.icon, event.status)}
@@ -160,7 +160,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
     {
       key: 'created_at',
       label: 'Fecha',
-      width: '15%',
+      width: '19%',
       render: (event: any) => (
         <div className="flex flex-col">
           {event.created_at ? (
@@ -181,7 +181,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
     {
       key: 'action',
       label: 'Acción',
-      width: '20%',
+      width: '19%',
       render: (event: any) => (
         <div className="font-medium">{event.action}</div>
       )
@@ -189,35 +189,15 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
     {
       key: 'description',
       label: 'Descripción',
-      width: '35%',
+      width: '38%',
       render: (event: any) => (
         <div className="text-sm text-muted-foreground">{event.description}</div>
       )
     },
     {
-      key: 'user',
-      label: 'Usuario',
-      width: '15%',
-      render: (event: any) => (
-        <div className="flex items-center gap-2">
-          {event.user_name && (
-            <>
-              <Avatar className="w-6 h-6">
-                <AvatarImage src={event.user_avatar} />
-                <AvatarFallback className="text-xs">
-                  {getInitials(event.user_name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm">{event.user_name}</span>
-            </>
-          )}
-        </div>
-      )
-    },
-    {
       key: 'status',
       label: 'Estado',
-      width: '12%',
+      width: '19%',
       render: (event: any) => getStatusBadge(event.status)
     }
   ];
@@ -242,13 +222,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
 
   return (
     <div className="space-y-6">
-      <div className="border-l-4 border-blue-500 pl-4">
-        <h3 className="text-lg font-semibold mb-2">Cronología del Subcontrato</h3>
-        <p className="text-sm text-muted-foreground">
-          Lista cronológica de todos los eventos y acciones realizadas en este subcontrato,
-          desde su creación hasta el estado actual.
-        </p>
-      </div>
+
 
       <Table 
         columns={columns}
