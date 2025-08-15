@@ -78,6 +78,7 @@ export function SubcontractBidFormModal({
       };
 
       console.log('Saving bid:', bidData);
+      console.log('UserData member:', userData?.member);
 
       const response = await fetch('/api/subcontract-bids', {
         method: mode === 'create' ? 'POST' : 'PUT',
@@ -96,6 +97,8 @@ export function SubcontractBidFormModal({
         description: 'Los cambios se han guardado correctamente'
       });
 
+      // Refresh the bids list after creating
+      window.location.reload(); // Temporary solution to refresh the view
       onClose();
     } catch (error) {
       console.error('Error saving bid:', error);

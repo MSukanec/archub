@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/Table';
@@ -15,8 +15,36 @@ interface SubcontractBidsViewProps {
 export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const { openModal } = useGlobalModalStore();
   
-  // TODO: Implementar hook para obtener las ofertas
-  const subcontractBids = []; // Placeholder hasta implementar el hook
+  // Obtener ofertas del subcontrato
+  const [subcontractBids, setSubcontractBids] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Cargar ofertas
+  const loadBids = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/subcontract-bids/${subcontract.id}`);
+      if (response.ok) {
+        const bids = await response.json();
+        setSubcontractBids(bids || []);
+      } else {
+        console.error('Error fetching bids:', response.statusText);
+        setSubcontractBids([]);
+      }
+    } catch (error) {
+      console.error('Error fetching bids:', error);
+      setSubcontractBids([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cargar ofertas al montar el componente
+  useEffect(() => {
+    if (subcontract?.id) {
+      loadBids();
+    }
+  }, [subcontract?.id]);
 
   const handleAddBid = () => {
     openModal('subcontract-bid', {
