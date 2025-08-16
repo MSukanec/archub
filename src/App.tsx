@@ -40,7 +40,7 @@ import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
 import CostAnalysis from "@/pages/resources/CostAnalysis";
-import ConstructionTasks from "@/pages/construction/ConstructionTasks";
+import ConstructionTasks from "@/pages/construction/tasks/Tasks";
 
 import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import ConstructionSubcontracts from "@/pages/construction/subcontracts/Subcontracts";
