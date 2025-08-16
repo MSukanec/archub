@@ -50,7 +50,8 @@ import {
   Settings,
   Ruler,
   Receipt,
-  TrendingUp
+  TrendingUp,
+  BookOpen
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -73,6 +74,7 @@ export function SidebarSubmenu() {
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
+    if (location.startsWith('/recursos')) return 'recursos';
 
     if (location.startsWith('/admin')) return 'administracion';
     return 'organizacion'; // default fallback
@@ -141,6 +143,10 @@ export function SidebarSubmenu() {
       { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
     ],
 
+    'recursos': [
+      { icon: BookOpen, label: 'Biblioteca', href: '/library' },
+    ],
+
 
 
     'administracion': [
@@ -186,8 +192,9 @@ export function SidebarSubmenu() {
       'organizacion': { title: 'Organización', icon: Building },
 
       'diseno': { title: 'Diseño', icon: Brush },
-      'obra': { title: 'Obra', icon: HardHat },
+      'construccion': { title: 'Construcción', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
+      'recursos': { title: 'Recursos', icon: BookOpen },
 
       'administracion': { title: 'Administración', icon: Crown }
     };

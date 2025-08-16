@@ -84,7 +84,7 @@ export function Sidebar() {
   
   // Initialize theme from user preferences
   useEffect(() => {
-    const currentTheme = userData?.preferences?.theme || 'light';
+    const currentTheme = (userData?.preferences?.theme as 'light' | 'dark') || 'light';
     setTheme(currentTheme);
     setIsDark(currentTheme === 'dark');
     
@@ -311,11 +311,11 @@ export function Sidebar() {
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
     },
     { 
-      id: 'biblioteca', 
+      id: 'recursos', 
       icon: BookOpen, 
-      label: 'Biblioteca', 
-      defaultRoute: '/library',
-      isActive: activeSidebarSection === 'biblioteca' || location.startsWith('/library')
+      label: 'Recursos', 
+      defaultRoute: '/recursos/biblioteca',
+      isActive: activeSidebarSection === 'recursos' || location.startsWith('/recursos')
     },
     // Administración movida al footer
   ];

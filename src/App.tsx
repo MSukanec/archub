@@ -165,8 +165,15 @@ function Router() {
           </ProtectedRoute>
         </Route>
         
-        {/* Library Route */}
+        {/* Library Route - mantener para compatibilidad */}
         <Route path="/library">
+          <ProtectedRoute>
+            <Library />
+          </ProtectedRoute>
+        </Route>
+
+        {/* Resources Routes */}
+        <Route path="/recursos/biblioteca">
           <ProtectedRoute>
             <Library />
           </ProtectedRoute>
