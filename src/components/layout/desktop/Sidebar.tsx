@@ -275,6 +275,19 @@ export function Sidebar() {
     admin: null // Admin title removed as requested
   };
 
+  // Función para detectar qué sección debería estar expandida basándose en la ubicación actual
+  const getActiveSectionFromLocation = () => {
+    if (location.startsWith('/organization')) return 'organizacion';
+    if (location.startsWith('/design')) return 'diseno';
+    if (location.startsWith('/construction')) return 'construccion';
+    if (location.startsWith('/finances')) return 'finanzas';
+    if (location.startsWith('/recursos')) return 'recursos';
+    if (location.startsWith('/admin')) return 'administracion';
+    if (location.startsWith('/profile')) return 'perfil';
+    if (location === '/dashboard') return 'organizacion';
+    return null;
+  };
+
   // Función para manejar clicks en botones principales - ahora tipo acordeón
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
     // Toggle acordeón: si ya está expandido, colapsar; si no, expandir
@@ -374,8 +387,18 @@ export function Sidebar() {
       style={{
         overflow: 'hidden'
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => {
+        setHovered(true);
+        // Cuando se hace hover, expandir la sección activa basada en la ubicación actual
+        const activeSection = getActiveSectionFromLocation();
+        if (activeSection && submenuContent[activeSection as keyof typeof submenuContent]) {
+          setExpandedAccordion(activeSection);
+        }
+      }}
+      onMouseLeave={() => {
+        setHovered(false);
+        // Al salir del hover, mantener el estado de acordeón como estaba
+      }}
     >
       {/* Logo Section */}
       <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">
