@@ -9,12 +9,16 @@ import AdminCommunityUsers from './tabs/AdminCommunityUsers';
 const AdminCommunity = () => {
   const [activeTab, setActiveTab] = useState('resumen');
 
+  const headerProps = {
+    title: "Comunidad",
+    icon: Crown,
+    showSearch: false,
+    showFilters: false,
+    actions: []
+  };
+
   return (
-    <Layout
-      icon={Crown}
-      title="Comunidad"
-      description="Gestión de la comunidad y organizaciones"
-    >
+    <Layout wide headerProps={headerProps}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="resumen">Resumen</TabsTrigger>

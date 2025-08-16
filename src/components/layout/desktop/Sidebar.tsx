@@ -331,9 +331,7 @@ export function Sidebar() {
       { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
     ],
     'administracion': [
-      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
-      { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
       { icon: Tag, label: 'Categorías', href: '/admin/categories' },
       { icon: Package, label: 'Productos', href: '/admin/products' },
