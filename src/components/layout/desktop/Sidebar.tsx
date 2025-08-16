@@ -69,6 +69,9 @@ export function Sidebar() {
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
+  // Define if the main sidebar should be expanded (docked or hovered)
+  const isExpanded = isDocked || isHovered;
+  
   // Sync sidebar state with user preferences
   useEffect(() => {
     if (userData?.preferences?.sidebar_docked !== undefined) {
@@ -244,7 +247,7 @@ export function Sidebar() {
   const [projectSearchValue, setProjectSearchValue] = useState('');
   const prevContextRef = useRef(currentSidebarContext);
   
-  const isExpanded = false; // Always collapsed - only icons
+
 
   // Handle fade animation when context changes
   useEffect(() => {
@@ -327,8 +330,11 @@ export function Sidebar() {
     <aside 
       className={cn(
         "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-50 flex flex-col",
-        "w-[40px]"
+        isExpanded ? "w-64" : "w-[40px]"
       )}
+      style={{
+        overflow: 'hidden'
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
