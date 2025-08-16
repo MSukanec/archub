@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Package, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import AdminMaterialProductos from './tabs/AdminMaterialProductos';
+import AdminMaterialProducts from './tabs/AdminMaterialProducts';
 import AdminMaterialMateriales from './tabs/AdminMaterialMateriales';
 import AdminMaterialMarcas from './tabs/AdminMaterialMarcas';
 import AdminMaterialCategorias from './tabs/AdminMaterialCategorias';
@@ -70,7 +70,7 @@ const AdminMaterials = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'productos':
-        return <AdminMaterialProductos />;
+        return <AdminMaterialProducts />;
       case 'materiales':
         return <AdminMaterialMateriales />;
       case 'marcas':
@@ -80,7 +80,7 @@ const AdminMaterials = () => {
       case 'precios':
         return <AdminMaterialPrecios />;
       default:
-        return <AdminMaterialProductos />;
+        return <AdminMaterialProducts />;
     }
   };
 
