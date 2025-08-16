@@ -303,6 +303,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       isActive: currentSidebarContext === 'finances' || location.startsWith('/finances')
     },
     { 
+      id: 'gestion', 
+      icon: Settings, 
+      label: 'Gestión', 
+      defaultRoute: '/organization/board',
+      isActive: currentSidebarContext === 'gestion' || location.startsWith('/organization/board')
+    },
+    { 
+      id: 'recursos', 
+      icon: BookOpen, 
+      label: 'Recursos', 
+      defaultRoute: '/recursos/documentacion',
+      isActive: currentSidebarContext === 'recursos' || location.startsWith('/recursos')
+    },
+    { 
       id: 'perfil', 
       icon: User, 
       label: 'Perfil', 
@@ -321,12 +335,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
-
-      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
-
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
+    ],
 
-
+    gestion: [
+      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
     ],
 
     construccion: [

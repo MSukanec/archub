@@ -105,12 +105,7 @@ export function SidebarSubmenu() {
     
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
-
-      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
-
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
-
-
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
@@ -142,6 +137,10 @@ export function SidebarSubmenu() {
 
       { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
       { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
+    ],
+
+    'gestion': [
+      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
     ],
 
     'recursos': [
@@ -197,6 +196,7 @@ export function SidebarSubmenu() {
       'diseno': { title: 'Diseño', icon: Brush },
       'construccion': { title: 'Construcción', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
+      'gestion': { title: 'Gestión', icon: Settings },
       'recursos': { title: 'Recursos', icon: BookOpen },
 
       'administracion': { title: 'Administración', icon: Crown }
