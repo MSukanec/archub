@@ -397,8 +397,11 @@ export function Sidebar() {
       }}
     >
       {/* Logo Section */}
-      <div className="h-9 flex items-center justify-center bg-[var(--main-sidebar-bg)]">
+      <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)] px-3">
         <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
+        {isExpanded && (
+          <div className="ml-2 text-lg font-bold text-[var(--main-sidebar-fg)]">RCHUB</div>
+        )}
       </div>
 
       {/* Navigation Items */}
