@@ -136,7 +136,7 @@ export function OrganizationList() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
-  const navigationStore = useNavigationStore()
+  const { setCurrentProject } = useNavigationStore()
 
   const organizations = userData?.organizations || []
 
@@ -151,10 +151,10 @@ export function OrganizationList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/current-user'] })
-      // Reset project when switching org if method exists
+      setCurrentProject(null) // Reset project when switching org
       toast({
         title: "Organización cambiada",
-        description: "La organización se ha cambiada exitosamente."
+        description: "La organización se ha cambiado exitosamente."
       })
       navigate('/organization')
     },
@@ -192,22 +192,6 @@ export function OrganizationList() {
 
   return (
     <div className="space-y-6">
-      {/* Botón para cambiar organización */}
-      {selectedOrganization && (
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSwitchToSelected}
-            disabled={switchOrganization.isPending}
-            style={{
-              backgroundColor: 'var(--accent)',
-              color: 'var(--accent-foreground)'
-            }}
-            className="hover:opacity-90"
-          >
-            {switchOrganization.isPending ? 'Cambiando...' : 'Cambiar a esta organización'}
-          </Button>
-        </div>
-      )}
 
       {/* Lista de organizaciones */}
       <div className="space-y-2">

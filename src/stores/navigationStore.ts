@@ -8,6 +8,8 @@ interface NavigationState {
   // Nueva funcionalidad para columna lateral
   activeSidebarSection: string | null
   setActiveSidebarSection: (section: string | null) => void
+  // Project management
+  setCurrentProject: (project: any) => void
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({
@@ -16,4 +18,9 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   // Estado para la columna lateral derecha - default to organization summary
   activeSidebarSection: 'organizacion',
   setActiveSidebarSection: (section: string | null) => set({ activeSidebarSection: section }),
+  // Project management
+  setCurrentProject: (project: any) => {
+    // Implementation for setting current project
+    console.log('Setting current project:', project)
+  },
 }))
