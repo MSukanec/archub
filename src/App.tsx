@@ -33,7 +33,7 @@ import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
 
 
-import FinancesPreferences from "@/pages/organization/Preferences";
+import Preferences from "@/pages/organization/Preferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
@@ -102,7 +102,13 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        {/* Organization Routes */}
+        {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
+        <Route path="/organization/preferences">
+          <ProtectedRoute>
+            <Preferences />
+          </ProtectedRoute>
+        </Route>
+        
         <Route path="/organization">
           <ProtectedRoute>
             <Organization />
@@ -264,12 +270,6 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-
-        <Route path="/organization/preferences">
-          <ProtectedRoute>
-            <FinancesPreferences />
-          </ProtectedRoute>
-        </Route>
 
         {/* Profile Routes */}
         <Route path="/profile">

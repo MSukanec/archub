@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 
-export default function FinancesPreferences() {
+export default function Preferences() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
