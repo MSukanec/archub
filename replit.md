@@ -42,6 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **Onboarding Process**: Streamlined to a single step, focusing on essential user and organization data.
 - **UI/UX Enhancements**: Redesigned projects page, improved header component with dynamic height and aesthetic refinements for a clean, professional appearance. Consistent UI architecture with modern header system. Project section completely eliminated from sidebar - functionality distributed to appropriate sections (finances, library).
 - **Navigation Restructure**: Moved project management from organization to profile section - "Gestión de Proyectos" now located in profile sidebar above "Gestión de Organizaciones" (August 2025).
+- **Resources Reorganization**: Replaced unified Library page with separate pages for Documentation, Gallery, and Contacts in Resources section. Eliminated tabs in favor of dedicated pages accessible through sub-sidebar navigation (August 2025).
+- **Profile Organizations Refactor**: Split ProfileOrganizations.tsx into Organizations.tsx with tab-based interface containing OrganizationList.tsx and OrganizationBasicData.tsx components (August 2025).
 
 ## External Dependencies
 
