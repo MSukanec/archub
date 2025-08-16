@@ -70,7 +70,7 @@ import AdminMaterials2 from "@/pages/admin/AdminMaterials2";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
 import AdminBrands from "@/pages/admin/AdminBrands";
-import AdminProducts from "@/pages/admin/AdminProducts";
+
 import AdminUnitPresentations from "@/pages/admin/AdminUnitPresentations";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 import AdminChangelogs from "@/pages/admin/AdminChangelogs";
@@ -355,13 +355,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/products">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminProducts />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/unit-presentations">
           <ProtectedRoute>
             <AdminProtectedRoute>

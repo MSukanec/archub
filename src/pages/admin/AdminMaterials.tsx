@@ -26,13 +26,13 @@ const AdminMaterials = () => {
         return {
           label: "Nuevo Producto",
           icon: Plus,
-          onClick: () => openModal('admin-product', { isEditing: false })
+          onClick: () => openModal('product-form', { editingProduct: null })
         };
       case 'materiales':
         return {
           label: "Nuevo Material",
           icon: Plus,
-          onClick: () => openModal('admin-material', { isEditing: false })
+          onClick: () => openModal('material-form', { editingMaterial: null })
         };
       case 'marcas':
         return {
