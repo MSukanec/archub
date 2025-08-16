@@ -95,10 +95,10 @@ function Router() {
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
 
-        {/* Main Dashboard - redirects to Organizations */}
+        {/* Main Dashboard - redirects to Organization */}
         <Route path="/dashboard">
           <ProtectedRoute>
-            <Organizations />
+            <Organization />
           </ProtectedRoute>
         </Route>
 
