@@ -106,7 +106,7 @@ export function SidebarSubmenu() {
     
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/organization' },
-      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
