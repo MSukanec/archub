@@ -17,6 +17,7 @@ import {
   FileText,
   DollarSign,
   FolderOpen,
+  Folder,
   Mail,
   Activity,
   Calendar,
