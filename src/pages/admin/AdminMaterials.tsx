@@ -3,8 +3,8 @@ import { Package, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminMaterialProducts from './tabs/AdminMaterialProducts';
-import AdminMaterialMateriales from './tabs/AdminMaterialMateriales';
-import AdminMaterialMarcas from './tabs/AdminMaterialMarcas';
+import AdminMaterialMaterials from './tabs/AdminMaterialMaterials';
+import AdminMaterialBrands from './tabs/AdminMaterialBrands';
 import AdminMaterialCategorias from './tabs/AdminMaterialCategorias';
 import AdminMaterialPrecios from './tabs/AdminMaterialPrecios';
 
@@ -38,7 +38,7 @@ const AdminMaterials = () => {
         return {
           label: "Nueva Marca",
           icon: Plus,
-          onClick: () => openModal('admin-brand', { isEditing: false })
+          onClick: () => openModal('brand-form', { editingBrand: null })
         };
       case 'categorias':
         return {
@@ -72,9 +72,9 @@ const AdminMaterials = () => {
       case 'productos':
         return <AdminMaterialProducts />;
       case 'materiales':
-        return <AdminMaterialMateriales />;
+        return <AdminMaterialMaterials />;
       case 'marcas':
-        return <AdminMaterialMarcas />;
+        return <AdminMaterialBrands />;
       case 'categorias':
         return <AdminMaterialCategorias />;
       case 'precios':

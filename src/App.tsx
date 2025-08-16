@@ -60,13 +60,13 @@ import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/AdminCommunity";
-import AdminUsers from "@/pages/admin/AdminUsers";
+
 import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
 import AdminMaterials from "@/pages/admin/AdminMaterials";
-import AdminMaterials2 from "@/pages/admin/AdminMaterials2";
+
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
 import AdminBrands from "@/pages/admin/AdminBrands";
@@ -280,13 +280,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/admin/users">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminUsers />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/changelogs">
           <ProtectedRoute>
             <AdminProtectedRoute>
