@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Users } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Users, CreditCard } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -48,9 +49,28 @@ export default function SubcontractList() {
     const pendingSubcontracts = subcontracts.filter(s => s.status === 'pending');
     const inProgressSubcontracts = subcontracts.filter(s => s.status === 'in_progress');
 
-    // Calcular valores totales
-    const totalAwardedValueARS = awardedSubcontracts.reduce((sum, s) => sum + (s.amount_ars || 0), 0);
-    const totalAwardedValueUSD = awardedSubcontracts.reduce((sum, s) => sum + (s.amount_usd || 0), 0);
+    // Calcular valores totales corregidos
+    const totalAwardedValueARS = awardedSubcontracts.reduce((sum, s) => {
+      // Usar amount_total si la moneda es ARS, sino convertir
+      if (s.currency_code === 'ARS') {
+        return sum + (s.amount_total || 0);
+      } else if (s.currency_code === 'USD') {
+        // Convertir USD a ARS usando exchange_rate
+        return sum + ((s.amount_total || 0) * (s.exchange_rate || 1125));
+      }
+      return sum;
+    }, 0);
+    
+    const totalAwardedValueUSD = awardedSubcontracts.reduce((sum, s) => {
+      // Usar amount_total si la moneda es USD, sino convertir
+      if (s.currency_code === 'USD') {
+        return sum + (s.amount_total || 0);
+      } else if (s.currency_code === 'ARS') {
+        // Convertir ARS a USD usando exchange_rate
+        return sum + ((s.amount_total || 0) / (s.exchange_rate || 1125));
+      }
+      return sum;
+    }, 0);
     
     // Valor total según vista de moneda
     const getTotalValue = () => {
@@ -74,10 +94,20 @@ export default function SubcontractList() {
 
     const totalValues = getTotalValue();
 
-    // Calcular promedio de adjudicación
-    const averageAwardValue = awardedSubcontracts.length > 0 
-      ? totalAwardedValueARS / awardedSubcontracts.length 
-      : 0;
+    // Calcular saldo restante (total pagado vs total adjudicado)
+    const totalPaidARS = subcontractAnalysis.reduce((sum, analysis) => {
+      const totalPaid = analysis.movements?.reduce((moveSum: number, mov: any) => {
+        if (mov.currency_code === 'ARS') {
+          return moveSum + (mov.amount || 0);
+        } else if (mov.currency_code === 'USD') {
+          return moveSum + ((mov.amount || 0) * (mov.exchange_rate || 1125));
+        }
+        return moveSum;
+      }, 0) || 0;
+      return sum + totalPaid;
+    }, 0);
+    
+    const remainingBalanceARS = totalAwardedValueARS - totalPaidARS;
 
     // Distribución por estado
     const statusDistribution = {
@@ -93,7 +123,8 @@ export default function SubcontractList() {
       pendingCount: pendingSubcontracts.length,
       inProgressCount: inProgressSubcontracts.length,
       totalValues,
-      averageAwardValue,
+      remainingBalanceARS,
+      totalPaidARS,
       statusDistribution,
       awardedPercentage: (awardedSubcontracts.length / totalSubcontracts) * 100
     };
@@ -430,6 +461,31 @@ export default function SubcontractList() {
                   <div className="text-xs text-muted-foreground">
                     {kpiData.awardedCount} adjudicados • {kpiData.pendingCount} pendientes
                   </div>
+                  
+                  {/* Mini gráfico de dona */}
+                  <div className="h-16 mt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Adjudicados', value: kpiData.awardedCount, color: 'var(--accent)' },
+                            { name: 'Pendientes', value: kpiData.pendingCount, color: '#f59e0b' },
+                            { name: 'Otros', value: kpiData.totalSubcontracts - kpiData.awardedCount - kpiData.pendingCount, color: '#6b7280' }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={15}
+                          outerRadius={25}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          <Cell key="awarded" fill="var(--accent)" />
+                          <Cell key="pending" fill="#f59e0b" />
+                          <Cell key="other" fill="#6b7280" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -465,26 +521,62 @@ export default function SubcontractList() {
                   <div className="text-xs text-muted-foreground">
                     {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}% del total
                   </div>
+                  
+                  {/* Mini gráfico de barras comparativo */}
+                  <div className="h-12 mt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { name: 'Adjudicado', value: kpiData.totalValues.ars, color: 'var(--accent)' },
+                        { name: 'Pagado', value: kpiData.totalPaidARS, color: '#22c55e' }
+                      ]}>
+                        <Bar dataKey="value" radius={2}>
+                          <Cell key="adjudicado" fill="var(--accent)" />
+                          <Cell key="pagado" fill="#22c55e" />
+                        </Bar>
+                        <Tooltip 
+                          formatter={(value: any) => `$${value.toLocaleString('es-AR')}`}
+                          labelStyle={{ color: '#374151' }}
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '6px',
+                            fontSize: '12px'
+                          }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Promedio por Subcontrato */}
+          {/* Saldo Restante */}
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Promedio Adjudicado</p>
-                  <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className="text-sm text-muted-foreground">Saldo Restante</p>
+                  <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 <div className="space-y-2">
                   <p className="text-2xl font-bold">
-                    ${(kpiData.averageAwardValue || 0).toLocaleString('es-AR')}
+                    ${(kpiData.remainingBalanceARS || 0).toLocaleString('es-AR')}
                   </p>
                   <div className="text-xs text-muted-foreground">
-                    Por subcontrato adjudicado
+                    Pendiente de pago
+                  </div>
+                  
+                  {/* Mini gráfico de barras */}
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min((kpiData.totalPaidARS / (kpiData.totalValues.ars || 1)) * 100, 100)}%`,
+                        background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -504,6 +596,30 @@ export default function SubcontractList() {
                   <p className="text-2xl font-bold">{kpiData.awardedPercentage.toFixed(0)}%</p>
                   <div className="text-xs text-muted-foreground">
                     Tasa de adjudicación
+                  </div>
+                  
+                  {/* Barra de progreso circular */}
+                  <div className="h-16 mt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Completado', value: kpiData.awardedPercentage },
+                            { name: 'Restante', value: 100 - kpiData.awardedPercentage }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          startAngle={90}
+                          endAngle={450}
+                          innerRadius={20}
+                          outerRadius={25}
+                          dataKey="value"
+                        >
+                          <Cell key="completed" fill="var(--accent)" />
+                          <Cell key="remaining" fill="#e5e7eb" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
