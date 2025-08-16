@@ -106,6 +106,7 @@ export function SidebarSubmenu() {
     
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
@@ -136,7 +137,6 @@ export function SidebarSubmenu() {
       { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
 
       { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
-      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
 
 

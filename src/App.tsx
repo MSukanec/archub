@@ -33,7 +33,7 @@ import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
 
 
-import FinancesPreferences from "@/pages/finances/FinancesPreferences";
+import FinancesPreferences from "@/pages/finances/Preferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
