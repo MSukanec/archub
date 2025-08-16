@@ -1,5 +1,5 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
+import React, { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -8,8 +8,6 @@ interface CustomButtonProps {
   title: string
   description?: string
   onClick: () => void
-  variant?: 'default' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
   className?: string
   disabled?: boolean
 }
@@ -19,50 +17,67 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
   title,
   description,
   onClick,
-  variant = 'outline',
-  size = 'md',
   className,
   disabled = false
 }) => {
-  const sizeClasses = {
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6'
-  }
-
-  const iconSizes = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5', 
-    lg: 'h-6 w-6'
-  }
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <Button
-      variant={variant}
-      onClick={onClick}
-      disabled={disabled}
+    <div 
       className={cn(
-        'w-full justify-start text-left h-auto',
-        sizeClasses[size],
+        "group relative w-full transition-all duration-200",
         className
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center gap-3 w-full">
-        <Icon 
-          className={cn(
-            iconSizes[size],
-            'text-muted-foreground flex-shrink-0'
-          )} 
-        />
+      {/* Main Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onClick()
+        }}
+        disabled={disabled}
+        className={cn(
+          "w-full flex items-center gap-3 p-3 rounded-lg border transition-all duration-200",
+          "text-left bg-transparent hover:bg-accent/5",
+          "border-solid border-foreground/20 hover:border-accent",
+          "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-foreground/20",
+          isHovered && !disabled && "border-accent shadow-sm"
+        )}
+      >
+        {/* Icon */}
+        <div className="flex-shrink-0 w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+          <Icon className="w-4 h-4 text-accent" />
+        </div>
+
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm">{title}</div>
+          <div className={cn(
+            "font-medium text-sm transition-colors duration-200",
+            "text-foreground",
+            isHovered && !disabled && "text-accent"
+          )}>
+            {title}
+          </div>
           {description && (
-            <div className="text-xs text-muted-foreground mt-0.5">
+            <div className="text-xs text-muted-foreground mt-0.5 truncate">
               {description}
             </div>
           )}
         </div>
-      </div>
-    </Button>
+
+        {/* Always Visible Add Icon */}
+        <div className="flex-shrink-0">
+          <Plus className={cn(
+            "h-4 w-4 text-muted-foreground transition-colors duration-200",
+            isHovered && !disabled && "text-accent"
+          )} />
+        </div>
+      </button>
+    </div>
   )
 }
