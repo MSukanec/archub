@@ -126,7 +126,7 @@ export function SidebarSubmenu() {
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
-      { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis', requiresProject: true },
+
     ],
 
     'finanzas': [
@@ -146,6 +146,7 @@ export function SidebarSubmenu() {
       { icon: Images, label: 'Galería', href: '/recursos/galeria' },
       { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
       { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
+      { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
     ],
 
 

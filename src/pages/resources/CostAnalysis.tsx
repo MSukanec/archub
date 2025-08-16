@@ -14,7 +14,7 @@ import { Selector } from '@/components/ui-custom/Selector'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 
-export default function ConstructionCostAnalysis() {
+export default function CostAnalysis() {
   const [activeTab, setActiveTab] = useState("tareas")
   const [dataType, setDataType] = useState("todos")
 
@@ -28,7 +28,7 @@ export default function ConstructionCostAnalysis() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('construction')
+    setSidebarContext('recursos')
   }, [setSidebarContext])
 
   // Filter tasks (no search filtering since search is removed)
