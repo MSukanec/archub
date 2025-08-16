@@ -321,7 +321,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     organizacion: [
       { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
+
       { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
 
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
