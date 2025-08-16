@@ -120,7 +120,7 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
 
-      { icon: Calendar, label: 'Cronograma', href: '/construction/schedule', requiresProject: true },
+
       { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
       { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
