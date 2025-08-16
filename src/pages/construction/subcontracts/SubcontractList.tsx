@@ -177,8 +177,8 @@ export default function SubcontractList() {
       projectId: userData?.preferences?.last_project_id,
       organizationId: userData?.organization?.id,
       userId: userData?.user?.id,
-      subcontractId: subcontract.id,
-      isEditing: true
+      isEditing: true,
+      subcontract
     });
   };
 
@@ -295,22 +295,6 @@ export default function SubcontractList() {
               border: 'none'
             };
             displayText = 'Cancelado';
-            break;
-          case 'en_progreso':
-            badgeStyle = { 
-              backgroundColor: '#3b82f6', // Azul
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'En Progreso';
-            break;
-          case 'pendiente':
-            badgeStyle = { 
-              backgroundColor: '#f59e0b', // Amarillo/Naranja
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Pendiente';
             break;
           default:
             badgeStyle = { 
