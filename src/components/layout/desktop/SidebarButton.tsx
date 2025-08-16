@@ -117,11 +117,11 @@ export default function SidebarButton({
       {isExpanded && (
         <div className={cn(
           "flex items-center justify-between w-full",
-          isChild ? "ml-2" : "ml-8" // Menos margen para elementos hijos
+          isChild ? "ml-2" : "ml-10" // Más margen para separar del icono
         )}>
           <span className={cn(
             "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            variant === 'main' ? "font-medium" : "font-normal"
+            "font-normal" // Quitar negrita de todos los textos
           )}>
             {label}
           </span>
