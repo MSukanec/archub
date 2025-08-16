@@ -326,7 +326,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
 
-      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+
     ],
 
     construccion: [
@@ -346,6 +346,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments' },
       { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts' },
       { icon: Users, label: 'Clientes', href: '/finances/clients' },
+      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
     diseno: [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },

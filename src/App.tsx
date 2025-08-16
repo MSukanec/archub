@@ -33,7 +33,7 @@ import FinancesInstallments from "@/pages/finances/FinancesInstallments";
 import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
 
 
-import OrganizationPreferences from "@/pages/organization/OrganizationPreferences";
+import FinancesPreferences from "@/pages/finances/FinancesPreferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
@@ -272,9 +272,9 @@ function Router() {
         </Route>
 
 
-        <Route path="/organization/preferences">
+        <Route path="/finances/preferences">
           <ProtectedRoute>
-            <OrganizationPreferences />
+            <FinancesPreferences />
           </ProtectedRoute>
         </Route>
 

@@ -110,7 +110,7 @@ export function SidebarSubmenu() {
 
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
 
-      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
@@ -141,6 +141,7 @@ export function SidebarSubmenu() {
       { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
 
       { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
+      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
 
     'recursos': [

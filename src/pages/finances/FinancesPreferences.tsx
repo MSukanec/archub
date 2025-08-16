@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 
-export default function OrganizationPreferences() {
+export default function FinancesPreferences() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
@@ -34,7 +34,7 @@ export default function OrganizationPreferences() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('organization');
+    setSidebarContext('finances');
   }, [setSidebarContext]);
 
   // Initialize form values from organization data
@@ -223,9 +223,10 @@ export default function OrganizationPreferences() {
       wide={false}
       headerProps={{
         title: "Preferencias",
+        icon: Coins,
         breadcrumb: [
-          { name: "Organización", href: "/organization/dashboard" },
-          { name: "Preferencias", href: "/organization/preferences" }
+          { name: "Finanzas", href: "/finances/dashboard" },
+          { name: "Preferencias", href: "/finances/preferences" }
         ]
       }}
     >
