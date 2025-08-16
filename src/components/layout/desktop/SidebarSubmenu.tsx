@@ -235,24 +235,7 @@ export function SidebarSubmenu() {
 
       {/* Contenido del submenú */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
-        <div className="relative flex flex-col gap-[1px]">
-          {/* Línea vertical para conectar sub-items - visible solo cuando hay sub-items activos */}
-          {filteredSubmenu.length > 0 && filteredSubmenu.some(item => 
-            (item.href && location === item.href) || 
-            (item.type === 'accordion' && item.items?.some(subItem => location === subItem.href))
-          ) && (
-            <div 
-              className="absolute left-[16px] top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-[var(--accent)] to-transparent opacity-50"
-              style={{ 
-                background: `linear-gradient(to bottom, 
-                  transparent 0%, 
-                  var(--accent) 10%, 
-                  var(--accent) 90%, 
-                  transparent 100%)`
-              }}
-            />
-          )}
-          
+        <div className="flex flex-col gap-[1px]">
           {filteredSubmenu.length > 0 ? (
             filteredSubmenu.map((item, index) => {
               if (item.type === 'accordion') {
@@ -267,29 +250,20 @@ export function SidebarSubmenu() {
                       </div>
                     )}
                     {/* Items del acordeón */}
-                    <div className="flex flex-col gap-[1px] relative">
-                      {item.items?.map((subItem, subIndex) => {
-                        const isActiveSubItem = location === subItem.href;
-                        return (
-                          <div key={subIndex} className="mb-[1px] relative">
-                            {/* Punto de conexión para el item activo */}
-                            {isActiveSubItem && (
-                              <div 
-                                className="absolute left-[16px] top-[50%] w-[3px] h-[3px] bg-[var(--accent)] rounded-full transform -translate-y-1/2 z-10"
-                              />
-                            )}
-                            <SidebarButton
-                              icon={<subItem.icon className="w-[18px] h-[18px]" />}
-                              href={subItem.href}
-                              isActive={isActiveSubItem}
-                              onClick={subItem.onClick}
-                              label={subItem.label}
-                              isExpanded={isSecondarySidebarExpanded}
-                              variant="secondary"
-                            />
-                          </div>
-                        );
-                      })}
+                    <div className="flex flex-col gap-[1px]">
+                      {item.items?.map((subItem, subIndex) => (
+                        <div key={subIndex} className="mb-[1px]">
+                          <SidebarButton
+                            icon={<subItem.icon className="w-[18px] h-[18px]" />}
+                            href={subItem.href}
+                            isActive={location === subItem.href}
+                            onClick={subItem.onClick}
+                            label={subItem.label}
+                            isExpanded={isSecondarySidebarExpanded}
+                            variant="secondary"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
@@ -327,23 +301,17 @@ export function SidebarSubmenu() {
 
               // Botón con restricción de modo general
               if (item.generalModeRestricted) {
-                const isActiveItem = item.href === '/organization' 
-                  ? (location === '/organization' || location === '/dashboard')
-                  : location === item.href;
-                  
                 return (
-                  <div key={index} className="mb-[1px] relative">
-                    {/* Punto de conexión para el item activo */}
-                    {isActiveItem && (
-                      <div 
-                        className="absolute left-[16px] top-[50%] w-[3px] h-[3px] bg-[var(--accent)] rounded-full transform -translate-y-1/2 z-10"
-                      />
-                    )}
+                  <div key={index} className="mb-[1px]">
                     <CustomRestricted reason="general_mode" functionName={item.label}>
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href={item.href}
-                        isActive={isActiveItem}
+                        isActive={
+                          item.href === '/organization' 
+                            ? (location === '/organization' || location === '/dashboard')
+                            : location === item.href
+                        }
                         onClick={item.onClick}
                         label={item.label}
                         isExpanded={isSecondarySidebarExpanded}
@@ -354,22 +322,16 @@ export function SidebarSubmenu() {
                 );
               }
 
-              const isActiveItem = item.href === '/organization' 
-                ? (location === '/organization' || location === '/dashboard')
-                : location === item.href;
-              
               return (
-                <div key={index} className="mb-[1px] relative">
-                  {/* Punto de conexión para el item activo */}
-                  {isActiveItem && (
-                    <div 
-                      className="absolute left-[16px] top-[50%] w-[3px] h-[3px] bg-[var(--accent)] rounded-full transform -translate-y-1/2 z-10"
-                    />
-                  )}
+                <div key={index} className="mb-[1px]">
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}
-                    isActive={isActiveItem}
+                    isActive={
+                      item.href === '/organization' 
+                        ? (location === '/organization' || location === '/dashboard')
+                        : location === item.href
+                    }
                     onClick={item.onClick}
                     label={item.label}
                     isExpanded={isSecondarySidebarExpanded}

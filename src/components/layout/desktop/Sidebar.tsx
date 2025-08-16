@@ -391,7 +391,7 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-50 flex flex-col relative",
+        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-50 flex flex-col",
         isExpanded ? "w-64" : "w-[40px]"
       )}
       style={{
@@ -410,19 +410,6 @@ export function Sidebar() {
         // Al salir del hover, mantener el estado de acordeón como estaba
       }}
     >
-      {/* Línea vertical del indicador de sección activa en el sidebar principal */}
-      {getActiveSectionFromLocation() && (
-        <div 
-          className="absolute right-0 top-0 bottom-0 w-[2px] bg-[var(--accent)] opacity-60 z-20"
-          style={{
-            background: `linear-gradient(to bottom, 
-              transparent 0%, 
-              var(--accent) 20%, 
-              var(--accent) 80%, 
-              transparent 100%)`
-          }}
-        />
-      )}
       {/* Logo Section */}
       <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
         {isExpanded ? (
