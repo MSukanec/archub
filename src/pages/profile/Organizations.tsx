@@ -154,7 +154,9 @@ export function OrganizationList() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] })
+      // Force refresh user data
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      queryClient.refetchQueries({ queryKey: ['current-user'] })
       setCurrentProject(null) // Reset project when switching org
       toast({
         title: "Organización cambiada",
