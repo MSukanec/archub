@@ -314,7 +314,7 @@ export function Sidebar() {
       id: 'recursos', 
       icon: BookOpen, 
       label: 'Recursos', 
-      defaultRoute: '/recursos/biblioteca',
+      defaultRoute: '/recursos/documentacion',
       isActive: activeSidebarSection === 'recursos' || location.startsWith('/recursos')
     },
     // Administración movida al footer

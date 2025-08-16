@@ -36,7 +36,6 @@ import {
   FileCode,
   History,
   Contact,
-  Images,
   Database,
   Layout,
 
@@ -51,7 +50,8 @@ import {
   Ruler,
   Receipt,
   TrendingUp,
-  BookOpen
+  BookOpen,
+  Images
 } from "lucide-react";
 
 export function SidebarSubmenu() {
@@ -144,7 +144,8 @@ export function SidebarSubmenu() {
     ],
 
     'recursos': [
-      { icon: BookOpen, label: 'Biblioteca', href: '/library' },
+      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
+      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
     ],
 
 

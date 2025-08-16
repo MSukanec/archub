@@ -46,7 +46,9 @@ import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import ConstructionSubcontracts from "@/pages/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/design/DesignDashboard";
-import Library from "@/pages/Library";
+import Library from "@/pages/resources/Library";
+import Documentation from "@/pages/resources/Documentation";
+import Gallery from "@/pages/resources/Gallery";
 import OrganizationBoard from "@/pages/organization/OrganizationBoard";
 import ProfileOrganizations from "@/pages/profile/ProfileOrganizations";
 
@@ -173,9 +175,14 @@ function Router() {
         </Route>
 
         {/* Resources Routes */}
-        <Route path="/recursos/biblioteca">
+        <Route path="/recursos/documentacion">
           <ProtectedRoute>
-            <Library />
+            <Documentation />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/recursos/galeria">
+          <ProtectedRoute>
+            <Gallery />
           </ProtectedRoute>
         </Route>
 
