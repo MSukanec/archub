@@ -54,7 +54,6 @@ import Organizations from "@/pages/profile/Organizations";
 import Organization from "@/pages/organization/Organization";
 
 import Profile from "@/pages/profile/Profile";
-import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
 import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/others/SelectMode";
@@ -278,11 +277,7 @@ function Router() {
             <Profile />
           </ProtectedRoute>
         </Route>
-        <Route path="/profile/data">
-          <ProtectedRoute>
-            <ProfileBasicData />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/profile/settings">
           <ProtectedRoute>
             <ProfileSettings />
