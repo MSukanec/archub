@@ -130,13 +130,13 @@ export default function OrganizationDashboard() {
                 icon={CheckSquare}
                 title="Gestionar cronograma"
                 description="Administra tareas y cronograma del proyecto"
-                onClick={() => setLocation('/construction/timeline')}
+                onClick={() => setLocation('/construction/schedule')}
               />
               <CustomButton
                 icon={FileText}
                 title="Gestionar bitácoras"
                 description="Registra el progreso y eventos del proyecto"
-                onClick={() => setLocation('/construction/site-logs')}
+                onClick={() => setLocation('/construction/logs')}
               />
               <CustomButton
                 icon={HardHat}
