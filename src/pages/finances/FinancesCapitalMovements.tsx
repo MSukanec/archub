@@ -301,6 +301,7 @@ export default function FinancesCapitalMovements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['capital-movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: 'Movimiento eliminado',
         description: 'El movimiento de capital ha sido eliminado correctamente',

@@ -1345,6 +1345,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Movimiento actualizado' : 'Movimiento creado',
         description: editingMovement 
@@ -1475,6 +1476,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Conversión actualizada' : 'Conversión creada',
         description: editingMovement 
@@ -1552,6 +1554,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: 'Transferencia creada',
         description: 'La transferencia interna ha sido creada correctamente',
@@ -1622,6 +1625,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Aporte actualizado' : 'Aporte registrado',
         description: editingMovement 
@@ -1701,6 +1705,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Aporte Propio actualizado' : 'Aporte Propio registrado',
         description: editingMovement 
@@ -1768,6 +1773,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Retiro Propio actualizado' : 'Retiro Propio registrado',
         description: editingMovement 
@@ -1856,6 +1862,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Compra de Materiales actualizada' : 'Compra de Materiales registrada',
         description: editingMovement 
@@ -1963,6 +1970,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['/api/movement-subcontracts'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
         title: editingMovement ? 'Pago de Subcontrato actualizado' : 'Pago de Subcontrato registrado',
         description: editingMovement 

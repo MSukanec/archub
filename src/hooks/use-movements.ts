@@ -274,6 +274,7 @@ export function useToggleMovementFavorite() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
     }
   })
 }
