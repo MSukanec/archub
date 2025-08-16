@@ -397,10 +397,13 @@ export function Sidebar() {
       }}
     >
       {/* Logo Section */}
-      <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)] px-3">
-        <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
-        {isExpanded && (
-          <div className="ml-2 text-lg font-bold text-[var(--main-sidebar-fg)]">RCHUB</div>
+      <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
+        {isExpanded ? (
+          <div className="ml-3 text-lg font-bold text-[var(--main-sidebar-fg)]">ARCHUB</div>
+        ) : (
+          <div className="w-full flex items-center justify-center">
+            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
+          </div>
         )}
       </div>
 
