@@ -6,6 +6,7 @@ import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskParameters from './AdminTaskParameters';
 import AdminTaskTemplates from './AdminTaskTemplates';
+import AdminTaskFlow from './AdminTaskFlow';
 
 const AdminTasks = () => {
   const [activeTab, setActiveTab] = useState('tareas');
@@ -14,6 +15,7 @@ const AdminTasks = () => {
   const tabs = [
     { id: 'tareas', label: 'Tareas', isActive: activeTab === 'tareas' },
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
+    { id: 'flujo', label: 'Flujo', isActive: activeTab === 'flujo' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
     { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' }
   ];
@@ -41,6 +43,8 @@ const AdminTasks = () => {
             console.log('Crear nuevo parámetro');
           }
         };
+      case 'flujo':
+        return null; // No action button for flow tab
       case 'plantillas':
         return {
           label: "Nueva Plantilla",
@@ -64,6 +68,8 @@ const AdminTasks = () => {
         return <AdminTaskCategories />;
       case 'parametros':
         return <AdminTaskParameters />;
+      case 'flujo':
+        return <AdminTaskFlow />;
       case 'plantillas':
         return <AdminTaskTemplates />;
       default:
