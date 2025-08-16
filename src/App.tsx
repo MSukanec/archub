@@ -60,7 +60,6 @@ import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/community/AdminCommunity";
-import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 
 
 import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
@@ -286,13 +285,7 @@ function Router() {
 
 
 
-        <Route path="/admin/task-parameters">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminTaskParameters />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         
 
 
