@@ -86,8 +86,8 @@ export default function FinancesDashboard() {
   return (
     <Layout headerProps={{ title: "Resumen Financiero", icon: DollarSign }} wide={true}>
       <div>
-        {/* ActionBar with view mode toggle */}
-        <ActionBar>
+        {/* View mode toggle */}
+        <div className="flex items-center justify-between p-4 border-b bg-background/50 backdrop-blur-sm mb-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Ver datos de:</span>
             <div className="flex bg-muted rounded-lg p-1">
@@ -111,7 +111,7 @@ export default function FinancesDashboard() {
               </Button>
             </div>
           </div>
-        </ActionBar>
+        </div>
 
         {/* Show empty state if no movements exist */}
         {!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0) ? (
