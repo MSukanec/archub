@@ -413,8 +413,19 @@ export function Sidebar() {
             {mainSidebarItems.map((item, index) => (
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
-                {item.generalModeRestricted ? (
-                  <CustomRestricted reason="general_mode" functionName={item.label}>
+                <div className="relative">
+                  {item.generalModeRestricted ? (
+                    <CustomRestricted reason="general_mode" functionName={item.label}>
+                      <SidebarButton
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={item.isActive}
+                        isExpanded={isExpanded}
+                        onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                        variant="main"
+                      />
+                    </CustomRestricted>
+                  ) : (
                     <SidebarButton
                       icon={<item.icon className="w-[18px] h-[18px]" />}
                       label={item.label}
@@ -423,17 +434,16 @@ export function Sidebar() {
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                       variant="main"
                     />
-                  </CustomRestricted>
-                ) : (
-                  <SidebarButton
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={item.isActive}
-                    isExpanded={isExpanded}
-                    onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-                    variant="main"
-                  />
-                )}
+                  )}
+                  
+                  {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
+                  {!isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
+                    <div 
+                      className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
+                      style={{ transform: 'translateX(1px)' }}
+                    />
+                  )}
+                </div>
                 
                 {/* Mostrar subelementos si está expandido y el sidebar está expandido */}
                 {isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
@@ -463,14 +473,24 @@ export function Sidebar() {
           {/* Admin button (above Profile) */}
           {isAdmin && (
             <div className="mb-[2px]">
-              <SidebarButton
-                icon={<Crown className="w-[18px] h-[18px]" />}
-                label="Administración"
-                isActive={location.startsWith('/admin')}
-                isExpanded={isExpanded}
-                onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
-                variant="main"
-              />
+              <div className="relative">
+                <SidebarButton
+                  icon={<Crown className="w-[18px] h-[18px]" />}
+                  label="Administración"
+                  isActive={location.startsWith('/admin')}
+                  isExpanded={isExpanded}
+                  onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
+                  variant="main"
+                />
+                
+                {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
+                {!isExpanded && expandedAccordion === 'administracion' && (
+                  <div 
+                    className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
+                    style={{ transform: 'translateX(1px)' }}
+                  />
+                )}
+              </div>
               
               {/* Mostrar subelementos de administración si está expandido */}
               {isExpanded && expandedAccordion === 'administracion' && (
@@ -529,16 +549,26 @@ export function Sidebar() {
           
           {/* Profile */}
           <div className="mb-[2px]">
-            <SidebarButton
-              icon={<UserCircle className="w-[18px] h-[18px]" />}
-              label="Mi Perfil"
-              isActive={location.startsWith('/profile')}
-              isExpanded={isExpanded}
-              onClick={() => handleMainSectionClick('perfil', '/profile/data')}
-              avatarUrl={userData?.user?.avatar_url}
-              userFullName={userData?.user?.full_name}
-              variant="main"
-            />
+            <div className="relative">
+              <SidebarButton
+                icon={<UserCircle className="w-[18px] h-[18px]" />}
+                label="Mi Perfil"
+                isActive={location.startsWith('/profile')}
+                isExpanded={isExpanded}
+                onClick={() => handleMainSectionClick('perfil', '/profile/data')}
+                avatarUrl={userData?.user?.avatar_url}
+                userFullName={userData?.user?.full_name}
+                variant="main"
+              />
+              
+              {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
+              {!isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
+                <div 
+                  className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
+                  style={{ transform: 'translateX(1px)' }}
+                />
+              )}
+            </div>
             
             {/* Mostrar subelementos del perfil si está expandido */}
             {isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
