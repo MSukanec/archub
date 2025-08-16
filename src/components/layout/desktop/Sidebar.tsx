@@ -285,7 +285,7 @@ export function Sidebar() {
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization/dashboard',
-      isActive: activeSidebarSection === 'organizacion' || location.startsWith('/organization') || location === '/dashboard'
+      isActive: activeSidebarSection === 'organizacion' || (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard'
     },
 
     { 
@@ -315,7 +315,7 @@ export function Sidebar() {
       icon: Settings, 
       label: 'Gestión', 
       defaultRoute: '/organization/board',
-      isActive: activeSidebarSection === 'gestion' || location.startsWith('/organization/board')
+      isActive: activeSidebarSection === 'gestion' || location === '/organization/board'
     },
     { 
       id: 'recursos', 

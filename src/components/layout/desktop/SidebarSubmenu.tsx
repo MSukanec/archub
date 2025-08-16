@@ -69,6 +69,7 @@ export function SidebarSubmenu() {
   // Definir sección por defecto basada en la ruta actual
   const getDefaultSection = () => {
     if (location.startsWith('/profile')) return 'perfil';
+    if (location.startsWith('/organization/board')) return 'gestion';
     if (location.startsWith('/organization')) return 'organizacion';
 
     if (location.startsWith('/design')) return 'diseno';

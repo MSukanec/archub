@@ -277,7 +277,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization/dashboard',
-      isActive: currentSidebarContext === 'organization' || location.startsWith('/organization') || location === '/dashboard' || location === '/tasks'
+      isActive: currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard' || location === '/tasks'
     },
 
     { 
@@ -307,7 +307,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       icon: Settings, 
       label: 'Gestión', 
       defaultRoute: '/organization/board',
-      isActive: currentSidebarContext === 'gestion' || location.startsWith('/organization/board')
+      isActive: currentSidebarContext === 'gestion' || location === '/organization/board'
     },
     { 
       id: 'recursos', 
