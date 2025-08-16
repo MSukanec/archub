@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { OrganizationDashboardView } from './tabs/OrganizationDashboardView';
 import { OrganizationMembersView } from './tabs/OrganizationMembersView';
 import { OrganizationSettingsView } from './tabs/OrganizationSettingsView';
+import { OrganizationActivityView } from './tabs/OrganizationActivityView';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -28,6 +29,11 @@ export default function Organization() {
       id: 'Miembros',
       label: 'Miembros',
       isActive: activeTab === 'Miembros'
+    },
+    {
+      id: 'Actividad',
+      label: 'Actividad',
+      isActive: activeTab === 'Actividad'
     },
     {
       id: 'Configuración',
@@ -77,6 +83,7 @@ export default function Organization() {
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Resumen' && <OrganizationDashboardView organization={organization} />}
       {activeTab === 'Miembros' && <OrganizationMembersView organization={organization} />}
+      {activeTab === 'Actividad' && <OrganizationActivityView />}
       {activeTab === 'Configuración' && <OrganizationSettingsView organization={organization} />}
     </Layout>
   );
