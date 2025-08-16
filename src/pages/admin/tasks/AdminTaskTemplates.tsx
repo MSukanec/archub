@@ -146,20 +146,20 @@ const AdminTaskTemplates = () => {
   // Show full empty state when no templates exist
   if (!isLoading && templates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
-        <FileCode className="w-16 h-16 text-muted-foreground mb-6" />
-        <h3 className="text-xl font-semibold mb-2">No hay plantillas</h3>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          Crea tu primera plantilla para comenzar a generar tareas paramétricas
-        </p>
-        <Button
-          onClick={() => openModal('task-template')}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Crear Primera Plantilla
-        </Button>
-      </div>
+      <EmptyState
+        icon={<FileCode className="w-12 h-12 text-muted-foreground" />}
+        title="No hay plantillas"
+        description="Crea tu primera plantilla para comenzar a generar tareas paramétricas"
+        action={
+          <Button
+            onClick={() => openModal('task-template')}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Crear Primera Plantilla
+          </Button>
+        }
+      />
     )
   }
 
@@ -176,13 +176,11 @@ const AdminTaskTemplates = () => {
             onSearchChange: setSearchValue
           }}
           emptyState={
-            <div className="text-center py-8">
-              <FileCode className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No se encontraron plantillas</h3>
-              <p className="text-muted-foreground">
-                Prueba ajustando el término de búsqueda
-              </p>
-            </div>
+            <EmptyState
+              icon={<FileCode className="w-12 h-12 text-muted-foreground" />}
+              title="No se encontraron plantillas"
+              description="Prueba ajustando el término de búsqueda"
+            />
           }
         />
       )}
@@ -206,19 +204,19 @@ const AdminTaskTemplates = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Selecciona una plantilla</h3>
-                <p className="text-muted-foreground mb-6">
-                  Elige una plantilla de la lista para comenzar a editarla
-                </p>
-                <Button
-                  onClick={() => setActiveTab('Lista')}
-                  variant="outline"
-                >
-                  Ir a Lista
-                </Button>
-              </div>
+              <EmptyState
+                icon={<Settings className="w-12 h-12 text-muted-foreground" />}
+                title="Selecciona una plantilla"
+                description="Elige una plantilla de la lista para comenzar a editarla"
+                action={
+                  <Button
+                    onClick={() => setActiveTab('Lista')}
+                    variant="outline"
+                  >
+                    Ir a Lista
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>
