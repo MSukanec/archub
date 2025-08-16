@@ -65,6 +65,7 @@ import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
 import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
+import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 
 
 
@@ -321,6 +322,14 @@ function Router() {
           <ProtectedRoute>
             <AdminProtectedRoute>
               <AdminTasks />
+            </AdminProtectedRoute>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/admin/general">
+          <ProtectedRoute>
+            <AdminProtectedRoute>
+              <AdminGeneral />
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
