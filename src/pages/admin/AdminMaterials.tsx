@@ -44,7 +44,7 @@ const AdminMaterials = () => {
         return {
           label: "Nueva Categoría",
           icon: Plus,
-          onClick: () => openModal('task-category', { isEditing: true })
+          onClick: () => openModal('material-category-form', { editingMaterialCategory: null })
         };
       case 'precios':
         return {
