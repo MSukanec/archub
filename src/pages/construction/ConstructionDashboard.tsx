@@ -16,7 +16,8 @@ export default function ConstructionDashboard() {
     <Layout 
       wide
       headerProps={{
-        title: "Resumen de Construcción"
+        title: "Resumen de Construcción",
+        icon: Building
       }}
     >
       <div>

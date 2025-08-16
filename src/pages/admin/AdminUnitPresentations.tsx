@@ -208,6 +208,7 @@ export default function AdminUnitPresentations() {
 
   const headerProps = {
     title: 'Unidades',
+    icon: Ruler,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

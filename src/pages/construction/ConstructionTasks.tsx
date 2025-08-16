@@ -508,6 +508,7 @@ export default function ConstructionTasks() {
 
   const headerProps = {
     title: "Listado de Tareas",
+    icon: CheckSquare,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "tasks" ? {

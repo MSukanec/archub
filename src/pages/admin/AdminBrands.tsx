@@ -149,6 +149,7 @@ export default function AdminBrands() {
 
   const headerProps = {
     title: 'Marcas',
+    icon: Tag,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

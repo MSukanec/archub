@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Tag } from 'lucide-react';
+import { Plus, Tag, Layers } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -147,6 +147,7 @@ export default function AdminMaterialCategories() {
 
   const headerProps = {
     title: 'Categorías de Materiales',
+    icon: Layers,
     showSearch: true,
     searchValue: searchTerm,
     onSearchChange: handleSearch,

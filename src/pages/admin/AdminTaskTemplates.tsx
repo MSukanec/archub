@@ -128,6 +128,7 @@ export default function AdminTaskTemplates() {
 
   const headerProps = {
     title: 'Plantillas de Tareas',
+    icon: FileCode,
     description: 'Gestión de plantillas de tareas paramétricas para generación automática',
     tabs: [
       { id: 'Lista', label: 'Lista', isActive: activeTab === 'Lista' },

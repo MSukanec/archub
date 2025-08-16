@@ -242,8 +242,16 @@ export function Header({
             </Button>
           )}
           {(pageTitle || title) && (
-            <h1 className="text-xl font-light text-foreground tracking-wider">
-              {isViewMode && showBackButton ? `Viendo: ${pageTitle || title}` : (pageTitle || title)}
+            <h1 className="text-xl font-light text-foreground tracking-wider flex items-center gap-3">
+              {icon && (
+                React.createElement(icon as React.ComponentType<any>, { 
+                  className: "h-6 w-6", 
+                  style: { color: 'var(--accent)' } 
+                })
+              )}
+              <span>
+                {isViewMode && showBackButton ? `Viendo: ${pageTitle || title}` : (pageTitle || title)}
+              </span>
             </h1>
           )}
         </div>

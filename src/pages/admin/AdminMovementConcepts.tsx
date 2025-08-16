@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, Search } from 'lucide-react';
+import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, Search, ArrowUpDown } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -202,6 +202,7 @@ export default function AdminMovementConcepts() {
 
   const headerProps = {
     title: "Conceptos de Movimientos",
+    icon: ArrowUpDown,
     showSearch: true,
     searchValue: searchTerm,
     onSearchChange: setSearchTerm,

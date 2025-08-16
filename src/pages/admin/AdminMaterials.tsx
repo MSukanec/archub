@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 
-import { Plus, Edit, Trash2, Package, Crown, Copy } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Crown, Copy, Wrench } from 'lucide-react'
 
 export default function AdminMaterials() {
   const [searchValue, setSearchValue] = useState('')
@@ -271,6 +271,7 @@ export default function AdminMaterials() {
 
   const headerProps = {
     title: 'Materiales',
+    icon: Wrench,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

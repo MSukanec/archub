@@ -84,7 +84,7 @@ export default function FinancesDashboard() {
   }
 
   return (
-    <Layout headerProps={{ title: "Resumen Financiero" }} wide={true}>
+    <Layout headerProps={{ title: "Resumen Financiero", icon: DollarSign }} wide={true}>
       <div>
         {/* ActionBar with view mode toggle */}
         <ActionBar>

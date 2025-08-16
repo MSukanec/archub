@@ -11,7 +11,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MoreHorizontal, FileText, Calendar, Users, BookOpen, Edit, Trash2, Plus } from 'lucide-react';
+import { MoreHorizontal, FileText, Calendar, Users, BookOpen, Edit, Trash2, Plus, ScrollText } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop';
 
@@ -233,6 +233,7 @@ export default function AdminChangelogs() {
 
   const headerProps = {
     title: 'Changelog',
+    icon: ScrollText,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

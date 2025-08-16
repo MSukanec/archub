@@ -1,8 +1,10 @@
 import { Layout } from "@/components/layout/desktop/Layout";
+import { Building } from "lucide-react";
 
 export default function OrganizationDashboard() {
   const headerProps = {
     title: "Resumen de Organización",
+    icon: Building,
     breadcrumb: [
       { name: "Organización", href: "/organization/dashboard" }
     ],

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Building, Users, Crown, Activity } from 'lucide-react';
+import { Building, Users, Crown, Activity, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -96,6 +96,7 @@ export default function AdminDashboard() {
 
   const headerProps = {
     title: "Resumen de Administración",
+    icon: BarChart3,
     showSearch: false,
     showFilters: false,
     actions: []

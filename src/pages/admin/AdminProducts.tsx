@@ -15,7 +15,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/Table'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 
-import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box } from 'lucide-react'
 
 export default function AdminProducts() {
   const [searchValue, setSearchValue] = useState('')
@@ -355,6 +355,7 @@ export default function AdminProducts() {
 
   const headerProps = {
     title: 'Productos',
+    icon: Box,
     showSearch: true,
     searchValue,
     onSearchChange: setSearchValue,

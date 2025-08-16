@@ -331,6 +331,7 @@ export default function AdminTasks() {
 
   const headerProps = {
     title: 'Tareas',
+    icon: CheckSquare,
     actionButton: {
       label: "Nueva Tarea",
       icon: Plus,
