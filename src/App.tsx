@@ -65,7 +65,7 @@ import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
-import AdminMaterials from "@/pages/admin/AdminMaterials";
+import AdminMaterials from "@/pages/admin/AdminMaterials2";
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
 import AdminBrands from "@/pages/admin/AdminBrands";
