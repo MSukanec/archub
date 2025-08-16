@@ -231,7 +231,7 @@ export default function Movements() {
 
   const { data: movements = [], isLoading } = useMovements(
     organizationId,
-    projectId,
+    projectId || undefined,
   );
 
   // Get organization's default currency
@@ -959,7 +959,7 @@ export default function Movements() {
         
         return (
           <span className="text-xs font-medium">
-            {item.movement_data?.type?.name || item.type_name || "Sin tipo"}
+            {item.movement_data?.type?.name || "Sin tipo"}
           </span>
         );
       },
@@ -987,8 +987,8 @@ export default function Movements() {
           );
         }
         
-        const categoryName = item.movement_data?.category?.name || item.category_name || "Sin categoría";
-        const subcategoryName = item.movement_data?.subcategory?.name || item.subcategory_name;
+        const categoryName = item.movement_data?.category?.name || "Sin categoría";
+        const subcategoryName = item.movement_data?.subcategory?.name;
         
         return (
           <div className="space-y-1">
@@ -1377,7 +1377,7 @@ export default function Movements() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
-                    {availableCategories.map((category) => (
+                    {availableCategories.filter(Boolean).map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -1397,7 +1397,7 @@ export default function Movements() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las subcategorías</SelectItem>
-                    {filteredSubcategories.map((subcategory) => (
+                    {filteredSubcategories.filter(Boolean).map((subcategory) => (
                       <SelectItem key={subcategory} value={subcategory}>
                         {subcategory}
                       </SelectItem>
@@ -1480,8 +1480,8 @@ export default function Movements() {
           }
           
           // For regular movements, determine type
-          const typeName = item.movement_data?.type?.name || item.type_name || "";
-          const categoryName = item.movement_data?.category?.name || item.category_name || "";
+          const typeName = item.movement_data?.type?.name || "";
+          const categoryName = item.movement_data?.category?.name || "";
           
           // Check for APORTES PROPIOS and RETIROS PROPIOS based on category name
           if (categoryName && (categoryName.toLowerCase().includes("aportes propios") || 
