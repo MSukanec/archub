@@ -66,6 +66,7 @@ import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
 import AdminMaterials from "@/pages/admin/AdminMaterials";
+import AdminTasks from "@/pages/admin/AdminTasks";
 
 
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
@@ -320,6 +321,14 @@ function Router() {
           <ProtectedRoute>
             <AdminProtectedRoute>
               <AdminMaterials />
+            </AdminProtectedRoute>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/admin/tasks">
+          <ProtectedRoute>
+            <AdminProtectedRoute>
+              <AdminTasks />
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
