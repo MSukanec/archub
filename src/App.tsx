@@ -60,7 +60,6 @@ import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/AdminCommunity";
-import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
@@ -279,13 +278,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/organizations">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminOrganizations />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/users">
           <ProtectedRoute>
             <AdminProtectedRoute>
