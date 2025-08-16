@@ -10,8 +10,8 @@ const AdminGeneral = () => {
   const { openModal } = useGlobalModalStore();
 
   const tabs = [
-    { id: 'movimientos', label: 'Movimientos' },
-    { id: 'unidades', label: 'Unidades de Venta' }
+    { id: 'movimientos', label: 'Movimientos', isActive: activeTab === 'movimientos' },
+    { id: 'unidades', label: 'Unidades de Venta', isActive: activeTab === 'unidades' }
   ];
 
   const getActionButton = () => {
@@ -54,8 +54,9 @@ const AdminGeneral = () => {
   const headerProps = {
     title: 'General',
     icon: Settings,
+    showSearch: false,
+    showFilters: false,
     tabs,
-    activeTab,
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };

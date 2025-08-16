@@ -12,10 +12,10 @@ const AdminTasks = () => {
   const { openModal } = useGlobalModalStore();
 
   const tabs = [
-    { id: 'tareas', label: 'Tareas' },
-    { id: 'parametros', label: 'Parámetros' },
-    { id: 'categorias', label: 'Categorías' },
-    { id: 'plantillas', label: 'Plantillas' }
+    { id: 'tareas', label: 'Tareas', isActive: activeTab === 'tareas' },
+    { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
+    { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
+    { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' }
   ];
 
   const getActionButton = () => {
@@ -77,8 +77,9 @@ const AdminTasks = () => {
   const headerProps = {
     title: 'Tareas',
     icon: ListTodo,
+    showSearch: false,
+    showFilters: false,
     tabs,
-    activeTab,
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
