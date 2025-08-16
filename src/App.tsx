@@ -64,7 +64,7 @@ import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
 import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
-import AdminTasks from "@/pages/admin/AdminTasks";
+import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 
 
 
