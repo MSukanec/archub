@@ -312,7 +312,7 @@ export function Sidebar() {
     },
     { 
       id: 'gestion', 
-      icon: Settings, 
+      icon: Layout, 
       label: 'Gestión', 
       defaultRoute: '/organization/board',
       isActive: activeSidebarSection === 'gestion' || location === '/organization/board'

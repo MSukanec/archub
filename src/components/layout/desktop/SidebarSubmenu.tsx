@@ -197,7 +197,7 @@ export function SidebarSubmenu() {
       'diseno': { title: 'Diseño', icon: Brush },
       'construccion': { title: 'Construcción', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
-      'gestion': { title: 'Gestión', icon: Settings },
+      'gestion': { title: 'Gestión', icon: Layout },
       'recursos': { title: 'Recursos', icon: BookOpen },
 
       'administracion': { title: 'Administración', icon: Crown }

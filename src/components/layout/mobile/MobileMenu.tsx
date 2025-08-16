@@ -304,7 +304,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     },
     { 
       id: 'gestion', 
-      icon: Settings, 
+      icon: Layout, 
       label: 'Gestión', 
       defaultRoute: '/organization/board',
       isActive: currentSidebarContext === 'gestion' || location === '/organization/board'
