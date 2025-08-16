@@ -306,7 +306,11 @@ export function SidebarSubmenu() {
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href={item.href}
-                        isActive={location === item.href}
+                        isActive={
+                          item.href === '/organization' 
+                            ? (location === '/organization' || location === '/dashboard')
+                            : location === item.href
+                        }
                         onClick={item.onClick}
                         label={item.label}
                         isExpanded={isSecondarySidebarExpanded}
@@ -322,7 +326,11 @@ export function SidebarSubmenu() {
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}
                     href={item.href}
-                    isActive={location === item.href}
+                    isActive={
+                      item.href === '/organization' 
+                        ? (location === '/organization' || location === '/dashboard')
+                        : location === item.href
+                    }
                     onClick={item.onClick}
                     label={item.label}
                     isExpanded={isSecondarySidebarExpanded}
