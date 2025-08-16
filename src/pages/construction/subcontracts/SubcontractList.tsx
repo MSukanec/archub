@@ -456,7 +456,7 @@ export default function SubcontractList() {
                   <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Mini gráfico de barras */}
+                {/* Mini gráfico de barras - altura fija */}
                 <div className="flex items-end gap-1 h-8">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
@@ -490,7 +490,7 @@ export default function SubcontractList() {
                   <Award className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Gráfico de línea de tendencia */}
+                {/* Gráfico de línea de tendencia - altura fija */}
                 <div className="h-8 relative">
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <path
@@ -505,23 +505,14 @@ export default function SubcontractList() {
                 </div>
                 
                 <div>
-                  {currencyView === 'discriminado' ? (
-                    <div>
-                      <p className="text-lg font-bold">
-                        ${kpiData.totalValues.ars.toLocaleString('es-AR')}
-                      </p>
-                      <p className="text-sm font-medium">
-                        US$ {kpiData.totalValues.usd.toLocaleString('es-AR')}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-2xl font-bold">
-                      {currencyView === 'pesificado' 
-                        ? `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
-                        : `US$${kpiData.totalValues.usd.toLocaleString('es-AR')}`
-                      }
-                    </p>
-                  )}
+                  <p className="text-2xl font-bold">
+                    {currencyView === 'pesificado' 
+                      ? `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
+                      : currencyView === 'dolarizado'
+                      ? `US$${kpiData.totalValues.usd.toLocaleString('es-AR')}`
+                      : `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
+                    }
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}% del total
                   </p>
@@ -539,15 +530,17 @@ export default function SubcontractList() {
                   <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Barra de progreso de pagos */}
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${Math.min((kpiData.totalPaidARS / (kpiData.totalValues.ars || 1)) * 100, 100)}%`,
-                      background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
-                    }}
-                  />
+                {/* Barra de progreso de pagos - altura fija */}
+                <div className="h-8 flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min((kpiData.totalPaidARS / (kpiData.totalValues.ars || 1)) * 100, 100)}%`,
+                        background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
+                      }}
+                    />
+                  </div>
                 </div>
                 
                 <div>
@@ -571,7 +564,7 @@ export default function SubcontractList() {
                   <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Gráfico de área llena */}
+                {/* Gráfico de área llena - altura fija */}
                 <div className="h-8 relative">
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <defs>
