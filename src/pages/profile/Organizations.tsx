@@ -42,12 +42,7 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
       }}
     >
       <CardContent className="p-4">
-        <div className="grid grid-cols-6 gap-4 items-center">
-          {/* Fecha */}
-          <div className="col-span-1 text-xs text-muted-foreground">
-            {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
-          </div>
-
+        <div className="grid grid-cols-4 gap-4 items-center">
           {/* Organización */}
           <div className="col-span-1 flex items-center gap-2">
             <Avatar className="w-8 h-8 avatar-border">
@@ -128,36 +123,6 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
               {organization.is_active ? "Activa" : "Inactiva"}
             </Badge>
           </div>
-
-          {/* Acciones */}
-          <div className="col-span-1 flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(organization); }}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  Ver detalles
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(organization); }}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                {!organization.is_system && (
-                  <DropdownMenuItem 
-                    onClick={(e) => { e.stopPropagation(); onDelete(organization); }}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Eliminar
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       </CardContent>
     </Card>
@@ -228,33 +193,6 @@ export function OrganizationList() {
 
   return (
     <div className="space-y-6">
-      {/* Botón de acción en la esquina superior derecha */}
-      <div className="flex justify-end">
-        <div className="flex gap-2">
-          {selectedOrganization && selectedOrganization !== userData?.organization?.id && (
-            <Button 
-              onClick={handleSwitchToSelected}
-              disabled={switchOrganization.isPending}
-            >
-              {switchOrganization.isPending ? 'Cambiando...' : 'Cambiar a Seleccionada'}
-            </Button>
-          )}
-          <Button onClick={() => openModal('organization')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Organización
-          </Button>
-        </div>
-      </div>
-
-      {/* Headers de la tabla */}
-      <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-muted/30 rounded-lg text-sm font-medium text-muted-foreground">
-        <div>Fecha</div>
-        <div>Organización</div>
-        <div>Plan</div>
-        <div>Miembros</div>
-        <div>Estado</div>
-        <div className="text-right">Acciones Rápidas</div>
-      </div>
 
       {/* Lista de organizaciones */}
       <div className="space-y-2">
