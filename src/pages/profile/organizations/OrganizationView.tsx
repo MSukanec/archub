@@ -58,7 +58,15 @@ export default function OrganizationView() {
     backButton: {
       href: '/profile/organizations',
       label: 'Volver a organizaciones'
-    }
+    },
+    // Solo mostrar botón de invitar en la tab de Miembros
+    ...(activeTab === 'Miembros' && {
+      actionButton: {
+        label: 'Invitar Miembro',
+        icon: 'UserPlus',
+        onClick: () => console.log('Invitar miembro') // TODO: Implementar modal
+      }
+    })
   };
 
   if (isLoading) {
