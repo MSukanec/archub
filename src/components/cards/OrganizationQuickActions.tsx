@@ -57,12 +57,12 @@ export function OrganizationQuickActions() {
       onClick: () => navigate('/construction/logs')
     },
     {
-      title: "Invitar Miembro",
-      description: "Nuevo miembro del equipo",
+      title: "Gestionar Organizaciones",
+      description: "Ver y administrar organizaciones",
       icon: Users,
       color: "text-accent-foreground",
       bgColor: "bg-accent",
-      onClick: () => navigate('/organization/members')
+      onClick: () => navigate('/profile/organizations')
     }
   ]
 

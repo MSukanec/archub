@@ -21,7 +21,7 @@ import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationBasicData from "@/pages/organization/OrganizationBasicData";
 import ProfileProjects from "@/pages/profile/ProfileProjects";
 
-import OrganizationMembers from "@/pages/organization/OrganizationMembers";
+
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 
 
@@ -124,11 +124,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/organization/members">
-          <ProtectedRoute>
-            <OrganizationMembers />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/organization/activity">
           <ProtectedRoute>
             <OrganizationActivity />
