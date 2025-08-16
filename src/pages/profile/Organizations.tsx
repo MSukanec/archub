@@ -56,41 +56,69 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
               </AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium text-sm">{organization.name}</div>
-              {organization.is_system && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Shield className="w-3 h-3" />
-                  Sistema
-                </div>
-              )}
+              <div className="font-medium flex items-center gap-2">
+                {organization.name}
+                {isSelected && (
+                  <Badge variant="secondary" className="text-xs">
+                    Activa
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Plan */}
           <div className="col-span-1">
-            <Badge 
-              variant="secondary" 
-              className="text-white" 
-              style={{
-                backgroundColor: organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                               organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                               organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                               'var(--plan-free-bg)'
-              }}
-            >
-              {organization.plan?.name || 'Free'}
-            </Badge>
+            {organization.plan ? (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{
+                  backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                 'var(--plan-free-bg)'
+                }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                {organization.plan.name}
+              </Badge>
+            ) : (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{ backgroundColor: 'var(--plan-free-bg)' }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                Free
+              </Badge>
+            )}
           </div>
 
           {/* Miembros */}
-          <div className="col-span-1">
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-medium">({members.length})</span>
-              <ActiveOrganizationMembersCard 
-                organizationId={organization.id}
-                maxVisible={3}
-                size="sm"
-              />
+          <div className="col-span-1 flex items-center gap-2">
+            <span className="text-xs font-medium">({members.length})</span>
+            <div className="flex -space-x-1">
+              {members.slice(0, 3).map((member, index) => (
+                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
+                  {member.avatar_url ? (
+                    <img 
+                      src={member.avatar_url} 
+                      alt={member.full_name || member.email} 
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-xs">
+                      {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              ))}
+              {members.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-border)'}}>
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -136,7 +164,8 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
   )
 }
 
-export default function Organizations() {
+// Componente principal de lista de organizaciones
+export function OrganizationList() {
   const { data: userData } = useCurrentUser()
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null)
   const [, navigate] = useLocation()
@@ -146,11 +175,6 @@ export default function Organizations() {
   const { setCurrentProject } = useNavigationStore()
 
   const organizations = userData?.organizations || []
-
-  const headerProps = {
-    icon: Building,
-    title: "Gestión de Organizaciones"
-  }
 
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
@@ -203,70 +227,81 @@ export default function Organizations() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-6">
-        {/* Header con información del estado actual */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Organizaciones Disponibles</h2>
-            <p className="text-sm text-muted-foreground">
-              Gestiona las organizaciones a las que perteneces. 
-              Organización actual: <span className="font-medium">{userData?.organization?.name}</span>
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {selectedOrganization && selectedOrganization !== userData?.organization?.id && (
-              <Button 
-                onClick={handleSwitchToSelected}
-                disabled={switchOrganization.isPending}
-              >
-                {switchOrganization.isPending ? 'Cambiando...' : 'Cambiar a Seleccionada'}
-              </Button>
-            )}
-            <Button onClick={() => openModal('organization')}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Organización
+    <div className="space-y-6">
+      {/* Header con información del estado actual */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Organizaciones Disponibles</h2>
+          <p className="text-sm text-muted-foreground">
+            Gestiona las organizaciones a las que perteneces. 
+            Organización actual: <span className="font-medium">{userData?.organization?.name}</span>
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {selectedOrganization && selectedOrganization !== userData?.organization?.id && (
+            <Button 
+              onClick={handleSwitchToSelected}
+              disabled={switchOrganization.isPending}
+            >
+              {switchOrganization.isPending ? 'Cambiando...' : 'Cambiar a Seleccionada'}
             </Button>
-          </div>
-        </div>
-
-        {/* Headers de la tabla */}
-        <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-muted/30 rounded-lg text-sm font-medium text-muted-foreground">
-          <div>Fecha</div>
-          <div>Organización</div>
-          <div>Plan</div>
-          <div>Miembros</div>
-          <div>Estado</div>
-          <div className="text-right">Acciones Rápidas</div>
-        </div>
-
-        {/* Lista de organizaciones */}
-        <div className="space-y-2">
-          {organizations.map((organization) => (
-            <OrganizationCard
-              key={organization.id}
-              organization={organization}
-              isSelected={selectedOrganization === organization.id}
-              onSelect={handleSelect}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-          
-          {organizations.length === 0 && (
-            <div className="text-center py-12">
-              <Building className="mx-auto h-12 w-12 text-muted-foreground/40" />
-              <h3 className="mt-4 text-lg font-semibold">No hay organizaciones</h3>
-              <p className="text-muted-foreground">Crea tu primera organización para comenzar.</p>
-              <Button className="mt-4" onClick={() => openModal('organization')}>
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Organización
-              </Button>
-            </div>
           )}
+          <Button onClick={() => openModal('organization')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Organización
+          </Button>
         </div>
       </div>
+
+      {/* Headers de la tabla */}
+      <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-muted/30 rounded-lg text-sm font-medium text-muted-foreground">
+        <div>Fecha</div>
+        <div>Organización</div>
+        <div>Plan</div>
+        <div>Miembros</div>
+        <div>Estado</div>
+        <div className="text-right">Acciones Rápidas</div>
+      </div>
+
+      {/* Lista de organizaciones */}
+      <div className="space-y-2">
+        {organizations.map((organization) => (
+          <OrganizationCard
+            key={organization.id}
+            organization={organization}
+            isSelected={selectedOrganization === organization.id}
+            onSelect={handleSelect}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+        
+        {organizations.length === 0 && (
+          <div className="text-center py-12">
+            <Building className="mx-auto h-12 w-12 text-muted-foreground/40" />
+            <h3 className="mt-4 text-lg font-semibold">No hay organizaciones</h3>
+            <p className="text-muted-foreground">Crea tu primera organización para comenzar.</p>
+            <Button className="mt-4" onClick={() => openModal('organization')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Crear Organización
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function Organizations() {
+  const headerProps = {
+    icon: Building,
+    title: "Gestión de Organizaciones"
+  }
+
+  return (
+    <Layout headerProps={headerProps} wide={true}>
+      <OrganizationList />
     </Layout>
   )
 }
