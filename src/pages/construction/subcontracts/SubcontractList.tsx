@@ -178,7 +178,7 @@ export default function SubcontractList() {
       organizationId: userData?.organization?.id,
       userId: userData?.user?.id,
       isEditing: true,
-      subcontract
+      subcontractId: subcontract.id
     });
   };
 
