@@ -29,10 +29,7 @@ const AdminGeneral = () => {
         return {
           label: "Nueva Unidad",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de unidades
-            console.log('Crear nueva unidad');
-          }
+          onClick: () => openModal('unit-presentation')
         };
       default:
         return {

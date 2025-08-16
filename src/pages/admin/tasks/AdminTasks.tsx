@@ -13,8 +13,8 @@ const AdminTasks = () => {
 
   const tabs = [
     { id: 'tareas', label: 'Tareas' },
-    { id: 'categorias', label: 'Categorías' },
     { id: 'parametros', label: 'Parámetros' },
+    { id: 'categorias', label: 'Categorías' },
     { id: 'plantillas', label: 'Plantillas' }
   ];
 

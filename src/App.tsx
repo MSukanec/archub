@@ -74,7 +74,7 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import AdminUnitPresentations from "@/pages/admin/AdminUnitPresentations";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 
-import AdminCategories from "@/pages/admin/AdminCategories";
+
 
 
 import NotFound from "@/pages/NotFound";
@@ -285,13 +285,7 @@ function Router() {
 
 
 
-        <Route path="/admin/categories">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminCategories />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/admin/task-parameters">
           <ProtectedRoute>
