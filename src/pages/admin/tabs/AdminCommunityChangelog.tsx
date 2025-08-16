@@ -11,174 +11,161 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
-interface Changelog {
-  id: string
-  version: string
-  title: string
-  description: string
-  category: string
-  is_featured: boolean
-  created_at: string
-  updated_at: string
+interface ChangelogEntry {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  date: string;
+  is_public: boolean;
+  created_at: string;
+  created_by: string;
+  creator?: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+  } | null;
 }
 
 const AdminCommunityChangelog = () => {
-  const [searchValue, setSearchValue] = useState('')
-  const [sortBy, setSortBy] = useState('created_at')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [featuredFilter, setFeaturedFilter] = useState('all')
-  
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
 
-  // Fetch changelogs
-  const { data: changelogs = [], isLoading } = useQuery({
-    queryKey: ['admin-changelogs', searchValue, sortBy, categoryFilter, featuredFilter],
+  // Fetch changelog entries (usando la misma lógica que AdminChangelogs.tsx)
+  const { data: changelogEntries = [], isLoading } = useQuery({
+    queryKey: ['admin-changelog-entries'],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      let query = supabase
-        .from('changelogs')
-        .select('*')
-      
-      // Apply filters
-      if (searchValue) {
-        query = query.or(`title.ilike.%${searchValue}%,description.ilike.%${searchValue}%,version.ilike.%${searchValue}%`)
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data, error } = await supabase
+        .from('changelog_entries')
+        .select(`
+          id,
+          title,
+          description,
+          type,
+          date,
+          is_public,
+          created_at,
+          created_by
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching changelog entries:', error);
+        throw error;
       }
+
+      // Obtener los usuarios creadores
+      const creatorIds = Array.from(new Set(data.map(entry => entry.created_by).filter(Boolean)));
       
-      if (categoryFilter !== 'all') {
-        query = query.eq('category', categoryFilter)
-      }
-      
-      if (featuredFilter !== 'all') {
-        query = query.eq('is_featured', featuredFilter === 'featured')
-      }
-      
-      // Apply sorting
-      if (sortBy === 'version') {
-        query = query.order('version', { ascending: true })
-      } else if (sortBy === 'title') {
-        query = query.order('title', { ascending: true })
-      } else if (sortBy === 'category') {
-        query = query.order('category', { ascending: true })
-      } else {
-        query = query.order('created_at', { ascending: false })
-      }
-      
-      const { data, error } = await query
-      if (error) throw error
-      
-      console.log('Changelogs:', data)
-      return data
+      const usersResult = creatorIds.length > 0 ? await supabase!
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .in('id', creatorIds) : { data: [], error: null };
+
+      // Mapear entradas con sus creadores
+      const entriesWithCreators = data.map(entry => ({
+        ...entry,
+        creator: usersResult.data?.find(user => user.id === entry.created_by) || null
+      }));
+
+      return entriesWithCreators;
     }
   })
 
-  // Delete changelog mutation
-  const deleteChangelogMutation = useMutation({
-    mutationFn: async (changelogId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      const { error } = await supabase
-        .from('changelogs')
-        .delete()
-        .eq('id', changelogId)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-changelogs'] })
-      toast({
-        title: 'Changelog eliminado',
-        description: 'El changelog ha sido eliminado exitosamente.',
-      })
-    },
-    onError: (error) => {
-      console.error('Error deleting changelog:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el changelog.',
-        variant: 'destructive',
-      })
-    }
-  })
+  const handleEdit = (entry: ChangelogEntry) => {
+    openModal('changelog-entry', { entry, isEditing: true });
+  };
 
-  const handleEdit = (changelog: Changelog) => {
-    openModal('admin-changelog', { changelog, isEditing: true })
-  }
-
-  const handleDeleteDangerous = (changelog: Changelog) => {
+  const handleDelete = (entry: ChangelogEntry) => {
     openModal('delete-confirmation', {
-      title: 'Eliminar Changelog',
-      description: `¿Estás seguro de que deseas eliminar el changelog "${changelog.title}" (${changelog.version})? Esta acción no se puede deshacer.`,
-      itemName: `${changelog.title} (${changelog.version})`,
-      onConfirm: () => deleteChangelogMutation.mutate(changelog.id),
-      dangerous: true
-    })
-  }
+      title: 'Eliminar entrada del changelog',
+      description: '¿Estás seguro de que deseas eliminar esta entrada del changelog? Esta acción no se puede deshacer.',
+      itemName: entry.title,
+      destructiveActionText: 'Eliminar',
+      onConfirm: async () => {
+        if (!supabase) return;
+        
+        const { error } = await supabase
+          .from('changelog_entries')
+          .delete()
+          .eq('id', entry.id);
+        
+        if (error) {
+          console.error('Error deleting changelog entry:', error);
+        } else {
+          // Invalidar caché para actualizar la tabla
+          queryClient.invalidateQueries({ queryKey: ['admin-changelog-entries'] });
+        }
+      }
+    });
+  };
 
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'feature':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'bugfix':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'improvement':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      case 'security':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+  const getTypeBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'Novedad':
+        return 'default';
+      case 'Mejora':
+        return 'secondary';
+      case 'Arreglo de Errores':
+        return 'destructive';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        return 'outline';
     }
-  }
+  };
 
   const columns = [
-    {
-      key: 'version',
-      label: 'Versión',
-      width: '15%',
-      render: (changelog: Changelog) => (
-        <span className="font-mono text-sm font-medium">{changelog.version}</span>
-      )
-    },
     {
       key: 'title',
       label: 'Título',
       width: '25%',
-      render: (changelog: Changelog) => (
+      render: (entry: ChangelogEntry) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm">{changelog.title}</span>
-          <span className="text-xs text-muted-foreground line-clamp-2">{changelog.description}</span>
+          <span className="font-medium text-sm">{entry.title}</span>
+          <span className="text-xs text-muted-foreground line-clamp-2">{entry.description}</span>
         </div>
       )
     },
     {
-      key: 'category',
-      label: 'Categoría',
+      key: 'type',
+      label: 'Tipo',
       width: '15%',
-      render: (changelog: Changelog) => (
-        <Badge className={`text-xs ${getCategoryColor(changelog.category)}`}>
-          {changelog.category}
+      render: (entry: ChangelogEntry) => (
+        <Badge variant={getTypeBadgeVariant(entry.type)} className="text-xs">
+          {entry.type}
         </Badge>
       )
     },
     {
-      key: 'is_featured',
-      label: 'Destacado',
+      key: 'date',
+      label: 'Fecha',
       width: '15%',
-      render: (changelog: Changelog) => (
-        <Badge variant={changelog.is_featured ? 'default' : 'secondary'} className="text-xs">
-          {changelog.is_featured ? 'Sí' : 'No'}
-        </Badge>
-      )
-    },
-    {
-      key: 'created_at',
-      label: 'Fecha de Creación',
-      width: '15%',
-      render: (changelog: Changelog) => (
+      render: (entry: ChangelogEntry) => (
         <span className="text-xs text-muted-foreground">
-          {format(new Date(changelog.created_at), 'dd/MM/yy', { locale: es })}
+          {format(new Date(entry.date), 'dd/MM/yy', { locale: es })}
+        </span>
+      )
+    },
+    {
+      key: 'is_public',
+      label: 'Público',
+      width: '15%',
+      render: (entry: ChangelogEntry) => (
+        <Badge variant={entry.is_public ? 'default' : 'secondary'} className="text-xs">
+          {entry.is_public ? 'Sí' : 'No'}
+        </Badge>
+      )
+    },
+    {
+      key: 'creator',
+      label: 'Creado por',
+      width: '15%',
+      render: (entry: ChangelogEntry) => (
+        <span className="text-xs text-muted-foreground">
+          {entry.creator?.full_name || 'Desconocido'}
         </span>
       )
     },
@@ -186,12 +173,12 @@ const AdminCommunityChangelog = () => {
       key: 'actions',
       label: 'Acciones',
       width: '15%',
-      render: (changelog: Changelog) => (
+      render: (entry: ChangelogEntry) => (
         <div className="flex items-center space-x-2">
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => handleEdit(changelog)}
+            onClick={() => handleEdit(entry)}
             className="h-8 w-8 p-0"
           >
             <Edit className="h-4 w-4" />
@@ -199,7 +186,7 @@ const AdminCommunityChangelog = () => {
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => handleDeleteDangerous(changelog)}
+            onClick={() => handleDelete(entry)}
             className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
           >
             <Trash2 className="h-4 w-4" />
@@ -211,11 +198,11 @@ const AdminCommunityChangelog = () => {
 
   return (
     <div className="space-y-6">
-      {/* Changelogs Table */}
+      {/* Changelog Entries Table */}
       <Card>
         <CardContent className="p-0">
           <Table
-            data={changelogs}
+            data={changelogEntries}
             columns={columns}
             isLoading={isLoading}
             emptyState={

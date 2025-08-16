@@ -36,7 +36,7 @@ const AdminCommunity = () => {
         return {
           label: "Nuevo Changelog",
           icon: Plus,
-          onClick: () => openModal('admin-changelog', { isEditing: false })
+          onClick: () => openModal('changelog-entry', { isEditing: false })
         };
       default:
         return undefined;
