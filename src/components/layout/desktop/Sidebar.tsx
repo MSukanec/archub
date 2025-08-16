@@ -298,7 +298,7 @@ export function Sidebar() {
   // Definir contenido de submenu para cada sección (copiado de SidebarSubmenu)
   const submenuContent = {
     'organizacion': [
-      { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Home, label: 'Resumen de Organización', href: '/dashboard' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     'diseno': [
