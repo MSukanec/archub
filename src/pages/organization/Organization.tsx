@@ -4,7 +4,7 @@ import { Building, UserPlus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { OrganizationDashboardView } from './tabs/OrganizationDashboardView';
 import { OrganizationMembersView } from './tabs/OrganizationMembersView';
-import { OrganizationBasicData } from './tabs/OrganizationBasicData';
+import { OrganizationBasicData } from './tabs/OrganizationBasicDataView';
 import { OrganizationActivityView } from './tabs/OrganizationActivityView';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
