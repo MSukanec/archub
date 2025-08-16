@@ -296,6 +296,24 @@ export default function SubcontractList() {
             };
             displayText = 'Cancelado';
             break;
+          case 'en_progreso':
+          case 'in_progress':
+            badgeStyle = { 
+              backgroundColor: '#f59e0b', // Naranja/Amarillo
+              color: 'white',
+              border: 'none'
+            };
+            displayText = 'En Progreso';
+            break;
+          case 'pendiente':
+          case 'pending':
+            badgeStyle = { 
+              backgroundColor: '#8b5cf6', // Púrpura
+              color: 'white',
+              border: 'none'
+            };
+            displayText = 'Pendiente';
+            break;
           default:
             badgeStyle = { 
               backgroundColor: '#f3f4f6', 
