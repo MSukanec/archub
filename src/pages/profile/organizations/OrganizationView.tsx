@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { Building } from 'lucide-react';
+import { Building, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { OrganizationDashboardView } from './tabs/OrganizationDashboardView';
@@ -8,6 +8,7 @@ import { OrganizationMembersView } from './tabs/OrganizationMembersView';
 import { OrganizationSettingsView } from './tabs/OrganizationSettingsView';
 import { OrganizationHistoryView } from './tabs/OrganizationHistoryView';
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function OrganizationView() {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ export default function OrganizationView() {
   const [activeTab, setActiveTab] = useState('Resumen');
   
   const { data: userData, isLoading } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
   
   // Buscar la organización específica
   const organization = userData?.organizations?.find(org => org.id === id);
@@ -63,8 +65,8 @@ export default function OrganizationView() {
     ...(activeTab === 'Miembros' && {
       actionButton: {
         label: 'Invitar Miembro',
-        icon: 'UserPlus',
-        onClick: () => console.log('Invitar miembro') // TODO: Implementar modal
+        icon: UserPlus,
+        onClick: () => openModal('member')
       }
     })
   };
