@@ -283,7 +283,7 @@ export function Sidebar() {
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/recursos')) return 'recursos';
     if (location.startsWith('/admin')) return 'administracion';
-    if (location.startsWith('/profile')) return 'perfil';
+
     if (location === '/dashboard') return 'organizacion';
     return null;
   };
@@ -327,12 +327,6 @@ export function Sidebar() {
       { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
       { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
-    ],
-    'perfil': [
-      { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
-      { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
-      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/profile/projects' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
   };
 
@@ -532,30 +526,13 @@ export function Sidebar() {
             <SidebarButton
               icon={<UserCircle className="w-[18px] h-[18px]" />}
               label="Mi Perfil"
+              href="/profile"
               isActive={location.startsWith('/profile')}
               isExpanded={isExpanded}
-              onClick={() => handleMainSectionClick('perfil', '/profile')}
               avatarUrl={userData?.user?.avatar_url}
               userFullName={userData?.user?.full_name}
               variant="main"
             />
-            
-            {/* Mostrar subelementos del perfil si está expandido */}
-            {isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
-              <div className="ml-4 mt-[2px] space-y-[1px]">
-                {submenuContent['perfil'].map((subItem, subIndex) => (
-                  <SidebarButton
-                    key={subIndex}
-                    icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                    label={subItem.label}
-                    href={subItem.href}
-                    isActive={location === subItem.href}
-                    isExpanded={isExpanded}
-                    variant="secondary"
-                  />
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
