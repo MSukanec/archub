@@ -21,7 +21,7 @@ import ProjectHeroImage from '@/components/ui-custom/ProjectHeroImage'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { queryClient } from '@/lib/queryClient'
 
-export default function ProfileProjects() {
+export default function Projects() {
   const { openModal } = useGlobalModalStore()
   const [activeTab, setActiveTab] = useState('projects')
   

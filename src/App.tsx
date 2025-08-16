@@ -19,7 +19,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 // Protected Pages
 
 
-import ProfileProjects from "@/pages/profile/ProfileProjects";
+import Projects from "@/pages/organization/Projects";
 
 
 
@@ -116,9 +116,9 @@ function Router() {
         </Route>
 
 
-        <Route path="/profile/projects">
+        <Route path="/organization/projects">
           <ProtectedRoute>
-            <ProfileProjects />
+            <Projects />
           </ProtectedRoute>
         </Route>
 
@@ -139,7 +139,7 @@ function Router() {
         {/* Projects Routes */}
         <Route path="/projects">
           <ProtectedRoute>
-            <ProfileProjects />
+            <Projects />
           </ProtectedRoute>
         </Route>
 

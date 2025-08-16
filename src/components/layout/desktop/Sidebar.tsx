@@ -299,6 +299,7 @@ export function Sidebar() {
   const submenuContent = {
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/dashboard' },
+      { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     'diseno': [
