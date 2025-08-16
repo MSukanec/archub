@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3 } from 'lucide-react'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3, Eye } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -18,14 +18,14 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
-import { useProjectContext } from '@/stores/projectContext'
-import { useAuthStore } from '@/stores/authStore'
+
 
 // Componente para una sola tarjeta de organización
-function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete }: {
+function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, onDelete }: {
   organization: any,
   isSelected: boolean,
   onSelect: (id: string) => void,
+  onView: (org: any) => void,
   onEdit: (org: any) => void,
   onDelete: (org: any) => void
 }) {
@@ -130,17 +130,42 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
           </div>
 
           {/* Acciones */}
-          <div className="col-span-1">
+          <div className="col-span-1 flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={(e) => {
                 e.stopPropagation()
-                onSelect(organization.id)
+                onView(organization)
               }}
+              title="Ver detalles"
             >
-              <Settings className="h-4 w-4" />
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(organization)
+              }}
+              title="Editar organización"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(organization)
+              }}
+              title="Eliminar organización"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -160,8 +185,7 @@ export function OrganizationList() {
   const { openModal } = useGlobalModalStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { switchOrganization } = useProjectContext()
-  const { updateSession } = useAuthStore()
+  // Removed unused imports
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context to 'organizations' when page loads
@@ -296,6 +320,10 @@ export function OrganizationList() {
     }
   }
 
+  const handleViewOrganization = (organization: any) => {
+    navigate(`/profile/organizations/${organization.id}`)
+  }
+
   const handleEditOrganization = (organization: any) => {
     openModal('organization', { 
       editingOrganization: organization,
@@ -304,8 +332,18 @@ export function OrganizationList() {
   }
 
   const handleDeleteOrganization = (organization: any) => {
-    // TODO: Implementar modal de confirmación para eliminar organización
-    console.log('Delete organization:', organization)
+    openModal('confirm', {
+      mode: 'dangerous',
+      title: 'Confirmar eliminación',
+      description: `¿Estás seguro de que quieres eliminar la organización "${organization.name}"? Esta acción no se puede deshacer.`,
+      itemName: organization.name,
+      itemType: 'organización',
+      destructiveActionText: 'Eliminar Organización',
+      onConfirm: () => {
+        // TODO: Implementar eliminación de organización
+        console.log('Eliminar organización:', organization)
+      }
+    })
   }
 
   // Seleccionar automáticamente la organización actual
@@ -332,7 +370,7 @@ export function OrganizationList() {
           <div className="col-span-1">Plan</div>
           <div className="col-span-1">Miembros</div>
           <div className="col-span-1">Estado</div>
-          <div className="col-span-1"></div>
+          <div className="col-span-1">Acciones Rápidas</div>
         </div>
 
         {/* Organizaciones */}
@@ -342,6 +380,7 @@ export function OrganizationList() {
             organization={organization}
             isSelected={selectedOrganization === organization.id}
             onSelect={handleSelectOrganization}
+            onView={handleViewOrganization}
             onEdit={handleEditOrganization}
             onDelete={handleDeleteOrganization}
           />
@@ -351,7 +390,7 @@ export function OrganizationList() {
       {/* Panel lateral con información de la organización seleccionada */}
       {selectedOrganization && (
         <div className="mt-8">
-          <ActiveOrganizationMembersCard />
+          <ActiveOrganizationMembersCard members={[]} />
         </div>
       )}
     </div>

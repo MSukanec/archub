@@ -51,6 +51,7 @@ import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import OrganizationBoard from "@/pages/organization/OrganizationBoard";
 import Organizations from "@/pages/profile/organizations/Organizations";
+import OrganizationView from "@/pages/profile/organizations/OrganizationView";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
@@ -304,6 +305,11 @@ function Router() {
         <Route path="/profile/organizations">
           <ProtectedRoute>
             <Organizations />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/profile/organizations/:id">
+          <ProtectedRoute>
+            <OrganizationView />
           </ProtectedRoute>
         </Route>
 
