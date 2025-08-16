@@ -56,7 +56,7 @@ import Organization from "@/pages/organization/Organization";
 import Profile from "@/pages/profile/Profile";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
 import Onboarding from "@/pages/Onboarding";
-import SelectMode from "@/pages/others/SelectMode";
+import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
