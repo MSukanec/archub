@@ -4,7 +4,7 @@ import { Building, UserPlus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { OrganizationDashboardView } from './tabs/OrganizationDashboardView';
 import { OrganizationMembersView } from './tabs/OrganizationMembersView';
-import { OrganizationSettingsView } from './tabs/OrganizationSettingsView';
+import { OrganizationBasicData } from './tabs/OrganizationBasicData';
 import { OrganizationActivityView } from './tabs/OrganizationActivityView';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -26,6 +26,11 @@ export default function Organization() {
       isActive: activeTab === 'Resumen'
     },
     {
+      id: 'Datos Básicos',
+      label: 'Datos Básicos',
+      isActive: activeTab === 'Datos Básicos'
+    },
+    {
       id: 'Miembros',
       label: 'Miembros',
       isActive: activeTab === 'Miembros'
@@ -34,11 +39,6 @@ export default function Organization() {
       id: 'Actividad',
       label: 'Actividad',
       isActive: activeTab === 'Actividad'
-    },
-    {
-      id: 'Configuración',
-      label: 'Configuración',
-      isActive: activeTab === 'Configuración'
     }
   ];
 
@@ -82,9 +82,9 @@ export default function Organization() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Resumen' && <OrganizationDashboardView organization={organization} />}
+      {activeTab === 'Datos Básicos' && <OrganizationBasicData organization={organization} />}
       {activeTab === 'Miembros' && <OrganizationMembersView organization={organization} />}
       {activeTab === 'Actividad' && <OrganizationActivityView />}
-      {activeTab === 'Configuración' && <OrganizationSettingsView organization={organization} />}
     </Layout>
   );
 }

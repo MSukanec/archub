@@ -17,11 +17,11 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-interface OrganizationSettingsViewProps {
+interface OrganizationBasicDataProps {
   organization: any;
 }
 
-export function OrganizationSettingsView({ organization }: OrganizationSettingsViewProps) {
+export function OrganizationBasicData({ organization }: OrganizationBasicDataProps) {
   const { data: userData } = useCurrentUser();
 
   const { toast } = useToast();
