@@ -279,7 +279,7 @@ export function Sidebar() {
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
     // Toggle acordeón: si ya está expandido, colapsar; si no, expandir
     setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
-    setActiveSidebarSection(sectionId);
+    // NO cambiar activeSidebarSection aquí - debe basarse en la ruta actual
   };
 
   // Definir contenido de submenu para cada sección (copiado de SidebarSubmenu)
@@ -330,14 +330,14 @@ export function Sidebar() {
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization',
-      isActive: activeSidebarSection === 'organizacion' || (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard'
+      isActive: (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard'
     },
     { 
       id: 'diseno', 
       icon: Brush, 
       label: 'Diseño', 
       defaultRoute: '/design/dashboard',
-      isActive: activeSidebarSection === 'diseno' || location.startsWith('/design'),
+      isActive: location.startsWith('/design'),
       generalModeRestricted: true
     },
     { 
@@ -345,21 +345,21 @@ export function Sidebar() {
       icon: HardHat, 
       label: 'Construcción', 
       defaultRoute: '/construction/dashboard',
-      isActive: activeSidebarSection === 'construccion' || location.startsWith('/construction')
+      isActive: location.startsWith('/construction')
     },
     { 
       id: 'finanzas', 
       icon: DollarSign, 
       label: 'Finanzas', 
       defaultRoute: '/finances/dashboard',
-      isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
+      isActive: location.startsWith('/finances')
     },
     { 
       id: 'recursos', 
       icon: BookOpen, 
       label: 'Recursos', 
       defaultRoute: '/recursos/documentacion',
-      isActive: activeSidebarSection === 'recursos' || location.startsWith('/recursos')
+      isActive: location.startsWith('/recursos')
     },
   ];
 
@@ -443,7 +443,7 @@ export function Sidebar() {
               <SidebarButton
                 icon={<Crown className="w-[18px] h-[18px]" />}
                 label="Administración"
-                isActive={activeSidebarSection === 'administracion' || location.startsWith('/admin')}
+                isActive={location.startsWith('/admin')}
                 isExpanded={isExpanded}
                 onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
                 variant="main"
@@ -509,7 +509,7 @@ export function Sidebar() {
             <SidebarButton
               icon={<UserCircle className="w-[18px] h-[18px]" />}
               label="Mi Perfil"
-              isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
+              isActive={location.startsWith('/profile')}
               isExpanded={isExpanded}
               onClick={() => handleMainSectionClick('perfil', '/profile/data')}
               avatarUrl={userData?.user?.avatar_url}
