@@ -51,7 +51,7 @@ import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
 import Organizations from "@/pages/organization/Organizations";
-import OrganizationView from "@/pages/organization/OrganizationView";
+import Organization from "@/pages/organization/Organization";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
@@ -105,7 +105,7 @@ function Router() {
         {/* Organization Routes */}
         <Route path="/organization">
           <ProtectedRoute>
-            <Organizations />
+            <Organization />
           </ProtectedRoute>
         </Route>
 
@@ -131,6 +131,11 @@ function Router() {
         <Route path="/organizations">
           <ProtectedRoute>
             <Organizations />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/organization/:organizationId">
+          <ProtectedRoute>
+            <Organization />
           </ProtectedRoute>
         </Route>
 
@@ -293,7 +298,7 @@ function Router() {
         </Route>
         <Route path="/profile/organizations/:id">
           <ProtectedRoute>
-            <OrganizationView />
+            <Organization />
           </ProtectedRoute>
         </Route>
 

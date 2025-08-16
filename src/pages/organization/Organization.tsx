@@ -1,32 +1,22 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
+import { useState } from "react";
 import { Building, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { OrganizationDashboardView } from './tabs/OrganizationDashboardView';
 import { OrganizationMembersView } from './tabs/OrganizationMembersView';
 import { OrganizationSettingsView } from './tabs/OrganizationSettingsView';
-import { OrganizationActivityView } from './tabs/OrganizationActivityView';
+
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-export default function OrganizationView() {
-  const { id } = useParams<{ id: string }>();
-  const [, navigate] = useLocation();
+export default function Organization() {
   const [activeTab, setActiveTab] = useState('Resumen');
   
   const { data: userData, isLoading } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   
-  // Buscar la organización específica
-  const organization = userData?.organizations?.find(org => org.id === id);
-
-  useEffect(() => {
-    if (!isLoading && !organization) {
-      // Si no se encuentra la organización, redirigir de vuelta
-      navigate('/profile/organizations');
-    }
-  }, [organization, isLoading, navigate]);
+  // Usar la organización actual del usuario
+  const organization = userData?.organization;
 
   const headerTabs = [
     {
@@ -43,11 +33,6 @@ export default function OrganizationView() {
       id: 'Configuración',
       label: 'Configuración',
       isActive: activeTab === 'Configuración'
-    },
-    {
-      id: 'Historial',
-      label: 'Historial',
-      isActive: activeTab === 'Historial'
     }
   ];
 
@@ -57,10 +42,7 @@ export default function OrganizationView() {
     subtitle: `${organization?.is_system ? 'Organización del sistema' : 'Organización'} • Plan ${organization?.plan?.name || 'Free'}`,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    backButton: {
-      href: '/profile/organizations',
-      label: 'Volver a organizaciones'
-    },
+
     // Solo mostrar botón de invitar en la tab de Miembros
     ...(activeTab === 'Miembros' && {
       actionButton: {
@@ -96,7 +78,6 @@ export default function OrganizationView() {
       {activeTab === 'Resumen' && <OrganizationDashboardView organization={organization} />}
       {activeTab === 'Miembros' && <OrganizationMembersView organization={organization} />}
       {activeTab === 'Configuración' && <OrganizationSettingsView organization={organization} />}
-      {activeTab === 'Historial' && <OrganizationActivityView />}
     </Layout>
   );
 }
