@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building, MapPin, Globe, Share, ExternalLink, FileText } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building, MapPin, Globe, Share, ExternalLink, FileText, Contact } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import React, { useState, useEffect } from 'react'
@@ -39,7 +39,7 @@ import ContactCardDesktop from '@/components/cards/contacts/ContactCardDesktop'
 import { ContactAvatarUploader } from '@/components/contacts/ContactAvatarUploader'
 import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
 
-export default function OrganizationContacts() {
+export default function Contacts() {
   const [activeTab, setActiveTab] = useState("personas")
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState('name_asc')
@@ -398,7 +398,7 @@ export default function OrganizationContacts() {
     return (
       <Layout
         headerProps={{
-          icon: Users,
+          icon: Contact,
           title: "Contactos",
           tabs: headerTabs,
           onTabChange: (tabId: string) => {
@@ -443,7 +443,7 @@ export default function OrganizationContacts() {
     <Layout
       wide={true}
       headerProps={{
-        icon: Users,
+        icon: Contact,
         title: "Contactos",
         pageTitle: "Contactos",
         breadcrumb: [
@@ -461,8 +461,8 @@ export default function OrganizationContacts() {
         showHeaderSearch: true,
         headerSearchValue: searchValue,
         onHeaderSearchChange: setSearchValue,
-        showHeaderFilter: true,
-        renderHeaderFilterContent: () => (
+        showFilter: true,
+        renderFilterContent: () => (
           <div className="space-y-3 p-3">
             <div>
               <Label className="text-xs font-medium mb-2 block">Ordenar</Label>

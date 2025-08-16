@@ -146,6 +146,7 @@ export function SidebarSubmenu() {
     'recursos': [
       { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
       { icon: Images, label: 'Galería', href: '/recursos/galeria' },
+      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
     ],
 
 

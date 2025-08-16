@@ -20,7 +20,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationBasicData from "@/pages/organization/OrganizationBasicData";
 import ProfileProjects from "@/pages/profile/ProfileProjects";
-import OrganizationContacts from "@/pages/organization/OrganizationContacts";
+
 import OrganizationMembers from "@/pages/organization/OrganizationMembers";
 import OrganizationActivity from "@/pages/organization/OrganizationActivity";
 
@@ -46,9 +46,9 @@ import ConstructionSchedule from "@/pages/construction/ConstructionSchedule";
 import ConstructionSubcontracts from "@/pages/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/design/DesignDashboard";
-import Library from "@/pages/resources/Library";
 import Documentation from "@/pages/resources/Documentation";
 import Gallery from "@/pages/resources/Gallery";
+import Contacts from "@/pages/resources/Contacts";
 import OrganizationBoard from "@/pages/organization/OrganizationBoard";
 import ProfileOrganizations from "@/pages/profile/ProfileOrganizations";
 
@@ -122,11 +122,7 @@ function Router() {
             <ProfileProjects />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/contacts">
-          <ProtectedRoute>
-            <OrganizationContacts />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/organization/members">
           <ProtectedRoute>
             <OrganizationMembers />
@@ -167,12 +163,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
         
-        {/* Library Route - mantener para compatibilidad */}
-        <Route path="/library">
-          <ProtectedRoute>
-            <Library />
-          </ProtectedRoute>
-        </Route>
+
 
         {/* Resources Routes */}
         <Route path="/recursos/documentacion">
@@ -183,6 +174,11 @@ function Router() {
         <Route path="/recursos/galeria">
           <ProtectedRoute>
             <Gallery />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/recursos/contactos">
+          <ProtectedRoute>
+            <Contacts />
           </ProtectedRoute>
         </Route>
 
