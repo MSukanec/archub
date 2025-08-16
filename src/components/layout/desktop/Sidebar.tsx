@@ -54,7 +54,8 @@ import {
   BookOpen,
   BarChart3,
   HandCoins,
-  TrendingUp
+  TrendingUp,
+  ListTodo
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -332,6 +333,7 @@ export function Sidebar() {
     ],
     'administracion': [
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
+      { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
       { icon: Tag, label: 'Categorías', href: '/admin/categories' },
       { icon: Package, label: 'Productos', href: '/admin/products' },
