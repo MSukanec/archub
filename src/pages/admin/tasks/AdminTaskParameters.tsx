@@ -3,11 +3,10 @@ import { Settings, Edit, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
 
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
-
+import { ActionBar } from '@/components/layout/desktop/ActionBar';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -254,40 +253,14 @@ const AdminTaskParameters = () => {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-3 p-4 border-b bg-background/50 backdrop-blur-sm">
-            <div className="flex-1">
-              <ComboBox
-                value={selectedParameterId}
-                onValueChange={setSelectedParameterId}
-                placeholder="Selecciona un parámetro para ver sus opciones"
-                options={parameterOptions}
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEditParameter}
-                disabled={!selectedParameterId}
-                className="h-8 px-3"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDeleteParameter}
-                disabled={!selectedParameterId}
-                className="h-8 px-3 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar
-              </Button>
-            </div>
-          </div>
+          <ActionBar
+            selectedValue={selectedParameterId}
+            onValueChange={setSelectedParameterId}
+            onEdit={handleEditParameter}
+            onDelete={handleDeleteParameter}
+            placeholder="Selecciona un parámetro para ver sus opciones"
+            options={parameterOptions}
+          />
 
           <div className="p-6">
             {selectedParameter ? (
