@@ -30,10 +30,7 @@ const AdminTasks = () => {
         return {
           label: "Nueva Categoría",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de categorías
-            console.log('Crear nueva categoría');
-          }
+          onClick: () => openModal('task-category', { isEditing: true })
         };
       case 'parametros':
         return {
