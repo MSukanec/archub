@@ -229,10 +229,20 @@ export default function Movements() {
   const { selectedProjectId, isGlobalView } = useProjectContext();
   const projectId = selectedProjectId;
 
-  const { data: movements = [], isLoading } = useMovements(
+  const { data: rawMovements = [], isLoading } = useMovements(
     organizationId,
     projectId || undefined,
   );
+
+  // Safe movements with defensive checks
+  const movements = useMemo(() => {
+    return rawMovements.filter(movement => 
+      movement && 
+      movement.id &&
+      movement.movement_data &&
+      typeof movement.movement_data === 'object'
+    );
+  }, [rawMovements]);
 
   // Get organization's default currency
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
@@ -625,6 +635,11 @@ export default function Movements() {
   // Filter movements (applied before grouping)
   const filteredMovements = movements
     .filter((movement) => {
+      // Ensure movement and movement_data exist
+      if (!movement || !movement.movement_data) {
+        return false;
+      }
+
       const matchesSearch =
         movement.description
           ?.toLowerCase()
@@ -641,14 +656,14 @@ export default function Movements() {
 
       const matchesType =
         filterByType === "all" ||
-        movement.movement_data?.type?.name === filterByType;
+        (movement.movement_data?.type?.name && movement.movement_data.type.name === filterByType);
       const matchesCategory =
         filterByCategory === "all" ||
-        movement.movement_data?.category?.name === filterByCategory;
+        (movement.movement_data?.category?.name && movement.movement_data.category.name === filterByCategory);
       
       const matchesSubcategory =
         filterBySubcategory === "all" ||
-        movement.movement_data?.subcategory?.name === filterBySubcategory;
+        (movement.movement_data?.subcategory?.name && movement.movement_data.subcategory.name === filterBySubcategory);
       const matchesFavorites =
         filterByFavorites === "all" ||
         (filterByFavorites === "favorites" && movement.is_favorite);
@@ -660,11 +675,11 @@ export default function Movements() {
       
       const matchesCurrency =
         filterByCurrency === "all" ||
-        movement.movement_data?.currency?.name === filterByCurrency;
+        (movement.movement_data?.currency?.name && movement.movement_data.currency.name === filterByCurrency);
       
       const matchesWallet =
         filterByWallet === "all" ||
-        movement.movement_data?.wallet?.name === filterByWallet;
+        (movement.movement_data?.wallet?.name && movement.movement_data.wallet.name === filterByWallet);
 
       return (
         matchesSearch && matchesType && matchesCategory && matchesSubcategory && matchesFavorites && matchesScope && matchesCurrency && matchesWallet
