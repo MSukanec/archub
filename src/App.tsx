@@ -53,6 +53,7 @@ import Board from "@/pages/resources/Board";
 import Organizations from "@/pages/profile/Organizations";
 import Organization from "@/pages/organization/Organization";
 
+import Profile from "@/pages/profile/Profile";
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
 import Onboarding from "@/pages/Onboarding";
@@ -274,7 +275,7 @@ function Router() {
         {/* Profile Routes */}
         <Route path="/profile">
           <ProtectedRoute>
-            <ProfileBasicData />
+            <Profile />
           </ProtectedRoute>
         </Route>
         <Route path="/profile/data">
