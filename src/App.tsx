@@ -296,11 +296,6 @@ function Router() {
             <Organizations />
           </ProtectedRoute>
         </Route>
-        <Route path="/profile/organizations/:id">
-          <ProtectedRoute>
-            <Organization />
-          </ProtectedRoute>
-        </Route>
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard">
