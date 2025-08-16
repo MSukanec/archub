@@ -228,15 +228,8 @@ export function OrganizationList() {
 
   return (
     <div className="space-y-6">
-      {/* Header con información del estado actual */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Organizaciones Disponibles</h2>
-          <p className="text-sm text-muted-foreground">
-            Gestiona las organizaciones a las que perteneces. 
-            Organización actual: <span className="font-medium">{userData?.organization?.name}</span>
-          </p>
-        </div>
+      {/* Botón de acción en la esquina superior derecha */}
+      <div className="flex justify-end">
         <div className="flex gap-2">
           {selectedOrganization && selectedOrganization !== userData?.organization?.id && (
             <Button 
