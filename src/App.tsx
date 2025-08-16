@@ -71,7 +71,6 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 
 
 
-import AdminUnitPresentations from "@/pages/admin/AdminUnitPresentations";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
 
 
@@ -330,13 +329,7 @@ function Router() {
 
 
 
-        <Route path="/admin/unit-presentations">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminUnitPresentations />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/movement-concepts">
           <ProtectedRoute>
             <AdminProtectedRoute>

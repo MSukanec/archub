@@ -20,10 +20,7 @@ const AdminGeneral = () => {
         return {
           label: "Nuevo Concepto",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de conceptos
-            console.log('Crear nuevo concepto');
-          }
+          onClick: () => openModal('movement-concept')
         };
       case 'unidades':
         return {
