@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { ListTodo, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import AdminTaskList from './tabs/AdminTaskList';
-import AdminTaskCategories from './tabs/AdminTaskCategories';
-import AdminTaskParameters from './tabs/AdminTaskParameters';
-import AdminTaskTemplates from './tabs/AdminTaskTemplates';
+import AdminTaskList from './community/AdminTaskList';
+import AdminTaskCategories from './community/AdminTaskCategories';
+import AdminTaskParameters from './community/AdminTaskParameters';
+import AdminTaskTemplates from './community/AdminTaskTemplates';
 
 const AdminTasks = () => {
   const [activeTab, setActiveTab] = useState('tareas');

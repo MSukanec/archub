@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Crown, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import AdminCommunityDashboard from './tabs/AdminCommunityDashboard';
-import AdminCommunityOrganizations from './tabs/AdminCommunityOrganizations';
-import AdminCommunityUsers from './tabs/AdminCommunityUsers';
-import AdminCommunityChangelog from './tabs/AdminCommunityChangelog';
+import AdminCommunityDashboard from './AdminCommunityDashboard';
+import AdminCommunityOrganizations from './AdminCommunityOrganizations';
+import AdminCommunityUsers from './AdminCommunityUsers';
+import AdminCommunityChangelog from './AdminCommunityChangelog';
 
 const AdminCommunity = () => {
   const [activeTab, setActiveTab] = useState('resumen');

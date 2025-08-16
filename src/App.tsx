@@ -59,9 +59,7 @@ import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
-import AdminCommunity from "@/pages/admin/AdminCommunity";
-
-import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
+import AdminCommunity from "@/pages/admin/community/AdminCommunity";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
@@ -284,13 +282,7 @@ function Router() {
 
 
 
-        <Route path="/admin/generated-tasks">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminGeneratedTasks />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/admin/categories">
           <ProtectedRoute>
