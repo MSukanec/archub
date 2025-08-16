@@ -149,10 +149,10 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         if (!a.created_at) return 1; 
         if (!b.created_at) return -1;
         
-        // Ordenar por fecha: más reciente primero
+        // Ordenar por fecha: más reciente PRIMERO (descendente)
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
-        return dateB - dateA; // Descendente (más reciente primero)
+        return dateB - dateA; // Descendente: lo más nuevo arriba
       });
       console.log('Sorted events:', sortedEvents);
       return sortedEvents;
@@ -208,14 +208,9 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       render: (event: any) => (
         <div className="flex flex-col">
           {event.created_at ? (
-            <>
-              <div className="text-sm font-medium">
-                {format(new Date(event.created_at), 'dd/MM/yyyy', { locale: es })}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {format(new Date(event.created_at), 'HH:mm', { locale: es })}
-              </div>
-            </>
+            <div className="text-sm font-medium">
+              {format(new Date(event.created_at), 'dd/MM/yyyy', { locale: es })}
+            </div>
           ) : (
             <div className="text-sm text-muted-foreground">Pendiente</div>
           )}
