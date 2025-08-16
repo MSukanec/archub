@@ -77,9 +77,14 @@ export function SubcontractAwardModal({
         throw new Error(errorData.error || 'Error al adjudicar el subcontrato');
       }
 
+      const contactName = winningBid.contacts?.company_name || 
+                          winningBid.contacts?.full_name || 
+                          `${winningBid.contacts?.first_name || ''} ${winningBid.contacts?.last_name || ''}`.trim() ||
+                          'Sin nombre';
+      
       toast({
         title: "Subcontrato adjudicado",
-        description: `El subcontrato ha sido adjudicado exitosamente a ${winningBid.contacts?.company_name || winningBid.contacts?.full_name}`
+        description: `El subcontrato ha sido adjudicado exitosamente a ${contactName}`
       });
 
       if (onSuccess) {
@@ -115,7 +120,10 @@ export function SubcontractAwardModal({
             <div>
               <p className="text-sm font-medium">Proveedor ganador</p>
               <p className="text-sm text-muted-foreground">
-                {winningBid?.contacts?.company_name || winningBid?.contacts?.full_name || 'Sin nombre'}
+                {winningBid?.contacts?.company_name || 
+                 winningBid?.contacts?.full_name || 
+                 `${winningBid?.contacts?.first_name || ''} ${winningBid?.contacts?.last_name || ''}`.trim() ||
+                 'Sin nombre'}
               </p>
             </div>
           </div>
