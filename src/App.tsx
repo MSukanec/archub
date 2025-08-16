@@ -18,7 +18,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 // Protected Pages
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
-import OrganizationBasicData from "@/pages/organization/OrganizationBasicData";
+
 import ProfileProjects from "@/pages/profile/ProfileProjects";
 
 
@@ -113,11 +113,7 @@ function Router() {
             <OrganizationDashboard />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/basic-data">
-          <ProtectedRoute>
-            <OrganizationBasicData />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/profile/projects">
           <ProtectedRoute>
             <ProfileProjects />

@@ -325,7 +325,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
 
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
-      { icon: Database, label: 'Datos Básicos', href: '/organization/basic-data' },
+
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
 
