@@ -330,6 +330,15 @@ export function Sidebar() {
       { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
     ],
+    'administracion': [
+      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
+      { icon: Building, label: 'Organizaciones', href: '/admin/organizations' },
+      { icon: Users, label: 'Usuarios', href: '/admin/users' },
+      { icon: Database, label: 'Materiales', href: '/admin/materials' },
+      { icon: Tag, label: 'Categorías', href: '/admin/categories' },
+      { icon: Package, label: 'Productos', href: '/admin/products' },
+      { icon: Star, label: 'Marcas', href: '/admin/brands' },
+    ],
   };
 
   // Botones principales del sidebar - ahora con sistema de acordeón
@@ -370,6 +379,13 @@ export function Sidebar() {
       defaultRoute: '/recursos/documentacion',
       isActive: location.startsWith('/recursos')
     },
+    ...(isAdmin ? [{ 
+      id: 'administracion', 
+      icon: Crown, 
+      label: 'Administración', 
+      defaultRoute: '/admin/dashboard',
+      isActive: location.startsWith('/admin')
+    }] : []),
   ];
 
 
@@ -462,49 +478,7 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Admin button (above Profile) */}
-          {isAdmin && (
-            <div className="mb-[2px]">
-              <SidebarButton
-                icon={<Crown className="w-[18px] h-[18px]" />}
-                label="Administración"
-                isActive={location.startsWith('/admin')}
-                isExpanded={isExpanded}
-                onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
-                variant="main"
-              />
-              
-              {/* Mostrar subelementos de administración si está expandido */}
-              {isExpanded && expandedAccordion === 'administracion' && (
-                <div className="ml-4 mt-[2px] space-y-[1px]">
-                  <SidebarButton
-                    icon={<Home className="w-[16px] h-[16px]" />}
-                    label="Resumen de Administración"
-                    href="/admin/dashboard"
-                    isActive={location === '/admin/dashboard'}
-                    isExpanded={isExpanded}
-                    variant="secondary"
-                  />
-                  <SidebarButton
-                    icon={<Building className="w-[16px] h-[16px]" />}
-                    label="Organizaciones"
-                    href="/admin/organizations"
-                    isActive={location === '/admin/organizations'}
-                    isExpanded={isExpanded}
-                    variant="secondary"
-                  />
-                  <SidebarButton
-                    icon={<Users className="w-[16px] h-[16px]" />}
-                    label="Usuarios"
-                    href="/admin/users"
-                    isActive={location === '/admin/users'}
-                    isExpanded={isExpanded}
-                    variant="secondary"
-                  />
-                </div>
-              )}
-            </div>
-          )}
+
           
           {/* Settings buttons */}
           <div className="flex flex-col gap-[2px] mb-[2px]">
