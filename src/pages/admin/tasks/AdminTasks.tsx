@@ -45,10 +45,7 @@ const AdminTasks = () => {
         return {
           label: "Nueva Plantilla",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de plantillas
-            console.log('Crear nueva plantilla');
-          }
+          onClick: () => openModal('task-template')
         };
       default:
         return {
