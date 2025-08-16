@@ -6,7 +6,7 @@ import AdminMaterialProducts from './tabs/AdminMaterialProducts';
 import AdminMaterialMaterials from './tabs/AdminMaterialMaterials';
 import AdminMaterialBrands from './tabs/AdminMaterialBrands';
 import AdminMaterialCategories from './tabs/AdminMaterialCategories';
-import AdminMaterialPrecios from './tabs/AdminMaterialPrecios';
+import AdminMaterialPrices from './tabs/AdminMaterialPrices';
 
 const AdminMaterials = () => {
   const [activeTab, setActiveTab] = useState('productos');
@@ -50,7 +50,10 @@ const AdminMaterials = () => {
         return {
           label: "Nuevo Precio",
           icon: Plus,
-          onClick: () => openModal('admin-material-price', { isEditing: false })
+          onClick: () => {
+            // TODO: Crear modal de creación de precios
+            console.log('Crear nuevo precio');
+          }
         };
       default:
         return undefined;
@@ -78,7 +81,7 @@ const AdminMaterials = () => {
       case 'categorias':
         return <AdminMaterialCategories />;
       case 'precios':
-        return <AdminMaterialPrecios />;
+        return <AdminMaterialPrices />;
       default:
         return <AdminMaterialProducts />;
     }

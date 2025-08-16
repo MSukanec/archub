@@ -67,7 +67,7 @@ import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
 import AdminMaterials from "@/pages/admin/AdminMaterials";
 
-import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
+
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
 
 
@@ -315,13 +315,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/admin/material-categories">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminMaterialCategories />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/admin/materials">
           <ProtectedRoute>
             <AdminProtectedRoute>
