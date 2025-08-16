@@ -144,9 +144,12 @@ export function OrganizationList() {
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
     mutationFn: async (organizationId: string) => {
-      const { data, error } = await supabase.auth.updateUser({
-        data: { current_organization_id: organizationId }
-      })
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organizationId })
+        .eq('user_id', userData?.user?.id)
+        .select()
+      
       if (error) throw error
       return data
     },
