@@ -34,7 +34,7 @@ export default function FinancesPreferences() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('organizacion');
+    setSidebarContext('organization');
   }, [setSidebarContext]);
 
   // Initialize form values from organization data
