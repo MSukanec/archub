@@ -1,194 +1,178 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { toast } from '@/hooks/use-toast'
+import { useUnitPresentations, UnitPresentation, useDeleteUnitPresentation } from '@/hooks/use-unit-presentations'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 
 import { Table } from '@/components/ui-custom/Table'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useUnitPresentations, useDeleteUnitPresentation, type UnitPresentation } from '@/hooks/use-unit-presentations'
-import { useCurrentUser } from '@/hooks/use-current-user'
 
-import { Edit, Trash2, Target, Zap, Package, Clock } from 'lucide-react'
-import { exportToExcel, createExportColumns } from '@/lib/export-utils'
+import { Plus, Edit, Trash2, Ruler, Package } from 'lucide-react'
 
 const AdminGeneralUnitPresentations = () => {
   const [searchValue, setSearchValue] = useState('')
-  const [sortBy, setSortBy] = useState('created_at')
-  const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
-
+  const [sortBy, setSortBy] = useState('name')
+  const [filterByUnit, setFilterByUnit] = useState('')
+  
   const { openModal } = useGlobalModalStore()
-  const { data: userData } = useCurrentUser()
 
-  // Real data from useUnitPresentations hook
+  // Fetch unit presentations using the hook
   const { data: unitPresentations = [], isLoading } = useUnitPresentations()
   const deleteUnitPresentationMutation = useDeleteUnitPresentation()
 
-  // Filter and sort unit presentations
-  const filteredUnitPresentations = unitPresentations
-    .filter((unitPresentation: UnitPresentation) => {
-      // Search filter - search in unit presentation name
-      const matchesSearch = !searchValue || 
-        unitPresentation.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        unitPresentation.slug?.toLowerCase().includes(searchValue.toLowerCase())
-      
-      // Type filter
-      const matchesType = typeFilter === 'all' || 
-        (typeFilter === 'system' && unitPresentation.is_system) ||
-        (typeFilter === 'user' && !unitPresentation.is_system)
-      
-      return matchesSearch && matchesType
-    })
-    .sort((a: UnitPresentation, b: UnitPresentation) => {
-      if (sortBy === 'name') {
-        return (a.name || '').localeCompare(b.name || '')
+  // Get unique units for filters
+  const uniqueUnits = unitPresentations
+    .filter(up => up.unit)
+    .reduce((acc: any[], unitPresentation) => {
+      if (!acc.find(u => u.id === unitPresentation.unit?.id)) {
+        acc.push(unitPresentation.unit)
       }
+      return acc
+    }, [])
+
+  // Apply client-side filtering
+  const filteredUnitPresentations = unitPresentations.filter(unitPresentation => {
+    const matchesSearch = searchValue === '' || 
+      unitPresentation.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      unitPresentation.unit?.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      unitPresentation.description?.toLowerCase().includes(searchValue.toLowerCase())
+    
+    const matchesUnit = filterByUnit === '' || unitPresentation.unit_id === filterByUnit
+    
+    return matchesSearch && matchesUnit
+  })
+
+  // Apply client-side sorting
+  const sortedUnitPresentations = [...filteredUnitPresentations].sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name)
+    } else if (sortBy === 'unit') {
+      return (a.unit?.name || '').localeCompare(b.unit?.name || '')
+    } else if (sortBy === 'equivalence') {
+      return a.equivalence - b.equivalence
+    } else {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
+    }
+  })
 
   const handleEdit = (unitPresentation: UnitPresentation) => {
-    console.log('📝 Editando unidad de presentación:', unitPresentation);
-    const modalData = { unitPresentation: unitPresentation, isEditing: true };
-    openModal('unit-presentation', modalData)
+    openModal('unit-presentation-form', { editingUnitPresentation: unitPresentation })
+  }
+
+  const handleCreate = () => {
+    openModal('unit-presentation-form', { editingUnitPresentation: null })
   }
 
   const handleDelete = (unitPresentation: UnitPresentation) => {
     openModal('delete-confirmation', {
-      title: 'Eliminar Unidad de Presentación',
-      description: `Para confirmar la eliminación, escribe el nombre exacto de la unidad de presentación.`,
+      mode: 'dangerous',
+      title: 'Eliminar Unidad',
+      description: `¿Estás seguro que deseas eliminar la unidad "${unitPresentation.name}"? Esta acción no se puede deshacer.`,
       itemName: unitPresentation.name,
-      itemType: 'unidad de presentación',
-      destructiveActionText: 'Eliminar Unidad de Presentación',
-      onConfirm: () => deleteUnitPresentationMutation.mutate(unitPresentation.id),
-      mode: 'dangerous'
+      destructiveActionText: 'Eliminar Unidad',
+      onDelete: () => deleteUnitPresentationMutation.mutate(unitPresentation.id),
+      isLoading: deleteUnitPresentationMutation.isPending
     })
   }
 
   const clearFilters = () => {
     setSearchValue('')
-    setSortBy('created_at')
-    setTypeFilter('all')
+    setSortBy('name')
+    setFilterByUnit('')
   }
 
-  const handleExport = () => {
-    console.log('🔄 Exportando unidades de presentación...')
-    const columns = createExportColumns([
-      { key: 'name', label: 'Nombre' },
-      { key: 'slug', label: 'Slug' },
-      { key: 'is_system', label: 'Es Sistema', transform: (value) => value ? 'Sí' : 'No' },
-      { key: 'created_at', label: 'Fecha de Creación', transform: (value) => format(new Date(value), 'dd/MM/yyyy HH:mm', { locale: es }) }
-    ])
-    
-    exportToExcel(filteredUnitPresentations, columns, 'unidades-presentacion')
-  }
-
-  // Table columns configuration
   const columns = [
-    { 
-      key: 'name', 
-      label: 'Nombre', 
-      width: 'minmax(0, 1fr)',
+    {
+      key: 'created_at',
+      label: 'Fecha',
+      width: '5%',
       render: (unitPresentation: UnitPresentation) => (
-        <div>
-          <div className="font-medium">
-            {unitPresentation.name}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {unitPresentation.slug}
-          </div>
-        </div>
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(unitPresentation.created_at), 'dd/MM/yy', { locale: es })}
+        </span>
       )
     },
-    { 
-      key: 'is_system', 
-      label: 'Tipo', 
-      width: '10%',
-      render: (unitPresentation: UnitPresentation) => (
-        <div>
-          {unitPresentation.is_system ? (
-            <Badge variant="secondary" className="text-xs">
-              Sistema
-            </Badge>
-          ) : (
-            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-              Usuario
-            </Badge>
-          )}
-        </div>
-      )
-    },
-    { 
-      key: 'created_at', 
-      label: 'Fecha', 
-      width: '10%',
-      render: (unitPresentation: UnitPresentation) => (
-        <div className="text-sm text-muted-foreground">
-          {format(new Date(unitPresentation.created_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
-      )
-    },
-    { 
-      key: 'actions', 
-      label: 'Acciones', 
-      width: '10%',
+    {
+      key: 'name',
+      label: 'Presentación',
       render: (unitPresentation: UnitPresentation) => (
         <div className="flex items-center gap-2">
+          <Ruler className="h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">{unitPresentation.name}</span>
+            <span className="text-xs text-muted-foreground">
+              {unitPresentation.equivalence} {unitPresentation.unit?.name}
+            </span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'unit',
+      label: 'Unidad Base',
+      render: (unitPresentation: UnitPresentation) => (
+        <Badge variant="secondary" className="text-xs">
+          <Package className="h-3 w-3 mr-1" />
+          {unitPresentation.unit?.name || 'Sin unidad'}
+        </Badge>
+      )
+    },
+    {
+      key: 'equivalence',
+      label: 'Equivalencia',
+      render: (unitPresentation: UnitPresentation) => (
+        <span className="text-sm font-medium">
+          {unitPresentation.equivalence}
+        </span>
+      )
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      render: (unitPresentation: UnitPresentation) => (
+        <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+          {unitPresentation.description || '-'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '10%',
+      render: (unitPresentation: UnitPresentation) => (
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(unitPresentation)}
-            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
-            title="Editar unidad de presentación"
+            className="h-7 w-7 p-0"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3 w-3" />
           </Button>
-          {!unitPresentation.is_system && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(unitPresentation)}
-              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              title="Eliminar unidad de presentación"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(unitPresentation)}
+            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </div>
       )
-    }
-  ]
-
-  const features = [
-    {
-      icon: <Package className="w-5 h-5" />,
-      title: "Gestión de Unidades",
-      description: "Administra las diferentes unidades de presentación utilizadas en el sistema para la comercialización de productos."
-    },
-    {
-      icon: <Target className="w-5 h-5" />,
-      title: "Sistema de Slugs",
-      description: "Identificadores únicos que facilitan la integración con otros sistemas y la organización interna."
-    },
-    {
-      icon: <Zap className="w-5 h-5" />,
-      title: "Unidades del Sistema",
-      description: "Unidades predefinidas que garantizan la consistencia y estabilidad del sistema de presentación."
-    },
-    {
-      icon: <Clock className="w-5 h-5" />,
-      title: "Seguimiento Temporal",
-      description: "Monitorea la creación y modificación de unidades con registros temporales completos para auditoría."
     }
   ]
 
   return (
     <div className="space-y-6">
+      {/* Unit Presentations Table */}
       <Table
-        data={filteredUnitPresentations}
+        data={sortedUnitPresentations}
         columns={columns}
         isLoading={isLoading}
         topBar={{
@@ -196,47 +180,49 @@ const AdminGeneralUnitPresentations = () => {
           searchValue: searchValue,
           onSearchChange: setSearchValue,
           showFilter: true,
-          isFilterActive: typeFilter !== 'all' || sortBy !== 'created_at',
+          isFilterActive: filterByUnit !== '' || sortBy !== 'name',
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
-                <Label className="text-xs font-medium mb-1 block">Tipo</Label>
-                <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+                <Label className="text-xs font-medium mb-1 block">Unidad Base</Label>
+                <Select value={filterByUnit} onValueChange={setFilterByUnit}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las unidades" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todas las unidades</SelectItem>
-                    <SelectItem value="system">Unidades del sistema</SelectItem>
-                    <SelectItem value="user">Unidades de usuario</SelectItem>
+                    <SelectItem value="">Todas las unidades</SelectItem>
+                    {uniqueUnits.map((unit: any) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+              
               <div>
                 <Label className="text-xs font-medium mb-1 block">Ordenar por</Label>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Fecha de creación" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="created_at">Fecha de creación</SelectItem>
                     <SelectItem value="name">Nombre</SelectItem>
+                    <SelectItem value="unit">Unidad Base</SelectItem>
+                    <SelectItem value="equivalence">Equivalencia</SelectItem>
+                    <SelectItem value="created_at">Fecha de creación</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
           ),
-          showClearFilters: typeFilter !== 'all' || sortBy !== 'created_at',
-          onClearFilters: clearFilters,
-          showExport: true,
-          onExport: handleExport,
-          showFeatures: true,
-          features: features
+          showClearFilters: filterByUnit !== '' || sortBy !== 'name',
+          onClearFilters: clearFilters
         }}
         emptyState={
           <div className="text-center py-8">
-            <h3 className="text-lg font-medium text-muted-foreground">No hay unidades de presentación</h3>
-            <p className="text-sm text-muted-foreground mt-1">Crea tu primera unidad de presentación para comenzar a organizar productos.</p>
+            <h3 className="text-lg font-medium text-muted-foreground">No hay unidades</h3>
+            <p className="text-sm text-muted-foreground mt-1">No hay unidades de presentación que coincidan con los filtros seleccionados.</p>
           </div>
         }
       />

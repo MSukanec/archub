@@ -29,7 +29,7 @@ const AdminGeneral = () => {
         return {
           label: "Nueva Unidad",
           icon: Plus,
-          onClick: () => openModal('unit-presentation')
+          onClick: () => openModal('unit-presentation-form', { editingUnitPresentation: null })
         };
       default:
         return {
