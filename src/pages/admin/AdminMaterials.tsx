@@ -5,7 +5,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import AdminMaterialProducts from './tabs/AdminMaterialProducts';
 import AdminMaterialMaterials from './tabs/AdminMaterialMaterials';
 import AdminMaterialBrands from './tabs/AdminMaterialBrands';
-import AdminMaterialCategorias from './tabs/AdminMaterialCategorias';
+import AdminMaterialCategories from './tabs/AdminMaterialCategories';
 import AdminMaterialPrecios from './tabs/AdminMaterialPrecios';
 
 const AdminMaterials = () => {
@@ -44,7 +44,7 @@ const AdminMaterials = () => {
         return {
           label: "Nueva Categoría",
           icon: Plus,
-          onClick: () => openModal('admin-material-category', { isEditing: false })
+          onClick: () => openModal('task-category', { isEditing: true })
         };
       case 'precios':
         return {
@@ -76,7 +76,7 @@ const AdminMaterials = () => {
       case 'marcas':
         return <AdminMaterialBrands />;
       case 'categorias':
-        return <AdminMaterialCategorias />;
+        return <AdminMaterialCategories />;
       case 'precios':
         return <AdminMaterialPrecios />;
       default:

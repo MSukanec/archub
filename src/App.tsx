@@ -69,11 +69,11 @@ import AdminMaterials from "@/pages/admin/AdminMaterials";
 
 import AdminMaterialCategories from "@/pages/admin/AdminMaterialCategories";
 import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
-import AdminBrands from "@/pages/admin/AdminBrands";
+
 
 import AdminUnitPresentations from "@/pages/admin/AdminUnitPresentations";
 import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
-import AdminChangelogs from "@/pages/admin/AdminChangelogs";
+
 import AdminCategories from "@/pages/admin/AdminCategories";
 
 
@@ -281,13 +281,7 @@ function Router() {
         </Route>
 
 
-        <Route path="/admin/changelogs">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminChangelogs />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/admin/generated-tasks">
           <ProtectedRoute>
@@ -342,13 +336,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/brands">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminBrands />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/admin/unit-presentations">
           <ProtectedRoute>
