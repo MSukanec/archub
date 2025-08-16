@@ -413,19 +413,8 @@ export function Sidebar() {
             {mainSidebarItems.map((item, index) => (
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
-                <div className="relative">
-                  {item.generalModeRestricted ? (
-                    <CustomRestricted reason="general_mode" functionName={item.label}>
-                      <SidebarButton
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
-                        label={item.label}
-                        isActive={item.isActive}
-                        isExpanded={isExpanded}
-                        onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-                        variant="main"
-                      />
-                    </CustomRestricted>
-                  ) : (
+                {item.generalModeRestricted ? (
+                  <CustomRestricted reason="general_mode" functionName={item.label}>
                     <SidebarButton
                       icon={<item.icon className="w-[18px] h-[18px]" />}
                       label={item.label}
@@ -434,19 +423,17 @@ export function Sidebar() {
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                       variant="main"
                     />
-                  )}
-                  
-                  {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
-                  {!isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
-                    <div 
-                      className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
-                      style={{ 
-                        top: '40px', // Empezar después del botón principal (32px + 8px margen)
-                        height: `${submenuContent[item.id as keyof typeof submenuContent]?.length * 34}px` // 32px por botón + 2px gap
-                      }}
-                    />
-                  )}
-                </div>
+                  </CustomRestricted>
+                ) : (
+                  <SidebarButton
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    label={item.label}
+                    isActive={item.isActive}
+                    isExpanded={isExpanded}
+                    onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
+                    variant="main"
+                  />
+                )}
                 
                 {/* Mostrar subelementos si está expandido y el sidebar está expandido */}
                 {isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
@@ -476,27 +463,14 @@ export function Sidebar() {
           {/* Admin button (above Profile) */}
           {isAdmin && (
             <div className="mb-[2px]">
-              <div className="relative">
-                <SidebarButton
-                  icon={<Crown className="w-[18px] h-[18px]" />}
-                  label="Administración"
-                  isActive={location.startsWith('/admin')}
-                  isExpanded={isExpanded}
-                  onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
-                  variant="main"
-                />
-                
-                {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
-                {!isExpanded && expandedAccordion === 'administracion' && (
-                  <div 
-                    className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
-                    style={{ 
-                      top: '40px', // Empezar después del botón principal
-                      height: '102px' // 3 botones admin * 34px cada uno
-                    }}
-                  />
-                )}
-              </div>
+              <SidebarButton
+                icon={<Crown className="w-[18px] h-[18px]" />}
+                label="Administración"
+                isActive={location.startsWith('/admin')}
+                isExpanded={isExpanded}
+                onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
+                variant="main"
+              />
               
               {/* Mostrar subelementos de administración si está expandido */}
               {isExpanded && expandedAccordion === 'administracion' && (
@@ -555,29 +529,16 @@ export function Sidebar() {
           
           {/* Profile */}
           <div className="mb-[2px]">
-            <div className="relative">
-              <SidebarButton
-                icon={<UserCircle className="w-[18px] h-[18px]" />}
-                label="Mi Perfil"
-                isActive={location.startsWith('/profile')}
-                isExpanded={isExpanded}
-                onClick={() => handleMainSectionClick('perfil', '/profile/data')}
-                avatarUrl={userData?.user?.avatar_url}
-                userFullName={userData?.user?.full_name}
-                variant="main"
-              />
-              
-              {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
-              {!isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
-                <div 
-                  className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
-                  style={{ 
-                    top: '40px', // Empezar después del botón principal
-                    height: `${submenuContent['perfil']?.length * 34}px` // Altura dinámica basada en cantidad de subitems
-                  }}
-                />
-              )}
-            </div>
+            <SidebarButton
+              icon={<UserCircle className="w-[18px] h-[18px]" />}
+              label="Mi Perfil"
+              isActive={location.startsWith('/profile')}
+              isExpanded={isExpanded}
+              onClick={() => handleMainSectionClick('perfil', '/profile/data')}
+              avatarUrl={userData?.user?.avatar_url}
+              userFullName={userData?.user?.full_name}
+              variant="main"
+            />
             
             {/* Mostrar subelementos del perfil si está expandido */}
             {isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
