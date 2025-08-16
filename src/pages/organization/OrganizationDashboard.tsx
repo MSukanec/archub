@@ -1,15 +1,15 @@
 import { Layout } from "@/components/layout/desktop/Layout";
-import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar } from "lucide-react";
+import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomButton } from "@/components/ui-custom/CustomButton";
-import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useLocation } from "wouter";
 
 export default function OrganizationDashboard() {
-  const { openModal } = useGlobalModalStore();
   const { data: userData } = useCurrentUser();
+  const [, setLocation] = useLocation();
   
   const organization = userData?.organization;
   const currentTime = new Date();
@@ -94,25 +94,25 @@ export default function OrganizationDashboard() {
                 icon={Plus}
                 title="Crear un nuevo proyecto"
                 description="Inicia un nuevo proyecto de construcción"
-                onClick={() => openModal('project', {})}
+                onClick={() => setLocation('/profile/projects')}
               />
               <CustomButton
                 icon={Users}
                 title="Crear un nuevo contacto"
                 description="Agrega un nuevo cliente o proveedor"
-                onClick={() => openModal('contact', {})}
+                onClick={() => setLocation('/organization/contacts')}
               />
               <CustomButton
                 icon={DollarSign}
                 title="Crear un nuevo movimiento"
                 description="Registra un ingreso o egreso financiero"
-                onClick={() => openModal('movement', {})}
+                onClick={() => setLocation('/finances/movements')}
               />
               <CustomButton
-                icon={CheckSquare}
-                title="Crear una nueva tarea"
-                description="Agrega una tarea administrativa"
-                onClick={() => openModal('construction-task', {})}
+                icon={Kanban}
+                title="Gestionar tablero de organización"
+                description="Administra las tareas del tablero organizacional"
+                onClick={() => setLocation('/organization/board')}
               />
             </CardContent>
           </Card>
@@ -128,27 +128,27 @@ export default function OrganizationDashboard() {
             <CardContent className="space-y-3">
               <CustomButton
                 icon={CheckSquare}
-                title="Crear una nueva tarea"
-                description="Agrega una tarea de construcción al proyecto activo"
-                onClick={() => openModal('construction-task', {})}
+                title="Gestionar cronograma"
+                description="Administra tareas y cronograma del proyecto"
+                onClick={() => setLocation('/construction/timeline')}
               />
               <CustomButton
                 icon={FileText}
-                title="Crear una nueva bitácora"
+                title="Gestionar bitácoras"
                 description="Registra el progreso y eventos del proyecto"
-                onClick={() => openModal('site-log', {})}
+                onClick={() => setLocation('/construction/site-logs')}
               />
               <CustomButton
                 icon={HardHat}
-                title="Crear un nuevo subcontrato"
-                description="Gestiona subcontratistas y trabajos externos"
-                onClick={() => openModal('subcontract', {})}
+                title="Gestionar subcontratos"
+                description="Administra subcontratistas y sus tareas"
+                onClick={() => setLocation('/construction/subcontracts')}
               />
               <CustomButton
                 icon={Receipt}
-                title="Crear un nuevo presupuesto"
-                description="Estima costos para el proyecto"
-                onClick={() => openModal('budget', {})}
+                title="Gestionar presupuestos"
+                description="Administra costos y presupuestos del proyecto"
+                onClick={() => setLocation('/construction/budgets')}
               />
             </CardContent>
           </Card>
