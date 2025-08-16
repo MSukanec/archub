@@ -49,62 +49,27 @@ export default function SubcontractList() {
     const pendingSubcontracts = subcontracts.filter(s => s.status === 'pending');
     const inProgressSubcontracts = subcontracts.filter(s => s.status === 'in_progress');
 
-    // Calcular valores totales corregidos
+    // Calcular valores totales usando los campos correctos de la base de datos
     const totalAwardedValueARS = awardedSubcontracts.reduce((sum, s) => {
-      // Usar amount_total si la moneda es ARS, sino convertir
-      if (s.currency_code === 'ARS') {
-        return sum + (s.amount_total || 0);
-      } else if (s.currency_code === 'USD') {
-        // Convertir USD a ARS usando exchange_rate
-        return sum + ((s.amount_total || 0) * (s.exchange_rate || 1125));
-      }
-      return sum;
+      // Los subcontratos adjudicados tienen amount_total
+      return sum + (s.amount_total || 0);
     }, 0);
     
     const totalAwardedValueUSD = awardedSubcontracts.reduce((sum, s) => {
-      // Usar amount_total si la moneda es USD, sino convertir
-      if (s.currency_code === 'USD') {
-        return sum + (s.amount_total || 0);
-      } else if (s.currency_code === 'ARS') {
-        // Convertir ARS a USD usando exchange_rate
-        return sum + ((s.amount_total || 0) / (s.exchange_rate || 1125));
-      }
-      return sum;
+      // Convertir a USD usando tasa de cambio (para vista dolarizada)
+      return sum + ((s.amount_total || 0) / 1125);
     }, 0);
     
-    // Valor total según vista de moneda
-    const getTotalValue = () => {
-      if (currencyView === 'discriminado') {
-        return { ars: totalAwardedValueARS, usd: totalAwardedValueUSD };
-      } else if (currencyView === 'pesificado') {
-        const exchangeRate = subcontracts[0]?.exchange_rate || 1;
-        return { 
-          ars: totalAwardedValueARS + (totalAwardedValueUSD * exchangeRate), 
-          usd: 0 
-        };
-      } else if (currencyView === 'dolarizado') {
-        const exchangeRate = subcontracts[0]?.exchange_rate || 1;
-        return { 
-          ars: 0, 
-          usd: totalAwardedValueUSD + (totalAwardedValueARS / exchangeRate) 
-        };
-      }
-      return { ars: totalAwardedValueARS, usd: totalAwardedValueUSD };
+    // Simplificar para usar directamente los valores calculados
+    const totalValues = {
+      ars: totalAwardedValueARS,
+      usd: totalAwardedValueUSD
     };
 
-    const totalValues = getTotalValue();
-
-    // Calcular saldo restante (total pagado vs total adjudicado)
+    // Calcular saldo restante usando los campos correctos del análisis
     const totalPaidARS = subcontractAnalysis.reduce((sum, analysis) => {
-      const totalPaid = analysis.movements?.reduce((moveSum: number, mov: any) => {
-        if (mov.currency_code === 'ARS') {
-          return moveSum + (mov.amount || 0);
-        } else if (mov.currency_code === 'USD') {
-          return moveSum + ((mov.amount || 0) * (mov.exchange_rate || 1125));
-        }
-        return moveSum;
-      }, 0) || 0;
-      return sum + totalPaid;
+      // subcontractAnalysis tiene pagoALaFecha
+      return sum + (analysis.pagoALaFecha || 0);
     }, 0);
     
     const remainingBalanceARS = totalAwardedValueARS - totalPaidARS;
