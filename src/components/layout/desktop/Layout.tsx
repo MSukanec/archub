@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
-import { SidebarSubmenu } from "./SidebarSubmenu";
+// import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -98,7 +98,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
-        <SidebarSubmenu />
+        {/* <SidebarSubmenu /> */} {/* Commented out - using accordion sidebar instead */}
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
@@ -114,10 +114,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           // Calculate top padding based on new double-row header (h-20)
           "md:pt-24" // h-20 header + 4 units padding
         } ${
-          // Calculate margin based on fixed main sidebar (40px) and variable secondary sidebar
-          isSecondaryExpanded
-            ? "md:ml-[304px]" // 40px main + 264px secondary
-            : "md:ml-[80px]" // 40px main + 40px secondary
+          // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
+          (isMainDocked || isMainHovered)
+            ? "md:ml-[264px]" // 264px main sidebar when expanded
+            : "md:ml-[40px]" // 40px main sidebar when collapsed
         } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
       >
         <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
