@@ -156,7 +156,7 @@ const AdminCommunityUsers = () => {
     {
       key: 'created_at',
       label: 'Fecha de Registro',
-      width: '16.66%',
+      width: '20%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
@@ -166,7 +166,7 @@ const AdminCommunityUsers = () => {
     {
       key: 'last_activity_at',
       label: 'Última Actividad',
-      width: '16.66%',
+      width: '20%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
@@ -176,7 +176,7 @@ const AdminCommunityUsers = () => {
     {
       key: 'full_name',
       label: 'Usuario',
-      width: '16.66%',
+      width: '20%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -195,7 +195,7 @@ const AdminCommunityUsers = () => {
     {
       key: 'organizations_count',
       label: 'Organizaciones',
-      width: '16.66%',
+      width: '20%',
       render: (user: User) => (
         <div className="flex items-center gap-1">
           <Building className="h-3 w-3 text-muted-foreground" />
@@ -204,19 +204,9 @@ const AdminCommunityUsers = () => {
       )
     },
     {
-      key: 'is_active',
-      label: 'Estado',
-      width: '16.66%',
-      render: (user: User) => (
-        <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
-          {user.is_active ? 'Activo' : 'Inactivo'}
-        </Badge>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
-      width: '16.66%',
+      width: '20%',
       render: (user: User) => (
         <div className="flex items-center space-x-2">
           <Button 

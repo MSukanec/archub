@@ -16,6 +16,25 @@ const AdminCommunity = () => {
     { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' }
   ];
 
+  const getActionButton = () => {
+    switch (activeTab) {
+      case 'organizaciones':
+        return {
+          label: "Nueva Organización",
+          icon: Plus,
+          onClick: () => openModal('admin-organization', { isEditing: false })
+        };
+      case 'usuarios':
+        return {
+          label: "Nuevo Usuario",
+          icon: Plus,
+          onClick: () => openModal('admin-user', { isEditing: false })
+        };
+      default:
+        return undefined;
+    }
+  };
+
   const headerProps = {
     title: "Comunidad",
     icon: Crown,
@@ -23,11 +42,7 @@ const AdminCommunity = () => {
     showFilters: false,
     tabs,
     onTabChange: setActiveTab,
-    actionButton: {
-      label: "Nueva Organización",
-      icon: Plus,
-      onClick: () => openModal('admin-organization', { isEditing: false })
-    }
+    actionButton: getActionButton()
   };
 
   const renderTabContent = () => {
