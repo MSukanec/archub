@@ -169,7 +169,7 @@ export function OrganizationList() {
   })
 
   const handleSelect = (organizationId: string) => {
-    setSelectedOrganization(organizationId)
+    switchOrganization.mutate(organizationId)
   }
 
   const handleView = (organization: any) => {

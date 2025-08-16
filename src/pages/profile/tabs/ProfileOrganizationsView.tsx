@@ -168,7 +168,7 @@ export function OrganizationList() {
   })
 
   const handleSelect = (organizationId: string) => {
-    setSelectedOrganization(organizationId)
+    switchOrganization.mutate(organizationId)
   }
 
   const handleView = (organization: any) => {
@@ -184,11 +184,7 @@ export function OrganizationList() {
     console.log('Delete organization:', organization)
   }
 
-  const handleSwitchToSelected = () => {
-    if (selectedOrganization) {
-      switchOrganization.mutate(selectedOrganization)
-    }
-  }
+
 
   return (
     <div className="space-y-6">
