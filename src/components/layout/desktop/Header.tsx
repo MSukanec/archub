@@ -220,10 +220,10 @@ export function Header({
   return (
     <div
       className={`fixed top-0 right-0 z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
-        // Calculate left margin based on fixed main sidebar (40px) and variable secondary sidebar
-        isSecondaryExpanded
-          ? "left-[304px]" // 40px main + 264px secondary
-          : "left-[80px]" // 40px main + 40px secondary
+        // Calculate left margin based on main sidebar only (since we're using accordion sidebar now)
+        (isMainDocked || isMainHovered)
+          ? "left-[264px]" // 264px main sidebar when expanded
+          : "left-[40px]" // 40px main sidebar when collapsed
       }`}
     >
       {/* Primera fila: Botón Volver + Título + Selector de proyectos */}
