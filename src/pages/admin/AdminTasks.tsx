@@ -24,10 +24,7 @@ const AdminTasks = () => {
         return {
           label: "Nueva Tarea",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de tareas
-            console.log('Crear nueva tarea');
-          }
+          onClick: () => openModal('parametric-task')
         };
       case 'categorias':
         return {

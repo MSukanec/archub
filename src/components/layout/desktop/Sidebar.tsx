@@ -335,9 +335,6 @@ export function Sidebar() {
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
-      { icon: Tag, label: 'Categorías', href: '/admin/categories' },
-      { icon: Package, label: 'Productos', href: '/admin/products' },
-      { icon: Star, label: 'Marcas', href: '/admin/brands' },
     ],
   };
 
