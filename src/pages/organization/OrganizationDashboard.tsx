@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomButton } from "@/components/ui-custom/CustomButton";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { UpcomingTasksTimeline } from "@/components/charts/dashboard/UpcomingTasksTimeline";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -80,9 +79,6 @@ export default function OrganizationDashboard() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Timeline de Tareas Próximas */}
-        <UpcomingTasksTimeline />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Acciones Rápidas de Organización */}
