@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Building } from 'lucide-react'
-import { OrganizationList } from './OrganizationList'
+import { OrganizationList } from '../organization/OrganizationList'
 
 export default function Organizations() {
   const headerProps = {

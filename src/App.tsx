@@ -50,7 +50,7 @@ import Documentation from "@/pages/resources/Documentation";
 import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
-import Organizations from "@/pages/organization/Organizations";
+import Organizations from "@/pages/profile/Organizations";
 import Organization from "@/pages/organization/Organization";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
