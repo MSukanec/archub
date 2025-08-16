@@ -928,11 +928,11 @@ export default function Movements() {
     {
       key: "creator",
       label: "Creador",
-      width: "10%",
+      width: "8%",
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => (
-        <div className="flex items-center gap-2">
+        <div className="flex justify-center">
           <Avatar className="h-6 w-6">
             <AvatarImage src={item.creator?.avatar_url} />
             <AvatarFallback className="text-xs">
@@ -941,11 +941,6 @@ export default function Movements() {
                 "U"}
             </AvatarFallback>
           </Avatar>
-          <span className="text-xs truncate">
-            {item.creator?.full_name ||
-              item.creator?.email ||
-              "Usuario"}
-          </span>
         </div>
       ),
     },
