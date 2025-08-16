@@ -3,7 +3,7 @@ import { es } from 'date-fns/locale';
 import { Activity, Building, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { Layout } from '@/components/layout/desktop/Layout';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export default function OrganizationActivity() {
+export function OrganizationActivityView() {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
 
@@ -62,13 +62,11 @@ export default function OrganizationActivity() {
 
   if (!organizationId) {
     return (
-      <Layout>
-        <div className="text-center py-12 text-muted-foreground">
-          <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-          <p className="text-sm">No hay organización seleccionada.</p>
-          <p className="text-xs">Selecciona una organización para ver la actividad.</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12 text-muted-foreground">
+        <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+        <p className="text-sm">No hay organización seleccionada.</p>
+        <p className="text-xs">Selecciona una organización para ver la actividad.</p>
+      </div>
     );
   }
 
@@ -159,37 +157,26 @@ export default function OrganizationActivity() {
     }
   ];
 
-  const headerProps = {
-    title: "Actividad",
-    description: "Registro de todas las acciones de la organización",
-    breadcrumb: [
-      { name: "Organización", href: "/organization/dashboard" },
-      { name: "Actividad", href: "/organization/activity" }
-    ]
-  };
-
   return (
-    <Layout headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Activity Chart and Table */}
-        {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
-            <p className="text-sm">Cargando actividades...</p>
-          </div>
-        ) : activities.length === 0 ? (
-          <EmptyState
-            icon={<Activity className="w-12 h-12" />}
-            title="No hay actividades registradas"
-            description="Cuando se realicen acciones en la organización, aparecerán aquí."
-          />
-        ) : (
-          <Table
-            data={activities}
-            columns={columns}
-          />
-        )}
-      </div>
-    </Layout>
+    <div className="space-y-6">
+      {/* Activity Chart and Table */}
+      {isLoading ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <Activity className="h-12 w-12 mx-auto mb-4 opacity-20 animate-pulse" />
+          <p className="text-sm">Cargando actividades...</p>
+        </div>
+      ) : activities.length === 0 ? (
+        <EmptyState
+          icon={<Activity className="w-12 h-12" />}
+          title="No hay actividades registradas"
+          description="Cuando se realicen acciones en la organización, aparecerán aquí."
+        />
+      ) : (
+        <Table
+          data={activities}
+          columns={columns}
+        />
+      )}
+    </div>
   );
 }
