@@ -69,7 +69,7 @@ export function SidebarSubmenu() {
   // Definir sección por defecto basada en la ruta actual
   const getDefaultSection = () => {
     if (location.startsWith('/profile')) return 'perfil';
-    if (location.startsWith('/organization/board')) return 'gestion';
+
     if (location.startsWith('/organization')) return 'organizacion';
 
     if (location.startsWith('/design')) return 'diseno';
@@ -140,14 +140,13 @@ export function SidebarSubmenu() {
       { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
 
-    'gestion': [
-      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
-    ],
+
 
     'recursos': [
       { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
       { icon: Images, label: 'Galería', href: '/recursos/galeria' },
       { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
+      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
     ],
 
 
@@ -197,7 +196,7 @@ export function SidebarSubmenu() {
       'diseno': { title: 'Diseño', icon: Brush },
       'construccion': { title: 'Construcción', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
-      'gestion': { title: 'Gestión', icon: Layout },
+
       'recursos': { title: 'Recursos', icon: BookOpen },
 
       'administracion': { title: 'Administración', icon: Crown }

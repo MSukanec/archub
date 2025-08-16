@@ -310,13 +310,7 @@ export function Sidebar() {
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
     },
-    { 
-      id: 'gestion', 
-      icon: Layout, 
-      label: 'Gestión', 
-      defaultRoute: '/organization/board',
-      isActive: activeSidebarSection === 'gestion' || location === '/organization/board'
-    },
+
     { 
       id: 'recursos', 
       icon: BookOpen, 

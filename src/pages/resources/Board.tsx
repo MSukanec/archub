@@ -161,8 +161,8 @@ function BoardContent() {
 
   // Breadcrumb configuration
   const breadcrumb = [
-    { name: "Organización", href: "/organization/dashboard" },
-    { name: "Tablero", href: "/organization/board" }
+    { name: "Recursos", href: "/recursos/documentacion" },
+    { name: "Tablero", href: "/recursos/board" }
   ];
 
   // Header configuration following ai-page-template.md

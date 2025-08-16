@@ -49,7 +49,7 @@ import DesignDashboard from "@/pages/design/DesignDashboard";
 import Documentation from "@/pages/resources/Documentation";
 import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
-import OrganizationBoard from "@/pages/organization/OrganizationBoard";
+import Board from "@/pages/resources/Board";
 import Organizations from "@/pages/profile/organizations/Organizations";
 import OrganizationView from "@/pages/profile/organizations/OrganizationView";
 
@@ -126,9 +126,9 @@ function Router() {
             <OrganizationActivity />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/board">
+        <Route path="/recursos/board">
           <ProtectedRoute>
-            <OrganizationBoard />
+            <Board />
           </ProtectedRoute>
         </Route>
         <Route path="/organizaciones">

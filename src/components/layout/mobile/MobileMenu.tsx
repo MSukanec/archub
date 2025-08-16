@@ -302,13 +302,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       defaultRoute: '/finances/dashboard',
       isActive: currentSidebarContext === 'finances' || location.startsWith('/finances')
     },
-    { 
-      id: 'gestion', 
-      icon: Layout, 
-      label: 'Gestión', 
-      defaultRoute: '/organization/board',
-      isActive: currentSidebarContext === 'gestion' || location === '/organization/board'
-    },
+
     { 
       id: 'recursos', 
       icon: BookOpen, 
@@ -338,9 +332,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
     ],
 
-    gestion: [
-      { icon: CheckSquare, label: 'Tablero', href: '/organization/board' },
-    ],
+
 
     construccion: [
       { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
