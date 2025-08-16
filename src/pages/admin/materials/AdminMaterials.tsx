@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Package, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import AdminMaterialProducts from './community/AdminMaterialProducts';
-import AdminMaterialMaterials from './community/AdminMaterialMaterials';
-import AdminMaterialBrands from './community/AdminMaterialBrands';
-import AdminMaterialCategories from './community/AdminMaterialCategories';
-import AdminMaterialPrices from './community/AdminMaterialPrices';
+import AdminMaterialProducts from './AdminMaterialProducts';
+import AdminMaterialMaterials from './AdminMaterialMaterials';
+import AdminMaterialBrands from './AdminMaterialBrands';
+import AdminMaterialCategories from './AdminMaterialCategories';
+import AdminMaterialPrices from './AdminMaterialPrices';
 
 const AdminMaterials = () => {
   const [activeTab, setActiveTab] = useState('productos');

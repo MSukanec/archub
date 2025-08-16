@@ -63,11 +63,11 @@ import AdminCommunity from "@/pages/admin/community/AdminCommunity";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
 import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
 
-import AdminMaterials from "@/pages/admin/AdminMaterials";
+import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
 import AdminTasks from "@/pages/admin/AdminTasks";
 
 
-import AdminMaterialPrices from "@/pages/admin/AdminMaterialPrices";
+
 
 
 import AdminUnitPresentations from "@/pages/admin/AdminUnitPresentations";
@@ -324,13 +324,7 @@ function Router() {
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
-        <Route path="/admin/material-prices">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminMaterialPrices />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
 
         <Route path="/admin/unit-presentations">
