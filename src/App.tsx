@@ -61,7 +61,7 @@ import SelectMode from "@/pages/SelectMode";
 // Admin Pages
 import AdminCommunity from "@/pages/admin/community/AdminCommunity";
 import AdminTaskParameters from "@/pages/admin/AdminTaskParameters";
-import AdminTaskTemplates from "@/pages/admin/AdminTaskTemplates";
+
 
 import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
@@ -71,7 +71,7 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 
 
 
-import AdminMovementConcepts from "@/pages/admin/AdminMovementConcepts";
+
 
 
 
@@ -294,13 +294,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
         
-        <Route path="/admin/task-templates">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminTaskTemplates />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
 
         <Route path="/admin/materials">
@@ -330,13 +324,7 @@ function Router() {
 
 
 
-        <Route path="/admin/movement-concepts">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminMovementConcepts />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
-        </Route>
+
 
         {/* 404 Route - Must be last */}
         <Route path="*" component={NotFound} />
