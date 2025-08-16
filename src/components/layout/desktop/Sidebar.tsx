@@ -50,7 +50,10 @@ import {
   HardHat,
   NotebookPen,
   FileImage,
-  BookOpen
+  BookOpen,
+  BarChart3,
+  HandCoins,
+  TrendingUp
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -272,25 +275,63 @@ export function Sidebar() {
     admin: null // Admin title removed as requested
   };
 
-  // Función para manejar clicks en botones principales
+  // Función para manejar clicks en botones principales - ahora tipo acordeón
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Siempre establecer la sección activa y navegar
+    // Toggle acordeón: si ya está expandido, colapsar; si no, expandir
+    setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     setActiveSidebarSection(sectionId);
-    if (location !== defaultRoute) {
-      navigate(defaultRoute);
-    }
   };
 
-  // Botones principales del sidebar - solo estos se muestran
+  // Definir contenido de submenu para cada sección (copiado de SidebarSubmenu)
+  const submenuContent = {
+    'organizacion': [
+      { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+    ],
+    'diseno': [
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
+    ],
+    'construccion': [
+      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard', requiresProject: true },
+      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
+      { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
+      { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
+      { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
+    ],
+    'finanzas': [
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
+      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
+      { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments', generalModeRestricted: true },
+      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
+      { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
+    ],
+    'recursos': [
+      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
+      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
+      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
+      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
+      { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
+    ],
+    'perfil': [
+      { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
+      { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
+      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/profile/projects' },
+      { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
+    ],
+  };
+
+  // Botones principales del sidebar - ahora con sistema de acordeón
   const mainSidebarItems = [
     { 
       id: 'organizacion', 
       icon: Building, 
       label: 'Organización', 
-      defaultRoute: '/organization/dashboard',
+      defaultRoute: '/organization',
       isActive: activeSidebarSection === 'organizacion' || (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard'
     },
-
     { 
       id: 'diseno', 
       icon: Brush, 
@@ -313,7 +354,6 @@ export function Sidebar() {
       defaultRoute: '/finances/dashboard',
       isActive: activeSidebarSection === 'finanzas' || location.startsWith('/finances')
     },
-
     { 
       id: 'recursos', 
       icon: BookOpen, 
@@ -321,7 +361,6 @@ export function Sidebar() {
       defaultRoute: '/recursos/documentacion',
       isActive: activeSidebarSection === 'recursos' || location.startsWith('/recursos')
     },
-    // Administración movida al footer
   ];
 
 
@@ -372,6 +411,23 @@ export function Sidebar() {
                     variant="main"
                   />
                 )}
+                
+                {/* Mostrar subelementos si está expandido y el sidebar está expandido */}
+                {isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
+                  <div className="ml-4 mt-[2px] space-y-[1px]">
+                    {submenuContent[item.id as keyof typeof submenuContent].map((subItem, subIndex) => (
+                      <SidebarButton
+                        key={subIndex}
+                        icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                        label={subItem.label}
+                        href={subItem.href}
+                        isActive={location === subItem.href}
+                        isExpanded={isExpanded}
+                        variant="secondary"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -383,14 +439,46 @@ export function Sidebar() {
         <div className="flex flex-col gap-[2px]">
           {/* Admin button (above Profile) */}
           {isAdmin && (
-            <SidebarButton
-              icon={<Crown className="w-[18px] h-[18px]" />}
-              label="Administración"
-              isActive={activeSidebarSection === 'administracion' || location.startsWith('/admin')}
-              isExpanded={isExpanded}
-              onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
-              variant="main"
-            />
+            <div className="mb-[2px]">
+              <SidebarButton
+                icon={<Crown className="w-[18px] h-[18px]" />}
+                label="Administración"
+                isActive={activeSidebarSection === 'administracion' || location.startsWith('/admin')}
+                isExpanded={isExpanded}
+                onClick={() => handleMainSectionClick('administracion', '/admin/dashboard')}
+                variant="main"
+              />
+              
+              {/* Mostrar subelementos de administración si está expandido */}
+              {isExpanded && expandedAccordion === 'administracion' && (
+                <div className="ml-4 mt-[2px] space-y-[1px]">
+                  <SidebarButton
+                    icon={<Home className="w-[16px] h-[16px]" />}
+                    label="Resumen de Administración"
+                    href="/admin/dashboard"
+                    isActive={location === '/admin/dashboard'}
+                    isExpanded={isExpanded}
+                    variant="secondary"
+                  />
+                  <SidebarButton
+                    icon={<Building className="w-[16px] h-[16px]" />}
+                    label="Organizaciones"
+                    href="/admin/organizations"
+                    isActive={location === '/admin/organizations'}
+                    isExpanded={isExpanded}
+                    variant="secondary"
+                  />
+                  <SidebarButton
+                    icon={<Users className="w-[16px] h-[16px]" />}
+                    label="Usuarios"
+                    href="/admin/users"
+                    isActive={location === '/admin/users'}
+                    isExpanded={isExpanded}
+                    variant="secondary"
+                  />
+                </div>
+              )}
+            </div>
           )}
           
           {/* Settings buttons */}
@@ -417,16 +505,35 @@ export function Sidebar() {
           </div>
           
           {/* Profile */}
-          <SidebarButton
-            icon={<UserCircle className="w-[18px] h-[18px]" />}
-            label="Mi Perfil"
-            isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
-            isExpanded={isExpanded}
-            onClick={() => handleMainSectionClick('perfil', '/profile/data')}
-            avatarUrl={userData?.user?.avatar_url}
-            userFullName={userData?.user?.full_name}
-            variant="main"
-          />
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<UserCircle className="w-[18px] h-[18px]" />}
+              label="Mi Perfil"
+              isActive={activeSidebarSection === 'perfil' || location.startsWith('/profile')}
+              isExpanded={isExpanded}
+              onClick={() => handleMainSectionClick('perfil', '/profile/data')}
+              avatarUrl={userData?.user?.avatar_url}
+              userFullName={userData?.user?.full_name}
+              variant="main"
+            />
+            
+            {/* Mostrar subelementos del perfil si está expandido */}
+            {isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
+              <div className="ml-4 mt-[2px] space-y-[1px]">
+                {submenuContent['perfil'].map((subItem, subIndex) => (
+                  <SidebarButton
+                    key={subIndex}
+                    icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                    label={subItem.label}
+                    href={subItem.href}
+                    isActive={location === subItem.href}
+                    isExpanded={isExpanded}
+                    variant="secondary"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </aside>
