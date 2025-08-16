@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
-import { Layout } from '@/components/layout/desktop/Layout';
-
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 
@@ -16,7 +14,7 @@ import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterO
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
 
-export default function AdminTaskParameters() {
+const AdminTaskParameters = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name_asc');
   const [selectedParameterId, setSelectedParameterId] = useState<string>('');
@@ -80,11 +78,9 @@ export default function AdminTaskParameters() {
 
   if (isLoading) {
     return (
-      <Layout wide={true}>
-        <div className="p-8 text-center text-muted-foreground">
-          Cargando parámetros...
-        </div>
-      </Layout>
+      <div className="p-8 text-center text-muted-foreground">
+        Cargando parámetros...
+      </div>
     );
   }
 
@@ -231,124 +227,92 @@ export default function AdminTaskParameters() {
     );
   }
 
-  const headerProps = {
-    title: 'Parámetros de Tareas',
-    showSearch: true,
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    customFilters: renderCustomFilters(),
-    actionButton: {
-      label: "Nuevo Parámetro",
-      icon: Plus,
-      onClick: () => openModal('task-parameter', {
-        onParameterCreated: (parameterId: string) => {
-          setSelectedParameterId(parameterId);
-        }
-      }),
-      additionalButton: filteredAndSortedParameters.length > 0 && selectedParameter ? {
-        label: "Agregar Opción",
-        icon: Plus,
-        onClick: () => {
-          if (selectedParameter) {
-            openModal('task-parameter-option', {
-              parameterId: selectedParameter.id,
-              parameterLabel: selectedParameter.label
-            });
-          }
-        },
-        variant: "ghost" as const
-      } : undefined
-    }
-  };
-
   return (
-    <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {filteredAndSortedParameters.length === 0 ? (
-          <EmptyState
-            icon={<Settings className="w-12 h-12 text-muted-foreground" />}
-            title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
-            description={searchTerm 
-              ? 'Prueba ajustando los filtros de búsqueda' 
-              : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
-            }
-          />
-        ) : (
-          <>
-            {/* Parameter Selection Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <List className="h-5 w-5" />
-                  Seleccionar Parámetro
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="parameter-select">Parámetro</Label>
-                      <Select
-                        value={selectedParameterId}
-                        onValueChange={setSelectedParameterId}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un parámetro para ver sus opciones" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {filteredAndSortedParameters.map((parameter) => (
-                            <SelectItem key={parameter.id} value={parameter.id}>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {parameter.type}
-                                </Badge>
-                                {parameter.label}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    {selectedParameter && (
-                      <div className="flex flex-col justify-end">
-                        <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
-                          <div className="text-sm text-muted-foreground mb-1">
-                            Parámetro seleccionado:
-                          </div>
-                          <div className="font-medium">
-                            {selectedParameter.label}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
-                          </div>
+    <div className="space-y-6">
+      {filteredAndSortedParameters.length === 0 ? (
+        <EmptyState
+          icon={<Settings className="w-12 h-12 text-muted-foreground" />}
+          title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
+          description={searchTerm 
+            ? 'Prueba ajustando los filtros de búsqueda' 
+            : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
+          }
+        />
+      ) : (
+        <>
+          {/* Parameter Selection Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <List className="h-5 w-5" />
+                Seleccionar Parámetro
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="parameter-select">Parámetro</Label>
+                    <Select
+                      value={selectedParameterId}
+                      onValueChange={setSelectedParameterId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un parámetro para ver sus opciones" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredAndSortedParameters.map((parameter) => (
+                          <SelectItem key={parameter.id} value={parameter.id}>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {parameter.type}
+                              </Badge>
+                              {parameter.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {selectedParameter && (
+                    <div className="flex flex-col justify-end">
+                      <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
+                        <div className="text-sm text-muted-foreground mb-1">
+                          Parámetro seleccionado:
+                        </div>
+                        <div className="font-medium">
+                          {selectedParameter.label}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Parameter Values Table */}
-            {selectedParameter ? (
-              <ParameterValuesTable parameterId={selectedParameter.id} />
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <div className="text-lg font-medium mb-2">
-                  Selecciona un parámetro
-                </div>
-                <div>
-                  Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </CardContent>
+          </Card>
 
-      {/* All modals now managed by ModalFactory */}
-    </Layout>
+          {/* Parameter Values Table */}
+          {selectedParameter ? (
+            <ParameterValuesTable parameterId={selectedParameter.id} />
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <div className="text-lg font-medium mb-2">
+                Selecciona un parámetro
+              </div>
+              <div>
+                Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
-}
+};
+
+export default AdminTaskParameters;

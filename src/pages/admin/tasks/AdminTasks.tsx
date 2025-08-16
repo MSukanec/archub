@@ -44,7 +44,7 @@ const AdminTasks = () => {
           }
         };
       case 'flujo':
-        return null; // No action button for flow tab
+        return undefined; // No action button for flow tab
       case 'plantillas':
         return {
           label: "Nueva Plantilla",
