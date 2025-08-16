@@ -1,133 +1,148 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Building, Users, Calendar, Crown } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomButton } from "@/components/ui-custom/CustomButton";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { useLocation } from "wouter";
 
 interface OrganizationDashboardViewProps {
   organization: any;
 }
 
 export function OrganizationDashboardView({ organization }: OrganizationDashboardViewProps) {
-  const { data: members = [] } = useOrganizationMembers(organization.id);
+  const { data: userData } = useCurrentUser();
+  const [, setLocation] = useLocation();
+  const currentTime = new Date();
 
   return (
     <div className="space-y-6">
-      {/* Información general */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estado</CardTitle>
-            <Building className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <Badge variant={organization.is_active ? "default" : "secondary"}>
-              {organization.is_active ? "Activa" : "Inactiva"}
-            </Badge>
-          </CardContent>
-        </Card>
+        {/* Welcome Card - Full Width */}
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent"></div>
+          <CardContent className="relative p-6">
+            <div className="flex items-center gap-6">
+              {/* Organization Avatar */}
+              <div className="flex-shrink-0">
+                {organization?.logo_url ? (
+                  <img 
+                    src={organization.logo_url} 
+                    alt={organization.name}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-accent/20"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/20">
+                    <Building className="w-8 h-8 text-accent" />
+                  </div>
+                )}
+              </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Miembros</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{members.length}</div>
-            <p className="text-xs text-muted-foreground">
-              miembros activos
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Plan</CardTitle>
-            <Crown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <Badge 
-              variant="secondary" 
-              className="text-white" 
-              style={{
-                backgroundColor: organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
-                               organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
-                               organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
-                               'var(--plan-free-bg)'
-              }}
-            >
-              {organization.plan?.name || 'Free'}
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Detalles de la organización */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Información General</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-              <p className="text-sm">{organization.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Fecha de creación</label>
-              <p className="text-sm">
-                {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
-              </p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Tipo</label>
-              <p className="text-sm">
-                {organization.is_system ? 'Organización del sistema' : 'Organización regular'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Miembros Recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {members.slice(0, 5).map((member) => (
-                <div key={member.id} className="flex items-center gap-3">
-                  <Avatar className="w-8 h-8 avatar-border">
-                    {member.avatar_url ? (
-                      <img 
-                        src={member.avatar_url} 
-                        alt={member.full_name || member.email} 
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <AvatarFallback className="text-xs">
-                        {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {member.full_name || member.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      Sin rol
-                    </p>
+              {/* Welcome Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-2xl font-bold text-foreground">
+                    ¡Bienvenido a {organization?.name || 'tu organización'}!
+                  </h1>
+                </div>
+                <p className="text-muted-foreground mb-3">
+                  Estás gestionando las operaciones de construcción. Desde aquí puedes acceder rápidamente a todas las funciones principales.
+                </p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{format(currentTime, "HH:mm", { locale: es })}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
                   </div>
                 </div>
-              ))}
-              {members.length === 0 && (
-                <p className="text-sm text-muted-foreground">No hay miembros</p>
-              )}
+              </div>
+
+              {/* Status Badge */}
+              <div className="flex-shrink-0">
+                <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  Sistema Activo
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Acciones Rápidas de Organización */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Acciones Rápidas de Organización
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CustomButton
+                icon={Plus}
+                title="Crear un nuevo proyecto"
+                description="Inicia un nuevo proyecto de construcción"
+                onClick={() => setLocation('/profile/projects')}
+              />
+              <CustomButton
+                icon={Users}
+                title="Crear un nuevo contacto"
+                description="Agrega un nuevo cliente o proveedor"
+                onClick={() => setLocation('/organization/contacts')}
+              />
+              <CustomButton
+                icon={DollarSign}
+                title="Crear un nuevo movimiento"
+                description="Registra un ingreso o egreso financiero"
+                onClick={() => setLocation('/finances/movements')}
+              />
+              <CustomButton
+                icon={Kanban}
+                title="Gestionar tablero de organización"
+                description="Administra las tareas del tablero organizacional"
+                onClick={() => setLocation('/recursos/board')}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Acciones Rápidas de Proyecto */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <HardHat className="h-5 w-5" />
+                Acciones Rápidas de Proyecto
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CustomButton
+                icon={CheckSquare}
+                title="Gestionar cronograma"
+                description="Administra tareas y cronograma del proyecto"
+                onClick={() => setLocation('/construction/schedule')}
+              />
+              <CustomButton
+                icon={FileText}
+                title="Gestionar bitácoras"
+                description="Registra el progreso y eventos del proyecto"
+                onClick={() => setLocation('/construction/logs')}
+              />
+              <CustomButton
+                icon={HardHat}
+                title="Gestionar subcontratos"
+                description="Administra subcontratistas y sus tareas"
+                onClick={() => setLocation('/construction/subcontracts')}
+              />
+              <CustomButton
+                icon={Receipt}
+                title="Gestionar presupuestos"
+                description="Administra costos y presupuestos del proyecto"
+                onClick={() => setLocation('/construction/budgets')}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
   );
 }
