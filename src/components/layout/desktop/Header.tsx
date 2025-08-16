@@ -250,7 +250,7 @@ export function Header({
                 })
               )}
               <span>
-                {isViewMode && showBackButton ? `Viendo: ${pageTitle || title}` : (pageTitle || title)}
+                {isViewMode && showBackButton ? `Editando: ${pageTitle || title}` : (pageTitle || title)}
               </span>
             </h1>
           )}
