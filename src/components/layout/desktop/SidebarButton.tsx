@@ -65,32 +65,32 @@ export default function SidebarButton({
         onMouseEnter={(e) => {
           handleMouseEnter();
           if (!isActive) {
-            e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-hover-bg)`;
-            e.currentTarget.style.color = `var(--${variant}-sidebar-button-hover-fg)`;
+            e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-hover-bg)`; // Usar siempre main
+            e.currentTarget.style.color = `var(--main-sidebar-button-hover-fg)`; // Usar siempre main
           }
         }}
         style={{ 
         borderRadius: '4px', // All buttons have 4px rounded corners
         backgroundColor: isActive 
-          ? `var(--${variant}-sidebar-button-active-bg)` 
-          : `var(--${variant}-sidebar-button-bg)`,
+          ? `var(--main-sidebar-button-active-bg)` // Usar siempre las variables main para consistencia
+          : `var(--main-sidebar-button-bg)`,
         color: isActive 
-          ? `var(--${variant}-sidebar-button-active-fg)` 
-          : `var(--${variant}-sidebar-button-fg)`,
-        '--hover-bg': `var(--${variant}-sidebar-button-hover-bg)`,
-        '--hover-fg': `var(--${variant}-sidebar-button-hover-fg)`,
+          ? `var(--main-sidebar-button-active-fg)` // Usar siempre las variables main para consistencia
+          : `var(--main-sidebar-button-fg)`,
+        '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
+        '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
         // Extend active main buttons to overlap the border
         ...(variant === 'main' && isActive && {
           width: 'calc(100% + 1px)',
           marginRight: '-1px',
           zIndex: 10,
-          borderRight: `1px solid var(--${variant}-sidebar-button-active-bg)`
+          borderRight: `1px solid var(--main-sidebar-button-active-bg)` // Usar siempre main
         })
       } as React.CSSProperties}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.backgroundColor = `var(--${variant}-sidebar-button-bg)`;
-          e.currentTarget.style.color = `var(--${variant}-sidebar-button-fg)`;
+          e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-bg)`; // Usar siempre main
+          e.currentTarget.style.color = `var(--main-sidebar-button-fg)`; // Usar siempre main
         }
       }}
     >
