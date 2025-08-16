@@ -5,6 +5,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import AdminCommunityDashboard from './tabs/AdminCommunityDashboard';
 import AdminCommunityOrganizations from './tabs/AdminCommunityOrganizations';
 import AdminCommunityUsers from './tabs/AdminCommunityUsers';
+import AdminCommunityChangelog from './tabs/AdminCommunityChangelog';
 
 const AdminCommunity = () => {
   const [activeTab, setActiveTab] = useState('resumen');
@@ -13,7 +14,8 @@ const AdminCommunity = () => {
   const tabs = [
     { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen' },
     { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones' },
-    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' }
+    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
+    { id: 'cambios', label: 'Cambios', isActive: activeTab === 'cambios' }
   ];
 
   const getActionButton = () => {
@@ -29,6 +31,12 @@ const AdminCommunity = () => {
           label: "Nuevo Usuario",
           icon: Plus,
           onClick: () => openModal('admin-user', { isEditing: false })
+        };
+      case 'cambios':
+        return {
+          label: "Nuevo Changelog",
+          icon: Plus,
+          onClick: () => openModal('admin-changelog', { isEditing: false })
         };
       default:
         return undefined;
@@ -53,6 +61,8 @@ const AdminCommunity = () => {
         return <AdminCommunityOrganizations />;
       case 'usuarios':
         return <AdminCommunityUsers />;
+      case 'cambios':
+        return <AdminCommunityChangelog />;
       default:
         return <AdminCommunityDashboard />;
     }
