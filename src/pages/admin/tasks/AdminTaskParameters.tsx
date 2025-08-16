@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { Settings, Plus, Edit, Trash2, List } from 'lucide-react';
+import { Settings, Edit, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 
 import { Table } from '@/components/ui-custom/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { ActionBar } from '@/components/layout/desktop/ActionBar';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -61,20 +59,7 @@ const AdminTaskParameters = () => {
       }
     });
 
-  // Render custom filters
-  const renderCustomFilters = () => (
-    <Select value={sortBy} onValueChange={setSortBy}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Ordenar por..." />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-        <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-        <SelectItem value="type_asc">Tipo A-Z</SelectItem>
-        <SelectItem value="type_desc">Tipo Z-A</SelectItem>
-      </SelectContent>
-    </Select>
-  );
+  // Removed renderCustomFilters - no longer needed with ActionBar
 
   if (isLoading) {
     return (
@@ -227,88 +212,71 @@ const AdminTaskParameters = () => {
     );
   }
 
+  // Preparar opciones para el ComboBox
+  const parameterOptions = filteredAndSortedParameters.map(parameter => ({
+    value: parameter.id,
+    label: `${parameter.label} (${parameter.type})`
+  }));
+
+  const handleEditParameter = () => {
+    if (selectedParameter) {
+      openModal('task-parameter', { parameter: selectedParameter });
+    }
+  };
+
+  const handleDeleteParameter = () => {
+    if (selectedParameter) {
+      openModal('delete-confirmation', {
+        title: 'Eliminar Parámetro',
+        description: '¿Estás seguro de que deseas eliminar este parámetro? Esta acción también eliminará todas sus opciones.',
+        itemName: selectedParameter.label,
+        onConfirm: () => {
+          deleteParameterMutation.mutate(selectedParameter.id);
+          setSelectedParameterId('');
+        }
+      });
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
       {filteredAndSortedParameters.length === 0 ? (
-        <EmptyState
-          icon={<Settings className="w-12 h-12 text-muted-foreground" />}
-          title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
-          description={searchTerm 
-            ? 'Prueba ajustando los filtros de búsqueda' 
-            : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
-          }
-        />
+        <div className="p-6">
+          <EmptyState
+            icon={<Settings className="w-12 h-12 text-muted-foreground" />}
+            title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
+            description={searchTerm 
+              ? 'Prueba ajustando los filtros de búsqueda' 
+              : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
+            }
+          />
+        </div>
       ) : (
         <>
-          {/* Parameter Selection Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <List className="h-5 w-5" />
-                Seleccionar Parámetro
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="parameter-select">Parámetro</Label>
-                    <Select
-                      value={selectedParameterId}
-                      onValueChange={setSelectedParameterId}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un parámetro para ver sus opciones" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredAndSortedParameters.map((parameter) => (
-                          <SelectItem key={parameter.id} value={parameter.id}>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {parameter.type}
-                              </Badge>
-                              {parameter.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {selectedParameter && (
-                    <div className="flex flex-col justify-end">
-                      <div className="bg-muted/30 rounded-lg p-3 border border-dashed">
-                        <div className="text-sm text-muted-foreground mb-1">
-                          Parámetro seleccionado:
-                        </div>
-                        <div className="font-medium">
-                          {selectedParameter.label}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Slug: {selectedParameter.slug} | Tipo: {selectedParameter.type}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+          <ActionBar
+            selectedValue={selectedParameterId}
+            onValueChange={setSelectedParameterId}
+            onEdit={handleEditParameter}
+            onDelete={handleDeleteParameter}
+            placeholder="Selecciona un parámetro para ver sus opciones"
+            options={parameterOptions}
+          />
+
+          <div className="p-6">
+            {selectedParameter ? (
+              <ParameterValuesTable parameterId={selectedParameter.id} />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <div className="text-lg font-medium mb-2">
+                  Selecciona un parámetro
+                </div>
+                <div>
+                  Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Parameter Values Table */}
-          {selectedParameter ? (
-            <ParameterValuesTable parameterId={selectedParameter.id} />
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <div className="text-lg font-medium mb-2">
-                Selecciona un parámetro
-              </div>
-              <div>
-                Utiliza el selector de arriba para elegir un parámetro y ver sus opciones
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>

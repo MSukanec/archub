@@ -38,10 +38,7 @@ const AdminTasks = () => {
         return {
           label: "Nuevo Parámetro",
           icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de parámetros
-            console.log('Crear nuevo parámetro');
-          }
+          onClick: () => openModal('task-parameter')
         };
       case 'flujo':
         return undefined; // No action button for flow tab

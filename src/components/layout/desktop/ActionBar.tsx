@@ -1,113 +1,65 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SelectableGhostButton, SelectableGhostButtonOption } from '@/components/ui-custom/SelectableGhostButton';
-import { LucideIcon } from 'lucide-react';
-
-interface FilterConfig {
-  key: string;
-  label: string;
-  icon: LucideIcon;
-  value: string;
-  setValue: (value: string) => void;
-  options: (string | null)[];
-  defaultLabel: string;
-  enabled?: boolean;
-}
-
-interface ActionConfig {
-  label: string;
-  icon: LucideIcon;
-  onClick: () => void;
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
-  enabled?: boolean;
-}
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
 
 interface ActionBarProps {
-  // Configuración de filtros - completamente flexible
-  filters?: FilterConfig[];
-  
-  // Configuración de acciones - completamente flexible  
-  actions?: ActionConfig[];
-  
-  // Opcional: restricciones personalizadas
-  customRestricted?: ReactNode;
-  
-  // Opcional: children para contenido personalizado
-  children?: ReactNode;
+  selectedValue?: string;
+  onValueChange?: (value: string) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  placeholder?: string;
+  options?: Array<{
+    value: string;
+    label: string;
+  }>;
+  disabled?: boolean;
 }
 
-export const ActionBar: React.FC<ActionBarProps> = ({
-  filters = [],
-  actions = [],
-  customRestricted,
-  children
-}) => {
-  // Si hay children, usar layout simple sin configuración
-  if (children) {
-    return (
-      <div 
-        className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"
-        style={{ backgroundColor: "var(--card-bg)" }}
-      >
-        <div className="flex items-center justify-between px-4 py-3">
-          {children}
-        </div>
-      </div>
-    );
-  }
-
+export function ActionBar({
+  selectedValue,
+  onValueChange,
+  onEdit,
+  onDelete,
+  placeholder = "Seleccionar...",
+  options = [],
+  disabled = false
+}: ActionBarProps) {
   return (
-    <div 
-      className="hidden md:flex flex-col rounded-lg border border-[var(--card-border)] mb-6 shadow-lg"
-      style={{ backgroundColor: "var(--card-bg)" }}
-    >
-      <div className="flex items-center justify-between px-4 py-3">
-        {/* Filtros a la izquierda - Completamente dinámicos */}
-        <div className="flex items-center gap-2">
-          {filters.filter(filter => filter.enabled !== false).map((filter) => {
-            // Convertir las opciones al formato esperado por SelectableGhostButton
-            const selectableOptions: SelectableGhostButtonOption[] = filter.options
-              .filter(Boolean)
-              .map(option => ({
-                value: option!,
-                label: option!
-              }));
-
-            return (
-              <SelectableGhostButton
-                key={filter.key}
-                title={filter.label}
-                defaultLabel={filter.defaultLabel}
-                selectedValue={filter.value}
-                options={selectableOptions}
-                onSelect={(value) => {
-                  // Si no hay valor seleccionado, usar string vacío
-                  filter.setValue(value || "");
-                }}
-                icon={<filter.icon className="w-4 h-4" />}
-                placeholder={filter.defaultLabel}
-              />
-            );
-          })}
-        </div>
-
-        {/* Acciones a la derecha - Completamente dinámicas */}
-        <div className="flex items-center gap-2">
-          {customRestricted}
-          {actions.filter(action => action.enabled !== false).map((action, index) => (
-            <Button
-              key={index}
-              variant={action.variant || 'default'}
-              size="sm"
-              onClick={action.onClick}
-              className="h-8 px-3 text-xs"
-            >
-              {action.icon && <action.icon className="mr-1 h-3 w-3" />}
-              {action.label}
-            </Button>
-          ))}
-        </div>
+    <div className="flex items-center gap-3 p-4 border-b bg-background/50 backdrop-blur-sm">
+      <div className="flex-1">
+        <ComboBox
+          value={selectedValue}
+          onValueChange={onValueChange}
+          placeholder={placeholder}
+          options={options}
+          disabled={disabled}
+        />
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onEdit}
+          disabled={!selectedValue || disabled}
+          className="h-8 px-3"
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          Editar
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDelete}
+          disabled={!selectedValue || disabled}
+          className="h-8 px-3 text-destructive hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Eliminar
+        </Button>
       </div>
     </div>
   );
-};
+}
