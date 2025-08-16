@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Edit, Trash2 } from 'lucide-react';
+import { Settings, Edit, Trash2, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,8 +59,6 @@ const AdminTaskParameters = () => {
       }
     });
 
-  // Removed renderCustomFilters - no longer needed with ActionBar
-
   if (isLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
@@ -73,7 +71,7 @@ const AdminTaskParameters = () => {
   function ParameterValuesTable({ parameterId }: { parameterId: string }) {
     const parameter = filteredAndSortedParameters.find(p => p.id === parameterId);
     const parameterValues = parameter?.options || [];
-    
+
     // Fetch categories and units for display
     const { data: categories = [] } = useTopLevelCategories();
     const { data: units = [] } = useUnits();
@@ -84,18 +82,33 @@ const AdminTaskParameters = () => {
     if (!parameter) {
       return (
         <div className="text-center py-8 text-muted-foreground">
-          Selecciona un parámetro para ver sus opciones
+          Parámetro no encontrado
         </div>
       );
     }
 
     if (parameterValues.length === 0) {
       return (
-        <EmptyState
-          icon={<Settings className="w-8 h-8 text-muted-foreground" />}
-          title="No hay opciones en este parámetro"
-          description="Comienza agregando la primera opción para este parámetro"
-        />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => {
+                openModal('task-parameter-option', { parameterId });
+              }}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Agregar Opción
+            </Button>
+          </div>
+          <EmptyState
+            icon={<Settings className="w-8 h-8 text-muted-foreground" />}
+            title="No hay opciones en este parámetro"
+            description="Comienza agregando la primera opción para este parámetro"
+          />
+        </div>
       );
     }
 
@@ -205,10 +218,25 @@ const AdminTaskParameters = () => {
     ];
 
     return (
-      <Table
-        data={parameterValues}
-        columns={columns}
-      />
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2"
+            onClick={() => {
+              openModal('task-parameter-option', { parameterId });
+            }}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Agregar Opción
+          </Button>
+        </div>
+        <Table
+          data={parameterValues}
+          columns={columns}
+        />
+      </div>
     );
   }
 
