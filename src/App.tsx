@@ -59,7 +59,7 @@ import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/SelectMode";
 
 // Admin Pages
-import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminCommunity from "@/pages/admin/AdminCommunity";
 import AdminOrganizations from "@/pages/admin/AdminOrganizations";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminGeneratedTasks from "@/pages/admin/AdminGeneratedTasks";
@@ -275,7 +275,7 @@ function Router() {
         <Route path="/admin/dashboard">
           <ProtectedRoute>
             <AdminProtectedRoute>
-              <AdminDashboard />
+              <AdminCommunity />
             </AdminProtectedRoute>
           </ProtectedRoute>
         </Route>
