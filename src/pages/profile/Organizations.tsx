@@ -1,16 +1,272 @@
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Building } from 'lucide-react'
-import { OrganizationList } from '../organization/OrganizationList'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { Building, Crown, Plus, Calendar, Shield, MoreHorizontal, Edit, Trash2, Users, Settings, Network, BarChart3, Eye } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { useNavigationStore } from '@/stores/navigationStore'
+import { useLocation } from 'wouter'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
+
+// Componente para una sola tarjeta de organización
+function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, onDelete }: {
+  organization: any,
+  isSelected: boolean,
+  onSelect: (id: string) => void,
+  onView: (org: any) => void,
+  onEdit: (org: any) => void,
+  onDelete: (org: any) => void
+}) {
+  const { data: members = [] } = useOrganizationMembers(organization.id)
+
+  return (
+    <Card 
+      className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
+        isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
+      }`}
+      onClick={(e) => {
+        e.stopPropagation()
+        onSelect(organization.id)
+      }}
+    >
+      <CardContent className="p-4">
+        <div className="grid grid-cols-6 gap-4 items-center">
+          {/* Fecha */}
+          <div className="col-span-1 text-xs text-muted-foreground">
+            {format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es })}
+          </div>
+
+          {/* Organización */}
+          <div className="col-span-1 flex items-center gap-2">
+            <Avatar className="w-8 h-8 avatar-border">
+              <AvatarFallback className="text-xs">
+                {organization.name?.substring(0, 2)?.toUpperCase() || 'ORG'}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium text-sm">{organization.name}</div>
+              {organization.is_system && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Shield className="w-3 h-3" />
+                  Sistema
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Plan */}
+          <div className="col-span-1">
+            <Badge 
+              variant="secondary" 
+              className="text-white" 
+              style={{
+                backgroundColor: organization.plan?.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                               organization.plan?.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                               organization.plan?.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                               'var(--plan-free-bg)'
+              }}
+            >
+              {organization.plan?.name || 'Free'}
+            </Badge>
+          </div>
+
+          {/* Miembros */}
+          <div className="col-span-1">
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium">({members.length})</span>
+              <ActiveOrganizationMembersCard 
+                organizationId={organization.id}
+                maxVisible={3}
+                size="sm"
+              />
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div className="col-span-1">
+            <Badge variant={organization.is_active ? "default" : "secondary"}>
+              {organization.is_active ? "Activa" : "Inactiva"}
+            </Badge>
+          </div>
+
+          {/* Acciones */}
+          <div className="col-span-1 flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(organization); }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver detalles
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(organization); }}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
+                {!organization.is_system && (
+                  <DropdownMenuItem 
+                    onClick={(e) => { e.stopPropagation(); onDelete(organization); }}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Eliminar
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function Organizations() {
+  const { data: userData } = useCurrentUser()
+  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null)
+  const [, navigate] = useLocation()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const { openModal } = useGlobalModalStore()
+  const { setCurrentProject } = useNavigationStore()
+
+  const organizations = userData?.organizations || []
+
   const headerProps = {
     icon: Building,
     title: "Gestión de Organizaciones"
   }
 
+  // Mutation para cambiar organización activa
+  const switchOrganization = useMutation({
+    mutationFn: async (organizationId: string) => {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { current_organization_id: organizationId }
+      })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] })
+      setCurrentProject(null) // Reset project when switching org
+      toast({
+        title: "Organización cambiada",
+        description: "La organización se ha cambiado exitosamente."
+      })
+      navigate('/organization')
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo cambiar la organización.",
+        variant: "destructive"
+      })
+    }
+  })
+
+  const handleSelect = (organizationId: string) => {
+    setSelectedOrganization(organizationId)
+  }
+
+  const handleView = (organization: any) => {
+    navigate(`/profile/organizations/${organization.id}`)
+  }
+
+  const handleEdit = (organization: any) => {
+    openModal('organization', { organization })
+  }
+
+  const handleDelete = (organization: any) => {
+    // Implement delete logic
+    console.log('Delete organization:', organization)
+  }
+
+  const handleSwitchToSelected = () => {
+    if (selectedOrganization) {
+      switchOrganization.mutate(selectedOrganization)
+    }
+  }
+
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <OrganizationList />
+      <div className="space-y-6">
+        {/* Header con información del estado actual */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Organizaciones Disponibles</h2>
+            <p className="text-sm text-muted-foreground">
+              Gestiona las organizaciones a las que perteneces. 
+              Organización actual: <span className="font-medium">{userData?.organization?.name}</span>
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {selectedOrganization && selectedOrganization !== userData?.organization?.id && (
+              <Button 
+                onClick={handleSwitchToSelected}
+                disabled={switchOrganization.isPending}
+              >
+                {switchOrganization.isPending ? 'Cambiando...' : 'Cambiar a Seleccionada'}
+              </Button>
+            )}
+            <Button onClick={() => openModal('organization')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Organización
+            </Button>
+          </div>
+        </div>
+
+        {/* Headers de la tabla */}
+        <div className="grid grid-cols-6 gap-4 px-4 py-2 bg-muted/30 rounded-lg text-sm font-medium text-muted-foreground">
+          <div>Fecha</div>
+          <div>Organización</div>
+          <div>Plan</div>
+          <div>Miembros</div>
+          <div>Estado</div>
+          <div className="text-right">Acciones Rápidas</div>
+        </div>
+
+        {/* Lista de organizaciones */}
+        <div className="space-y-2">
+          {organizations.map((organization) => (
+            <OrganizationCard
+              key={organization.id}
+              organization={organization}
+              isSelected={selectedOrganization === organization.id}
+              onSelect={handleSelect}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+          
+          {organizations.length === 0 && (
+            <div className="text-center py-12">
+              <Building className="mx-auto h-12 w-12 text-muted-foreground/40" />
+              <h3 className="mt-4 text-lg font-semibold">No hay organizaciones</h3>
+              <p className="text-muted-foreground">Crea tu primera organización para comenzar.</p>
+              <Button className="mt-4" onClick={() => openModal('organization')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Crear Organización
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   )
 }
