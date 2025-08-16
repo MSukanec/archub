@@ -50,11 +50,11 @@ import Documentation from "@/pages/resources/Documentation";
 import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
-import Organizations from "@/pages/profile/Organizations";
+
 import Organization from "@/pages/organization/Organization";
 
 import Profile from "@/pages/profile/Profile";
-import ProfileSettings from "@/pages/profile/ProfileSettings";
+
 import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/SelectMode";
 
@@ -129,16 +129,7 @@ function Router() {
             <Board />
           </ProtectedRoute>
         </Route>
-        <Route path="/organizaciones">
-          <ProtectedRoute>
-            <Organizations />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/organizations">
-          <ProtectedRoute>
-            <Organizations />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/organization/:organizationId">
           <ProtectedRoute>
             <Organization />
@@ -278,16 +269,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/profile/settings">
-          <ProtectedRoute>
-            <ProfileSettings />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/profile/organizations">
-          <ProtectedRoute>
-            <Organizations />
-          </ProtectedRoute>
-        </Route>
+
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard">
