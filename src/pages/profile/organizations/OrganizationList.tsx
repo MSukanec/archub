@@ -3,7 +3,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
@@ -14,7 +13,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -69,53 +67,81 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
             </div>
           </div>
 
-          {/* Miembros */}
-          <div className="col-span-1 text-sm text-muted-foreground">
-            {members.length} miembros
-          </div>
-
           {/* Plan */}
           <div className="col-span-1">
-            <Badge variant="outline" className="text-xs">
-              {organization.plan?.name || 'Sin plan'}
-            </Badge>
+            {organization.plan ? (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{
+                  backgroundColor: organization.plan.name?.toLowerCase() === 'free' ? 'var(--plan-free-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'pro' ? 'var(--plan-pro-bg)' :
+                                 organization.plan.name?.toLowerCase() === 'teams' ? 'var(--plan-teams-bg)' :
+                                 'var(--plan-free-bg)'
+                }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                {organization.plan.name}
+              </Badge>
+            ) : (
+              <Badge 
+                variant="secondary" 
+                className="text-xs text-white" 
+                style={{ backgroundColor: 'var(--plan-free-bg)' }}
+              >
+                <Crown className="w-3 h-3 mr-1" />
+                Free
+              </Badge>
+            )}
           </div>
 
-          {/* Rol */}
+          {/* Miembros */}
+          <div className="col-span-1 flex items-center gap-2">
+            <span className="text-xs font-medium">({members.length})</span>
+            <div className="flex -space-x-1">
+              {members.slice(0, 3).map((member, index) => (
+                <Avatar key={member.id} className="w-6 h-6 avatar-border" style={{border: '3px solid var(--card-border)'}}>
+                  {member.avatar_url ? (
+                    <img 
+                      src={member.avatar_url} 
+                      alt={member.full_name || member.email} 
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-xs">
+                      {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              ))}
+              {members.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-[var(--muted)] flex items-center justify-center" style={{border: '3px solid var(--card-border)'}}>
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">+{members.length - 3}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Estado */}
           <div className="col-span-1">
-            <Badge variant="secondary" className="text-xs">
-              Administrador
+            <Badge variant={organization.is_active ? "default" : "secondary"} className="text-xs">
+              {organization.is_active ? "Activa" : "Inactiva"}
             </Badge>
           </div>
 
           {/* Acciones */}
-          <div className="col-span-1 flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation()
-                  onEdit(organization)
-                }}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(organization)
-                  }} 
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="col-span-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSelect(organization.id)
+              }}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -125,7 +151,9 @@ function OrganizationCard({ organization, isSelected, onSelect, onEdit, onDelete
 
 export function OrganizationList() {
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState('created_at_desc')
+  const [searchValue, setSearchValue] = useState('')
+  const [filterByStatus, setFilterByStatus] = useState('all')
+  const [sortBy, setSortBy] = useState('date_recent')
   const [, navigate] = useLocation()
   
   const { data: userData, isLoading } = useCurrentUser()
@@ -134,70 +162,128 @@ export function OrganizationList() {
   const queryClient = useQueryClient()
   const { switchOrganization } = useProjectContext()
   const { updateSession } = useAuthStore()
+  const { setSidebarContext } = useNavigationStore()
 
-  // Obtener organizaciones del usuario
-  const organizations = userData?.organizations || []
+  // Set sidebar context to 'organizations' when page loads
+  useEffect(() => {
+    setSidebarContext('organizations')
+  }, [])
 
   // Filtrar y ordenar organizaciones
-  const sortedOrganizations = [...organizations].sort((a, b) => {
+  let filteredOrganizations = userData?.organizations?.filter(org => {
+    const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase())
+    
+    if (filterByStatus === "all") return matchesSearch
+    if (filterByStatus === "active") return matchesSearch && org.is_active
+    if (filterByStatus === "system") return matchesSearch && org.is_system
+    if (filterByStatus === "regular") return matchesSearch && !org.is_system
+    
+    return matchesSearch
+  }) || []
+
+  // Aplicar ordenamiento
+  filteredOrganizations = [...filteredOrganizations].sort((a, b) => {
     switch (sortBy) {
       case 'name_asc':
         return a.name.localeCompare(b.name)
       case 'name_desc':
         return b.name.localeCompare(a.name)
-      case 'created_at_asc':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      case 'created_at_desc':
+      case 'date_recent':
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'date_oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       default:
         return 0
     }
   })
 
-  // Seleccionar la organización actual del usuario
-  useEffect(() => {
-    if (userData?.organization?.id) {
-      setSelectedOrganization(userData.organization.id)
-    }
-  }, [userData?.organization?.id])
+  // Poner la organización activa primero
+  const currentActiveOrgId = userData?.preferences?.last_organization_id
+  if (currentActiveOrgId) {
+    filteredOrganizations = [
+      ...filteredOrganizations.filter(org => org.id === currentActiveOrgId),
+      ...filteredOrganizations.filter(org => org.id !== currentActiveOrgId)
+    ]
+  }
 
-  // Mutación para cambiar organización
-  const switchOrganizationMutation = useMutation({
+  // Mutación para seleccionar organización
+  const selectOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized')
-      
-      const { error } = await supabase
-        .from('user_organization_preferences')
-        .update({ current_organization_id: organizationId })
-        .eq('user_id', userData?.user?.id)
-      
-      if (error) throw error
-      
-      return organizationId
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          throw new Error('No authentication token available')
+        }
+
+        const response = await fetch('/api/user/select-organization', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'x-user-id': userData?.preferences?.user_id,
+          },
+          body: JSON.stringify({ organization_id: organizationId }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al cambiar organización');
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('Error switching organization:', error);
+        throw error;
+      }
     },
-    onSuccess: async (organizationId) => {
-      // Actualizar el contexto
-      await switchOrganization(organizationId)
-      await updateSession()
+    onMutate: async (organizationId) => {
+      // Cancelar queries para evitar conflictos
+      await queryClient.cancelQueries({ queryKey: ['current-user'] })
       
-      toast({
-        title: "Organización cambiada",
-        description: "Has cambiado a la nueva organización exitosamente"
-      })
+      // Obtener snapshot para rollback
+      const previousUserData = queryClient.getQueryData(['current-user'])
       
-      // Invalidar queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
+      // Actualización optimista inmediata
+      if (previousUserData && userData?.organizations) {
+        const selectedOrg = userData.organizations.find(org => org.id === organizationId)
+        if (selectedOrg) {
+          queryClient.setQueryData(['current-user'], (old: any) => ({
+            ...old,
+            organization: selectedOrg,
+            preferences: {
+              ...old.preferences,
+              last_organization_id: organizationId
+            }
+          }))
+        }
+      }
       
-      // Navegar al dashboard de la organización
+      // Limpiar proyecto context
+      const { setSelectedProject } = useProjectContext.getState()
+      setSelectedProject(null)
+      
+      // Navegación inmediata
       navigate('/organization/dashboard')
+      
+      return { previousUserData }
     },
-    onError: (error) => {
+    onError: (err, organizationId, context) => {
+      // Rollback en caso de error
+      if (context?.previousUserData) {
+        queryClient.setQueryData(['current-user'], context.previousUserData)
+      }
+      
       toast({
-        title: "Error",
-        description: "No se pudo cambiar la organización",
+        title: "Error al cambiar organización",
+        description: "No se pudo cambiar a la organización seleccionada",
         variant: "destructive"
       })
-      console.error('Switch organization error:', error)
+    },
+    onSettled: () => {
+      // Siempre refrescar datos
+      queryClient.invalidateQueries({ queryKey: ['current-user'] })
     }
   })
 
@@ -206,7 +292,7 @@ export function OrganizationList() {
     
     // Solo cambiar si es diferente a la actual
     if (organizationId !== userData?.organization?.id) {
-      switchOrganizationMutation.mutate(organizationId)
+      selectOrganizationMutation.mutate(organizationId)
     }
   }
 
@@ -221,6 +307,13 @@ export function OrganizationList() {
     // TODO: Implementar modal de confirmación para eliminar organización
     console.log('Delete organization:', organization)
   }
+
+  // Seleccionar automáticamente la organización actual
+  useEffect(() => {
+    if (userData?.organization?.id) {
+      setSelectedOrganization(userData.organization.id)
+    }
+  }, [userData?.organization?.id])
 
   if (isLoading) {
     return <div className="p-4">Cargando...</div>
@@ -242,17 +335,12 @@ export function OrganizationList() {
               <SelectContent>
                 <SelectItem value="name_asc">Nombre A-Z</SelectItem>
                 <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                <SelectItem value="created_at_asc">Más antiguas</SelectItem>
-                <SelectItem value="created_at_desc">Más recientes</SelectItem>
+                <SelectItem value="date_recent">Más recientes</SelectItem>
+                <SelectItem value="date_oldest">Más antiguas</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-
-        <Button onClick={() => openModal('organization', { isEditing: false })}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Organización
-        </Button>
       </div>
 
       {/* Lista de organizaciones */}
@@ -261,14 +349,14 @@ export function OrganizationList() {
         <div className="grid grid-cols-6 gap-4 px-4 py-2 text-xs font-medium text-muted-foreground border-b">
           <div className="col-span-1">Fecha</div>
           <div className="col-span-1">Organización</div>
-          <div className="col-span-1">Miembros</div>
           <div className="col-span-1">Plan</div>
-          <div className="col-span-1">Rol</div>
+          <div className="col-span-1">Miembros</div>
+          <div className="col-span-1">Estado</div>
           <div className="col-span-1"></div>
         </div>
 
         {/* Organizaciones */}
-        {sortedOrganizations.map((organization) => (
+        {filteredOrganizations.map((organization) => (
           <OrganizationCard
             key={organization.id}
             organization={organization}
@@ -280,7 +368,7 @@ export function OrganizationList() {
         ))}
       </div>
 
-      {/* Panel lateral si hay organización seleccionada */}
+      {/* Panel lateral con información de la organización seleccionada */}
       {selectedOrganization && (
         <div className="mt-8">
           <ActiveOrganizationMembersCard />
