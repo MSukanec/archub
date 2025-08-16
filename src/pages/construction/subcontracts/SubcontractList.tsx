@@ -456,36 +456,26 @@ export default function SubcontractList() {
                   <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                <div className="space-y-2">
+                {/* Mini gráfico de barras */}
+                <div className="flex items-end gap-1 h-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-sm flex-1"
+                      style={{
+                        backgroundColor: 'var(--accent)',
+                        height: `${Math.max(30, Math.random() * 100)}%`,
+                        opacity: i < kpiData.totalSubcontracts ? 1 : 0.3
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                <div>
                   <p className="text-2xl font-bold">{kpiData.totalSubcontracts}</p>
-                  <div className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {kpiData.awardedCount} adjudicados • {kpiData.pendingCount} pendientes
-                  </div>
-                  
-                  {/* Mini gráfico de dona */}
-                  <div className="h-16 mt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'Adjudicados', value: kpiData.awardedCount, color: 'var(--accent)' },
-                            { name: 'Pendientes', value: kpiData.pendingCount, color: '#f59e0b' },
-                            { name: 'Otros', value: kpiData.totalSubcontracts - kpiData.awardedCount - kpiData.pendingCount, color: '#6b7280' }
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={15}
-                          outerRadius={25}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          <Cell key="awarded" fill="var(--accent)" />
-                          <Cell key="pending" fill="#f59e0b" />
-                          <Cell key="other" fill="#6b7280" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -500,7 +490,21 @@ export default function SubcontractList() {
                   <Award className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                <div className="space-y-2">
+                {/* Gráfico de línea de tendencia */}
+                <div className="h-8 relative">
+                  <svg className="w-full h-full" viewBox="0 0 100 32">
+                    <path
+                      d="M 0,24 Q 25,20 50,12 T 100,8"
+                      stroke="var(--accent)"
+                      strokeWidth="2"
+                      fill="none"
+                      className="opacity-80"
+                    />
+                    <circle cx="100" cy="8" r="2" fill="var(--accent)" />
+                  </svg>
+                </div>
+                
+                <div>
                   {currencyView === 'discriminado' ? (
                     <div>
                       <p className="text-lg font-bold">
@@ -518,34 +522,9 @@ export default function SubcontractList() {
                       }
                     </p>
                   )}
-                  <div className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}% del total
-                  </div>
-                  
-                  {/* Mini gráfico de barras comparativo */}
-                  <div className="h-12 mt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={[
-                        { name: 'Adjudicado', value: kpiData.totalValues.ars, color: 'var(--accent)' },
-                        { name: 'Pagado', value: kpiData.totalPaidARS, color: '#22c55e' }
-                      ]}>
-                        <Bar dataKey="value" radius={2}>
-                          <Cell key="adjudicado" fill="var(--accent)" />
-                          <Cell key="pagado" fill="#22c55e" />
-                        </Bar>
-                        <Tooltip 
-                          formatter={(value: any) => `$${value.toLocaleString('es-AR')}`}
-                          labelStyle={{ color: '#374151' }}
-                          contentStyle={{ 
-                            backgroundColor: 'white', 
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '6px',
-                            fontSize: '12px'
-                          }}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -560,30 +539,30 @@ export default function SubcontractList() {
                   <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                <div className="space-y-2">
+                {/* Barra de progreso de pagos */}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${Math.min((kpiData.totalPaidARS / (kpiData.totalValues.ars || 1)) * 100, 100)}%`,
+                      background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
+                    }}
+                  />
+                </div>
+                
+                <div>
                   <p className="text-2xl font-bold">
                     ${(kpiData.remainingBalanceARS || 0).toLocaleString('es-AR')}
                   </p>
-                  <div className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Pendiente de pago
-                  </div>
-                  
-                  {/* Mini gráfico de barras */}
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((kpiData.totalPaidARS / (kpiData.totalValues.ars || 1)) * 100, 100)}%`,
-                        background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
-                      }}
-                    />
-                  </div>
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Estado de Subcontratos */}
+          {/* Estado General */}
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -592,35 +571,27 @@ export default function SubcontractList() {
                   <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                <div className="space-y-2">
+                {/* Gráfico de área llena */}
+                <div className="h-8 relative">
+                  <svg className="w-full h-full" viewBox="0 0 100 32">
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8"/>
+                        <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.2"/>
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M 0,32 L 0,${32 - (kpiData.awardedPercentage * 0.3)} Q 25,${20 - (kpiData.awardedPercentage * 0.2)} 50,${16 - (kpiData.awardedPercentage * 0.25)} T 100,${12 - (kpiData.awardedPercentage * 0.2)} L 100,32 Z`}
+                      fill="url(#areaGradient)"
+                    />
+                  </svg>
+                </div>
+                
+                <div>
                   <p className="text-2xl font-bold">{kpiData.awardedPercentage.toFixed(0)}%</p>
-                  <div className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Tasa de adjudicación
-                  </div>
-                  
-                  {/* Barra de progreso circular */}
-                  <div className="h-16 mt-2">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'Completado', value: kpiData.awardedPercentage },
-                            { name: 'Restante', value: 100 - kpiData.awardedPercentage }
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          startAngle={90}
-                          endAngle={450}
-                          innerRadius={20}
-                          outerRadius={25}
-                          dataKey="value"
-                        >
-                          <Cell key="completed" fill="var(--accent)" />
-                          <Cell key="remaining" fill="#e5e7eb" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                  </p>
                 </div>
               </div>
             </CardContent>
