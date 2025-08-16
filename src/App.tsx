@@ -17,12 +17,12 @@ import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 // Protected Pages
-import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
+
 
 import ProfileProjects from "@/pages/profile/ProfileProjects";
 
 
-import OrganizationActivity from "@/pages/organization/OrganizationActivity";
+
 
 
 import FinancesClients from "@/pages/finances/FinancesClients";
@@ -50,8 +50,8 @@ import Documentation from "@/pages/resources/Documentation";
 import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
-import Organizations from "@/pages/profile/organizations/Organizations";
-import OrganizationView from "@/pages/profile/organizations/OrganizationView";
+import Organizations from "@/pages/organization/Organizations";
+import OrganizationView from "@/pages/organization/OrganizationView";
 
 import ProfileBasicData from "@/pages/profile/ProfileBasicData";
 import ProfileSettings from "@/pages/profile/ProfileSettings";
@@ -95,24 +95,20 @@ function Router() {
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
 
-        {/* Main Dashboard - redirects to Organization Dashboard */}
+        {/* Main Dashboard - redirects to Organizations */}
         <Route path="/dashboard">
           <ProtectedRoute>
-            <OrganizationDashboard />
+            <Organizations />
           </ProtectedRoute>
         </Route>
 
         {/* Organization Routes */}
         <Route path="/organization">
           <ProtectedRoute>
-            <OrganizationDashboard />
+            <Organizations />
           </ProtectedRoute>
         </Route>
-        <Route path="/organization/dashboard">
-          <ProtectedRoute>
-            <OrganizationDashboard />
-          </ProtectedRoute>
-        </Route>
+
 
         <Route path="/profile/projects">
           <ProtectedRoute>
@@ -121,11 +117,7 @@ function Router() {
         </Route>
 
 
-        <Route path="/organization/activity">
-          <ProtectedRoute>
-            <OrganizationActivity />
-          </ProtectedRoute>
-        </Route>
+
         <Route path="/recursos/board">
           <ProtectedRoute>
             <Board />
