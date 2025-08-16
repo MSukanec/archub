@@ -321,27 +321,7 @@ export function OrganizationList() {
 
   return (
     <div className="space-y-6">
-      {/* Controles superiores */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="sort" className="text-sm font-medium">
-              Ordenar por:
-            </Label>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name_asc">Nombre A-Z</SelectItem>
-                <SelectItem value="name_desc">Nombre Z-A</SelectItem>
-                <SelectItem value="date_recent">Más recientes</SelectItem>
-                <SelectItem value="date_oldest">Más antiguas</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+
 
       {/* Lista de organizaciones */}
       <div className="space-y-2">
