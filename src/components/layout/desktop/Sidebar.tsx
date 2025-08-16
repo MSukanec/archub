@@ -439,8 +439,11 @@ export function Sidebar() {
                   {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
                   {!isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
                     <div 
-                      className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
-                      style={{ transform: 'translateX(1px)' }}
+                      className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
+                      style={{ 
+                        top: '40px', // Empezar después del botón principal (32px + 8px margen)
+                        height: `${submenuContent[item.id as keyof typeof submenuContent]?.length * 34}px` // 32px por botón + 2px gap
+                      }}
                     />
                   )}
                 </div>
@@ -486,8 +489,11 @@ export function Sidebar() {
                 {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
                 {!isExpanded && expandedAccordion === 'administracion' && (
                   <div 
-                    className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
-                    style={{ transform: 'translateX(1px)' }}
+                    className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
+                    style={{ 
+                      top: '40px', // Empezar después del botón principal
+                      height: '102px' // 3 botones admin * 34px cada uno
+                    }}
                   />
                 )}
               </div>
@@ -564,8 +570,11 @@ export function Sidebar() {
               {/* Línea vertical indicadora cuando está colapsado pero tiene subelementos activos */}
               {!isExpanded && expandedAccordion === 'perfil' && submenuContent['perfil'] && (
                 <div 
-                  className="absolute right-0 top-1 bottom-1 w-[2px] bg-[var(--main-sidebar-button-active-bg)] rounded-full"
-                  style={{ transform: 'translateX(1px)' }}
+                  className="absolute left-0 w-[3px] bg-red-500 rounded-r-full"
+                  style={{ 
+                    top: '40px', // Empezar después del botón principal
+                    height: `${submenuContent['perfil']?.length * 34}px` // Altura dinámica basada en cantidad de subitems
+                  }}
                 />
               )}
             </div>
