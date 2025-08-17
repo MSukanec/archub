@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Plus, CheckSquare, Calendar } from 'lucide-react'
-import { useConstructionTasks, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -35,10 +35,25 @@ export default function Tasks() {
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
 
-  const { data: tasks = [], isLoading } = useConstructionTasks(
-    projectId || '', 
-    organizationId || ''
-  )
+  // Usar la misma fuente que el cronograma para consistencia
+  const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '')
+  
+  // Transformar las tareas de la vista para que sean compatibles con el componente TaskListView
+  const tasks = tasksView.map(task => ({
+    id: task.id,
+    project_id: task.project_id,
+    task_id: task.task_id,
+    quantity: task.quantity,
+    created_at: task.created_at,
+    updated_at: task.updated_at,
+    phase_name: task.phase_name,
+    task: {
+      id: task.task_id,
+      display_name: task.name_rendered,
+      category_name: task.category_name,
+      unit_name: task.unit_name,
+    }
+  }))
 
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
 
