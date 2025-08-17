@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Plus } from "lucide-react";
+import { Handshake, Plus } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -30,7 +30,7 @@ export default function Subcontracts() {
   // Props del header que cambian según la tab activa
   const getHeaderProps = () => {
     const baseProps = {
-      icon: Package,
+      icon: Handshake,
       pageTitle: "Subcontratos",
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },

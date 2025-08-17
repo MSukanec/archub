@@ -311,7 +311,7 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
       { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
-      { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
       { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },

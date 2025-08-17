@@ -37,6 +37,7 @@ import {
   Crown,
   User,
   BarChart3,
+  Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -349,7 +350,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments' },
-      { icon: Package, label: 'Subcontratos', href: '/finances/subcontracts' },
+      { icon: Handshake, label: 'Subcontratos', href: '/finances/subcontracts' },
       { icon: Users, label: 'Clientes', href: '/finances/clients' },
       { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
     ],
