@@ -54,8 +54,10 @@ interface LayoutProps {
     };
     breadcrumb?: { name: string; href: string }[];
     showCurrencySelector?: boolean;
-    currencyView?: 'discriminado' | 'pesificado' | 'dolarizado';
-    onCurrencyViewChange?: (view: 'discriminado' | 'pesificado' | 'dolarizado') => void;
+    currencyView?: "discriminado" | "pesificado" | "dolarizado";
+    onCurrencyViewChange?: (
+      view: "discriminado" | "pesificado" | "dolarizado",
+    ) => void;
   };
 }
 
@@ -98,7 +100,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
-        {/* <SidebarSubmenu /> */} {/* Commented out - using accordion sidebar instead */}
+        {/* <SidebarSubmenu /> */}{" "}
+        {/* Commented out - using accordion sidebar instead */}
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
@@ -115,7 +118,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           "md:pt-24" // h-20 header + 4 units padding
         } ${
           // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
-          (isMainDocked || isMainHovered)
+          isMainDocked || isMainHovered
             ? "md:ml-[264px]" // 264px main sidebar when expanded
             : "md:ml-[40px]" // 40px main sidebar when collapsed
         } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
