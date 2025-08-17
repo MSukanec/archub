@@ -329,7 +329,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
     organizacion: [
-      { icon: Home, label: 'Resumen de Organización', href: '/organization/dashboard' },
+      { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
     ],
 
