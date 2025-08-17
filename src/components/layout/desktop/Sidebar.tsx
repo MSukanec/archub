@@ -308,7 +308,7 @@ export function Sidebar() {
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
     ],
     'construccion': [
-      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard', requiresProject: true },
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard', requiresProject: true },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
       { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },

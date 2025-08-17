@@ -336,10 +336,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
 
     construccion: [
-      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Calendar, label: 'Cronograma', href: '/construction/schedule' },
-      { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
