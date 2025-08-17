@@ -193,6 +193,10 @@ TABLA (VIEW) CONSTRUCTION_TASKS_VIEW:
 
 [
   {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
     "column_name": "id",
     "data_type": "uuid"
   },
@@ -206,10 +210,6 @@ TABLA (VIEW) CONSTRUCTION_TASKS_VIEW:
   },
   {
     "column_name": "name_rendered",
-    "data_type": "text"
-  },
-  {
-    "column_name": "unit_name",
     "data_type": "text"
   },
   {
@@ -239,10 +239,6 @@ TABLA (VIEW) CONSTRUCTION_TASKS_VIEW:
   {
     "column_name": "phase_name",
     "data_type": "text"
-  },
-  {
-    "column_name": "phase_position",
-    "data_type": "integer"
   },
   {
     "column_name": "created_at",

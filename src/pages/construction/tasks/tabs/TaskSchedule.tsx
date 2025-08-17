@@ -60,7 +60,7 @@ export function TaskSchedule() {
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.preferences?.last_organization_id
 
-  const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '')
+  const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
 
   // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')

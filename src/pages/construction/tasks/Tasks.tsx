@@ -36,7 +36,7 @@ export default function Tasks() {
   const organizationId = userData?.preferences?.last_organization_id
 
   // Usar la misma fuente que el cronograma para consistencia
-  const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '')
+  const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
   
   // Transformar las tareas de la vista para que sean compatibles con el componente TaskListView
   const tasks = tasksView.map(task => ({
@@ -49,9 +49,11 @@ export default function Tasks() {
     phase_name: task.phase_name,
     task: {
       id: task.task_id,
+      code: task.task_id, // Usar task_id como code por compatibilidad
       display_name: task.name_rendered,
       category_name: task.category_name,
       unit_name: task.unit_name,
+      rubro_name: null, // No disponible en la vista
     }
   }))
 

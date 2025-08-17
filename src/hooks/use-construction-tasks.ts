@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 // Interfaz actualizada para la vista CONSTRUCTION_TASKS_VIEW
 export interface ConstructionTaskView {
   id: string;
+  organization_id: string; // Nueva columna agregada
   project_id: string;
   task_id: string;
   name_rendered: string;
@@ -21,9 +22,9 @@ export interface ConstructionTaskView {
 }
 
 // Hook específico para la vista CONSTRUCTION_TASKS_VIEW optimizada para cronograma
-export function useConstructionTasksView(projectId: string) {
+export function useConstructionTasksView(projectId: string, organizationId: string) {
   return useQuery({
-    queryKey: ['construction-tasks-view', projectId],
+    queryKey: ['construction-tasks-view', projectId, organizationId],
     queryFn: async (): Promise<ConstructionTaskView[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -31,6 +32,7 @@ export function useConstructionTasksView(projectId: string) {
         .from('construction_tasks_view')
         .select('*')
         .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -40,7 +42,7 @@ export function useConstructionTasksView(projectId: string) {
 
       return data || [];
     },
-    enabled: !!projectId,
+    enabled: !!projectId && !!organizationId,
   });
 }
 
