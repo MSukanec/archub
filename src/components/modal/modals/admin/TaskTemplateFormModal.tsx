@@ -82,14 +82,14 @@ function SortableParameterItem({
           >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </button>
-          <div>
+          <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{parameter?.label}</span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+              {parameter?.type}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-xs text-muted-foreground">
-            {parameter?.type}
-          </div>
           <Select
             value={templateParam?.is_required ? "true" : "false"}
             onValueChange={(value) => onRequiredChange(templateParam.id, value === "true")}
