@@ -7,6 +7,7 @@ import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskParameters from './AdminTaskParameters';
 import AdminTaskTemplates from './AdminTaskTemplates';
 import AdminTaskFlow from './AdminTaskFlow';
+import AdminActionsList from './AdminActionsList';
 
 const AdminTasks = () => {
   const [activeTab, setActiveTab] = useState('tareas');
@@ -17,7 +18,8 @@ const AdminTasks = () => {
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
     { id: 'flujo', label: 'Flujo', isActive: activeTab === 'flujo' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
-    { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' }
+    { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' },
+    { id: 'acciones', label: 'Acciones', isActive: activeTab === 'acciones' }
   ];
 
   const getActionButton = () => {
@@ -48,6 +50,12 @@ const AdminTasks = () => {
           icon: Plus,
           onClick: () => openModal('task-template')
         };
+      case 'acciones':
+        return {
+          label: "Nueva Acción",
+          icon: Plus,
+          onClick: () => console.log('Nueva acción - modal pendiente')
+        };
       default:
         return {
           label: "Nueva Tarea",
@@ -69,6 +77,8 @@ const AdminTasks = () => {
         return <AdminTaskFlow />;
       case 'plantillas':
         return <AdminTaskTemplates />;
+      case 'acciones':
+        return <AdminActionsList />;
       default:
         return <AdminTaskList />;
     }
