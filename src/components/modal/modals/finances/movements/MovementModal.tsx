@@ -22,6 +22,8 @@ import { DefaultMovementFields } from './fields/DefaultFields'
 const basicMovementSchema = z.object({
   movement_date: z.date(),
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
   description: z.string().min(1, 'Descripción es requerida'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
@@ -43,9 +45,42 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
 
+  // States for hierarchical selection like the original modal
+  const [selectedTypeId, setSelectedTypeId] = React.useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('')
+
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
   const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
+
+  // Calculate categories and subcategories like the original modal
+  const categories = React.useMemo(() => {
+    if (!movementConcepts || !selectedTypeId) return []
+    
+    // Flatten the structure to find the selected type
+    const flattenConcepts = (concepts: any[]): any[] => {
+      return concepts.reduce((acc, concept) => {
+        acc.push(concept)
+        if (concept.children && concept.children.length > 0) {
+          acc.push(...flattenConcepts(concept.children))
+        }
+        return acc
+      }, [])
+    }
+    
+    const allConcepts = flattenConcepts(movementConcepts)
+    const selectedType = allConcepts.find(concept => concept.id === selectedTypeId)
+    
+    return selectedType?.children || []
+  }, [movementConcepts, selectedTypeId])
+
+  const subcategories = React.useMemo(() => {
+    if (!selectedCategoryId || !categories) return []
+    
+    const selectedCategory = categories.find((cat: any) => cat.id === selectedCategoryId)
+    return selectedCategory?.children || []
+  }, [categories, selectedCategoryId])
 
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
@@ -53,6 +88,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     defaultValues: {
       movement_date: new Date(), // HOY por defecto
       type_id: '',
+      category_id: '',
+      subcategory_id: '',
       description: '',
       currency_id: defaultCurrency || '',
       wallet_id: defaultWallet || '',
@@ -90,8 +127,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
                 <DatePicker
-                  date={field.value}
-                  onDateChange={field.onChange}
+                  value={field.value}
+                  onChange={field.onChange}
                   placeholder="Seleccionar fecha..."
                 />
               </FormControl>
@@ -107,7 +144,17 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Movimiento *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select 
+                value={selectedTypeId} 
+                onValueChange={(value) => {
+                  setSelectedTypeId(value)
+                  setSelectedCategoryId('')
+                  setSelectedSubcategoryId('')
+                  field.onChange(value)
+                  form.setValue('category_id', '')
+                  form.setValue('subcategory_id', '')
+                }}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar tipo..." />
@@ -125,6 +172,76 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             </FormItem>
           )}
         />
+
+        {/* Categoría - solo mostrar si hay tipo seleccionado y tiene categorías */}
+        {selectedTypeId && categories.length > 0 && (
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría *</FormLabel>
+                <Select 
+                  value={selectedCategoryId} 
+                  onValueChange={(value) => {
+                    setSelectedCategoryId(value)
+                    setSelectedSubcategoryId('')
+                    field.onChange(value)
+                    form.setValue('subcategory_id', '')
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* Subcategoría - solo mostrar si hay categoría seleccionada y tiene subcategorías */}
+        {selectedCategoryId && subcategories.length > 0 && (
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subcategoría</FormLabel>
+                <Select 
+                  value={selectedSubcategoryId} 
+                  onValueChange={(value) => {
+                    setSelectedSubcategoryId(value)
+                    field.onChange(value)
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar subcategoría..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subcategories.map((subcategory: any) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Descripción */}
         <FormField
