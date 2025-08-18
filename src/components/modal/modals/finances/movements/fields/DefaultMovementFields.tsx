@@ -1,87 +1,57 @@
-import React from 'react'
-import { UseFormReturn } from 'react-hook-form'
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Users } from 'lucide-react'
-import UserSelector from '@/components/ui-custom/UserSelector'
-import { Button } from '@/components/ui/button'
+import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
+import { Package, Users } from 'lucide-react'
+import { UseFormReturn } from 'react-hook-form'
 
-interface AportesPropriosForm {
-  created_by: string
-  movement_date: Date
-  type_id: string
-  category_id: string
-  description?: string
-  member_id: string
-  currency_id: string
-  wallet_id: string
-  amount: number
-  exchange_rate?: number
-}
-
-interface Props {
-  form: UseFormReturn<AportesPropriosForm>
+interface DefaultMovementFieldsProps {
+  form: UseFormReturn<any>
   currencies: any[]
   wallets: any[]
-  members: any[]
-  concepts: any[]
+  // Props opcionales para botones específicos
+  showPersonButton?: boolean
+  showTaskButton?: boolean
+  selectedPersonId?: string | null
+  selectedTaskId?: string | null
+  onOpenPersonSubform?: () => void
+  onOpenTasksSubform?: () => void
 }
 
-export function AportesPropiosFields({ form, currencies, wallets, members, concepts }: Props) {
-  // Filtrar categorías para este tipo
-  const categories = concepts?.filter((concept: any) => concept.parent_id && concept.view_mode?.trim() === "aportes_propios")
-
+export function DefaultMovementFields({
+  form,
+  currencies,
+  wallets,
+  showPersonButton = false,
+  showTaskButton = false,
+  selectedPersonId = null,
+  selectedTaskId = null,
+  onOpenPersonSubform,
+  onOpenTasksSubform
+}: DefaultMovementFieldsProps) {
   return (
-    <div className="space-y-4">
-
-      {/* Socio */}
+    <>
+      {/* Descripción - Campo compartido */}
       <FormField
         control={form.control}
-        name="member_id"
-        render={({ field }) => {
-          // Mostrar estado vacío si no hay socios
-          if (!members || members.length === 0) {
-            return (
-              <FormItem>
-                <FormLabel>Socio</FormLabel>
-                <FormControl>
-                  <div className="flex items-center justify-center p-4 border-accent border-dashed border-2 rounded-lg bg-muted/50">
-                    <div className="text-center">
-                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Aún no tienes Socios, ¿quieres agregar uno?
-                      </p>
-                      <Button variant="default" size="sm" disabled>
-                        Agregar
-                      </Button>
-                    </div>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )
-          }
-
-          return (
-            <FormItem>
-              <FormLabel>Socio</FormLabel>
-              <FormControl>
-                <UserSelector
-                  users={members || []}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar socio"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )
-        }}
+        name="description"
+        render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel>Descripción</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Descripción del movimiento..."
+                {...field}
+                value={field.value || ''}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
 
       {/* Fila: Moneda | Billetera */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="currency_id"
@@ -133,14 +103,14 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
         />
       </div>
 
-      {/* Fila: Cantidad | Cotización */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Fila: Monto | Cotización */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cantidad *</FormLabel>
+              <FormLabel>Monto *</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -178,7 +148,29 @@ export function AportesPropiosFields({ form, currencies, wallets, members, conce
         />
       </div>
 
+      {/* Botón para Selección de Persona - Solo si showPersonButton es true */}
+      {showPersonButton && onOpenPersonSubform && (
+        <div className="col-span-2">
+          <FormSubsectionButton
+            icon={<Users />}
+            title="Seleccionar Persona"
+            description={selectedPersonId ? "Persona seleccionada" : "Selecciona la persona relacionada con este movimiento"}
+            onClick={onOpenPersonSubform}
+          />
+        </div>
+      )}
 
-    </div>
+      {/* Botón para Selección de Tareas - Solo si showTaskButton es true */}
+      {showTaskButton && onOpenTasksSubform && (
+        <div className="col-span-2">
+          <FormSubsectionButton
+            icon={<Package />}
+            title="Seleccionar Tarea de Construcción"
+            description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este movimiento"}
+            onClick={onOpenTasksSubform}
+          />
+        </div>
+      )}
+    </>
   )
 }

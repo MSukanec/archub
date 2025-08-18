@@ -20,12 +20,7 @@ import UserSelector from '@/components/ui-custom/UserSelector'
 import { useToast } from '@/hooks/use-toast'
 import { ConversionFields } from './fields/ConversionFields'
 import { TransferFields } from './fields/TransferFields'
-import { AportesFields } from './fields/AportesFields'
-import { AportesPropiosFields } from './fields/AportesPropiosFields'
-import { RetirosPropiosFields } from './fields/RetirosPropiosFields'
-import { MaterialesFields } from './fields/MaterialesFields'
-import { SubcontratosFields } from './fields/SubcontratosFields'
-import { PersonalFields } from './fields/PersonalFields'
+import { DefaultMovementFields } from './fields/DefaultMovementFields'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -2724,13 +2719,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       ) : (isAportes || isEditingAportes) ? (
         <Form {...aportesForm}>
           <form onSubmit={aportesForm.handleSubmit(onSubmitAportes)} className="space-y-4">
-            <AportesFields
+            <DefaultMovementFields
               form={aportesForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
-              projectClients={projectClients}
+              showPersonButton={true}
+              selectedPersonId={selectedPersonId}
+              onOpenPersonSubform={openPersonSubform}
             />
           </form>
         </Form>
@@ -2738,12 +2733,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE APORTES PROPIOS
         <Form {...aportesPropriosForm}>
           <form onSubmit={aportesPropriosForm.handleSubmit(onSubmitAportesPropios)} className="space-y-4">
-            <AportesPropiosFields
+            <DefaultMovementFields
               form={aportesPropriosForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
             />
           </form>
         </Form>
@@ -2751,12 +2744,10 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE RETIROS PROPIOS
         <Form {...retirosPropriosForm}>
           <form onSubmit={retirosPropriosForm.handleSubmit(onSubmitRetirosPropios)} className="space-y-4">
-            <RetirosPropiosFields
+            <DefaultMovementFields
               form={retirosPropriosForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
             />
           </form>
         </Form>
@@ -2764,16 +2755,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE SUBCONTRATOS
         <Form {...subcontratosForm}>
           <form onSubmit={subcontratosForm.handleSubmit(onSubmitSubcontratos)} className="space-y-4">
-            <SubcontratosFields
+            <DefaultMovementFields
               form={subcontratosForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
+              showTaskButton={true}
+              selectedTaskId={selectedTaskId}
               onOpenTasksSubform={openTasksSubform}
-              projectId={form.watch('project_id')}
-              selectedSubcontractId={selectedSubcontractId}
-              setSelectedSubcontractId={setSelectedSubcontractId}
             />
           </form>
         </Form>
@@ -2781,16 +2769,13 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE PERSONAL
         <Form {...personalForm}>
           <form onSubmit={personalForm.handleSubmit(onSubmitPersonal)} className="space-y-4">
-            <PersonalFields
+            <DefaultMovementFields
               form={personalForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
-              onOpenPersonnelSubform={openPersonnelSubform}
-              projectId={form.watch('project_id')}
-              selectedPersonnelId={selectedPersonnelId}
-              setSelectedPersonnelId={setSelectedPersonnelId}
+              showPersonButton={true}
+              selectedPersonId={selectedPersonnelId}
+              onOpenPersonSubform={openPersonnelSubform}
             />
           </form>
         </Form>
@@ -2798,14 +2783,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
           <form onSubmit={materialesForm.handleSubmit(onSubmitMateriales)} className="space-y-4">
-            <MaterialesFields
+            <DefaultMovementFields
               form={materialesForm}
               currencies={currencies || []}
               wallets={wallets || []}
-              members={members || []}
-              concepts={concepts}
+              showTaskButton={true}
               selectedTaskId={selectedTaskId}
-              setSelectedTaskId={setSelectedTaskId}
               onOpenTasksSubform={openTasksSubform}
             />
           </form>
@@ -2815,111 +2798,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         // FORMULARIO NORMAL
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
-
-
-            {/* Fila: Moneda | Billetera */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="currency_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Moneda *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar moneda..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {currencies?.map((orgCurrency) => (
-                          <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                            {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="wallet_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Billetera *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar billetera..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {wallets?.map((wallet) => (
-                          <SelectItem key={wallet.id} value={wallet.id}>
-                            {wallet.wallets?.name || 'Sin nombre'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Fila: Monto | Cotización */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Monto *</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-10"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="exchange_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cotización (opcional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.0001"
-                        min="0"
-                        placeholder="Ej: 1.0000"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-
+            <DefaultMovementFields
+              form={form}
+              currencies={currencies || []}
+              wallets={wallets || []}
+            />
           </form>
         </Form>
       )}
