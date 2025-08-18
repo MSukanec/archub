@@ -217,14 +217,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                   onValueChange={field.onChange}
                   options={taskCategories.map(category => ({
                     value: category.id,
-                    label: (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
-                          {category.code}
-                        </span>
-                        {category.name}
-                      </div>
-                    )
+                    label: `${category.code} - ${category.name}`
                   }))}
                   placeholder="Seleccionar categoría"
                   searchPlaceholder="Buscar categoría..."

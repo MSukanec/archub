@@ -144,7 +144,18 @@ export function ComboBox({
                       value === option.value ? "opacity-100 text-accent" : "opacity-0"
                     )}
                   />
-                  <span className="text-foreground truncate">{option.label}</span>
+                  <span className="text-foreground truncate">
+                    {option.label.includes(' - ') ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                          {option.label.split(' - ')[0]}
+                        </span>
+                        {option.label.split(' - ')[1]}
+                      </div>
+                    ) : (
+                      option.label
+                    )}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>
