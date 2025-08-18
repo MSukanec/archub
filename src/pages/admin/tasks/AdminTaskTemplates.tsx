@@ -66,7 +66,7 @@ const AdminTaskTemplates = () => {
     {
       key: 'name',
       label: 'Nombre',
-      className: 'w-1/3',
+      className: 'w-1/4',
       render: (template: any) => (
         <div className="flex items-center gap-2">
           <FileCode className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -78,9 +78,31 @@ const AdminTaskTemplates = () => {
       )
     },
     {
+      key: 'category',
+      label: 'Categoría',
+      className: 'w-1/4',
+      render: (template: any) => {
+        const category = allCategories.find(cat => cat.id === template.task_category_id)
+        const parentCategory = getParentCategory(template.task_category_id)
+        
+        return (
+          <div className="space-y-1">
+            <Badge variant="outline" className="text-xs">
+              {category?.name || 'Sin categoría'}
+            </Badge>
+            {parentCategory && parentCategory.id !== category?.id && (
+              <div className="text-xs text-muted-foreground">
+                {parentCategory.name}
+              </div>
+            )}
+          </div>
+        )
+      }
+    },
+    {
       key: 'unit',
       label: 'Unidad',
-      className: 'w-1/3',
+      className: 'w-1/4',
       render: (template: any) => (
         <Badge variant="outline" className="text-xs">
           {template.unit?.name || 'Sin unidad'}
@@ -90,7 +112,7 @@ const AdminTaskTemplates = () => {
     {
       key: 'actions',
       label: 'Acciones',
-      className: 'w-1/3',
+      className: 'w-1/4',
       render: (template: any) => (
         <div className="flex items-center gap-1">
           <Button
