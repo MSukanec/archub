@@ -22,6 +22,7 @@ import { useOrganizationMovementConcepts } from '@/hooks/use-organization-moveme
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { ConversionFields } from './fields/ConversionFields'
+import { TransferFields } from './fields/TransferFields'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -61,8 +62,24 @@ const conversionSchema = z.object({
   path: ["currency_id_to"]
 })
 
+// Schema para transferencia interna
+const transferSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
+  wallet_id_to: z.string().min(1, 'Billetera destino es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0')
+}).refine((data) => data.wallet_id_from !== data.wallet_id_to, {
+  message: "Las billeteras de origen y destino deben ser diferentes",
+  path: ["wallet_id_to"]
+})
+
 type BasicMovementForm = z.infer<typeof basicMovementSchema>
 type ConversionForm = z.infer<typeof conversionSchema>
+type TransferForm = z.infer<typeof transferSchema>
 
 interface MovementModalProps {
   modalData?: any
@@ -84,8 +101,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
   const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('')
   
-  // State para detectar conversión (como en el modal original)
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion'>('normal')
+  // State para detectar tipo de movimiento
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -158,6 +175,21 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     }
   })
 
+  // Transfer form
+  const transferForm = useForm<TransferForm>({
+    resolver: zodResolver(transferSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: currentMember?.id || '',
+      description: '',
+      type_id: '',
+      currency_id: defaultCurrency || '',
+      wallet_id_from: defaultWallet || '',
+      wallet_id_to: '',
+      amount: 0
+    }
+  })
+
   // Set default values when data loads (like the original modal)
   React.useEffect(() => {
     if (defaultCurrency && !form.watch('currency_id')) {
@@ -180,7 +212,18 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     if (defaultWallet && !conversionForm.watch('wallet_id_from')) {
       conversionForm.setValue('wallet_id_from', defaultWallet)
     }
-  }, [defaultCurrency, defaultWallet, currentMember, form, conversionForm])
+
+    // También actualizar transfer form
+    if (currentMember?.id && !transferForm.watch('created_by')) {
+      transferForm.setValue('created_by', currentMember.id)
+    }
+    if (defaultCurrency && !transferForm.watch('currency_id')) {
+      transferForm.setValue('currency_id', defaultCurrency)
+    }
+    if (defaultWallet && !transferForm.watch('wallet_id_from')) {
+      transferForm.setValue('wallet_id_from', defaultWallet)
+    }
+  }, [defaultCurrency, defaultWallet, currentMember, form, conversionForm, transferForm])
 
   // Handle type change para detectar conversión (como en el modal original)
   const handleTypeChange = React.useCallback((newTypeId: string) => {
@@ -188,26 +231,29 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     
     setSelectedTypeId(newTypeId)
     
-    // Detectar si es conversión por view_mode 
+    // Detectar tipo de movimiento por view_mode 
     const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
     
     if (viewMode === "conversion") {
       setMovementType('conversion')
+    } else if (viewMode === "transfer") {
+      setMovementType('transfer')
     } else {
       setMovementType('normal')
     }
     
-    // Sincronizar type_id en ambos formularios
+    // Sincronizar type_id en todos los formularios
     form.setValue('type_id', newTypeId)
     conversionForm.setValue('type_id', newTypeId)
+    transferForm.setValue('type_id', newTypeId)
     
     // Reset categorías
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
     form.setValue('category_id', '')
     form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm])
+  }, [movementConcepts, form, conversionForm, transferForm])
 
   // Mutation para crear el movimiento normal
   const createMovementMutation = useMutation({
@@ -348,6 +394,87 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     }
   })
 
+  // Mutation para crear transferencia interna
+  const createTransferMutation = useMutation({
+    mutationFn: async (data: TransferForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      // Crear nueva transferencia con grupo UUID
+      const transferGroupId = crypto.randomUUID()
+
+      // Buscar tipos de egreso e ingreso
+      const egressType = movementConcepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('egreso')
+      )
+      const ingressType = movementConcepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('ingreso')
+      )
+
+      // Crear movimiento de egreso (salida)
+      const egressMovementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Transferencia - Salida',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id_from,
+        type_id: egressType?.id || data.type_id,
+        conversion_group_id: transferGroupId,
+        is_conversion: false,
+        is_favorite: false
+      }
+
+      // Crear movimiento de ingreso (entrada)
+      const ingressMovementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Transferencia - Entrada',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id_to,
+        type_id: ingressType?.id || data.type_id,
+        conversion_group_id: transferGroupId,
+        is_conversion: false,
+        is_favorite: false
+      }
+
+      // Insertar ambos movimientos
+      const { data: results, error } = await supabase
+        .from('movements')
+        .insert([egressMovementData, ingressMovementData])
+        .select()
+
+      if (error) throw error
+      return results
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      toast({
+        title: 'Transferencia creada',
+        description: 'La transferencia ha sido creada correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al crear la transferencia: ${error.message}`,
+      })
+    }
+  })
+
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
     createMovementMutation.mutate(values)
@@ -355,6 +482,10 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
 
   const onSubmitConversion = (values: ConversionForm) => {
     createConversionMutation.mutate(values)
+  }
+
+  const onSubmitTransfer = (values: TransferForm) => {
+    createTransferMutation.mutate(values)
   }
 
   // Renderizar panel para conversiones
@@ -438,6 +569,91 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           members={members || []}
           concepts={movementConcepts || []}
           movement={undefined}
+        />
+      </form>
+    </Form>
+  )
+
+  // Renderizar panel para transferencias internas
+  const transferPanel = (
+    <Form {...transferForm}>
+      <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
+        {/* 1. FECHA */}
+        <FormField
+          control={transferForm.control}
+          name="movement_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha *</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 2. TIPO DE MOVIMIENTO */}
+        <FormField
+          control={transferForm.control}
+          name="type_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Movimiento *</FormLabel>
+              <Select 
+                value={selectedTypeId} 
+                onValueChange={(value) => {
+                  handleTypeChange(value)
+                  field.onChange(value)
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {movementConcepts?.map((concept) => (
+                    <SelectItem key={concept.id} value={concept.id}>
+                      {concept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 3. DESCRIPCIÓN (TEXTAREA) */}
+        <FormField
+          control={transferForm.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción de la transferencia..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
+        <TransferFields
+          form={transferForm}
+          currencies={currencies || []}
+          wallets={wallets || []}
+          members={members || []}
+          concepts={movementConcepts || []}
         />
       </form>
     </Form>
@@ -595,7 +811,11 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   )
 
   // Panel condicional
-  const editPanel = movementType === 'conversion' ? conversionPanel : normalPanel
+  const editPanel = movementType === 'conversion' 
+    ? conversionPanel 
+    : movementType === 'transfer' 
+      ? transferPanel 
+      : normalPanel
 
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
@@ -616,10 +836,14 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       rightLabel="Guardar"
       onRightClick={movementType === 'conversion' 
         ? conversionForm.handleSubmit(onSubmitConversion)
-        : form.handleSubmit(onSubmit)}
+        : movementType === 'transfer'
+          ? transferForm.handleSubmit(onSubmitTransfer)
+          : form.handleSubmit(onSubmit)}
       showLoadingSpinner={movementType === 'conversion' 
         ? createConversionMutation.isPending 
-        : createMovementMutation.isPending}
+        : movementType === 'transfer'
+          ? createTransferMutation.isPending
+          : createMovementMutation.isPending}
     />
   )
 
