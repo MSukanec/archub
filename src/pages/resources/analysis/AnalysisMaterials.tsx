@@ -75,7 +75,7 @@ export default function AnalysisMaterials() {
       label: 'Marca',
       width: '13%',
       render: (product: Product) => (
-        <span className="text-sm text-[var(--text-muted)]">
+        <span className="text-sm font-medium">
           {product.brand?.name || 'Sin marca'}
         </span>
       )
@@ -166,7 +166,7 @@ export default function AnalysisMaterials() {
         <div className="flex items-center gap-1">
           <span className="text-sm font-mono">
             {product.default_price !== null && product.default_price !== undefined ? 
-              `S/. ${product.default_price.toFixed(2)}` : 
+              `ARS ${product.default_price.toFixed(2)}` : 
               '-'
             }
           </span>
