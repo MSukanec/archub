@@ -60,9 +60,12 @@ export default function Analysis() {
     // Add action button based on active tab
     ...(activeTab === 'materiales' && {
       actionButton: {
-        label: "Crear Material",
+        label: "Nuevo Producto Personalizado",
         icon: Plus,
-        onClick: () => openModal('material-form', {}),
+        onClick: () => {
+          // TODO: Implementar modal para producto personalizado
+          console.log('Crear nuevo producto personalizado')
+        },
         variant: "default" as const
       }
     }),

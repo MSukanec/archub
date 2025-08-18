@@ -210,27 +210,6 @@ export default function AnalysisMaterials() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h2 className="text-sm font-medium text-[var(--card-fg)]">
-            Catálogo de Productos
-          </h2>
-          <p className="text-xs text-[var(--text-muted)]">
-            Gestiona el catálogo completo de productos disponibles para tus proyectos
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-[var(--accent)]" />
-            <span className="text-xs text-[var(--text-muted)]">
-              {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Products Table */}
       <div className="w-full">
         {productsLoading ? (
