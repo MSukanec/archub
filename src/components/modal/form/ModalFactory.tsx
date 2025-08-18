@@ -11,11 +11,11 @@ import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
 import ProjectClientFormModal from '../modals/finances/ProjectClientFormModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
-import MovementFormModal from '../modals/finances/MovementFormModal';
+import MovementFormModal from '../modals/finances/movements/MovementFormModal';
 import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
 import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
 
-import MovementImportStepModal from '../modals/finances/MovementImportStepModal';
+import MovementImportStepModal from '../modals/finances/movements/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
 import { ConstructionTaskFormModal } from '../modals/construction/ConstructionTaskFormModal';
