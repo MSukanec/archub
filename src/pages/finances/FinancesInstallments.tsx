@@ -182,12 +182,7 @@ export default function FinancesInstallments() {
           subcategory_id,
           exchange_rate,
           created_at,
-          currencies(
-            id,
-            name,
-            code,
-            symbol
-          ),
+
           movement_clients!inner(
             id,
             project_client_id,
@@ -217,10 +212,11 @@ export default function FinancesInstallments() {
         throw error
       }
 
-      // Manually fetch wallets and users for the movements
+      // Manually fetch wallets, users, and currencies for the movements
       if (movements && movements.length > 0) {
         const walletIds = [...new Set(movements.map(m => m.wallet_id).filter(Boolean))]
         const userIds = [...new Set(movements.map(m => m.created_by).filter(Boolean))]
+        const currencyIds = [...new Set(movements.map(m => m.currency_id).filter(Boolean))]
 
         // Fetch wallets
         const { data: walletsData } = await supabase
@@ -234,10 +230,17 @@ export default function FinancesInstallments() {
           .select('id, full_name, email')
           .in('id', userIds)
 
-        // Add wallet and creator data to movements
+        // Fetch currencies
+        const { data: currenciesData } = await supabase
+          .from('currencies')
+          .select('id, name, code, symbol')
+          .in('id', currencyIds)
+
+        // Add wallet, creator, and currency data to movements
         movements.forEach(movement => {
           movement.wallet = walletsData?.find(w => w.id === movement.wallet_id)
           movement.creator = usersData?.find(u => u.id === movement.created_by)
+          movement.currency = currenciesData?.find(c => c.id === movement.currency_id)
         })
       }
 
@@ -247,6 +250,9 @@ export default function FinancesInstallments() {
       }
 
       console.log('Installments fetched:', movements?.length || 0)
+      
+      console.log('Installments loaded successfully:', movements?.length || 0, 'movements with currencies')
+      
       return movements || []
     },
     enabled: !!organizationId && !!projectId && !!supabase
@@ -283,71 +289,67 @@ export default function FinancesInstallments() {
     return sum
   }, 0)
 
-  // Create client summary based on project_clients and installments
+  // Create client summary based on installments (movements with movement_clients)
   const { clientSummary, availableCurrencies } = React.useMemo(() => {
     const currenciesSet = new Set<string>()
+    const clientsMap = new Map<string, any>()
     
-    // Track currencies from installments
+    // Process installments to create client summary
+    
+    // Process each installment to extract client data
     installments.forEach(installment => {
       if (installment.currency?.code) {
         currenciesSet.add(installment.currency.code)
       }
-    })
-    
-    // Create summary for ALL project clients (including those without installments)
-    const summary = projectClients
-      .map(client => {
-        // Calculate dollarized total from installments for this client
-        let dollarizedTotal = 0
+      
+      // Process each movement_client within this installment
+      installment.movement_clients?.forEach(movementClient => {
+        const projectClient = movementClient.project_clients
+        const contact = projectClient?.contacts
+        const clientId = projectClient?.client_id || 'unknown'
         
-        // Find installments that include this client via movement_clients
-        const clientInstallments = installments.filter(installment => 
-          installment.movement_clients?.some(mc => mc.project_client_id === client.id)
-        )
+
         
-        clientInstallments.forEach(installment => {
-          // Get the specific amount for this client from movement_clients
-          const movementClient = installment.movement_clients?.find(mc => mc.project_client_id === client.id)
-          const clientAmount = movementClient?.amount || 0
-          const currencyCode = installment.currency?.code || 'N/A'
-          
-          if (currencyCode === 'USD') {
-            dollarizedTotal += clientAmount
-          } else if (currencyCode === 'ARS' && installment.exchange_rate) {
-            // Convert from ARS to USD: amount_in_pesos / exchange_rate_pesos_per_usd
-            const convertedAmount = clientAmount / installment.exchange_rate
-            dollarizedTotal += convertedAmount
-          }
-        })
+        if (!clientsMap.has(clientId)) {
+          clientsMap.set(clientId, {
+            contact_id: clientId,
+            contact: contact,
+            currencies: {},
+            dollarizedTotal: 0,
+            client: projectClient // Include full project client data
+          })
+        }
         
-        // Group installments by currency
-        const currencies: { [key: string]: { amount: number; currency: any } } = {}
-        clientInstallments.forEach(installment => {
-          const movementClient = installment.movement_clients?.find(mc => mc.project_client_id === client.id)
-          const clientAmount = movementClient?.amount || 0
-          const currencyCode = installment.currency?.code || 'N/A'
-          
-          if (!currencies[currencyCode]) {
-            currencies[currencyCode] = {
-              amount: 0,
-              currency: {
-                code: installment.currency?.code,
-                symbol: installment.currency?.symbol,
-                name: installment.currency?.name
-              }
+        const clientData = clientsMap.get(clientId)
+        const currencyCode = installment.currency?.code || 'N/A'
+        const amount = movementClient.amount || 0
+        
+
+        
+        // Add to currency breakdown
+        if (!clientData.currencies[currencyCode]) {
+          clientData.currencies[currencyCode] = {
+            amount: 0,
+            currency: {
+              code: installment.currency?.code,
+              symbol: installment.currency?.symbol,
+              name: installment.currency?.name
             }
           }
-          currencies[currencyCode].amount += clientAmount
-        })
+        }
+        clientData.currencies[currencyCode].amount += amount
         
-        return {
-          contact_id: client.client_id,
-          contact: client.contact,
-          currencies,
-          dollarizedTotal,
-          client // Include full client data for committed_amount and currency_id
+        // Add to dollarized total
+        if (currencyCode === 'USD') {
+          clientData.dollarizedTotal += amount
+        } else if (currencyCode === 'ARS' && installment.exchange_rate) {
+          const convertedAmount = amount / installment.exchange_rate
+          clientData.dollarizedTotal += convertedAmount
         }
       })
+    })
+    
+    const summary = Array.from(clientsMap.values())
     
     // Calculate totals for percentages and totals row
     const totalCommittedAmountUSD = summary.reduce((sum, item) => {
@@ -416,8 +418,10 @@ export default function FinancesInstallments() {
     
     const currencies = Array.from(currenciesSet).sort()
     
+
+    
     return { clientSummary: [...sortedSummary, totalsRow], availableCurrencies: currencies }
-  }, [projectClients, installments, allCurrencies])
+  }, [installments, allCurrencies])
 
   // Apply search filter to installments
   const filteredInstallments = installments.filter(installment => {
