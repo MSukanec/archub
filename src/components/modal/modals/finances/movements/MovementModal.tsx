@@ -26,7 +26,7 @@ import { TransferFields } from './fields/TransferFields'
 import { CustomButton } from '@/components/ui-custom/CustomButton'
 import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { PersonnelForm } from './forms/PersonnelForm'
+import { PersonnelForm, PersonnelFormHandle } from './forms/PersonnelForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 
@@ -882,8 +882,11 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const viewPanel = editPanel
 
   // Panel para PersonnelForm
+  const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
+  
   const personnelPanel = (
     <PersonnelForm 
+      ref={personnelFormRef}
       onClose={() => setShowPersonnelForm(false)} 
       onConfirm={(personnelList) => {
         setSelectedPersonnel(personnelList)
@@ -908,9 +911,10 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     <FormModalFooter
       leftLabel="Volver"
       onLeftClick={() => setShowPersonnelForm(false)}
-      rightLabel=""
-      onRightClick={() => {}}
-      rightDisabled={true}
+      rightLabel="Confirmar Personal"
+      onRightClick={() => {
+        personnelFormRef.current?.confirmPersonnel()
+      }}
     />
   ) : (
     <FormModalFooter

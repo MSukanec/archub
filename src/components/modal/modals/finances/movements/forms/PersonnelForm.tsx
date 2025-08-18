@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useImperativeHandle, forwardRef } from 'react'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,46 +17,57 @@ interface PersonnelFormProps {
   onConfirm?: (personnelList: PersonnelItem[]) => void
 }
 
-export function PersonnelForm({ onClose, onConfirm }: PersonnelFormProps) {
-  const [selectedPersonnelId, setSelectedPersonnelId] = useState('')
-  const [amount, setAmount] = useState<string>('')
-  const [addedPersonnel, setAddedPersonnel] = useState<PersonnelItem[]>([])
-  
-  // Get current user data to access project info
-  const { data: userData } = useCurrentUser()
-  const projectId = userData?.preferences?.last_project_id
+export interface PersonnelFormHandle {
+  confirmPersonnel: () => void
+}
 
-  // Get project personnel
-  const { data: projectPersonnel = [], isLoading } = useProjectPersonnel(projectId)
+export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>(
+  ({ onClose, onConfirm }, ref) => {
+    const [selectedPersonnelId, setSelectedPersonnelId] = useState('')
+    const [addedPersonnel, setAddedPersonnel] = useState<PersonnelItem[]>([])
+    
+    // Get current user data to access project info
+    const { data: userData } = useCurrentUser()
+    const projectId = userData?.preferences?.last_project_id
 
-  // Transform personnel data for ComboBox
-  const personnelOptions = projectPersonnel.map((person: any) => ({
-    value: person.id,
-    label: `${person.contact?.first_name || ''} ${person.contact?.last_name || ''}`.trim() || 'Sin nombre'
-  }))
+    // Get project personnel
+    const { data: projectPersonnel = [], isLoading } = useProjectPersonnel(projectId)
 
-  const handleAddPersonnel = () => {
-    if (!selectedPersonnelId || !amount) return
+    // Transform personnel data for ComboBox
+    const personnelOptions = projectPersonnel.map((person: any) => ({
+      value: person.id,
+      label: `${person.contact?.[0]?.first_name || ''} ${person.contact?.[0]?.last_name || ''}`.trim() || 'Sin nombre'
+    }))
 
-    const selectedPerson = projectPersonnel.find(p => p.id === selectedPersonnelId)
-    if (!selectedPerson) return
+    const handleAddPersonnel = () => {
+      if (!selectedPersonnelId) return
 
-    const contactName = `${selectedPerson.contact?.first_name || ''} ${selectedPerson.contact?.last_name || ''}`.trim() || 'Sin nombre'
+      const selectedPerson = projectPersonnel.find(p => p.id === selectedPersonnelId)
+      if (!selectedPerson) return
+
+      // Check if person is already added
+      if (addedPersonnel.some(p => p.personnel_id === selectedPersonnelId)) {
+        return // Don't add duplicates
+      }
+
+      const contactName = `${selectedPerson.contact?.[0]?.first_name || ''} ${selectedPerson.contact?.[0]?.last_name || ''}`.trim() || 'Sin nombre'
     
     const newPersonnelItem: PersonnelItem = {
       personnel_id: selectedPersonnelId,
       contact_name: contactName,
-      amount: parseFloat(amount)
-    }
-
-    // Check if person is already added
-    if (addedPersonnel.some(p => p.personnel_id === selectedPersonnelId)) {
-      return // Don't add duplicates
+      amount: 0 // Start with 0, user will input amount
     }
 
     setAddedPersonnel([...addedPersonnel, newPersonnelItem])
     setSelectedPersonnelId('')
-    setAmount('')
+  }
+
+  const handleAmountChange = (personnelId: string, amount: string) => {
+    setAddedPersonnel(addedPersonnel.map(person => 
+      person.personnel_id === personnelId 
+        ? { ...person, amount: parseFloat(amount) || 0 }
+        : person
+    ))
   }
 
   const handleRemovePersonnel = (personnelId: string) => {
@@ -70,54 +81,44 @@ export function PersonnelForm({ onClose, onConfirm }: PersonnelFormProps) {
     onClose()
   }
 
+  // Expose the confirmPersonnel method via ref
+  useImperativeHandle(ref, () => ({
+    confirmPersonnel: handleConfirm
+  }))
+
   return (
     <div className="space-y-4">
-      {/* ComboBox for Personnel Selection */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">
-          Seleccionar Personal
-        </label>
-        <ComboBox
-          value={selectedPersonnelId}
-          onValueChange={setSelectedPersonnelId}
-          options={personnelOptions}
-          placeholder="Seleccionar personal..."
-          searchPlaceholder="Buscar personal..."
-          emptyMessage={isLoading ? "Cargando..." : "No hay personal disponible"}
-          disabled={isLoading}
-        />
+      {/* Personnel Selection - Inline with Add Button */}
+      <div className="flex gap-2 items-end">
+        <div className="flex-1">
+          <label className="text-sm font-medium text-foreground mb-2 block">
+            Seleccionar Personal
+          </label>
+          <ComboBox
+            value={selectedPersonnelId}
+            onValueChange={setSelectedPersonnelId}
+            options={personnelOptions}
+            placeholder="Seleccionar personal..."
+            searchPlaceholder="Buscar personal..."
+            emptyMessage={isLoading ? "Cargando..." : "No hay personal disponible"}
+            disabled={isLoading}
+          />
+        </div>
+        <Button 
+          type="button"
+          variant="default" 
+          onClick={handleAddPersonnel}
+          className="flex items-center gap-2 h-10"
+          disabled={!selectedPersonnelId}
+        >
+          <Plus className="h-4 w-4" />
+          Agregar Personal
+        </Button>
       </div>
 
-      {/* Amount Input */}
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">
-          Monto
-        </label>
-        <Input
-          type="number"
-          placeholder="0.00"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          min="0"
-          step="0.01"
-        />
-      </div>
-
-      {/* Add Personnel Button */}
-      <Button 
-        type="button"
-        variant="default" 
-        onClick={handleAddPersonnel}
-        className="w-full flex items-center gap-2"
-        disabled={!selectedPersonnelId || !amount}
-      >
-        <Plus className="h-4 w-4" />
-        Agregar Personal
-      </Button>
-
-      {/* Added Personnel List */}
+      {/* Added Personnel List with editable amounts */}
       {addedPersonnel.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h4 className="text-sm font-medium text-foreground">Personal Agregado:</h4>
           {addedPersonnel.map((person) => (
             <div 
@@ -129,9 +130,17 @@ export function PersonnelForm({ onClose, onConfirm }: PersonnelFormProps) {
                 {person.contact_name}
               </div>
               
-              {/* Amount Column */}
-              <div className="text-sm text-foreground font-medium text-right">
-                ${person.amount.toFixed(2)}
+              {/* Amount Input Column */}
+              <div>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={person.amount}
+                  onChange={(e) => handleAmountChange(person.personnel_id, e.target.value)}
+                  min="0"
+                  step="0.01"
+                  className="text-right text-sm h-8"
+                />
               </div>
               
               {/* Remove Button */}
@@ -152,23 +161,13 @@ export function PersonnelForm({ onClose, onConfirm }: PersonnelFormProps) {
             <div className="text-sm font-medium text-foreground">
               Total:
             </div>
-            <div className="text-sm font-bold text-foreground text-right">
+            <div className="text-sm font-bold text-foreground text-right pr-3">
               ${addedPersonnel.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
             </div>
             <div></div>
           </div>
         </div>
       )}
-
-      {/* Confirm Button */}
-      <Button 
-        type="button"
-        variant="default" 
-        onClick={handleConfirm}
-        className="w-full"
-      >
-        Confirmar Personal
-      </Button>
     </div>
   )
-}
+})
