@@ -34,7 +34,7 @@ const basicMovementSchema = z.object({
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
-  description: z.string().min(1, 'Descripción es requerida'),
+  description: z.string().optional(), // Descripción opcional
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
@@ -788,7 +788,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción *</FormLabel>
+              <FormLabel>Descripción</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Descripción del movimiento..."
