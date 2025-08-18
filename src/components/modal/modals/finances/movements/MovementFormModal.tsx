@@ -25,6 +25,7 @@ import { AportesPropiosFields } from './fields/AportesPropiosFields'
 import { RetirosPropiosFields } from './fields/RetirosPropiosFields'
 import { MaterialesFields } from './fields/MaterialesFields'
 import { SubcontratosFields } from './fields/SubcontratosFields'
+import { PersonalFields } from './fields/PersonalFields'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -168,6 +169,20 @@ const subcontratosFormSchema = z.object({
   subcontrato: z.string().optional()
 })
 
+const personalFormSchema = z.object({
+  movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
+  description: z.string().optional(),
+  type_id: z.string().min(1, 'Tipo es requerido'),
+  category_id: z.string().min(1, 'Categoría es requerida'),
+  subcategory_id: z.string().optional(),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().optional(),
+  personal: z.string().optional()
+})
+
 export type MovementForm = z.infer<typeof movementFormSchema>
 type ConversionForm = z.infer<typeof conversionFormSchema>
 type TransferForm = z.infer<typeof transferFormSchema>
@@ -176,6 +191,7 @@ type AportesPropriosForm = z.infer<typeof aportesPropriosFormSchema>
 type RetirosPropriosForm = z.infer<typeof retirosPropriosFormSchema>
 type MaterialesForm = z.infer<typeof materialesFormSchema>
 type SubcontratosForm = z.infer<typeof subcontratosFormSchema>
+type PersonalForm = z.infer<typeof personalFormSchema>
 
 interface MovementFormModalProps {
   modalData?: {
@@ -414,6 +430,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isRetirosPropios = movementType === 'retiros_propios'
   const isMateriales = movementType === 'materiales'
   const isSubcontratos = movementType === 'subcontratos'
+  const isPersonal = movementType === 'personal'
 
   // Obtener categorías y subcategorías de la estructura jerárquica de organización
   const categories = React.useMemo(() => {
@@ -583,6 +600,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   })
 
+  const personalForm = useForm<PersonalForm>({
+    resolver: zodResolver(personalFormSchema),
+    defaultValues: {
+      movement_date: new Date(),
+      created_by: userData?.user?.id || '',
+      description: '',
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
+      personal: '',  
+      currency_id: userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id || '',
+      wallet_id: userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id || '',
+      amount: 0,
+      exchange_rate: undefined
+    }
+  })
+
 
 
   // Manejar envío con ENTER
@@ -708,6 +742,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       if (!retirosPropriosForm.watch('currency_id')) retirosPropriosForm.setValue('currency_id', defaultCurrency)
       if (!materialesForm.watch('currency_id')) materialesForm.setValue('currency_id', defaultCurrency)
       if (!subcontratosForm.watch('currency_id')) subcontratosForm.setValue('currency_id', defaultCurrency)
+      if (!personalForm.watch('currency_id')) personalForm.setValue('currency_id', defaultCurrency)
     }
     
     if (defaultWallet) {
@@ -733,6 +768,9 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
       if (!subcontratosForm.watch('wallet_id')) {
         subcontratosForm.setValue('wallet_id', defaultWallet)
+      }
+      if (!personalForm.watch('wallet_id')) {
+        personalForm.setValue('wallet_id', defaultWallet)
       }
     }
     
@@ -882,15 +920,31 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
           form.setValue('category_id', categoryId)
           form.setValue('subcategory_id', selectedSubcategoryId)
+        } else if (isPersonalCategory) {
+          // PERSONAL: Personal del proyecto + Información financiera
+          
+          personalForm.setValue('type_id', form.watch('type_id'))
+          personalForm.setValue('category_id', categoryId)
+          personalForm.setValue('subcategory_id', selectedSubcategoryId)
+          personalForm.setValue('description', preserveValues ? currentValues.description : '')
+          personalForm.setValue('created_by', preserveValues ? currentValues.created_by : currentMember || '')
+          personalForm.setValue('currency_id', preserveValues ? currentValues.currency_id : defaultCurrency || '') 
+          personalForm.setValue('wallet_id', preserveValues ? currentValues.wallet_id : defaultWallet || '')
+          personalForm.setValue('amount', preserveValues ? currentValues.amount : 0)
+          if (currentValues.exchange_rate) personalForm.setValue('exchange_rate', currentValues.exchange_rate)
+          
+          // CRITICAL: También sincronizar el formulario principal para que aparezcan los campos superiores
+          form.setValue('category_id', categoryId)
+          form.setValue('subcategory_id', selectedSubcategoryId)
         }
       } else {
         // Si no es una categoría especial, permitir regresar al formulario normal
-        if (isAportes || isAportesPropios || isRetirosPropios || isMateriales || isSubcontratos) {
+        if (isAportes || isAportesPropios || isRetirosPropios || isMateriales || isSubcontratos || isPersonal) {
           setMovementType('normal')
         }
       }
     }
-  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), subcontratosForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isSubcontratos, editingMovement, currencies, wallets, selectedSubcategoryId])
+  }, [form.watch('category_id'), aportesForm.watch('category_id'), aportesPropriosForm.watch('category_id'), retirosPropriosForm.watch('category_id'), materialesForm.watch('category_id'), subcontratosForm.watch('category_id'), personalForm.watch('category_id'), categories, members, userData, isAportes, isAportesPropios, isRetirosPropios, isMateriales, isSubcontratos, isPersonal, editingMovement, currencies, wallets, selectedSubcategoryId])
 
 
 
@@ -980,8 +1034,20 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       } else if (isPersonalMovement) {
         setMovementType('personal')
         
-        // Por ahora solo establecer el tipo, la lógica completa se implementará después
-        console.log('🧑‍💼 Personal movement detected in edit mode')
+        // Cargar datos en formulario de personal
+        personalForm.reset({
+          movement_date: new Date(editingMovement.movement_date),
+          created_by: editingMovement.created_by || userData?.user?.id || '',
+          description: editingMovement.description || '',
+          type_id: editingMovement.type_id,
+          category_id: editingMovement.category_id,
+          subcategory_id: editingMovement.subcategory_id || '',
+          personal: '',  // Se sincronizará después con selectedPersonnelId
+          currency_id: matchingCurrency?.id || editingMovement.currency_id,
+          wallet_id: matchingWallet?.wallets.id || editingMovement.wallet_id,
+          amount: Math.abs(editingMovement.amount),
+          exchange_rate: editingMovement.exchange_rate || undefined
+        })
       } else {
         setMovementType('normal')
       }
@@ -1988,6 +2054,76 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   })
 
+  const createPersonalMutation = useMutation({
+    mutationFn: async (data: PersonalForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: form.watch('project_id') || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: data.created_by,
+        description: data.description || 'Pago de Personal',
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id,
+        type_id: data.type_id,
+        category_id: data.category_id,
+        exchange_rate: data.exchange_rate || null,
+      }
+
+      // Si estamos editando, actualizar el movimiento existente
+      if (editingMovement?.id) {
+        const { data: result, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      } else {
+        // Si estamos creando, insertar nuevo movimiento
+        const { data: result, error } = await supabase
+          .from('movements')
+          .insert([movementData])
+          .select()
+          .single()
+
+        if (error) throw error
+        return result
+      }
+    },
+    onSuccess: async (createdMovement) => {
+      // El pago de personal no requiere vinculación específica adicional
+
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      toast({
+        title: editingMovement ? 'Pago de Personal actualizado' : 'Pago de Personal registrado',
+        description: editingMovement 
+          ? 'El pago de personal ha sido actualizado correctamente'
+          : 'El pago de personal ha sido registrado correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al ${editingMovement ? 'actualizar' : 'registrar'} el pago de personal: ${error.message}`,
+      })
+    }
+  })
+
   const onSubmitMateriales = async (data: MaterialesForm) => {
     // La selección de tareas es opcional
     await createMaterialesMutation.mutateAsync(data)
@@ -1996,6 +2132,11 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const onSubmitSubcontratos = async (data: SubcontratosForm) => {
     // La selección de tareas es opcional
     await createSubcontratosMutation.mutateAsync(data)
+  }
+
+  const onSubmitPersonal = async (data: PersonalForm) => {
+    // La selección de personal es opcional
+    await createPersonalMutation.mutateAsync(data)
   }
 
 
@@ -2016,6 +2157,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       retirosPropriosForm.setValue('created_by', currentMember.id)
       materialesForm.setValue('created_by', currentMember.id)
       subcontratosForm.setValue('created_by', currentMember.id)
+      personalForm.setValue('created_by', currentMember.id)
       conversionForm.setValue('created_by', currentMember.id)
       transferForm.setValue('created_by', currentMember.id)
     }
@@ -2041,13 +2183,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     // Detectar subcontratos por subcategoría UUID específica  
     const currentSubcategoryId = form.watch('subcategory_id')
     const isCurrentSubcontratos = currentSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID de Subcontratos
+    // Detectar personal por subcategoría UUID específica
+    const isCurrentPersonal = currentSubcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff' // UUID de Personal
     
     console.log("🎯 Movement Detection:", {
       isCurrentAportes,
       isCurrentAportesPropios,
       isCurrentRetirosPropios,
       isCurrentMateriales,
-      isCurrentSubcontratos
+      isCurrentSubcontratos,
+      isCurrentPersonal
     })
     
     // Detect current movement type based on category
@@ -2178,6 +2323,31 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
       }
       
       subcontratosForm.handleSubmit(onSubmitSubcontratos)()
+    } else if (isCurrentPersonal) {
+      
+      // CRITICAL: Sincronizar TODOS los campos centralizados del formulario principal antes de enviar
+      const mainFormTypeId = form.watch('type_id')
+      const mainFormCreatedBy = form.watch('created_by')
+      const mainFormMovementDate = form.watch('movement_date')
+      const mainFormDescription = form.watch('description')
+      
+      if (mainFormTypeId) {
+        personalForm.setValue('type_id', mainFormTypeId)
+      }
+      
+      if (mainFormCreatedBy) {
+        personalForm.setValue('created_by', mainFormCreatedBy)
+      }
+      
+      if (mainFormMovementDate) {
+        personalForm.setValue('movement_date', mainFormMovementDate)
+      }
+      
+      if (mainFormDescription) {
+        personalForm.setValue('description', mainFormDescription)
+      }
+      
+      personalForm.handleSubmit(onSubmitPersonal)()
     } else {
       // Usar el movementType original para casos como conversión/transferencia
       switch (movementType) {
@@ -2193,7 +2363,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     }
   }
 
-  const isLoading = createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createSubcontratosMutation.isPending
+  const isLoading = createMovementMutation.isPending || createConversionMutation.isPending || createTransferMutation.isPending || createAportesMutation.isPending || createAportesPropriosMutation.isPending || createRetirosPropriosMutation.isPending || createMaterialesMutation.isPending || createSubcontratosMutation.isPending || createPersonalMutation.isPending
 
   // Encontrar datos para display
   const selectedCurrency = currencies?.find(c => c.currency?.id === form.watch('currency_id'))?.currency
@@ -2274,6 +2444,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const isEditingAportesPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "aportes_propios"
   const isEditingRetirosPropios = editingMovement && concepts?.find((c: any) => c.id === editingMovement.type_id)?.view_mode?.trim() === "retiros_propios"
   const isEditingSubcontratos = editingMovement && editingMovement.subcategory_id === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' // UUID correcto de Subcontratos
+  const isEditingPersonal = editingMovement && editingMovement.subcategory_id === '7ef27d3f-ef17-49c3-a392-55282b3576ff' // UUID de Personal
 
   const editPanel = (
     <div className="space-y-4">
@@ -2297,6 +2468,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 retirosPropriosForm.setValue('movement_date', date)
                 materialesForm.setValue('movement_date', date)
                 subcontratosForm.setValue('movement_date', date)
+                personalForm.setValue('movement_date', date)
               }
             }}
             placeholder="Seleccionar fecha"
@@ -2324,7 +2496,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                 form.setValue('category_id', '')
                 form.setValue('subcategory_id', '')
                 
-                const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
+                const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, personalForm, conversionForm, transferForm]
                 allForms.forEach(specialForm => {
                   specialForm.setValue('type_id', value)
                   specialForm.setValue('category_id', '')
@@ -2369,7 +2541,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                   form.setValue('category_id', value)
                   form.setValue('subcategory_id', '')
                   
-                  const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
+                  const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, personalForm, conversionForm, transferForm]
                   allForms.forEach(specialForm => {
                     specialForm.setValue('category_id', value)
                     specialForm.setValue('subcategory_id', '')
@@ -2431,14 +2603,16 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
                     // Actualizar formularios
                     form.setValue('subcategory_id', value)
                     
-                    const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, conversionForm, transferForm]
+                    const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, subcontratosForm, personalForm, conversionForm, transferForm]
                     allForms.forEach(specialForm => {
                       specialForm.setValue('subcategory_id', value)
                     })
                     
-                    // Detectar subcontratos por UUID específico
+                    // Detectar subcontratos y personal por UUID específico
                     if (value === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
                       setMovementType('subcontratos')
+                    } else if (value === '7ef27d3f-ef17-49c3-a392-55282b3576ff') {
+                      setMovementType('personal')
                     }
                   }}
                 >
@@ -2603,26 +2777,23 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             />
           </form>
         </Form>
-      ) : movementType === 'personal' ? (
+      ) : (isPersonal || isEditingPersonal) ? (
         // FORMULARIO DE PERSONAL
-        <div className="space-y-4">
-          {/* Personal Selection Button */}
-          <FormSubsectionButton
-            title="Personal del Proyecto"
-            description={
-              selectedPersonnelId && personnelOptions.find(p => p.value === selectedPersonnelId)
-                ? `${personnelOptions.find(p => p.value === selectedPersonnelId)?.label}`
-                : "Seleccionar persona para el pago"
-            }
-            isConfigured={!!selectedPersonnelId}
-            onClick={openPersonnelSubform}
-          />
-
-          {/* Fields similares a otros formularios - por ahora solo lo básico */}
-          <div className="text-xs text-muted-foreground">
-            Configuración de pago de personal en desarrollo. Por ahora solo se puede seleccionar el personal.
-          </div>
-        </div>
+        <Form {...personalForm}>
+          <form onSubmit={personalForm.handleSubmit(onSubmitPersonal)} className="space-y-4">
+            <PersonalFields
+              form={personalForm}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              members={members || []}
+              concepts={concepts}
+              onOpenPersonnelSubform={openPersonnelSubform}
+              projectId={form.watch('project_id')}
+              selectedPersonnelId={selectedPersonnelId}
+              setSelectedPersonnelId={setSelectedPersonnelId}
+            />
+          </form>
+        </Form>
       ) : isMateriales ? (
         // FORMULARIO DE MATERIALES
         <Form {...materialesForm}>
