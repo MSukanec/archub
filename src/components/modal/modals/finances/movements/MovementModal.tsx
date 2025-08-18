@@ -349,22 +349,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (subcontractAssignments && subcontractAssignments.length > 0) {
         const formattedSubcontracts = subcontractAssignments.map((assignment: any) => {
-          const contact = assignment.subcontracts?.contact
-          let contactName = 'Sin nombre'
-          
-          if (contact) {
-            if (contact.company_name) {
-              contactName = contact.company_name
-            } else if (contact.full_name) {
-              contactName = contact.full_name
-            } else {
-              contactName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
-            }
-          }
+          // Usar el título del subcontrato en lugar del nombre del contacto
+          const subcontractTitle = assignment.subcontracts?.title || 'Subcontrato sin título'
 
           return {
             subcontract_id: assignment.subcontract_id,
-            contact_name: contactName,
+            contact_name: subcontractTitle, // Usamos title para consistencia con SubcontractsForm
             amount: assignment.amount
           }
         })
