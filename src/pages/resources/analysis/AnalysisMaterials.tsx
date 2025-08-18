@@ -63,7 +63,7 @@ export default function AnalysisMaterials() {
     {
       key: 'material',
       label: 'Material',
-      width: '18%',
+      width: '16%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.material?.name || 'Sin material'}
@@ -73,7 +73,7 @@ export default function AnalysisMaterials() {
     {
       key: 'brand',
       label: 'Marca',
-      width: '15%',
+      width: '13%',
       render: (product: Product) => (
         <Badge variant="outline" className="text-xs">
           {product.brand?.name || 'Sin marca'}
@@ -83,7 +83,7 @@ export default function AnalysisMaterials() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '20%',
+      width: '18%',
       render: (product: Product) => (
         <span className="text-sm font-medium">{product.name}</span>
       )
@@ -171,6 +171,19 @@ export default function AnalysisMaterials() {
             }
           </span>
         </div>
+      )
+    },
+    {
+      key: 'is_system',
+      label: 'Tipo',
+      width: '8%',
+      render: (product: Product) => (
+        <Badge 
+          variant={product.is_system ? "default" : "secondary"} 
+          className="text-xs"
+        >
+          {product.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
       )
     },
     {

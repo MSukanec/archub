@@ -38,6 +38,7 @@ export interface Product {
   url?: string;
   default_price?: number;
   default_provider?: string;
+  is_system?: boolean;
   created_at: string;
   // Campos calculados
   categoryHierarchy?: string;
