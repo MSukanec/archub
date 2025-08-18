@@ -59,17 +59,19 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   })
 
-  // Fetch task categories for dropdown
+  // Fetch task categories for dropdown (only third level - 3 letter codes)
   const { data: taskCategories = [] } = useQuery({
-    queryKey: ['task-categories'],
+    queryKey: ['task-categories-third-level'],
     queryFn: async () => {
       if (!supabase) return []
       const { data, error } = await supabase
         .from('task_categories')
-        .select('id, name')
+        .select('id, name, code')
+        .not('code', 'is', null)
         .order('name')
       if (error) throw error
-      return data
+      // Filter only categories with 3-letter codes (third level)
+      return data.filter(category => category.code && category.code.length === 3)
     }
   })
 
@@ -112,7 +114,6 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
         const newTemplate = await createMutation.mutateAsync({
           ...data,
           is_active: true,
-          created_by: currentUser?.user?.id || '',
         })
         setCreatedTemplate(newTemplate)
       }
@@ -197,7 +198,12 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                 <SelectContent>
                   {taskCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                          {category.code}
+                        </span>
+                        {category.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
