@@ -99,6 +99,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: ['partners', organizationId] });
       toast({
         title: 'Socio agregado',
         description: 'El socio ha sido agregado correctamente',
@@ -132,6 +133,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: ['partners', organizationId] });
       toast({
         title: 'Socio actualizado',
         description: 'Los datos del socio han sido actualizados',

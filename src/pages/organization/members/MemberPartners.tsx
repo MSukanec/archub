@@ -62,16 +62,51 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
   
   const organizationId = organization?.id;
 
-  // Mock partners data (empty for now since we don't have a partners table yet)
-  const partners: any[] = [];
-  console.log('No partners table found, using empty array');
+  // Query to get partners with their contact information
+  const { data: partners = [], isLoading } = useQuery({
+    queryKey: ['partners', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('partners')
+        .select(`
+          id,
+          created_at,
+          contacts!inner(
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            company_name
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching partners:', error);
+        throw error;
+      }
+      
+      console.log('Partners fetched:', data);
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
 
   const removeMemberMutation = useMutation({
     mutationFn: async (partnerId: string) => {
-      // Mock functionality
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase
+        .from('partners')
+        .delete()
+        .eq('id', partnerId);
+
+      if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partners'] });
       toast({
         title: "Socio eliminado",
         description: "El socio ha sido eliminado de la organización.",
@@ -91,7 +126,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
       mode: 'dangerous',
       title: 'Eliminar socio',
       description: 'Esta acción eliminará permanentemente el socio de la organización. Perderá acceso a todos los proyectos y datos.',
-      itemName: partner.user_data?.full_name || partner.email || 'Socio',
+      itemName: `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() || partner.contacts?.email || 'Socio',
       destructiveActionText: 'Eliminar',
       onConfirm: () => removeMemberMutation.mutate(partner.id),
       isLoading: removeMemberMutation.isPending
@@ -116,100 +151,88 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
         {/* Right Column - Partners Content */}
         <div className="lg:col-span-8">
           
-          {isMobile ? (
-            <div className="space-y-3">
-              {partners.map((partner) => (
-                <MemberCard 
-                  key={partner.id} 
-                  member={{
-                    ...partner,
-                    users: Array.isArray(partner.users) ? partner.users[0] : partner.users,
-                    roles: Array.isArray(partner.roles) ? partner.roles[0] : partner.roles
-                  }}
-                />
-              ))}
-              {partners.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <HandHeart className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay socios en esta organización.</p>
-                  <p className="text-xs">Ingresa al primer socio para comenzar.</p>
-                </div>
-              )}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-sm text-muted-foreground">Cargando socios...</div>
+            </div>
+          ) : partners.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <HandHeart className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                No hay socios en esta organización.
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Ingresa al primer socio para comenzar.
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
-              {partners.map((partner) => (
-                <Card key={partner.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={(Array.isArray(partner.users) ? partner.users[0] : partner.users)?.avatar_url} />
-                          <AvatarFallback>
-                            {getInitials((Array.isArray(partner.users) ? partner.users[0] : partner.users)?.full_name || (Array.isArray(partner.users) ? partner.users[0] : partner.users)?.email || 'S')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">
-                              {(Array.isArray(partner.users) ? partner.users[0] : partner.users)?.full_name || 'Sin nombre'}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {(Array.isArray(partner.users) ? partner.users[0] : partner.users)?.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>
-                            {partner.joined_at && !isNaN(new Date(partner.joined_at).getTime()) 
-                              ? format(new Date(partner.joined_at), 'MMM dd, yyyy', { locale: es })
-                              : 'Fecha no disponible'
-                            }
+              {partners.map((partner) => {
+                const contact = partner.contacts;
+                const fullName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
+                const displayName = fullName || contact?.company_name || 'Sin nombre';
+                
+                return (
+                  <Card key={partner.id} className="p-4">
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback>
+                              {getInitials(displayName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">
+                                {displayName}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {contact?.email || 'Sin email'}
+                            </p>
                           </div>
                         </div>
 
-                        <Badge 
-                          variant={getRoleBadgeVariant((Array.isArray(partner.roles) ? partner.roles[0] : partner.roles)?.name || '')}
-                          className={getRoleBadgeClassName((Array.isArray(partner.roles) ? partner.roles[0] : partner.roles)?.name || '')}
-                        >
-                          {(Array.isArray(partner.roles) ? partner.roles[0] : partner.roles)?.name || 'Sin rol'}
-                        </Badge>
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
+                            <div>
+                              {partner.created_at && !isNaN(new Date(partner.created_at).getTime()) 
+                                ? format(new Date(partner.created_at), 'MMM dd, yyyy', { locale: es })
+                                : 'Fecha no disponible'
+                              }
+                            </div>
+                          </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openModal('partner', { editingPartner: partner })}>
-                              Editar socio
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => handleDeletePartner(partner)}
-                            >
-                              Eliminar socio
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          <Badge variant="secondary">
+                            Socio
+                          </Badge>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openModal('partner', { editingPartner: partner })}>
+                                Editar socio
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeletePartner(partner)}
+                              >
+                                Eliminar socio
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {partners.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <HandHeart className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay socios en esta organización.</p>
-                  <p className="text-xs">Ingresa al primer socio para comenzar.</p>
-                </div>
-              )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
