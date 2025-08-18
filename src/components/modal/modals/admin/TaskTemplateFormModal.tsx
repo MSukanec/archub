@@ -455,30 +455,16 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     const sortedParams = currentTemplateParams
       .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
     
-    // Debug the parameters to see what we're getting
-    console.log('Debug parameters:', sortedParams.map(tp => ({
-      slug: tp.parameter?.slug,
-      expression_template: tp.parameter?.expression_template,
-      full_param: tp.parameter
-    })))
-    
-    // Use expression_template from each parameter, fallback to {value} if not available
+    // Use expression_template as-is from each parameter
     const parts = sortedParams.map(tp => {
-      const expressionTemplate = tp.parameter?.expression_template || '{value}'
-      const placeholder = `{{${tp.parameter?.slug || 'parámetro'}}}`
-      
-      // Handle the case where expression_template might be null or undefined
-      if (!expressionTemplate || expressionTemplate === '{value}') {
-        return placeholder
-      }
-      
-      return expressionTemplate.replace('{value}', placeholder)
+      // Return the expression_template exactly as it is in the database
+      return tp.parameter?.expression_template || '{value}'
     })
     
-    // Filter out empty parts and join appropriately 
+    // Filter out empty parts and join with spaces
     const filteredParts = parts.filter(part => part && part.trim())
     
-    // Join with spaces, handling spacing better
+    // Join with spaces and clean up
     let result = filteredParts.join(' ')
     
     // Clean up multiple spaces
