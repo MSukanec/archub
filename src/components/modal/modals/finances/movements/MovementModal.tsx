@@ -492,42 +492,17 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     createTransferMutation.mutate(values)
   }
 
-  // Función para determinar qué botón mostrar según el category_id
-  const getActionButton = (categoryId: string) => {
+  // Función para determinar qué botón mostrar según el subcategory_id
+  const getActionButton = (subcategoryId: string) => {
     const buttonConfig = {
-      'e854de08-da8f-4769-a2c5-b24b622f20b0': { 
-        text: 'Gestionar Indirectos', 
-        icon: FileText,
-        onClick: () => console.log('Gestionar Indirectos clicked') 
-      },
-      'd376d404-734a-47a9-b851-d112d64147db': { 
-        text: 'Gestionar Mano de Obra', 
+      '7ef27d3f-ef17-49c3-a392-55282b3576ff': { 
+        text: 'Gestionar Personal', 
         icon: Users,
         onClick: () => setShowPersonnelForm(true) 
-      },
-      'a8cab4bd-3d66-4022-a26d-4c208d0baccb': { 
-        text: 'Gestionar Materiales', 
-        icon: Package,
-        onClick: () => console.log('Gestionar Materiales clicked') 
-      },
-      'c04a82f8-6fd8-439d-81f7-325c63905a1b': { 
-        text: 'Gestionar Retiros Propios', 
-        icon: ArrowUpRight,
-        onClick: () => console.log('Gestionar Retiros Propios clicked') 
-      },
-      'f3b96eda-15d5-4c96-ade7-6f53685115d3': { 
-        text: 'Gestionar Aportes de Terceros', 
-        icon: ArrowDownLeft,
-        onClick: () => console.log('Gestionar Aportes de Terceros clicked') 
-      },
-      'a0429ca8-f4b9-4b91-84a2-b6603452f7fb': { 
-        text: 'Gestionar Aportes Propios', 
-        icon: ArrowDownLeft,
-        onClick: () => console.log('Gestionar Aportes Propios clicked') 
       }
     }
 
-    const config = buttonConfig[categoryId as keyof typeof buttonConfig]
+    const config = buttonConfig[subcategoryId as keyof typeof buttonConfig]
     
     if (!config) return null
 
@@ -809,13 +784,14 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           />
         )}
 
-        {/* SUBCATEGORÍAS (OCULTAS TEMPORALMENTE) */}
-        {/* {selectedCategoryId && subcategories.length > 0 && (
+        {/* SUBCATEGORÍAS */}
+        {selectedCategoryId && subcategories.length > 0 && (
           <FormField
             control={form.control}
             name="subcategory_id"
             render={({ field }) => (
               <FormItem>
+                <FormLabel>Subcategoría <span className="text-destructive">*</span></FormLabel>
                 <Select 
                   value={selectedSubcategoryId} 
                   onValueChange={(value) => {
@@ -840,7 +816,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
               </FormItem>
             )}
           />
-        )} */}
+        )}
 
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
@@ -861,7 +837,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedCategoryId)}
+        {getActionButton(selectedSubcategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
