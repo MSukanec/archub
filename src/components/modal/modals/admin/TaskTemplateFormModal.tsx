@@ -10,6 +10,7 @@ import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
@@ -146,19 +147,17 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
-  // Auto-generate code from name with accent normalization
+  // Auto-generate code from name with accent normalization (always update, even in edit mode)
   const handleNameChange = (value: string) => {
     form.setValue('name', value)
-    if (!isEditing) {
-      const code = value
-        .normalize('NFD') // Decompose accented characters
-        .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
-        .toUpperCase()
-        .replace(/[^A-Z0-9\s]/g, '') // Keep only alphanumeric and spaces
-        .replace(/\s+/g, '_') // Replace spaces with underscores
-        .trim()
-      form.setValue('code', code)
-    }
+    const code = value
+      .normalize('NFD') // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, '') // Keep only alphanumeric and spaces
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .trim()
+    form.setValue('code', code)
   }
 
   // Paso 1: Información básica
@@ -212,25 +211,20 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categoría</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {taskCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
-                          {category.code}
-                        </span>
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={taskCategories.map(category => ({
+                    value: category.id,
+                    label: category.name,
+                    badge: category.code
+                  }))}
+                  placeholder="Seleccionar categoría"
+                  searchPlaceholder="Buscar categoría..."
+                  emptyMessage="No se encontraron categorías"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
