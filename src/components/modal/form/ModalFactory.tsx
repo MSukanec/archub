@@ -53,6 +53,7 @@ import { SubcontractAwardModal } from '../modals/construction/SubcontractAwardMo
 import { SubcontractTaskFormModal } from '../modals/construction/SubcontractTaskFormModal';
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
+import { PartnerModal } from '../modals/organizations/members/PartnerModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -62,6 +63,8 @@ export function ModalFactory() {
   switch (type) {
     case 'member':
       return <MemberFormModal editingMember={data?.editingMember} onClose={closeModal} />;
+    case 'partner':
+      return <PartnerModal editingPartner={data?.editingPartner} onClose={closeModal} />;
     case 'gallery':
       return <GalleryFormModal modalData={data} onClose={closeModal} />;
     case 'board':

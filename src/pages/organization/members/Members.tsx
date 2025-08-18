@@ -49,7 +49,7 @@ export default function Members() {
       actionButton: {
         label: 'Ingresar Socio',
         icon: UserPlus,
-        onClick: () => {} // Sin función por ahora
+        onClick: () => openModal('partner')
       }
     })
   };
