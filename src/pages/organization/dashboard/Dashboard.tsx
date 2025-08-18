@@ -73,31 +73,19 @@ export default function Dashboard() {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">No se encontró información de la organización</div>
+          <div className="text-muted-foreground">Organización no encontrada</div>
         </div>
       </Layout>
     );
   }
 
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'Resumen':
-        return <DashboardDashboard organization={organization} />;
-      case 'Datos Básicos':
-        return <DashboardBasicData organization={organization} />;
-      case 'Miembros':
-        return <DashboardMembers organization={organization} />;
-      case 'Actividad':
-        return <DashboardActivity />;
-      default:
-        return <DashboardDashboard organization={organization} />;
-    }
-  };
-
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="p-6">
-        {renderActiveTab()}
+        {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
+        {activeTab === 'Datos Básicos' && <DashboardBasicData organization={organization} />}
+        {activeTab === 'Miembros' && <DashboardMembers organization={organization} />}
+        {activeTab === 'Actividad' && <DashboardActivity />}
       </div>
     </Layout>
   );

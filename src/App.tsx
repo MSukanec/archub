@@ -51,7 +51,7 @@ import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
 
-import Organization from "@/pages/organization/Organization";
+import Dashboard from "@/pages/organization/dashboard/Dashboard";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -97,7 +97,7 @@ function Router() {
         {/* Main Dashboard - redirects to Organization */}
         <Route path="/dashboard">
           <ProtectedRoute>
-            <Organization />
+            <Dashboard />
           </ProtectedRoute>
         </Route>
 
@@ -110,7 +110,7 @@ function Router() {
         
         <Route path="/organization">
           <ProtectedRoute>
-            <Organization />
+            <Dashboard />
           </ProtectedRoute>
         </Route>
 
@@ -131,7 +131,7 @@ function Router() {
 
         <Route path="/organization/:organizationId">
           <ProtectedRoute>
-            <Organization />
+            <Dashboard />
           </ProtectedRoute>
         </Route>
 

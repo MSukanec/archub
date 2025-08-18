@@ -44,6 +44,7 @@ Preferred communication style: Simple, everyday language.
 - **Navigation Restructure**: Moved project management from organization to profile section - "Gestión de Proyectos" now located in profile sidebar above "Gestión de Organizaciones" (August 2025).
 - **Resources Reorganization**: Replaced unified Library page with separate pages for Documentation, Gallery, and Contacts in Resources section. Eliminated tabs in favor of dedicated pages accessible through sub-sidebar navigation (August 2025).
 - **Profile Organizations Refactor**: Split ProfileOrganizations.tsx into Organizations.tsx with tab-based interface containing OrganizationList.tsx and OrganizationBasicData.tsx components (August 2025).
+- **Organization Dashboard Restructure**: Completely restructured organization management from tabs to dashboard architecture. Renamed src/pages/organization/tabs to /dashboard, moved Organization.tsx to dashboard/Dashboard.tsx, and renamed all components from "Organization*" prefix to "Dashboard*" prefix. Updated routing in App.tsx to use new Dashboard component. This provides cleaner separation of concerns and improved maintainability (August 2025).
 
 ## External Dependencies
 
