@@ -446,6 +446,22 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
+  // Generate template preview phrase
+  const generateTemplatePreview = () => {
+    if (currentTemplateParams.length === 0) {
+      return 'Sin parámetros configurados'
+    }
+
+    const sortedParams = currentTemplateParams
+      .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+    
+    // Generate a simple preview showing parameter placeholders
+    const parts = sortedParams.map(tp => `{{${tp.parameter?.slug || 'parámetro'}}}`)
+    
+    // Join with spaces to create a basic template preview
+    return parts.join(' ')
+  }
+
   // Handle drag end for parameter reordering
   const handleDragEnd = async (event: any) => {
     const { active, over } = event
@@ -607,6 +623,16 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Preview phrase */}
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
+                    Frase del template:
+                  </p>
+                  <p className="text-base font-medium text-foreground italic">
+                    {generateTemplatePreview()}
+                  </p>
+                </div>
+                
                 <div className="border-b pb-2 mb-4">
                   <h3 className="font-medium text-sm">
                     {template?.name || form.getValues('name') || 'Nueva Plantilla'}
