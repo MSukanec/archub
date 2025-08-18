@@ -180,7 +180,6 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             name="category_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Categoría *</FormLabel>
                 <Select 
                   value={selectedCategoryId} 
                   onValueChange={(value) => {
@@ -216,7 +215,6 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             name="subcategory_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subcategoría</FormLabel>
                 <Select 
                   value={selectedSubcategoryId} 
                   onValueChange={(value) => {
