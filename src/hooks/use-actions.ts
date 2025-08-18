@@ -2,26 +2,29 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
-export interface Action {
+export interface TaskKind {
   id: string;
+  code: string;
   name: string;
+  description: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export function useActions() {
+export function useTaskKinds() {
   return useQuery({
-    queryKey: ['actions'],
-    queryFn: async (): Promise<Action[]> => {
+    queryKey: ['task-kinds'],
+    queryFn: async (): Promise<TaskKind[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('actions')
+        .from('task_kind')
         .select('*')
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching actions:', error);
+        console.error('Error fetching task kinds:', error);
         throw error;
       }
 
@@ -30,7 +33,7 @@ export function useActions() {
   });
 }
 
-export function useDeleteAction() {
+export function useDeleteTaskKind() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -38,21 +41,21 @@ export function useDeleteAction() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { error } = await supabase
-        .from('actions')
+        .from('task_kind')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['actions'] });
+      queryClient.invalidateQueries({ queryKey: ['task-kinds'] });
       toast({
         title: "Acción eliminada",
         description: "La acción ha sido eliminada correctamente.",
       });
     },
     onError: (error) => {
-      console.error('Error deleting action:', error);
+      console.error('Error deleting task kind:', error);
       toast({
         title: "Error",
         description: "No se pudo eliminar la acción.",
