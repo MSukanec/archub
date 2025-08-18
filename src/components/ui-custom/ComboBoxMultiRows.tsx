@@ -65,19 +65,23 @@ export function ComboBoxMultiRows({
     return `${value.length} opciones seleccionadas`
   }
 
+  const isPlaceholder = value.length === 0
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
           role="combobox"
           aria-expanded={open}
-          className={cn("justify-between", className)}
+          className={cn(
+            "flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
           disabled={disabled}
         >
-          <span className="truncate">{getDisplayText()}</span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <span className={cn("truncate text-left", isPlaceholder && "text-muted-foreground")}>{getDisplayText()}</span>
+          <ChevronsUpDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
