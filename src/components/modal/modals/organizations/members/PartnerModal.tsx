@@ -45,11 +45,15 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
       
       const { data, error } = await supabase
         .from('contacts')
-        .select('id, name, email, phone')
+        .select('id, first_name, last_name, email, phone, company_name')
         .eq('organization_id', organizationId)
-        .order('name');
+        .order('first_name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching contacts:', error);
+        throw error;
+      }
+      console.log('Contacts fetched:', data);
       return data || [];
     },
     enabled: !!organizationId,
@@ -148,7 +152,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
     onClose();
   };
 
-  const onSubmit = async (data: PartnerFormData) => {
+  const handleSubmit = async (data: PartnerFormData) => {
     setIsLoading(true);
     try {
       if (editingPartner) {
@@ -166,49 +170,47 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
   // Convert contacts to ComboBox options
   const contactOptions = contacts.map(contact => ({
     value: contact.id,
-    label: `${contact.name} - ${contact.email}`,
+    label: `${contact.first_name} ${contact.last_name || ''} - ${contact.email || contact.company_name || ''}`.trim(),
   }));
-
-  const viewPanel = (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-muted-foreground">Contacto</label>
-        <p className="text-sm">
-          {contacts.find(c => c.id === form.getValues('contactId'))?.name || 'No seleccionado'}
-        </p>
-      </div>
-    </div>
-  );
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormModalBody>
-          <FormField
-            control={form.control}
-            name="contactId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Contacto</FormLabel>
-                <FormControl>
-                  <ComboBox
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={contactOptions}
-                    placeholder="Seleccionar contacto..."
-                    searchPlaceholder="Buscar contacto..."
-                    emptyMessage="No se encontraron contactos."
-                    className="w-full"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </FormModalBody>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="contactId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contacto</FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={contactOptions}
+                  placeholder="Seleccionar contacto..."
+                  searchPlaceholder="Buscar contacto..."
+                  emptyMessage="No se encontraron contactos."
+                  className="w-full"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
   );
+
+  const viewPanel = editingPartner ? (
+    <div className="space-y-4">
+      <div>
+        <h4 className="font-medium">Contacto</h4>
+        <p className="text-muted-foreground mt-1">
+          {contacts.find(c => c.id === editingPartner?.contact_id)?.first_name || 'No seleccionado'} {contacts.find(c => c.id === editingPartner?.contact_id)?.last_name || ''}
+        </p>
+      </div>
+    </div>
+  ) : null;
 
   const headerContent = (
     <FormModalHeader 
@@ -222,8 +224,9 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={editingPartner ? 'Actualizar' : 'Ingresar'}
-      onRightClick={form.handleSubmit(onSubmit)}
-      isLoading={isLoading}
+      onRightClick={form.handleSubmit(handleSubmit)}
+      showLoadingSpinner={isLoading}
+      submitDisabled={isLoading}
     />
   );
 
