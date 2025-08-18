@@ -14,15 +14,13 @@ interface Contact {
 
 export interface ProjectClient {
   id: string
+  organization_id: string
   project_id: string
   client_id: string
-  committed_amount: number
+  client_amount: number
   currency_id: string
-  role: string
   is_active: boolean
-  notes: string
   created_at: string
-  updated_at: string
   contact: Contact
 }
 
@@ -43,21 +41,27 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
       const { data, error } = await supabase
         .from('project_clients')
         .select(`
-          *,
-          contact:contacts!inner(
+          id,
+          organization_id,
+          project_id,
+          client_id,
+          client_amount,
+          currency_id,
+          is_active,
+          created_at,
+          contact:client_id (
             id,
             first_name,
             last_name,
             company_name,
             email,
             phone,
-            full_name,
-            organization_id
+            full_name
           )
         `)
         .eq('project_id', projectId)
-        .eq('is_active', true)
         .eq('organization_id', organizationId)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
 
       console.log('useProjectClients - Query result:', { data, error, count: data?.length || 0 })
@@ -69,12 +73,6 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
       
       return data || []
     },
-    enabled: options?.enabled !== false && !!projectId && !!organizationId && !!supabase,
-    onError: (error) => {
-      console.error('useProjectClients - Hook error:', error)
-    },
-    onSuccess: (data) => {
-      console.log('useProjectClients - Hook success:', data?.length || 0, 'clients loaded')
-    }
+    enabled: options?.enabled !== false && !!projectId && !!organizationId && !!supabase
   })
 }

@@ -390,7 +390,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount,
           project_clients:project_client_id (
             id,
-            contact:contact_id (
+            client_id,
+            contact:client_id (
               first_name,
               last_name,
               company_name,

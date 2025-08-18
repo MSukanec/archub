@@ -19,19 +19,27 @@ export interface ClientsFormHandle {
   setSelectedClients: (clients: ClientItem[]) => void
   getTotalAmount: () => number
   validate: () => boolean
+  confirmClients: () => void
 }
 
 interface ClientsFormProps {
-  organizationId: string
-  projectId: string
+  onClose: () => void
+  onConfirm: (clients: ClientItem[]) => void
   initialClients?: ClientItem[]
 }
 
 export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
-  ({ organizationId, projectId, initialClients = [] }, ref) => {
-    console.log('🏗️ ClientsForm initialized with:', { organizationId, projectId, initialClientsCount: initialClients.length })
-
+  ({ onClose, onConfirm, initialClients = [] }, ref) => {
     const { data: userData } = useCurrentUser()
+    const projectId = userData?.preferences?.last_project_id
+    const organizationId = userData?.organization?.id
+
+    console.log('🏗️ ClientsForm initialized with:', { 
+      organizationId, 
+      projectId, 
+      initialClientsCount: initialClients.length 
+    })
+
     const { data: projectClients = [], isLoading: isLoadingClients } = useProjectClients(
       projectId,
       { enabled: !!projectId && !!organizationId }
@@ -72,6 +80,10 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       setSelectedClients: (clients: ClientItem[]) => {
         console.log('📝 ClientsForm: setSelectedClients called with:', clients.length, 'clients')
         setSelectedClientsState(clients)
+      },
+      confirmClients: () => {
+        console.log('✅ ClientsForm: confirmClients called with:', selectedClients.length, 'clients')
+        onConfirm(selectedClients)
       },
       getTotalAmount: () => {
         const total = selectedClients.reduce((sum, client) => sum + client.amount, 0)
