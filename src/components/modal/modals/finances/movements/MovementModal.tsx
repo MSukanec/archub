@@ -26,6 +26,7 @@ import { TransferFields } from './fields/TransferFields'
 import { CustomButton } from '@/components/ui-custom/CustomButton'
 import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { PersonnelForm } from './forms/PersonnelForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 
@@ -105,6 +106,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   
   // State para detectar tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
+  const [showPersonnelForm, setShowPersonnelForm] = React.useState(false)
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -501,7 +503,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       'd376d404-734a-47a9-b851-d112d64147db': { 
         text: 'Gestionar Mano de Obra', 
         icon: Users,
-        onClick: () => console.log('Gestionar Mano de Obra clicked') 
+        onClick: () => setShowPersonnelForm(true) 
       },
       'a8cab4bd-3d66-4022-a26d-4c208d0baccb': { 
         text: 'Gestionar Materiales', 
@@ -881,16 +883,31 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
 
+  // Panel para PersonnelForm
+  const personnelPanel = (
+    <PersonnelForm onClose={() => setShowPersonnelForm(false)} />
+  )
+
+  // Seleccionar panel a mostrar
+  const currentPanel = showPersonnelForm ? personnelPanel : editPanel
+
   // Header del modal
   const headerContent = (
     <FormModalHeader 
-      title="Nuevo Movimiento"
-      icon={DollarSign}
+      title={showPersonnelForm ? "Gestión de Personal" : "Nuevo Movimiento"}
+      icon={showPersonnelForm ? Users : DollarSign}
     />
   )
 
   // Footer del modal
-  const footerContent = (
+  const footerContent = showPersonnelForm ? (
+    <FormModalFooter
+      leftLabel="Volver"
+      onLeftClick={() => setShowPersonnelForm(false)}
+      rightLabel="Cerrar"
+      onRightClick={onClose}
+    />
+  ) : (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
@@ -911,8 +928,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
+      viewPanel={currentPanel}
+      editPanel={currentPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
