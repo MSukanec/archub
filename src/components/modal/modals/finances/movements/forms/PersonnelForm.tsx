@@ -39,28 +39,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
       label: `${person.contact?.first_name || ''} ${person.contact?.last_name || ''}`.trim() || 'Sin nombre'
     }))
 
-    const handleAddPersonnel = () => {
-      if (!selectedPersonnelId) return
-
-      const selectedPerson = projectPersonnel.find(p => p.id === selectedPersonnelId)
-      if (!selectedPerson) return
-
-      // Check if person is already added
-      if (addedPersonnel.some(p => p.personnel_id === selectedPersonnelId)) {
-        return // Don't add duplicates
-      }
-
-      const contactName = `${selectedPerson.contact?.first_name || ''} ${selectedPerson.contact?.last_name || ''}`.trim() || 'Sin nombre'
-    
-    const newPersonnelItem: PersonnelItem = {
-      personnel_id: selectedPersonnelId,
-      contact_name: contactName,
-      amount: 0 // Start with 0, user will input amount
-    }
-
-    setAddedPersonnel([...addedPersonnel, newPersonnelItem])
-    setSelectedPersonnelId('')
-  }
+    // Remove handleAddPersonnel - functionality moved to onValueChange
 
   const handleAmountChange = (personnelId: string, amount: string) => {
     setAddedPersonnel(addedPersonnel.map(person => 
@@ -91,37 +70,41 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
       {/* Section Header - Personnel Selection */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-muted-foreground" />
+          <UserPlus className="h-5 w-5 text-[var(--accent)]" />
           <div>
             <h3 className="text-sm font-medium text-foreground">Seleccionar Personal</h3>
-            <p className="text-xs text-muted-foreground">Busca y agrega personal del proyecto</p>
+            <p className="text-xs text-muted-foreground">Busca y selecciona personal del proyecto</p>
           </div>
         </div>
       </div>
 
-      {/* Personnel Selection - Inline with Add Button */}
-      <div className="flex gap-2 items-end mb-6">
-        <div className="flex-1">
-          <ComboBox
-            value={selectedPersonnelId}
-            onValueChange={setSelectedPersonnelId}
-            options={personnelOptions}
-            placeholder="Seleccionar personal..."
-            searchPlaceholder="Buscar personal..."
-            emptyMessage={isLoading ? "Cargando..." : "No hay personal disponible"}
-            disabled={isLoading}
-          />
-        </div>
-        <Button 
-          type="button"
-          variant="default" 
-          onClick={handleAddPersonnel}
-          className="flex items-center gap-2 h-10"
-          disabled={!selectedPersonnelId}
-        >
-          <Plus className="h-4 w-4" />
-          Agregar Personal
-        </Button>
+      {/* Personnel Selection - Auto-add on selection */}
+      <div className="mb-6">
+        <ComboBox
+          value={selectedPersonnelId}
+          onValueChange={(value) => {
+            setSelectedPersonnelId(value)
+            if (value) {
+              // Auto-add personnel when selected
+              const selectedPerson = projectPersonnel.find(p => p.id === value)
+              if (selectedPerson && !addedPersonnel.some(p => p.personnel_id === value)) {
+                const contactName = `${selectedPerson.contact?.first_name || ''} ${selectedPerson.contact?.last_name || ''}`.trim() || 'Sin nombre'
+                const newPersonnelItem: PersonnelItem = {
+                  personnel_id: value,
+                  contact_name: contactName,
+                  amount: 0
+                }
+                setAddedPersonnel([...addedPersonnel, newPersonnelItem])
+                setSelectedPersonnelId('')
+              }
+            }
+          }}
+          options={personnelOptions}
+          placeholder="Seleccionar personal..."
+          searchPlaceholder="Buscar personal..."
+          emptyMessage={isLoading ? "Cargando..." : "No hay personal disponible"}
+          disabled={isLoading}
+        />
       </div>
 
       {/* Added Personnel List with editable amounts */}
@@ -130,7 +113,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
           {/* Section Header - Added Personnel */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-muted-foreground" />
+              <Users className="h-5 w-5 text-[var(--accent)]" />
               <div>
                 <h3 className="text-sm font-medium text-foreground">Personal Agregado</h3>
                 <p className="text-xs text-muted-foreground">Asigna los montos correspondientes a cada persona</p>
