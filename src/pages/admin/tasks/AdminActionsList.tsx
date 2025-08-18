@@ -124,7 +124,7 @@ const AdminActionsList = () => {
         data={taskKinds}
         columns={columns}
         isLoading={isLoading}
-        emptyStateProps={{
+        emptyState={{
           title: "No hay acciones registradas",
           description: "Comienza creando tu primera acción para el sistema.",
         }}
