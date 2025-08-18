@@ -490,8 +490,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     createTransferMutation.mutate(values)
   }
 
-  // Función para determinar qué botón mostrar según el type_id
-  const getActionButton = (typeId: string) => {
+  // Función para determinar qué botón mostrar según el subcategory_id
+  const getActionButton = (subcategoryId: string) => {
     const buttonConfig = {
       '7ef27d3f-ef17-49c3-a392-55282b3576ff': { 
         text: 'Gestionar Personal', 
@@ -530,7 +530,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       }
     }
 
-    const config = buttonConfig[typeId as keyof typeof buttonConfig]
+    const config = buttonConfig[subcategoryId as keyof typeof buttonConfig]
     
     if (!config) return null
 
@@ -619,7 +619,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedTypeId)}
+        {getActionButton(selectedSubcategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
@@ -708,7 +708,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedTypeId)}
+        {getActionButton(selectedSubcategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
         <TransferFields
@@ -864,7 +864,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedTypeId)}
+        {getActionButton(selectedSubcategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
