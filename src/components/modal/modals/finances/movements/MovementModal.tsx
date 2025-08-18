@@ -334,6 +334,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           subcontracts:subcontract_id (
             id,
             title,
+            contact_id,
             contact:contact_id (
               first_name,
               last_name,
