@@ -39,7 +39,7 @@ import ConstructionLogs from "@/pages/construction/ConstructionLogs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
-import Analysis from "@/pages/resources/Analysis";
+import Analysis from "@/pages/resources/analysis/Analysis";
 import ConstructionTasks from "@/pages/construction/tasks/Tasks";
 
 

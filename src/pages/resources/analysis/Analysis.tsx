@@ -3,10 +3,10 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { BarChart3, TableIcon, Users, Package, DollarSign, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AnalysisTasks from './analysis/AnalysisTasks'
-import AnalysisLabor from './analysis/AnalysisLabor'
-import AnalysisMaterials from './analysis/AnalysisMaterials'
-import AnalysisOverheads from './analysis/AnalysisOverheads'
+import AnalysisTasks from './AnalysisTasks'
+import AnalysisLabor from './AnalysisLabor'
+import AnalysisMaterials from './AnalysisMaterials'
+import AnalysisOverheads from './AnalysisOverheads'
 
 export default function Analysis() {
   const [activeTab, setActiveTab] = useState("tareas")
@@ -16,7 +16,7 @@ export default function Analysis() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('resources')
+    setSidebarContext('organization')
   }, [setSidebarContext])
 
   // Header tabs configuration

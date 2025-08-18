@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Table } from '@/components/ui-custom/Table'
-import { useMaterials, useDeleteMaterial } from '@/hooks/use-materials'
-import { Package, Edit, Trash2 } from 'lucide-react'
+import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
+import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -9,164 +9,263 @@ import { Selector } from '@/components/ui-custom/Selector'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 
 export default function AnalysisMaterials() {
   const [dataType, setDataType] = useState("todos")
+  const [lightboxImages, setLightboxImages] = useState<string[]>([])
   
-  const { data: materials = [], isLoading: materialsLoading } = useMaterials()
-  const deleteMaterialMutation = useDeleteMaterial()
+  const { data: products = [], isLoading: productsLoading } = useProducts()
+  const deleteProductMutation = useDeleteProduct()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
+  const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
-  // Filter materials by type only (no search filtering)
-  const filteredMaterials = materials.filter((material) => {
-    let matchesType = true
-    if (dataType === "sistema") {
-      matchesType = material.is_system === true
-    } else if (dataType === "organizacion") {
-      matchesType = material.is_system === false && material.organization_id !== null
-    }
-    // "todos" shows all materials regardless of type
-    
-    return matchesType
-  })
+  // Filter products by type (no search filtering since it's analysis view)
+  const filteredProducts = products
 
   // Data type selector options
   const dataTypeOptions = [
-    { value: "todos", label: "Todos" },
-    { value: "sistema", label: "Del Sistema" },
-    { value: "organizacion", label: "De la Organización" }
+    { value: "todos", label: "Todos" }
   ]
 
-  // Materials table columns configuration
-  const materialsColumns = [
+  const handleEdit = (product: Product) => {
+    openModal('product-form', { editingProduct: product })
+  }
+
+  const handleDuplicate = (product: Product) => {
+    // Create a duplicate object with "Copia" added to the name
+    const duplicateProduct = {
+      ...product,
+      id: undefined, // Remove ID so it creates a new product
+      name: `${product.name} - Copia`,
+      created_at: undefined, // Remove created_at
+      updated_at: undefined  // Remove updated_at
+    }
+    openModal('product-form', { editingProduct: duplicateProduct, isDuplicating: true })
+  }
+
+  const handleDelete = (product: Product) => {
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar Producto',
+      description: `¿Estás seguro que deseas eliminar el producto "${product.name}"? Esta acción no se puede deshacer.`,
+      itemName: product.name,
+      destructiveActionText: 'Eliminar Producto',
+      onDelete: () => deleteProductMutation.mutate(product.id),
+      isLoading: deleteProductMutation.isPending
+    })
+  }
+
+  // Products table columns configuration
+  const productsColumns = [
     {
-      key: 'name',
+      key: 'material',
       label: 'Material',
-      render: (material: any) => (
-        <span className="text-sm font-medium">{material.name}</span>
+      width: '18%',
+      render: (product: Product) => (
+        <span className="text-sm font-medium">
+          {product.material?.name || 'Sin material'}
+        </span>
       )
     },
     {
-      key: 'category',
-      label: 'Categoría',
-      width: '20%',
-      render: (material: any) => (
+      key: 'brand',
+      label: 'Marca',
+      width: '15%',
+      render: (product: Product) => (
         <Badge variant="outline" className="text-xs">
-          {material.category?.name || 'Sin categoría'}
+          {product.brand?.name || 'Sin marca'}
         </Badge>
+      )
+    },
+    {
+      key: 'name',
+      label: 'Modelo',
+      width: '20%',
+      render: (product: Product) => (
+        <span className="text-sm font-medium">{product.name}</span>
       )
     },
     {
       key: 'unit',
       label: 'Unidad',
       width: '12%',
-      render: (material: any) => (
+      render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
-          {material.unit?.name || 'N/A'}
+          {product.unit_presentation?.unit?.name || 'N/A'}
         </Badge>
       )
     },
     {
-      key: 'archub_average_cost',
-      label: 'Costo Promedio de Archub',
-      width: '18%',
-      render: (material: any) => (
-        <div className="text-xs text-muted-foreground italic">
-          Próximamente
+      key: 'url',
+      label: 'Link',
+      width: '8%',
+      render: (product: Product) => (
+        <div className="flex items-center">
+          {product.url ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open(product.url, '_blank')}
+              className="h-7 px-2 text-blue-600 hover:text-blue-700"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Link
+            </Button>
+          ) : (
+            <span className="text-xs text-muted-foreground">-</span>
+          )}
         </div>
       )
     },
     {
-      key: 'own_cost',
-      label: 'Costo Propio',
-      width: '15%',
-      render: (material: any) => {
-        // Buscar el precio del material en organization_material_prices
-        const materialPrice = material.organization_material_prices?.[0]
-        if (materialPrice?.unit_price && materialPrice?.currency) {
-          const formattedPrice = Number(materialPrice.unit_price).toFixed(2)
-          return (
-            <div className="text-sm font-medium">
-              {materialPrice.currency.symbol} {formattedPrice}
+      key: 'image',
+      label: 'Imagen',
+      width: '8%',
+      render: (product: Product) => (
+        <div className="flex items-center">
+          {product.image_url ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setLightboxImages([product.image_url!])
+                openLightbox(0)
+              }}
+              className="h-7 w-7 p-0"
+            >
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="h-6 w-6 object-cover rounded"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = '<Image className="h-3 w-3 text-muted-foreground" />';
+                  }
+                }}
+              />
+            </Button>
+          ) : (
+            <div className="flex items-center justify-center h-7 w-7">
+              <Image className="h-3 w-3 text-muted-foreground" />
             </div>
-          )
-        }
-        return (
-          <div className="text-xs text-muted-foreground">
-            Sin precio
-          </div>
-        )
-      }
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'default_price',
+      label: 'Precio',
+      width: '12%',
+      render: (product: Product) => (
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-mono">
+            {product.default_price !== null && product.default_price !== undefined ? 
+              `S/. ${product.default_price.toFixed(2)}` : 
+              '-'
+            }
+          </span>
+        </div>
+      )
     },
     {
       key: 'actions',
       label: 'Acciones',
       width: '10%',
-      render: (material: any) => (
-        <div className="flex items-center gap-2">
+      render: (product: Product) => (
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => openModal('material-form', { editingMaterial: material })}
-            className="h-8 w-8 p-0"
+            onClick={() => handleEdit(product)}
+            className="h-7 w-7 p-0"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3 w-3" />
           </Button>
-          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
-          {!material.is_system && material.organization_id === userData?.organization?.id && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                showDeleteConfirmation({
-                  title: "Eliminar material",
-                  description: `¿Estás seguro de que quieres eliminar "${material.name || 'este material'}"?`,
-                  itemName: material.name || 'este material',
-                  onConfirm: () => {
-                    deleteMaterialMutation.mutate(material.id)
-                  }
-                })
-              }}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDuplicate(product)}
+            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+          >
+            <Copy className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(product)}
+            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </div>
       )
     }
   ]
 
   return (
-    <div>
-      {/* Data type selector for materials tab */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-medium">Tipo de material:</span>
-        <Selector
-          options={dataTypeOptions}
-          value={dataType}
-          onValueChange={setDataType}
-          className="h-8"
-        />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h2 className="text-sm font-medium text-[var(--card-fg)]">
+            Catálogo de Productos
+          </h2>
+          <p className="text-xs text-[var(--text-muted)]">
+            Gestiona el catálogo completo de productos disponibles para tus proyectos
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-4 w-4 text-[var(--accent)]" />
+            <span className="text-xs text-[var(--text-muted)]">
+              {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {filteredMaterials.length === 0 ? (
+      {/* Products Table */}
+      <div className="w-full">
+        {productsLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)]" />
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <EmptyState
-            icon={<Package className="h-16 w-16" />}
-            title="No hay materiales que coincidan"
-            description="No se encontraron materiales que coincidan con los filtros seleccionados."
+            icon={<Package />}
+            title="No hay productos registrados"
+            description="Comienza agregando productos al catálogo desde el panel de administración."
           />
         ) : (
           <Table
-            data={filteredMaterials}
-            columns={materialsColumns}
-            isLoading={materialsLoading}
+            data={filteredProducts}
+            columns={productsColumns}
+            emptyState={
+              <EmptyState
+                icon={<Package />}
+                title="No se encontraron productos"
+                description="Intenta ajustar los filtros de búsqueda."
+              />
+            }
+            className="bg-[var(--card-bg)] border-[var(--card-border)]"
           />
         )}
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        isOpen={isOpen}
+        images={lightboxImages}
+        currentIndex={currentIndex}
+        onClose={closeLightbox}
+      />
     </div>
   )
 }
