@@ -170,7 +170,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
               {partners.map((partner) => {
                 const contact = partner.contacts;
                 const fullName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-                const displayName = fullName || contact?.company_name || 'Sin nombre';
+                const displayName = fullName || contact?.company_name || contact?.email || 'Sin nombre';
                 
                 return (
                   <Card key={partner.id} className="p-4">
@@ -190,7 +190,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
                               </h4>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {contact?.email || 'Sin email'}
+                              {fullName ? (contact?.email || 'Sin email') : 'Clic para editar nombre'}
                             </p>
                           </div>
                         </div>
