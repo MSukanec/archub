@@ -87,9 +87,22 @@ type TransferForm = z.infer<typeof transferSchema>
 interface MovementModalProps {
   modalData?: any
   onClose: () => void
+  editingMovement?: any // Movement data when editing
+  isEditing?: boolean
 }
 
-export function MovementModal({ modalData, onClose }: MovementModalProps) {
+export function MovementModal({ modalData, onClose, editingMovement: propEditingMovement, isEditing: propIsEditing }: MovementModalProps) {
+  // Extract editing data from modalData or props
+  const editingMovement = propEditingMovement || modalData?.editingMovement
+  const isEditing = propIsEditing || !!editingMovement
+
+  // Debug logs
+  React.useEffect(() => {
+    if (editingMovement) {
+      console.log('📝 MovementModal: Editing movement data:', editingMovement)
+      console.log('📝 MovementModal: isEditing:', isEditing)
+    }
+  }, [editingMovement, isEditing])
   // Hooks
   const { data: userData } = useCurrentUser()
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
@@ -150,15 +163,16 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
-      movement_date: new Date(), // HOY por defecto
-      created_by: currentMember?.id || '',
-      type_id: '',
-      category_id: '',
-      subcategory_id: '',
-      description: '',
-      currency_id: defaultCurrency || '',
-      wallet_id: defaultWallet || '',
-      amount: 0
+      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      created_by: editingMovement?.created_by || currentMember?.id || '',
+      type_id: editingMovement?.type_id || '',
+      category_id: editingMovement?.category_id || '',
+      subcategory_id: editingMovement?.subcategory_id || '',
+      description: editingMovement?.description || '',
+      currency_id: editingMovement?.currency_id || defaultCurrency || '',
+      wallet_id: editingMovement?.wallet_id || defaultWallet || '',
+      amount: editingMovement?.amount || 0,
+      exchange_rate: editingMovement?.exchange_rate || undefined
     }
   })
 
@@ -166,17 +180,17 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
-      movement_date: new Date(),
-      created_by: currentMember?.id || '',
-      description: '',
-      type_id: '',
-      currency_id_from: defaultCurrency || '',
-      wallet_id_from: defaultWallet || '',
-      amount_from: 0,
-      currency_id_to: '',
-      wallet_id_to: '',
-      amount_to: 0,
-      exchange_rate: undefined
+      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      created_by: editingMovement?.created_by || currentMember?.id || '',
+      description: editingMovement?.description || '',
+      type_id: editingMovement?.type_id || '',
+      currency_id_from: editingMovement?.currency_id_from || defaultCurrency || '',
+      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet || '',
+      amount_from: editingMovement?.amount_from || 0,
+      currency_id_to: editingMovement?.currency_id_to || '',
+      wallet_id_to: editingMovement?.wallet_id_to || '',
+      amount_to: editingMovement?.amount_to || 0,
+      exchange_rate: editingMovement?.exchange_rate || undefined
     }
   })
 
@@ -184,14 +198,14 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
-      movement_date: new Date(),
-      created_by: currentMember?.id || '',
-      description: '',
-      type_id: '',
-      currency_id: defaultCurrency || '',
-      wallet_id_from: defaultWallet || '',
-      wallet_id_to: '',
-      amount: 0
+      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      created_by: editingMovement?.created_by || currentMember?.id || '',
+      description: editingMovement?.description || '',
+      type_id: editingMovement?.type_id || '',
+      currency_id: editingMovement?.currency_id || defaultCurrency || '',
+      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet || '',
+      wallet_id_to: editingMovement?.wallet_id_to || '',
+      amount: editingMovement?.amount || 0
     }
   })
 
@@ -230,6 +244,71 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     }
   }, [defaultCurrency, defaultWallet, currentMember, form, conversionForm, transferForm])
 
+  // Effect para cargar datos existentes cuando se está editando
+  React.useEffect(() => {
+    if (isEditing && editingMovement) {
+      // Cargar selecciones jerárquicas
+      setSelectedTypeId(editingMovement.type_id || '')
+      setSelectedCategoryId(editingMovement.category_id || '')
+      setSelectedSubcategoryId(editingMovement.subcategory_id || '')
+
+      // Determinar tipo de movimiento
+      if (editingMovement.is_conversion || editingMovement.conversion_group_id) {
+        setMovementType('conversion')
+      } else if (editingMovement.transfer_group_id) {
+        setMovementType('transfer')
+      } else {
+        setMovementType('normal')
+      }
+
+      // Cargar personal asignado si existe
+      if (editingMovement.id) {
+        loadMovementPersonnel(editingMovement.id)
+      }
+    }
+  }, [isEditing, editingMovement])
+
+  // Función para cargar personal asignado del movimiento
+  const loadMovementPersonnel = async (movementId: string) => {
+    try {
+      const { data: personnelAssignments, error } = await supabase
+        .from('movement_personnel')
+        .select(`
+          personnel_id,
+          amount,
+          personnel:personnel_id (
+            id,
+            contact:contact_id (
+              first_name,
+              last_name
+            )
+          )
+        `)
+        .eq('movement_id', movementId)
+
+      if (error) throw error
+
+      if (personnelAssignments && personnelAssignments.length > 0) {
+        const formattedPersonnel = personnelAssignments.map((assignment: any) => {
+          const contact = assignment.personnel?.contact
+          const contactName = contact 
+            ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
+            : 'Sin nombre'
+
+          return {
+            personnel_id: assignment.personnel_id,
+            contact_name: contactName,
+            amount: assignment.amount
+          }
+        })
+
+        setSelectedPersonnel(formattedPersonnel)
+      }
+    } catch (error) {
+      console.error('Error loading movement personnel:', error)
+    }
+  }
+
   // Handle type change para detectar conversión (como en el modal original)
   const handleTypeChange = React.useCallback((newTypeId: string) => {
     if (!newTypeId || !movementConcepts) return
@@ -260,7 +339,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     form.setValue('subcategory_id', '')
   }, [movementConcepts, form, conversionForm, transferForm])
 
-  // Mutation para crear el movimiento normal
+  // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
     mutationFn: async (data: BasicMovementForm) => {
       if (!userData?.organization?.id) {
@@ -285,13 +364,38 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         is_favorite: false
       }
 
-      const { data: result, error } = await supabase
-        .from('movements')
-        .insert(movementData)
-        .select()
-        .single()
+      let result;
 
-      if (error) throw error
+      if (isEditing && editingMovement?.id) {
+        // Actualizar movimiento existente
+        const { data: updateResult, error } = await supabase
+          .from('movements')
+          .update(movementData)
+          .eq('id', editingMovement.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        result = updateResult
+
+        // Actualizar personal asignado - eliminar existente y crear nuevo
+        const { error: deleteError } = await supabase
+          .from('movement_personnel')
+          .delete()
+          .eq('movement_id', editingMovement.id)
+
+        if (deleteError) throw deleteError
+      } else {
+        // Crear nuevo movimiento
+        const { data: insertResult, error } = await supabase
+          .from('movements')
+          .insert(movementData)
+          .select()
+          .single()
+
+        if (error) throw error
+        result = insertResult
+      }
 
       // Si hay personal seleccionado, guardar las asignaciones en movement_personnel
       if (selectedPersonnel && selectedPersonnel.length > 0) {
@@ -318,8 +422,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
-        title: 'Movimiento creado',
-        description: 'El movimiento ha sido creado correctamente',
+        title: isEditing ? 'Movimiento actualizado' : 'Movimiento creado',
+        description: isEditing ? 'El movimiento ha sido actualizado correctamente' : 'El movimiento ha sido creado correctamente',
       })
       onClose()
     },
@@ -327,7 +431,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al crear el movimiento: ${error.message}`,
+        description: `Error al ${isEditing ? 'actualizar' : 'crear'} el movimiento: ${error.message}`,
       })
     }
   })
@@ -950,8 +1054,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   // Header del modal
   const headerContent = (
     <FormModalHeader 
-      title={showPersonnelForm ? "Gestión de Personal" : "Nuevo Movimiento"}
-      description={showPersonnelForm ? "Asigna personal y montos para este movimiento financiero" : "Registra un nuevo movimiento financiero en el sistema"}
+      title={showPersonnelForm ? "Gestión de Personal" : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
+      description={showPersonnelForm ? "Asigna personal y montos para este movimiento financiero" : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
       icon={showPersonnelForm ? Users : DollarSign}
     />
   )
@@ -970,7 +1074,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Guardar"
+      rightLabel={isEditing ? "Actualizar" : "Guardar"}
       onRightClick={movementType === 'conversion' 
         ? conversionForm.handleSubmit(onSubmitConversion)
         : movementType === 'transfer'
