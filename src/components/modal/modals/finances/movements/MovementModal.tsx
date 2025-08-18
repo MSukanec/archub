@@ -107,6 +107,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   // State para detectar tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
   const [showPersonnelForm, setShowPersonnelForm] = React.useState(false)
+  const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -841,6 +842,25 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
         {getActionButton(selectedSubcategoryId)}
 
+        {/* PERSONAL SELECCIONADO (si hay) */}
+        {selectedPersonnel.length > 0 && (
+          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
+            <h4 className="text-sm font-medium text-foreground">Personal Seleccionado:</h4>
+            {selectedPersonnel.map((person, index) => (
+              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                <div className="truncate">{person.contact_name}</div>
+                <div className="text-right font-medium">${person.amount.toFixed(2)}</div>
+              </div>
+            ))}
+            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+              <div className="font-medium">Total:</div>
+              <div className="text-right font-bold">
+                ${selectedPersonnel.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
           form={form}
@@ -863,7 +883,13 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
 
   // Panel para PersonnelForm
   const personnelPanel = (
-    <PersonnelForm onClose={() => setShowPersonnelForm(false)} />
+    <PersonnelForm 
+      onClose={() => setShowPersonnelForm(false)} 
+      onConfirm={(personnelList) => {
+        setSelectedPersonnel(personnelList)
+        setShowPersonnelForm(false)
+      }}
+    />
   )
 
   // Seleccionar panel a mostrar
@@ -882,8 +908,9 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     <FormModalFooter
       leftLabel="Volver"
       onLeftClick={() => setShowPersonnelForm(false)}
-      rightLabel="Cerrar"
-      onRightClick={onClose}
+      rightLabel=""
+      onRightClick={() => {}}
+      rightDisabled={true}
     />
   ) : (
     <FormModalFooter
