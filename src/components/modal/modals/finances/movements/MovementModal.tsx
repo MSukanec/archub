@@ -490,28 +490,23 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     createTransferMutation.mutate(values)
   }
 
-  // Función para determinar qué botón mostrar según el subcategory_id
-  const getActionButton = (subcategoryId: string) => {
+  // Función para determinar qué botón mostrar según el category_id
+  const getActionButton = (categoryId: string) => {
     const buttonConfig = {
-      '7ef27d3f-ef17-49c3-a392-55282b3576ff': { 
-        text: 'Gestionar Personal', 
-        icon: Users,
-        onClick: () => console.log('Gestionar Personal clicked') 
-      },
-      'f40a8fda-69e6-4e81-bc8a-464359cd8498': { 
-        text: 'Gestionar Subcontrato', 
+      'e854de08-da8f-4769-a2c5-b24b622f20b0': { 
+        text: 'Gestionar Indirectos', 
         icon: FileText,
-        onClick: () => console.log('Gestionar Subcontrato clicked') 
+        onClick: () => console.log('Gestionar Indirectos clicked') 
       },
-      '5a9b80fd-c244-498a-9b44-15d9fa179d37': { 
-        text: 'Gestionar Compra', 
-        icon: ShoppingCart,
-        onClick: () => console.log('Gestionar Compra clicked') 
+      'd376d404-734a-47a9-b851-d112d64147db': { 
+        text: 'Gestionar Mano de Obra', 
+        icon: Users,
+        onClick: () => console.log('Gestionar Mano de Obra clicked') 
       },
-      'f7de2861-6520-4d97-b26c-784b461a6c37': { 
-        text: 'Gestionar Acopio', 
+      'a8cab4bd-3d66-4022-a26d-4c208d0baccb': { 
+        text: 'Gestionar Materiales', 
         icon: Package,
-        onClick: () => console.log('Gestionar Acopio clicked') 
+        onClick: () => console.log('Gestionar Materiales clicked') 
       },
       'c04a82f8-6fd8-439d-81f7-325c63905a1b': { 
         text: 'Gestionar Retiros Propios', 
@@ -530,7 +525,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       }
     }
 
-    const config = buttonConfig[subcategoryId as keyof typeof buttonConfig]
+    const config = buttonConfig[categoryId as keyof typeof buttonConfig]
     
     if (!config) return null
 
@@ -619,7 +614,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedSubcategoryId)}
+        {getActionButton(selectedCategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
@@ -708,7 +703,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedSubcategoryId)}
+        {getActionButton(selectedCategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
         <TransferFields
@@ -864,7 +859,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         />
 
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedSubcategoryId)}
+        {getActionButton(selectedCategoryId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
