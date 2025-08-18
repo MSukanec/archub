@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { TableIcon, Edit, Trash2 } from 'lucide-react'
@@ -13,41 +14,54 @@ export default function AnalysisTasks() {
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
+  
+  // Estado para agrupación - por defecto "Por Rubros"
+  const [groupingType, setGroupingType] = useState('rubros')
 
-  // Filter tasks (no search filtering since search is removed)
-  const filteredTasks = tasks
+  // Filtrar tareas y agregar groupKey
+  const filteredTasks = useMemo(() => {
+    return tasks.map(task => {
+      let groupKey = '';
+      
+      switch (groupingType) {
+        case 'rubros':
+          groupKey = task.category_name || 'Sin rubro';
+          break;
+        default:
+          groupKey = '';
+      }
+      
+      return {
+        ...task,
+        groupKey
+      };
+    });
+  }, [tasks, groupingType]);
 
-  // Table columns configuration - similar to AdminGeneratedTasks
-  const columns = [
-    {
-      key: 'code',
-      label: 'Código',
-      width: '5%',
-      render: (task: any) => (
-        <span className="text-xs font-mono text-muted-foreground">{task.code}</span>
-      )
-    },
+  // Columnas base para la tabla
+  const baseColumns = [
     {
       key: 'category_name',
       label: 'Rubro',
-      width: '10%',
+      width: '20%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
-          {task.category_name || 'Sin categoría'}
+          {task.category_name || 'Sin rubro'}
         </Badge>
       )
     },
     {
       key: 'name_rendered',
       label: 'Tarea',
+      width: '60%',
       render: (task: any) => (
-        <span className="text-sm">{task.name_rendered}</span>
+        <span className="text-sm font-medium">{task.name_rendered}</span>
       )
     },
     {
       key: 'unit_name',
       label: 'Unidad',
-      width: '5%',
+      width: '10%',
       render: (task: any) => (
         <Badge variant="secondary" className="text-xs">
           {task.unit_name || 'N/A'}
@@ -59,14 +73,14 @@ export default function AnalysisTasks() {
       label: 'Acciones',
       width: '10%',
       render: (task: any) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => openModal('parametric-task', { taskId: task.id })}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3 w-3" />
           </Button>
           {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
           {!task.is_system && task.organization_id === userData?.organization?.id && (
@@ -84,9 +98,9 @@ export default function AnalysisTasks() {
                   }
                 })
               }}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           )}
         </div>
@@ -94,21 +108,58 @@ export default function AnalysisTasks() {
     }
   ]
 
+  // Seleccionar columnas según el tipo de agrupación
+  const columns = useMemo(() => {
+    // Para sin agrupar, usar todas las columnas base
+    if (groupingType === 'none') {
+      return baseColumns;
+    }
+    
+    // Para agrupación por rubros, filtrar la columna de rubro
+    return baseColumns.filter(column => {
+      if (groupingType === 'rubros' && column.key === 'category_name') return false;
+      return true;
+    });
+  }, [groupingType]);
+
+  if (tasks.length === 0) {
+    return (
+      <EmptyState
+        icon={<TableIcon className="h-16 w-16" />}
+        title="No hay tareas para analizar"
+        description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
+      />
+    )
+  }
+
   return (
-    <div className="space-y-6">
-      {filteredTasks.length === 0 ? (
+    <Table
+      columns={columns}
+      data={filteredTasks}
+      isLoading={tasksLoading}
+      groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+      topBar={{
+        tabs: ['Sin Agrupar', 'Por Rubros'],
+        activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',
+        onTabChange: (tab: string) => {
+          if (tab === 'Sin Agrupar') setGroupingType('none')
+          else if (tab === 'Por Rubros') setGroupingType('rubros')
+        }
+      }}
+      renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+        <>
+          <div className="col-span-full text-sm font-medium">
+            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+          </div>
+        </>
+      )}
+      emptyState={
         <EmptyState
           icon={<TableIcon className="h-16 w-16" />}
-          title="No hay tareas para analizar"
-          description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
+          title="No hay tareas que coincidan"
+          description="Intenta cambiar los filtros de agrupación para encontrar las tareas que buscas."
         />
-      ) : (
-        <Table
-          data={filteredTasks}
-          columns={columns}
-          isLoading={tasksLoading}
-        />
-      )}
-    </div>
+      }
+    />
   )
 }
