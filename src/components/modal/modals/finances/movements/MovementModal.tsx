@@ -23,6 +23,8 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { ConversionFields } from './fields/ConversionFields'
 import { TransferFields } from './fields/TransferFields'
+import { CustomButton } from '@/components/ui-custom/CustomButton'
+import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -488,6 +490,61 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     createTransferMutation.mutate(values)
   }
 
+  // Función para determinar qué botón mostrar según el type_id
+  const getActionButton = (typeId: string) => {
+    const buttonConfig = {
+      '7ef27d3f-ef17-49c3-a392-55282b3576ff': { 
+        text: 'Gestionar Personal', 
+        icon: Users,
+        onClick: () => console.log('Gestionar Personal clicked') 
+      },
+      'f40a8fda-69e6-4e81-bc8a-464359cd8498': { 
+        text: 'Gestionar Subcontrato', 
+        icon: FileText,
+        onClick: () => console.log('Gestionar Subcontrato clicked') 
+      },
+      '5a9b80fd-c244-498a-9b44-15d9fa179d37': { 
+        text: 'Gestionar Compra', 
+        icon: ShoppingCart,
+        onClick: () => console.log('Gestionar Compra clicked') 
+      },
+      'f7de2861-6520-4d97-b26c-784b461a6c37': { 
+        text: 'Gestionar Acopio', 
+        icon: Package,
+        onClick: () => console.log('Gestionar Acopio clicked') 
+      },
+      'c04a82f8-6fd8-439d-81f7-325c63905a1b': { 
+        text: 'Gestionar Retiros Propios', 
+        icon: ArrowUpRight,
+        onClick: () => console.log('Gestionar Retiros Propios clicked') 
+      },
+      'f3b96eda-15d5-4c96-ade7-6f53685115d3': { 
+        text: 'Gestionar Aportes de Terceros', 
+        icon: ArrowDownLeft,
+        onClick: () => console.log('Gestionar Aportes de Terceros clicked') 
+      },
+      'a0429ca8-f4b9-4b91-84a2-b6603452f7fb': { 
+        text: 'Gestionar Aportes Propios', 
+        icon: ArrowDownLeft,
+        onClick: () => console.log('Gestionar Aportes Propios clicked') 
+      }
+    }
+
+    const config = buttonConfig[typeId as keyof typeof buttonConfig]
+    
+    if (!config) return null
+
+    return (
+      <div className="mt-4">
+        <CustomButton
+          icon={config.icon}
+          title={config.text}
+          onClick={config.onClick}
+        />
+      </div>
+    )
+  }
+
   // Renderizar panel para conversiones
   const conversionPanel = (
     <Form {...conversionForm}>
@@ -560,6 +617,9 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             </FormItem>
           )}
         />
+
+        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
+        {getActionButton(selectedTypeId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
@@ -646,6 +706,9 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             </FormItem>
           )}
         />
+
+        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
+        {getActionButton(selectedTypeId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
         <TransferFields
@@ -799,6 +862,9 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
             </FormItem>
           )}
         />
+
+        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
+        {getActionButton(selectedTypeId)}
 
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
