@@ -622,52 +622,13 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                 <p className="text-xs">La vista previa aparecerá cuando agregues parámetros</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {/* Preview phrase */}
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    Frase del template:
-                  </p>
-                  <p className="text-base font-medium text-foreground italic">
-                    {generateTemplatePreview()}
-                  </p>
-                </div>
-                
-                <div className="border-b pb-2 mb-4">
-                  <h3 className="font-medium text-sm">
-                    {template?.name || form.getValues('name') || 'Nueva Plantilla'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Código: {template?.code || form.getValues('code') || 'N/A'}
-                  </p>
-                </div>
-                
-                <div className="space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    Parámetros ({currentTemplateParams.length})
-                  </p>
-                  
-                  {currentTemplateParams
-                    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
-                    .map((tp, index) => (
-                      <div key={tp.id} className="border rounded p-3 bg-background">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">
-                            {index + 1}
-                          </span>
-                          <span className="text-sm font-medium">
-                            {tp.parameter?.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Tipo: {tp.parameter?.type}</span>
-                          <code className="bg-muted px-1 rounded">
-                            {tp.parameter?.slug}
-                          </code>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+              <div className="bg-muted/50 rounded-lg p-3">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Frase del template:
+                </p>
+                <p className="text-base font-medium text-foreground italic">
+                  {generateTemplatePreview()}
+                </p>
               </div>
             )}
           </div>
