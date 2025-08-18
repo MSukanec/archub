@@ -181,58 +181,31 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           />
         </div>
 
-        {/* Grid de 2 columnas para categoría y unidad */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="task_category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoría</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar categoría" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {taskCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="unit_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad de Medida</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar unidad" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {unit.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* Categoría */}
+        <FormField
+          control={form.control}
+          name="task_category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoría</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar categoría" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {taskCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Tipo de Acción */}
         <FormField
@@ -251,6 +224,32 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                   {taskKinds.map((kind) => (
                     <SelectItem key={kind.id} value={kind.id}>
                       {kind.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Unidad de Medida */}
+        <FormField
+          control={form.control}
+          name="unit_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad de Medida</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar unidad" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -348,6 +347,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       footerContent={footerContent}
       stepContent={getCurrentStepContent()}
       onClose={onClose}
+      columns={1}
     />
   )
 }
