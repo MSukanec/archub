@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { Plus, FileText, GripVertical, Settings, Eye } from 'lucide-react'
+import { Plus, FileText, GripVertical, Settings, Eye, Trash2 } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -45,12 +45,14 @@ function SortableParameterItem({
   id, 
   parameter, 
   templateParam, 
-  onRequiredChange 
+  onRequiredChange,
+  onDelete
 }: { 
   id: string; 
   parameter: any; 
   templateParam: any;
   onRequiredChange: (templateParamId: string, isRequired: boolean) => void;
+  onDelete: (templateParamId: string) => void;
 }) {
   const {
     attributes,
@@ -100,6 +102,14 @@ function SortableParameterItem({
               <SelectItem value="true">Requerido</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(templateParam.id)}
+            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </div>
       </div>
     </div>
@@ -154,6 +164,33 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado requerido",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Handle parameter deletion
+  const handleDeleteParameter = async (templateParamId: string) => {
+    try {
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .delete()
+        .eq('id', templateParamId)
+
+      if (error) throw error
+
+      toast({
+        title: "Parámetro eliminado",
+        description: "El parámetro se ha eliminado del template correctamente.",
+      })
+
+      // Invalidate cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+    } catch (error) {
+      console.error('Error deleting parameter:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el parámetro del template",
         variant: "destructive",
       })
     }
@@ -649,6 +686,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                       parameter={tp.parameter}
                       templateParam={tp}
                       onRequiredChange={handleRequiredChange}
+                      onDelete={handleDeleteParameter}
                     />
                   ))}
                 </div>
