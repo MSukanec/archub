@@ -31,25 +31,6 @@ export function DefaultMovementFields({
 }: DefaultMovementFieldsProps) {
   return (
     <>
-      {/* Descripción - Campo compartido */}
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem className="col-span-2">
-            <FormLabel>Descripción</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Descripción del movimiento..."
-                {...field}
-                value={field.value || ''}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       {/* Fila: Moneda | Billetera */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
