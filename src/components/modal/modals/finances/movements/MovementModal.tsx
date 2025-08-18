@@ -43,18 +43,32 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
 
-  // Form setup
+  // Extract default values like the original modal
+  const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
+  const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
+
+  // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
-      movement_date: new Date(),
+      movement_date: new Date(), // HOY por defecto
       type_id: '',
       description: '',
-      currency_id: userData?.organization?.preferences?.default_currency || '',
-      wallet_id: userData?.organization?.preferences?.default_wallet || '',
+      currency_id: defaultCurrency || '',
+      wallet_id: defaultWallet || '',
       amount: 0
     }
   })
+
+  // Set default values when data loads (like the original modal)
+  React.useEffect(() => {
+    if (defaultCurrency && !form.watch('currency_id')) {
+      form.setValue('currency_id', defaultCurrency)
+    }
+    if (defaultWallet && !form.watch('wallet_id')) {
+      form.setValue('wallet_id', defaultWallet)
+    }
+  }, [defaultCurrency, defaultWallet, form])
 
   // Función de envío simple
   const onSubmit = (values: BasicMovementForm) => {
