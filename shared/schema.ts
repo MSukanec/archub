@@ -191,7 +191,7 @@ export const task_template_parameters = pgTable("task_template_parameters", {
   template_id: uuid("template_id").notNull(),
   parameter_id: uuid("parameter_id").notNull(),
   order_index: integer("order_index").default(0),
-  is_required: boolean("is_required").default(false),
+  is_required: boolean("is_required").default(true),
   condition_json: jsonb("condition_json"), // Usar jsonb en lugar de json para consistencia
   created_at: timestamp("created_at").defaultNow(),
 });

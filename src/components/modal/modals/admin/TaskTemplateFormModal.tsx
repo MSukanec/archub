@@ -465,7 +465,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           template_id: templateId,
           parameter_id: selectedParameterId,
           order_index: currentTemplateParams.length,
-          is_required: false
+          is_required: true
         })
 
       if (error) throw error
