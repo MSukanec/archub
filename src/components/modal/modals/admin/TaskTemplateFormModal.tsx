@@ -389,7 +389,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
         .from('task_template_parameters')
         .select(`
           *,
-          parameter:task_parameters(id, slug, label, type)
+          parameter:task_parameters(id, slug, label, type, expression_template)
         `)
         .eq('template_id', templateId)
         .order('order_index')
@@ -446,7 +446,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
-  // Generate template preview phrase
+  // Generate template preview phrase using expression_template
   const generateTemplatePreview = () => {
     if (currentTemplateParams.length === 0) {
       return 'Sin parámetros configurados'
@@ -455,11 +455,14 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     const sortedParams = currentTemplateParams
       .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
     
-    // Generate a simple preview showing parameter placeholders
-    const parts = sortedParams.map(tp => `{{${tp.parameter?.slug || 'parámetro'}}}`)
+    // Use expression_template from each parameter, fallback to {value} if not available
+    const parts = sortedParams.map(tp => {
+      const expressionTemplate = tp.parameter?.expression_template || '{value}'
+      return expressionTemplate.replace('{value}', `{{${tp.parameter?.slug || 'parámetro'}}}`)
+    })
     
-    // Join with spaces to create a basic template preview
-    return parts.join(' ')
+    // Join with spaces and add period at the end
+    return parts.join(' ') + '.'
   }
 
   // Handle drag end for parameter reordering
@@ -622,10 +625,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                 <p className="text-xs">La vista previa aparecerá cuando agregues parámetros</p>
               </div>
             ) : (
-              <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm font-medium text-muted-foreground mb-2">
-                  Frase del template:
-                </p>
+              <div className="bg-muted/50 rounded-lg p-2">
                 <p className="text-base font-medium text-foreground italic">
                   {generateTemplatePreview()}
                 </p>
