@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
+import { TemplateParamsStep } from '@/components/modal/steps/TemplateParamsStep'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery } from '@tanstack/react-query'
@@ -284,20 +285,27 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     </Form>
   )
 
-  // Paso 2: Configuración JSON (por implementar)
-  const getStep2Content = () => (
-    <div className="space-y-4">
-      <div className="text-center py-8">
-        <h3 className="text-lg font-medium">Configuración JSON</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Aquí podrás configurar parámetros y estructura JSON de la plantilla
-        </p>
-        <p className="text-xs text-muted-foreground mt-2">
-          Plantilla creada: {createdTemplate?.name}
-        </p>
-      </div>
-    </div>
-  )
+  // Paso 2: Configuración de Parámetros
+  const getStep2Content = () => {
+    const templateId = createdTemplate?.id || (isEditing ? template?.id : null)
+    
+    if (!templateId) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">Error: No se encontró el ID del template</p>
+        </div>
+      )
+    }
+
+    return (
+      <TemplateParamsStep
+        templateId={templateId}
+        nameExpression={createdTemplate?.name_expression || template?.name_expression}
+        onBack={() => setCurrentStep(1)}
+        onFinish={onClose}
+      />
+    )
+  }
 
   const getCurrentStepContent = () => {
     switch (currentStep) {
@@ -314,8 +322,8 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const stepConfig: StepModalConfig = {
     currentStep,
     totalSteps: 2,
-    stepTitle: currentStep === 1 ? 'Información Básica' : 'Configuración JSON',
-    stepDescription: currentStep === 1 ? 'Define los datos principales de la plantilla' : 'Configura parámetros y estructura'
+    stepTitle: currentStep === 1 ? 'Información Básica' : 'Configurar Parámetros',
+    stepDescription: currentStep === 1 ? 'Define los datos principales de la plantilla' : 'Asigna y configura parámetros del template'
   }
 
   // Configuración del footer según el paso

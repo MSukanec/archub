@@ -1,0 +1,239 @@
+Objetivo: construir la UI/CRUD para asignar parámetros a un template (task_templates.id) usando la tabla public.task_template_parameters.
+Tablas relevantes:
+
+task_templates(id, name, code, name_expression, unit_id, task_kind_id, task_category_id, version, is_active, is_system, created_by, created_at, updated_at)
+
+task_parameters(id, code, name, input_type, hint, is_active, created_at, updated_at)
+
+task_parameter_options(id, parameter_id, label, value, order_index, is_active) (para enums)
+
+task_template_parameters(id, template_id, parameter_id, order_index, is_required, condition_json, created_at)
+
+Componente a crear
+
+Crea un componente React llamado TemplateParamsStep que recibe:
+
+interface Props {
+  templateId: string;   // id del template recién creado/editado en paso 1
+  nameExpression?: string | null; // opcional, para vista previa
+  onBack: () => void;
+  onFinish: () => void; // cerrar wizard
+}
+
+Layout/UI (todo en un solo modal/página)
+
+Header:
+
+Título: “Configurar parámetros del template”
+
+Subtítulo: nombre del template (fetch por templateId)
+
+Panel izquierdo — “Parámetros asignados” (lista ordenable)
+
+Tabla/lista con columnas:
+
+Drag handle (ordenar)
+
+Parámetro (name + code)
+
+Tipo (input_type)
+
+Requerido (switch)
+
+Condición (badge “Ninguna” / “Con condición” + botón editar)
+
+Acciones (borrar)
+
+Soportar drag & drop para reordenar → actualiza order_index en estado local.
+
+Panel derecho — “Agregar parámetro”
+
+Select de búsqueda (async) sobre task_parameters (is_active=true):
+
+Muestra name + code + input_type.
+
+Si input_type === 'enum', debajo mostrar lista de opciones (read-only) cargadas de task_parameter_options para confirmar que es el parámetro correcto.
+
+Botón “Agregar” → inserta en el estado local como última fila (order_index = last+1, is_required=false, condition = null).
+
+Editor de condición (modal pequeñito por fila)
+
+Botón “Editar condición”.
+
+Builder simple:
+
+“Este parámetro se muestra cuando”
+
+Select “Parámetro” (entre los ya asignados antes en el orden)
+
+Operador: = (por ahora)
+
+Valor: input dinámico según input_type del parámetro elegido (si enum: dropdown con task_parameter_options; si text/number/bool: input correspondiente)
+
+Guarda en condition_json con estructura:
+
+{ "if": { "parameter_code": "TIPO_MURO", "op": "=", "value": "doble" } }
+
+
+(Usar parameter_code del parámetro referenciado para que sea estable; si no lo tenés, usar parameter_id y además guardar su code como metadata).
+
+Vista previa (opcional pero muy útil)
+
+Card “Vista previa de nombre”:
+
+Generar un formulario mínimo solo para preview, con inputs por cada parámetro asignado (según input_type y opciones).
+
+Renderizar nameExpression reemplazando {code} por el valor de preview, y limpiando dobles espacios / parámetros faltantes.
+
+Si nameExpression es NULL, ocultar este bloque.
+
+Botonera
+
+“Volver”
+
+“Finalizar” (primary): persiste todos los cambios.
+
+Lógica/Estados
+
+Estado local rows: Array<{ id?: string; parameter_id: string; parameter_code: string; name: string; input_type: string; is_required: boolean; order_index: number; condition_json: any | null; }>.
+
+Al montar:
+
+Fetch task_templates por templateId (para mostrar name y name_expression).
+
+Fetch task_template_parameters de ese template (ordenar por order_index asc).
+
+Por cada fila, enriquecer con task_parameters (name, code, input_type).
+
+Agregar: push a rows si no existe ya ese parameter_id (evitar duplicado).
+
+Borrar: remove de rows.
+
+Reordenar: actualizar order_index en rows.
+
+Persistencia (Supabase)
+
+Al presionar Finalizar:
+
+Leer del servidor el conjunto actual de task_template_parameters (SELECT id, parameter_id FROM ... WHERE template_id = $1).
+
+Calcular diferencias:
+
+toInsert: filas que están en rows y no están en DB (por parameter_id).
+
+toUpdate: filas que existen en DB y cambiaron is_required, order_index o condition_json.
+
+toDelete: filas que están en DB y no están en rows.
+
+Ejecutar en transacción (o secuencial con manejo de errores):
+
+Insert toInsert con template_id, parameter_id, order_index, is_required, condition_json.
+
+Update toUpdate por id.
+
+Delete toDelete por id.
+
+Toast de éxito y onFinish().
+
+SQL/Queries (pseudo-código con supabase-js):
+
+// 1) actuales en DB
+const { data: current, error: e1 } = await supabase
+  .from('task_template_parameters')
+  .select('id, parameter_id, order_index, is_required, condition_json')
+  .eq('template_id', templateId)
+  .order('order_index', { ascending: true });
+
+// 2) calcular diffs
+// comparar por parameter_id
+// produce: toInsert[], toUpdate[], toDelete[]
+
+// 3) persistir
+if (toInsert.length) {
+  await supabase.from('task_template_parameters').insert(
+    toInsert.map(r => ({
+      template_id: templateId,
+      parameter_id: r.parameter_id,
+      order_index: r.order_index,
+      is_required: r.is_required,
+      condition_json: r.condition_json ?? null
+    }))
+  );
+}
+
+for (const u of toUpdate) {
+  await supabase.from('task_template_parameters')
+    .update({
+      order_index: u.order_index,
+      is_required: u.is_required,
+      condition_json: u.condition_json ?? null
+    })
+    .eq('id', u.id);
+}
+
+if (toDelete.length) {
+  await supabase.from('task_template_parameters')
+    .delete()
+    .in('id', toDelete.map(d => d.id));
+}
+
+Validaciones
+
+No permitir duplicar un parameter_id dentro del mismo template.
+
+order_index debe ser 0..n-1 sin huecos (normalizar antes de guardar).
+
+Si una condición hace referencia a un parámetro posterior en el orden, mostrar error: “La condición solo puede referenciar parámetros anteriores.”
+
+is_required=true no puede coexistir con condición que oculte siempre el campo (no validar lógico complejo ahora; basta con warning si condition_json siempre false).
+
+Para parámetros enum, si no existen opciones en task_parameter_options, mostrar aviso “Este parámetro no tiene opciones configuradas”.
+
+Detalles de UX
+
+Botón “Agregar parámetro” deshabilitado si no hay uno seleccionado.
+
+En cada fila, un ícono que muestre el input_type: text, number, enum, boolean.
+
+Si input_type === 'enum', en hover de la fila mostrar popover con primeras 5 opciones (label (value)), y link “ver todas” que abre un modal read-only con la lista completa.
+
+Al guardar, bloquear UI con spinner y prevenir clicks repetidos.
+
+Vista previa de name_expression
+
+Implementa una función:
+
+function renderName(expression: string, previewValues: Record<string,string|number|boolean>) {
+  // Reemplaza {slug} por previewValues[slug] si existe
+  // Elimina dobles espacios y espacios antes de puntuación
+}
+
+
+Usar parameter_code como “slug” (ej. {TIPO_MURO}, {ESPESOR}), por lo que cada fila debe cargar parameter_code desde task_parameters.code.
+
+Consideraciones técnicas
+
+Usa React Hook Form para el formulario de preview (no para la grilla principal).
+
+Para drag & drop: @dnd-kit/core o react-beautiful-dnd.
+
+Tipografía y estilos iguales al paso 1.
+
+Todo accesible (labels, aria-labels).
+
+Manejo de errores de Supabase con toasts.
+
+Criterios de “listo”
+
+Puedo agregar/quitar parámetros.
+
+Puedo reordenarlos y marcar “requerido”.
+
+Puedo definir una condición simple por fila y queda en condition_json.
+
+Al Finalizar, los cambios se persisten correctamente en task_template_parameters.
+
+La vista previa refleja name_expression usando valores de ejemplo.
+
+Con esto, el paso 2 ya “hace la magia”: define la receta de parámetros del template en tu modelo relacional ✅.
+Cuando lo tengas, seguimos con el Modal para crear Tareas desde un Template (usa estos parámetros, valida, y compone name_rendered).
