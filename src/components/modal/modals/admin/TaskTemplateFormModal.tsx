@@ -565,8 +565,16 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
 
   // Generate template preview phrase using expression_template
   const generateTemplatePreview = () => {
+    // Get the task kind name from the form data
+    const taskKindId = form.getValues('task_kind_id')
+    const selectedTaskKind = taskKinds.find(kind => kind.id === taskKindId)
+    const taskKindName = selectedTaskKind?.name || ''
+
+    // Start with task kind name if available
+    let result = taskKindName
+
     if (currentTemplateParams.length === 0) {
-      return 'Sin parámetros configurados'
+      return result || 'Sin parámetros configurados'
     }
 
     const sortedParams = currentTemplateParams
@@ -581,8 +589,12 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     // Filter out empty parts and join with spaces
     const filteredParts = parts.filter(part => part && part.trim())
     
-    // Join with spaces and clean up
-    let result = filteredParts.join(' ')
+    // Combine task kind name with parameters
+    if (result && filteredParts.length > 0) {
+      result = result + ' ' + filteredParts.join(' ')
+    } else if (filteredParts.length > 0) {
+      result = filteredParts.join(' ')
+    }
     
     // Clean up multiple spaces
     result = result.replace(/\s+/g, ' ').trim()
@@ -747,19 +759,11 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           </div>
 
           <div className="border rounded-lg p-4 bg-muted/20">
-            {currentTemplateParams.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Sin parámetros asignados</p>
-                <p className="text-xs">La vista previa aparecerá cuando agregues parámetros</p>
-              </div>
-            ) : (
-              <div className="bg-muted/50 rounded-lg p-2">
-                <p className="text-base font-medium text-foreground italic">
-                  {generateTemplatePreview()}
-                </p>
-              </div>
-            )}
+            <div className="bg-muted/50 rounded-lg p-2">
+              <p className="text-base font-medium text-foreground italic">
+                {generateTemplatePreview()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
