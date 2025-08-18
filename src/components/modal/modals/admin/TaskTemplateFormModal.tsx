@@ -86,8 +86,9 @@ function SortableParameterItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="border rounded-lg p-3 bg-background"
+      className="border rounded-lg p-3 bg-background space-y-2"
     >
+      {/* Primera fila: título, badge y botones */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
@@ -104,13 +105,6 @@ function SortableParameterItem({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <ComboBoxMultiRows
-            options={mockOptions}
-            value={selectedOptions}
-            onValueChange={setSelectedOptions}
-            placeholder="Seleccionar opciones..."
-            className="w-40 h-7 text-xs"
-          />
           <Button
             variant="ghost"
             size="sm"
@@ -137,6 +131,17 @@ function SortableParameterItem({
             <Trash2 className="h-3 w-3" />
           </Button>
         </div>
+      </div>
+      
+      {/* Segunda fila: selector de opciones a 100% ancho */}
+      <div className="w-full">
+        <ComboBoxMultiRows
+          options={mockOptions}
+          value={selectedOptions}
+          onValueChange={setSelectedOptions}
+          placeholder="Seleccionar opciones..."
+          className="w-full h-7 text-xs"
+        />
       </div>
     </div>
   )
