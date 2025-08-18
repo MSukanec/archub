@@ -64,20 +64,6 @@ const AdminTaskTemplates = () => {
 
   const columns = [
     {
-      key: 'name',
-      label: 'Nombre',
-      className: 'w-1/4',
-      render: (template: any) => (
-        <div className="flex items-center gap-2">
-          <FileCode className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <div>
-            <div className="font-medium text-sm">{template.name}</div>
-            <div className="text-xs text-muted-foreground">{template.slug}</div>
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'category',
       label: 'Categoría',
       className: 'w-1/4',
@@ -87,9 +73,9 @@ const AdminTaskTemplates = () => {
         
         return (
           <div className="space-y-1">
-            <Badge variant="outline" className="text-xs">
+            <div className="text-sm font-medium">
               {category?.name || 'Sin categoría'}
-            </Badge>
+            </div>
             {parentCategory && parentCategory.id !== category?.id && (
               <div className="text-xs text-muted-foreground">
                 {parentCategory.name}
@@ -98,6 +84,17 @@ const AdminTaskTemplates = () => {
           </div>
         )
       }
+    },
+    {
+      key: 'name',
+      label: 'Nombre',
+      className: 'w-1/4',
+      render: (template: any) => (
+        <div>
+          <div className="font-medium text-sm">{template.name}</div>
+          <div className="text-xs text-muted-foreground">{template.slug}</div>
+        </div>
+      )
     },
     {
       key: 'unit',
@@ -200,55 +197,42 @@ const AdminTaskTemplates = () => {
               description="Prueba ajustando el término de búsqueda"
             />
           ) : (
-            <div className="space-y-6">
-              {Object.entries(groupedTemplates).map(([groupName, groupTemplates]) => (
-                <div key={groupName}>
-                  {groupBy === 'category' && (
-                    <div className="mb-3">
-                      <h3 className="text-sm font-medium text-muted-foreground bg-muted/30 px-3 py-2 rounded-md">
-                        {groupName} ({groupTemplates.length})
-                      </h3>
-                    </div>
-                  )}
-                  <Table
-                    data={groupTemplates}
-                    columns={columns}
-                    isLoading={false}
-                    className="min-w-full"
-                    topBar={{
-                      tabs: [groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías'],
-                      activeTab: groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías',
-                      onTabChange: (tab) => setGroupBy(tab === 'Sin Agrupar' ? 'none' : 'category'),
-                      showSearch: true,
-                      searchValue: searchValue,
-                      onSearchChange: setSearchValue,
-                      showSort: true,
-                      renderSortContent: () => (
-                        <div className="p-3 space-y-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-xs"
-                            onClick={() => setGroupBy('none')}
-                          >
-                            Sin Agrupar
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-xs"
-                            onClick={() => setGroupBy('category')}
-                          >
-                            Por Categorías
-                          </Button>
-                        </div>
-                      ),
-                      isSortActive: true
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+            <Table
+              data={filteredTemplates}
+              columns={columns}
+              isLoading={false}
+              className="min-w-full"
+              topBar={{
+                tabs: [groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías'],
+                activeTab: groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+                onTabChange: (tab) => setGroupBy(tab === 'Sin Agrupar' ? 'none' : 'category'),
+                showSearch: true,
+                searchValue: searchValue,
+                onSearchChange: setSearchValue,
+                showSort: true,
+                renderSortContent: () => (
+                  <div className="p-3 space-y-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs"
+                      onClick={() => setGroupBy('none')}
+                    >
+                      Sin Agrupar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs"
+                      onClick={() => setGroupBy('category')}
+                    >
+                      Por Categorías
+                    </Button>
+                  </div>
+                ),
+                isSortActive: true
+              }}
+            />
           )}
         </>
       )}
