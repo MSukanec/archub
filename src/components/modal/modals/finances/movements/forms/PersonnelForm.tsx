@@ -69,24 +69,10 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
       ))
     }
 
-    const formatNumber = (value: number): string => {
-      return new Intl.NumberFormat('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(value)
-    }
-
-    const parseNumber = (value: string): number => {
-      // Remove all dots (thousands separators) and replace comma with dot for decimal
-      const cleaned = value.replace(/\./g, '').replace(',', '.')
-      return parseFloat(cleaned) || 0
-    }
-
     const handleAmountChange = (index: number, amount: string) => {
-      const numericValue = parseNumber(amount)
       setPersonnelRows(rows => rows.map((row, i) => 
         i === index 
-          ? { ...row, amount: numericValue }
+          ? { ...row, amount: parseFloat(amount) || 0 }
           : row
       ))
     }
@@ -138,10 +124,12 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                 <Input
-                  type="text"
-                  value={row.amount > 0 ? formatNumber(row.amount) : ''}
+                  type="number"
+                  value={row.amount}
                   onChange={(e) => handleAmountChange(index, e.target.value)}
-                  placeholder="0,00"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
                   className="text-right pl-8"
                 />
               </div>
