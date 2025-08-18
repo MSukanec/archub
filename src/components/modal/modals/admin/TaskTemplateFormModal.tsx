@@ -455,14 +455,37 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     const sortedParams = currentTemplateParams
       .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
     
+    // Debug the parameters to see what we're getting
+    console.log('Debug parameters:', sortedParams.map(tp => ({
+      slug: tp.parameter?.slug,
+      expression_template: tp.parameter?.expression_template,
+      full_param: tp.parameter
+    })))
+    
     // Use expression_template from each parameter, fallback to {value} if not available
     const parts = sortedParams.map(tp => {
       const expressionTemplate = tp.parameter?.expression_template || '{value}'
-      return expressionTemplate.replace('{value}', `{{${tp.parameter?.slug || 'parámetro'}}}`)
+      const placeholder = `{{${tp.parameter?.slug || 'parámetro'}}}`
+      
+      // Handle the case where expression_template might be null or undefined
+      if (!expressionTemplate || expressionTemplate === '{value}') {
+        return placeholder
+      }
+      
+      return expressionTemplate.replace('{value}', placeholder)
     })
     
-    // Join with spaces and add period at the end
-    return parts.join(' ') + '.'
+    // Filter out empty parts and join appropriately 
+    const filteredParts = parts.filter(part => part && part.trim())
+    
+    // Join with spaces, handling spacing better
+    let result = filteredParts.join(' ')
+    
+    // Clean up multiple spaces
+    result = result.replace(/\s+/g, ' ').trim()
+    
+    // Add period at the end
+    return result + '.'
   }
 
   // Handle drag end for parameter reordering
