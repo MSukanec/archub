@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { Plus, FileText, GripVertical, Settings } from 'lucide-react'
+import { Plus, FileText, GripVertical, Settings, Eye } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -582,6 +582,69 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
               </SortableContext>
             </DndContext>
           )}
+        </div>
+
+        {/* Vista Previa */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Eye className="h-4 w-4 text-[var(--accent)]" />
+            <div className="flex-1 pr-2">
+              <h2 className="text-sm font-medium text-[var(--card-fg)]">
+                Vista Previa
+              </h2>
+              <p className="text-xs text-[var(--text-muted)] leading-tight">
+                Cómo se verá el template en la creación de tareas
+              </p>
+            </div>
+          </div>
+
+          <div className="border rounded-lg p-4 bg-muted/20">
+            {currentTemplateParams.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Sin parámetros asignados</p>
+                <p className="text-xs">La vista previa aparecerá cuando agregues parámetros</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="border-b pb-2 mb-4">
+                  <h3 className="font-medium text-sm">
+                    {template?.name || form.getValues('name') || 'Nueva Plantilla'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Código: {template?.code || form.getValues('code') || 'N/A'}
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Parámetros ({currentTemplateParams.length})
+                  </p>
+                  
+                  {currentTemplateParams
+                    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                    .map((tp, index) => (
+                      <div key={tp.id} className="border rounded p-3 bg-background">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">
+                            {index + 1}
+                          </span>
+                          <span className="text-sm font-medium">
+                            {tp.parameter?.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>Tipo: {tp.parameter?.type}</span>
+                          <code className="bg-muted px-1 rounded">
+                            {tp.parameter?.slug}
+                          </code>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     )
