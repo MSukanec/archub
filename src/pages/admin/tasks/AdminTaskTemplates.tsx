@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Plus, FileCode, Edit, Trash2, Search, Settings } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
+import { TableTopBar } from '@/components/ui-custom/TableTopBar'
 import { useTaskTemplates, useDeleteTaskTemplate } from '@/hooks/use-task-templates'
+import { useTaskCategories } from '@/hooks/use-task-categories'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Header } from '@/components/layout/desktop/Header'
 
@@ -17,8 +19,10 @@ const AdminTaskTemplates = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Lista')
   const [searchValue, setSearchValue] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  const [groupBy, setGroupBy] = useState<'none' | 'category'>('category')
   
   const { data: templates = [], isLoading } = useTaskTemplates()
+  const { data: allCategories = [] } = useTaskCategories()
   const deleteTaskTemplate = useDeleteTaskTemplate()
   const { openModal } = useGlobalModalStore()
 
@@ -27,6 +31,36 @@ const AdminTaskTemplates = () => {
     template.name.toLowerCase().includes(searchValue.toLowerCase()) ||
     template.slug.toLowerCase().includes(searchValue.toLowerCase())
   )
+
+  // Función para obtener la categoría padre
+  const getParentCategory = (categoryId: string) => {
+    const category = allCategories.find(cat => cat.id === categoryId)
+    if (!category) return null
+    
+    // Si no tiene parent_id, es una categoría padre
+    if (!category.parent_id) return category
+    
+    // Si tiene parent_id, buscar la categoría padre recursivamente
+    let parentCategory = allCategories.find(cat => cat.id === category.parent_id)
+    while (parentCategory && parentCategory.parent_id) {
+      parentCategory = allCategories.find(cat => cat.id === parentCategory.parent_id)
+    }
+    return parentCategory
+  }
+
+  // Agrupar plantillas por categoría padre si está habilitado
+  const groupedTemplates = groupBy === 'category' 
+    ? filteredTemplates.reduce((groups, template) => {
+        const parentCategory = getParentCategory(template.task_category_id)
+        const groupName = parentCategory ? parentCategory.name : 'Sin categoría'
+        
+        if (!groups[groupName]) {
+          groups[groupName] = []
+        }
+        groups[groupName].push(template)
+        return groups
+      }, {} as Record<string, typeof filteredTemplates>)
+    : { 'Todas las plantillas': filteredTemplates }
 
   const columns = [
     {
@@ -147,23 +181,72 @@ const AdminTaskTemplates = () => {
   return (
     <div className="space-y-6">
       {activeTab === 'Lista' && (
-        <Table
-          data={filteredTemplates}
-          columns={columns}
-          isLoading={isLoading}
-          topBar={{
-            showSearch: true,
-            searchValue: searchValue,
-            onSearchChange: setSearchValue
-          }}
-          emptyState={
+        <div className="space-y-4">
+          {/* TableTopBar */}
+          <TableTopBar
+            tabs={groupBy === 'none' ? ['Sin Agrupar'] : ['Por Categorías']}
+            activeTab={groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías'}
+            onTabChange={(tab) => setGroupBy(tab === 'Sin Agrupar' ? 'none' : 'category')}
+            showSearch={true}
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            showSort={true}
+            renderSortContent={() => (
+              <div className="p-3 space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs"
+                  onClick={() => setGroupBy('none')}
+                >
+                  Sin Agrupar
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs"
+                  onClick={() => setGroupBy('category')}
+                >
+                  Por Categorías
+                </Button>
+              </div>
+            )}
+            isSortActive={true}
+          />
+
+          {/* Contenido agrupado */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+            </div>
+          ) : filteredTemplates.length === 0 ? (
             <EmptyState
               icon={<FileCode className="w-12 h-12 text-muted-foreground" />}
               title="No se encontraron plantillas"
               description="Prueba ajustando el término de búsqueda"
             />
-          }
-        />
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(groupedTemplates).map(([groupName, groupTemplates]) => (
+                <div key={groupName}>
+                  {groupBy === 'category' && (
+                    <div className="mb-3">
+                      <h3 className="text-sm font-medium text-muted-foreground bg-muted/30 px-3 py-2 rounded-md">
+                        {groupName} ({groupTemplates.length})
+                      </h3>
+                    </div>
+                  )}
+                  <Table
+                    data={groupTemplates}
+                    columns={columns}
+                    isLoading={false}
+                    className="min-w-full"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
       
       {activeTab === 'Editor' && (
