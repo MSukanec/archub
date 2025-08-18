@@ -505,12 +505,14 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
         {/* Agregar parámetro */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Plus className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Agregar parámetro</h3>
-              <p className="text-sm text-muted-foreground">Selecciona un parámetro para agregar al template</p>
+            <Plus className="h-4 w-4 text-[var(--accent)]" />
+            <div className="flex-1 pr-2">
+              <h2 className="text-sm font-medium text-[var(--card-fg)]">
+                Agregar parámetro
+              </h2>
+              <p className="text-xs text-[var(--text-muted)] leading-tight">
+                Selecciona un parámetro para agregar al template
+              </p>
             </div>
           </div>
           
@@ -541,12 +543,14 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
         {/* Parámetros asignados */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Settings className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Parámetros asignados</h3>
-              <p className="text-sm text-muted-foreground">Arrastra para reordenar los parámetros del template</p>
+            <Settings className="h-4 w-4 text-[var(--accent)]" />
+            <div className="flex-1 pr-2">
+              <h2 className="text-sm font-medium text-[var(--card-fg)]">
+                Parámetros asignados
+              </h2>
+              <p className="text-xs text-[var(--text-muted)] leading-tight">
+                Arrastra para reordenar los parámetros del template
+              </p>
             </div>
           </div>
           
