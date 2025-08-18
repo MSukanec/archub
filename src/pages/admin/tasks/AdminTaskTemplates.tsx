@@ -146,21 +146,23 @@ const AdminTaskTemplates = () => {
   // Show full empty state when no templates exist
   if (!isLoading && templates.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <EmptyState
-          icon={<FileCode className="w-12 h-12 text-muted-foreground" />}
-          title="No hay plantillas"
-          description="Crea tu primera plantilla para comenzar a generar tareas paramétricas"
-          action={
-            <Button
-              onClick={() => openModal('task-template')}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Crear Primera Plantilla
-            </Button>
-          }
-        />
+      <div className="flex flex-col items-center justify-center min-h-[500px] w-full max-w-md mx-auto text-center space-y-6">
+        <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center">
+          <FileCode className="w-8 h-8 text-accent" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-foreground">No hay plantillas</h3>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Crea tu primera plantilla para comenzar a generar tareas paramétricas
+          </p>
+        </div>
+        <Button
+          onClick={() => openModal('task-template')}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Crear Primera Plantilla
+        </Button>
       </div>
     )
   }
