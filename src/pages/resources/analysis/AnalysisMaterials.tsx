@@ -75,9 +75,9 @@ export default function AnalysisMaterials() {
       label: 'Marca',
       width: '13%',
       render: (product: Product) => (
-        <Badge variant="outline" className="text-xs">
+        <span className="text-sm text-[var(--text-muted)]">
           {product.brand?.name || 'Sin marca'}
-        </Badge>
+        </span>
       )
     },
     {
@@ -179,8 +179,11 @@ export default function AnalysisMaterials() {
       width: '8%',
       render: (product: Product) => (
         <Badge 
-          variant={product.is_system ? "default" : "secondary"} 
-          className="text-xs"
+          variant={product.is_system ? "default" : "secondary"}
+          className={`text-xs ${product.is_system 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+          }`}
         >
           {product.is_system ? 'Sistema' : 'Organización'}
         </Badge>
