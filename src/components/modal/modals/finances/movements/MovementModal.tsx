@@ -384,7 +384,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const loadMovementProjectClients = async (movementId: string) => {
     try {
       const { data: clientAssignments, error } = await supabase
-        .from('movement_project_clients')
+        .from('movement_clients')
         .select(`
           project_client_id,
           amount,
@@ -519,7 +519,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         // Actualizar clientes de proyecto asignados - eliminar existentes y crear nuevos
         const { error: deleteProjectClientsError } = await supabase
-          .from('movement_project_clients')
+          .from('movement_clients')
           .delete()
           .eq('movement_id', editingMovement.id)
 
@@ -575,7 +575,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }))
 
         const { error: projectClientsError } = await supabase
-          .from('movement_project_clients')
+          .from('movement_clients')
           .insert(projectClientsData)
 
         if (projectClientsError) throw projectClientsError

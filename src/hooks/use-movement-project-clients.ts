@@ -51,7 +51,7 @@ export function useMovementProjectClients(movementId?: string) {
       console.log('🔍 Fetching movement project client assignments for movement:', movementId)
 
       const { data, error } = await supabase
-        .from('movement_project_clients')
+        .from('movement_clients')
         .select(`
           id,
           movement_id,
@@ -59,14 +59,14 @@ export function useMovementProjectClients(movementId?: string) {
           amount,
           created_at,
           updated_at,
-          project_clients:project_client_id(
+          project_clients!inner(
             id,
             organization_id,
             project_id,
             client_id,
             is_active,
             created_at,
-            contact:client_id(
+            contact:client_id!inner(
               id,
               first_name,
               last_name,
@@ -106,7 +106,7 @@ export function useCreateMovementProjectClients() {
       console.log('💾 Creating movement project client assignments:', assignments.length)
 
       const { data, error } = await supabase
-        .from('movement_project_clients')
+        .from('movement_clients')
         .insert(assignments)
         .select()
 
@@ -146,7 +146,7 @@ export function useUpdateMovementProjectClients() {
 
       // Primero eliminamos todas las asignaciones existentes
       const { error: deleteError } = await supabase
-        .from('movement_project_clients')
+        .from('movement_clients')
         .delete()
         .eq('movement_id', movementId)
 
@@ -160,7 +160,7 @@ export function useUpdateMovementProjectClients() {
       // Si hay nuevas asignaciones, las creamos
       if (assignments.length > 0) {
         const { data, error } = await supabase
-          .from('movement_project_clients')
+          .from('movement_clients')
           .insert(assignments.map(assignment => ({
             movement_id: movementId,
             project_client_id: assignment.project_client_id,
