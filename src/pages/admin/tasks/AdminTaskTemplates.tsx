@@ -115,15 +115,15 @@ const AdminTaskTemplates = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0"
+            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => openModal('task-template', { template })}
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Plantilla',
@@ -136,7 +136,7 @@ const AdminTaskTemplates = () => {
               })
             }}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="w-4 h-4 text-red-500" />
           </Button>
         </div>
       )
