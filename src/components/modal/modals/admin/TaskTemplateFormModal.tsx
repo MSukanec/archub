@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { Plus, FileText } from 'lucide-react'
+import { Plus, FileText, GripVertical } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -21,6 +21,69 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery as useSupabaseQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// Componente sortable para los parámetros asignados
+function SortableParameterItem({ id, parameter }: { id: string; parameter: any }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="border rounded-lg p-3 bg-background"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded"
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </button>
+          <div>
+            <span className="font-medium text-sm">{parameter?.label}</span>
+            <code className="text-xs text-muted-foreground ml-2">
+              {parameter?.slug}
+            </code>
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {parameter?.type}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const taskTemplateSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -46,11 +109,20 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const createMutation = useCreateTaskTemplate()
   const updateMutation = useUpdateTaskTemplate()
   
-  const [currentStep, setCurrentStep] = useState(1)
-  const [createdTemplate, setCreatedTemplate] = useState<any>(null)
-  
   const isEditing = Boolean(modalData?.template)
   const template = modalData?.template
+  
+  const [currentStep, setCurrentStep] = useState(isEditing ? 2 : 1)
+  const [createdTemplate, setCreatedTemplate] = useState<any>(null)
+  const [selectedParameterId, setSelectedParameterId] = useState('')
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   // Fetch organization members to get current member ID
   const { data: organizationMembers = [] } = useSupabaseQuery({
@@ -290,7 +362,6 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   )
 
   // Estados para el paso 2
-  const [selectedParameterId, setSelectedParameterId] = useState<string>('')
 
   // Queries para el paso 2
   const templateId = createdTemplate?.id || (isEditing ? template?.id : null)
@@ -375,6 +446,50 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
+  // Handle drag end for parameter reordering
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event
+
+    if (active.id !== over.id) {
+      const oldIndex = currentTemplateParams.findIndex((param) => param.id === active.id)
+      const newIndex = currentTemplateParams.findIndex((param) => param.id === over.id)
+
+      const newOrder = arrayMove(currentTemplateParams, oldIndex, newIndex)
+
+      try {
+        // Update order_index for all affected parameters
+        const updates = newOrder.map((param, index) => ({
+          id: param.id,
+          order_index: index
+        }))
+
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('task_template_parameters')
+            .update({ order_index: update.order_index })
+            .eq('id', update.id)
+
+          if (error) throw error
+        }
+
+        // Refresh the data
+        queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+        
+        toast({
+          title: 'Orden actualizado',
+          description: 'El orden de los parámetros se ha guardado correctamente.',
+        })
+      } catch (error) {
+        console.error('Error updating parameter order:', error)
+        toast({
+          title: 'Error',
+          description: 'No se pudo actualizar el orden de los parámetros.',
+          variant: 'destructive',
+        })
+      }
+    }
+  }
+
   // Paso 2: Configuración de Parámetros
   const getStep2Content = () => {
     if (!templateId) {
@@ -427,23 +542,26 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
               <p className="text-xs">Agrega parámetros desde el panel superior</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {currentTemplateParams.map((tp) => (
-                <div key={tp.id} className="border rounded-lg p-3 bg-background">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-medium text-sm">{tp.parameter?.label}</span>
-                      <code className="text-xs text-muted-foreground ml-2">
-                        {tp.parameter?.slug}
-                      </code>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {tp.parameter?.type}
-                    </div>
-                  </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={currentTemplateParams.map(tp => tp.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {currentTemplateParams.map((tp) => (
+                    <SortableParameterItem
+                      key={tp.id}
+                      id={tp.id}
+                      parameter={tp.parameter}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </div>
