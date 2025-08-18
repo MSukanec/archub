@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { Plus, FileText, GripVertical } from 'lucide-react'
+import { Plus, FileText, GripVertical, Settings } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -504,10 +504,17 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       <div className="space-y-6">
         {/* Agregar parámetro */}
         <div className="space-y-4">
-          <h3 className="text-base font-medium">Agregar parámetro</h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Plus className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Agregar parámetro</h3>
+              <p className="text-sm text-muted-foreground">Selecciona un parámetro para agregar al template</p>
+            </div>
+          </div>
           
           <div className="space-y-3">
-            <label className="text-sm font-medium">Seleccionar parámetro</label>
             <ComboBox
               value={selectedParameterId}
               onValueChange={setSelectedParameterId}
@@ -533,7 +540,15 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
 
         {/* Parámetros asignados */}
         <div className="space-y-4">
-          <h3 className="text-base font-medium">Parámetros asignados</h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Settings className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Parámetros asignados</h3>
+              <p className="text-sm text-muted-foreground">Arrastra para reordenar los parámetros del template</p>
+            </div>
+          </div>
           
           {currentTemplateParams.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
