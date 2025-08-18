@@ -24,29 +24,42 @@ interface Installment {
   movement_date: string
   amount: number
   description: string
-  contact_id: string
   currency_id: string
   wallet_id: string
   project_id: string
   created_by: string
+  subcategory_id: string
   exchange_rate?: number
-  contact?: {
+  // Joined data from movement_clients table
+  movement_clients?: Array<{
     id: string
-    first_name: string
-    last_name: string
-    company_name?: string
-    avatar_url?: string
-  }
+    project_client_id: string
+    amount: number
+    project_client?: {
+      id: string
+      client_id: string
+      contact?: {
+        id: string
+        first_name: string
+        last_name: string
+        company_name?: string
+        full_name?: string
+      }
+    }
+  }>
+  // Joined currency data
   currency?: {
     id: string
     name: string
     code: string
     symbol: string
   }
+  // Joined wallet data
   wallet?: {
     id: string
     name: string
   }
+  // Creator data
   creator?: {
     id: string
     full_name: string
@@ -143,58 +156,100 @@ export default function FinancesInstallments() {
     enabled: !!organizationId && !!supabase
   })
 
-  // Get Aportes de Terceros concept ID from movement concepts
-  const { data: aportesDeTerrerosConcept } = useQuery({
-    queryKey: ['aportes-de-terceros-concept', organizationId],
-    queryFn: async () => {
-      if (!supabase || !organizationId) return null
-      
-      const { data, error } = await supabase
-        .from('movement_concepts')
-        .select('id, name')
-        .eq('organization_id', organizationId)
-        .eq('name', 'Aportes de Terceros')
+  // Use the fixed subcategory ID for project clients (installments)
+  const projectClientsSubcategoryId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
 
-      if (error) {
-        return null
-      }
-
-      if (!data || data.length === 0) {
-        // Return the correct ID for Aportes de Terceros subcategory
-        return { id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3', name: 'Aportes de Terceros' }
-      }
-
-      return data[0]
-    },
-    enabled: !!organizationId && !!supabase
-  })
-
-  // Get installments (movements filtered by Aportes de Terceros concept)
+  // Get installments (movements with project clients subcategory)
   const { data: installments = [], isLoading } = useQuery({
-    queryKey: ['installments', organizationId, projectId, aportesDeTerrerosConcept?.id],
+    queryKey: ['installments', organizationId, projectId, projectClientsSubcategoryId],
     queryFn: async () => {
-      if (!supabase || !organizationId || !projectId || !aportesDeTerrerosConcept) return []
+      if (!supabase || !organizationId || !projectId) return []
 
+      console.log('Fetching installments for:', { organizationId, projectId, projectClientsSubcategoryId })
 
-
-      // Use the new movement_view - much simpler query with all joins already done!
-      // Changed from subcategory_id to category_id to filter by "Aportes de Terceros" category
+      // Query movements with the project clients subcategory and manual joins for relations that exist
       const { data: movements, error } = await supabase
-        .from('movement_view')
-        .select('*')
+        .from('movements')
+        .select(`
+          id,
+          movement_date,
+          amount,
+          description,
+          currency_id,
+          wallet_id,
+          project_id,
+          created_by,
+          subcategory_id,
+          exchange_rate,
+          created_at,
+          currencies(
+            id,
+            name,
+            code,
+            symbol
+          ),
+          movement_clients!inner(
+            id,
+            project_client_id,
+            amount,
+            project_clients!inner(
+              id,
+              client_id,
+              committed_amount,
+              currency_id,
+              contacts!inner(
+                id,
+                first_name,
+                last_name,
+                company_name,
+                full_name
+              )
+            )
+          )
+        `)
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .eq('category_id', aportesDeTerrerosConcept.id)
+        .eq('subcategory_id', projectClientsSubcategoryId)
         .order('movement_date', { ascending: false })
 
       if (error) {
+        console.error('Error fetching installments:', error)
         throw error
       }
 
-      // The view already includes all the joined data, so just return the movements!
+      // Manually fetch wallets and users for the movements
+      if (movements && movements.length > 0) {
+        const walletIds = [...new Set(movements.map(m => m.wallet_id).filter(Boolean))]
+        const userIds = [...new Set(movements.map(m => m.created_by).filter(Boolean))]
+
+        // Fetch wallets
+        const { data: walletsData } = await supabase
+          .from('wallets')
+          .select('id, name')
+          .in('id', walletIds)
+
+        // Fetch users
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, full_name, email')
+          .in('id', userIds)
+
+        // Add wallet and creator data to movements
+        movements.forEach(movement => {
+          movement.wallet = walletsData?.find(w => w.id === movement.wallet_id)
+          movement.creator = usersData?.find(u => u.id === movement.created_by)
+        })
+      }
+
+      if (error) {
+        console.error('Error fetching installments:', error)
+        throw error
+      }
+
+      console.log('Installments fetched:', movements?.length || 0)
       return movements || []
     },
-    enabled: !!organizationId && !!projectId && !!aportesDeTerrerosConcept?.id
+    enabled: !!organizationId && !!projectId && !!supabase
   })
 
   // Get organization currencies for read-only display
@@ -217,7 +272,7 @@ export default function FinancesInstallments() {
   // Calculate total contributed (dollarized)
   const totalContributedDollarized = installments.reduce((sum, installment) => {
     const amount = installment.amount || 0
-    const currencyCode = installment.currency_code || 'N/A'
+    const currencyCode = installment.currency?.code || 'N/A'
     
     if (currencyCode === 'USD') {
       return sum + amount
@@ -234,8 +289,8 @@ export default function FinancesInstallments() {
     
     // Track currencies from installments
     installments.forEach(installment => {
-      if (installment.currency_code) {
-        currenciesSet.add(installment.currency_code)
+      if (installment.currency?.code) {
+        currenciesSet.add(installment.currency.code)
       }
     })
     
@@ -244,21 +299,23 @@ export default function FinancesInstallments() {
       .map(client => {
         // Calculate dollarized total from installments for this client
         let dollarizedTotal = 0
-        const clientInstallments = installments.filter(installment => installment.contact_id === client.client_id)
         
-        // Don't skip clients with no installments - show them with 0 amounts
+        // Find installments that include this client via movement_clients
+        const clientInstallments = installments.filter(installment => 
+          installment.movement_clients?.some(mc => mc.project_client_id === client.id)
+        )
         
         clientInstallments.forEach(installment => {
-          const amount = installment.amount || 0
-          const currencyCode = installment.currency_code || 'N/A'
+          // Get the specific amount for this client from movement_clients
+          const movementClient = installment.movement_clients?.find(mc => mc.project_client_id === client.id)
+          const clientAmount = movementClient?.amount || 0
+          const currencyCode = installment.currency?.code || 'N/A'
           
-
           if (currencyCode === 'USD') {
-            dollarizedTotal += amount
+            dollarizedTotal += clientAmount
           } else if (currencyCode === 'ARS' && installment.exchange_rate) {
             // Convert from ARS to USD: amount_in_pesos / exchange_rate_pesos_per_usd
-            const convertedAmount = amount / installment.exchange_rate
-
+            const convertedAmount = clientAmount / installment.exchange_rate
             dollarizedTotal += convertedAmount
           }
         })
@@ -266,18 +323,21 @@ export default function FinancesInstallments() {
         // Group installments by currency
         const currencies: { [key: string]: { amount: number; currency: any } } = {}
         clientInstallments.forEach(installment => {
-          const currencyCode = installment.currency_code || 'N/A'
+          const movementClient = installment.movement_clients?.find(mc => mc.project_client_id === client.id)
+          const clientAmount = movementClient?.amount || 0
+          const currencyCode = installment.currency?.code || 'N/A'
+          
           if (!currencies[currencyCode]) {
             currencies[currencyCode] = {
               amount: 0,
               currency: {
-                code: installment.currency_code,
-                symbol: installment.currency_symbol,
-                name: installment.currency_name
+                code: installment.currency?.code,
+                symbol: installment.currency?.symbol,
+                name: installment.currency?.name
               }
             }
           }
-          currencies[currencyCode].amount += installment.amount || 0
+          currencies[currencyCode].amount += clientAmount
         })
         
         return {
@@ -364,12 +424,15 @@ export default function FinancesInstallments() {
     if (!searchValue) return true
     
     const searchLower = searchValue.toLowerCase()
-    const contactName = installment.contact_name 
-      ? `${installment.contact_name} ${installment.contact_company || ''}`.toLowerCase()
-      : ''
+    // Get contact names from movement_clients
+    const contactNames = installment.movement_clients?.map(mc => {
+      const contact = mc.project_client?.contact
+      return contact?.company_name || contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+    }).join(' ') || ''
+    
     const description = (installment.description || '').toLowerCase()
     
-    return contactName.includes(searchLower) || description.includes(searchLower)
+    return contactNames.toLowerCase().includes(searchLower) || description.includes(searchLower)
   })
 
   // Handler for adding installment
@@ -389,14 +452,16 @@ export default function FinancesInstallments() {
   }
 
   const handleDelete = (installment: any) => {
-    const contactName = installment.contact_name 
-      ? (installment.contact_company_name || installment.contact_name)
-      : 'Sin contacto'
+    // Get contact names from movement_clients
+    const contactNames = installment.movement_clients?.map((mc: any) => {
+      const contact = mc.project_client?.contact
+      return contact?.company_name || contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+    }).join(', ') || 'Sin contacto'
     
     openModal('delete-confirmation', {
       title: 'Eliminar Compromiso',
-      message: `¿Estás seguro de que deseas eliminar el compromiso de pago de ${contactName}?`,
-      itemName: `${contactName} - ${installment.currency_symbol || '$'}${installment.amount}`,
+      message: `¿Estás seguro de que deseas eliminar el compromiso de pago de ${contactNames}?`,
+      itemName: `${contactNames} - ${installment.currency?.symbol || '$'}${installment.amount}`,
       onConfirm: async () => {
         try {
           const { error } = await supabase!
@@ -414,7 +479,7 @@ export default function FinancesInstallments() {
           // Refrescar datos
           queryClient.invalidateQueries({ queryKey: ['installments'] })
           queryClient.invalidateQueries({ queryKey: ['movements'] })
-          queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+          queryClient.invalidateQueries({ queryKey: ['movement-clients'] })
         } catch (error: any) {
           toast({
             variant: 'destructive',
@@ -685,7 +750,9 @@ export default function FinancesInstallments() {
               onClick={() => {
                 // Open edit commitment modal using the installment modal
                 // We'll edit the first installment for this client as a way to edit the commitment
-                const clientInstallments = installments.filter(installment => installment.contact_id === item.contact_id)
+                const clientInstallments = installments.filter(installment => 
+                  installment.movement_clients?.some(mc => mc.project_client?.client_id === item.contact_id)
+                )
                 if (clientInstallments.length > 0) {
                   const firstInstallment = clientInstallments[0]
                   openModal('installment', {
@@ -714,7 +781,9 @@ export default function FinancesInstallments() {
                   onConfirm: async () => {
                     try {
                       // First delete all installments for this client
-                      const clientInstallments = installments.filter(installment => installment.contact_id === item.contact_id)
+                      const clientInstallments = installments.filter(installment => 
+                        installment.movement_clients?.some(mc => mc.project_client?.client_id === item.contact_id)
+                      )
                       
                       for (const installment of clientInstallments) {
                         await supabase!
@@ -843,19 +912,26 @@ export default function FinancesInstallments() {
       label: "Contacto",
       width: "16.7%",
       render: (item: any) => {
-        if (!item.contact_name) {
+        // Get all contacts from movement_clients
+        const contacts = item.movement_clients?.map((mc: any) => {
+          const contact = mc.project_client?.contact
+          return contact?.company_name || contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim()
+        }).filter(Boolean) || []
+
+        if (contacts.length === 0) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const displayName = item.contact_company_name || item.contact_name || 'Sin nombre'
-        const initials = item.contact_company_name 
-          ? item.contact_company_name.charAt(0).toUpperCase()
-          : (item.contact_name?.split(' ').map((n: string) => n[0]).join('') || 'SC').toUpperCase()
+        const displayName = contacts.join(', ')
+        const firstContact = item.movement_clients?.[0]?.project_client?.contact
+        const initials = firstContact?.company_name 
+          ? firstContact.company_name.charAt(0).toUpperCase()
+          : `${firstContact?.first_name?.charAt(0) || ''}${firstContact?.last_name?.charAt(0) || ''}`.toUpperCase()
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-8 h-8">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="text-xs">{initials || 'SC'}</AvatarFallback>
             </Avatar>
             <div>
               <div className="text-sm font-medium">{displayName}</div>
@@ -871,11 +947,11 @@ export default function FinancesInstallments() {
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
-        const subcategoryName = item.subcategory_name || 'Sin especificar'
+        // This is always "Aportes de Terceros" since we're filtering by that subcategory
         return (
           <div className="text-sm">
             <Badge variant="secondary" className="text-xs">
-              {subcategoryName}
+              Aportes de Terceros
             </Badge>
           </div>
         )
@@ -886,7 +962,7 @@ export default function FinancesInstallments() {
       label: "Billetera",
       width: "16.7%",
       render: (item: any) => (
-        <div className="text-sm">{item.wallet_name || 'Sin billetera'}</div>
+        <div className="text-sm">{item.wallet?.name || 'Sin billetera'}</div>
       )
     },
     {
@@ -896,7 +972,7 @@ export default function FinancesInstallments() {
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
-        const symbol = item.currency_symbol || '$'
+        const symbol = item.currency?.symbol || '$'
         return (
           <div className="text-sm font-medium text-green-600">
             {symbol} {Math.abs(item.amount || 0).toLocaleString('es-AR')}
