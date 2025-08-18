@@ -902,6 +902,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const headerContent = (
     <FormModalHeader 
       title={showPersonnelForm ? "Gestión de Personal" : "Nuevo Movimiento"}
+      description={showPersonnelForm ? "Asigna personal y montos para este movimiento financiero" : "Registra un nuevo movimiento financiero en el sistema"}
       icon={showPersonnelForm ? Users : DollarSign}
     />
   )

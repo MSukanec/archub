@@ -2,7 +2,7 @@ import React, { useState, useImperativeHandle, forwardRef } from 'react'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, UserPlus, Users } from 'lucide-react'
 import { useProjectPersonnel, ProjectPersonnel } from '@/hooks/use-project-personnel'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -88,12 +88,20 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
 
   return (
     <div className="space-y-4">
+      {/* Section Header - Personnel Selection */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <h3 className="text-sm font-medium text-foreground">Seleccionar Personal</h3>
+            <p className="text-xs text-muted-foreground">Busca y agrega personal del proyecto</p>
+          </div>
+        </div>
+      </div>
+
       {/* Personnel Selection - Inline with Add Button */}
-      <div className="flex gap-2 items-end">
+      <div className="flex gap-2 items-end mb-6">
         <div className="flex-1">
-          <label className="text-sm font-medium text-foreground mb-2 block">
-            Seleccionar Personal
-          </label>
           <ComboBox
             value={selectedPersonnelId}
             onValueChange={setSelectedPersonnelId}
@@ -119,7 +127,16 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
       {/* Added Personnel List with editable amounts */}
       {addedPersonnel.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-foreground">Personal Agregado:</h4>
+          {/* Section Header - Added Personnel */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h3 className="text-sm font-medium text-foreground">Personal Agregado</h3>
+                <p className="text-xs text-muted-foreground">Asigna los montos correspondientes a cada persona</p>
+              </div>
+            </div>
+          </div>
           {addedPersonnel.map((person) => (
             <div 
               key={person.personnel_id} 
