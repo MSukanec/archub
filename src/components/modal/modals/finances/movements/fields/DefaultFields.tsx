@@ -5,7 +5,7 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 
-interface DefaultMovementFieldsProps {
+interface DefaultFieldsProps {
   form: UseFormReturn<any>
   currencies: any[]
   wallets: any[]
@@ -28,7 +28,7 @@ export function DefaultMovementFields({
   selectedTaskId = null,
   onOpenPersonSubform,
   onOpenTasksSubform
-}: DefaultMovementFieldsProps) {
+}: DefaultFieldsProps) {
   return (
     <>
       {/* Fila: Moneda | Billetera */}
