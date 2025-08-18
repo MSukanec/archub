@@ -12,10 +12,13 @@ interface DefaultFieldsProps {
   // Props opcionales para botones específicos
   showPersonButton?: boolean
   showTaskButton?: boolean
+  showSubcontractButton?: boolean
   selectedPersonId?: string | null
   selectedTaskId?: string | null
+  selectedSubcontractId?: string | null
   onOpenPersonSubform?: () => void
   onOpenTasksSubform?: () => void
+  onOpenSubcontractSubform?: () => void
 }
 
 export function DefaultMovementFields({
@@ -24,10 +27,13 @@ export function DefaultMovementFields({
   wallets,
   showPersonButton = false,
   showTaskButton = false,
+  showSubcontractButton = false,
   selectedPersonId = null,
   selectedTaskId = null,
+  selectedSubcontractId = null,
   onOpenPersonSubform,
-  onOpenTasksSubform
+  onOpenTasksSubform,
+  onOpenSubcontractSubform
 }: DefaultFieldsProps) {
   return (
     <>
@@ -149,6 +155,18 @@ export function DefaultMovementFields({
             title="Seleccionar Tarea de Construcción"
             description={selectedTaskId ? "Tarea seleccionada" : "Selecciona la tarea relacionada con este movimiento"}
             onClick={onOpenTasksSubform}
+          />
+        </div>
+      )}
+
+      {/* Botón para Selección de Subcontrato - Solo si showSubcontractButton es true */}
+      {showSubcontractButton && onOpenSubcontractSubform && (
+        <div className="col-span-2">
+          <FormSubsectionButton
+            icon={<Package />}
+            title="Configurar Subcontrato"
+            description={selectedSubcontractId ? "Subcontrato configurado" : "Configura el subcontrato relacionado con este pago"}
+            onClick={onOpenSubcontractSubform}
           />
         </div>
       )}

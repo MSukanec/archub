@@ -198,6 +198,12 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     setCurrentSubform('personnel')
     setPanel('subform')
   }
+
+  // Función para abrir el subform de subcontratos
+  const openSubcontractSubform = () => {
+    setCurrentSubform('subcontracts')
+    setPanel('subform')
+  }
   
   // Función para cerrar el subform y volver al panel principal
   const closeSubform = () => {
@@ -275,7 +281,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
   const [selectedPersonnelId, setSelectedPersonnelId] = React.useState<string>('')
   
   // Estado para el subform actual
-  const [currentSubform, setCurrentSubform] = React.useState<'tasks' | 'personnel' | null>(null)
+  const [currentSubform, setCurrentSubform] = React.useState<'tasks' | 'personnel' | 'subcontracts' | null>(null)
   
   // Hook para crear/actualizar relaciones de tareas con movimientos
   const createMovementTasksMutation = useCreateMovementTasks()
@@ -2568,18 +2574,19 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           </form>
         </Form>
       ) : (isSubcontratos || isEditingSubcontratos) ? (
-        // FORMULARIO DE SUBCONTRATOS usando componente independiente
-        <SubcontractForm
-          editingMovement={editingMovement}
-          mainForm={form}
-          onClose={() => setModalOpen(false)}
-          onSuccess={() => {
-            // Invalidar cache de movimientos
-            queryClient.invalidateQueries({ queryKey: ['/api/finance/movements'] })
-            // Cerrar modal
-            setModalOpen(false)
-          }}
-        />
+        // FORMULARIO DE SUBCONTRATOS
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <DefaultMovementFields
+              form={form}
+              currencies={currencies || []}
+              wallets={wallets || []}
+              showSubcontractButton={true}
+              selectedSubcontractId={selectedSubcontractId}
+              onOpenSubcontractSubform={openSubcontractSubform}
+            />
+          </form>
+        </Form>
       ) : (isPersonal || isEditingPersonal) ? (
         // FORMULARIO DE PERSONAL
         <Form {...personalForm}>
@@ -2755,6 +2762,21 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </div>
   )
 
+  // Subform para configuración de subcontratos
+  const subcontractsSubform = (
+    <SubcontractForm
+      editingMovement={editingMovement}
+      mainForm={form}
+      onClose={onClose}
+      onSuccess={() => {
+        // Invalidar cache de movimientos
+        queryClient.invalidateQueries({ queryKey: ['/api/finance/movements'] })
+        // Cerrar modal
+        onClose()
+      }}
+    />
+  )
+
   // Función para obtener el subform actual
   const getSubform = () => {
     switch (currentSubform) {
@@ -2762,6 +2784,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
         return tasksSubform
       case 'personnel':
         return personnelSubform
+      case 'subcontracts':
+        return subcontractsSubform
       default:
         return null
     }
