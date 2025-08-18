@@ -7,6 +7,7 @@ import { DollarSign } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -356,16 +357,13 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     createConversionMutation.mutate(values)
   }
 
-  // Panel de edición/creación
-  const editPanel = (
-    <Form {...(movementType === 'conversion' ? conversionForm : form)}>
-      <form onSubmit={movementType === 'conversion' 
-        ? conversionForm.handleSubmit(onSubmitConversion) 
-        : form.handleSubmit(onSubmit)} className="space-y-4">
-        
-        {/* Fecha */}
+  // Renderizar panel para conversiones
+  const conversionPanel = (
+    <Form {...conversionForm}>
+      <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
+        {/* 1. FECHA */}
         <FormField
-          control={movementType === 'conversion' ? conversionForm.control : form.control}
+          control={conversionForm.control}
           name="movement_date"
           render={({ field }) => (
             <FormItem>
@@ -382,9 +380,9 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           )}
         />
 
-        {/* Tipo de Movimiento */}
+        {/* 2. TIPO DE MOVIMIENTO */}
         <FormField
-          control={movementType === 'conversion' ? conversionForm.control : form.control}
+          control={conversionForm.control}
           name="type_id"
           render={({ field }) => (
             <FormItem>
@@ -392,7 +390,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
               <Select 
                 value={selectedTypeId} 
                 onValueChange={(value) => {
-                  handleTypeChange(value) // Usar la función que detecta conversión
+                  handleTypeChange(value)
                   field.onChange(value)
                 }}
               >
@@ -414,18 +412,16 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           )}
         />
 
-        {/* Descripción - siempre visible */}
+        {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
-          control={movementType === 'conversion' ? conversionForm.control : form.control}
+          control={conversionForm.control}
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción {movementType === 'normal' ? '*' : ''}</FormLabel>
+              <FormLabel>Descripción</FormLabel>
               <FormControl>
-                <Input
-                  placeholder={movementType === 'conversion' 
-                    ? "Descripción de la conversión..." 
-                    : "Descripción del movimiento..."}
+                <Textarea
+                  placeholder="Descripción de la conversión..."
                   {...field}
                 />
               </FormControl>
@@ -434,100 +430,172 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           )}
         />
 
-        {/* Campos condicionales según el tipo de movimiento */}
-        {movementType === 'conversion' ? (
-          // Para conversiones, mostrar campos especializados
-          <ConversionFields
-            form={conversionForm}
-            currencies={currencies || []}
-            wallets={wallets || []}
-            members={members || []}
-            concepts={movementConcepts || []}
-            movement={undefined}
-          />
-        ) : (
-          // Para movimientos normales, mostrar campos jerárquicos y por defecto
-          <>
-            {/* Categoría - solo mostrar si hay tipo seleccionado y tiene categorías */}
-            {selectedTypeId && categories.length > 0 && (
-              <FormField
-                control={form.control}
-                name="category_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <Select 
-                      value={selectedCategoryId} 
-                      onValueChange={(value) => {
-                        setSelectedCategoryId(value)
-                        setSelectedSubcategoryId('')
-                        field.onChange(value)
-                        form.setValue('subcategory_id', '')
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar categoría..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category: any) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {/* Subcategoría - solo mostrar si hay categoría seleccionada y tiene subcategorías */}
-            {selectedCategoryId && subcategories.length > 0 && (
-              <FormField
-                control={form.control}
-                name="subcategory_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <Select 
-                      value={selectedSubcategoryId} 
-                      onValueChange={(value) => {
-                        setSelectedSubcategoryId(value)
-                        field.onChange(value)
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar subcategoría..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {subcategories.map((subcategory: any) => (
-                          <SelectItem key={subcategory.id} value={subcategory.id}>
-                            {subcategory.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-
-
-            <DefaultMovementFields
-              form={form}
-              currencies={currencies || []}
-              wallets={wallets || []}
-            />
-          </>
-        )}
+        {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
+        <ConversionFields
+          form={conversionForm}
+          currencies={currencies || []}
+          wallets={wallets || []}
+          members={members || []}
+          concepts={movementConcepts || []}
+          movement={undefined}
+        />
       </form>
     </Form>
   )
+
+  // Renderizar panel para movimientos normales
+  const normalPanel = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* 1. FECHA */}
+        <FormField
+          control={form.control}
+          name="movement_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha *</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 2. TIPO DE MOVIMIENTO */}
+        <FormField
+          control={form.control}
+          name="type_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Movimiento *</FormLabel>
+              <Select 
+                value={selectedTypeId} 
+                onValueChange={(value) => {
+                  handleTypeChange(value)
+                  field.onChange(value)
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {movementConcepts?.map((concept) => (
+                    <SelectItem key={concept.id} value={concept.id}>
+                      {concept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* CATEGORÍAS (solo para movimientos normales) */}
+        {selectedTypeId && categories.length > 0 && (
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <Select 
+                  value={selectedCategoryId} 
+                  onValueChange={(value) => {
+                    setSelectedCategoryId(value)
+                    setSelectedSubcategoryId('')
+                    field.onChange(value)
+                    form.setValue('subcategory_id', '')
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* SUBCATEGORÍAS (solo para movimientos normales) */}
+        {selectedCategoryId && subcategories.length > 0 && (
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem>
+                <Select 
+                  value={selectedSubcategoryId} 
+                  onValueChange={(value) => {
+                    setSelectedSubcategoryId(value)
+                    field.onChange(value)
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar subcategoría..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subcategories.map((subcategory: any) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* 3. DESCRIPCIÓN (TEXTAREA) */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción *</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción del movimiento..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
+        <DefaultMovementFields
+          form={form}
+          currencies={currencies || []}
+          wallets={wallets || []}
+        />
+      </form>
+    </Form>
+  )
+
+  // Panel condicional
+  const editPanel = movementType === 'conversion' ? conversionPanel : normalPanel
 
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
