@@ -36,7 +36,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
     // Transform personnel data for ComboBox
     const personnelOptions = projectPersonnel.map((person: any) => ({
       value: person.id,
-      label: `${person.contact?.[0]?.first_name || ''} ${person.contact?.[0]?.last_name || ''}`.trim() || 'Sin nombre'
+      label: `${person.contact?.first_name || ''} ${person.contact?.last_name || ''}`.trim() || 'Sin nombre'
     }))
 
     const handleAddPersonnel = () => {
@@ -50,7 +50,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
         return // Don't add duplicates
       }
 
-      const contactName = `${selectedPerson.contact?.[0]?.first_name || ''} ${selectedPerson.contact?.[0]?.last_name || ''}`.trim() || 'Sin nombre'
+      const contactName = `${selectedPerson.contact?.first_name || ''} ${selectedPerson.contact?.last_name || ''}`.trim() || 'Sin nombre'
     
     const newPersonnelItem: PersonnelItem = {
       personnel_id: selectedPersonnelId,
