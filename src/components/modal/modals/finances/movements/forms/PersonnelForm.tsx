@@ -109,20 +109,23 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
             
             {/* Right Column - Amount */}
             <div className="flex items-end gap-2">
-              <Input
-                type="number"
-                value={row.amount}
-                onChange={(e) => handleAmountChange(index, e.target.value)}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                className="text-right"
-              />
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                <Input
+                  type="number"
+                  value={row.amount}
+                  onChange={(e) => handleAmountChange(index, e.target.value)}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  className="text-right pl-8"
+                />
+              </div>
               {personnelRows.length > 1 && (
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="default"
                   onClick={() => removeRow(index)}
                   className="h-10 w-10 p-0"
                 >
@@ -137,7 +140,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
         <div className="flex justify-center pt-2">
           <Button
             type="button"
-            variant="outline"
+            variant="default"
             size="sm"
             onClick={addNewRow}
             className="flex items-center gap-2"
