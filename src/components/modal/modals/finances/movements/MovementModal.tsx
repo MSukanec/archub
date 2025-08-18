@@ -292,6 +292,22 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         .single()
 
       if (error) throw error
+
+      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel
+      if (selectedPersonnel && selectedPersonnel.length > 0) {
+        const personnelData = selectedPersonnel.map(person => ({
+          movement_id: result.id,
+          personnel_id: person.personnel_id,
+          amount: person.amount
+        }))
+
+        const { error: personnelError } = await supabase
+          .from('movement_personnel')
+          .insert(personnelData)
+
+        if (personnelError) throw personnelError
+      }
+
       return result
     },
     onSuccess: () => {
@@ -375,6 +391,22 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         .select()
 
       if (error) throw error
+
+      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
+      if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
+        const egressPersonnelData = selectedPersonnel.map(person => ({
+          movement_id: results[0].id, // Movimiento de egreso
+          personnel_id: person.personnel_id,
+          amount: person.amount
+        }))
+
+        const { error: personnelError } = await supabase
+          .from('movement_personnel')
+          .insert(egressPersonnelData)
+
+        if (personnelError) throw personnelError
+      }
+
       return results
     },
     onSuccess: () => {
@@ -456,6 +488,22 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         .select()
 
       if (error) throw error
+
+      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
+      if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
+        const egressPersonnelData = selectedPersonnel.map(person => ({
+          movement_id: results[0].id, // Movimiento de egreso
+          personnel_id: person.personnel_id,
+          amount: person.amount
+        }))
+
+        const { error: personnelError } = await supabase
+          .from('movement_personnel')
+          .insert(egressPersonnelData)
+
+        if (personnelError) throw personnelError
+      }
+
       return results
     },
     onSuccess: () => {
