@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,8 +26,6 @@ const taskTemplateSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   code: z.string().min(1, 'El código es requerido'),
   unit_id: z.string().optional(),
-  task_category_id: z.string().optional(),
-  task_kind_id: z.string().optional(),
 })
 
 type TaskTemplateFormData = z.infer<typeof taskTemplateSchema>
@@ -118,10 +116,19 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       name: template?.name || '',
       code: template?.slug || '',
       unit_id: template?.unit_id || '',
-      task_category_id: '',
-      task_kind_id: '',
     },
   })
+
+  // Reset form when template changes
+  useEffect(() => {
+    if (template) {
+      form.reset({
+        name: template.name || '',
+        code: template.slug || '',
+        unit_id: template.unit_id || '',
+      })
+    }
+  }, [template, form])
 
   const isLoading = createMutation.isPending || updateMutation.isPending
 
@@ -208,57 +215,6 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
             )}
           />
         </div>
-
-        {/* Categoría */}
-        <FormField
-          control={form.control}
-          name="task_category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría</FormLabel>
-              <FormControl>
-                <ComboBox
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  options={taskCategories.map(category => ({
-                    value: category.id,
-                    label: `${category.code} - ${category.name}`
-                  }))}
-                  placeholder="Seleccionar categoría"
-                  searchPlaceholder="Buscar categoría..."
-                  emptyMessage="No se encontraron categorías"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Tipo de Acción */}
-        <FormField
-          control={form.control}
-          name="task_kind_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Acción</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo de acción" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {taskKinds.map((kind) => (
-                    <SelectItem key={kind.id} value={kind.id}>
-                      {kind.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Unidad de Medida */}
         <FormField
