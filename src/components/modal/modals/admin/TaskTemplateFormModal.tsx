@@ -196,6 +196,43 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
+  // Handle final save - save preview to name_expression
+  const handleFinalSave = async () => {
+    try {
+      if (!templateId) {
+        console.error('No template ID available')
+        return
+      }
+
+      // Generate the template preview phrase
+      const previewContent = generateTemplatePreview()
+
+      // Update the template with the generated name_expression
+      const { error } = await supabase
+        .from('task_templates')
+        .update({ name_expression: previewContent })
+        .eq('id', templateId)
+
+      if (error) throw error
+
+      toast({
+        title: "Template finalizado",
+        description: "La plantilla se ha guardado correctamente con la expresión generada.",
+      })
+
+      // Invalidate cache and close modal
+      queryClient.invalidateQueries({ queryKey: ['task-templates'] })
+      onClose()
+    } catch (error) {
+      console.error('Error saving final template:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo finalizar la plantilla",
+        variant: "destructive",
+      })
+    }
+  }
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -766,10 +803,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           previousAction: { label: 'Anterior', onClick: () => setCurrentStep(1) },
           submitAction: { 
             label: 'Finalizar', 
-            onClick: () => {
-              // TODO: Implementar guardado final
-              onClose()
-            }
+            onClick: handleFinalSave
           }
         }
       default:
