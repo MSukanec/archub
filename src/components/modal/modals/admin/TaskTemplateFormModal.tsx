@@ -41,7 +41,17 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 
 // Componente sortable para los parámetros asignados
-function SortableParameterItem({ id, parameter }: { id: string; parameter: any }) {
+function SortableParameterItem({ 
+  id, 
+  parameter, 
+  templateParam, 
+  onRequiredChange 
+}: { 
+  id: string; 
+  parameter: any; 
+  templateParam: any;
+  onRequiredChange: (templateParamId: string, isRequired: boolean) => void;
+}) {
   const {
     attributes,
     listeners,
@@ -72,13 +82,24 @@ function SortableParameterItem({ id, parameter }: { id: string; parameter: any }
           </button>
           <div>
             <span className="font-medium text-sm">{parameter?.label}</span>
-            <code className="text-xs text-muted-foreground ml-2">
-              {parameter?.slug}
-            </code>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {parameter?.type}
+        <div className="flex items-center gap-2">
+          <div className="text-xs text-muted-foreground">
+            {parameter?.type}
+          </div>
+          <Select
+            value={templateParam?.is_required ? "true" : "false"}
+            onValueChange={(value) => onRequiredChange(templateParam.id, value === "true")}
+          >
+            <SelectTrigger className="w-24 h-7 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="false">Opcional</SelectItem>
+              <SelectItem value="true">Requerido</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
@@ -115,6 +136,28 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const [currentStep, setCurrentStep] = useState(isEditing ? 2 : 1)
   const [createdTemplate, setCreatedTemplate] = useState<any>(null)
   const [selectedParameterId, setSelectedParameterId] = useState('')
+
+  // Handle required change
+  const handleRequiredChange = async (templateParamId: string, isRequired: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .update({ is_required: isRequired })
+        .eq('id', templateParamId)
+
+      if (error) throw error
+
+      // Invalidate cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+    } catch (error) {
+      console.error('Error updating required status:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado requerido",
+        variant: "destructive",
+      })
+    }
+  }
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -604,6 +647,8 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
                       key={tp.id}
                       id={tp.id}
                       parameter={tp.parameter}
+                      templateParam={tp}
+                      onRequiredChange={handleRequiredChange}
                     />
                   ))}
                 </div>
