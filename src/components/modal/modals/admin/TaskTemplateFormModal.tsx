@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBoxMultiRows, type ComboBoxMultiRowsOption } from '@/components/ui-custom/ComboBoxMultiRows'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 import { Plus, FileText, GripVertical, Settings, Eye, Trash2 } from 'lucide-react'
 
@@ -54,6 +55,18 @@ function SortableParameterItem({
   onRequiredChange: (templateParamId: string, isRequired: boolean) => void;
   onDelete: (templateParamId: string) => void;
 }) {
+  // Estado local para las opciones seleccionadas (por ahora no se guarda)
+  const [selectedOptions, setSelectedOptions] = React.useState<string[]>([])
+
+  // Mock data de opciones para demostración (después vendrá de la BD)
+  const mockOptions: ComboBoxMultiRowsOption[] = [
+    { value: 'ladrillo', label: 'Ladrillo' },
+    { value: 'hormigon', label: 'Hormigón' },
+    { value: 'acero', label: 'Acero' },
+    { value: 'madera', label: 'Madera' },
+    { value: 'vidrio', label: 'Vidrio' },
+    { value: 'aluminio', label: 'Aluminio' },
+  ]
   const {
     attributes,
     listeners,
@@ -90,6 +103,13 @@ function SortableParameterItem({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ComboBoxMultiRows
+            options={mockOptions}
+            value={selectedOptions}
+            onValueChange={setSelectedOptions}
+            placeholder="Seleccionar opciones..."
+            className="w-40 h-7 text-xs"
+          />
           <Select
             value={templateParam?.is_required ? "true" : "false"}
             onValueChange={(value) => onRequiredChange(templateParam.id, value === "true")}

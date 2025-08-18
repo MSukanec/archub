@@ -1,125 +1,127 @@
-import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { cn } from '@/lib/utils';
+import React, { useState } from 'react'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
+
+export interface ComboBoxMultiRowsOption {
+  value: string
+  label: string
+}
 
 interface ComboBoxMultiRowsProps {
-  options: Array<{
-    value: string;
-    label: string;
-  }>;
-  value: string[];
-  onChange: (value: string[]) => void;
-  placeholder?: string;
-  addButtonText?: string;
-  className?: string;
+  options: ComboBoxMultiRowsOption[]
+  value: string[]
+  onValueChange: (value: string[]) => void
+  placeholder?: string
+  searchPlaceholder?: string
+  emptyMessage?: string
+  className?: string
+  disabled?: boolean
 }
 
 export function ComboBoxMultiRows({
   options,
   value,
-  onChange,
-  placeholder = "Seleccionar opción...",
-  addButtonText = "Agregar",
+  onValueChange,
+  placeholder = "Seleccionar opciones...",
+  searchPlaceholder = "Buscar opciones...",
+  emptyMessage = "No se encontraron opciones",
   className,
+  disabled = false,
 }: ComboBoxMultiRowsProps) {
-  const [showComboBox, setShowComboBox] = useState(false);
-  const [newValue, setNewValue] = useState<string>('');
-  const { openModal } = useGlobalModalStore();
+  const [open, setOpen] = useState(false)
 
-  // Get available options (excluding already selected ones)
-  const availableOptions = options.filter(option => !value.includes(option.value));
-
-  const handleAdd = (selectedValue: string) => {
-    if (selectedValue && !value.includes(selectedValue)) {
-      onChange([...value, selectedValue]);
-      setNewValue('');
-      setShowComboBox(false);
+  const handleSelect = (selectedValue: string) => {
+    if (value.includes(selectedValue)) {
+      // Remove from selection
+      onValueChange(value.filter(v => v !== selectedValue))
+    } else {
+      // Add to selection
+      onValueChange([...value, selectedValue])
     }
-  };
+  }
 
-  const handleRemove = (valueToRemove: string) => {
-    const optionToRemove = options.find(opt => opt.value === valueToRemove);
-    
-    openModal('delete-confirmation', {
-      title: "Eliminar elemento",
-      description: `¿Estás seguro de que deseas eliminar "${optionToRemove?.label}"?`,
-      itemName: optionToRemove?.label || '',
-      mode: 'dangerous',
-      onConfirm: () => {
-        onChange(value.filter(v => v !== valueToRemove));
-      }
-    });
-  };
-
-  const getOptionLabel = (optionValue: string) => {
-    return options.find(opt => opt.value === optionValue)?.label || optionValue;
-  };
-
-  const showAddButton = availableOptions.length > 0 && (!showComboBox || value.length === 0);
+  const getDisplayText = () => {
+    if (value.length === 0) {
+      return placeholder
+    }
+    if (value.length === 1) {
+      const option = options.find(opt => opt.value === value[0])
+      return option?.label || value[0]
+    }
+    return `${value.length} opciones seleccionadas`
+  }
 
   return (
-    <div className={cn("space-y-3", className)}>
-      {/* Selected items */}
-      {value.length > 0 && (
-        <div className="space-y-2">
-          {value.map((selectedValue) => (
-            <div
-              key={selectedValue}
-              className="flex items-center gap-2"
-            >
-              <div className="flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 items-center">
-                {getOptionLabel(selectedValue)}
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemove(selectedValue)}
-                className="text-destructive hover:text-destructive h-10 w-10 p-0 shrink-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ComboBox for adding new item */}
-      {showComboBox && availableOptions.length > 0 && (
-        <div className="space-y-2">
-          <ComboBox
-            options={availableOptions}
-            value={newValue}
-            onValueChange={(selectedValue) => {
-              setNewValue(selectedValue);
-              handleAdd(selectedValue);
-            }}
-            placeholder={placeholder}
-            searchPlaceholder="Buscar opciones..."
-          />
-        </div>
-      )}
-
-      {/* Add button */}
-      {showAddButton && (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
-          variant="default"
-          onClick={() => setShowComboBox(true)}
-          className="w-full"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("justify-between", className)}
+          disabled={disabled}
         >
-          <Plus className="h-4 w-4 mr-2" />
-          {addButtonText}
+          <span className="truncate">{getDisplayText()}</span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
-      )}
-
-      {/* No more options available */}
-      {availableOptions.length === 0 && value.length < options.length && (
-        <p className="text-sm text-muted-foreground">
-          Todas las opciones disponibles han sido seleccionadas.
-        </p>
-      )}
-    </div>
-  );
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder} />
+          <CommandEmpty>{emptyMessage}</CommandEmpty>
+          <CommandGroup className="max-h-[200px] overflow-auto">
+            {options.map((option) => (
+              <CommandItem
+                key={option.value}
+                value={option.value}
+                onSelect={() => handleSelect(option.value)}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value.includes(option.value) ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+        {value.length > 0 && (
+          <div className="p-2 border-t">
+            <div className="flex flex-wrap gap-1">
+              {value.map((val) => {
+                const option = options.find(opt => opt.value === val)
+                return (
+                  <Badge
+                    key={val}
+                    variant="secondary"
+                    className="text-xs cursor-pointer"
+                    onClick={() => handleSelect(val)}
+                  >
+                    {option?.label || val}
+                    <span className="ml-1">×</span>
+                  </Badge>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  )
 }
