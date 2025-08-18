@@ -1,16 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FileCode } from 'lucide-react'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
-import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
-import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { FormModalStepHeader } from '@/components/modal/form/FormModalStepHeader'
+import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery } from '@tanstack/react-query'
@@ -23,7 +23,6 @@ const taskTemplateSchema = z.object({
   unit_id: z.string().optional(),
   task_category_id: z.string().optional(),
   task_kind_id: z.string().optional(),
-  is_active: z.boolean().default(true),
 })
 
 type TaskTemplateFormData = z.infer<typeof taskTemplateSchema>
@@ -39,6 +38,9 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const { data: currentUser } = useCurrentUser()
   const createMutation = useCreateTaskTemplate()
   const updateMutation = useUpdateTaskTemplate()
+  
+  const [currentStep, setCurrentStep] = useState(1)
+  const [createdTemplate, setCreatedTemplate] = useState<any>(null)
   
   const isEditing = Boolean(modalData?.template)
   const template = modalData?.template
@@ -93,26 +95,28 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
       unit_id: template?.unit_id || '',
       task_category_id: template?.task_category_id || '',
       task_kind_id: template?.task_kind_id || '',
-      is_active: template?.is_active ?? true,
     },
   })
 
   const isLoading = createMutation.isPending || updateMutation.isPending
 
-  const onSubmit = async (data: TaskTemplateFormData) => {
+  const onSubmitStep1 = async (data: TaskTemplateFormData) => {
     try {
       if (isEditing && template) {
-        await updateMutation.mutateAsync({
+        const updated = await updateMutation.mutateAsync({
           id: template.id,
           updates: data
         })
+        setCreatedTemplate(updated)
       } else {
-        await createMutation.mutateAsync({
+        const newTemplate = await createMutation.mutateAsync({
           ...data,
+          is_active: true,
           created_by: currentUser?.user?.id || '',
         })
+        setCreatedTemplate(newTemplate)
       }
-      onClose()
+      setCurrentStep(2)
     } catch (error) {
       console.error('Error saving template:', error)
     }
@@ -133,52 +137,51 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
-  const editPanel = (
+  // Paso 1: Información básica
+  const getStep1Content = () => (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Primera fila: Nombre */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de la Plantilla</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Muro de mampostería"
-                  {...field}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmitStep1)} className="space-y-4">
+        {/* Grid de 2 columnas: Nombre y Código inline */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre de la Plantilla</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ej: Muro de mampostería"
+                    {...field}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Segunda fila: Código (bloqueado) */}
-        <FormField
-          control={form.control}
-          name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Se genera automáticamente"
-                  {...field}
-                  disabled={true}
-                  className="bg-muted"
-                />
-              </FormControl>
-              <p className="text-xs text-muted-foreground">
-                Se genera automáticamente desde el nombre
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Código</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Se genera automáticamente"
+                    {...field}
+                    disabled={true}
+                    className="bg-muted"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {/* Grid de 2 columnas para desktop */}
+        {/* Grid de 2 columnas para categoría y unidad */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -256,58 +259,95 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
             </FormItem>
           )}
         />
-
-        {/* Estado */}
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Estado</FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Plantilla activa
-                </div>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
       </form>
     </Form>
   )
 
+  // Paso 2: Configuración JSON (por implementar)
+  const getStep2Content = () => (
+    <div className="space-y-4">
+      <div className="text-center py-8">
+        <h3 className="text-lg font-medium">Configuración JSON</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Aquí podrás configurar parámetros y estructura JSON de la plantilla
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Plantilla creada: {createdTemplate?.name}
+        </p>
+      </div>
+    </div>
+  )
+
+  const getCurrentStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return getStep1Content()
+      case 2:
+        return getStep2Content()
+      default:
+        return getStep1Content()
+    }
+  }
+
+  // Configuración del paso actual
+  const stepConfig: StepModalConfig = {
+    currentStep,
+    totalSteps: 2,
+    stepTitle: currentStep === 1 ? 'Información Básica' : 'Configuración JSON',
+    stepDescription: currentStep === 1 ? 'Define los datos principales de la plantilla' : 'Configura parámetros y estructura'
+  }
+
+  // Configuración del footer según el paso
+  const getFooterConfig = (): StepModalFooterConfig => {
+    switch (currentStep) {
+      case 1:
+        return {
+          cancelAction: { label: 'Cancelar', onClick: onClose },
+          nextAction: { 
+            label: isEditing ? 'Guardar y Continuar' : 'Crear y Continuar', 
+            onClick: form.handleSubmit(onSubmitStep1),
+            loading: isLoading
+          }
+        }
+      case 2:
+        return {
+          cancelAction: { label: 'Cancelar', onClick: onClose },
+          previousAction: { label: 'Anterior', onClick: () => setCurrentStep(1) },
+          submitAction: { 
+            label: 'Finalizar', 
+            onClick: () => {
+              // TODO: Implementar guardado final
+              onClose()
+            }
+          }
+        }
+      default:
+        return {
+          cancelAction: { label: 'Cancelar', onClick: onClose }
+        }
+    }
+  }
+
   const headerContent = (
-    <FormModalHeader
+    <FormModalStepHeader
       title={isEditing ? 'Editar Plantilla' : 'Nueva Plantilla'}
       icon={FileCode}
+      stepConfig={stepConfig}
     />
   )
 
   const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel={isEditing ? 'Guardar Cambios' : 'Crear Plantilla'}
-      onRightClick={form.handleSubmit(onSubmit)}
-      isLoading={isLoading}
+    <FormModalStepFooter
+      config={getFooterConfig()}
     />
   )
 
   return (
     <FormModalLayout
-      viewPanel={null}
-      editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
+      stepContent={getCurrentStepContent()}
       onClose={onClose}
-      isEditing={true}
-      columns={1}
     />
   )
 }
