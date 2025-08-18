@@ -7,13 +7,14 @@ import { FileCode } from 'lucide-react'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalStepHeader } from '@/components/modal/form/FormModalStepHeader'
 import { FormModalStepFooter } from '@/components/modal/form/FormModalStepFooter'
+import { cn } from '@/lib/utils'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { ComboBoxMultiRows, type ComboBoxMultiRowsOption } from '@/components/ui-custom/ComboBoxMultiRows'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { Plus, FileText, GripVertical, Settings, Eye, Trash2 } from 'lucide-react'
+import { Plus, FileText, GripVertical, Settings, Eye, Trash2, Check, X } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -110,18 +111,23 @@ function SortableParameterItem({
             placeholder="Seleccionar opciones..."
             className="w-40 h-7 text-xs"
           />
-          <Select
-            value={templateParam?.is_required ? "true" : "false"}
-            onValueChange={(value) => onRequiredChange(templateParam.id, value === "true")}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onRequiredChange(templateParam.id, !templateParam?.is_required)}
+            className={`h-7 w-7 p-0 ${
+              templateParam?.is_required 
+                ? "text-green-600 hover:text-green-700 hover:bg-green-50" 
+                : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+            }`}
+            title={templateParam?.is_required ? "Requerido" : "Opcional"}
           >
-            <SelectTrigger className="w-24 h-7 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="false">Opcional</SelectItem>
-              <SelectItem value="true">Requerido</SelectItem>
-            </SelectContent>
-          </Select>
+            {templateParam?.is_required ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <X className="h-3 w-3" />
+            )}
+          </Button>
           <Button
             variant="ghost"
             size="sm"
