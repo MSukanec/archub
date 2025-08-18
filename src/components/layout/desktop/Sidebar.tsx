@@ -302,6 +302,7 @@ export function Sidebar() {
     'organizacion': [
       { icon: Home, label: 'Resumen', href: '/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
     'diseno': [
