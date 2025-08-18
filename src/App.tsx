@@ -52,6 +52,7 @@ import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
 
 import Dashboard from "@/pages/organization/dashboard/Dashboard";
+import Members from "@/pages/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -105,6 +106,12 @@ function Router() {
         <Route path="/organization/preferences">
           <ProtectedRoute>
             <Preferences />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/organization/members">
+          <ProtectedRoute>
+            <Members />
           </ProtectedRoute>
         </Route>
         

@@ -55,11 +55,11 @@ function getRoleBadgeClassName(roleName: string) {
   return '';
 }
 
-interface DashboardMembersProps {
+interface MemberListProps {
   organization: any;
 }
 
-export function DashboardMembers({ organization }: DashboardMembersProps) {
+export function MemberList({ organization }: MemberListProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();

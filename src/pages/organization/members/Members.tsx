@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Building } from 'lucide-react';
+import { Users, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { DashboardDashboard } from './DashboardDashboard';
-import { DashboardBasicData } from './DashboardBasicData';
-import { DashboardActivity } from './DashboardActivity';
+import { MemberList } from './MemberList';
+import { MemberClients } from './MemberClients';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('Resumen');
+export default function Members() {
+  const [activeTab, setActiveTab] = useState('Lista');
   
   const { data: userData, isLoading } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -20,38 +19,39 @@ export default function Dashboard() {
 
   const headerTabs = [
     {
-      id: 'Resumen',
-      label: 'Resumen',
-      isActive: activeTab === 'Resumen'
+      id: 'Lista',
+      label: 'Lista',
+      isActive: activeTab === 'Lista'
     },
     {
-      id: 'Datos Básicos',
-      label: 'Datos Básicos',
-      isActive: activeTab === 'Datos Básicos'
-    },
-
-    {
-      id: 'Actividad',
-      label: 'Actividad',
-      isActive: activeTab === 'Actividad'
+      id: 'Clientes',
+      label: 'Clientes',
+      isActive: activeTab === 'Clientes'
     }
   ];
 
   const headerProps = {
-    icon: Building,
-    title: organization?.name || 'Organización',
-    subtitle: `${organization?.is_system ? 'Organización del sistema' : 'Organización'} • Plan ${organization?.plan?.name || 'Free'}`,
+    icon: Users,
+    title: 'Miembros',
+    subtitle: `Gestión de miembros y clientes de ${organization?.name || 'la organización'}`,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
 
-
+    // Solo mostrar botón de invitar en la tab de Lista
+    ...(activeTab === 'Lista' && {
+      actionButton: {
+        label: 'Invitar Miembro',
+        icon: UserPlus,
+        onClick: () => openModal('member')
+      }
+    })
   };
 
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando organización...</div>
+          <div className="text-muted-foreground">Cargando miembros...</div>
         </div>
       </Layout>
     );
@@ -69,9 +69,8 @@ export default function Dashboard() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
-      {activeTab === 'Datos Básicos' && <DashboardBasicData organization={organization} />}
-      {activeTab === 'Actividad' && <DashboardActivity />}
+      {activeTab === 'Lista' && <MemberList organization={organization} />}
+      {activeTab === 'Clientes' && <MemberClients organization={organization} />}
     </Layout>
   );
 }
