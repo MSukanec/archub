@@ -717,106 +717,108 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           )}
         />
 
-        {/* 2. TIPO DE MOVIMIENTO */}
-        <FormField
-          control={form.control}
-          name="type_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Movimiento *</FormLabel>
-              <Select 
-                value={selectedTypeId} 
-                onValueChange={(value) => {
-                  handleTypeChange(value)
-                  field.onChange(value)
-                }}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {movementConcepts?.map((concept) => (
-                    <SelectItem key={concept.id} value={concept.id}>
-                      {concept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
+        {/* GRUPO DE SELECCIÓN CON ESPACIADO REDUCIDO */}
+        <div className="space-y-0.5">
+          {/* 2. TIPO DE MOVIMIENTO */}
+          <FormField
+            control={form.control}
+            name="type_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Movimiento *</FormLabel>
+                <Select 
+                  value={selectedTypeId} 
+                  onValueChange={(value) => {
+                    handleTypeChange(value)
+                    field.onChange(value)
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {movementConcepts?.map((concept) => (
+                      <SelectItem key={concept.id} value={concept.id}>
+                        {concept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* CATEGORÍAS (solo para movimientos normales) */}
+          {selectedTypeId && categories.length > 0 && (
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <Select 
+                    value={selectedCategoryId} 
+                    onValueChange={(value) => {
+                      setSelectedCategoryId(value)
+                      setSelectedSubcategoryId('')
+                      field.onChange(value)
+                      form.setValue('subcategory_id', '')
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar categoría..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category: any) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-        />
 
-        {/* CATEGORÍAS (solo para movimientos normales) */}
-        {selectedTypeId && categories.length > 0 && (
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <Select 
-                  value={selectedCategoryId} 
-                  onValueChange={(value) => {
-                    setSelectedCategoryId(value)
-                    setSelectedSubcategoryId('')
-                    field.onChange(value)
-                    form.setValue('subcategory_id', '')
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar categoría..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* SUBCATEGORÍAS */}
-        {selectedCategoryId && subcategories.length > 0 && (
-          <FormField
-            control={form.control}
-            name="subcategory_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subcategoría <span className="text-destructive">*</span></FormLabel>
-                <Select 
-                  value={selectedSubcategoryId} 
-                  onValueChange={(value) => {
-                    setSelectedSubcategoryId(value)
-                    field.onChange(value)
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar subcategoría..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {subcategories.map((subcategory: any) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+          {/* SUBCATEGORÍAS */}
+          {selectedCategoryId && subcategories.length > 0 && (
+            <FormField
+              control={form.control}
+              name="subcategory_id"
+              render={({ field }) => (
+                <FormItem>
+                  <Select 
+                    value={selectedSubcategoryId} 
+                    onValueChange={(value) => {
+                      setSelectedSubcategoryId(value)
+                      field.onChange(value)
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar subcategoría..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {subcategories.map((subcategory: any) => (
+                        <SelectItem key={subcategory.id} value={subcategory.id}>
+                          {subcategory.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
 
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
