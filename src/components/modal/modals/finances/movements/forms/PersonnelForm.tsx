@@ -105,7 +105,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
       <div className="space-y-4">
         {/* Personnel Rows - Default two columns */}
         {personnelRows.map((row, index) => (
-          <div key={index} className="grid grid-cols-2 gap-3 items-end">
+          <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">
             {/* Left Column - Personnel Selector */}
             <div>
               <ComboBox
@@ -158,7 +158,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Agregar Personal
+            Agregar Otro
           </Button>
         </div>
       </div>
