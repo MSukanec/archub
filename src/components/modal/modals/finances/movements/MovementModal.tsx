@@ -17,6 +17,9 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { DefaultMovementFields } from './fields/DefaultFields'
+import { supabase } from '@/lib/supabase'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
 
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
@@ -44,6 +47,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   // States for hierarchical selection like the original modal
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
@@ -107,11 +112,65 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     }
   }, [defaultCurrency, defaultWallet, form])
 
-  // Función de envío simple
+  // Mutation para crear el movimiento
+  const createMovementMutation = useMutation({
+    mutationFn: async (data: BasicMovementForm) => {
+      if (!userData?.organization?.id) {
+        throw new Error('Organization ID not found')
+      }
+
+      // Preparar datos del movimiento según la estructura de la tabla
+      const movementData = {
+        organization_id: userData.organization.id,
+        project_id: userData.preferences?.last_project_id || null,
+        movement_date: data.movement_date.toISOString().split('T')[0],
+        created_by: userData.id,
+        description: data.description,
+        amount: data.amount,
+        currency_id: data.currency_id,
+        wallet_id: data.wallet_id, // Este debe ser el organization_wallet.id 
+        type_id: data.type_id,
+        category_id: data.category_id || null,
+        subcategory_id: data.subcategory_id || null,
+        exchange_rate: data.exchange_rate || null,
+        is_conversion: false,
+        is_favorite: false
+      }
+
+      const { data: result, error } = await supabase
+        .from('movements')
+        .insert(movementData)
+        .select()
+        .single()
+
+      if (error) throw error
+      return result
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] })
+      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      toast({
+        title: 'Movimiento creado',
+        description: 'El movimiento ha sido creado correctamente',
+      })
+      onClose()
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al crear el movimiento: ${error.message}`,
+      })
+    }
+  })
+
+  // Función de envío que ejecuta la mutación
   const onSubmit = (values: BasicMovementForm) => {
-    console.log('Valores del formulario:', values)
-    // TODO: Implementar lógica de creación
-    onClose()
+    createMovementMutation.mutate(values)
   }
 
   // Panel de edición/creación
@@ -287,7 +346,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
       onLeftClick={onClose}
       rightLabel="Guardar"
       onRightClick={form.handleSubmit(onSubmit)}
-      showLoadingSpinner={false}
+      showLoadingSpinner={createMovementMutation.isPending}
     />
   )
 
