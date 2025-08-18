@@ -2724,8 +2724,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               currencies={currencies || []}
               wallets={wallets || []}
               showPersonButton={true}
-              selectedPersonId={selectedPersonId}
-              onOpenPersonSubform={openPersonSubform}
+              selectedPersonId={selectedPersonnelId}
+              onOpenPersonSubform={openPersonnelSubform}
             />
           </form>
         </Form>
