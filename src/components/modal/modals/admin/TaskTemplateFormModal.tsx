@@ -172,12 +172,35 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   // Handle parameter deletion
   const handleDeleteParameter = async (templateParamId: string) => {
     try {
-      const { error } = await supabase
+      // Get the order_index of the parameter being deleted
+      const paramToDelete = currentTemplateParams.find(p => p.id === templateParamId)
+      if (!paramToDelete) return
+
+      // Delete the parameter
+      const { error: deleteError } = await supabase
         .from('task_template_parameters')
         .delete()
         .eq('id', templateParamId)
 
-      if (error) throw error
+      if (deleteError) throw deleteError
+
+      // Reorder remaining parameters - decrease order_index for all parameters after the deleted one
+      const parametersToUpdate = currentTemplateParams
+        .filter(p => p.id !== templateParamId && (p.order_index || 0) > (paramToDelete.order_index || 0))
+        .map(p => ({
+          id: p.id,
+          order_index: (p.order_index || 0) - 1
+        }))
+
+      // Update order indices for remaining parameters
+      for (const update of parametersToUpdate) {
+        const { error: updateError } = await supabase
+          .from('task_template_parameters')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id)
+
+        if (updateError) throw updateError
+      }
 
       toast({
         title: "Parámetro eliminado",
