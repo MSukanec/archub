@@ -146,25 +146,54 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const [currentStep, setCurrentStep] = useState(isEditing ? 2 : 1)
   const [createdTemplate, setCreatedTemplate] = useState<any>(null)
   const [selectedParameterId, setSelectedParameterId] = useState('')
-  const [localTemplateParams, setLocalTemplateParams] = useState<any[]>([])
-  const [hasLoadedParams, setHasLoadedParams] = useState(false)
 
-  // Handle required change locally
-  const handleRequiredChange = (templateParamId: string, isRequired: boolean) => {
-    setLocalTemplateParams(params =>
-      params.map(param =>
-        param.id === templateParamId
-          ? { ...param, is_required: isRequired }
-          : param
-      )
-    )
+  // Handle required change
+  const handleRequiredChange = async (templateParamId: string, isRequired: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .update({ is_required: isRequired })
+        .eq('id', templateParamId)
+
+      if (error) throw error
+
+      // Invalidate cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+    } catch (error) {
+      console.error('Error updating required status:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado requerido",
+        variant: "destructive",
+      })
+    }
   }
 
-  // Handle parameter deletion locally
-  const handleDeleteParameter = (templateParamId: string) => {
-    setLocalTemplateParams(params =>
-      params.filter(param => param.id !== templateParamId)
-    )
+  // Handle parameter deletion
+  const handleDeleteParameter = async (templateParamId: string) => {
+    try {
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .delete()
+        .eq('id', templateParamId)
+
+      if (error) throw error
+
+      toast({
+        title: "Parámetro eliminado",
+        description: "El parámetro se ha eliminado del template correctamente.",
+      })
+
+      // Invalidate cache to refresh data
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+    } catch (error) {
+      console.error('Error deleting parameter:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el parámetro del template",
+        variant: "destructive",
+      })
+    }
   }
 
   // Drag and drop sensors
@@ -451,53 +480,59 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     enabled: !!templateId && currentStep === 2
   })
 
-  // Load existing parameters to local state when they're fetched
-  React.useEffect(() => {
-    if (currentTemplateParams.length > 0 && !hasLoadedParams) {
-      setLocalTemplateParams(currentTemplateParams)
-      setHasLoadedParams(true)
-    }
-  }, [currentTemplateParams, hasLoadedParams])
+  const addParameter = async () => {
+    if (!selectedParameterId || !templateId) return
 
-  const addParameter = () => {
-    if (!selectedParameterId) return
+    try {
+      // Check if parameter is already assigned
+      const isAlreadyAssigned = currentTemplateParams.some(tp => tp.parameter_id === selectedParameterId)
+      if (isAlreadyAssigned) {
+        toast({
+          title: 'Parámetro duplicado',
+          description: 'Este parámetro ya está asignado al template.',
+          variant: 'destructive',
+        })
+        return
+      }
 
-    // Check if parameter is already assigned
-    const isAlreadyAssigned = localTemplateParams.some(tp => tp.parameter_id === selectedParameterId)
-    if (isAlreadyAssigned) {
+      // Add parameter to template
+      const { error } = await supabase
+        .from('task_template_parameters')
+        .insert({
+          template_id: templateId,
+          parameter_id: selectedParameterId,
+          order_index: currentTemplateParams.length,
+          is_required: true
+        })
+
+      if (error) throw error
+
+      // Reset selection and show success
+      setSelectedParameterId('')
       toast({
-        title: 'Parámetro duplicado',
-        description: 'Este parámetro ya está asignado al template.',
+        title: 'Parámetro agregado',
+        description: 'El parámetro se ha agregado correctamente al template.',
+      })
+
+      // Refresh the template parameters list
+      queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+    } catch (error) {
+      console.error('Error adding parameter:', error)
+      toast({
+        title: 'Error',
+        description: 'No se pudo agregar el parámetro al template.',
         variant: 'destructive',
       })
-      return
     }
-
-    // Find the parameter data
-    const parameterData = allParameters.find(p => p.id === selectedParameterId)
-    if (!parameterData) return
-
-    // Add parameter to local state
-    const newTemplateParam = {
-      id: `temp-${Date.now()}`, // Temporary ID for local state
-      template_id: templateId || 'temp',
-      parameter_id: selectedParameterId,
-      order_index: localTemplateParams.length,
-      is_required: true,
-      parameter: parameterData
-    }
-
-    setLocalTemplateParams([...localTemplateParams, newTemplateParam])
-    setSelectedParameterId('')
   }
 
-  // Generate template preview phrase using expression_template from local state
+  // Generate template preview phrase using expression_template
   const generateTemplatePreview = () => {
-    if (localTemplateParams.length === 0) {
+    if (currentTemplateParams.length === 0) {
       return 'Sin parámetros configurados'
     }
 
-    const sortedParams = localTemplateParams
+    const sortedParams = currentTemplateParams
       .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
     
     // Use expression_template as-is from each parameter
@@ -519,65 +554,47 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     return result + '.'
   }
 
-  // Save template parameters to database (called when finishing the modal)
-  const saveTemplateParameters = async (finalTemplateId: string) => {
-    try {
-      // First, delete existing parameters for this template
-      const { error: deleteError } = await supabase
-        .from('task_template_parameters')
-        .delete()
-        .eq('template_id', finalTemplateId)
-
-      if (deleteError) throw deleteError
-
-      // Then insert all local parameters
-      if (localTemplateParams.length > 0) {
-        const parametersToInsert = localTemplateParams.map((param, index) => ({
-          template_id: finalTemplateId,
-          parameter_id: param.parameter_id,
-          order_index: index,
-          is_required: param.is_required
-        }))
-
-        const { error: insertError } = await supabase
-          .from('task_template_parameters')
-          .insert(parametersToInsert)
-
-        if (insertError) throw insertError
-      }
-
-      // Update the template's name_expression with the preview
-      const preview = generateTemplatePreview()
-      const { error: updateError } = await supabase
-        .from('task_templates')
-        .update({ name_expression: preview })
-        .eq('id', finalTemplateId)
-
-      if (updateError) throw updateError
-
-    } catch (error) {
-      console.error('Error saving template parameters:', error)
-      throw error
-    }
-  }
-
-  // Handle drag end for parameter reordering (local state only)
-  const handleDragEnd = (event: any) => {
+  // Handle drag end for parameter reordering
+  const handleDragEnd = async (event: any) => {
     const { active, over } = event
 
     if (active.id !== over.id) {
-      const oldIndex = localTemplateParams.findIndex((param) => param.id === active.id)
-      const newIndex = localTemplateParams.findIndex((param) => param.id === over.id)
+      const oldIndex = currentTemplateParams.findIndex((param) => param.id === active.id)
+      const newIndex = currentTemplateParams.findIndex((param) => param.id === over.id)
 
-      const newOrder = arrayMove(localTemplateParams, oldIndex, newIndex)
-      
-      // Update order_index for all parameters
-      const updatedParams = newOrder.map((param, index) => ({
-        ...param,
-        order_index: index
-      }))
+      const newOrder = arrayMove(currentTemplateParams, oldIndex, newIndex)
 
-      setLocalTemplateParams(updatedParams)
+      try {
+        // Update order_index for all affected parameters
+        const updates = newOrder.map((param, index) => ({
+          id: param.id,
+          order_index: index
+        }))
+
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('task_template_parameters')
+            .update({ order_index: update.order_index })
+            .eq('id', update.id)
+
+          if (error) throw error
+        }
+
+        // Refresh the data
+        queryClient.invalidateQueries({ queryKey: ['task-template-parameters', templateId] })
+        
+        toast({
+          title: 'Orden actualizado',
+          description: 'El orden de los parámetros se ha guardado correctamente.',
+        })
+      } catch (error) {
+        console.error('Error updating parameter order:', error)
+        toast({
+          title: 'Error',
+          description: 'No se pudo actualizar el orden de los parámetros.',
+          variant: 'destructive',
+        })
+      }
     }
   }
 
@@ -645,7 +662,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
             </div>
           </div>
           
-          {localTemplateParams.length === 0 ? (
+          {currentTemplateParams.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No hay parámetros asignados</p>
@@ -658,11 +675,11 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={localTemplateParams.map(tp => tp.id)}
+                items={currentTemplateParams.map(tp => tp.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-2">
-                  {localTemplateParams.map((tp) => (
+                  {currentTemplateParams.map((tp) => (
                     <SortableParameterItem
                       key={tp.id}
                       id={tp.id}
