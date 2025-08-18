@@ -28,9 +28,11 @@ import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } f
 import { supabase } from '@/lib/supabase'
 import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/PersonnelForm'
 import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
+import { ClientsForm, ClientsFormHandle, ClientItem } from './forms/ClientsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
+import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
 
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
@@ -123,6 +125,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
+  // Mutaciones para clientes de proyecto
+  const createMovementProjectClientsMutation = useCreateMovementProjectClients()
+  const updateMovementProjectClientsMutation = useUpdateMovementProjectClients()
+
+  // Query para cargar clientes existentes en modo edición
+  const { data: existingProjectClients } = useMovementProjectClients(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
+
   // States for hierarchical selection like the original modal
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
@@ -134,6 +145,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
   const [showSubcontractsForm, setShowSubcontractsForm] = React.useState(false)
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
+  const [showClientsForm, setShowClientsForm] = React.useState(false)
+  const [selectedClients, setSelectedClients] = React.useState<Array<{project_client_id: string, client_name: string, amount: number}>>([])
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -278,6 +291,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (editingMovement.id) {
         loadMovementPersonnel(editingMovement.id)
         loadMovementSubcontracts(editingMovement.id)
+        loadMovementProjectClients(editingMovement.id)
       }
     }
   }, [isEditing, editingMovement])
@@ -366,6 +380,57 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }
 
+  // Función para cargar clientes del proyecto asignados al movimiento
+  const loadMovementProjectClients = async (movementId: string) => {
+    try {
+      const { data: clientAssignments, error } = await supabase
+        .from('movement_project_clients')
+        .select(`
+          project_client_id,
+          amount,
+          project_clients:project_client_id (
+            id,
+            contact:contact_id (
+              first_name,
+              last_name,
+              company_name,
+              full_name
+            )
+          )
+        `)
+        .eq('movement_id', movementId)
+
+      if (error) throw error
+
+      if (clientAssignments && clientAssignments.length > 0) {
+        const formattedClients = clientAssignments.map((assignment: any) => {
+          const contact = assignment.project_clients?.contact
+          let clientName = 'Cliente sin nombre'
+          
+          if (contact) {
+            if (contact.company_name) {
+              clientName = contact.company_name
+            } else if (contact.full_name) {
+              clientName = contact.full_name
+            } else {
+              clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
+            }
+          }
+
+          return {
+            project_client_id: assignment.project_client_id,
+            client_name: clientName,
+            amount: assignment.amount
+          }
+        })
+
+        setSelectedClients(formattedClients)
+      }
+    } catch (error) {
+      console.error('Error loading movement project clients:', error)
+    }
+  }
+
   // Handle type change para detectar conversión (como en el modal original)
   const handleTypeChange = React.useCallback((newTypeId: string) => {
     if (!newTypeId || !movementConcepts) return
@@ -450,6 +515,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .eq('movement_id', editingMovement.id)
 
         if (deleteSubcontractsError) throw deleteSubcontractsError
+
+        // Actualizar clientes de proyecto asignados - eliminar existentes y crear nuevos
+        const { error: deleteProjectClientsError } = await supabase
+          .from('movement_project_clients')
+          .delete()
+          .eq('movement_id', editingMovement.id)
+
+        if (deleteProjectClientsError) throw deleteProjectClientsError
       } else {
         // Crear nuevo movimiento
         const { data: insertResult, error } = await supabase
@@ -490,6 +563,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .insert(subcontractsData)
 
         if (subcontractsError) throw subcontractsError
+      }
+
+      // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_project_clients
+      if (selectedClients && selectedClients.length > 0) {
+        const projectClientsData = selectedClients.map(client => ({
+          movement_id: result.id,
+          project_client_id: client.project_client_id,
+          amount: client.amount
+        }))
+
+        const { error: projectClientsError } = await supabase
+          .from('movement_project_clients')
+          .insert(projectClientsData)
+
+        if (projectClientsError) throw projectClientsError
       }
 
       return result
@@ -737,6 +825,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         text: 'Gestionar Subcontratos',
         icon: FileText,
         onClick: () => setShowSubcontractsForm(true)
+      },
+      'f3b96eda-15d5-4c96-ade7-6f53685115d3': {
+        text: 'Gestionar Clientes',
+        icon: Users,
+        onClick: () => setShowClientsForm(true)
       }
     }
 
@@ -1117,6 +1210,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           </div>
         )}
 
+        {/* CLIENTES DE PROYECTO SELECCIONADOS (si hay) */}
+        {selectedClients.length > 0 && (
+          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
+            <h4 className="text-sm font-medium text-foreground">Clientes Seleccionados:</h4>
+            {selectedClients.map((client, index) => (
+              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                <div className="truncate">{client.client_name}</div>
+                <div className="text-right font-medium">${client.amount.toFixed(2)}</div>
+              </div>
+            ))}
+            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+              <div className="font-medium">Total:</div>
+              <div className="text-right font-bold">
+                ${selectedClients.reduce((sum, c) => sum + c.amount, 0).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
           form={form}
@@ -1140,6 +1252,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Panel para PersonnelForm
   const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
   const subcontractsFormRef = React.useRef<SubcontractsFormHandle>(null)
+  const clientsFormRef = React.useRef<ClientsFormHandle>(null)
   
   const personnelPanel = (
     <PersonnelForm 
@@ -1165,12 +1278,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     />
   )
 
+  const clientsPanel = (
+    <ClientsForm 
+      ref={clientsFormRef}
+      onClose={() => setShowClientsForm(false)} 
+      onConfirm={(clientsList) => {
+        setSelectedClients(clientsList)
+        setShowClientsForm(false)
+      }}
+      initialClients={selectedClients}
+    />
+  )
+
   // Seleccionar panel a mostrar
   const currentPanel = showPersonnelForm 
     ? personnelPanel 
     : showSubcontractsForm 
       ? subcontractsPanel 
-      : editPanel
+      : showClientsForm
+        ? clientsPanel
+        : editPanel
 
   // Header del modal
   const headerContent = (
@@ -1179,17 +1306,23 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         ? "Gestión de Personal" 
         : showSubcontractsForm 
           ? "Gestión de Subcontratos"
-          : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
+          : showClientsForm
+            ? "Gestión de Clientes"
+            : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
       description={showPersonnelForm 
         ? "Asigna personal y montos para este movimiento financiero" 
         : showSubcontractsForm
           ? "Asigna subcontratos y montos para este movimiento financiero"
-          : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
+          : showClientsForm
+            ? "Asigna clientes de proyecto y montos para este movimiento financiero"
+            : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
       icon={showPersonnelForm 
         ? Users 
         : showSubcontractsForm
           ? FileText
-          : DollarSign}
+          : showClientsForm
+            ? Users
+            : DollarSign}
     />
   )
 
@@ -1210,6 +1343,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       rightLabel="Confirmar Subcontratos"
       onRightClick={() => {
         subcontractsFormRef.current?.confirmSubcontracts()
+      }}
+    />
+  ) : showClientsForm ? (
+    <FormModalFooter
+      leftLabel="Volver"
+      onLeftClick={() => setShowClientsForm(false)}
+      rightLabel="Confirmar Clientes"
+      onRightClick={() => {
+        clientsFormRef.current?.confirmClients()
       }}
     />
   ) : (

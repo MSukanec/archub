@@ -179,3 +179,32 @@ TABLA MOVEMENT_SUBCONTRACTS:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLA MOVEMENT_PROJECT_CLIENTS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_client_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
