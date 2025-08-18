@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Plus, FileCode, Edit, Copy, Trash2, Search, Settings, Eye } from 'lucide-react'
+import { Plus, FileCode, Edit, Trash2, Search, Settings } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
 import { useTaskTemplates, useDeleteTaskTemplate } from '@/hooks/use-task-templates'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -78,31 +78,9 @@ const AdminTaskTemplates = () => {
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0"
-            onClick={() => {
-              setSelectedTemplate(template)
-              setActiveTab('Editor')
-            }}
-          >
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
             onClick={() => openModal('task-template', { template })}
           >
             <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={() => {
-              // TODO: Implementar duplicar plantilla
-              console.log('Duplicar plantilla:', template.id)
-            }}
-          >
-            <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
