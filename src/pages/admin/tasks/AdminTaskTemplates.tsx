@@ -66,6 +66,7 @@ const AdminTaskTemplates = () => {
     {
       key: 'name',
       label: 'Nombre',
+      className: 'w-1/3',
       render: (template: any) => (
         <div className="flex items-center gap-2">
           <FileCode className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -79,6 +80,7 @@ const AdminTaskTemplates = () => {
     {
       key: 'unit',
       label: 'Unidad',
+      className: 'w-1/3',
       render: (template: any) => (
         <Badge variant="outline" className="text-xs">
           {template.unit?.name || 'Sin unidad'}
@@ -86,26 +88,9 @@ const AdminTaskTemplates = () => {
       )
     },
     {
-      key: 'parameters',
-      label: 'Parámetros',
-      render: (template: any) => (
-        <div className="text-sm text-muted-foreground">
-          {template.parameters?.length || 0} parámetros
-        </div>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Estado',
-      render: (template: any) => (
-        <Badge variant={template.is_active ? 'default' : 'secondary'} className="text-xs">
-          {template.is_active ? 'Activo' : 'Inactivo'}
-        </Badge>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
+      className: 'w-1/3',
       render: (template: any) => (
         <div className="flex items-center gap-1">
           <Button
@@ -181,40 +166,7 @@ const AdminTaskTemplates = () => {
   return (
     <div className="space-y-6">
       {activeTab === 'Lista' && (
-        <div className="space-y-4">
-          {/* TableTopBar */}
-          <TableTopBar
-            tabs={groupBy === 'none' ? ['Sin Agrupar'] : ['Por Categorías']}
-            activeTab={groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías'}
-            onTabChange={(tab) => setGroupBy(tab === 'Sin Agrupar' ? 'none' : 'category')}
-            showSearch={true}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            showSort={true}
-            renderSortContent={() => (
-              <div className="p-3 space-y-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-xs"
-                  onClick={() => setGroupBy('none')}
-                >
-                  Sin Agrupar
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-xs"
-                  onClick={() => setGroupBy('category')}
-                >
-                  Por Categorías
-                </Button>
-              </div>
-            )}
-            isSortActive={true}
-          />
-
-          {/* Contenido agrupado */}
+        <>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
@@ -241,12 +193,42 @@ const AdminTaskTemplates = () => {
                     columns={columns}
                     isLoading={false}
                     className="min-w-full"
+                    topBar={{
+                      tabs: [groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías'],
+                      activeTab: groupBy === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+                      onTabChange: (tab) => setGroupBy(tab === 'Sin Agrupar' ? 'none' : 'category'),
+                      showSearch: true,
+                      searchValue: searchValue,
+                      onSearchChange: setSearchValue,
+                      showSort: true,
+                      renderSortContent: () => (
+                        <div className="p-3 space-y-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-xs"
+                            onClick={() => setGroupBy('none')}
+                          >
+                            Sin Agrupar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-xs"
+                            onClick={() => setGroupBy('category')}
+                          >
+                            Por Categorías
+                          </Button>
+                        </div>
+                      ),
+                      isSortActive: true
+                    }}
                   />
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </>
       )}
       
       {activeTab === 'Editor' && (
