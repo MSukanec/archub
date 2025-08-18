@@ -94,7 +94,7 @@ export default function AnalysisMaterials() {
       width: '12%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
-          {product.unit_presentation?.unit?.name || 'N/A'}
+          {product.unit_presentation?.name || 'N/A'}
         </Badge>
       )
     },
