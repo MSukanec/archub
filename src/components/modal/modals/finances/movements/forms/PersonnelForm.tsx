@@ -17,6 +17,7 @@ export interface PersonnelItem {
 interface PersonnelFormProps {
   onClose: () => void
   onConfirm?: (personnelList: PersonnelItem[]) => void
+  initialPersonnel?: PersonnelItem[]
 }
 
 // Handle interface for ref
@@ -25,11 +26,14 @@ export interface PersonnelFormHandle {
 }
 
 export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>(
-  ({ onClose, onConfirm }, ref) => {
-    // Initialize with one empty row by default
-    const [personnelRows, setPersonnelRows] = useState<PersonnelItem[]>([
-      { personnel_id: '', contact_name: '', amount: 0 }
-    ])
+  ({ onClose, onConfirm, initialPersonnel }, ref) => {
+    // Initialize with existing personnel or one empty row
+    const [personnelRows, setPersonnelRows] = useState<PersonnelItem[]>(() => {
+      if (initialPersonnel && initialPersonnel.length > 0) {
+        return initialPersonnel
+      }
+      return [{ personnel_id: '', contact_name: '', amount: 0 }]
+    })
     
     // Get current user data to access project info
     const { data: userData } = useCurrentUser()
@@ -38,17 +42,25 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
     // Get project personnel
     const { data: projectPersonnel = [], isLoading } = useProjectPersonnel(projectId)
 
-    // Transform personnel data for ComboBox
-    const personnelOptions = projectPersonnel.map((person: any) => ({
-      value: person.id,
-      label: `${person.contact?.first_name || ''} ${person.contact?.last_name || ''}`.trim() || 'Sin nombre'
-    }))
+    // Transform personnel data for ComboBox  
+    const personnelOptions = projectPersonnel.map((person: any) => {
+      // Handle both array and object contact structures
+      const contact = Array.isArray(person.contact) ? person.contact[0] : person.contact
+      return {
+        value: person.id,
+        label: `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
+      }
+    })
 
     const handlePersonnelChange = (index: number, personnelId: string) => {
       const selectedPerson = projectPersonnel.find(p => p.id === personnelId)
-      const contactName = selectedPerson 
-        ? `${selectedPerson.contact?.first_name || ''} ${selectedPerson.contact?.last_name || ''}`.trim() || 'Sin nombre'
-        : ''
+      let contactName = 'Sin nombre'
+      
+      if (selectedPerson) {
+        // Handle both array and object contact structures
+        const contact = Array.isArray(selectedPerson.contact) ? selectedPerson.contact[0] : selectedPerson.contact
+        contactName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
+      }
 
       setPersonnelRows(rows => rows.map((row, i) => 
         i === index 

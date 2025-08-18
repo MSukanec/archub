@@ -892,6 +892,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         setSelectedPersonnel(personnelList)
         setShowPersonnelForm(false)
       }}
+      initialPersonnel={selectedPersonnel}
     />
   )
 
