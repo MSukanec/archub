@@ -16,6 +16,7 @@ import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/ho
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useQuery as useSupabaseQuery } from '@tanstack/react-query'
 
 const taskTemplateSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -44,6 +45,22 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   
   const isEditing = Boolean(modalData?.template)
   const template = modalData?.template
+
+  // Fetch organization members to get current member ID
+  const { data: organizationMembers = [] } = useSupabaseQuery({
+    queryKey: ['organization-members', currentUser?.organization?.id],
+    queryFn: async () => {
+      if (!supabase || !currentUser?.organization?.id) return []
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id, user_id')
+        .eq('organization_id', currentUser.organization.id)
+        .eq('is_active', true)
+      if (error) throw error
+      return data
+    },
+    enabled: !!currentUser?.organization?.id
+  })
 
   // Fetch units for dropdown
   const { data: units = [] } = useQuery({
@@ -111,9 +128,15 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
         })
         setCreatedTemplate(updated)
       } else {
+        // Get current organization member ID
+        const currentUserId = currentUser?.user?.id
+        const currentMember = organizationMembers.find(m => m.user_id === currentUserId)
+        if (!currentMember) throw new Error('No se encontró el miembro de la organización')
+
         const newTemplate = await createMutation.mutateAsync({
           ...data,
           is_active: true,
+          created_by: currentMember.id, // Use organization member UUID
         })
         setCreatedTemplate(newTemplate)
       }
