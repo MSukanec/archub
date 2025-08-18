@@ -20,11 +20,9 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 const taskTemplateSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   code: z.string().min(1, 'El código es requerido'),
-  name_expression: z.string().min(1, 'La expresión de nombre es requerida'),
   unit_id: z.string().optional(),
   task_category_id: z.string().optional(),
   task_kind_id: z.string().optional(),
-  version: z.number().min(1, 'La versión debe ser mayor a 0').default(1),
   is_active: z.boolean().default(true),
 })
 
@@ -92,11 +90,9 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     defaultValues: {
       name: template?.name || '',
       code: template?.code || '',
-      name_expression: template?.name_expression || '',
       unit_id: template?.unit_id || '',
       task_category_id: template?.task_category_id || '',
       task_kind_id: template?.task_kind_id || '',
-      version: template?.version || 1,
       is_active: template?.is_active ?? true,
     },
   })
@@ -122,14 +118,16 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
   }
 
-  // Auto-generate code from name
+  // Auto-generate code from name with accent normalization
   const handleNameChange = (value: string) => {
     form.setValue('name', value)
     if (!isEditing) {
       const code = value
+        .normalize('NFD') // Decompose accented characters
+        .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
         .toUpperCase()
-        .replace(/[^A-Z0-9\s]/g, '')
-        .replace(/\s+/g, '_')
+        .replace(/[^A-Z0-9\s]/g, '') // Keep only alphanumeric and spaces
+        .replace(/\s+/g, '_') // Replace spaces with underscores
         .trim()
       form.setValue('code', code)
     }
@@ -138,6 +136,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Primera fila: Nombre */}
         <FormField
           control={form.control}
           name="name"
@@ -156,106 +155,93 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           )}
         />
 
+        {/* Segunda fila: Código (bloqueado) */}
         <FormField
           control={form.control}
           name="code"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Código / Slug Único</FormLabel>
+              <FormLabel>Código</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ej: MURO_MAMPOSTERIA"
+                  placeholder="Se genera automáticamente"
                   {...field}
+                  disabled={true}
+                  className="bg-muted"
                 />
               </FormControl>
               <p className="text-xs text-muted-foreground">
-                Debe ser único en la base de datos
+                Se genera automáticamente desde el nombre
               </p>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="name_expression"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Expresión de Nombre</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Muro {tipo_muro} con {tipo_ladrillo}"
-                  {...field}
-                />
-              </FormControl>
-              <p className="text-xs text-muted-foreground">
-                Usar llaves {'{}'} para parámetros dinámicos
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Grid de 2 columnas para desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="task_category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {taskCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="unit_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad de Medida</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar unidad (m2, ml, unidad...)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="unit_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unidad de Medida</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar unidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <FormField
-          control={form.control}
-          name="task_category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría (ej: Albañilería, Terminaciones...)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {taskCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        {/* Tipo de Acción */}
         <FormField
           control={form.control}
           name="task_kind_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo de Acción / Kind</FormLabel>
+              <FormLabel>Tipo de Acción</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo (ej: Ejecución, Instalación, Pintura...)" />
+                    <SelectValue placeholder="Seleccionar tipo de acción" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -271,25 +257,7 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="version"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Versión</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Ej: 1"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        {/* Estado */}
         <FormField
           control={form.control}
           name="is_active"
