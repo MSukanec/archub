@@ -414,25 +414,25 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           )}
         />
 
-        {/* Descripción para conversiones */}
-        {movementType === 'conversion' && (
-          <FormField
-            control={conversionForm.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Descripción de la conversión..."
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {/* Descripción - siempre visible */}
+        <FormField
+          control={movementType === 'conversion' ? conversionForm.control : form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción {movementType === 'normal' ? '*' : ''}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={movementType === 'conversion' 
+                    ? "Descripción de la conversión..." 
+                    : "Descripción del movimiento..."}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Campos condicionales según el tipo de movimiento */}
         {movementType === 'conversion' ? (
@@ -516,23 +516,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
               />
             )}
 
-            {/* Descripción */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Descripción del movimiento..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <DefaultMovementFields
               form={form}
