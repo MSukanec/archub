@@ -12,13 +12,17 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
-import { TemplateParamsStep } from '@/components/modal/steps/TemplateParamsStep'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Plus, FileText } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery as useSupabaseQuery } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
 
 const taskTemplateSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -39,6 +43,7 @@ interface TaskTemplateFormModalProps {
 
 export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormModalProps) {
   const { data: currentUser } = useCurrentUser()
+  const { toast } = useToast()
   const createMutation = useCreateTaskTemplate()
   const updateMutation = useUpdateTaskTemplate()
   
@@ -285,10 +290,56 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     </Form>
   )
 
+  // Estados para el paso 2
+  const [selectedParameterId, setSelectedParameterId] = useState<string>('')
+
+  // Queries para el paso 2
+  const templateId = createdTemplate?.id || (isEditing ? template?.id : null)
+
+  // Fetch all available parameters
+  const { data: allParameters = [] } = useQuery({
+    queryKey: ['task-parameters-available'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_parameters')
+        .select('*')
+        .order('label')
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: currentStep === 2
+  })
+
+  // Fetch current template parameters
+  const { data: currentTemplateParams = [] } = useQuery({
+    queryKey: ['task-template-parameters', templateId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('task_template_parameters')
+        .select(`
+          *,
+          parameter:task_parameters(id, slug, label, type)
+        `)
+        .eq('template_id', templateId)
+        .order('order_index')
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!templateId && currentStep === 2
+  })
+
+  const addParameter = () => {
+    console.log('Adding parameter:', selectedParameterId)
+    toast({
+      title: 'Parámetro agregado',
+      description: 'Esta funcionalidad se implementará próximamente.',
+    })
+  }
+
   // Paso 2: Configuración de Parámetros
   const getStep2Content = () => {
-    const templateId = createdTemplate?.id || (isEditing ? template?.id : null)
-    
     if (!templateId) {
       return (
         <div className="text-center py-8">
@@ -298,12 +349,79 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     }
 
     return (
-      <TemplateParamsStep
-        templateId={templateId}
-        nameExpression={createdTemplate?.name_expression || template?.name_expression}
-        onBack={() => setCurrentStep(1)}
-        onFinish={onClose}
-      />
+      <div className="space-y-6">
+        {/* Add Parameter Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Agregar parámetro</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Seleccionar parámetro</label>
+              <Select value={selectedParameterId} onValueChange={setSelectedParameterId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Buscar parámetro..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {allParameters.map(param => (
+                    <SelectItem key={param.id} value={param.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{param.label}</span>
+                        <code className="text-xs text-muted-foreground">
+                          {param.slug}
+                        </code>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              onClick={addParameter} 
+              disabled={!selectedParameterId}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar parámetro
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Assigned Parameters Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Parámetros asignados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {currentTemplateParams.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No hay parámetros asignados</p>
+                <p className="text-xs">Agrega parámetros desde el panel superior</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {currentTemplateParams.map((tp) => (
+                  <div key={tp.id} className="border rounded-lg p-3 bg-background">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium text-sm">{tp.parameter?.label}</span>
+                        <code className="text-xs text-muted-foreground ml-2">
+                          {tp.parameter?.slug}
+                        </code>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {tp.parameter?.type}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
