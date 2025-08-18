@@ -81,12 +81,10 @@ export default function Dashboard() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="p-6">
-        {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
-        {activeTab === 'Datos Básicos' && <DashboardBasicData organization={organization} />}
-        {activeTab === 'Miembros' && <DashboardMembers organization={organization} />}
-        {activeTab === 'Actividad' && <DashboardActivity />}
-      </div>
+      {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
+      {activeTab === 'Datos Básicos' && <DashboardBasicData organization={organization} />}
+      {activeTab === 'Miembros' && <DashboardMembers organization={organization} />}
+      {activeTab === 'Actividad' && <DashboardActivity />}
     </Layout>
   );
 }
