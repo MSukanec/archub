@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Plus, FileCode, Edit, Copy, Trash2, Search, Settings, Eye } from 'lucide-react'
 import { Table } from '@/components/ui-custom/Table'
-import { useTaskTemplates } from '@/hooks/use-task-templates'
+import { useTaskTemplates, useDeleteTaskTemplate } from '@/hooks/use-task-templates'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Header } from '@/components/layout/desktop/Header'
 
@@ -19,6 +19,7 @@ const AdminTaskTemplates = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   
   const { data: templates = [], isLoading } = useTaskTemplates()
+  const deleteTaskTemplate = useDeleteTaskTemplate()
   const { openModal } = useGlobalModalStore()
 
   // Filtrar plantillas
@@ -113,8 +114,8 @@ const AdminTaskTemplates = () => {
                 description: '¿Estás seguro de que deseas eliminar esta plantilla de tarea?',
                 itemName: template.name,
                 onConfirm: () => {
-                  // TODO: Implementar eliminación
                   console.log('Eliminar plantilla:', template.id)
+                  deleteTaskTemplate.mutate(template.id)
                 }
               })
             }}
