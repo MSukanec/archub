@@ -304,6 +304,10 @@ TABLA TASKS:
   {
     "column_name": "custom_name",
     "data_type": "text"
+  },
+  {
+    "column_name": "task_template_id",
+    "data_type": "uuid"
   }
 ]
 
@@ -389,14 +393,6 @@ TABLA TASK_TEMPLATES:
     "data_type": "text"
   },
   {
-    "column_name": "slug",
-    "data_type": "text"
-  },
-  {
-    "column_name": "description",
-    "data_type": "text"
-  },
-  {
     "column_name": "unit_id",
     "data_type": "uuid"
   },
@@ -415,6 +411,30 @@ TABLA TASK_TEMPLATES:
   {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "task_kind_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "version",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
   }
 ]
 
