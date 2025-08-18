@@ -154,3 +154,28 @@ TABLA MOVEMENT_PERSONNEL:
     "data_type": "numeric"
   }
 ]
+
+TABLA MOVEMENT_SUBCONTRACTS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "subcontract_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  }
+]

@@ -26,7 +26,8 @@ import { TransferFields } from './fields/TransferFields'
 import { CustomButton } from '@/components/ui-custom/CustomButton'
 import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { PersonnelForm, PersonnelFormHandle } from './forms/PersonnelForm'
+import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/PersonnelForm'
+import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 
@@ -121,6 +122,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
   const [showPersonnelForm, setShowPersonnelForm] = React.useState(false)
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
+  const [showSubcontractsForm, setShowSubcontractsForm] = React.useState(false)
+  const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -652,6 +655,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         text: 'Gestionar Personal', 
         icon: Users,
         onClick: () => setShowPersonnelForm(true) 
+      },
+      'f40a8fda-69e6-4e81-bc8a-464359cd8498': {
+        text: 'Gestionar Subcontratos',
+        icon: FileText,
+        onClick: () => setShowSubcontractsForm(true)
       }
     }
 
@@ -1035,6 +1043,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Panel para PersonnelForm
   const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
+  const subcontractsFormRef = React.useRef<SubcontractsFormHandle>(null)
   
   const personnelPanel = (
     <PersonnelForm 
@@ -1048,15 +1057,43 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     />
   )
 
+  const subcontractsPanel = (
+    <SubcontractsForm 
+      ref={subcontractsFormRef}
+      onClose={() => setShowSubcontractsForm(false)} 
+      onConfirm={(subcontractsList) => {
+        setSelectedSubcontracts(subcontractsList)
+        setShowSubcontractsForm(false)
+      }}
+      initialSubcontracts={selectedSubcontracts}
+    />
+  )
+
   // Seleccionar panel a mostrar
-  const currentPanel = showPersonnelForm ? personnelPanel : editPanel
+  const currentPanel = showPersonnelForm 
+    ? personnelPanel 
+    : showSubcontractsForm 
+      ? subcontractsPanel 
+      : editPanel
 
   // Header del modal
   const headerContent = (
     <FormModalHeader 
-      title={showPersonnelForm ? "Gestión de Personal" : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
-      description={showPersonnelForm ? "Asigna personal y montos para este movimiento financiero" : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
-      icon={showPersonnelForm ? Users : DollarSign}
+      title={showPersonnelForm 
+        ? "Gestión de Personal" 
+        : showSubcontractsForm 
+          ? "Gestión de Subcontratos"
+          : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
+      description={showPersonnelForm 
+        ? "Asigna personal y montos para este movimiento financiero" 
+        : showSubcontractsForm
+          ? "Asigna subcontratos y montos para este movimiento financiero"
+          : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
+      icon={showPersonnelForm 
+        ? Users 
+        : showSubcontractsForm
+          ? FileText
+          : DollarSign}
     />
   )
 
@@ -1068,6 +1105,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       rightLabel="Confirmar Personal"
       onRightClick={() => {
         personnelFormRef.current?.confirmPersonnel()
+      }}
+    />
+  ) : showSubcontractsForm ? (
+    <FormModalFooter
+      leftLabel="Volver"
+      onLeftClick={() => setShowSubcontractsForm(false)}
+      rightLabel="Confirmar Subcontratos"
+      onRightClick={() => {
+        subcontractsFormRef.current?.confirmSubcontracts()
       }}
     />
   ) : (
