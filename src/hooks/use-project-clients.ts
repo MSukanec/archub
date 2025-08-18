@@ -17,8 +17,6 @@ export interface ProjectClient {
   organization_id: string
   project_id: string
   client_id: string
-  client_amount: number
-  currency_id: string
   is_active: boolean
   created_at: string
   contact: Contact
@@ -45,8 +43,6 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
           organization_id,
           project_id,
           client_id,
-          client_amount,
-          currency_id,
           is_active,
           created_at,
           contact:client_id (

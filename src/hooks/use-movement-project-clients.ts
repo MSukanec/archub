@@ -10,15 +10,11 @@ export interface MovementProjectClientAssignment {
   updated_at?: string
   project_clients?: {
     id: string
+    organization_id: string
     project_id: string
     client_id: string
-    committed_amount: number
-    currency_id: string
-    role: string
     is_active: boolean
-    notes: string
     created_at: string
-    updated_at: string
     contact: {
       id: string
       first_name: string
@@ -63,18 +59,14 @@ export function useMovementProjectClients(movementId?: string) {
           amount,
           created_at,
           updated_at,
-          project_clients:project_clients!inner(
+          project_clients:project_client_id(
             id,
+            organization_id,
             project_id,
             client_id,
-            committed_amount,
-            currency_id,
-            role,
             is_active,
-            notes,
             created_at,
-            updated_at,
-            contact:contacts!inner(
+            contact:client_id(
               id,
               first_name,
               last_name,
