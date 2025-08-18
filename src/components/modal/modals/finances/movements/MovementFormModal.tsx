@@ -2762,19 +2762,30 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
     </div>
   )
 
-  // Subform para configuración de subcontratos
+  // Subform para selección de subcontratos
   const subcontractsSubform = (
-    <SubcontractForm
-      editingMovement={editingMovement}
-      mainForm={form}
-      onClose={onClose}
-      onSuccess={() => {
-        // Invalidar cache de movimientos
-        queryClient.invalidateQueries({ queryKey: ['/api/finance/movements'] })
-        // Cerrar modal
-        onClose()
-      }}
-    />
+    <div className="space-y-6">
+      <div className="space-y-4">
+        {/* Campo de Subcontrato */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-foreground">
+            Subcontrato
+          </label>
+          <ComboBoxWrite
+            value={selectedSubcontractId || ""}
+            onValueChange={setSelectedSubcontractId}
+            options={subcontractOptions}
+            placeholder="Seleccionar subcontrato..."
+            searchPlaceholder="Buscar subcontrato..."
+            emptyMessage="No se encontraron subcontratos del proyecto."
+          />
+        </div>
+        
+        <p className="text-xs text-muted-foreground">
+          Configura el subcontrato relacionado con este pago
+        </p>
+      </div>
+    </div>
   )
 
   // Función para obtener el subform actual
