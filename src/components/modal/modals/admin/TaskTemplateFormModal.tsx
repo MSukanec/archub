@@ -17,6 +17,7 @@ import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/
 import { Plus, FileText, GripVertical, Settings, Eye, Trash2, Check, X } from 'lucide-react'
 
 import { useCreateTaskTemplate, useUpdateTaskTemplate, TaskTemplate } from '@/hooks/use-task-templates'
+import { useTaskParametersAdmin, type TaskParameterOption } from '@/hooks/use-task-parameters-admin'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -59,15 +60,15 @@ function SortableParameterItem({
   // Estado local para las opciones seleccionadas (por ahora no se guarda)
   const [selectedOptions, setSelectedOptions] = React.useState<string[]>([])
 
-  // Mock data de opciones para demostración (después vendrá de la BD)
-  const mockOptions: ComboBoxMultiRowsOption[] = [
-    { value: 'ladrillo', label: 'Ladrillo' },
-    { value: 'hormigon', label: 'Hormigón' },
-    { value: 'acero', label: 'Acero' },
-    { value: 'madera', label: 'Madera' },
-    { value: 'vidrio', label: 'Vidrio' },
-    { value: 'aluminio', label: 'Aluminio' },
-  ]
+  // Obtener datos de parámetros para conseguir las opciones reales
+  const { data: parametersData } = useTaskParametersAdmin()
+  
+  // Encontrar las opciones del parámetro actual
+  const parameterWithOptions = parametersData?.find(p => p.id === parameter?.id)
+  const realOptions: ComboBoxMultiRowsOption[] = parameterWithOptions?.options?.map(option => ({
+    value: option.id,
+    label: option.label
+  })) || []
   const {
     attributes,
     listeners,
@@ -136,11 +137,12 @@ function SortableParameterItem({
       {/* Segunda fila: selector de opciones a 100% ancho */}
       <div className="w-full">
         <ComboBoxMultiRows
-          options={mockOptions}
+          options={realOptions}
           value={selectedOptions}
           onValueChange={setSelectedOptions}
-          placeholder="Seleccionar opciones..."
+          placeholder={realOptions.length > 0 ? "Seleccionar opciones..." : "No hay opciones disponibles"}
           className="w-full h-7 text-xs"
+          disabled={realOptions.length === 0}
         />
       </div>
     </div>
