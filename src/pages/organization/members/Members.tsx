@@ -3,7 +3,7 @@ import { Users, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { MemberList } from './MemberList';
-import { MemberClients } from './MemberClients';
+import { MemberPartners } from './MemberPartners';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -24,9 +24,9 @@ export default function Members() {
       isActive: activeTab === 'Lista'
     },
     {
-      id: 'Clientes',
-      label: 'Clientes',
-      isActive: activeTab === 'Clientes'
+      id: 'Socios',
+      label: 'Socios',
+      isActive: activeTab === 'Socios'
     }
   ];
 
@@ -37,12 +37,19 @@ export default function Members() {
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
 
-    // Solo mostrar botón de invitar en la tab de Lista
+    // Botones según la tab activa
     ...(activeTab === 'Lista' && {
       actionButton: {
         label: 'Invitar Miembro',
         icon: UserPlus,
         onClick: () => openModal('member')
+      }
+    }),
+    ...(activeTab === 'Socios' && {
+      actionButton: {
+        label: 'Ingresar Socio',
+        icon: UserPlus,
+        onClick: () => {} // Sin función por ahora
       }
     })
   };
@@ -70,7 +77,7 @@ export default function Members() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Lista' && <MemberList organization={organization} />}
-      {activeTab === 'Clientes' && <MemberClients organization={organization} />}
+      {activeTab === 'Socios' && <MemberPartners organization={organization} />}
     </Layout>
   );
 }
