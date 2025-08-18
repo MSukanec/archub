@@ -129,3 +129,28 @@ TABLA MOVEMENT_CONCEPTS:
     "data_type": "jsonb"
   }
 ]
+
+TABLA MOVEMENT_PERSONNEL:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "personnel_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  }
+]

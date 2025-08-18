@@ -43,9 +43,9 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
         className={cn(
           "w-full flex items-center gap-3 p-3 rounded-lg border transition-all duration-200",
           "text-left bg-transparent hover:bg-accent/5",
-          "border-solid border-foreground/20 hover:border-accent",
+          "border-solid border-[var(--input-border)] hover:border-accent",
           "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-foreground/20",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-[var(--input-border)]",
           isHovered && !disabled && "border-accent shadow-sm"
         )}
       >

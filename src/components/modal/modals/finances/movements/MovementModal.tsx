@@ -807,8 +807,8 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
           />
         )}
 
-        {/* SUBCATEGORÍAS (solo para movimientos normales) */}
-        {selectedCategoryId && subcategories.length > 0 && (
+        {/* SUBCATEGORÍAS (OCULTAS TEMPORALMENTE) */}
+        {/* {selectedCategoryId && subcategories.length > 0 && (
           <FormField
             control={form.control}
             name="subcategory_id"
@@ -838,7 +838,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
               </FormItem>
             )}
           />
-        )}
+        )} */}
 
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
