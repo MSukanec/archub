@@ -5,13 +5,17 @@ import { useToast } from '@/hooks/use-toast'
 export interface TaskTemplate {
   id: string
   name: string
-  slug: string
-  description?: string
+  code: string
   unit_id?: string
+  task_category_id?: string
+  task_kind_id?: string
   name_expression: string
   is_active: boolean
   created_by: string
   created_at: string
+  updated_at?: string
+  version?: number
+  is_system?: boolean
   unit?: {
     id: string
     name: string

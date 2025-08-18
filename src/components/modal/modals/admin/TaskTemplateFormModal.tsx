@@ -116,10 +116,10 @@ export function TaskTemplateFormModal({ modalData, onClose }: TaskTemplateFormMo
     resolver: zodResolver(taskTemplateSchema),
     defaultValues: {
       name: template?.name || '',
-      code: template?.slug || '',
+      code: template?.code || '',
       unit_id: template?.unit_id || '',
-      task_category_id: '',
-      task_kind_id: '',
+      task_category_id: template?.task_category_id || '',
+      task_kind_id: template?.task_kind_id || '',
     },
   })
 
