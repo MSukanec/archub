@@ -16,6 +16,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
+import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -24,6 +25,7 @@ import { useToast } from '@/hooks/use-toast'
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
   movement_date: z.date(),
+  created_by: z.string().min(1, 'Creador es requerido'),
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
@@ -47,6 +49,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
+  const { data: members } = useOrganizationMembers(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -58,6 +61,11 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
   const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
+  
+  // Find current member like the original modal
+  const currentMember = React.useMemo(() => {
+    return members?.find(m => m.user_id === userData?.user?.id)
+  }, [members, userData?.user?.id])
 
   // Calculate categories and subcategories like the original modal
   const categories = React.useMemo(() => {
@@ -92,6 +100,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
       movement_date: new Date(), // HOY por defecto
+      created_by: currentMember?.id || '',
       type_id: '',
       category_id: '',
       subcategory_id: '',
@@ -110,7 +119,10 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
     if (defaultWallet && !form.watch('wallet_id')) {
       form.setValue('wallet_id', defaultWallet)
     }
-  }, [defaultCurrency, defaultWallet, form])
+    if (currentMember?.id && !form.watch('created_by')) {
+      form.setValue('created_by', currentMember.id)
+    }
+  }, [defaultCurrency, defaultWallet, currentMember, form])
 
   // Mutation para crear el movimiento
   const createMovementMutation = useMutation({
@@ -124,7 +136,7 @@ export function MovementModal({ modalData, onClose }: MovementModalProps) {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
         movement_date: data.movement_date.toISOString().split('T')[0],
-        created_by: userData.id,
+        created_by: data.created_by,
         description: data.description,
         amount: data.amount,
         currency_id: data.currency_id,
