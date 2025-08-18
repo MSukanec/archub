@@ -15,7 +15,8 @@ import {
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { usePartners } from '@/hooks/use-partners';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
@@ -63,38 +64,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
   const organizationId = organization?.id;
 
   // Query to get partners with their contact information
-  const { data: partners = [], isLoading } = useQuery({
-    queryKey: ['partners', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      
-      const { data, error } = await supabase
-        .from('partners')
-        .select(`
-          id,
-          created_at,
-          contacts!inner(
-            id,
-            first_name,
-            last_name,
-            email,
-            phone,
-            company_name
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching partners:', error);
-        throw error;
-      }
-      
-      console.log('Partners fetched:', data);
-      return data || [];
-    },
-    enabled: !!organizationId,
-  });
+  const { data: partners = [], isLoading } = usePartners(organizationId);
 
   const removeMemberMutation = useMutation({
     mutationFn: async (partnerId: string) => {

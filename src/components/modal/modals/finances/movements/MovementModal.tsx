@@ -29,6 +29,7 @@ import { supabase } from '@/lib/supabase'
 import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/PersonnelForm'
 import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
 import { ClientsForm, ClientsFormHandle, ClientItem } from './forms/ClientsForm'
+import { PartnerWithdrawalsForm, PartnerWithdrawalsFormHandle, PartnerWithdrawalItem } from './forms/PartnerWithdrawalsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
@@ -147,6 +148,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [showClientsForm, setShowClientsForm] = React.useState(false)
   const [selectedClients, setSelectedClients] = React.useState<Array<{project_client_id: string, client_name: string, amount: number}>>([])
+  const [showPartnerWithdrawalsForm, setShowPartnerWithdrawalsForm] = React.useState(false)
+  const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -831,6 +834,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         text: 'Gestionar Clientes',
         icon: Users,
         onClick: () => setShowClientsForm(true)
+      },
+      'c04a82f8-6fd8-439d-81f7-325c63905a1b': {
+        text: 'Gestionar Retiros de Socios',
+        icon: Users,
+        onClick: () => setShowPartnerWithdrawalsForm(true)
       }
     }
 
@@ -1230,6 +1238,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           </div>
         )}
 
+        {/* RETIROS DE SOCIOS SELECCIONADOS (si hay) */}
+        {selectedPartnerWithdrawals.length > 0 && (
+          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
+            <h4 className="text-sm font-medium text-foreground">Retiros de Socios Seleccionados:</h4>
+            {selectedPartnerWithdrawals.map((partnerWithdrawal, index) => (
+              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                <div className="truncate">{partnerWithdrawal.partner_name}</div>
+                <div className="text-right font-medium">${partnerWithdrawal.amount.toFixed(2)}</div>
+              </div>
+            ))}
+            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+              <div className="font-medium">Total:</div>
+              <div className="text-right font-bold">
+                ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + pw.amount, 0).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
           form={form}
@@ -1254,6 +1281,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
   const subcontractsFormRef = React.useRef<SubcontractsFormHandle>(null)
   const clientsFormRef = React.useRef<ClientsFormHandle>(null)
+  const partnerWithdrawalsFormRef = React.useRef<PartnerWithdrawalsFormHandle>(null)
   
   const personnelPanel = (
     <PersonnelForm 
@@ -1291,6 +1319,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     />
   )
 
+  const partnerWithdrawalsPanel = (
+    <PartnerWithdrawalsForm 
+      ref={partnerWithdrawalsFormRef}
+      onClose={() => setShowPartnerWithdrawalsForm(false)} 
+      onConfirm={(partnerWithdrawalsList) => {
+        setSelectedPartnerWithdrawals(partnerWithdrawalsList)
+        setShowPartnerWithdrawalsForm(false)
+      }}
+      initialPartnerWithdrawals={selectedPartnerWithdrawals}
+    />
+  )
+
   // Seleccionar panel a mostrar
   const currentPanel = showPersonnelForm 
     ? personnelPanel 
@@ -1298,7 +1338,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       ? subcontractsPanel 
       : showClientsForm
         ? clientsPanel
-        : editPanel
+        : showPartnerWithdrawalsForm
+          ? partnerWithdrawalsPanel
+          : editPanel
 
   // Header del modal
   const headerContent = (
@@ -1309,21 +1351,27 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           ? "Gestión de Subcontratos"
           : showClientsForm
             ? "Gestión de Clientes"
-            : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
+            : showPartnerWithdrawalsForm
+              ? "Gestión de Retiros de Socios"
+              : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
       description={showPersonnelForm 
         ? "Asigna personal y montos para este movimiento financiero" 
         : showSubcontractsForm
           ? "Asigna subcontratos y montos para este movimiento financiero"
           : showClientsForm
             ? "Asigna clientes de proyecto y montos para este movimiento financiero"
-            : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
+            : showPartnerWithdrawalsForm
+              ? "Asigna socios y montos para retiros en este movimiento financiero"
+              : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
       icon={showPersonnelForm 
         ? Users 
         : showSubcontractsForm
           ? FileText
           : showClientsForm
             ? Users
-            : DollarSign}
+            : showPartnerWithdrawalsForm
+              ? Users
+              : DollarSign}
     />
   )
 
@@ -1353,6 +1401,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       rightLabel="Confirmar Clientes"
       onRightClick={() => {
         clientsFormRef.current?.confirmClients()
+      }}
+    />
+  ) : showPartnerWithdrawalsForm ? (
+    <FormModalFooter
+      leftLabel="Volver"
+      onLeftClick={() => setShowPartnerWithdrawalsForm(false)}
+      rightLabel="Confirmar Retiros"
+      onRightClick={() => {
+        partnerWithdrawalsFormRef.current?.confirmPartnerWithdrawals()
       }}
     />
   ) : (
