@@ -30,6 +30,7 @@ import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/Perso
 import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
@@ -112,6 +113,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const { data: members } = useOrganizationMembers(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Mutaciones para subcontratos
+  const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
+  const updateMovementSubcontractsMutation = useUpdateMovementSubcontracts()
+
+  // Query para cargar subcontratos existentes en modo edición
+  const { data: existingSubcontracts } = useMovementSubcontracts(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
 
   // States for hierarchical selection like the original modal
   const [selectedTypeId, setSelectedTypeId] = React.useState('')
@@ -267,6 +277,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       // Cargar personal asignado si existe
       if (editingMovement.id) {
         loadMovementPersonnel(editingMovement.id)
+        loadMovementSubcontracts(editingMovement.id)
       }
     }
   }, [isEditing, editingMovement])
@@ -309,6 +320,58 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
     } catch (error) {
       console.error('Error loading movement personnel:', error)
+    }
+  }
+
+  // Función para cargar subcontratos asignados del movimiento
+  const loadMovementSubcontracts = async (movementId: string) => {
+    try {
+      const { data: subcontractAssignments, error } = await supabase
+        .from('movement_subcontracts')
+        .select(`
+          subcontract_id,
+          amount,
+          subcontracts:subcontract_id (
+            id,
+            title,
+            contact:contact_id (
+              first_name,
+              last_name,
+              full_name,
+              company_name
+            )
+          )
+        `)
+        .eq('movement_id', movementId)
+
+      if (error) throw error
+
+      if (subcontractAssignments && subcontractAssignments.length > 0) {
+        const formattedSubcontracts = subcontractAssignments.map((assignment: any) => {
+          const contact = assignment.subcontracts?.contact
+          let contactName = 'Sin nombre'
+          
+          if (contact) {
+            if (contact.company_name) {
+              contactName = contact.company_name
+            } else if (contact.full_name) {
+              contactName = contact.full_name
+            } else {
+              contactName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
+            }
+          }
+
+          return {
+            subcontract_id: assignment.subcontract_id,
+            contact_name: contactName,
+            amount: assignment.amount
+          }
+        })
+
+        setSelectedSubcontracts(formattedSubcontracts)
+      }
+    } catch (error) {
+      console.error('Error loading movement subcontracts:', error)
     }
   }
 
@@ -382,12 +445,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         result = updateResult
 
         // Actualizar personal asignado - eliminar existente y crear nuevo
-        const { error: deleteError } = await supabase
+        const { error: deletePersonnelError } = await supabase
           .from('movement_personnel')
           .delete()
           .eq('movement_id', editingMovement.id)
 
-        if (deleteError) throw deleteError
+        if (deletePersonnelError) throw deletePersonnelError
+
+        // Actualizar subcontratos asignados - eliminar existentes y crear nuevos
+        const { error: deleteSubcontractsError } = await supabase
+          .from('movement_subcontracts')
+          .delete()
+          .eq('movement_id', editingMovement.id)
+
+        if (deleteSubcontractsError) throw deleteSubcontractsError
       } else {
         // Crear nuevo movimiento
         const { data: insertResult, error } = await supabase
@@ -413,6 +484,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .insert(personnelData)
 
         if (personnelError) throw personnelError
+      }
+
+      // Si hay subcontratos seleccionados, guardar las asignaciones en movement_subcontracts
+      if (selectedSubcontracts && selectedSubcontracts.length > 0) {
+        const subcontractsData = selectedSubcontracts.map(subcontract => ({
+          movement_id: result.id,
+          subcontract_id: subcontract.subcontract_id,
+          amount: subcontract.amount
+        }))
+
+        const { error: subcontractsError } = await supabase
+          .from('movement_subcontracts')
+          .insert(subcontractsData)
+
+        if (subcontractsError) throw subcontractsError
       }
 
       return result
@@ -1016,6 +1102,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <div className="font-medium">Total:</div>
               <div className="text-right font-bold">
                 ${selectedPersonnel.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBCONTRATOS SELECCIONADOS (si hay) */}
+        {selectedSubcontracts.length > 0 && (
+          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
+            <h4 className="text-sm font-medium text-foreground">Subcontratos Seleccionados:</h4>
+            {selectedSubcontracts.map((subcontract, index) => (
+              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                <div className="truncate">{subcontract.contact_name}</div>
+                <div className="text-right font-medium">${subcontract.amount.toFixed(2)}</div>
+              </div>
+            ))}
+            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+              <div className="font-medium">Total:</div>
+              <div className="text-right font-bold">
+                ${selectedSubcontracts.reduce((sum, s) => sum + s.amount, 0).toFixed(2)}
               </div>
             </div>
           </div>
