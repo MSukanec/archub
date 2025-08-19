@@ -165,8 +165,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
             committed_amount: data.committed_amount,
             currency_id: data.currency_id,
             role: 'Cliente',
-            organization_id: organizationId,
-            exchange_rate: 1.0
+            organization_id: organizationId
           })
           .select()
 
