@@ -265,6 +265,31 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
     
+    // Obtener valores actuales de campos comunes del formulario activo
+    const getCurrentCommonValues = () => {
+      if (movementType === 'conversion') {
+        return {
+          movement_date: conversionForm.getValues('movement_date'),
+          description: conversionForm.getValues('description'),
+          created_by: conversionForm.getValues('created_by')
+        }
+      } else if (movementType === 'transfer') {
+        return {
+          movement_date: transferForm.getValues('movement_date'),
+          description: transferForm.getValues('description'),
+          created_by: transferForm.getValues('created_by')
+        }
+      } else {
+        return {
+          movement_date: form.getValues('movement_date'),
+          description: form.getValues('description'),
+          created_by: form.getValues('created_by')
+        }
+      }
+    }
+    
+    const commonValues = getCurrentCommonValues()
+    
     if (viewMode === "conversion") {
       setMovementType('conversion')
     } else if (viewMode === "transfer") {
@@ -273,17 +298,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       setMovementType('normal')
     }
     
-    // Sincronizar type_id en todos los formularios
+    // Sincronizar campos comunes en todos los formularios
     form.setValue('type_id', newTypeId)
+    form.setValue('movement_date', commonValues.movement_date)
+    form.setValue('description', commonValues.description)
+    form.setValue('created_by', commonValues.created_by)
+    
     conversionForm.setValue('type_id', newTypeId)
+    conversionForm.setValue('movement_date', commonValues.movement_date)
+    conversionForm.setValue('description', commonValues.description)
+    conversionForm.setValue('created_by', commonValues.created_by)
+    
     transferForm.setValue('type_id', newTypeId)
+    transferForm.setValue('movement_date', commonValues.movement_date)
+    transferForm.setValue('description', commonValues.description)
+    transferForm.setValue('created_by', commonValues.created_by)
     
     // Reset categorías
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
     form.setValue('category_id', '')
     form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm, transferForm])
+  }, [movementConcepts, form, conversionForm, transferForm, movementType])
 
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
