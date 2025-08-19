@@ -601,19 +601,47 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                   <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Mini gráfico de barras - altura fija */}
+                {/* Mini gráfico de barras - muestra distribución real de compromisos */}
                 <div className="flex items-end gap-1 h-8">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-sm flex-1"
-                      style={{
-                        backgroundColor: 'var(--accent)',
-                        height: `${Math.max(30, Math.random() * 100)}%`,
-                        opacity: i < clientAnalysis.totalCommitments ? 1 : 0.3
-                      }}
-                    />
-                  ))}
+                  {(() => {
+                    // Calcular la distribución de compromisos por cliente
+                    const clientCommitments = projectClients
+                      .filter(pc => pc.committed_amount && pc.committed_amount > 0)
+                      .map(pc => pc.committed_amount)
+                      .sort((a, b) => b - a) // Ordenar de mayor a menor
+                      .slice(0, 6) // Mostrar solo los 6 clientes principales
+                    
+                    const maxAmount = Math.max(...clientCommitments, 1)
+                    
+                    // Si no hay datos reales, mostrar un estado vacío
+                    if (clientCommitments.length === 0) {
+                      return Array.from({ length: 6 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="rounded-sm flex-1 bg-muted"
+                          style={{ height: '20%', opacity: 0.3 }}
+                        />
+                      ))
+                    }
+                    
+                    // Rellenar con barras vacías si hay menos de 6 clientes
+                    const paddedCommitments = [...clientCommitments]
+                    while (paddedCommitments.length < 6) {
+                      paddedCommitments.push(0)
+                    }
+                    
+                    return paddedCommitments.map((amount, i) => (
+                      <div
+                        key={i}
+                        className="rounded-sm flex-1"
+                        style={{
+                          backgroundColor: amount > 0 ? 'var(--accent)' : 'var(--muted)',
+                          height: amount > 0 ? `${Math.max(20, (amount / maxAmount) * 100)}%` : '10%',
+                          opacity: amount > 0 ? 1 : 0.2
+                        }}
+                      />
+                    ))
+                  })()}
                 </div>
                 
                 <div>
