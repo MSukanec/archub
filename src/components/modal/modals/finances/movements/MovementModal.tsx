@@ -443,6 +443,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
     mutationFn: async (data: BasicMovementForm) => {
+      console.log('🚀 Iniciando creación de movimiento:', {
+        isEditing,
+        editingMovement: editingMovement?.id,
+        selectedClients: selectedClients.length,
+        selectedPersonnel: selectedPersonnel.length,
+        selectedSubcontracts: selectedSubcontracts.length
+      })
+
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
@@ -546,19 +554,31 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (subcontractsError) throw subcontractsError
       }
 
-      // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_project_clients
+      // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
       if (selectedClients && selectedClients.length > 0) {
+        console.log('💾 Guardando clientes del movimiento:', {
+          movement_id: result.id,
+          selectedClients: selectedClients
+        })
+        
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
           project_client_id: client.project_client_id,
           amount: client.amount
         }))
 
+        console.log('💾 Datos a insertar en movement_clients:', projectClientsData)
+
         const { error: projectClientsError } = await supabase
           .from('movement_clients')
           .insert(projectClientsData)
 
-        if (projectClientsError) throw projectClientsError
+        if (projectClientsError) {
+          console.error('❌ Error al insertar clientes del movimiento:', projectClientsError)
+          throw projectClientsError
+        }
+
+        console.log('✅ Clientes del movimiento guardados correctamente')
       }
 
       return result
