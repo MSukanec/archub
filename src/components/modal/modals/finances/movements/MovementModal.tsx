@@ -15,6 +15,7 @@ import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 
 import DatePicker from '@/components/ui-custom/DatePicker'
+import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
@@ -88,6 +89,22 @@ const transferSchema = z.object({
 type BasicMovementForm = z.infer<typeof basicMovementSchema>
 type ConversionForm = z.infer<typeof conversionSchema>
 type TransferForm = z.infer<typeof transferSchema>
+
+// Function to transform organization concepts to CascadingSelect format
+const transformConceptsToOptions = (concepts: any[]): any[] => {
+  return concepts.map(concept => ({
+    value: concept.id,
+    label: concept.name,
+    children: concept.children ? concept.children.map((child: any) => ({
+      value: child.id,
+      label: child.name,
+      children: child.children ? child.children.map((grandchild: any) => ({
+        value: grandchild.id,
+        label: grandchild.name
+      })) : undefined
+    })) : undefined
+  }))
+}
 
 interface MovementModalProps {
   modalData?: any
@@ -1441,28 +1458,68 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const normalPanel = (
     <Form {...form} key={`normal-${movementType}`}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* 1. FECHA */}
-        <FormField
-          control={form.control}
-          name="movement_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha *</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* LAYOUT DE DOS COLUMNAS: FECHA Y TIPO DE MOVIMIENTO */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* 1. FECHA */}
+          <FormField
+            control={form.control}
+            name="movement_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha *</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar fecha..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* GRUPO DE SELECCIÓN CON ESPACIADO REDUCIDO */}
+          {/* 2. TIPO DE MOVIMIENTO CON CASCADINGSELECT */}
+          <FormItem>
+            <FormLabel>Tipo de Movimiento *</FormLabel>
+            <FormControl>
+              <CascadingSelect
+                options={transformConceptsToOptions(movementConcepts || [])}
+                value={[selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean)}
+                onValueChange={(values) => {
+                  console.log('🎯 CascadingSelect values:', values)
+                  
+                  const typeId = values[0] || ''
+                  const categoryId = values[1] || ''
+                  const subcategoryId = values[2] || ''
+                  
+                  // Actualizar estados
+                  setSelectedTypeId(typeId)
+                  setSelectedCategoryId(categoryId)
+                  setSelectedSubcategoryId(subcategoryId)
+                  
+                  // Actualizar formulario
+                  form.setValue('type_id', typeId)
+                  form.setValue('category_id', categoryId)
+                  form.setValue('subcategory_id', subcategoryId)
+                  
+                  // Mantener lógica original de handleTypeChange
+                  if (typeId) {
+                    handleTypeChange(typeId)
+                  }
+                }}
+                placeholder="Seleccionar tipo..."
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </div>
+
+        {/* CAMPOS COMENTADOS - SELECTS JERÁRQUICOS ORIGINALES */}
+        {/*
+        // GRUPO DE SELECCIÓN CON ESPACIADO REDUCIDO - VERSIÓN ORIGINAL COMENTADA
         <div className="space-y-0.5">
-          {/* 2. TIPO DE MOVIMIENTO */}
+          // 2. TIPO DE MOVIMIENTO
           <FormField
             control={form.control}
             name="type_id"
@@ -1494,7 +1551,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             )}
           />
 
-          {/* CATEGORÍAS (solo para movimientos normales) */}
+          // CATEGORÍAS (solo para movimientos normales)
           {selectedTypeId && categories.length > 0 && (
             <FormField
               control={form.control}
@@ -1529,7 +1586,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             />
           )}
 
-          {/* SUBCATEGORÍAS */}
+          // SUBCATEGORÍAS
           {selectedCategoryId && subcategories.length > 0 && (
             <FormField
               control={form.control}
@@ -1562,6 +1619,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             />
           )}
         </div>
+        */}
 
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
