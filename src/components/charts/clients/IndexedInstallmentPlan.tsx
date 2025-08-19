@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2, Edit, Trash2, Calendar } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/hooks/use-toast'
 
 interface InstallmentData {
   id: string
@@ -75,6 +77,38 @@ export default function IndexedInstallmentPlan({
 }: IndexedInstallmentPlanProps) {
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  // Delete payment plan mutation
+  const deletePaymentPlanMutation = useMutation({
+    mutationFn: async (paymentPlanId: string) => {
+      const { error } = await supabase
+        .from('project_payment_plans')
+        .delete()
+        .eq('id', paymentPlanId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      // Invalidate and refetch related queries
+      queryClient.invalidateQueries({ queryKey: ['project-payment-plan', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['project-installments', projectId] })
+      
+      toast({
+        title: "Plan eliminado",
+        description: "El plan de pagos ha sido eliminado exitosamente.",
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting payment plan:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el plan de pagos. Inténtalo de nuevo.",
+        variant: "destructive"
+      })
+    }
+  })
 
   // Fetch installments - Force fresh data with specific column selection
   const { data: installments, isLoading: installmentsLoading } = useQuery({
@@ -325,7 +359,7 @@ export default function IndexedInstallmentPlan({
           {paymentPlan && (
             <div className="flex-shrink-0">
               <Button
-                variant="ghost" 
+                variant="ghost"
                 size="sm"
                 onClick={() => openModal('delete-confirmation', {
                   mode: 'dangerous',
@@ -333,14 +367,12 @@ export default function IndexedInstallmentPlan({
                   description: 'Esta acción eliminará permanentemente el plan de pagos y todas sus cuotas asociadas. Esta acción no se puede deshacer.',
                   itemName: paymentPlan.payment_plans?.name || 'Plan de cuotas indexadas',
                   destructiveActionText: 'Eliminar Plan',
-                  onConfirm: () => {
-                    console.log('Eliminar plan de pagos:', paymentPlan.id)
-                    // TODO: Implementar eliminación del plan
-                  }
+                  onConfirm: () => deletePaymentPlanMutation.mutate(paymentPlan.id),
+                  isLoading: deletePaymentPlanMutation.isPending
                 })}
-                className="text-muted-foreground hover:text-destructive"
+                className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3 h-3" />
               </Button>
             </div>
           )}
