@@ -290,13 +290,28 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     })
   }, [projectClients, installments, allCurrencies])
 
-  // Sort data alphabetically by client name
+  // Sort data by unit first, then by client name
   const sortedCommitmentSummary = useMemo(() => {
     return [...commitmentSummary].sort((a, b) => {
+      // First sort by unit (if available)
+      const unitA = a.unit?.trim() || ''
+      const unitB = b.unit?.trim() || ''
+      
+      // If both have units, sort by unit
+      if (unitA && unitB) {
+        return unitA.localeCompare(unitB)
+      }
+      
+      // If only one has unit, prioritize the one with unit
+      if (unitA && !unitB) return -1
+      if (!unitA && unitB) return 1
+      
+      // If neither has unit, sort by contact name
       const nameA = (a.contacts?.company_name || 
                     `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase()
       const nameB = (b.contacts?.company_name || 
                     `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase()
+      
       return nameA.localeCompare(nameB)
     })
   }, [commitmentSummary])
