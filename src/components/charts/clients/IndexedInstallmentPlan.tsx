@@ -170,13 +170,12 @@ export default function IndexedInstallmentPlan({
     )
   }
 
-  if (!installments?.length || !commitments?.length) {
+  if (!installments?.length) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-muted-foreground">
-            {!installments?.length && "No hay cuotas definidas"}
-            {!commitments?.length && "No hay unidades funcionales registradas"}
+            No hay cuotas definidas
           </div>
         </CardContent>
       </Card>
@@ -193,69 +192,72 @@ export default function IndexedInstallmentPlan({
   installments.forEach((installment) => {
     const rowData: HeatmapCellData[] = []
     
-    // Create columns for each unit
-    commitments.forEach((commitment) => {
-      if (!commitment?.unit) return
-      
-      // Find payments for this specific functional unit and installment number
-      const installmentPayments = payments?.filter(payment => 
-        payment.unit === commitment.unit && 
-        payment.installment_number === installment.number
-      ) || []
-      
-      // Convert payments to commitment currency using exchange rates
-      const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum, payment) => {
-        let convertedAmount = payment.amount || 0
+    // Only process units if commitments exist
+    if (commitments?.length) {
+      // Create columns for each unit
+      commitments.forEach((commitment) => {
+        if (!commitment?.unit) return
         
-        if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
-          convertedAmount = convertedAmount * (payment.exchange_rate || 1)
+        // Find payments for this specific functional unit and installment number
+        const installmentPayments = payments?.filter(payment => 
+          payment.unit === commitment.unit && 
+          payment.installment_number === installment.number
+        ) || []
+        
+        // Convert payments to commitment currency using exchange rates
+        const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum, payment) => {
+          let convertedAmount = payment.amount || 0
+          
+          if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
+            convertedAmount = convertedAmount * (payment.exchange_rate || 1)
+          }
+          
+          return sum + convertedAmount
+        }, 0)
+        
+        // Get commitment currency info
+        const commitmentCurrency = commitment.currencies || { symbol: '$' }
+        
+        // Calculate updated amount (violeta) SECUENCIALMENTE:
+        let updatedAmount: number
+        
+        if (installment.number === 1) {
+          // Primera cuota = COMPROMISO TOTAL
+          updatedAmount = Math.round(commitment.committed_amount || 0)
+        } else {
+          // Cuotas siguientes = SALDO AZUL de cuota anterior + porcentaje de aumento
+          const previousBalance = previousBalancesByUnit[commitment.id] || 0
+          // Usar el index_reference de la cuota como porcentaje de aumento
+          const percentageIncrease = installment.index_reference || 0
+          updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
         }
         
-        return sum + convertedAmount
-      }, 0)
-      
-      // Get commitment currency info
-      const commitmentCurrency = commitment.currencies || { symbol: '$' }
-      
-      // Calculate updated amount (violeta) SECUENCIALMENTE:
-      let updatedAmount: number
-      
-      if (installment.number === 1) {
-        // Primera cuota = COMPROMISO TOTAL
-        updatedAmount = Math.round(commitment.committed_amount || 0)
-      } else {
-        // Cuotas siguientes = SALDO AZUL de cuota anterior + porcentaje de aumento
-        const previousBalance = previousBalancesByUnit[commitment.id] || 0
-        // Usar el index_reference de la cuota como porcentaje de aumento
-        const percentageIncrease = installment.index_reference || 0
-        updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
-      }
-      
-      // Calculate installment value = MONTO VIOLETA / CUOTAS RESTANTES
-      const totalInstallments = installments?.length || 1
-      const remainingInstallments = totalInstallments - installment.number + 1
-      const installmentValue = Math.round(updatedAmount / remainingInstallments)
-      
-      // Calculate balance = MONTO ACTUALIZADO (violeta) - PAGO (verde)
-      const balance = updatedAmount - Math.round(totalPaidInCommitmentCurrency)
-      
-      // Store balance for next installment
-      previousBalancesByUnit[commitment.id] = balance
-      
-      rowData.push({
-        unitId: commitment.id,
-        installmentNumber: installment.number,
-        updatedAmount: updatedAmount,
-        installmentValue: installmentValue,
-        payment: Math.round(totalPaidInCommitmentCurrency),
-        balance: balance,
-        isPaid: totalPaidInCommitmentCurrency > 0,
-        commitmentCurrency: {
-          symbol: commitmentCurrency.symbol || '$',
-          exchangeRate: commitment.exchange_rate || 1
-        }
+        // Calculate installment value = MONTO VIOLETA / CUOTAS RESTANTES
+        const totalInstallments = installments?.length || 1
+        const remainingInstallments = totalInstallments - installment.number + 1
+        const installmentValue = Math.round(updatedAmount / remainingInstallments)
+        
+        // Calculate balance = MONTO ACTUALIZADO (violeta) - PAGO (verde)
+        const balance = updatedAmount - Math.round(totalPaidInCommitmentCurrency)
+        
+        // Store balance for next installment
+        previousBalancesByUnit[commitment.id] = balance
+        
+        rowData.push({
+          unitId: commitment.id,
+          installmentNumber: installment.number,
+          updatedAmount: updatedAmount,
+          installmentValue: installmentValue,
+          payment: Math.round(totalPaidInCommitmentCurrency),
+          balance: balance,
+          isPaid: totalPaidInCommitmentCurrency > 0,
+          commitmentCurrency: {
+            symbol: commitmentCurrency.symbol || '$',
+            exchangeRate: commitment.exchange_rate || 1
+          }
+        })
       })
-    })
+    }
     
     heatmapData.push(rowData)
   })
@@ -325,24 +327,32 @@ export default function IndexedInstallmentPlan({
           {/* Scrollable right area header */}
           <div className="flex-1 overflow-x-auto">
             <div className="flex" style={{ minWidth: 'max-content' }}>
-              {commitments.map((commitment) => commitment?.unit ? (
-                <div
-                  key={commitment.id}
-                  className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border"
-                >
-                  <div className="font-bold text-xs mb-1">
-                    {commitment.unit}
-                  </div>
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {getClientDisplayName(commitment)}
-                  </div>
-                  {formatCommittedAmount(commitment) && (
-                    <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
-                      {formatCommittedAmount(commitment)}
+              {commitments?.length ? (
+                commitments.map((commitment) => commitment?.unit ? (
+                  <div
+                    key={commitment.id}
+                    className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border"
+                  >
+                    <div className="font-bold text-xs mb-1">
+                      {commitment.unit}
                     </div>
-                  )}
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {getClientDisplayName(commitment)}
+                    </div>
+                    {formatCommittedAmount(commitment) && (
+                      <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
+                        {formatCommittedAmount(commitment)}
+                      </div>
+                    )}
+                  </div>
+                ) : null)
+              ) : (
+                <div className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border">
+                  <div className="text-xs text-muted-foreground">
+                    No hay unidades funcionales registradas
+                  </div>
                 </div>
-              ) : null)}
+              )}
             </div>
           </div>
         </div>
@@ -408,46 +418,54 @@ export default function IndexedInstallmentPlan({
               {/* Scrollable right area - unit data */}
               <div className="flex-1 overflow-x-auto">
                 <div className="flex" style={{ minWidth: 'max-content' }}>
-                  {rowData.map((cellData, colIndex) => (
-                    <div
-                      key={`${rowIndex}-${colIndex}`}
-                      className="w-40 p-2 text-xs border-l border-border"
-                    >
-                      <div className="space-y-1">
-                        {/* Actualización - Violeta */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-violet-600 dark:text-violet-400 font-medium">A:</span>
-                          <span className="text-violet-600 dark:text-violet-400 font-medium text-right">
-                            {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
-                          </span>
-                        </div>
-                        
-                        {/* Valor de Cuota - Rojo */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-red-600 dark:text-red-400">V.C:</span>
-                          <span className="text-red-600 dark:text-red-400 text-right">
-                            {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
-                          </span>
-                        </div>
-                        
-                        {/* Pago - Verde */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-green-600 dark:text-green-400">P:</span>
-                          <span className="text-green-600 dark:text-green-400 text-right">
-                            {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
-                          </span>
-                        </div>
-                        
-                        {/* Saldo - Azul */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-blue-600 dark:text-blue-400">S:</span>
-                          <span className="text-blue-600 dark:text-blue-400 text-right">
-                            {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
-                          </span>
+                  {rowData.length > 0 ? (
+                    rowData.map((cellData, colIndex) => (
+                      <div
+                        key={`${rowIndex}-${colIndex}`}
+                        className="w-40 p-2 text-xs border-l border-border"
+                      >
+                        <div className="space-y-1">
+                          {/* Actualización - Violeta */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-violet-600 dark:text-violet-400 font-medium">A:</span>
+                            <span className="text-violet-600 dark:text-violet-400 font-medium text-right">
+                              {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
+                            </span>
+                          </div>
+                          
+                          {/* Valor de Cuota - Rojo */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-red-600 dark:text-red-400">V.C:</span>
+                            <span className="text-red-600 dark:text-red-400 text-right">
+                              {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
+                            </span>
+                          </div>
+                          
+                          {/* Pago - Verde */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-green-600 dark:text-green-400">P:</span>
+                            <span className="text-green-600 dark:text-green-400 text-right">
+                              {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
+                            </span>
+                          </div>
+                          
+                          {/* Saldo - Azul */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-600 dark:text-blue-400">S:</span>
+                            <span className="text-blue-600 dark:text-blue-400 text-right">
+                              {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="w-40 p-2 text-xs border-l border-border">
+                      <div className="text-center text-muted-foreground">
+                        Sin datos
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>
