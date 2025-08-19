@@ -176,6 +176,22 @@ type RetirosPropriosForm = z.infer<typeof retirosPropriosFormSchema>
 type MaterialesForm = z.infer<typeof materialesFormSchema>
 type PersonalForm = z.infer<typeof personalFormSchema>
 
+// Function to transform organization concepts to CascadingSelect format
+const transformConceptsToOptions = (concepts: any[]): any[] => {
+  return concepts.map(concept => ({
+    value: concept.id,
+    label: concept.name,
+    children: concept.children ? concept.children.map((child: any) => ({
+      value: child.id,
+      label: child.name,
+      children: child.children ? child.children.map((grandchild: any) => ({
+        value: grandchild.id,
+        label: grandchild.name
+      })) : undefined
+    })) : undefined
+  }))
+}
+
 interface MovementFormModalProps {
   modalData?: {
     editingMovement?: any
@@ -2267,8 +2283,8 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Campos centralizados: Fecha y Tipo de Movimiento */}
-      <div className="space-y-4">
+      {/* Campos centralizados: Fecha y Tipo de Movimiento en dos columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha */}
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -2293,13 +2309,99 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
           />
         </div>
 
-        {/* Tipo de Movimiento (3 Selects Jerárquicos) */}
+        {/* Tipo de Movimiento con CascadingSelect */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Tipo de Movimiento *
+          </label>
+          <CascadingSelect
+            options={transformConceptsToOptions(organizationConcepts || [])}
+            value={[selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean)}
+            onValueChange={(values) => {
+              console.log('🎯 CascadingSelect values:', values)
+              
+              // Resetear estados
+              setSelectedTypeId(values[0] || '')
+              setSelectedCategoryId(values[1] || '')
+              setSelectedSubcategoryId(values[2] || '')
+              
+              // Actualizar formularios con todos los valores
+              const typeId = values[0] || ''
+              const categoryId = values[1] || ''
+              const subcategoryId = values[2] || ''
+              
+              form.setValue('type_id', typeId)
+              form.setValue('category_id', categoryId)
+              form.setValue('subcategory_id', subcategoryId)
+              
+              const allForms = [aportesForm, aportesPropriosForm, retirosPropriosForm, materialesForm, personalForm, conversionForm, transferForm]
+              allForms.forEach(specialForm => {
+                specialForm.setValue('type_id', typeId)
+                specialForm.setValue('category_id', categoryId)
+                specialForm.setValue('subcategory_id', subcategoryId)
+              })
+              
+              // Detectar tipo de formulario según la lógica original
+              if (typeId && organizationConcepts) {
+                const selectedConcept = organizationConcepts.find(concept => concept.id === typeId)
+                if (selectedConcept?.view_mode === 'conversion') {
+                  setMovementType('conversion')
+                } else if (selectedConcept?.view_mode === 'transfer') {
+                  setMovementType('transfer')
+                } else {
+                  setMovementType('normal')
+                }
+                
+                // Si hay categoría, verificar view_mode específico
+                if (categoryId) {
+                  let selectedCategory = null
+                  for (const concept of organizationConcepts) {
+                    const foundCategory = concept.children?.find((cat: any) => cat.id === categoryId)
+                    if (foundCategory) {
+                      selectedCategory = foundCategory
+                      break
+                    }
+                  }
+                  
+                  if (selectedCategory) {
+                    const viewMode = (selectedCategory.view_mode ?? "normal").trim()
+                    
+                    if (viewMode === "aportes") {
+                      setMovementType('aportes')
+                    } else if (viewMode === "aportes_propios") {
+                      setMovementType('aportes_propios')
+                    } else if (viewMode === "retiros_propios") {
+                      setMovementType('retiros_propios')
+                    } else if (viewMode === "materiales" || selectedCategory.name?.toLowerCase().includes('material')) {
+                      setMovementType('materiales')
+                    }
+                  }
+                }
+                
+                // Si hay subcategoría, detectar subcontratos y personal por UUID específico
+                if (subcategoryId) {
+                  if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+                    setMovementType('subcontratos')
+                  } else if (subcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff') {
+                    setMovementType('personal')
+                  }
+                }
+              }
+            }}
+            placeholder="Seleccionar tipo..."
+          />
+        </div>
+      </div>
+
+      {/* CAMPOS COMENTADOS - SELECTS JERÁRQUICOS ORIGINALES */}
+      {/*
+        // Tipo de Movimiento (3 Selects Jerárquicos) - VERSIÓN ORIGINAL COMENTADA
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Tipo de Movimiento *
           </label>
           
-          {/* Select de Tipo */}
+          // Select de Tipo
           <div className="space-y-2">
             <Select 
               value={selectedTypeId} 
@@ -2346,7 +2448,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               </SelectContent>
             </Select>
             
-            {/* Select de Categoría */}
+            // Select de Categoría
             {selectedTypeId && (
               <Select 
                 value={selectedCategoryId} 
@@ -2405,7 +2507,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
               </Select>
             )}
             
-            {/* Select de Subcategoría - Solo mostrar si la categoría tiene hijos */}
+            // Select de Subcategoría - Solo mostrar si la categoría tiene hijos
             {selectedCategoryId && (() => {
               const selectedType = organizationConcepts?.find(concept => concept.id === selectedTypeId)
               const selectedCategory = selectedType?.children?.find((cat: any) => cat.id === selectedCategoryId)
@@ -2449,7 +2551,7 @@ export default function MovementFormModal({ modalData, onClose }: MovementFormMo
             })()}
           </div>
         </div>
-      </div>
+      */}
 
       {/* Selector de proyecto - Solo mostrar en modo GENERAL (sin proyecto activo) */}
       {!userData?.preferences?.last_project_id && !editingMovement && (
