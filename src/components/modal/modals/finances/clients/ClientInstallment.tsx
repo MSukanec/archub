@@ -120,6 +120,15 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
       queryClient.invalidateQueries({ queryKey: ['project-installments', projectId] })
       queryClient.invalidateQueries({ queryKey: ['client-monthly-installments', organizationId, projectId] })
       
+      // IMPORTANTE: También invalidar la vista de pagos que usa InstallmentHeatmapChart
+      queryClient.invalidateQueries({ queryKey: ['movement-payments-view', projectId, organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['movement-payments-view'] })
+      
+      // Invalidar análisis de clientes que también dependen de las cuotas
+      queryClient.invalidateQueries({ queryKey: ['client-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['client-payment-details'] })
+      queryClient.invalidateQueries({ queryKey: ['client-obligations'] })
+      
       onClose()
     },
     onError: (error: any) => {
