@@ -796,6 +796,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (selectedClients && selectedClients.length > 0) {
         console.log('🔍 DEBUG - selectedClients antes de mapear:', selectedClients)
         
+        // Primero eliminar registros existentes si es edición
+        if (editingMovement?.id) {
+          const { error: deleteError } = await supabase
+            .from('movement_clients')
+            .delete()
+            .eq('movement_id', editingMovement.id)
+
+          if (deleteError) {
+            console.error('❌ Error al eliminar clientes existentes:', deleteError)
+          } else {
+            console.log('✅ DEBUG - Clientes existentes eliminados')
+          }
+        }
+        
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
           project_client_id: client.project_client_id,
