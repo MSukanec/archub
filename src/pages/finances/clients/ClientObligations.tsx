@@ -641,9 +641,23 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">
-                    ${clientAnalysis.totalCommittedAmount.toLocaleString('es-AR')}
-                  </p>
+                  {clientAnalysis.currencyMetrics && clientAnalysis.currencyMetrics.length > 0 ? (
+                    <div className="space-y-1">
+                      {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
+                        const currency = allCurrencies.find(c => c.id === metric.currencyId)
+                        return (
+                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                            {currency?.symbol || '$'} {metric.totalCommitted.toLocaleString('es-AR')}
+                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
+                          </p>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-bold">
+                      ${clientAnalysis.totalCommittedAmount.toLocaleString('es-AR')}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {clientAnalysis.totalCommitments} compromisos registrados
                   </p>
@@ -676,9 +690,23 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">
-                    ${clientAnalysis.totalPaidAmount.toLocaleString('es-AR')}
-                  </p>
+                  {clientAnalysis.currencyMetrics && clientAnalysis.currencyMetrics.length > 0 ? (
+                    <div className="space-y-1">
+                      {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
+                        const currency = allCurrencies.find(c => c.id === metric.currencyId)
+                        return (
+                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                            {currency?.symbol || '$'} {metric.totalPaid.toLocaleString('es-AR')}
+                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
+                          </p>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-bold">
+                      ${clientAnalysis.totalPaidAmount.toLocaleString('es-AR')}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {clientAnalysis.paymentPercentage.toFixed(1)}% del total
                   </p>
@@ -710,9 +738,23 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">
-                    ${clientAnalysis.remainingBalance.toLocaleString('es-AR')}
-                  </p>
+                  {clientAnalysis.currencyMetrics && clientAnalysis.currencyMetrics.length > 0 ? (
+                    <div className="space-y-1">
+                      {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
+                        const currency = allCurrencies.find(c => c.id === metric.currencyId)
+                        return (
+                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                            {currency?.symbol || '$'} {metric.remainingBalance.toLocaleString('es-AR')}
+                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
+                          </p>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-bold">
+                      ${clientAnalysis.remainingBalance.toLocaleString('es-AR')}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Pendiente de pago
                   </p>

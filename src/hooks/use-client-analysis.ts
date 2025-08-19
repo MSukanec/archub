@@ -37,34 +37,67 @@ export function useClientAnalysis(projectId: string | null) {
 
       if (paymentsError) throw paymentsError
 
-      // 4. Calcular KPIs
+      // 4. Calcular KPIs por moneda
       const totalCommitments = projectClients?.length || 0
       
-      // Calcular total comprometido en ARS (conversión básica)
-      const totalCommittedAmount = (projectClients || []).reduce((sum, client) => {
+      // Agrupar compromisos por moneda
+      const commitmentsByCurrency = (projectClients || []).reduce((acc: Record<string, any>, client: any) => {
+        const currencyId = client.currency_id
         const amount = client.committed_amount || 0
-        // Conversión simple para USD a ARS (se puede mejorar con tasas dinámicas)
-        if (client.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f') { // USD
-          return sum + (amount * 1125) // Tasa fija temporal
+        
+        if (!acc[currencyId]) {
+          acc[currencyId] = {
+            totalCommitted: 0,
+            totalPaid: 0,
+            currencyId
+          }
         }
-        return sum + amount
-      }, 0)
+        
+        acc[currencyId].totalCommitted += amount
+        return acc
+      }, {} as Record<string, any>)
 
-      // Calcular total pagado en ARS - usando los datos de la nueva vista
-      const totalPaidAmount = (clientPayments || []).reduce((sum, payment) => {
-        return sum + Math.abs(payment.amount || 0)
-      }, 0)
+      // Agrupar pagos por moneda
+      (clientPayments || []).forEach((payment: any) => {
+        const currencyId = payment.currency_id
+        const amount = Math.abs(payment.amount || 0)
+        
+        if (commitmentsByCurrency[currencyId]) {
+          commitmentsByCurrency[currencyId].totalPaid += amount
+        }
+      })
 
-      // Calcular saldo restante
-      const remainingBalance = totalCommittedAmount - totalPaidAmount
+      // Calcular métricas por moneda
+      const currencyMetrics = Object.values(commitmentsByCurrency).map((currency: any) => {
+        const remainingBalance = currency.totalCommitted - currency.totalPaid
+        const paymentPercentage = currency.totalCommitted > 0 
+          ? (currency.totalPaid / currency.totalCommitted) * 100 
+          : 0
+        const remainingPercentage = 100 - paymentPercentage
 
-      // Calcular porcentaje pagado
-      const paymentPercentage = totalCommittedAmount > 0 
-        ? (totalPaidAmount / totalCommittedAmount) * 100 
-        : 0
+        return {
+          ...currency,
+          remainingBalance,
+          paymentPercentage,
+          remainingPercentage
+        }
+      })
 
-      // Porcentaje restante
-      const remainingPercentage = 100 - paymentPercentage
+      // Para compatibilidad, usar la primera moneda como principal o calcular totales generales
+      const primaryCurrency = currencyMetrics[0] || {
+        totalCommitted: 0,
+        totalPaid: 0,
+        remainingBalance: 0,
+        paymentPercentage: 0,
+        remainingPercentage: 100
+      }
+
+      // Totales legacy para compatibilidad
+      const totalCommittedAmount = primaryCurrency.totalCommitted
+      const totalPaidAmount = primaryCurrency.totalPaid
+      const remainingBalance = primaryCurrency.remainingBalance
+      const paymentPercentage = primaryCurrency.paymentPercentage
+      const remainingPercentage = primaryCurrency.remainingPercentage
 
       return {
         totalCommitments,
@@ -73,6 +106,7 @@ export function useClientAnalysis(projectId: string | null) {
         remainingBalance,
         paymentPercentage,
         remainingPercentage,
+        currencyMetrics,
         projectClients: projectClients || [],
         movements: clientPayments
       }
