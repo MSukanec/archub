@@ -1364,13 +1364,14 @@ export default function Movements() {
       }}
       wide={true}
     >
-      {/* Movement KPIs */}
-      <MovementKPICards 
-        organizationId={organizationId} 
-        projectId={projectId || undefined} 
-      />
-      
-      {processedMovements.length === 0 ? (
+      {/* Solo mostrar contenido si no está cargando */}
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="text-center py-8">
+            <div className="text-muted-foreground">Cargando movimientos...</div>
+          </div>
+        </div>
+      ) : processedMovements.length === 0 ? (
         <EmptyState
           icon={<DollarSign className="h-12 w-12" />}
           title="No hay movimientos registrados"
@@ -1386,22 +1387,28 @@ export default function Movements() {
           }
         />
       ) : (
-        <Table
-        columns={tableColumns}
-        data={processedMovements}
-        isLoading={isLoading}
-        selectable={true}
-        defaultSort={{
-          key: "movement_date",
-          direction: "desc",
-        }}
-        topBar={{
-          showSearch: true,
-          searchValue: searchValue,
-          onSearchChange: setSearchValue,
-          showFilter: true,
-          isFilterActive: filterByType !== 'all' || filterByCategory !== 'all' || filterBySubcategory !== 'all' || filterByFavorites !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
-          renderFilterContent: () => (
+        <>
+          {/* Movement KPIs - Solo mostrar cuando hay datos */}
+          <MovementKPICards 
+            organizationId={organizationId} 
+            projectId={projectId || undefined} 
+          />
+          <Table
+            columns={tableColumns}
+            data={processedMovements}
+            isLoading={false} // Ya no está cargando cuando llegamos aquí
+            selectable={true}
+          defaultSort={{
+            key: "movement_date",
+            direction: "desc",
+          }}
+          topBar={{
+            showSearch: true,
+            searchValue: searchValue,
+            onSearchChange: setSearchValue,
+            showFilter: true,
+            isFilterActive: filterByType !== 'all' || filterByCategory !== 'all' || filterBySubcategory !== 'all' || filterByFavorites !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
+            renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
                 <Label className="text-xs font-medium mb-1 block">Tipo</Label>
@@ -1601,7 +1608,8 @@ export default function Movements() {
             );
           }
         }}
-        />
+          />
+        </>
       )}
 
       {/* Modal Factory will handle the movement modal */}
