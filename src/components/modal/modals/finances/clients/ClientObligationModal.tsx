@@ -168,29 +168,62 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         if (error) throw error
         return result
       } else {
-        // Create new client
-        const { data: result, error } = await supabase
+        // Check if client already exists for this project
+        const { data: existingClient, error: checkError } = await supabase
           .from('project_clients')
-          .insert({
-            project_id: projectId,
-            client_id: data.client_id,
-            unit: data.unit || null,
-            committed_amount: data.committed_amount,
-            currency_id: data.currency_id,
-            organization_id: organizationId
-          })
-          .select()
+          .select('id, committed_amount, unit')
+          .eq('project_id', projectId)
+          .eq('client_id', data.client_id)
+          .maybeSingle()
 
-        if (error) throw error
-        return result
+        if (checkError) throw checkError
+
+        if (existingClient) {
+          // Client already exists - update the existing record
+          const { data: result, error } = await supabase
+            .from('project_clients')
+            .update({
+              unit: data.unit || null,
+              committed_amount: data.committed_amount,
+              currency_id: data.currency_id
+            })
+            .eq('id', existingClient.id)
+            .select()
+
+          if (error) throw error
+          
+          // Return result with flag indicating it was an update
+          return { ...result, wasUpdated: true }
+        } else {
+          // Create new client
+          const { data: result, error } = await supabase
+            .from('project_clients')
+            .insert({
+              project_id: projectId,
+              client_id: data.client_id,
+              unit: data.unit || null,
+              committed_amount: data.committed_amount,
+              currency_id: data.currency_id,
+              organization_id: organizationId
+            })
+            .select()
+
+          if (error) throw error
+          return result
+        }
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Check if it was an update to existing client
+      const wasUpdated = result && typeof result === 'object' && 'wasUpdated' in result
+      
       toast({
-        title: isEditing ? "Compromiso actualizado" : "Compromiso creado",
+        title: isEditing ? "Compromiso actualizado" : wasUpdated ? "Compromiso actualizado" : "Compromiso creado",
         description: isEditing 
           ? "El compromiso de pago ha sido actualizado exitosamente"
-          : "El compromiso de pago del cliente ha sido registrado exitosamente",
+          : wasUpdated 
+            ? "El cliente ya tenía un compromiso. Se actualizó con los nuevos datos."
+            : "El compromiso de pago del cliente ha sido registrado exitosamente",
       })
       queryClient.invalidateQueries({ queryKey: ['project-clients', organizationId, projectId] })
       form.reset()
