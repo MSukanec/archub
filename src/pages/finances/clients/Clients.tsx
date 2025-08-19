@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ClientObligations } from './ClientObligations'
 
-import { ClientPaymentDetails } from './ClientPaymentDetails'
+import { ClientPayments } from './ClientPayments'
 
 export function Clients() {
   const [activeTab, setActiveTab] = useState("obligations")
@@ -24,7 +24,7 @@ export function Clients() {
     },
     {
       id: "details",
-      label: "Detalle de Pagos",
+      label: "Pagos",
       isActive: activeTab === "details"
     }
   ]
@@ -35,6 +35,15 @@ export function Clients() {
     tabs: headerTabs,
     onTabChange: setActiveTab,
     ...(activeTab === "obligations" && {
+      actionButton: {
+        label: "Nuevo Compromiso",
+        onClick: () => openModal('project-client', {
+          projectId,
+          organizationId
+        })
+      }
+    }),
+    ...(activeTab === "details" && {
       actionButton: {
         label: "Nuevo Aporte",
         onClick: () => openModal('installment', {
@@ -67,7 +76,7 @@ export function Clients() {
         )}
 
         {activeTab === "details" && (
-          <ClientPaymentDetails 
+          <ClientPayments 
             projectId={projectId}
             organizationId={organizationId}
           />

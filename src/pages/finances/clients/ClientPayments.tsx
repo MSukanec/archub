@@ -8,12 +8,12 @@ import InstallmentDetailCard from '@/components/cards/InstallmentDetailCard'
 import { Receipt } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
-interface ClientPaymentDetailsProps {
+interface ClientPaymentsProps {
   projectId: string
   organizationId: string
 }
 
-export function ClientPaymentDetails({ projectId, organizationId }: ClientPaymentDetailsProps) {
+export function ClientPayments({ projectId, organizationId }: ClientPaymentsProps) {
   // Fetch installments (movements) data
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['client-payment-details', organizationId, projectId],
@@ -68,9 +68,9 @@ export function ClientPaymentDetails({ projectId, organizationId }: ClientPaymen
 
       // Manually fetch currencies, wallets, and users
       if (movements && movements.length > 0) {
-        const currencyIds = [...new Set(movements.map(m => m.currency_id).filter(Boolean))]
-        const walletIds = [...new Set(movements.map(m => m.wallet_id).filter(Boolean))]
-        const userIds = [...new Set(movements.map(m => m.created_by).filter(Boolean))]
+        const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
+        const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
+        const userIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean)))
 
         const [currenciesData, walletsData, usersData] = await Promise.all([
           supabase.from('currencies').select('id, name, code, symbol').in('id', currencyIds),
@@ -79,7 +79,7 @@ export function ClientPaymentDetails({ projectId, organizationId }: ClientPaymen
         ])
 
         // Add related data to movements
-        movements.forEach(movement => {
+        movements.forEach((movement: any) => {
           movement.currency = currenciesData.data?.find(c => c.id === movement.currency_id)
           movement.wallet = walletsData.data?.find(w => w.id === movement.wallet_id)
           movement.creator = usersData.data?.find(u => u.id === movement.created_by)
