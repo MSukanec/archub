@@ -183,6 +183,9 @@ export default function InstallmentHeatmapChart({
   // Generate heatmap data - rows = installments, columns = units
   const heatmapData: HeatmapCellData[][] = []
   
+  // For sequential calculation, we need to store previous balances by unit
+  const previousBalancesByUnit: { [unitId: string]: number } = {}
+  
   // Create rows for each installment
   installments.forEach((installment) => {
     const rowData: HeatmapCellData[] = []
@@ -192,7 +195,6 @@ export default function InstallmentHeatmapChart({
       if (!commitment?.unit) return
       
       // Find payments for this specific functional unit and installment number
-      // Using the new MOVEMENT_PAYMENTS_VIEW which has installment_number and unit fields
       const installmentPayments = payments?.filter(payment => 
         payment.unit === commitment.unit && 
         payment.installment_number === installment.number
@@ -202,16 +204,12 @@ export default function InstallmentHeatmapChart({
       const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum, payment) => {
         let convertedAmount = payment.amount || 0
         
-        // Convert payment to commitment currency if different currencies
         if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
-          // Si el pago está en otra moneda (ej: USD), convertir a la moneda del compromiso (ej: ARS)
           convertedAmount = convertedAmount * (payment.exchange_rate || 1)
         }
         
         return sum + convertedAmount
       }, 0)
-      
-
       
       // Get commitment currency info
       const commitmentCurrency = commitment.currencies || { symbol: '$' }
@@ -220,16 +218,24 @@ export default function InstallmentHeatmapChart({
       const totalInstallments = installments?.length || 1
       const installmentValue = Math.round((commitment.committed_amount || 0) / totalInstallments)
       
-      // Calculate updated amount (violeta): 
-      // Primera cuota = COMPROMISO TOTAL (no hay cuotas anteriores)
-      // Cuotas siguientes = saldo anterior + porcentaje de aumento
-      const percentageIncrease = 0 // Por ahora 0% para todas las cuotas
-      const updatedAmount = installment.number === 1 
-        ? Math.round(commitment.committed_amount || 0) // Primera cuota: COMPROMISO TOTAL
-        : Math.round((installmentValue - Math.round(totalPaidInCommitmentCurrency)) * (1 + percentageIncrease / 100)) // Otras cuotas: saldo + porcentaje
+      // Calculate updated amount (violeta) SECUENCIALMENTE:
+      let updatedAmount: number
+      
+      if (installment.number === 1) {
+        // Primera cuota = COMPROMISO TOTAL
+        updatedAmount = Math.round(commitment.committed_amount || 0)
+      } else {
+        // Cuotas siguientes = SALDO AZUL de cuota anterior + porcentaje de aumento
+        const previousBalance = previousBalancesByUnit[commitment.id] || 0
+        const percentageIncrease = 0 // Por ahora 0% para todas las cuotas
+        updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
+      }
       
       // Calculate balance = MONTO ACTUALIZADO (violeta) - PAGO (verde)
       const balance = updatedAmount - Math.round(totalPaidInCommitmentCurrency)
+      
+      // Store balance for next installment
+      previousBalancesByUnit[commitment.id] = balance
       
       rowData.push({
         unitId: commitment.id,
