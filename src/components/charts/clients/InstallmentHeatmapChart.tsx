@@ -216,13 +216,17 @@ export default function InstallmentHeatmapChart({
       // Get commitment currency info
       const commitmentCurrency = commitment.currencies || { symbol: '$' }
       
+      // Calculate installment value = total commitment / number of installments
+      const totalInstallments = installments?.length || 1
+      const installmentValue = (commitment.committed_amount || 0) / totalInstallments
+      
       rowData.push({
         unitId: commitment.id,
         installmentNumber: installment.number,
         updateDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
-        installmentValue: 0, // Por ahora en cero como solicitado
+        installmentValue: installmentValue,
         payment: totalPaidInCommitmentCurrency,
-        balance: 0, // Por ahora en cero como solicitado  
+        balance: installmentValue - totalPaidInCommitmentCurrency, // Saldo = valor cuota - pago
         isPaid: totalPaidInCommitmentCurrency > 0,
         commitmentCurrency: {
           symbol: commitmentCurrency.symbol || '$',
@@ -283,7 +287,7 @@ export default function InstallmentHeatmapChart({
                     {getClientDisplayName(commitment)}
                   </div>
                   {formatCommittedAmount(commitment) && (
-                    <div className="text-xs font-medium text-green-700 dark:text-green-400">
+                    <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
                       {formatCommittedAmount(commitment)}
                     </div>
                   )}
