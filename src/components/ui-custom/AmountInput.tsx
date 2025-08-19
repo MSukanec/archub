@@ -63,22 +63,21 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
     }
 
     return (
-      <div className={cn("relative flex h-10", className)}>
-        {/* Currency Selector Button */}
+      <div className={cn("flex", className)}>
+        {/* Currency Selector Button - EXACTAMENTE IDÉNTICO al Input */}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
               disabled={disabled}
               className={cn(
-                "flex items-center justify-between px-3 text-sm border border-input bg-background text-foreground rounded-l-md border-r-0 min-w-[80px] transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                "hover:bg-accent hover:text-accent-foreground",
-                !selectedCurrency && "text-muted-foreground"
+                "flex w-[80px] text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-l-md transition-all duration-150 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+                "border-r-0 justify-between items-center",
+                !selectedCurrency && "text-[var(--input-placeholder)]"
               )}
             >
               <span className="truncate font-mono text-xs">
-                {selectedCurrency ? selectedCurrency.symbol : "---"}
+                {selectedCurrency ? selectedCurrency.symbol : "$"}
               </span>
               <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
             </button>
@@ -117,7 +116,7 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
           </PopoverContent>
         </Popover>
 
-        {/* Amount Input */}
+        {/* Amount Input - EXACTAMENTE IDÉNTICO al Input */}
         <input
           {...props}
           ref={ref}
@@ -129,8 +128,8 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "flex-1 h-10 rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            "rounded-l-none border-l-0"
+            "flex w-full text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-r-md transition-all duration-150 placeholder:text-[var(--input-placeholder)] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+            "border-l-0 rounded-l-none"
           )}
         />
       </div>
