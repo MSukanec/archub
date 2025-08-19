@@ -188,11 +188,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
 
+  // Helper function para manejar fechas correctamente evitando problemas de timezone
+  const parseMovementDate = (dateString: string | undefined): Date => {
+    if (!dateString) return new Date()
+    
+    // Si la fecha viene como YYYY-MM-DD, crear Date con componentes locales
+    const dateParts = dateString.split('-')
+    if (dateParts.length === 3) {
+      const year = parseInt(dateParts[0])
+      const month = parseInt(dateParts[1]) - 1 // Months are 0-indexed
+      const day = parseInt(dateParts[2])
+      return new Date(year, month, day)
+    }
+    
+    // Fallback para otras formas de fecha
+    return new Date(dateString)
+  }
+
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
-      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       type_id: editingMovement?.type_id || '',
       category_id: editingMovement?.category_id || '',
@@ -209,7 +226,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
-      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
@@ -227,7 +244,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
-      movement_date: editingMovement?.movement_date ? new Date(editingMovement.movement_date) : new Date(),
+      movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
@@ -811,10 +828,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
-    console.log('🚀 onSubmit ejecutado con valores:', values)
-    console.log('🚀 selectedClients:', selectedClients)
-    console.log('🚀 form.formState.errors:', form.formState.errors)
-    console.log('🚀 form.formState.isValid:', form.formState.isValid)
     createMovementMutation.mutate(values)
   }
 
