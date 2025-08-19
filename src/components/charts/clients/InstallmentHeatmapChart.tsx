@@ -22,6 +22,7 @@ interface ClientCommitment {
   unit: string
   committed_amount: number | null
   currency_id: string | null
+  exchange_rate: number | null
 }
 
 interface ClientInfo {
@@ -201,14 +202,16 @@ export default function InstallmentHeatmapChart({
       const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum, payment) => {
         let convertedAmount = payment.amount || 0
         
-        // Convert payment to commitment currency if different
+        // Convert payment to commitment currency if different currencies
         if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
-          // Si el pago está en otra moneda, convertir usando el exchange_rate
+          // Si el pago está en otra moneda (ej: USD), convertir a la moneda del compromiso (ej: ARS)
           convertedAmount = convertedAmount * (payment.exchange_rate || 1)
         }
         
         return sum + convertedAmount
       }, 0)
+      
+
       
       // Get commitment currency info
       const commitmentCurrency = commitment.currencies || { symbol: '$' }
