@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Receipt, Plus } from 'lucide-react'
+import { Receipt, Plus, Users } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -71,12 +71,13 @@ export function Clients() {
 
   const headerProps = {
     title: "Clientes",
-    icon: Receipt,
+    icon: Users,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     ...(activeTab === "obligations" && {
       actionButton: {
         label: "Nuevo Compromiso",
+        icon: Plus,
         onClick: () => openModal('project-client', {
           projectId,
           organizationId
@@ -97,6 +98,7 @@ export function Clients() {
     ...(activeTab === "details" && {
       actionButton: {
         label: "Nuevo Aporte",
+        icon: Plus,
         onClick: () => openModal('installment', {
           projectId,
           organizationId,

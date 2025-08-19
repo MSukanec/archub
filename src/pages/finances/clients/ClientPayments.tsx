@@ -4,8 +4,10 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { Button } from '@/components/ui/button'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import InstallmentDetailCard from '@/components/cards/InstallmentDetailCard'
-import { Receipt } from 'lucide-react'
+import { Receipt, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface ClientPaymentsProps {
@@ -14,6 +16,8 @@ interface ClientPaymentsProps {
 }
 
 export function ClientPayments({ projectId, organizationId }: ClientPaymentsProps) {
+  const { openModal } = useGlobalModalStore()
+  
   // Fetch installments (movements) data
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['client-payment-details', organizationId, projectId],
@@ -238,6 +242,22 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         icon={<Receipt className="h-8 w-8" />}
         title="Aún no hay compromisos registrados"
         description="Esta sección muestra el detalle de todos los pagos registrados."
+        action={
+          <div className="flex justify-center">
+            <Button 
+              onClick={() => openModal('installment', {
+                projectId,
+                organizationId,
+                subcategoryId: 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Subcategoría para Aportes de Terceros
+              })}
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nuevo Aporte
+            </Button>
+          </div>
+        }
       />
     )
   }
