@@ -37,7 +37,8 @@ const clientObligationSchema = z.object({
   client_id: z.string().min(1, 'Cliente es requerido'),
   unit: z.string().optional(),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  committed_amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0')
+  committed_amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  exchange_rate: z.number().min(0.01, 'Tasa de cambio debe ser mayor a 0').optional()
 })
 
 type ClientObligationForm = z.infer<typeof clientObligationSchema>
@@ -69,7 +70,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
       client_id: editingClient?.client_id || '',
       unit: editingClient?.unit || '',
       currency_id: editingClient?.currency_id || userData?.organization_preferences?.default_currency || '',
-      committed_amount: editingClient?.committed_amount || 0
+      committed_amount: editingClient?.committed_amount || 0,
+      exchange_rate: editingClient?.exchange_rate || undefined
     }
   })
 
@@ -160,7 +162,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
             client_id: data.client_id,
             unit: data.unit || null,
             committed_amount: data.committed_amount,
-            currency_id: data.currency_id
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || null
           })
           .eq('id', editingClient.id)
           .select()
@@ -185,7 +188,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
             .from('project_clients')
             .update({
               committed_amount: data.committed_amount,
-              currency_id: data.currency_id
+              currency_id: data.currency_id,
+              exchange_rate: data.exchange_rate || null
             })
             .eq('id', existingClient.id)
             .select()
@@ -204,6 +208,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
               unit: data.unit || null,
               committed_amount: data.committed_amount,
               currency_id: data.currency_id,
+              exchange_rate: data.exchange_rate || null,
               organization_id: organizationId
             })
             .select()
@@ -245,7 +250,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         client_id: editingClient.client_id || '',
         unit: editingClient.unit || '',
         currency_id: editingClient.currency_id || userData?.organization_preferences?.default_currency || '',
-        committed_amount: editingClient.committed_amount || 0
+        committed_amount: editingClient.committed_amount || 0,
+        exchange_rate: editingClient.exchange_rate || undefined
       })
     }
   }, [editingClient, form])
@@ -396,6 +402,32 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Fila: Tasa de Cambio */}
+        <div className="grid grid-cols-1 gap-4">
+          {/* Tasa de Cambio */}
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Tasa de Cambio (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="1.00"
+                    {...field}
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
