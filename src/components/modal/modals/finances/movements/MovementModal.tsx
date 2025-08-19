@@ -188,6 +188,36 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
 
+  // Handle type change para detectar conversión (como en el modal original) - MOVED UP
+  const handleTypeChange = React.useCallback((newTypeId: string) => {
+    if (!newTypeId || !movementConcepts) return
+    
+    setSelectedTypeId(newTypeId)
+    
+    // Detectar tipo de movimiento por view_mode 
+    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
+    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+    
+    if (viewMode === "conversion") {
+      setMovementType('conversion')
+    } else if (viewMode === "transfer") {
+      setMovementType('transfer')
+    } else {
+      setMovementType('normal')
+    }
+    
+    // Sincronizar type_id en todos los formularios
+    form.setValue('type_id', newTypeId)
+    conversionForm.setValue('type_id', newTypeId)
+    transferForm.setValue('type_id', newTypeId)
+    
+    // Reset categorías
+    setSelectedCategoryId('')
+    setSelectedSubcategoryId('')
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
+  }, [movementConcepts, form, conversionForm, transferForm])
+
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
@@ -466,36 +496,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       console.error('Error loading movement project clients:', error)
     }
   }
-
-  // Handle type change para detectar conversión (como en el modal original)
-  const handleTypeChange = React.useCallback((newTypeId: string) => {
-    if (!newTypeId || !movementConcepts) return
-    
-    setSelectedTypeId(newTypeId)
-    
-    // Detectar tipo de movimiento por view_mode 
-    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
-    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-    
-    if (viewMode === "conversion") {
-      setMovementType('conversion')
-    } else if (viewMode === "transfer") {
-      setMovementType('transfer')
-    } else {
-      setMovementType('normal')
-    }
-    
-    // Sincronizar type_id en todos los formularios
-    form.setValue('type_id', newTypeId)
-    conversionForm.setValue('type_id', newTypeId)
-    transferForm.setValue('type_id', newTypeId)
-    
-    // Reset categorías
-    setSelectedCategoryId('')
-    setSelectedSubcategoryId('')
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm, transferForm])
 
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
