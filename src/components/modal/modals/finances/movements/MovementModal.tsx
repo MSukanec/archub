@@ -476,7 +476,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const movementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description,
         amount: data.amount,
@@ -630,7 +632,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const egressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Conversión - Salida',
         amount: data.amount_from,
@@ -647,7 +651,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Conversión - Entrada',
         amount: data.amount_to,
@@ -729,7 +735,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const egressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Salida',
         amount: data.amount,
@@ -745,7 +753,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Entrada',
         amount: data.amount,
