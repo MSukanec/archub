@@ -294,6 +294,8 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       key: "contact",
       label: "Cliente",
       width: "25%",
+      sortable: true,
+      sortType: "string" as const,
       render: (item: any) => {
         if (!item.contacts) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -322,7 +324,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className="text-sm font-medium">
-            {item.currency?.symbol || '$'} {committedAmount.toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.round(committedAmount).toLocaleString()}
           </div>
         )
       }
@@ -336,7 +338,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       render: (item: any) => {
         return (
           <div className="text-sm">
-            {item.currency?.symbol || '$'} {(item.totalPaid || 0).toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.round(item.totalPaid || 0).toLocaleString()}
           </div>
         )
       }
@@ -353,7 +355,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className={`text-sm font-medium ${isNegative ? 'text-green-600' : 'text-muted-foreground'}`}>
-            {item.currency?.symbol || '$'} {Math.abs(remaining).toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.round(Math.abs(remaining)).toLocaleString()}
             {isNegative && ' (excedente)'}
           </div>
         )
@@ -455,7 +457,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           return <div className="text-sm text-muted-foreground">-</div>
         }
 
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(currencyData.amount)
+        const formattedAmount = Math.round(currencyData.amount).toLocaleString()
         return (
           <div className="text-sm font-medium">
             {currencyData.currency?.symbol || currencyCode} {formattedAmount}
