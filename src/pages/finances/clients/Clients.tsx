@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ClientObligations } from './ClientObligations'
-import { ClientPaymentCurrencies } from './ClientPaymentCurrencies'
+
 import { ClientPaymentDetails } from './ClientPaymentDetails'
 
 export function Clients() {
@@ -23,11 +23,6 @@ export function Clients() {
       isActive: activeTab === "obligations"
     },
     {
-      id: "currencies",
-      label: "Detalle por Moneda", 
-      isActive: activeTab === "currencies"
-    },
-    {
       id: "details",
       label: "Detalle de Pagos",
       isActive: activeTab === "details"
@@ -35,7 +30,7 @@ export function Clients() {
   ]
 
   const headerProps = {
-    title: "Aportes de Clientes",
+    title: "Clientes",
     icon: Receipt,
     tabs: headerTabs,
     onTabChange: setActiveTab,
@@ -66,13 +61,6 @@ export function Clients() {
       <div className="space-y-4">
         {activeTab === "obligations" && (
           <ClientObligations 
-            projectId={projectId}
-            organizationId={organizationId}
-          />
-        )}
-
-        {activeTab === "currencies" && (
-          <ClientPaymentCurrencies 
             projectId={projectId}
             organizationId={organizationId}
           />
