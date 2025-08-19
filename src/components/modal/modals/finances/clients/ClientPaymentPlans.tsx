@@ -271,98 +271,104 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           </Callout>
         )}
         
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="payment_plan_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Plan de Pagos</FormLabel>
-                <FormControl>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={field.onChange}
-                    disabled={paymentPlansLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona el tipo de plan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentPlans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
-                          {plan.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="frequency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Frecuencia de Pago</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} defaultValue="mensual">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona la frecuencia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quincenal">Quincenal (cada 15 días)</SelectItem>
-                      <SelectItem value="mensual">Mensual</SelectItem>
-                      <SelectItem value="trimestral">Trimestral (cada 3 meses)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-6">
+          {/* Primera fila: Tipo - Frecuencia */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="payment_plan_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Plan de Pagos</FormLabel>
+                  <FormControl>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={field.onChange}
+                      disabled={paymentPlansLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el tipo de plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentPlans.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="frequency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Frecuencia de Pago</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange} defaultValue="mensual">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona la frecuencia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="quincenal">Quincenal (cada 15 días)</SelectItem>
+                        <SelectItem value="mensual">Mensual</SelectItem>
+                        <SelectItem value="trimestral">Trimestral (cada 3 meses)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="installments_count"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cantidad de Cuotas</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="100"
-                    placeholder="Ej: 12"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="start_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Primera Cuota</FormLabel>
-                <FormControl>
-                  <DatePicker
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Selecciona la fecha"
-                    className="w-full"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Segunda fila: Cantidad - Fecha */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="installments_count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cantidad de Cuotas</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="100"
+                      placeholder="Ej: 12"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de Primera Cuota</FormLabel>
+                  <FormControl>
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Selecciona la fecha"
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           
+          {/* Resumen del Plan */}
           <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
             <p className="font-medium">Resumen del Plan:</p>
             {selectedPaymentPlan && (
