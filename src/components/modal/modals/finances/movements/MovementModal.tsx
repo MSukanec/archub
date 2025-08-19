@@ -358,31 +358,29 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     console.log('🔄 Cargando datos de conversión:', movement)
     
     try {
-      // Buscar el movimiento complementario de la conversión
-      const { data: conversionMovements, error } = await supabase
+      // Obtener TODOS los movimientos del grupo de conversión y ordenar por amount descendente
+      const { data: allGroupMovements, error } = await supabase
         .from('movements')
         .select('*')
         .eq('conversion_group_id', movement.conversion_group_id)
-        .neq('id', movement.id)
-        .single()
+        .order('amount', { ascending: false })
 
-      if (error) {
-        console.error('Error al buscar movimiento complementario:', error)
+      if (error || !allGroupMovements || allGroupMovements.length !== 2) {
+        console.error('Error al buscar grupo de conversión:', error)
         return
       }
 
-      console.log('🔄 Movimiento complementario encontrado:', conversionMovements)
+      console.log('🔄 Grupo de conversión completo encontrado:', allGroupMovements)
 
-      // Determinar si el movimiento actual es origen o destino usando la descripción
-      const isOriginMovement = movement.description.includes('Salida')
-      const originMovement = isOriginMovement ? movement : conversionMovements
-      const destinationMovement = isOriginMovement ? conversionMovements : movement
+      // El de mayor amount es el EGRESO (origen), el de menor amount es el INGRESO (destino)
+      const originMovement = allGroupMovements[0]  // Mayor amount (egreso)
+      const destinationMovement = allGroupMovements[1]  // Menor amount (ingreso)
       
-      console.log('🔍 Lógica de origen/destino:', {
-        movementDescription: movement.description,
-        isOriginMovement,
-        originMovement: originMovement.description,
-        destinationMovement: destinationMovement.description
+      console.log('🔍 Lógica corregida de origen/destino por amounts:', {
+        originAmount: originMovement.amount,
+        destinationAmount: destinationMovement.amount,
+        originCurrency: originMovement.currency_id,
+        destinationCurrency: destinationMovement.currency_id
       })
 
       // Llenar formulario de conversión
@@ -631,7 +629,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount,
           project_clients:project_client_id (
             id,
-            contact:contact_id (
+            contacts:contact_id (
               first_name,
               last_name
             )
