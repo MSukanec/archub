@@ -316,7 +316,7 @@ export default function IndexedInstallmentPlan({
         {/* Fixed left column + scrollable right area */}
         <div className="flex">
           {/* Fixed left column header */}
-          <div className="w-32 bg-muted/50 border-b border-border">
+          <div className="w-32 border-b border-border">
             <div className="p-3 font-medium text-sm">
               Cuota / Unidad
             </div>
@@ -355,7 +355,7 @@ export default function IndexedInstallmentPlan({
           return (
             <div key={installment.number} className="flex border-b border-border">
               {/* Fixed left column - installment info */}
-              <div className="group w-32 p-3 text-sm transition-colors relative bg-background">
+              <div className="group w-32 p-3 text-sm transition-colors relative">
                 <div className="font-bold mb-1">
                   Cuota {installment.number.toString().padStart(2, '0')}
                 </div>
