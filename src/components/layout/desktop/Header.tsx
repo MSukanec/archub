@@ -270,6 +270,8 @@ export function Header({
                   <span className="max-w-32 truncate">
                     {projects.length === 0
                       ? "No hay proyectos"
+                      : userOrgPrefs?.last_project_id === null
+                      ? "General"
                       : projects.find((p) => p.id === userOrgPrefs?.last_project_id)
                           ?.name || "Sin proyecto"}
                   </span>
@@ -278,26 +280,46 @@ export function Header({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
                 {projects.length > 0 ? (
-                  projects.map((project) => (
+                  <>
+                    {/* General/All projects option */}
                     <DropdownMenuItem
-                      key={project.id}
-                      onClick={() =>
-                        updateProjectMutation.mutate(project.id)
-                      }
-                      className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
+                      onClick={() => updateProjectMutation.mutate(null)}
+                      className={`${userOrgPrefs?.last_project_id === null ? "bg-[var(--accent)] text-white" : ""}`}
                     >
                       <div className="flex items-center w-full">
                         <Folder className="w-4 h-4 mr-2" />
-                        <span className="truncate">{project.name}</span>
+                        <span className="truncate">General</span>
                       </div>
-                      {userOrgPrefs?.last_project_id === project.id && (
+                      {userOrgPrefs?.last_project_id === null && (
                         <div
                           className="w-2 h-2 rounded-full ml-auto"
                           style={{ backgroundColor: "var(--accent)" }}
                         />
                       )}
                     </DropdownMenuItem>
-                  ))
+                    
+                    {/* Individual projects */}
+                    {projects.map((project) => (
+                      <DropdownMenuItem
+                        key={project.id}
+                        onClick={() =>
+                          updateProjectMutation.mutate(project.id)
+                        }
+                        className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
+                      >
+                        <div className="flex items-center w-full">
+                          <Folder className="w-4 h-4 mr-2" />
+                          <span className="truncate">{project.name}</span>
+                        </div>
+                        {userOrgPrefs?.last_project_id === project.id && (
+                          <div
+                            className="w-2 h-2 rounded-full ml-auto"
+                            style={{ backgroundColor: "var(--accent)" }}
+                          />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </>
                 ) : (
                   <div className="px-3 py-4 text-center">
                     <div className="flex flex-col items-center gap-2">

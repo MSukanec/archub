@@ -101,7 +101,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Obtener el proyecto actual para mostrar su nombre
   const currentProject = projectsData?.find((p: any) => p.id === selectedProjectId);
-  const currentProjectName = currentProject?.name || "Seleccionar proyecto";
+  const currentProjectName = selectedProjectId === null 
+    ? "General" 
+    : (currentProject?.name || "Seleccionar proyecto");
   const isAdmin = useIsAdmin();
 
   // Organization selection mutation - Updated to use new system
@@ -572,6 +574,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
                   Proyecto
                 </div>
+                
+                {/* General/All projects option */}
+                <button
+                  onClick={() => {
+                    projectMutation.mutate(null);
+                    setExpandedProjectSelector(false);
+                  }}
+                  className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-xl shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+                  style={{ color: 'var(--menues-fg)' }}
+                >
+                  General
+                </button>
+                
+                {/* Individual projects */}
                 {projectsData?.map((project: any) => (
                   <button
                     key={project.id}
