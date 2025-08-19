@@ -811,6 +811,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
+    console.log('🚀 onSubmit ejecutado con valores:', values)
+    console.log('🚀 selectedClients:', selectedClients)
+    console.log('🚀 form.formState.errors:', form.formState.errors)
+    console.log('🚀 form.formState.isValid:', form.formState.isValid)
     createMovementMutation.mutate(values)
   }
 
