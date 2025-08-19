@@ -7,12 +7,12 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
-interface ClientMonthlyInstallmentsProps {
+interface ClientPaymentPlansProps {
   projectId: string
   organizationId: string
 }
 
-export function ClientMonthlyInstallments({ projectId, organizationId }: ClientMonthlyInstallmentsProps) {
+export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentPlansProps) {
   const { openModal } = useGlobalModalStore()
 
   // Fetch installments data

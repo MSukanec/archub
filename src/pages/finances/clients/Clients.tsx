@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ClientObligations } from './ClientObligations'
-import { ClientMonthlyInstallments } from './ClientMonthlyInstallments'
+import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
 
 export function Clients() {
@@ -24,7 +24,7 @@ export function Clients() {
     },
     {
       id: "monthly-installments",
-      label: "Cuotas Mensuales",
+      label: "Plan de Cuotas",
       isActive: activeTab === "monthly-installments"
     },
     {
@@ -100,7 +100,7 @@ export function Clients() {
         )}
 
         {activeTab === "monthly-installments" && (
-          <ClientMonthlyInstallments 
+          <ClientPaymentPlans 
             projectId={projectId}
             organizationId={organizationId}
           />
