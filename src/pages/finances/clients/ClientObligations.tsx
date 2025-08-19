@@ -1,12 +1,15 @@
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import ClientSummaryCard from '@/components/cards/ClientSummaryCard'
 import CurrencyDetailCard from '@/components/cards/CurrencyDetailCard'
-import { Receipt } from 'lucide-react'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { Receipt, Edit2, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 interface ClientObligationsProps {
   projectId: string
@@ -14,6 +17,46 @@ interface ClientObligationsProps {
 }
 
 export function ClientObligations({ projectId, organizationId }: ClientObligationsProps) {
+  const { openModal } = useGlobalModalStore()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+
+  // Fetch project clients (commitments) data
+  const { data: projectClients = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ['project-clients', organizationId, projectId],
+    queryFn: async () => {
+      if (!supabase) return []
+      
+      const { data, error } = await supabase
+        .from('project_clients')
+        .select(`
+          id,
+          client_id,
+          committed_amount,
+          currency_id,
+          created_at,
+          contacts!inner(
+            id,
+            first_name,
+            last_name,
+            company_name,
+            full_name
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching project clients:', error)
+        throw error
+      }
+
+      return data || []
+    },
+    enabled: !!organizationId && !!projectId && !!supabase
+  })
+
   // Fetch installments (movements) data
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['client-obligations', organizationId, projectId],
@@ -175,19 +218,89 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     return { clientSummary: sortedSummary, availableCurrencies: currencies }
   }, [installments])
 
-  // Table columns for client summary
+  // Delete client mutation
+  const deleteClientMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized')
+      
+      const { error } = await supabase
+        .from('project_clients')
+        .delete()
+        .eq('id', clientId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast({
+        title: "Compromiso eliminado",
+        description: "El compromiso de pago ha sido eliminado exitosamente",
+      })
+      queryClient.invalidateQueries({ queryKey: ['project-clients', organizationId, projectId] })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al eliminar",
+        description: error.message || "Hubo un problema al eliminar el compromiso",
+        variant: "destructive",
+      })
+    }
+  })
+
+  // Create commitment summary with payment totals
+  const commitmentSummary = React.useMemo(() => {
+    return projectClients.map(client => {
+      // Find total payments for this client
+      const clientPayments = installments.filter(installment => 
+        installment.movement_clients?.some(mc => mc.project_clients?.client_id === client.client_id)
+      )
+      
+      let totalPaid = 0
+      const currency = allCurrencies.find(c => c.id === client.currency_id)
+      
+      clientPayments.forEach(payment => {
+        payment.movement_clients?.forEach(mc => {
+          if (mc.project_clients?.client_id === client.client_id) {
+            if (payment.currency_id === client.currency_id) {
+              totalPaid += mc.amount || 0
+            } else {
+              // Convert to client currency if different
+              const exchangeRate = payment.exchange_rate || 1
+              if (payment.currency?.code === 'USD' && currency?.code === 'ARS') {
+                totalPaid += (mc.amount || 0) * exchangeRate
+              } else if (payment.currency?.code === 'ARS' && currency?.code === 'USD') {
+                totalPaid += (mc.amount || 0) / exchangeRate
+              } else {
+                totalPaid += mc.amount || 0
+              }
+            }
+          }
+        })
+      })
+
+      const remainingAmount = (client.committed_amount || 0) - totalPaid
+
+      return {
+        ...client,
+        totalPaid,
+        remainingAmount,
+        currency
+      }
+    })
+  }, [projectClients, installments, allCurrencies])
+
+  // Table columns for commitments
   const contactSummaryColumns = [
     {
       key: "contact",
       label: "Cliente",
-      width: "40%",
+      width: "25%",
       render: (item: any) => {
-        if (!item.contact) {
+        if (!item.contacts) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
         }
 
-        const displayName = item.contact.company_name || 
-                           `${item.contact.first_name || ''} ${item.contact.last_name || ''}`.trim()
+        const displayName = item.contacts.company_name || 
+                           `${item.contacts.first_name || ''} ${item.contacts.last_name || ''}`.trim()
 
         return (
           <div className="text-sm font-medium">{displayName}</div>
@@ -195,61 +308,95 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       }
     },
     {
-      key: "dollarized_total",
-      label: "Total (USD)",
-      width: "20%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: any) => {
-        const formattedAmount = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD'
-        }).format(item.dollarizedTotal || 0)
-        
-        return (
-          <div className="text-sm font-medium">
-            {formattedAmount}
-          </div>
-        )
-      }
-    },
-    {
       key: "commitment",
       label: "Compromiso",
       width: "20%", 
+      sortable: true,
+      sortType: "number" as const,
       render: (item: any) => {
-        const committedAmount = item.client?.committed_amount || 0
-        const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
+        const committedAmount = item.committed_amount || 0
         
         if (committedAmount === 0) {
           return <div className="text-sm text-muted-foreground">Sin compromiso</div>
         }
         
         return (
-          <div className="text-sm">
-            {clientCurrency?.symbol || '$'} {committedAmount.toLocaleString()}
+          <div className="text-sm font-medium">
+            {item.currency?.symbol || '$'} {committedAmount.toLocaleString()}
           </div>
         )
       }
     },
     {
-      key: "percentage",
-      label: "% Completado",
+      key: "totalPaid",
+      label: "Pago a la Fecha",
       width: "20%",
+      sortable: true,
+      sortType: "number" as const,
       render: (item: any) => {
-        const committedAmount = item.client?.committed_amount || 0
-        const clientCurrency = allCurrencies.find(c => c.id === item.client?.currency_id)
-        let committedAmountUSD = committedAmount
-        
-        if (clientCurrency?.code === 'ARS' && committedAmount > 0) {
-          committedAmountUSD = committedAmount / 1200 // Convert ARS to USD
-        }
-        
-        const percentage = committedAmountUSD > 0 ? ((item.dollarizedTotal || 0) / committedAmountUSD) * 100 : 0
-        
         return (
           <div className="text-sm">
-            {percentage.toFixed(1)}%
+            {item.currency?.symbol || '$'} {(item.totalPaid || 0).toLocaleString()}
+          </div>
+        )
+      }
+    },
+    {
+      key: "remainingAmount",
+      label: "Monto Restante",
+      width: "20%",
+      sortable: true,
+      sortType: "number" as const,
+      render: (item: any) => {
+        const remaining = item.remainingAmount || 0
+        const isNegative = remaining < 0
+        
+        return (
+          <div className={`text-sm font-medium ${isNegative ? 'text-green-600' : 'text-muted-foreground'}`}>
+            {item.currency?.symbol || '$'} {Math.abs(remaining).toLocaleString()}
+            {isNegative && ' (excedente)'}
+          </div>
+        )
+      }
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      width: "15%",
+      render: (item: any) => {
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                openModal('project-client', {
+                  projectId,
+                  organizationId,
+                  editingClient: item,
+                  isEditing: true
+                })
+              }}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                openModal('delete-confirmation', {
+                  mode: 'dangerous',
+                  title: 'Eliminar Compromiso de Pago',
+                  description: `Esta acción eliminará permanentemente el compromiso de pago de ${item.contacts?.company_name || item.contacts?.full_name || 'este cliente'}. Esta acción no se puede deshacer.`,
+                  itemName: item.contacts?.company_name || item.contacts?.full_name || 'Sin nombre',
+                  itemType: 'compromiso',
+                  destructiveActionText: 'Eliminar Compromiso',
+                  onConfirm: () => deleteClientMutation.mutate(item.id)
+                })
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         )
       }
@@ -320,7 +467,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
 
-  if (isLoading) {
+  if (clientsLoading || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-sm text-muted-foreground">Cargando compromisos de pago...</div>
@@ -328,7 +475,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     )
   }
 
-  if (installments.length === 0) {
+  if (projectClients.length === 0) {
     return (
       <EmptyState
         icon={<Receipt className="h-8 w-8" />}
@@ -341,14 +488,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   return (
     <div className="space-y-6">
       {/* Tabla de Compromisos de Pago */}
-      {clientSummary.length > 0 && (
+      {commitmentSummary.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-foreground mb-3">Compromisos de Pago</h3>
           <Table
-            data={clientSummary}
+            data={commitmentSummary}
             columns={contactSummaryColumns}
             defaultSort={{ key: 'contact', direction: 'asc' }}
-            getItemId={(item) => item.contact_id || 'unknown'}
+            getItemId={(item) => item.id || 'unknown'}
             renderCard={(item) => (
               <ClientSummaryCard 
                 item={item} 

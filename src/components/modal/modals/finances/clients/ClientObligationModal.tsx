@@ -45,6 +45,8 @@ interface ClientObligationModalProps {
   modalData?: {
     projectId?: string
     organizationId?: string
+    editingClient?: any
+    isEditing?: boolean
   }
   onClose: () => void
 }
@@ -57,13 +59,15 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
 
   const projectId = modalData?.projectId || userData?.preferences?.last_project_id
   const organizationId = modalData?.organizationId || userData?.organization?.id
+  const editingClient = modalData?.editingClient
+  const isEditing = modalData?.isEditing || !!editingClient
 
   const form = useForm<ClientObligationForm>({
     resolver: zodResolver(clientObligationSchema),
     defaultValues: {
-      client_id: '',
-      currency_id: '',
-      committed_amount: 0
+      client_id: editingClient?.client_id || '',
+      currency_id: editingClient?.currency_id || '',
+      committed_amount: editingClient?.committed_amount || 0
     }
   })
 
@@ -132,59 +136,94 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     enabled: !!projectId && !!organizationId && !!supabase
   })
 
-  // Add client mutation
-  const addClientMutation = useMutation({
+  // Mutation for create/update client
+  const saveClientMutation = useMutation({
     mutationFn: async (data: ClientObligationForm) => {
       if (!supabase || !organizationId) throw new Error('Supabase client not initialized or missing organization ID')
       
-      const { data: result, error } = await supabase
-        .from('project_clients')
-        .insert({
-          project_id: projectId,
-          client_id: data.client_id,
-          committed_amount: data.committed_amount,
-          currency_id: data.currency_id,
-          role: 'Cliente',
-          is_active: true,
-          organization_id: organizationId,
-          exchange_rate: 1.0
-        })
-        .select()
+      if (isEditing && editingClient) {
+        // Update existing client
+        const { data: result, error } = await supabase
+          .from('project_clients')
+          .update({
+            client_id: data.client_id,
+            committed_amount: data.committed_amount,
+            currency_id: data.currency_id
+          })
+          .eq('id', editingClient.id)
+          .select()
 
-      if (error) throw error
-      return result
+        if (error) throw error
+        return result
+      } else {
+        // Create new client
+        const { data: result, error } = await supabase
+          .from('project_clients')
+          .insert({
+            project_id: projectId,
+            client_id: data.client_id,
+            committed_amount: data.committed_amount,
+            currency_id: data.currency_id,
+            role: 'Cliente',
+            organization_id: organizationId,
+            exchange_rate: 1.0
+          })
+          .select()
+
+        if (error) throw error
+        return result
+      }
     },
     onSuccess: () => {
       toast({
-        title: "Compromiso creado",
-        description: "El compromiso de pago del cliente ha sido registrado exitosamente",
+        title: isEditing ? "Compromiso actualizado" : "Compromiso creado",
+        description: isEditing 
+          ? "El compromiso de pago ha sido actualizado exitosamente"
+          : "El compromiso de pago del cliente ha sido registrado exitosamente",
       })
-      queryClient.invalidateQueries({ queryKey: ['project-clients', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['project-clients', organizationId, projectId] })
       form.reset()
       onClose()
     },
     onError: (error: any) => {
       toast({
-        title: "Error al agregar cliente",
-        description: error.message || "Hubo un problema al agregar el cliente",
+        title: isEditing ? "Error al actualizar" : "Error al crear compromiso",
+        description: error.message || "Hubo un problema al procesar el compromiso",
         variant: "destructive",
       })
     }
   })
 
+  // Reset form when editing client changes
+  useEffect(() => {
+    if (editingClient) {
+      form.reset({
+        client_id: editingClient.client_id || '',
+        currency_id: editingClient.currency_id || '',
+        committed_amount: editingClient.committed_amount || 0
+      })
+    }
+  }, [editingClient, form])
+
   const onSubmit = async (data: ClientObligationForm) => {
-    await addClientMutation.mutateAsync(data)
+    await saveClientMutation.mutateAsync(data)
   }
 
-  // Get available contacts (not already clients)
-  const availableContacts = organizationContacts?.filter(contact => 
-    !projectClients?.some(client => client.client_id === contact.id)
-  ) || []
+  // Get available contacts (not already clients, but include current client if editing)
+  const availableContacts = organizationContacts?.filter(contact => {
+    if (isEditing && editingClient?.client_id === contact.id) {
+      return true // Allow current client when editing
+    }
+    return !projectClients?.some(client => client.client_id === contact.id)
+  }) || []
 
   const viewPanel = (
     <div>
       <p className="text-muted-foreground">
-        Crea un nuevo compromiso de pago especificando el cliente, la moneda y el monto comprometido.
+        {isEditing 
+          ? "Modifica los datos del compromiso de pago del cliente."
+          : "Crea un nuevo compromiso de pago especificando el cliente, la moneda y el monto comprometido."
+        }
       </p>
     </div>
   )
@@ -287,7 +326,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
 
   const headerContent = (
     <FormModalHeader
-      title="Nuevo Compromiso de Pago"
+      title={isEditing ? "Editar Compromiso de Pago" : "Nuevo Compromiso de Pago"}
       icon={UserPlus}
     />
   )
@@ -296,10 +335,10 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Crear Compromiso"
+      rightLabel={isEditing ? "Actualizar Compromiso" : "Crear Compromiso"}
       onRightClick={() => form.handleSubmit(onSubmit)()}
       submitDisabled={!form.formState.isValid || availableContacts.length === 0}
-      showLoadingSpinner={addClientMutation.isPending}
+      showLoadingSpinner={saveClientMutation.isPending}
     />
   )
 
