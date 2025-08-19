@@ -5,7 +5,7 @@ import { Calendar, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import InstallmentHeatmapChart from '@/components/charts/clients/InstallmentHeatmapChart'
+import IndexedInstallmentPlan from '@/components/charts/clients/IndexedInstallmentPlan'
 
 interface ClientPaymentPlansProps {
   projectId: string
@@ -75,7 +75,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
               className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
-              Crear Plan de Cuotas
+              Nuevo Plan de Pagos
             </Button>
 
           </div>
@@ -85,7 +85,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
   }
 
   return (
-    <InstallmentHeatmapChart 
+    <IndexedInstallmentPlan 
       projectId={projectId} 
       organizationId={organizationId}
       onEditInstallment={handleEditInstallment}

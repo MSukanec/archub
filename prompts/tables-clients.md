@@ -280,3 +280,61 @@ VISTA MOVEMENT_PAYMENTS_VIEW:
     "data_type": "numeric"
   }
 ]
+
+TABLA PAYMENT_PLANS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]
+
+TABLA PROJECT_PAYMENT_PLANS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "payment_plan_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "installments_count",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "frequency",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  }
+]

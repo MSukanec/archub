@@ -46,19 +46,19 @@ interface HeatmapCellData {
   }
 }
 
-interface InstallmentHeatmapChartProps {
+interface IndexedInstallmentPlanProps {
   projectId: string
   organizationId: string
   onEditInstallment?: (installment: InstallmentData) => void
   onDeleteInstallment?: (installment: InstallmentData) => void
 }
 
-export default function InstallmentHeatmapChart({ 
+export default function IndexedInstallmentPlan({ 
   projectId, 
   organizationId, 
   onEditInstallment, 
   onDeleteInstallment 
-}: InstallmentHeatmapChartProps) {
+}: IndexedInstallmentPlanProps) {
   const { data: userData } = useCurrentUser()
 
   // Fetch installments - Force fresh data with specific column selection

@@ -24,7 +24,7 @@ export function Clients() {
     },
     {
       id: "monthly-installments",
-      label: "Plan de Cuotas",
+      label: "Plan de Pagos",
       isActive: activeTab === "monthly-installments"
     },
     {
@@ -50,7 +50,7 @@ export function Clients() {
     }),
     ...(activeTab === "monthly-installments" && {
       actionButton: {
-        label: "Crear Plan de Cuotas",
+        label: "Nuevo Plan de Pagos",
         icon: Plus,
         onClick: () => openModal('client-payment-plans', {
           projectId,

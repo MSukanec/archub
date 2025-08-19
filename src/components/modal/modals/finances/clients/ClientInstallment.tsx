@@ -206,7 +206,6 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
 
   const footerContent = (
     <FormModalFooter
-      onClose={onClose}
       submitText="Guardar Cambios"
       onSubmit={form.handleSubmit(handleSubmit)}
       isSubmitting={saveInstallmentMutation.isPending}
