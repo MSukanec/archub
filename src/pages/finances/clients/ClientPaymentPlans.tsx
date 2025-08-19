@@ -62,7 +62,14 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
       const { data, error } = await supabase
         .from('project_payment_plans')
         .select(`
-          *,
+          id,
+          project_id,
+          organization_id,
+          payment_plan_id,
+          installments_count,
+          frequency,
+          start_date,
+          created_at,
           payment_plans(
             id,
             name,

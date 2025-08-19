@@ -53,7 +53,7 @@ interface IndexedInstallmentPlanProps {
   onDeleteInstallment?: (installment: InstallmentData) => void
   paymentPlan?: {
     id: string
-    installment_count: number
+    installments_count: number
     start_date: string
     frequency: string
     created_at: string
@@ -320,7 +320,7 @@ export default function IndexedInstallmentPlan({
                   </div>
                 )}
                 <div>
-                  <span className="font-medium">Cuotas:</span> {paymentPlan.installment_count}
+                  <span className="font-medium">Cuotas:</span> {paymentPlan.installments_count}
                 </div>
                 <div>
                   <span className="font-medium">Frecuencia:</span> {
