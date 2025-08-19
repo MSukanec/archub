@@ -666,6 +666,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           const clientName = contact?.full_name || 
             `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
 
+          console.log('🔍 DEBUG loadMovementProjectClients - assignment:', assignment)
+          console.log('🔍 DEBUG loadMovementProjectClients - project_installment_id:', assignment.project_installment_id)
+
           return {
             project_client_id: assignment.project_client_id,
             unit: projectClient?.unit || 'N/A',
@@ -674,6 +677,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             installment_display: assignment.project_installment_id ? 'Cuota asignada' : 'Sin cuota'
           }
         })
+
+        console.log('🔍 DEBUG loadMovementProjectClients - formattedClients:', formattedClients)
 
         setSelectedClients(formattedClients)
       }
@@ -1610,7 +1615,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <h4 className="text-sm font-medium text-foreground">Compromisos Seleccionados:</h4>
             {selectedClients.map((client, index) => (
               <div key={index} className="text-xs">
-                <div className="truncate">{client.unit} - {client.client_name}</div>
+                <div className="truncate">
+                  {client.unit} - {client.client_name}
+                  {client.installment_display && (
+                    <span className="text-blue-600 ml-2">({client.installment_display})</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
