@@ -648,7 +648,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
                             {currency?.symbol || '$'} {metric.totalCommitted.toLocaleString('es-AR')}
-                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
                           </p>
                         )
                       })}
@@ -697,7 +696,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
                             {currency?.symbol || '$'} {metric.totalPaid.toLocaleString('es-AR')}
-                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
                           </p>
                         )
                       })}
@@ -745,7 +743,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
                             {currency?.symbol || '$'} {metric.remainingBalance.toLocaleString('es-AR')}
-                            {currency?.code && <span className="text-sm text-muted-foreground ml-1">({currency.code})</span>}
                           </p>
                         )
                       })}
