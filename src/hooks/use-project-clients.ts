@@ -17,9 +17,7 @@ export interface ProjectClient {
   organization_id: string
   project_id: string
   client_id: string
-  unit?: string
-  committed_amount?: number
-  currency_id?: string
+  is_active: boolean
   created_at: string
   contact: Contact
 }
@@ -45,9 +43,6 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
           organization_id,
           project_id,
           client_id,
-          unit,
-          committed_amount,
-          currency_id,
           created_at,
           contact:client_id (
             id,
@@ -70,10 +65,7 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
         throw error
       }
       
-      return (data || []).map((item: any) => ({
-        ...item,
-        contact: Array.isArray(item.contact) ? item.contact[0] : item.contact
-      })) as ProjectClient[]
+      return data || []
     },
     enabled: options?.enabled !== false && !!projectId && !!organizationId && !!supabase
   })

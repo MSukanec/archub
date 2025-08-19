@@ -35,7 +35,6 @@ interface ProjectClient {
 
 const clientObligationSchema = z.object({
   client_id: z.string().min(1, 'Cliente es requerido'),
-  unit: z.string().optional(),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   committed_amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0')
 })
@@ -67,7 +66,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     resolver: zodResolver(clientObligationSchema),
     defaultValues: {
       client_id: editingClient?.client_id || '',
-      unit: editingClient?.unit || '',
       currency_id: editingClient?.currency_id || '',
       committed_amount: editingClient?.committed_amount || 0
     }
@@ -148,7 +146,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           .from('project_clients')
           .update({
             client_id: data.client_id,
-            unit: data.unit || null,
             committed_amount: data.committed_amount,
             currency_id: data.currency_id
           })
@@ -164,7 +161,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           .insert({
             project_id: projectId,
             client_id: data.client_id,
-            unit: data.unit || null,
             committed_amount: data.committed_amount,
             currency_id: data.currency_id,
             organization_id: organizationId
@@ -200,7 +196,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     if (editingClient) {
       form.reset({
         client_id: editingClient.client_id || '',
-        unit: editingClient.unit || '',
         currency_id: editingClient.currency_id || '',
         committed_amount: editingClient.committed_amount || 0
       })
@@ -268,24 +263,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
                     </SelectContent>
                   </Select>
                 )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Unidad Funcional (Opcional) */}
-        <FormField
-          control={form.control}
-          name="unit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-medium">Unidad Funcional (Opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Apto 4A, Local 2, Oficina 101..."
-                  {...field}
-                />
               </FormControl>
               <FormMessage />
             </FormItem>

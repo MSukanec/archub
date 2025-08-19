@@ -32,7 +32,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         .select(`
           id,
           client_id,
-          unit,
           committed_amount,
           currency_id,
           created_at,
@@ -303,22 +302,8 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   // Table columns for commitments
   const contactSummaryColumns = [
     {
-      key: "unit",
-      label: "Unidad Funcional",
-      width: "15%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: any) => {
-        return (
-          <div className="text-sm">
-            {item.unit || '-'}
-          </div>
-        )
-      }
-    },
-    {
       key: "contact",
-      label: "Nombre Completo",
+      label: "Cliente",
       width: "18%",
       sortable: true,
       sortType: "string" as const,
@@ -338,7 +323,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso",
-      width: "13%", 
+      width: "15%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -358,7 +343,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "13%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -372,7 +357,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "13%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -390,7 +375,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "10%",
+      width: "12%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -414,7 +399,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "10%",
+      width: "12%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {

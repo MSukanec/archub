@@ -238,66 +238,37 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   })
 
-  // Set default values when data loads (like the original modal)
-  React.useEffect(() => {
-    if (defaultCurrency && !form.watch('currency_id')) {
-      form.setValue('currency_id', defaultCurrency)
-    }
-    if (defaultWallet && !form.watch('wallet_id')) {
-      form.setValue('wallet_id', defaultWallet)
-    }
-    if (currentMember?.id && !form.watch('created_by')) {
-      form.setValue('created_by', currentMember.id)
+  // Handle type change para detectar conversión (como en el modal original) - MOVED AFTER FORMS
+  const handleTypeChange = React.useCallback((newTypeId: string) => {
+    if (!newTypeId || !movementConcepts) return
+    
+    setSelectedTypeId(newTypeId)
+    
+    // Detectar tipo de movimiento por view_mode 
+    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
+    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+    
+    if (viewMode === "conversion") {
+      setMovementType('conversion')
+    } else if (viewMode === "transfer") {
+      setMovementType('transfer')
+    } else {
+      setMovementType('normal')
     }
     
-    // También actualizar conversion form
-    if (currentMember?.id && !conversionForm.watch('created_by')) {
-      conversionForm.setValue('created_by', currentMember.id)
-    }
-    if (defaultCurrency && !conversionForm.watch('currency_id_from')) {
-      conversionForm.setValue('currency_id_from', defaultCurrency)
-    }
-    if (defaultWallet && !conversionForm.watch('wallet_id_from')) {
-      conversionForm.setValue('wallet_id_from', defaultWallet)
-    }
+    // Sincronizar type_id en todos los formularios
+    form.setValue('type_id', newTypeId)
+    conversionForm.setValue('type_id', newTypeId)
+    transferForm.setValue('type_id', newTypeId)
+    
+    // Reset categorías
+    setSelectedCategoryId('')
+    setSelectedSubcategoryId('')
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
+  }, [movementConcepts, form, conversionForm, transferForm])
 
-    // También actualizar transfer form
-    if (currentMember?.id && !transferForm.watch('created_by')) {
-      transferForm.setValue('created_by', currentMember.id)
-    }
-    if (defaultCurrency && !transferForm.watch('currency_id')) {
-      transferForm.setValue('currency_id', defaultCurrency)
-    }
-    if (defaultWallet && !transferForm.watch('wallet_id_from')) {
-      transferForm.setValue('wallet_id_from', defaultWallet)
-    }
-  }, [defaultCurrency, defaultWallet, currentMember, form, conversionForm, transferForm])
-
-  // Effect para cargar datos existentes cuando se está editando
-  React.useEffect(() => {
-    if (isEditing && editingMovement) {
-      // Cargar selecciones jerárquicas
-      setSelectedTypeId(editingMovement.type_id || '')
-      setSelectedCategoryId(editingMovement.category_id || '')
-      setSelectedSubcategoryId(editingMovement.subcategory_id || '')
-
-      // Determinar tipo de movimiento
-      if (editingMovement.is_conversion || editingMovement.conversion_group_id) {
-        setMovementType('conversion')
-      } else if (editingMovement.transfer_group_id) {
-        setMovementType('transfer')
-      } else {
-        setMovementType('normal')
-      }
-
-      // Cargar personal asignado si existe
-      if (editingMovement.id) {
-        loadMovementPersonnel(editingMovement.id)
-        loadMovementSubcontracts(editingMovement.id)
-        loadMovementProjectClients(editingMovement.id)
-      }
-    }
-  }, [isEditing, editingMovement])
+  // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
   // Función para cargar personal asignado del movimiento
   const loadMovementPersonnel = async (movementId: string) => {
@@ -435,36 +406,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }
 
-  // Handle type change para detectar conversión (como en el modal original)
-  const handleTypeChange = React.useCallback((newTypeId: string) => {
-    if (!newTypeId || !movementConcepts) return
-    
-    setSelectedTypeId(newTypeId)
-    
-    // Detectar tipo de movimiento por view_mode 
-    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
-    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-    
-    if (viewMode === "conversion") {
-      setMovementType('conversion')
-    } else if (viewMode === "transfer") {
-      setMovementType('transfer')
-    } else {
-      setMovementType('normal')
-    }
-    
-    // Sincronizar type_id en todos los formularios
-    form.setValue('type_id', newTypeId)
-    conversionForm.setValue('type_id', newTypeId)
-    transferForm.setValue('type_id', newTypeId)
-    
-    // Reset categorías
-    setSelectedCategoryId('')
-    setSelectedSubcategoryId('')
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm, transferForm])
-
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
     mutationFn: async (data: BasicMovementForm) => {
@@ -476,7 +417,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const movementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description,
         amount: data.amount,
@@ -630,7 +573,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const egressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Conversión - Salida',
         amount: data.amount_from,
@@ -647,7 +592,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Conversión - Entrada',
         amount: data.amount_to,
@@ -729,7 +676,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const egressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Salida',
         amount: data.amount,
@@ -745,7 +694,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressMovementData = {
         organization_id: userData.organization.id,
         project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.toISOString().split('T')[0],
+        movement_date: data.movement_date.getFullYear() + '-' + 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Entrada',
         amount: data.amount,
