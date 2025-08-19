@@ -50,6 +50,31 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
   const existingPaymentPlan = modalData?.existingPaymentPlan
   const isChangingPlan = !!existingPaymentPlan
 
+  // Get current member ID for created_by field
+  const { data: currentMember } = useQuery({
+    queryKey: ['current-member', organizationId, userData?.user?.id],
+    queryFn: async () => {
+      if (!userData?.user?.id || !organizationId) return null;
+      
+      if (!supabase) return null;
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', userData.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching member:', error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!userData?.user?.id && !!organizationId
+  });
+
   // Fetch available payment plans
   const { data: paymentPlans = [], isLoading: paymentPlansLoading } = useQuery({
     queryKey: ['payment-plans'],
@@ -111,6 +136,10 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         throw new Error('Faltan datos requeridos')
       }
 
+      if (!currentMember?.id) {
+        throw new Error('No se pudo obtener el ID del miembro de la organización')
+      }
+
       // If changing plan, delete existing installments and payment plan
       if (isChangingPlan) {
         // Delete existing project payment plan
@@ -167,7 +196,9 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           project_id: projectId,
           organization_id: organizationId,
           number: i,
-          date: installmentDates[i - 1].toISOString().split('T')[0] // Solo fecha, sin hora
+          date: installmentDates[i - 1].toISOString().split('T')[0], // Solo fecha, sin hora
+          project_payment_plan: data.payment_plan_id, // Nuevo campo requerido
+          created_by: currentMember?.id // ID del miembro de la organización
         })
       }
 
