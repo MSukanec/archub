@@ -384,15 +384,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('created_by', movement.created_by)
       conversionForm.setValue('type_id', selectedTypeId)
       
-      // Datos de origen
-      conversionForm.setValue('origin_currency_id', originMovement.currency_id)
-      conversionForm.setValue('origin_wallet_id', originMovement.wallet_id)
-      conversionForm.setValue('origin_amount', Math.abs(originMovement.amount))
+      // Datos de origen (usando los nombres correctos del formulario)
+      conversionForm.setValue('currency_id_from', originMovement.currency_id)
+      conversionForm.setValue('wallet_id_from', originMovement.wallet_id)
+      conversionForm.setValue('amount_from', Math.abs(originMovement.amount))
       
-      // Datos de destino
-      conversionForm.setValue('destination_currency_id', destinationMovement.currency_id)
-      conversionForm.setValue('destination_wallet_id', destinationMovement.wallet_id)
-      conversionForm.setValue('destination_amount', Math.abs(destinationMovement.amount))
+      // Datos de destino (usando los nombres correctos del formulario)
+      conversionForm.setValue('currency_id_to', destinationMovement.currency_id)
+      conversionForm.setValue('wallet_id_to', destinationMovement.wallet_id)
+      conversionForm.setValue('amount_to', Math.abs(destinationMovement.amount))
+      
+      console.log('🎯 Valores cargados:', {
+        currency_id_from: originMovement.currency_id,
+        wallet_id_from: originMovement.wallet_id,
+        amount_from: Math.abs(originMovement.amount),
+        currency_id_to: destinationMovement.currency_id,
+        wallet_id_to: destinationMovement.wallet_id,
+        amount_to: Math.abs(destinationMovement.amount),
+        exchange_rate: movement.exchange_rate
+      })
       
       // Cotización
       if (movement.exchange_rate) {
