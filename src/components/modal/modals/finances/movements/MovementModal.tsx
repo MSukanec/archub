@@ -791,14 +791,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
       if (selectedClients && selectedClients.length > 0) {
-
-        
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
-          project_client_id: client.project_client_id
+          project_client_id: client.project_client_id,
+          project_installment_id: client.project_installment_id || null
         }))
-
-
 
         const { error: projectClientsError } = await supabase
           .from('movement_clients')
@@ -808,8 +805,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           console.error('❌ Error al insertar clientes del movimiento:', projectClientsError)
           throw projectClientsError
         }
-
-
       }
 
       return result

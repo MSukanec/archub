@@ -5,6 +5,7 @@ export interface MovementProjectClientAssignment {
   id: string
   movement_id: string
   project_client_id: string
+  project_installment_id?: string
   created_at: string
   updated_at?: string
   project_clients?: {
@@ -12,7 +13,7 @@ export interface MovementProjectClientAssignment {
     organization_id: string
     project_id: string
     client_id: string
-
+    unit: string
     created_at: string
     contact: {
       id: string
@@ -29,11 +30,12 @@ export interface MovementProjectClientAssignment {
 export interface CreateMovementProjectClientAssignment {
   movement_id: string
   project_client_id: string
+  project_installment_id?: string
 }
 
 export interface UpdateMovementProjectClientAssignment {
-  movement_id: string
   project_client_id: string
+  project_installment_id?: string
 }
 
 // Hook para obtener asignaciones de clientes de un movimiento
@@ -53,6 +55,7 @@ export function useMovementProjectClients(movementId?: string) {
           id,
           movement_id,
           project_client_id,
+          project_installment_id,
           created_at,
           updated_at,
           project_clients!inner(
@@ -60,7 +63,7 @@ export function useMovementProjectClients(movementId?: string) {
             organization_id,
             project_id,
             client_id,
-
+            unit,
             created_at,
             contact:client_id(
               id,
@@ -103,7 +106,10 @@ export function useCreateMovementProjectClients() {
 
       const { data, error } = await supabase
         .from('movement_clients')
-        .insert(assignments)
+        .insert(assignments.map(assignment => ({
+          ...assignment,
+          project_installment_id: assignment.project_installment_id || null
+        })))
         .select()
 
       if (error) {
@@ -159,7 +165,8 @@ export function useUpdateMovementProjectClients() {
           .from('movement_clients')
           .insert(assignments.map(assignment => ({
             movement_id: movementId,
-            project_client_id: assignment.project_client_id
+            project_client_id: assignment.project_client_id,
+            project_installment_id: assignment.project_installment_id || null
           })))
           .select()
 
