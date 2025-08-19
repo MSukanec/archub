@@ -373,10 +373,17 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       console.log('🔄 Movimiento complementario encontrado:', conversionMovements)
 
-      // Determinar si el movimiento actual es origen o destino
-      const isOrigin = movement.amount < 0 // Los egresos son negativos (origen)
-      const originMovement = isOrigin ? movement : conversionMovements
-      const destinationMovement = isOrigin ? conversionMovements : movement
+      // Determinar si el movimiento actual es origen o destino usando la descripción
+      const isOriginMovement = movement.description.includes('Salida')
+      const originMovement = isOriginMovement ? movement : conversionMovements
+      const destinationMovement = isOriginMovement ? conversionMovements : movement
+      
+      console.log('🔍 Lógica de origen/destino:', {
+        movementDescription: movement.description,
+        isOriginMovement,
+        originMovement: originMovement.description,
+        destinationMovement: destinationMovement.description
+      })
 
       // Llenar formulario de conversión
       conversionForm.setValue('movement_date', new Date(movement.movement_date))
@@ -387,20 +394,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       // Datos de origen (usando los nombres correctos del formulario)
       conversionForm.setValue('currency_id_from', originMovement.currency_id)
       conversionForm.setValue('wallet_id_from', originMovement.wallet_id)
-      conversionForm.setValue('amount_from', Math.abs(originMovement.amount))
+      conversionForm.setValue('amount_from', originMovement.amount) // Ya no necesito Math.abs
       
       // Datos de destino (usando los nombres correctos del formulario)
       conversionForm.setValue('currency_id_to', destinationMovement.currency_id)
       conversionForm.setValue('wallet_id_to', destinationMovement.wallet_id)
-      conversionForm.setValue('amount_to', Math.abs(destinationMovement.amount))
+      conversionForm.setValue('amount_to', destinationMovement.amount) // Ya no necesito Math.abs
       
       console.log('🎯 Valores cargados:', {
         currency_id_from: originMovement.currency_id,
         wallet_id_from: originMovement.wallet_id,
-        amount_from: Math.abs(originMovement.amount),
+        amount_from: originMovement.amount,
         currency_id_to: destinationMovement.currency_id,
         wallet_id_to: destinationMovement.wallet_id,
-        amount_to: Math.abs(destinationMovement.amount),
+        amount_to: destinationMovement.amount,
         exchange_rate: movement.exchange_rate
       })
       
