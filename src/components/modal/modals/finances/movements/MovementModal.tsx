@@ -28,7 +28,7 @@ import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } f
 import { supabase } from '@/lib/supabase'
 import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/PersonnelForm'
 import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
-import { ClientsForm, ClientsFormHandle, ClientItem } from './forms/ClientsForm'
+import { ClientsForm, ClientsFormHandle, CommitmentItem } from './forms/ClientsForm'
 import { PartnerWithdrawalsForm, PartnerWithdrawalsFormHandle, PartnerWithdrawalItem } from './forms/PartnerWithdrawalsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -147,7 +147,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [showSubcontractsForm, setShowSubcontractsForm] = React.useState(false)
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [showClientsForm, setShowClientsForm] = React.useState(false)
-  const [selectedClients, setSelectedClients] = React.useState<Array<{project_client_id: string, client_name: string, amount: number}>>([])
+  const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [showPartnerWithdrawalsForm, setShowPartnerWithdrawalsForm] = React.useState(false)
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
 
@@ -446,7 +446,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           return {
             project_client_id: assignment.project_client_id,
             client_name: clientName,
-            amount: assignment.amount
+            unit: assignment.project_clients?.unit || 'Sin unidad'
           }
         })
 
@@ -581,7 +581,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
           project_client_id: client.project_client_id,
-          amount: client.amount
+          amount: data.amount // Use the main movement amount
         }))
 
         console.log('💾 Datos a insertar en movement_clients:', projectClientsData)
@@ -1293,19 +1293,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         {/* CLIENTES DE PROYECTO SELECCIONADOS (si hay) */}
         {selectedClients.length > 0 && (
           <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Clientes Seleccionados:</h4>
+            <h4 className="text-sm font-medium text-foreground">Compromisos Seleccionados:</h4>
             {selectedClients.map((client, index) => (
-              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                <div className="truncate">{client.client_name}</div>
-                <div className="text-right font-medium">${client.amount.toFixed(2)}</div>
+              <div key={index} className="text-xs">
+                <div className="truncate">{client.unit} - {client.client_name}</div>
               </div>
             ))}
-            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-              <div className="font-medium">Total:</div>
-              <div className="text-right font-bold">
-                ${selectedClients.reduce((sum, c) => sum + c.amount, 0).toFixed(2)}
-              </div>
-            </div>
           </div>
         )}
 
