@@ -34,8 +34,15 @@ interface ClientInfo {
 interface HeatmapCellData {
   unitId: string
   installmentNumber: number
-  amount: number | null
+  updateDate: string // Actualización
+  installmentValue: number // Valor de Cuota
+  payment: number // Pago (actual)
+  balance: number // Saldo
   isPaid: boolean
+  commitmentCurrency: {
+    symbol: string
+    exchangeRate: number
+  }
 }
 
 interface InstallmentHeatmapChartProps {
@@ -190,14 +197,34 @@ export default function InstallmentHeatmapChart({
         payment.installment_number === installment.number
       ) || []
       
-      // Sum the payments specific to this installment
-      const totalPaidThisInstallment = installmentPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+      // Convert payments to commitment currency using exchange rates
+      const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum, payment) => {
+        let convertedAmount = payment.amount || 0
+        
+        // Convert payment to commitment currency if different
+        if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
+          // Si el pago está en otra moneda, convertir usando el exchange_rate
+          convertedAmount = convertedAmount * (payment.exchange_rate || 1)
+        }
+        
+        return sum + convertedAmount
+      }, 0)
+      
+      // Get commitment currency info
+      const commitmentCurrency = commitment.currencies || { symbol: '$' }
       
       rowData.push({
         unitId: commitment.id,
         installmentNumber: installment.number,
-        amount: totalPaidThisInstallment > 0 ? totalPaidThisInstallment : null,
-        isPaid: totalPaidThisInstallment > 0
+        updateDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+        installmentValue: 0, // Por ahora en cero como solicitado
+        payment: totalPaidInCommitmentCurrency,
+        balance: 0, // Por ahora en cero como solicitado  
+        isPaid: totalPaidInCommitmentCurrency > 0,
+        commitmentCurrency: {
+          symbol: commitmentCurrency.symbol || '$',
+          exchangeRate: commitment.exchange_rate || 1
+        }
       })
     })
     
@@ -244,7 +271,7 @@ export default function InstallmentHeatmapChart({
               {commitments.map((commitment) => commitment?.unit ? (
                 <div
                   key={commitment.id}
-                  className="w-32 p-3 bg-muted/50 text-sm text-center border-l border-border"
+                  className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border"
                 >
                   <div className="font-bold text-xs mb-1">
                     {commitment.unit}
@@ -320,19 +347,33 @@ export default function InstallmentHeatmapChart({
                   {rowData.map((cellData, colIndex) => (
                     <div
                       key={`${rowIndex}-${colIndex}`}
-                      className={`w-32 p-3 text-center text-sm border-l border-border transition-colors ${
+                      className={`w-40 p-2 text-center text-xs border-l border-border transition-colors ${
                         cellData.isPaid
-                          ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-                          : 'bg-gray-50 dark:bg-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-green-50 dark:bg-green-900/10'
+                          : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
-                      {cellData.amount ? (
-                        <div className="font-medium">
-                          ${cellData.amount.toLocaleString()}
+                      <div className="space-y-1">
+                        {/* Actualización - Violeta */}
+                        <div className="text-violet-600 dark:text-violet-400 font-medium">
+                          {cellData.updateDate}
                         </div>
-                      ) : (
-                        <div className="opacity-50">-</div>
-                      )}
+                        
+                        {/* Valor de Cuota - Rojo */}
+                        <div className="text-red-600 dark:text-red-400">
+                          {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toFixed(2)}
+                        </div>
+                        
+                        {/* Pago - Verde */}
+                        <div className="text-green-600 dark:text-green-400 font-medium">
+                          {cellData.commitmentCurrency.symbol}{cellData.payment.toFixed(2)}
+                        </div>
+                        
+                        {/* Saldo - Azul */}
+                        <div className="text-blue-600 dark:text-blue-400">
+                          {cellData.commitmentCurrency.symbol}{cellData.balance.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -342,14 +383,36 @@ export default function InstallmentHeatmapChart({
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-6 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded"></div>
-            <span>Cuota pagada</span>
+        <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700 rounded"></div>
+              <span>Cuota con pagos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded"></div>
+              <span>Cuota pendiente</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded"></div>
-            <span>Cuota pendiente</span>
+          <div className="space-y-2">
+            <div className="text-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-violet-500 rounded"></div>
+                <span className="text-violet-600 dark:text-violet-400">Actualización</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-red-500 rounded"></div>
+                <span className="text-red-600 dark:text-red-400">Valor de Cuota</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <span className="text-green-600 dark:text-green-400">Pago</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <span className="text-blue-600 dark:text-blue-400">Saldo</span>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>
