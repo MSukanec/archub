@@ -129,6 +129,7 @@ export function SidebarSubmenu() {
 
     ],
 
+    // Finanzas section - Clientes debe estar DEBAJO de Movimientos
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
