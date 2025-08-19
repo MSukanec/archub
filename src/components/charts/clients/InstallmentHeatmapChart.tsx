@@ -18,12 +18,12 @@ interface ClientCommitment {
   id: string
   project_id: string
   client_id: string
-  functional_unit: string
+  unit: string
   committed_amount: number
 }
 
 interface HeatmapCellData {
-  functionalUnit: string
+  unit: string
   installmentNumber: number
   amount: number | null
   isPaid: boolean
@@ -60,13 +60,13 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
 
   // Fetch client commitments
   const { data: commitments, isLoading: commitmentsLoading } = useQuery({
-    queryKey: ['client-commitments', projectId],
+    queryKey: ['project-clients-units', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_clients')
         .select('*')
         .eq('project_id', projectId)
-        .order('functional_unit', { ascending: true })
+        .order('unit', { ascending: true })
 
       if (error) {
         console.error('Error fetching commitments:', error)
@@ -80,7 +80,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
 
   // Fetch payments data (movements related to client payments)
   const { data: payments, isLoading: paymentsLoading } = useQuery({
-    queryKey: ['client-payments', projectId],
+    queryKey: ['client-payments-with-units', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('movements')
@@ -89,7 +89,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
           movement_clients (
             project_client_id,
             project_clients (
-              functional_unit
+              unit
             )
           )
         `)
@@ -150,14 +150,14 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
       // Find payments for this functional unit and installment
       const relatedPayments = payments?.filter(payment => 
         payment.movement_clients?.some((mc: any) => 
-          mc.project_clients?.functional_unit === commitment.functional_unit
+          mc.project_clients?.unit === commitment.unit
         )
       ) || []
       
       const totalPaid = relatedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
       
       rowData.push({
-        functionalUnit: commitment.functional_unit,
+        unit: commitment.unit,
         installmentNumber: installment.number,
         amount: totalPaid > 0 ? totalPaid : null,
         isPaid: totalPaid > 0
@@ -196,7 +196,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
             {heatmapData.map((rowData, rowIndex) => (
               <div key={commitments[rowIndex].id} className="flex border-b border-border">
                 <div className="w-32 p-3 font-medium text-sm bg-background">
-                  {commitments[rowIndex].functional_unit}
+                  {commitments[rowIndex].unit}
                 </div>
                 {rowData.map((cellData, colIndex) => (
                   <div
