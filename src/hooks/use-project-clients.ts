@@ -18,6 +18,8 @@ export interface ProjectClient {
   project_id: string
   client_id: string
   unit: string | null
+  committed_amount: number | null
+  currency_id: string | null
   created_at: string
   contact: any // Supabase returns joined data structure
 }
@@ -44,6 +46,8 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
           project_id,
           client_id,
           unit,
+          committed_amount,
+          currency_id,
           created_at,
           contact:client_id (
             id,

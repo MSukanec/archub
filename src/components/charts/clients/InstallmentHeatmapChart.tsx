@@ -20,7 +20,8 @@ interface ClientCommitment {
   project_id: string
   client_id: string
   unit: string
-  committed_amount: number
+  committed_amount: number | null
+  currency_id: string | null
 }
 
 interface ClientInfo {
@@ -73,13 +74,20 @@ export default function InstallmentHeatmapChart({
     enabled: !!projectId && !!organizationId
   })
 
-  // Fetch client commitments
+  // Fetch client commitments with currency info
   const { data: commitments, isLoading: commitmentsLoading } = useQuery({
     queryKey: ['project-clients-units', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_clients')
-        .select('*')
+        .select(`
+          *,
+          currencies(
+            id,
+            name,
+            symbol
+          )
+        `)
         .eq('project_id', projectId)
         .order('unit', { ascending: true })
 
@@ -88,7 +96,7 @@ export default function InstallmentHeatmapChart({
         throw error
       }
 
-      return data as ClientCommitment[]
+      return data as (ClientCommitment & { currencies?: { id: string; name: string; symbol: string } })[]
     },
     enabled: !!projectId
   })
@@ -216,6 +224,21 @@ export default function InstallmentHeatmapChart({
     return `${clientInfo.first_name || ''} ${clientInfo.last_name || ''}`.trim()
   }
 
+  const formatCommittedAmount = (commitment: ClientCommitment & { currencies?: { symbol: string } }) => {
+    if (!commitment.committed_amount) return null
+    
+    const symbol = commitment.currencies?.symbol || '$'
+    const amount = commitment.committed_amount
+    
+    // Format with thousands separator
+    const formatted = new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+    
+    return `${symbol}${formatted}`
+  }
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -234,9 +257,14 @@ export default function InstallmentHeatmapChart({
                   <div className="font-bold text-xs mb-1">
                     {commitment.unit}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-muted-foreground mb-1">
                     {getClientDisplayName(commitment)}
                   </div>
+                  {formatCommittedAmount(commitment) && (
+                    <div className="text-xs font-medium text-green-700 dark:text-green-400">
+                      {formatCommittedAmount(commitment)}
+                    </div>
+                  )}
                 </div>
               ) : null)}
             </div>
