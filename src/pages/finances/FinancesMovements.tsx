@@ -305,8 +305,16 @@ export default function Movements() {
       }
     },
     onSuccess: (result) => {
+      // Invalidate movements queries
       queryClient.invalidateQueries({ queryKey: ["movements"] });
-      // setDeletingMovement(null); // TODO: Add this state if needed
+      
+      // Invalidate client payment commitment queries
+      queryClient.invalidateQueries({ queryKey: ["client-monthly-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["project-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["movement-clients"] });
+      queryClient.invalidateQueries({ queryKey: ["project-payment-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["movement-project-clients"] });
+      
       toast({
         title: result.isConversion 
           ? "Conversión eliminada" 
@@ -341,7 +349,16 @@ export default function Movements() {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate movements queries
       queryClient.invalidateQueries({ queryKey: ["movements"] });
+      
+      // Invalidate client payment commitment queries
+      queryClient.invalidateQueries({ queryKey: ["client-monthly-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["project-installments"] });
+      queryClient.invalidateQueries({ queryKey: ["movement-clients"] });
+      queryClient.invalidateQueries({ queryKey: ["project-payment-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["movement-project-clients"] });
+      
       setSelectedMovements([]);
       toast({
         title: "Movimientos eliminados",
