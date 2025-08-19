@@ -68,13 +68,23 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     defaultValues: {
       client_id: editingClient?.client_id || '',
       unit: editingClient?.unit || '',
-      currency_id: editingClient?.currency_id || '',
+      currency_id: editingClient?.currency_id || userData?.organization_preferences?.default_currency || '',
       committed_amount: editingClient?.committed_amount || 0
     }
   })
 
   // Get organization currencies
   const { data: currencies } = useOrganizationCurrencies(organizationId)
+
+  // Set default currency when currencies are loaded
+  useEffect(() => {
+    if (currencies && currencies.length > 0 && !isEditing) {
+      const defaultCurrency = userData?.organization_preferences?.default_currency || currencies[0]?.currency?.id
+      if (defaultCurrency && !form.watch('currency_id')) {
+        form.setValue('currency_id', defaultCurrency)
+      }
+    }
+  }, [currencies, userData?.organization_preferences?.default_currency, form, isEditing])
 
   // Initialize panel to edit mode when modal opens
   useEffect(() => {
@@ -201,7 +211,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
       form.reset({
         client_id: editingClient.client_id || '',
         unit: editingClient.unit || '',
-        currency_id: editingClient.currency_id || '',
+        currency_id: editingClient.currency_id || userData?.organization_preferences?.default_currency || '',
         committed_amount: editingClient.committed_amount || 0
       })
     }
@@ -234,111 +244,117 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         
-        {/* Cliente */}
-        <FormField
-          control={form.control}
-          name="client_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-medium">Cliente</FormLabel>
-              <FormControl>
-                {organizationContacts === undefined ? (
-                  <div className="text-sm text-muted-foreground">Cargando contactos...</div>
-                ) : (
+        {/* Primera columna: Cliente - Unidad */}
+        <div className="space-y-4">
+          {/* Cliente */}
+          <FormField
+            control={form.control}
+            name="client_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Cliente</FormLabel>
+                <FormControl>
+                  {organizationContacts === undefined ? (
+                    <div className="text-sm text-muted-foreground">Cargando contactos...</div>
+                  ) : (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un contacto disponible" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableContacts.length === 0 ? (
+                          <SelectItem value="" disabled>
+                            No hay contactos disponibles
+                          </SelectItem>
+                        ) : (
+                          availableContacts.map(contact => {
+                            const displayName = contact.company_name || 
+                                             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+                            return (
+                              <SelectItem key={contact.id} value={contact.id}>
+                                {displayName}
+                              </SelectItem>
+                            )
+                          })
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Unidad Funcional */}
+          <FormField
+            control={form.control}
+            name="unit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Unidad Funcional (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ej: Departamento 1A, Local 101, etc."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Segunda columna: Moneda - Cantidad */}
+        <div className="space-y-4">
+          {/* Moneda */}
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Moneda</FormLabel>
+                <FormControl>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un contacto disponible" />
+                      <SelectValue placeholder="Selecciona una moneda" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableContacts.length === 0 ? (
-                        <SelectItem value="" disabled>
-                          No hay contactos disponibles
+                      {currencies?.map(currency => (
+                        <SelectItem key={currency.currency.id} value={currency.currency.id}>
+                          {currency.currency.symbol} - {currency.currency.name}
                         </SelectItem>
-                      ) : (
-                        availableContacts.map(contact => {
-                          const displayName = contact.company_name || 
-                                           `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-                          return (
-                            <SelectItem key={contact.id} value={contact.id}>
-                              {displayName}
-                            </SelectItem>
-                          )
-                        })
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
-                )}
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Unidad Funcional */}
-        <FormField
-          control={form.control}
-          name="unit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-medium">Unidad Funcional (Opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Departamento 1A, Local 101, etc."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Moneda */}
-        <FormField
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-medium">Moneda</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies?.map(currency => (
-                      <SelectItem key={currency.currency.id} value={currency.currency.id}>
-                        {currency.currency.symbol} - {currency.currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Cantidad */}
-        <FormField
-          control={form.control}
-          name="committed_amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs font-medium">Cantidad</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Cantidad */}
+          <FormField
+            control={form.control}
+            name="committed_amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Cantidad</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
       </form>
     </Form>
@@ -364,7 +380,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
 
   return (
     <FormModalLayout
-      columns={1}
+      columns={2}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
