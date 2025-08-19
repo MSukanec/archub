@@ -358,8 +358,30 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Effect para sincronizar estados cuando se está editando
   React.useEffect(() => {
     if (isEditing && editingMovement && movementConcepts) {
-      // Sincronizar type_id y cargar jerarquía
-      if (editingMovement.type_id) {
+      // DETECTAR TIPO DE MOVIMIENTO CORRECTO AL EDITAR
+      if (editingMovement.is_conversion) {
+        // Es una conversión - buscar el tipo "Conversión"
+        const conversionConcept = movementConcepts.find((concept: any) => 
+          concept.view_mode?.trim() === "conversion"
+        )
+        if (conversionConcept) {
+          console.log('🔄 Detectado movimiento de conversión, usando tipo:', conversionConcept.name)
+          setSelectedTypeId(conversionConcept.id)
+          handleTypeChange(conversionConcept.id)
+        }
+      } else if (editingMovement.transfer_group_id) {
+        // Es una transferencia - buscar el tipo "Transferencia"
+        const transferConcept = movementConcepts.find((concept: any) => 
+          concept.view_mode?.trim() === "transfer"
+        )
+        if (transferConcept) {
+          console.log('🔄 Detectado movimiento de transferencia, usando tipo:', transferConcept.name)
+          setSelectedTypeId(transferConcept.id)
+          handleTypeChange(transferConcept.id)
+        }
+      } else {
+        // Movimiento normal - usar type_id original
+        console.log('🔄 Movimiento normal, usando type_id:', editingMovement.type_id)
         setSelectedTypeId(editingMovement.type_id)
         handleTypeChange(editingMovement.type_id)
       }
