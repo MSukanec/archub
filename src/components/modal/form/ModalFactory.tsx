@@ -8,7 +8,7 @@ import { CardFormModal } from '../modals/organizations/CardFormModal';
 import { ListFormModal } from '../modals/organizations/ListFormModal';
 import { ContactFormModal } from '../modals/organizations/ContactFormModal';
 import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
-import ProjectClientFormModal from '../modals/finances/ProjectClientFormModal';
+import ClientObligationModal from '../modals/finances/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
 import { MovementModal } from '../modals/finances/movements/MovementModal';
@@ -78,7 +78,7 @@ export function ModalFactory() {
     case 'project':
       return <ProjectFormModal modalData={data} onClose={closeModal} />;
     case 'project-client':
-      return <ProjectClientFormModal onClose={closeModal} />;
+      return <ClientObligationModal modalData={data} onClose={closeModal} />;
     case 'document-upload':
       return <DocumentUploadFormModal modalData={data} onClose={closeModal} />;
     case 'document-folder':
