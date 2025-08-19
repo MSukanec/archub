@@ -836,8 +836,16 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         throw new Error('Organization ID not found')
       }
 
-      // Crear nueva conversión con grupo UUID
-      const conversionGroupId = crypto.randomUUID()
+      // Si estamos editando, usar el conversion_group_id existente
+      const conversionGroupId = isEditing && editingMovement?.conversion_group_id 
+        ? editingMovement.conversion_group_id 
+        : crypto.randomUUID()
+      
+      console.log('🔧 Modo conversión:', {
+        isEditing,
+        conversionGroupId,
+        existingGroupId: editingMovement?.conversion_group_id
+      })
 
       // Buscar tipos de egreso e ingreso
       const egressType = movementConcepts?.find((concept: any) => 
@@ -847,68 +855,136 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         concept.name?.toLowerCase().includes('ingreso')
       )
 
-      // Crear movimiento de egreso
-      const egressMovementData = {
-        organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.getFullYear() + '-' + 
-          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
-          String(data.movement_date.getDate()).padStart(2, '0'),
-        created_by: data.created_by,
-        description: data.description || 'Conversión - Salida',
-        amount: data.amount_from,
-        currency_id: data.currency_id_from,
-        wallet_id: data.wallet_id_from,
-        type_id: egressType?.id || data.type_id,
-        conversion_group_id: conversionGroupId,
-        exchange_rate: data.exchange_rate || null,
-        is_conversion: true,
-        is_favorite: false
+      if (isEditing && editingMovement?.conversion_group_id) {
+        console.log('✏️ Editando conversión existente')
+        
+        // Buscar ambos movimientos de la conversión
+        const { data: conversionMovements, error: fetchError } = await supabase
+          .from('movements')
+          .select('*')
+          .eq('conversion_group_id', editingMovement.conversion_group_id)
+          .order('created_at')
+
+        if (fetchError) throw fetchError
+
+        if (!conversionMovements || conversionMovements.length !== 2) {
+          throw new Error('Error: no se encontraron ambos movimientos de la conversión')
+        }
+
+        // Identificar cuál es origen y destino
+        const originMovement = conversionMovements.find(m => m.description.includes('Salida'))
+        const destMovement = conversionMovements.find(m => m.description.includes('Entrada'))
+
+        if (!originMovement || !destMovement) {
+          throw new Error('Error: no se pudieron identificar los movimientos de origen y destino')
+        }
+
+        // Actualizar movimiento de origen (egreso)
+        const { error: updateOriginError } = await supabase
+          .from('movements')
+          .update({
+            movement_date: data.movement_date.getFullYear() + '-' + 
+              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+              String(data.movement_date.getDate()).padStart(2, '0'),
+            description: data.description || 'Conversión - Salida',
+            amount: data.amount_from,
+            currency_id: data.currency_id_from,
+            wallet_id: data.wallet_id_from,
+            exchange_rate: data.exchange_rate || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', originMovement.id)
+
+        if (updateOriginError) throw updateOriginError
+
+        // Actualizar movimiento de destino (ingreso)
+        const { error: updateDestError } = await supabase
+          .from('movements')
+          .update({
+            movement_date: data.movement_date.getFullYear() + '-' + 
+              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+              String(data.movement_date.getDate()).padStart(2, '0'),
+            description: data.description ? data.description.replace('Salida', 'Entrada') : 'Conversión - Entrada',
+            amount: data.amount_to,
+            currency_id: data.currency_id_to,
+            wallet_id: data.wallet_id_to,
+            exchange_rate: data.exchange_rate || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', destMovement.id)
+
+        if (updateDestError) throw updateDestError
+
+        console.log('✅ Conversión actualizada correctamente')
+        return { id: editingMovement.id, updated: true }
+
+      } else {
+        console.log('➕ Creando nueva conversión')
+        
+        // Crear movimiento de egreso
+        const egressMovementData = {
+          organization_id: userData.organization.id,
+          project_id: userData.preferences?.last_project_id || null,
+          movement_date: data.movement_date.getFullYear() + '-' + 
+            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(data.movement_date.getDate()).padStart(2, '0'),
+          created_by: data.created_by,
+          description: data.description || 'Conversión - Salida',
+          amount: data.amount_from,
+          currency_id: data.currency_id_from,
+          wallet_id: data.wallet_id_from,
+          type_id: egressType?.id || data.type_id,
+          conversion_group_id: conversionGroupId,
+          exchange_rate: data.exchange_rate || null,
+          is_conversion: true,
+          is_favorite: false
+        }
+
+        // Crear movimiento de ingreso
+        const ingressMovementData = {
+          organization_id: userData.organization.id,
+          project_id: userData.preferences?.last_project_id || null,
+          movement_date: data.movement_date.getFullYear() + '-' + 
+            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(data.movement_date.getDate()).padStart(2, '0'),
+          created_by: data.created_by,
+          description: data.description ? data.description.replace('Salida', 'Entrada') : 'Conversión - Entrada',
+          amount: data.amount_to,
+          currency_id: data.currency_id_to,
+          wallet_id: data.wallet_id_to,
+          type_id: ingressType?.id || data.type_id,
+          conversion_group_id: conversionGroupId,
+          exchange_rate: data.exchange_rate || null,
+          is_conversion: true,
+          is_favorite: false
+        }
+
+        // Insertar ambos movimientos
+        const { data: results, error } = await supabase
+          .from('movements')
+          .insert([egressMovementData, ingressMovementData])
+          .select()
+
+        if (error) throw error
+
+        // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
+        if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
+          const egressPersonnelData = selectedPersonnel.map(person => ({
+            movement_id: results[0].id, // Movimiento de egreso
+            personnel_id: person.personnel_id,
+            amount: person.amount
+          }))
+
+          const { error: personnelError } = await supabase
+            .from('movement_personnel')
+            .insert(egressPersonnelData)
+
+          if (personnelError) throw personnelError
+        }
+
+        console.log('✅ Nueva conversión creada correctamente')
+        return results
       }
-
-      // Crear movimiento de ingreso
-      const ingressMovementData = {
-        organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
-        movement_date: data.movement_date.getFullYear() + '-' + 
-          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
-          String(data.movement_date.getDate()).padStart(2, '0'),
-        created_by: data.created_by,
-        description: data.description || 'Conversión - Entrada',
-        amount: data.amount_to,
-        currency_id: data.currency_id_to,
-        wallet_id: data.wallet_id_to,
-        type_id: ingressType?.id || data.type_id,
-        conversion_group_id: conversionGroupId,
-        exchange_rate: data.exchange_rate || null,
-        is_conversion: true,
-        is_favorite: false
-      }
-
-      // Insertar ambos movimientos
-      const { data: results, error } = await supabase
-        .from('movements')
-        .insert([egressMovementData, ingressMovementData])
-        .select()
-
-      if (error) throw error
-
-      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
-      if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
-        const egressPersonnelData = selectedPersonnel.map(person => ({
-          movement_id: results[0].id, // Movimiento de egreso
-          personnel_id: person.personnel_id,
-          amount: person.amount
-        }))
-
-        const { error: personnelError } = await supabase
-          .from('movement_personnel')
-          .insert(egressPersonnelData)
-
-        if (personnelError) throw personnelError
-      }
-
-      return results
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
@@ -918,8 +994,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
-        title: 'Conversión creada',
-        description: 'La conversión ha sido creada correctamente',
+        title: isEditing ? 'Conversión actualizada' : 'Conversión creada',
+        description: isEditing ? 'La conversión ha sido actualizada correctamente' : 'La conversión ha sido creada correctamente',
       })
       onClose()
     },
@@ -927,7 +1003,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al crear la conversión: ${error.message}`,
+        description: `Error al ${isEditing ? 'actualizar' : 'crear'} la conversión: ${error.message}`,
       })
     }
   })
