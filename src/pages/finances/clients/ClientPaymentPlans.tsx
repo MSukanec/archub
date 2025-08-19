@@ -15,6 +15,20 @@ interface ClientPaymentPlansProps {
 export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentPlansProps) {
   const { openModal } = useGlobalModalStore()
 
+  const handleEditInstallment = (installment: any) => {
+    openModal('client-installment', { 
+      projectId, 
+      organizationId,
+      installmentId: installment.id,
+      isEditing: true 
+    })
+  }
+
+  const handleDeleteInstallment = (installment: any) => {
+    // Could open a confirmation modal or handle deletion directly
+    console.log('Delete installment:', installment)
+  }
+
   // Fetch installments to check if any exist
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['project-installments', projectId],
@@ -75,5 +89,12 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     )
   }
 
-  return <InstallmentHeatmapChart projectId={projectId} organizationId={organizationId} />
+  return (
+    <InstallmentHeatmapChart 
+      projectId={projectId} 
+      organizationId={organizationId}
+      onEditInstallment={handleEditInstallment}
+      onDeleteInstallment={handleDeleteInstallment}
+    />
+  )
 }

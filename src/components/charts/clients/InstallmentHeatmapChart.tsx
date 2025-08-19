@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Loader2, Edit, Trash2 } from 'lucide-react'
 
 interface InstallmentData {
   id: string
@@ -39,9 +40,16 @@ interface HeatmapCellData {
 interface InstallmentHeatmapChartProps {
   projectId: string
   organizationId: string
+  onEditInstallment?: (installment: InstallmentData) => void
+  onDeleteInstallment?: (installment: InstallmentData) => void
 }
 
-export default function InstallmentHeatmapChart({ projectId, organizationId }: InstallmentHeatmapChartProps) {
+export default function InstallmentHeatmapChart({ 
+  projectId, 
+  organizationId, 
+  onEditInstallment, 
+  onDeleteInstallment 
+}: InstallmentHeatmapChartProps) {
   const { data: userData } = useCurrentUser()
 
   // Fetch installments
@@ -240,7 +248,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
               
               return (
                 <div key={installment.number} className="flex border-b border-border">
-                  <div className="w-32 p-3 text-sm bg-background">
+                  <div className="group w-32 p-3 text-sm bg-background hover:bg-muted/20 transition-colors relative">
                     <div className="font-bold mb-1">
                       Cuota {installment.number.toString().padStart(2, '0')}
                     </div>
@@ -254,6 +262,38 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
                     <div className="text-xs text-muted-foreground">
                       {installment.index ? installment.index.toFixed(2) : '0.00'}%
                     </div>
+                    
+                    {/* Action Buttons */}
+                    {(onEditInstallment || onDeleteInstallment) && (
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {onEditInstallment && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditInstallment(installment);
+                            }}
+                            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                        )}
+                        {onDeleteInstallment && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteInstallment(installment);
+                            }}
+                            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {rowData.map((cellData, colIndex) => (
                     <div
