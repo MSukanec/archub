@@ -97,22 +97,20 @@ export function ClientMonthlyInstallments({ projectId, organizationId }: ClientM
 
   if (installments.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <EmptyState
-          icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
-          title="No hay cuotas definidas"
-          description="Crea un plan de cuotas para comenzar a gestionar los pagos mensuales del proyecto."
-          action={
-            <Button 
-              onClick={() => openModal('client-payment-plans', { projectId, organizationId })}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Crear Plan de Cuotas
-            </Button>
-          }
-        />
-      </div>
+      <EmptyState
+        icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
+        title="No hay cuotas definidas"
+        description="Crea un plan de cuotas para comenzar a gestionar los pagos mensuales del proyecto."
+        action={
+          <Button 
+            onClick={() => openModal('client-payment-plans', { projectId, organizationId })}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Crear Plan de Cuotas
+          </Button>
+        }
+      />
     )
   }
 
