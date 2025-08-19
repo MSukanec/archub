@@ -149,6 +149,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [showPartnerWithdrawalsForm, setShowPartnerWithdrawalsForm] = React.useState(false)
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
+  
+  // Flags para controlar efectos problemáticos
+  const [isInitialLoading, setIsInitialLoading] = React.useState(false)
+  const [hasLoadedInitialData, setHasLoadedInitialData] = React.useState(false)
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
@@ -321,11 +325,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     form.setValue('subcategory_id', '')
   }, [movementConcepts, form, conversionForm, transferForm, movementType])
 
-  // Effect adicional para sincronización cuando cambia movementType
+  // Effect adicional para sincronización cuando cambia movementType (solo durante carga inicial)
   React.useEffect(() => {
-    if (!movementType) return
-    
-
+    if (!movementType || hasLoadedInitialData) return
     
     // Forzar actualización de valores en el formulario activo
     const commonValues = {
@@ -334,8 +336,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       created_by: form.getValues('created_by'),
       type_id: form.getValues('type_id')
     }
-    
-
     
     if (movementType === 'conversion') {
       conversionForm.setValue('movement_date', commonValues.movement_date)
@@ -350,7 +350,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       transferForm.setValue('type_id', commonValues.type_id)
 
     }
-  }, [movementType, form, conversionForm, transferForm])
+  }, [movementType, form, conversionForm, transferForm, hasLoadedInitialData])
 
   // Función para cargar datos específicos de conversión
   const loadConversionData = async (movement: any) => {
@@ -470,71 +470,89 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
-  // Effect para sincronizar estados cuando se está editando
+  // Effect para sincronizar estados cuando se está editando (una sola vez)
   React.useEffect(() => {
-    if (isEditing && editingMovement && movementConcepts) {
-      // DETECTAR TIPO DE MOVIMIENTO CORRECTO AL EDITAR
-      if (editingMovement.is_conversion) {
-        // Es una conversión - buscar el tipo "Conversión"
-        const conversionConcept = movementConcepts.find((concept: any) => 
-          concept.view_mode?.trim() === "conversion"
-        )
-        if (conversionConcept) {
+    if (!isEditing || !editingMovement || !movementConcepts || hasLoadedInitialData) return
 
-          setSelectedTypeId(conversionConcept.id)
-          handleTypeChange(conversionConcept.id)
-          
-          // Cargar datos específicos de conversión después de cambiar el tipo
-          setTimeout(() => {
-            loadConversionData(editingMovement)
-          }, 100)
-        }
-      } else if (editingMovement.transfer_group_id) {
-        // Es una transferencia - buscar el tipo "Transferencia"
-        const transferConcept = movementConcepts.find((concept: any) => 
-          concept.view_mode?.trim() === "transfer"
-        )
-        if (transferConcept) {
+    // Iniciar carga - evitar efectos adicionales
+    setIsInitialLoading(true)
 
-          setSelectedTypeId(transferConcept.id)
-          handleTypeChange(transferConcept.id)
-          
-          // Cargar datos específicos de transferencia después de cambiar el tipo
-          setTimeout(() => {
-            loadTransferData(editingMovement)
-          }, 100)
-        }
-      } else {
-        // Movimiento normal - usar type_id original
+    // Llenar formulario principal con los datos básicos del movimiento
+    form.setValue('movement_date', parseMovementDate(editingMovement.movement_date))
+    form.setValue('description', editingMovement.description || '')
+    form.setValue('created_by', editingMovement.created_by)
+    form.setValue('type_id', editingMovement.type_id)
+    form.setValue('category_id', editingMovement.category_id || '')
+    form.setValue('subcategory_id', editingMovement.subcategory_id || '')
+    form.setValue('currency_id', editingMovement.currency_id)
+    form.setValue('wallet_id', editingMovement.wallet_id)
+    form.setValue('amount', editingMovement.amount)
 
-        setSelectedTypeId(editingMovement.type_id)
-        handleTypeChange(editingMovement.type_id)
-      }
-      
-      // Sincronizar category_id después de un breve delay para asegurar que las categorías se carguen
-      if (editingMovement.category_id) {
+    // DETECTAR TIPO DE MOVIMIENTO CORRECTO AL EDITAR
+    if (editingMovement.is_conversion || editingMovement.conversion_group_id) {
+      // Es una conversión - buscar el tipo "Conversión"
+      const conversionConcept = movementConcepts.find((concept: any) => 
+        concept.view_mode?.trim() === "conversion"
+      )
+      if (conversionConcept) {
+        setSelectedTypeId(conversionConcept.id)
+        handleTypeChange(conversionConcept.id)
+        
+        // Cargar datos específicos de conversión después de cambiar el tipo
         setTimeout(() => {
-          setSelectedCategoryId(editingMovement.category_id)
-          form.setValue('category_id', editingMovement.category_id)
+          loadConversionData(editingMovement)
         }, 100)
       }
-      
-      // Sincronizar subcategory_id después de un breve delay para asegurar que las subcategorías se carguen
-      if (editingMovement.subcategory_id) {
+    } else if (editingMovement.transfer_group_id) {
+      // Es una transferencia - buscar el tipo "Transferencia"
+      const transferConcept = movementConcepts.find((concept: any) => 
+        concept.view_mode?.trim() === "transfer"
+      )
+      if (transferConcept) {
+        setSelectedTypeId(transferConcept.id)
+        handleTypeChange(transferConcept.id)
+        
+        // Cargar datos específicos de transferencia después de cambiar el tipo
         setTimeout(() => {
-          setSelectedSubcategoryId(editingMovement.subcategory_id)
-          form.setValue('subcategory_id', editingMovement.subcategory_id)
-        }, 200)
+          loadTransferData(editingMovement)
+        }, 100)
       }
-
-      // Cargar asignaciones existentes
-      if (editingMovement.id) {
-        loadMovementPersonnel(editingMovement.id)
-        loadMovementSubcontracts(editingMovement.id)
-        loadMovementProjectClients(editingMovement.id)
-      }
+    } else {
+      // Movimiento normal - usar type_id original
+      setSelectedTypeId(editingMovement.type_id)
+      handleTypeChange(editingMovement.type_id)
     }
-  }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData])
+    
+    // Sincronizar category_id después de un breve delay para asegurar que las categorías se carguen
+    if (editingMovement.category_id) {
+      setTimeout(() => {
+        setSelectedCategoryId(editingMovement.category_id)
+        form.setValue('category_id', editingMovement.category_id)
+      }, 100)
+    }
+    
+    // Sincronizar subcategory_id después de un breve delay para asegurar que las subcategorías se carguen
+    if (editingMovement.subcategory_id) {
+      setTimeout(() => {
+        setSelectedSubcategoryId(editingMovement.subcategory_id)
+        form.setValue('subcategory_id', editingMovement.subcategory_id)
+      }, 200)
+    }
+
+    // Cargar asignaciones existentes
+    if (editingMovement.id) {
+      loadMovementPersonnel(editingMovement.id)
+      loadMovementSubcontracts(editingMovement.id)
+      loadMovementProjectClients(editingMovement.id)
+    }
+
+    // Finalizar carga inicial después de un delay
+    setTimeout(() => {
+      setIsInitialLoading(false)
+      setHasLoadedInitialData(true)
+    }, 800)
+
+  }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData, hasLoadedInitialData])
 
   // Función para cargar personal asignado del movimiento
   const loadMovementPersonnel = async (movementId: string) => {
