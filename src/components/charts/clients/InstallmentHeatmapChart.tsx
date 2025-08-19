@@ -313,13 +313,18 @@ export default function InstallmentHeatmapChart({
           </div>
         </div>
 
-        <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
-          <div className="inline-block min-w-full">
-            {/* Header row with units */}
-            <div className="flex border-b border-border">
-              <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
-                Cuota / Unidad
-              </div>
+        {/* Fixed left column + scrollable right area */}
+        <div className="flex">
+          {/* Fixed left column header */}
+          <div className="w-32 bg-muted/50 border-b border-border">
+            <div className="p-3 font-medium text-sm">
+              Cuota / Unidad
+            </div>
+          </div>
+          
+          {/* Scrollable right area header */}
+          <div className="flex-1 overflow-x-auto">
+            <div className="flex" style={{ minWidth: 'max-content' }}>
               {commitments.map((commitment) => commitment?.unit ? (
                 <div
                   key={commitment.id}
@@ -339,63 +344,70 @@ export default function InstallmentHeatmapChart({
                 </div>
               ) : null)}
             </div>
+          </div>
+        </div>
 
-            {/* Data rows - each row is an installment */}
-            {heatmapData.map((rowData, rowIndex) => {
-              const installment = installments[rowIndex]
-              if (!installment) return null
-              
-              return (
-                <div key={installment.number} className="flex border-b border-border">
-                  <div className="group w-32 p-3 text-sm transition-colors relative">
-                    <div className="font-bold mb-1">
-                      Cuota {installment.number.toString().padStart(2, '0')}
+        {/* Data rows - each row is an installment */}
+        {heatmapData.map((rowData, rowIndex) => {
+          const installment = installments[rowIndex]
+          if (!installment) return null
+          
+          return (
+            <div key={installment.number} className="flex border-b border-border">
+              {/* Fixed left column - installment info */}
+              <div className="group w-32 p-3 text-sm transition-colors relative bg-background">
+                <div className="font-bold mb-1">
+                  Cuota {installment.number.toString().padStart(2, '0')}
+                </div>
+                <div className="text-xs text-muted-foreground mb-1">
+                  {new Date(installment.date).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {installment.index_reference !== undefined && installment.index_reference !== null ? installment.index_reference.toFixed(2) : '0.00'}%
+                </div>
+                
+                {/* Action Buttons */}
+                {(onEditInstallment || onDeleteInstallment) && (
+                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
+                      {onEditInstallment && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditInstallment(installment);
+                          }}
+                          className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                      )}
+                      {onDeleteInstallment && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteInstallment(installment);
+                          }}
+                          className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {new Date(installment.date).toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      })}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {installment.index_reference !== undefined && installment.index_reference !== null ? installment.index_reference.toFixed(2) : '0.00'}%
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    {(onEditInstallment || onDeleteInstallment) && (
-                      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
-                          {onEditInstallment && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEditInstallment(installment);
-                              }}
-                              className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          )}
-                          {onDeleteInstallment && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteInstallment(installment);
-                              }}
-                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
+                )}
+              </div>
+              
+              {/* Scrollable right area - unit data */}
+              <div className="flex-1 overflow-x-auto">
+                <div className="flex" style={{ minWidth: 'max-content' }}>
                   {rowData.map((cellData, colIndex) => (
                     <div
                       key={`${rowIndex}-${colIndex}`}
@@ -437,10 +449,10 @@ export default function InstallmentHeatmapChart({
                     </div>
                   ))}
                 </div>
-              )
-            })}
-          </div>
-        </div>
+              </div>
+            </div>
+          )
+        })}
 
 
       </CardContent>
