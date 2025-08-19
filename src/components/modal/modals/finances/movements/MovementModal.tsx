@@ -290,15 +290,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     
     const commonValues = getCurrentCommonValues()
     
-    if (viewMode === "conversion") {
-      setMovementType('conversion')
-    } else if (viewMode === "transfer") {
-      setMovementType('transfer')
-    } else {
-      setMovementType('normal')
-    }
-    
-    // Sincronizar campos comunes en todos los formularios
+    // Sincronizar campos comunes en todos los formularios ANTES de cambiar el tipo
     form.setValue('type_id', newTypeId)
     form.setValue('movement_date', commonValues.movement_date)
     form.setValue('description', commonValues.description)
@@ -314,12 +306,52 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     transferForm.setValue('description', commonValues.description)
     transferForm.setValue('created_by', commonValues.created_by)
     
+    // Cambiar tipo de movimiento DESPUÉS de sincronizar
+    if (viewMode === "conversion") {
+      setMovementType('conversion')
+    } else if (viewMode === "transfer") {
+      setMovementType('transfer')
+    } else {
+      setMovementType('normal')
+    }
+    
     // Reset categorías
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
     form.setValue('category_id', '')
     form.setValue('subcategory_id', '')
   }, [movementConcepts, form, conversionForm, transferForm, movementType])
+
+  // Effect adicional para sincronización cuando cambia movementType
+  React.useEffect(() => {
+    if (!movementType) return
+    
+    console.log('🔄 MovementType cambió a:', movementType)
+    
+    // Forzar actualización de valores en el formulario activo
+    const commonValues = {
+      movement_date: form.getValues('movement_date'),
+      description: form.getValues('description'),
+      created_by: form.getValues('created_by'),
+      type_id: form.getValues('type_id')
+    }
+    
+    console.log('🔄 Valores comunes a sincronizar:', commonValues)
+    
+    if (movementType === 'conversion') {
+      conversionForm.setValue('movement_date', commonValues.movement_date)
+      conversionForm.setValue('description', commonValues.description)
+      conversionForm.setValue('created_by', commonValues.created_by)
+      conversionForm.setValue('type_id', commonValues.type_id)
+      console.log('✅ Valores sincronizados en conversionForm')
+    } else if (movementType === 'transfer') {
+      transferForm.setValue('movement_date', commonValues.movement_date)
+      transferForm.setValue('description', commonValues.description)
+      transferForm.setValue('created_by', commonValues.created_by)
+      transferForm.setValue('type_id', commonValues.type_id)
+      console.log('✅ Valores sincronizados en transferForm')
+    }
+  }, [movementType, form, conversionForm, transferForm])
 
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
@@ -967,7 +999,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Renderizar panel para conversiones
   const conversionPanel = (
-    <Form {...conversionForm}>
+    <Form {...conversionForm} key={`conversion-${movementType}`}>
       <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
         {/* 1. FECHA */}
         <FormField
@@ -1056,7 +1088,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Renderizar panel para transferencias internas
   const transferPanel = (
-    <Form {...transferForm}>
+    <Form {...transferForm} key={`transfer-${movementType}`}>
       <form onSubmit={transferForm.handleSubmit(onSubmitTransfer)} className="space-y-4">
         {/* 1. FECHA */}
         <FormField
@@ -1144,7 +1176,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Renderizar panel para movimientos normales
   const normalPanel = (
-    <Form {...form}>
+    <Form {...form} key={`normal-${movementType}`}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* 1. FECHA */}
         <FormField
