@@ -221,6 +221,19 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     await saveClientMutation.mutateAsync(data)
   }
 
+  // Handle Enter key submission
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      form.handleSubmit(onSubmit)()
+    }
+  }
+
+  // Get selected currency symbol
+  const selectedCurrencyId = form.watch('currency_id')
+  const selectedCurrency = currencies?.find(c => c.currency.id === selectedCurrencyId)
+  const currencySymbol = selectedCurrency?.currency?.symbol || '$'
+
   // Get available contacts (not already clients, but include current client if editing)
   const availableContacts = organizationContacts?.filter(contact => {
     if (isEditing && editingClient?.client_id === contact.id) {
@@ -242,7 +255,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-4">
         
         {/* Fila: Cliente | Unidad Funcional */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -341,14 +354,20 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
               <FormItem>
                 <FormLabel className="text-xs font-medium">Cantidad</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                      {currencySymbol}
+                    </span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="pl-8"
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
