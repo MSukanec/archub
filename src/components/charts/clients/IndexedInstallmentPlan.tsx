@@ -4,6 +4,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2, Edit, Trash2, Calendar } from 'lucide-react'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface InstallmentData {
   id: string
@@ -73,6 +74,7 @@ export default function IndexedInstallmentPlan({
   paymentPlan
 }: IndexedInstallmentPlanProps) {
   const { data: userData } = useCurrentUser()
+  const { openModal } = useGlobalModalStore()
 
   // Fetch installments - Force fresh data with specific column selection
   const { data: installments, isLoading: installmentsLoading } = useQuery({
@@ -308,24 +310,40 @@ export default function IndexedInstallmentPlan({
         {/* Header del componente */}
         <div className="mb-6 flex items-start gap-3 pb-4 border-b border-border">
           <div className="flex-shrink-0">
-            <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'hsl(var(--accent))', opacity: 0.15 }}
-            >
-              <Calendar 
-                className="w-5 h-5" 
-                style={{ color: 'hsl(var(--accent))' }}
-              />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10">
+              <Calendar className="w-5 h-5 text-accent" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-foreground mb-1">
+            <h2 className="text-lg font-semibold text-foreground">
               Plan de Pagos
             </h2>
             <p className="text-sm text-muted-foreground">
               Visualización de cuotas indexadas con estado de pagos por unidad funcional
             </p>
           </div>
+          {paymentPlan && (
+            <div className="flex-shrink-0">
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={() => openModal('delete-confirmation', {
+                  mode: 'dangerous',
+                  title: 'Eliminar Plan de Pagos',
+                  description: 'Esta acción eliminará permanentemente el plan de pagos y todas sus cuotas asociadas. Esta acción no se puede deshacer.',
+                  itemName: paymentPlan.payment_plans?.name || 'Plan de cuotas indexadas',
+                  destructiveActionText: 'Eliminar Plan',
+                  onConfirm: () => {
+                    console.log('Eliminar plan de pagos:', paymentPlan.id)
+                    // TODO: Implementar eliminación del plan
+                  }
+                })}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Header con información del plan y referencias */}
