@@ -317,13 +317,14 @@ export default function InstallmentHeatmapChart({
           <div className="inline-block min-w-full">
             {/* Header row with units */}
             <div className="flex border-b border-border">
-              <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
+              <div className="w-32 p-3 font-medium text-sm" style={{ backgroundColor: 'var(--main-sidebar-bg)', color: 'var(--main-sidebar-fg)' }}>
                 Cuota / Unidad
               </div>
               {commitments.map((commitment) => commitment?.unit ? (
                 <div
                   key={commitment.id}
-                  className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border"
+                  className="w-40 p-3 text-sm text-center border-l border-border"
+                  style={{ backgroundColor: 'var(--main-sidebar-bg)', color: 'var(--main-sidebar-fg)' }}
                 >
                   <div className="font-bold text-xs mb-1">
                     {commitment.unit}
@@ -347,7 +348,7 @@ export default function InstallmentHeatmapChart({
               
               return (
                 <div key={installment.number} className="flex border-b border-border">
-                  <div className="group w-32 p-3 text-sm hover:bg-muted/10 transition-colors relative">
+                  <div className="group w-32 p-3 text-sm hover:bg-muted/10 transition-colors relative" style={{ backgroundColor: 'var(--main-sidebar-bg)', color: 'var(--main-sidebar-fg)' }}>
                     <div className="font-bold mb-1">
                       Cuota {installment.number.toString().padStart(2, '0')}
                     </div>
