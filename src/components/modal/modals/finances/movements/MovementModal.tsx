@@ -670,9 +670,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           const clientName = contact?.full_name || 
             `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
 
-          console.log('🔍 DEBUG loadMovementProjectClients - assignment:', assignment)
-          console.log('🔍 DEBUG loadMovementProjectClients - project_installment_id:', assignment.project_installment_id)
-
           const installmentNumber = assignment.project_installments?.number
           const installmentDisplay = installmentNumber ? 
             `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
@@ -687,7 +684,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           }
         })
 
-        console.log('🔍 DEBUG loadMovementProjectClients - formattedClients:', formattedClients)
+
 
         setSelectedClients(formattedClients)
       }
@@ -808,8 +805,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
       if (selectedClients && selectedClients.length > 0) {
-        console.log('🔍 DEBUG - selectedClients antes de mapear:', selectedClients)
-        
         // Primero eliminar registros existentes si es edición
         if (editingMovement?.id) {
           const { error: deleteError } = await supabase
@@ -817,11 +812,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             .delete()
             .eq('movement_id', editingMovement.id)
 
-          if (deleteError) {
-            console.error('❌ Error al eliminar clientes existentes:', deleteError)
-          } else {
-            console.log('✅ DEBUG - Clientes existentes eliminados')
-          }
+          if (deleteError) throw deleteError
         }
         
         const projectClientsData = selectedClients.map(client => ({
@@ -829,30 +820,35 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           project_client_id: client.project_client_id,
           project_installment_id: client.project_installment_id || null
         }))
-        
-        console.log('🔍 DEBUG - projectClientsData a insertar:', projectClientsData)
 
         const { error: projectClientsError } = await supabase
           .from('movement_clients')
           .insert(projectClientsData)
 
-        if (projectClientsError) {
-          console.error('❌ Error al insertar clientes del movimiento:', projectClientsError)
-          throw projectClientsError
-        }
-        
-        console.log('✅ DEBUG - Clientes de proyecto insertados correctamente')
+        if (projectClientsError) throw projectClientsError
       }
 
       return result
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
+      // Invalidar todas las queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movement-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
+      
+      // Invalidar específicamente los clientes del movimiento
+      if (result?.id) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['movement-project-clients', result.id] 
+        })
+      }
+      
+      // Esperar un momento para que se actualicen los datos
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
       toast({
         title: isEditing ? 'Movimiento actualizado' : 'Movimiento creado',
         description: isEditing ? 'El movimiento ha sido actualizado correctamente' : 'El movimiento ha sido creado correctamente',
