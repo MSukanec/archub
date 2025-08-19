@@ -793,8 +793,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
-          project_client_id: client.project_client_id,
-          amount: data.amount // Use the main movement amount
+          project_client_id: client.project_client_id
         }))
 
 

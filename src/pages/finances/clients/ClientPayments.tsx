@@ -40,7 +40,6 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
           movement_clients!inner(
             id,
             project_client_id,
-            amount,
             project_clients(
               id,
               client_id,

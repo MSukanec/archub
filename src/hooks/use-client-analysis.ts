@@ -70,9 +70,9 @@ export function useClientAnalysis(projectId: string | null) {
         return sum + amount
       }, 0)
 
-      // Calcular total pagado en ARS
+      // Calcular total pagado en ARS - ahora usa directamente el amount de movements
       const totalPaidAmount = (movements || []).reduce((sum, movement) => {
-        return sum + (movement.movement_clients?.[0]?.amount || 0)
+        return sum + (movement.amount || 0)
       }, 0)
 
       // Calcular saldo restante

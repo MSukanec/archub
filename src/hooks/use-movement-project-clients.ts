@@ -5,7 +5,6 @@ export interface MovementProjectClientAssignment {
   id: string
   movement_id: string
   project_client_id: string
-  amount: number
   created_at: string
   updated_at?: string
   project_clients?: {
@@ -30,13 +29,11 @@ export interface MovementProjectClientAssignment {
 export interface CreateMovementProjectClientAssignment {
   movement_id: string
   project_client_id: string
-  amount: number
 }
 
 export interface UpdateMovementProjectClientAssignment {
   movement_id: string
   project_client_id: string
-  amount: number
 }
 
 // Hook para obtener asignaciones de clientes de un movimiento
@@ -56,7 +53,6 @@ export function useMovementProjectClients(movementId?: string) {
           id,
           movement_id,
           project_client_id,
-          amount,
           created_at,
           updated_at,
           project_clients!inner(
@@ -162,8 +158,7 @@ export function useUpdateMovementProjectClients() {
           .from('movement_clients')
           .insert(assignments.map(assignment => ({
             movement_id: movementId,
-            project_client_id: assignment.project_client_id,
-            amount: assignment.amount
+            project_client_id: assignment.project_client_id
           })))
           .select()
 
