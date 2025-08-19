@@ -20,10 +20,15 @@ interface ClientCommitment {
   client_id: string
   unit: string
   committed_amount: number
+  clients: {
+    first_name: string
+    last_name: string
+    company_name?: string
+  }
 }
 
 interface HeatmapCellData {
-  unit: string
+  unitId: string
   installmentNumber: number
   amount: number | null
   isPaid: boolean
@@ -64,7 +69,14 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_clients')
-        .select('*')
+        .select(`
+          *,
+          clients (
+            first_name,
+            last_name,
+            company_name
+          )
+        `)
         .eq('project_id', projectId)
         .order('unit', { ascending: true })
 
@@ -125,9 +137,6 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
   if (!installments?.length || !commitments?.length) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Plan de Cuotas por Unidad Funcional</CardTitle>
-        </CardHeader>
         <CardContent className="p-6">
           <div className="text-center text-muted-foreground">
             {!installments?.length && "No hay cuotas definidas"}
@@ -138,15 +147,17 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
     )
   }
 
-  // Generate heatmap data
+  // Generate heatmap data - rows = installments, columns = units
   const heatmapData: HeatmapCellData[][] = []
   
-  // Create rows for each functional unit
-  commitments.forEach((commitment, rowIndex) => {
+  // Create rows for each installment
+  installments.forEach((installment) => {
     const rowData: HeatmapCellData[] = []
     
-    // Create columns for each installment
-    installments.forEach((installment) => {
+    // Create columns for each unit
+    commitments.forEach((commitment) => {
+      if (!commitment?.unit) return
+      
       // Find payments for this functional unit and installment
       const relatedPayments = payments?.filter(payment => 
         payment.movement_clients?.some((mc: any) => 
@@ -157,7 +168,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
       const totalPaid = relatedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
       
       rowData.push({
-        unit: commitment.unit,
+        unitId: commitment.id,
         installmentNumber: installment.number,
         amount: totalPaid > 0 ? totalPaid : null,
         isPaid: totalPaid > 0
@@ -169,55 +180,69 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
 
   const maxInstallmentNumber = Math.max(...installments.map(i => i.number))
 
+  const getClientDisplayName = (commitment: ClientCommitment) => {
+    if (commitment?.clients?.company_name) {
+      return commitment.clients.company_name
+    }
+    return `${commitment?.clients?.first_name || ''} ${commitment?.clients?.last_name || ''}`.trim()
+  }
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Plan de Cuotas por Unidad Funcional</CardTitle>
-      </CardHeader>
       <CardContent className="p-6">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
           <div className="inline-block min-w-full">
-            {/* Header row with installment numbers */}
+            {/* Header row with units */}
             <div className="flex border-b border-border">
-              <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
-                Unidad Funcional
+              <div className="w-24 p-3 bg-muted/50 font-medium text-sm">
+                Cuota
               </div>
-              {installments.map((installment) => (
+              {commitments.map((commitment) => commitment?.unit ? (
                 <div
-                  key={installment.number}
-                  className="w-20 p-3 bg-muted/50 font-medium text-sm text-center border-l border-border"
+                  key={commitment.id}
+                  className="w-32 p-3 bg-muted/50 text-sm text-center border-l border-border"
                 >
-                  Cuota {installment.number}
+                  <div className="font-bold text-xs mb-1">
+                    {commitment.unit}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {getClientDisplayName(commitment)}
+                  </div>
                 </div>
-              ))}
+              ) : null)}
             </div>
 
-            {/* Data rows */}
-            {heatmapData.map((rowData, rowIndex) => (
-              <div key={commitments[rowIndex].id} className="flex border-b border-border">
-                <div className="w-32 p-3 font-medium text-sm bg-background">
-                  {commitments[rowIndex].unit}
-                </div>
-                {rowData.map((cellData, colIndex) => (
-                  <div
-                    key={`${rowIndex}-${colIndex}`}
-                    className={`w-20 p-3 text-center text-sm border-l border-border transition-colors ${
-                      cellData.isPaid
-                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
-                        : 'bg-gray-50 dark:bg-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {cellData.amount ? (
-                      <div className="font-medium">
-                        ${cellData.amount.toLocaleString()}
-                      </div>
-                    ) : (
-                      <div className="opacity-50">-</div>
-                    )}
+            {/* Data rows - each row is an installment */}
+            {heatmapData.map((rowData, rowIndex) => {
+              const installment = installments[rowIndex]
+              if (!installment) return null
+              
+              return (
+                <div key={installment.number} className="flex border-b border-border">
+                  <div className="w-24 p-3 font-medium text-sm bg-background">
+                    Cuota {installment.number}
                   </div>
-                ))}
-              </div>
-            ))}
+                  {rowData.map((cellData, colIndex) => (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className={`w-32 p-3 text-center text-sm border-l border-border transition-colors ${
+                        cellData.isPaid
+                          ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                          : 'bg-gray-50 dark:bg-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {cellData.amount ? (
+                        <div className="font-medium">
+                          ${cellData.amount.toLocaleString()}
+                        </div>
+                      ) : (
+                        <div className="opacity-50">-</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </div>
 
