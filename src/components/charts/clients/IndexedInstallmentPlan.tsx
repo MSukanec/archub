@@ -192,15 +192,15 @@ export default function IndexedInstallmentPlan({
   installments.forEach((installment) => {
     const rowData: HeatmapCellData[] = []
     
-    // Only process units if commitments exist
+    // Process ALL commitments, regardless of whether they have units or not
     if (commitments?.length) {
-      // Create columns for each unit
+      // Create columns for each commitment
       commitments.forEach((commitment) => {
-        if (!commitment?.unit) return
+        // Process ALL commitments, not just those with units
         
-        // Find payments for this specific functional unit and installment number
+        // Find payments for this specific client and installment number
         const installmentPayments = payments?.filter(payment => 
-          payment.unit === commitment.unit && 
+          (commitment.unit ? payment.unit === commitment.unit : payment.client_id === commitment.client_id) &&
           payment.installment_number === installment.number
         ) || []
         
@@ -328,13 +328,13 @@ export default function IndexedInstallmentPlan({
           <div className="flex-1 overflow-x-auto">
             <div className="flex" style={{ minWidth: 'max-content' }}>
               {commitments?.length ? (
-                commitments.map((commitment) => commitment?.unit ? (
+                commitments.map((commitment) => (
                   <div
                     key={commitment.id}
                     className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border"
                   >
                     <div className="font-bold text-xs mb-1">
-                      {commitment.unit}
+                      {commitment.unit || 'Sin U.F.'}
                     </div>
                     <div className="text-xs text-muted-foreground mb-1">
                       {getClientDisplayName(commitment)}
@@ -345,11 +345,11 @@ export default function IndexedInstallmentPlan({
                       </div>
                     )}
                   </div>
-                ) : null)
+                ))
               ) : (
                 <div className="w-40 p-3 bg-muted/50 text-sm text-center border-l border-border">
                   <div className="text-xs text-muted-foreground">
-                    No hay unidades funcionales registradas
+                    No hay compromisos registrados
                   </div>
                 </div>
               )}
