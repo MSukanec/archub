@@ -75,7 +75,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
     defaultValues: {
       payment_plan_id: '',
       installments_count: 1,
-      frequency: 'mensual',
+      frequency: 'monthly',
       start_date: new Date()
     }
   })
@@ -92,11 +92,11 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
       dates.push(new Date(currentDate))
       
       // Calculate next date based on frequency
-      if (frequency === 'quincenal') {
+      if (frequency === 'biweekly') {
         currentDate = addDays(currentDate, 15)
-      } else if (frequency === 'mensual') {
+      } else if (frequency === 'monthly') {
         currentDate = addMonths(currentDate, 1)
-      } else if (frequency === 'trimestral') {
+      } else if (frequency === 'quarterly') {
         currentDate = addQuarters(currentDate, 1)
       }
     }
@@ -274,14 +274,14 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
               <FormItem>
                 <FormLabel>Frecuencia de Pago</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} defaultValue="mensual">
+                  <Select value={field.value} onValueChange={field.onChange} defaultValue="monthly">
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona la frecuencia" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="quincenal">Quincenal (cada 15 días)</SelectItem>
-                      <SelectItem value="mensual">Mensual</SelectItem>
-                      <SelectItem value="trimestral">Trimestral (cada 3 meses)</SelectItem>
+                      <SelectItem value="biweekly">Quincenal (cada 15 días)</SelectItem>
+                      <SelectItem value="monthly">Mensual</SelectItem>
+                      <SelectItem value="quarterly">Trimestral (cada 3 meses)</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>

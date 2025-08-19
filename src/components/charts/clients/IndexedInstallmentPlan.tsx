@@ -324,14 +324,14 @@ export default function IndexedInstallmentPlan({
                   <span className="font-medium">Cuotas:</span> {paymentPlan.installment_count}
                 </div>
                 <div>
-                  <span className="font-medium">Frecuencia:</span> {paymentPlan.frequency === 'monthly' ? 'Mensual' : paymentPlan.frequency}
-                </div>
-                <div>
-                  <span className="font-medium">Inicio:</span> {new Date(paymentPlan.start_date).toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit', 
-                    year: 'numeric'
-                  })}
+                  <span className="font-medium">Frecuencia:</span> {
+                    paymentPlan.frequency === 'monthly' ? 'Mensual' :
+                    paymentPlan.frequency === 'biweekly' ? 'Quincenal' :
+                    paymentPlan.frequency === 'weekly' ? 'Semanal' :
+                    paymentPlan.frequency === 'quarterly' ? 'Trimestral' :
+                    paymentPlan.frequency === 'annual' ? 'Anual' :
+                    paymentPlan.frequency.charAt(0).toUpperCase() + paymentPlan.frequency.slice(1)
+                  }
                 </div>
               </div>
             ) : (
