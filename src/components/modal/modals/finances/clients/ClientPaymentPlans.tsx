@@ -164,7 +164,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
               <FormItem>
                 <FormLabel>Frecuencia de Pago</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select value={field.value} onValueChange={field.onChange} defaultValue="mensual">
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona la frecuencia" />
                     </SelectTrigger>
