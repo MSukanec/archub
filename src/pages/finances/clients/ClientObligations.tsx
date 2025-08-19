@@ -306,7 +306,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "unit",
       label: "Unidad Funcional",
-      width: "15%",
+      width: "12%",
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
@@ -319,7 +319,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "contact",
       label: "Nombre Completo",
-      width: "18%",
+      width: "16%",
       sortable: true,
       sortType: "string" as const,
       render: (item: any) => {
@@ -338,7 +338,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso",
-      width: "15%", 
+      width: "13%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -358,7 +358,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "15%",
+      width: "13%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -372,7 +372,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "15%",
+      width: "13%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -390,7 +390,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "12%",
+      width: "11%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -414,7 +414,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "12%",
+      width: "11%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -441,7 +441,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "13%",
+      width: "11%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
