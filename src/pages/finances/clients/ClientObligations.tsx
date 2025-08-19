@@ -181,7 +181,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         const clientData = clientsMap.get(clientId)
         const currencyCode = installment.currency?.code || 'N/A'
-        const amount = movementClient.amount || 0
+        const amount = installment.amount || 0
         
         // Add currency to available currencies set
         if (installment.currency?.code) {
@@ -268,16 +268,16 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         payment.movement_clients?.forEach((mc: any) => {
           if (mc.project_clients?.client_id === client.client_id) {
             if (payment.currency_id === client.currency_id) {
-              totalPaid += mc.amount || 0
+              totalPaid += payment.amount || 0
             } else {
               // Convert to client currency if different
               const exchangeRate = payment.exchange_rate || 1
               if (payment.currency?.code === 'USD' && currency?.code === 'ARS') {
-                totalPaid += (mc.amount || 0) * exchangeRate
+                totalPaid += (payment.amount || 0) * exchangeRate
               } else if (payment.currency?.code === 'ARS' && currency?.code === 'USD') {
-                totalPaid += (mc.amount || 0) / exchangeRate
+                totalPaid += (payment.amount || 0) / exchangeRate
               } else {
-                totalPaid += mc.amount || 0
+                totalPaid += payment.amount || 0
               }
             }
           }
