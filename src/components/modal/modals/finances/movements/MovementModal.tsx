@@ -1503,9 +1503,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   form.setValue('category_id', categoryId)
                   form.setValue('subcategory_id', subcategoryId)
                   
-                  // Mantener lógica original de handleTypeChange
-                  if (typeId) {
-                    handleTypeChange(typeId)
+                  // Solo aplicar lógica de detección de tipo sin resetear categorías
+                  if (typeId && movementConcepts) {
+                    const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
+                    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+                    
+                    if (viewMode === "conversion") {
+                      setMovementType('conversion')
+                    } else if (viewMode === "transfer") {
+                      setMovementType('transfer')
+                    } else {
+                      setMovementType('normal')
+                    }
                   }
                 }}
                 placeholder="Seleccionar tipo..."
