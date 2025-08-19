@@ -20,7 +20,8 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
       projectId, 
       organizationId,
       installmentId: installment.id,
-      isEditing: true 
+      isEditing: true,
+      editingInstallment: installment
     })
   }
 

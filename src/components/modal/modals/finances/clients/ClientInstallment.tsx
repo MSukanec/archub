@@ -27,6 +27,9 @@ interface ClientInstallmentProps {
   modalData?: {
     projectId?: string
     organizationId?: string
+    installmentId?: string
+    isEditing?: boolean
+    editingInstallment?: any
   }
   onClose: () => void
 }
@@ -38,48 +41,79 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
 
   const projectId = modalData?.projectId || userData?.preferences?.last_project_id
   const organizationId = modalData?.organizationId || userData?.organization?.id
+  const installmentId = modalData?.installmentId
+  const isEditing = modalData?.isEditing || !!installmentId
+  const editingInstallment = modalData?.editingInstallment
 
-  const form = useForm<InstallmentForm>({
-    resolver: zodResolver(installmentSchema),
-    defaultValues: {
+  // Get default values based on editing mode
+  const getDefaultValues = (): InstallmentForm => {
+    if (isEditing && editingInstallment) {
+      return {
+        date: new Date(editingInstallment.date),
+        number: editingInstallment.number,
+        index: editingInstallment.index_reference || 0
+      }
+    }
+    return {
       date: new Date(),
       number: 1,
       index: 0
     }
+  }
+
+  const form = useForm<InstallmentForm>({
+    resolver: zodResolver(installmentSchema),
+    defaultValues: getDefaultValues()
   })
 
-  // Mutation to create installment
-  const createInstallmentMutation = useMutation({
+  // Mutation to create/update installment
+  const saveInstallmentMutation = useMutation({
     mutationFn: async (data: InstallmentForm) => {
       if (!projectId || !organizationId || !supabase) {
         throw new Error('Faltan datos requeridos')
       }
 
-      // Create single installment
       const installmentData = {
         project_id: projectId,
         organization_id: organizationId,
         number: data.number,
-        index: data.index,
+        index_reference: data.index,
         date: data.date.toISOString().split('T')[0] // Solo fecha, sin hora
       }
 
-      const { data: result, error } = await supabase
-        .from('project_installments')
-        .insert([installmentData])
-        .select()
+      if (isEditing && installmentId) {
+        // Update existing installment
+        const { data: result, error } = await supabase
+          .from('project_installments')
+          .update(installmentData)
+          .eq('id', installmentId)
+          .select()
 
-      if (error) {
-        console.error('Error creating installment:', error)
-        throw new Error('Error creando la cuota: ' + error.message)
+        if (error) {
+          console.error('Error updating installment:', error)
+          throw new Error('Error actualizando la cuota: ' + error.message)
+        }
+
+        return result
+      } else {
+        // Create new installment
+        const { data: result, error } = await supabase
+          .from('project_installments')
+          .insert([installmentData])
+          .select()
+
+        if (error) {
+          console.error('Error creating installment:', error)
+          throw new Error('Error creando la cuota: ' + error.message)
+        }
+
+        return result
       }
-
-      return result
     },
     onSuccess: (data) => {
       toast({
-        title: "Cuota creada",
-        description: `La cuota #${data?.[0]?.number} se creó exitosamente`,
+        title: isEditing ? "Cuota actualizada" : "Cuota creada",
+        description: `La cuota #${data?.[0]?.number} se ${isEditing ? 'actualizó' : 'creó'} exitosamente`,
       })
       
       // Invalidate queries to refresh the data
@@ -91,14 +125,14 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Error creando la cuota",
+        description: error.message || `Error ${isEditing ? 'actualizando' : 'creando'} la cuota`,
         variant: "destructive",
       })
     }
   })
 
   const handleSubmit = (data: InstallmentForm) => {
-    createInstallmentMutation.mutate(data)
+    saveInstallmentMutation.mutate(data)
   }
 
   const editPanel = (
@@ -169,28 +203,26 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   )
 
   const headerContent = (
-    <FormModalHeader 
-      title="Nueva Cuota"
-      description="Crea una cuota individual para el proyecto con fecha de vencimiento específica"
-      icon={Calendar}
+    <FormModalHeader
+      icon={<Calendar className="w-5 h-5" />}
+      title={isEditing ? "Editar Cuota" : "Nueva Cuota"}
+      description={isEditing ? "Modifica los detalles de la cuota existente" : "Crea una nueva cuota para el proyecto"}
     />
   )
 
   const footerContent = (
     <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel="Crear Cuota"
-      onRightClick={form.handleSubmit(handleSubmit)}
-      submitDisabled={createInstallmentMutation.isPending}
-      showLoadingSpinner={createInstallmentMutation.isPending}
+      onClose={onClose}
+      submitText={isEditing ? "Guardar Cambios" : "Crear Cuota"}
+      onSubmit={form.handleSubmit(handleSubmit)}
+      isSubmitting={saveInstallmentMutation.isPending}
     />
   )
 
   return (
     <FormModalLayout
       columns={1}
-      isEditing={true}
+      isEditing={isEditing}
       viewPanel={editPanel}
       editPanel={editPanel}
       headerContent={headerContent}
