@@ -221,11 +221,12 @@ export default function InstallmentHeatmapChart({
       const installmentValue = Math.round((commitment.committed_amount || 0) / totalInstallments)
       const balance = installmentValue - Math.round(totalPaidInCommitmentCurrency)
       
-      // Calculate updated amount (violeta): balance + percentage increase for this installment
-      // For first installment (0%), it should be the full amount
-      const percentageIncrease = installment.number === 1 ? 0 : 0 // Por ahora 0% para todas las cuotas
+      // Calculate updated amount (violeta): 
+      // Primera cuota = COMPROMISO TOTAL (no hay cuotas anteriores)
+      // Cuotas siguientes = saldo + porcentaje de aumento
+      const percentageIncrease = 0 // Por ahora 0% para todas las cuotas
       const updatedAmount = installment.number === 1 
-        ? installmentValue // Primera cuota: monto completo
+        ? Math.round(commitment.committed_amount || 0) // Primera cuota: COMPROMISO TOTAL
         : Math.round(balance * (1 + percentageIncrease / 100)) // Otras cuotas: saldo + porcentaje
       
       rowData.push({
