@@ -616,9 +616,11 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">{clientAnalysis.totalCommitments}</p>
+                  <p className="text-2xl font-bold">
+                    ${clientAnalysis.totalCommittedAmount.toLocaleString('es-AR')}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Compromisos registrados
+                    {clientAnalysis.totalCommitments} compromisos registrados
                   </p>
                 </div>
               </div>

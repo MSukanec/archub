@@ -87,7 +87,7 @@ export function useClientAnalysis(projectId: string | null) {
 
       return {
         totalCommitments,
-        totalCommittedAmount,
+        totalCommittedAmount, // Este es el valor que usaremos para la primera KPI
         totalPaidAmount,
         remainingBalance,
         paymentPercentage,
