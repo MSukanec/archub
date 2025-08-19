@@ -333,7 +333,8 @@ export default function InstallmentHeatmapChart({
                       })}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {installment.index ? installment.index.toFixed(2) : '0.00'}%
+                      {console.log('DEBUG installment:', installment)}
+                      {installment.index !== undefined && installment.index !== null ? installment.index.toFixed(2) : '0.00'}%
                     </div>
                     
                     {/* Action Buttons */}
