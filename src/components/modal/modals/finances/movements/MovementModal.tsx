@@ -653,6 +653,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               last_name,
               full_name
             )
+          ),
+          project_installments:project_installment_id (
+            id,
+            number
           )
         `)
         .eq('movement_id', movementId)
@@ -669,12 +673,17 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           console.log('🔍 DEBUG loadMovementProjectClients - assignment:', assignment)
           console.log('🔍 DEBUG loadMovementProjectClients - project_installment_id:', assignment.project_installment_id)
 
+          const installmentNumber = assignment.project_installments?.number
+          const installmentDisplay = installmentNumber ? 
+            `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
+            'Sin cuota'
+
           return {
             project_client_id: assignment.project_client_id,
             unit: projectClient?.unit || 'N/A',
             client_name: clientName,
             project_installment_id: assignment.project_installment_id,
-            installment_display: assignment.project_installment_id ? 'Cuota asignada' : 'Sin cuota'
+            installment_display: installmentDisplay
           }
         })
 

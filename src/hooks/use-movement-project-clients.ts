@@ -25,6 +25,10 @@ export interface MovementProjectClientAssignment {
       full_name: string
     }
   }
+  project_installments?: {
+    id: string
+    number: number
+  }
 }
 
 export interface CreateMovementProjectClientAssignment {
@@ -74,6 +78,10 @@ export function useMovementProjectClients(movementId?: string) {
               phone,
               full_name
             )
+          ),
+          project_installments:project_installment_id(
+            id,
+            number
           )
         `)
         .eq('movement_id', movementId)
