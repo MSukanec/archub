@@ -12,7 +12,7 @@ export interface MovementProjectClientAssignment {
     organization_id: string
     project_id: string
     client_id: string
-    is_active: boolean
+
     created_at: string
     contact: {
       id: string
@@ -60,7 +60,7 @@ export function useMovementProjectClients(movementId?: string) {
             organization_id,
             project_id,
             client_id,
-            is_active,
+
             created_at,
             contact:client_id(
               id,

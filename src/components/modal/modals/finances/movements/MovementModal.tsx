@@ -645,9 +645,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           project_client_id,
           project_clients:project_client_id (
             id,
-            contacts (
+            unit,
+            contact:client_id (
+              id,
               first_name,
-              last_name
+              last_name,
+              full_name
             )
           )
         `)
@@ -657,14 +660,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (clientAssignments && clientAssignments.length > 0) {
         const formattedClients = clientAssignments.map((assignment: any) => {
-          const contact = assignment.project_clients?.contacts
-          const contactName = contact 
-            ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
-            : 'Sin nombre'
+          const projectClient = assignment.project_clients
+          const contact = projectClient?.contact
+          const clientName = contact?.full_name || 
+            `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
 
           return {
             project_client_id: assignment.project_client_id,
-            contact_name: contactName
+            unit: projectClient?.unit || 'N/A',
+            client_name: clientName
           }
         })
 
