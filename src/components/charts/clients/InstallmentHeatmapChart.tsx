@@ -265,8 +265,8 @@ export default function InstallmentHeatmapChart({
                     
                     {/* Action Buttons */}
                     {(onEditInstallment || onDeleteInstallment) && (
-                      <div className="absolute top-1 left-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-background/90 backdrop-blur-sm border border-border rounded-md px-2 py-1 flex items-center justify-center gap-1 shadow-sm">
+                      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
                           {onEditInstallment && (
                             <Button
                               variant="ghost"
@@ -275,7 +275,7 @@ export default function InstallmentHeatmapChart({
                                 e.stopPropagation();
                                 onEditInstallment(installment);
                               }}
-                              className="h-6 w-6 p-0 hover:bg-accent/20"
+                              className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
                             >
                               <Edit className="w-3 h-3" />
                             </Button>
@@ -288,7 +288,7 @@ export default function InstallmentHeatmapChart({
                                 e.stopPropagation();
                                 onDeleteInstallment(installment);
                               }}
-                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-100/20"
+                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>

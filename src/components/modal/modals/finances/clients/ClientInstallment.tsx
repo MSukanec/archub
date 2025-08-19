@@ -204,7 +204,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
 
   const headerContent = (
     <FormModalHeader
-      icon={<Calendar className="w-5 h-5" />}
+      icon={Calendar}
       title={isEditing ? "Editar Cuota" : "Nueva Cuota"}
       description={isEditing ? "Modifica los detalles de la cuota existente" : "Crea una nueva cuota para el proyecto"}
     />
