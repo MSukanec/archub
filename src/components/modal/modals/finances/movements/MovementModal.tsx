@@ -643,7 +643,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_clients')
         .select(`
           project_client_id,
-          amount,
           project_clients:project_client_id (
             id,
             contacts (
@@ -665,12 +664,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
           return {
             project_client_id: assignment.project_client_id,
-            contact_name: contactName,
-            amount: assignment.amount
+            contact_name: contactName
           }
         })
 
-        setSelectedProjectClients(formattedClients)
+        setSelectedClients(formattedClients)
       }
     } catch (error) {
       console.error('Error loading project client assignments:', error)

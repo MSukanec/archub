@@ -60,8 +60,9 @@ export function useMovementProjectClients(movementId?: string) {
             organization_id,
             project_id,
             client_id,
+            is_active,
             created_at,
-            contact:client_id!inner(
+            contact:client_id(
               id,
               first_name,
               last_name,
