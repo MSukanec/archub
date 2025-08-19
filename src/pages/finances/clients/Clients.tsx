@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ClientObligations } from './ClientObligations'
-
+import { ClientMonthlyInstallments } from './ClientMonthlyInstallments'
 import { ClientPayments } from './ClientPayments'
 
 export function Clients() {
@@ -21,6 +21,11 @@ export function Clients() {
       id: "obligations",
       label: "Compromisos de Pago",
       isActive: activeTab === "obligations"
+    },
+    {
+      id: "monthly-installments",
+      label: "Cuotas Mensuales",
+      isActive: activeTab === "monthly-installments"
     },
     {
       id: "details",
@@ -70,6 +75,13 @@ export function Clients() {
       <div className="space-y-4">
         {activeTab === "obligations" && (
           <ClientObligations 
+            projectId={projectId}
+            organizationId={organizationId}
+          />
+        )}
+
+        {activeTab === "monthly-installments" && (
+          <ClientMonthlyInstallments 
             projectId={projectId}
             organizationId={organizationId}
           />
