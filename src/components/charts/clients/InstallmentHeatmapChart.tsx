@@ -11,7 +11,7 @@ interface InstallmentData {
   organization_id: string
   date: string
   number: number
-  index_reference: number | null
+  index_reference: number
   created_at: string
 }
 
@@ -67,7 +67,7 @@ export default function InstallmentHeatmapChart({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_installments')
-        .select('id, project_id, organization_id, date, number, index_reference, created_at, updated_at')
+        .select('id, project_id, organization_id, date, number, index, index_reference, created_at, updated_at')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('number', { ascending: true })
@@ -288,33 +288,14 @@ export default function InstallmentHeatmapChart({
   }
 
   return (
-    <div className="p-6">
-      {/* Color Legend - Inline at top */}
-      <div className="flex items-center gap-6 mb-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-violet-500 rounded"></div>
-          <span className="text-violet-600 dark:text-violet-400">Monto Actualizado</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded"></div>
-          <span className="text-red-600 dark:text-red-400">Valor de Cuota</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
-          <span className="text-green-600 dark:text-green-400">Pago</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded"></div>
-          <span className="text-blue-600 dark:text-blue-400">Saldo</span>
-        </div>
-      </div>
-      
-      <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
-        <div className="inline-block min-w-full border border-border rounded-lg">
+    <Card>
+      <CardContent className="p-6">
+        <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
+          <div className="inline-block min-w-full">
             {/* Header row with units */}
             <div className="flex border-b border-border">
               <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
-                Cuota / Unidad
+                Cuota
               </div>
               {commitments.map((commitment) => commitment?.unit ? (
                 <div
@@ -427,8 +408,43 @@ export default function InstallmentHeatmapChart({
                 </div>
               )
             })}
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* Legend */}
+        <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700 rounded"></div>
+              <span>Cuota con pagos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded"></div>
+              <span>Cuota pendiente</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-violet-500 rounded"></div>
+                <span className="text-violet-600 dark:text-violet-400">Monto Actualizado</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-red-500 rounded"></div>
+                <span className="text-red-600 dark:text-red-400">Valor de Cuota</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <span className="text-green-600 dark:text-green-400">Pago</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <span className="text-blue-600 dark:text-blue-400">Saldo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
