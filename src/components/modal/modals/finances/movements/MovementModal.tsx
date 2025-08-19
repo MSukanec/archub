@@ -353,6 +353,107 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [movementType, form, conversionForm, transferForm])
 
+  // Función para cargar datos específicos de conversión
+  const loadConversionData = async (movement: any) => {
+    console.log('🔄 Cargando datos de conversión:', movement)
+    
+    try {
+      // Buscar el movimiento complementario de la conversión
+      const { data: conversionMovements, error } = await supabase
+        .from('movements')
+        .select('*')
+        .eq('conversion_group_id', movement.conversion_group_id)
+        .neq('id', movement.id)
+        .single()
+
+      if (error) {
+        console.error('Error al buscar movimiento complementario:', error)
+        return
+      }
+
+      console.log('🔄 Movimiento complementario encontrado:', conversionMovements)
+
+      // Determinar si el movimiento actual es origen o destino
+      const isOrigin = movement.amount < 0 // Los egresos son negativos (origen)
+      const originMovement = isOrigin ? movement : conversionMovements
+      const destinationMovement = isOrigin ? conversionMovements : movement
+
+      // Llenar formulario de conversión
+      conversionForm.setValue('movement_date', new Date(movement.movement_date))
+      conversionForm.setValue('description', movement.description)
+      conversionForm.setValue('created_by', movement.created_by)
+      conversionForm.setValue('type_id', selectedTypeId)
+      
+      // Datos de origen
+      conversionForm.setValue('origin_currency_id', originMovement.currency_id)
+      conversionForm.setValue('origin_wallet_id', originMovement.wallet_id)
+      conversionForm.setValue('origin_amount', Math.abs(originMovement.amount))
+      
+      // Datos de destino
+      conversionForm.setValue('destination_currency_id', destinationMovement.currency_id)
+      conversionForm.setValue('destination_wallet_id', destinationMovement.wallet_id)
+      conversionForm.setValue('destination_amount', Math.abs(destinationMovement.amount))
+      
+      // Cotización
+      if (movement.exchange_rate) {
+        conversionForm.setValue('exchange_rate', movement.exchange_rate)
+      }
+
+      console.log('✅ Datos de conversión cargados correctamente')
+      
+    } catch (error) {
+      console.error('Error al cargar datos de conversión:', error)
+    }
+  }
+
+  // Función para cargar datos específicos de transferencia
+  const loadTransferData = async (movement: any) => {
+    console.log('🔄 Cargando datos de transferencia:', movement)
+    
+    try {
+      // Buscar el movimiento complementario de la transferencia
+      const { data: transferMovements, error } = await supabase
+        .from('movements')
+        .select('*')
+        .eq('transfer_group_id', movement.transfer_group_id)
+        .neq('id', movement.id)
+        .single()
+
+      if (error) {
+        console.error('Error al buscar movimiento complementario:', error)
+        return
+      }
+
+      console.log('🔄 Movimiento complementario encontrado:', transferMovements)
+
+      // Determinar si el movimiento actual es origen o destino
+      const isOrigin = movement.amount < 0 // Los egresos son negativos (origen)
+      const originMovement = isOrigin ? movement : transferMovements
+      const destinationMovement = isOrigin ? transferMovements : movement
+
+      // Llenar formulario de transferencia
+      transferForm.setValue('movement_date', new Date(movement.movement_date))
+      transferForm.setValue('description', movement.description)
+      transferForm.setValue('created_by', movement.created_by)
+      transferForm.setValue('type_id', selectedTypeId)
+      
+      // Datos de origen
+      transferForm.setValue('origin_currency_id', originMovement.currency_id)
+      transferForm.setValue('origin_wallet_id', originMovement.wallet_id)
+      transferForm.setValue('origin_amount', Math.abs(originMovement.amount))
+      
+      // Datos de destino
+      transferForm.setValue('destination_currency_id', destinationMovement.currency_id)
+      transferForm.setValue('destination_wallet_id', destinationMovement.wallet_id)
+      transferForm.setValue('destination_amount', Math.abs(destinationMovement.amount))
+
+      console.log('✅ Datos de transferencia cargados correctamente')
+      
+    } catch (error) {
+      console.error('Error al cargar datos de transferencia:', error)
+    }
+  }
+
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
   // Effect para sincronizar estados cuando se está editando
@@ -368,6 +469,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           console.log('🔄 Detectado movimiento de conversión, usando tipo:', conversionConcept.name)
           setSelectedTypeId(conversionConcept.id)
           handleTypeChange(conversionConcept.id)
+          
+          // Cargar datos específicos de conversión después de cambiar el tipo
+          setTimeout(() => {
+            loadConversionData(editingMovement)
+          }, 100)
         }
       } else if (editingMovement.transfer_group_id) {
         // Es una transferencia - buscar el tipo "Transferencia"
@@ -378,6 +484,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           console.log('🔄 Detectado movimiento de transferencia, usando tipo:', transferConcept.name)
           setSelectedTypeId(transferConcept.id)
           handleTypeChange(transferConcept.id)
+          
+          // Cargar datos específicos de transferencia después de cambiar el tipo
+          setTimeout(() => {
+            loadTransferData(editingMovement)
+          }, 100)
         }
       } else {
         // Movimiento normal - usar type_id original
@@ -409,7 +520,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         loadMovementProjectClients(editingMovement.id)
       }
     }
-  }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form])
+  }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData])
 
   // Función para cargar personal asignado del movimiento
   const loadMovementPersonnel = async (movementId: string) => {
@@ -448,7 +559,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedPersonnel(formattedPersonnel)
       }
     } catch (error) {
-      console.error('Error loading movement personnel:', error)
+      console.error('Error loading personnel assignments:', error)
     }
   }
 
@@ -462,13 +573,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount,
           subcontracts:subcontract_id (
             id,
-            title,
-            contact_id,
             contact:contact_id (
               first_name,
-              last_name,
-              full_name,
-              company_name
+              last_name
             )
           )
         `)
@@ -478,12 +585,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (subcontractAssignments && subcontractAssignments.length > 0) {
         const formattedSubcontracts = subcontractAssignments.map((assignment: any) => {
-          // Usar el título del subcontrato en lugar del nombre del contacto
-          const subcontractTitle = assignment.subcontracts?.title || 'Subcontrato sin título'
+          const contact = assignment.subcontracts?.contact
+          const contactName = contact 
+            ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
+            : 'Sin nombre'
 
           return {
             subcontract_id: assignment.subcontract_id,
-            contact_name: subcontractTitle, // Usamos title para consistencia con SubcontractsForm
+            contact_name: contactName,
             amount: assignment.amount
           }
         })
@@ -491,7 +600,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         setSelectedSubcontracts(formattedSubcontracts)
       }
     } catch (error) {
-      console.error('Error loading movement subcontracts:', error)
+      console.error('Error loading subcontract assignments:', error)
     }
   }
 
@@ -505,13 +614,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount,
           project_clients:project_client_id (
             id,
-            client_id,
-            unit,
-            contact:client_id (
+            contact:contact_id (
               first_name,
-              last_name,
-              company_name,
-              full_name
+              last_name
             )
           )
         `)
@@ -522,31 +627,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (clientAssignments && clientAssignments.length > 0) {
         const formattedClients = clientAssignments.map((assignment: any) => {
           const contact = assignment.project_clients?.contact
-          let clientName = 'Cliente sin nombre'
-          
-          if (contact) {
-            if (contact.company_name) {
-              clientName = contact.company_name
-            } else if (contact.full_name) {
-              clientName = contact.full_name
-            } else {
-              clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
-            }
-          }
+          const contactName = contact 
+            ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
+            : 'Sin nombre'
 
           return {
             project_client_id: assignment.project_client_id,
-            client_name: clientName,
-            unit: assignment.project_clients?.unit || 'Sin unidad'
+            contact_name: contactName,
+            amount: assignment.amount
           }
         })
 
-        setSelectedClients(formattedClients)
+        setSelectedProjectClients(formattedClients)
       }
     } catch (error) {
-      console.error('Error loading movement project clients:', error)
+      console.error('Error loading project client assignments:', error)
     }
   }
+
+
 
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
