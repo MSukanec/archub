@@ -102,18 +102,18 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
         title="No hay cuotas definidas"
         description="Crea una cuota individual o genera un plan completo para gestionar los pagos mensuales del proyecto."
         action={
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative z-30">
             <Button 
               onClick={() => openModal('client-payment-plans', { projectId, organizationId })}
               variant="secondary"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
               Crear Plan de Cuotas
             </Button>
             <Button 
               onClick={() => openModal('client-installment', { projectId, organizationId })}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
               Nueva Cuota

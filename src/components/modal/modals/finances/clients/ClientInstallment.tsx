@@ -191,6 +191,8 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   return (
     <FormModalLayout
       columns={1}
+      isEditing={true}
+      viewPanel={editPanel}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
