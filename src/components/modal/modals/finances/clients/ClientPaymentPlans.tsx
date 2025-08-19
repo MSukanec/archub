@@ -166,12 +166,11 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
 
   return (
     <FormModalLayout
-      viewPanel={null}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      isEditing={true}
+      isEditing={false}
     />
   )
 }
