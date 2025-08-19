@@ -9,7 +9,7 @@ export function Clients() {
   const [activeTab, setActiveTab] = useState("obligations")
   const { data: userData } = useCurrentUser()
   
-  const projectId = userData?.organization?.project?.id
+  const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
 
   // Crear tabs para el header
