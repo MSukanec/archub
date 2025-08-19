@@ -259,7 +259,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      isEditing={false}
+      isEditing={true}
     />
   )
 }
