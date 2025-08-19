@@ -372,11 +372,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       console.log('🔄 Grupo de conversión completo encontrado:', allGroupMovements)
 
-      // El de mayor amount es el EGRESO (origen), el de menor amount es el INGRESO (destino)
-      const originMovement = allGroupMovements[0]  // Mayor amount (egreso)
-      const destinationMovement = allGroupMovements[1]  // Menor amount (ingreso)
+      // Buscar tipos de egreso e ingreso en los conceptos de movimiento
+      const egressType = movementConcepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('egreso')
+      )
+      const ingressType = movementConcepts?.find((concept: any) => 
+        concept.name?.toLowerCase().includes('ingreso')
+      )
+
+      // Identificar movimientos por TIPO, no por amount
+      const originMovement = allGroupMovements.find(m => m.type_id === egressType?.id)
+      const destinationMovement = allGroupMovements.find(m => m.type_id === ingressType?.id)
       
-      console.log('🔍 Lógica corregida de origen/destino por amounts:', {
+      if (!originMovement || !destinationMovement) {
+        console.error('No se pudieron identificar movimientos de origen y destino por tipo')
+        return
+      }
+      
+      console.log('🔍 Lógica corregida de origen/destino por TIPOS:', {
+        originType: egressType?.name,
+        destinationType: ingressType?.name,
         originAmount: originMovement.amount,
         destinationAmount: destinationMovement.amount,
         originCurrency: originMovement.currency_id,
@@ -869,13 +884,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           throw new Error('Error: no se encontraron ambos movimientos de la conversión')
         }
 
-        // Identificar cuál es origen y destino
-        const originMovement = conversionMovements.find(m => m.description.includes('Salida'))
-        const destMovement = conversionMovements.find(m => m.description.includes('Entrada'))
+        // Buscar tipos de egreso e ingreso
+        const egressType = movementConcepts?.find((concept: any) => 
+          concept.name?.toLowerCase().includes('egreso')
+        )
+        const ingressType = movementConcepts?.find((concept: any) => 
+          concept.name?.toLowerCase().includes('ingreso')
+        )
+
+        // Identificar cuál es origen y destino POR TIPO
+        const originMovement = conversionMovements.find(m => m.type_id === egressType?.id)
+        const destMovement = conversionMovements.find(m => m.type_id === ingressType?.id)
 
         if (!originMovement || !destMovement) {
-          throw new Error('Error: no se pudieron identificar los movimientos de origen y destino')
+          throw new Error('Error: no se pudieron identificar los movimientos de origen y destino por tipo')
         }
+
+        console.log('🔍 Editando conversión - identificado por TIPOS:', {
+          originType: egressType?.name,
+          destinationType: ingressType?.name,
+          originId: originMovement.id,
+          destinationId: destMovement.id
+        })
 
         // Actualizar movimiento de origen (egreso)
         const { error: updateOriginError } = await supabase
