@@ -256,9 +256,9 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   // Create commitment summary with payment totals
   const commitmentSummary = React.useMemo(() => {
     return projectClients.map((client: any) => {
-      // Find total payments for this client
+      // Find total payments for this specific commitment (not all commitments from this client)
       const clientPayments = installments.filter((installment: any) => 
-        installment.movement_clients?.some((mc: any) => mc.project_clients?.client_id === client.client_id)
+        installment.movement_clients?.some((mc: any) => mc.project_client_id === client.id)
       )
       
       let totalPaid = 0
@@ -266,7 +266,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       
       clientPayments.forEach((payment: any) => {
         payment.movement_clients?.forEach((mc: any) => {
-          if (mc.project_clients?.client_id === client.client_id) {
+          if (mc.project_client_id === client.id) {
             if (payment.currency_id === client.currency_id) {
               totalPaid += payment.amount || 0
             } else {
