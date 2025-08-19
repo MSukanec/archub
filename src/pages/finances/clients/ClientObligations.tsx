@@ -25,14 +25,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
   // Fetch client analysis for KPIs
   const { data: clientAnalysis, isLoading: isLoadingAnalysis } = useClientAnalysis(projectId)
-  
-  // Debug logs
-  console.log('🔍 ClientAnalysis Debug:', {
-    projectId,
-    clientAnalysis,
-    isLoadingAnalysis,
-    hasAnalysis: !!clientAnalysis
-  })
 
   // Fetch project clients (commitments) data
   const { data: projectClients = [], isLoading: clientsLoading } = useQuery({
@@ -786,21 +778,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         </div>
       )}
 
-      {/* Tabla de Detalle por Moneda */}
-      {clientSummary.length > 0 && availableCurrencies && availableCurrencies.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-foreground mb-3">Detalle por Moneda</h3>
-          <Table
-            data={clientSummary}
-            columns={currencyDetailColumns}
-            defaultSort={{ key: 'contact', direction: 'asc' }}
-            getItemId={(item) => item.contact_id || 'unknown'}
-            renderCard={(item) => (
-              <CurrencyDetailCard item={item} />
-            )}
-          />
-        </div>
-      )}
+
     </div>
   )
 }

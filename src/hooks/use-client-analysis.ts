@@ -5,12 +5,7 @@ export function useClientAnalysis(projectId: string | null) {
   return useQuery({
     queryKey: ['client-analysis', projectId],
     queryFn: async () => {
-      if (!projectId || !supabase) {
-        console.log('⚠️ ClientAnalysis: Missing projectId or supabase', { projectId, supabase: !!supabase })
-        return null
-      }
-
-      console.log('🔄 ClientAnalysis: Starting analysis for project:', projectId)
+      if (!projectId || !supabase) return null
 
       // 1. Obtener todos los compromisos de clientes del proyecto
       const { data: projectClients, error: clientsError } = await supabase
@@ -32,12 +27,7 @@ export function useClientAnalysis(projectId: string | null) {
         `)
         .eq('project_id', projectId)
 
-      if (clientsError) {
-        console.error('❌ ClientAnalysis: Error fetching project clients:', clientsError)
-        throw clientsError
-      }
-      
-      console.log('✅ ClientAnalysis: Project clients found:', projectClients?.length || 0)
+      if (clientsError) throw clientsError
 
       // 2. Obtener todos los movimientos del proyecto de tipo egreso (pagos)
       const { data: movements, error: movementsError } = await supabase
@@ -54,19 +44,12 @@ export function useClientAnalysis(projectId: string | null) {
         `)
         .eq('project_id', projectId)
 
-      if (movementsError) {
-        console.error('❌ ClientAnalysis: Error fetching movements:', movementsError)
-        throw movementsError
-      }
-      
-      console.log('✅ ClientAnalysis: Total movements found:', movements?.length || 0)
+      if (movementsError) throw movementsError
       
       // 3. Filtrar solo los movimientos que tienen vinculaciones con project_clients
       const clientPayments = (movements || []).filter(movement => 
         movement.movement_clients && movement.movement_clients.length > 0
       )
-      
-      console.log('✅ ClientAnalysis: Client payments found:', clientPayments.length)
 
       // 4. Calcular KPIs
       const totalCommitments = projectClients?.length || 0
@@ -97,9 +80,9 @@ export function useClientAnalysis(projectId: string | null) {
       // Porcentaje restante
       const remainingPercentage = 100 - paymentPercentage
 
-      const result = {
+      return {
         totalCommitments,
-        totalCommittedAmount, // Este es el valor que usaremos para la primera KPI
+        totalCommittedAmount,
         totalPaidAmount,
         remainingBalance,
         paymentPercentage,
@@ -107,10 +90,6 @@ export function useClientAnalysis(projectId: string | null) {
         projectClients: projectClients || [],
         movements: clientPayments
       }
-      
-      console.log('📊 ClientAnalysis: Final result:', result)
-      
-      return result
     },
     enabled: !!projectId && !!supabase
   })
