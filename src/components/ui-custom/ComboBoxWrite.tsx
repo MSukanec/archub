@@ -123,7 +123,7 @@ export function ComboBox({
                 setSearchValue(value);
               }
             }}
-            className="text-sm bg-[var(--card-bg)] border-none text-foreground placeholder:text-muted-foreground"
+            className="text-xs bg-[var(--card-bg)] border-none text-foreground placeholder:text-muted-foreground"
           />
           <CommandList className="max-h-48 overflow-y-auto scrollbar-thin">
             {filteredOptions.length === 0 && !canCreateNew && (

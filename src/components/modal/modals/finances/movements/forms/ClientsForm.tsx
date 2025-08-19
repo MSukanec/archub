@@ -6,6 +6,11 @@ import { useProjectClients } from '@/hooks/use-project-clients'
 import { useProjectInstallments } from '@/hooks/use-project-installments'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Info, Calendar, DollarSign } from 'lucide-react'
 
 export interface CommitmentRow {
   commitment_id: string
@@ -46,6 +51,47 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       { enabled: !!projectId && !!organizationId }
     )
 
+    // Fetch payment plan information
+    const { data: paymentPlan } = useQuery({
+      queryKey: ['project-payment-plan', projectId],
+      queryFn: async () => {
+        if (!supabase || !projectId) return null
+        
+        const { data, error } = await supabase
+          .from('project_payment_plans')
+          .select(`
+            *,
+            payment_plans(
+              id,
+              name,
+              description,
+              frequency,
+              installment_count
+            )
+          `)
+          .eq('project_id', projectId)
+          .single()
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            return null
+          }
+          console.error('Error fetching payment plan:', error)
+          return null
+        }
+
+        return data
+      },
+      enabled: !!projectId
+    })
+
+    // Get selected client information for displaying payment status
+    const getSelectedClientInfo = (commitmentId: string) => {
+      if (!commitmentId) return null
+      const client = projectClients.find(pc => pc.id === commitmentId)
+      return client
+    }
+
     // Initialize rows from initial commitments or create one empty row
     const initializeRows = (): CommitmentRow[] => {
       if (initialClients.length > 0) {
@@ -74,9 +120,11 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
         clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
       }
       
-      // Add unit information if available - UNIT FIRST
-      const unit = projectClient.unit || 'Sin unidad'
-      return `${unit} - ${clientName}`
+      // Add unit information if available - UNIT FIRST, otherwise just client name
+      if (projectClient.unit) {
+        return `${projectClient.unit} - ${clientName}`
+      }
+      return clientName
     }
 
     // Create options for ComboBox - sorted by unit
@@ -174,8 +222,50 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
 
     return (
       <div className="space-y-4">
+        {/* Payment Plan Information */}
+        {paymentPlan?.payment_plans && (
+          <Card className="p-4 bg-muted/30 border-muted">
+            <div className="flex items-start gap-3">
+              <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-medium text-foreground">
+                    Plan de Pagos: {paymentPlan.payment_plans.name}
+                  </h4>
+                  <Badge variant="outline" className="text-xs">
+                    {paymentPlan.payment_plans.frequency}
+                  </Badge>
+                </div>
+                {paymentPlan.payment_plans.description && (
+                  <p className="text-xs text-muted-foreground">
+                    {paymentPlan.payment_plans.description}
+                  </p>
+                )}
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      {paymentPlan.payment_plans.installment_count 
+                        ? `${paymentPlan.payment_plans.installment_count} cuotas` 
+                        : 'Sin límite de cuotas'
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    <span>Selecciona un cliente y cuota para el pago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Commitment Rows - Two column layout: commitment and installment */}
-        {commitmentRows.map((row, index) => (
+        {commitmentRows.map((row, index) => {
+          const selectedClient = getSelectedClientInfo(row.commitment_id)
+          
+          return (
           <div key={index} className="space-y-2">
             <div className="flex items-center gap-2">
               {/* Commitment Selector */}
@@ -217,8 +307,36 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                 disabled={installmentsLoading || !row.commitment_id}
               />
             </div>
+
+            {/* Client Payment Information */}
+            {selectedClient && (
+              <Card className="p-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-3 w-3 text-green-600" />
+                      <span className="text-xs font-medium text-green-800 dark:text-green-200">
+                        Compromiso Total: 
+                      </span>
+                      <span className="text-xs font-bold text-green-900 dark:text-green-100">
+                        U$S {selectedClient.committed_amount?.toLocaleString('es-AR') || '0'}
+                      </span>
+                    </div>
+                    {selectedClient.unit && (
+                      <p className="text-xs text-green-700 dark:text-green-300">
+                        Unidad: {selectedClient.unit}
+                      </p>
+                    )}
+                  </div>
+                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Activo
+                  </Badge>
+                </div>
+              </Card>
+            )}
           </div>
-        ))}
+          )
+        })}
         
 
       </div>
