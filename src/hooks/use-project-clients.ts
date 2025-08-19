@@ -43,7 +43,6 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
           organization_id,
           project_id,
           client_id,
-          is_active,
           created_at,
           contact:client_id (
             id,
@@ -57,7 +56,6 @@ export function useProjectClients(projectId?: string, options?: { enabled?: bool
         `)
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
         .order('created_at', { ascending: false })
 
       console.log('useProjectClients - Query result:', { data, error, count: data?.length || 0 })

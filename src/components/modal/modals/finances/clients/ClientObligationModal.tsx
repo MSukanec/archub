@@ -126,7 +126,6 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           )
         `)
         .eq('project_id', projectId)
-        .eq('is_active', true)
         .eq('contact.organization_id', organizationId)
         .order('created_at', { ascending: false })
 
