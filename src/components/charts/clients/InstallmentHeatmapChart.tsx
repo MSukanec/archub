@@ -20,11 +20,13 @@ interface ClientCommitment {
   client_id: string
   unit: string
   committed_amount: number
-  clients: {
-    first_name: string
-    last_name: string
-    company_name?: string
-  }
+}
+
+interface ClientInfo {
+  id: string
+  first_name: string
+  last_name: string
+  company_name?: string
 }
 
 interface HeatmapCellData {
@@ -69,14 +71,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_clients')
-        .select(`
-          *,
-          clients (
-            first_name,
-            last_name,
-            company_name
-          )
-        `)
+        .select('*')
         .eq('project_id', projectId)
         .order('unit', { ascending: true })
 
@@ -88,6 +83,29 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
       return data as ClientCommitment[]
     },
     enabled: !!projectId
+  })
+
+  // Fetch client information separately
+  const { data: clientsInfo, isLoading: clientsLoading } = useQuery({
+    queryKey: ['clients-info', commitments?.map(c => c.client_id)],
+    queryFn: async () => {
+      if (!commitments?.length) return []
+      
+      const clientIds = commitments.map(c => c.client_id)
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('id, first_name, last_name, company_name')
+        .in('id', clientIds)
+        .eq('organization_id', organizationId)
+
+      if (error) {
+        console.error('Error fetching contacts info:', error)
+        return []
+      }
+
+      return data as ClientInfo[]
+    },
+    enabled: !!commitments?.length
   })
 
   // Fetch payments data (movements related to client payments)
@@ -119,7 +137,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
     enabled: !!projectId && !!organizationId
   })
 
-  const isLoading = installmentsLoading || commitmentsLoading || paymentsLoading
+  const isLoading = installmentsLoading || commitmentsLoading || paymentsLoading || clientsLoading
 
   if (isLoading) {
     return (
@@ -181,10 +199,13 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
   const maxInstallmentNumber = Math.max(...installments.map(i => i.number))
 
   const getClientDisplayName = (commitment: ClientCommitment) => {
-    if (commitment?.clients?.company_name) {
-      return commitment.clients.company_name
+    const clientInfo = clientsInfo?.find(client => client.id === commitment.client_id)
+    if (!clientInfo) return 'Cliente'
+    
+    if (clientInfo.company_name) {
+      return clientInfo.company_name
     }
-    return `${commitment?.clients?.first_name || ''} ${commitment?.clients?.last_name || ''}`.trim()
+    return `${clientInfo.first_name || ''} ${clientInfo.last_name || ''}`.trim()
   }
 
   return (
