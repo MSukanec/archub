@@ -123,6 +123,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
       organizationId={organizationId}
       onEditInstallment={handleEditInstallment}
       onDeleteInstallment={handleDeleteInstallment}
+      paymentPlan={existingPaymentPlan}
     />
   )
 }

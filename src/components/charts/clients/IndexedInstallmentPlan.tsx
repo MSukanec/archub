@@ -51,13 +51,26 @@ interface IndexedInstallmentPlanProps {
   organizationId: string
   onEditInstallment?: (installment: InstallmentData) => void
   onDeleteInstallment?: (installment: InstallmentData) => void
+  paymentPlan?: {
+    id: string
+    installment_count: number
+    start_date: string
+    frequency: string
+    created_at: string
+    payment_plans?: {
+      id: string
+      name: string
+      description: string
+    }
+  } | null
 }
 
 export default function IndexedInstallmentPlan({ 
   projectId, 
   organizationId, 
   onEditInstallment, 
-  onDeleteInstallment 
+  onDeleteInstallment,
+  paymentPlan
 }: IndexedInstallmentPlanProps) {
   const { data: userData } = useCurrentUser()
 
@@ -292,25 +305,60 @@ export default function IndexedInstallmentPlan({
   return (
     <Card>
       <CardContent className="p-6">
-        {/* Leyenda de colores inline */}
-        <div className="mb-4 p-3 bg-muted/20 rounded-lg border">
-          <div className="text-xs font-medium mb-2">Referencias de colores:</div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-violet-600 rounded"></div>
-              <span>Actualización</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-red-600 rounded"></div>
-              <span>Valor de cuota</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-600 rounded"></div>
-              <span>Pago</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-blue-600 rounded"></div>
-              <span>Saldo</span>
+        {/* Header con información del plan y referencias */}
+        <div className="mb-4 flex gap-4">
+          {/* Información del Plan de Pagos - 50% izquierda */}
+          <div className="flex-1 p-3 bg-muted/10 rounded-lg border">
+            <div className="text-xs font-medium mb-2">Plan de Pagos:</div>
+            {paymentPlan ? (
+              <div className="space-y-1 text-xs">
+                <div>
+                  <span className="font-medium">Tipo:</span> {paymentPlan.payment_plans?.name || 'Plan personalizado'}
+                </div>
+                {paymentPlan.payment_plans?.description && (
+                  <div>
+                    <span className="font-medium">Descripción:</span> {paymentPlan.payment_plans.description}
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium">Cuotas:</span> {paymentPlan.installment_count}
+                </div>
+                <div>
+                  <span className="font-medium">Frecuencia:</span> {paymentPlan.frequency === 'monthly' ? 'Mensual' : paymentPlan.frequency}
+                </div>
+                <div>
+                  <span className="font-medium">Inicio:</span> {new Date(paymentPlan.start_date).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric'
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">Plan no configurado</div>
+            )}
+          </div>
+
+          {/* Referencias de colores - 50% derecha */}
+          <div className="flex-1 p-3 bg-muted/20 rounded-lg border">
+            <div className="text-xs font-medium mb-2">Referencias de colores:</div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-violet-600 rounded"></div>
+                <span>Actualización</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-red-600 rounded"></div>
+                <span>Valor de cuota</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-600 rounded"></div>
+                <span>Pago</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-blue-600 rounded"></div>
+                <span>Saldo</span>
+              </div>
             </div>
           </div>
         </div>
