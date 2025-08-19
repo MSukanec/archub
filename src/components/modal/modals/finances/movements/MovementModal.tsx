@@ -817,6 +817,55 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     createTransferMutation.mutate(values)
   }
 
+  // Effect para manejar ENTER key para submit
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Solo procesar ENTER si no estamos en subformularios
+      if (
+        event.key === 'Enter' && 
+        event.ctrlKey === false && 
+        event.altKey === false && 
+        !showPersonnelForm && 
+        !showSubcontractsForm && 
+        !showClientsForm && 
+        !showPartnerWithdrawalsForm
+      ) {
+        // Evitar el comportamiento por defecto
+        event.preventDefault()
+        event.stopPropagation()
+
+        // Hacer submit según el tipo de movimiento
+        if (movementType === 'conversion') {
+          conversionForm.handleSubmit(onSubmitConversion)()
+        } else if (movementType === 'transfer') {
+          transferForm.handleSubmit(onSubmitTransfer)()
+        } else {
+          form.handleSubmit(onSubmit)()
+        }
+      }
+    }
+
+    // Agregar event listener
+    document.addEventListener('keydown', handleKeyDown)
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [
+    showPersonnelForm, 
+    showSubcontractsForm, 
+    showClientsForm, 
+    showPartnerWithdrawalsForm,
+    movementType,
+    form,
+    conversionForm,
+    transferForm,
+    onSubmit,
+    onSubmitConversion,
+    onSubmitTransfer
+  ])
+
   // Función para determinar qué botón mostrar según el subcategory_id
   const getActionButton = (subcategoryId: string) => {
     const buttonConfig = {
