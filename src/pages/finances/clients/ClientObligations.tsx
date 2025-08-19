@@ -32,6 +32,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         .select(`
           id,
           client_id,
+          unit,
           committed_amount,
           currency_id,
           created_at,
@@ -87,6 +88,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
             project_clients(
               id,
               client_id,
+              unit,
               committed_amount,
               currency_id,
               contacts!inner(
@@ -302,8 +304,21 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   // Table columns for commitments
   const contactSummaryColumns = [
     {
+      key: "unit",
+      label: "Unidad Funcional",
+      width: "15%",
+      sortable: true,
+      sortType: "string" as const,
+      render: (item: any) => {
+        if (!item.unit || item.unit.trim() === '') {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+        return <div className="text-sm">{item.unit}</div>
+      }
+    },
+    {
       key: "contact",
-      label: "Cliente",
+      label: "Nombre Completo",
       width: "18%",
       sortable: true,
       sortType: "string" as const,
