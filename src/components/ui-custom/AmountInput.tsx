@@ -63,24 +63,25 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
     }
 
     return (
-      <div className={cn("flex", className)}>
+      <div className={cn("relative flex h-10", className)}>
         {/* Currency Selector Button */}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
+            <button
+              type="button"
               disabled={disabled}
               className={cn(
-                "w-24 justify-between rounded-r-none border-r-0 bg-muted/50",
+                "flex items-center justify-between px-3 text-sm border border-input bg-background text-foreground rounded-l-md border-r-0 min-w-[80px] transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                "hover:bg-accent hover:text-accent-foreground",
                 !selectedCurrency && "text-muted-foreground"
               )}
             >
-              <span className="truncate">
+              <span className="truncate font-mono text-xs">
                 {selectedCurrency ? selectedCurrency.symbol : "---"}
               </span>
-              <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
+              <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+            </button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-0" align="start">
             <Command>
@@ -117,7 +118,7 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
         </Popover>
 
         {/* Amount Input */}
-        <Input
+        <input
           {...props}
           ref={ref}
           type="number"
@@ -127,7 +128,10 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
           onChange={handleInputChange}
           placeholder={placeholder}
           disabled={disabled}
-          className="rounded-l-none flex-1"
+          className={cn(
+            "flex-1 h-10 rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            "rounded-l-none border-l-0"
+          )}
         />
       </div>
     )
