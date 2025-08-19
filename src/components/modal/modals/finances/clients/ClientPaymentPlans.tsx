@@ -110,8 +110,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           project_id: projectId,
           organization_id: organizationId,
           number: i,
-          due_date: installmentDates[i - 1].toISOString(),
-          created_by: userData?.user?.id
+          date: installmentDates[i - 1].toISOString().split('T')[0] // Solo fecha, sin hora
         })
       }
 

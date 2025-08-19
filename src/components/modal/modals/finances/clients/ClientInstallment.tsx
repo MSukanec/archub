@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 
 const installmentSchema = z.object({
-  due_date: z.date({
+  date: z.date({
     required_error: 'Selecciona la fecha de vencimiento'
   }),
   number: z.number().min(1, 'El número debe ser mayor a 0'),
@@ -42,7 +42,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   const form = useForm<InstallmentForm>({
     resolver: zodResolver(installmentSchema),
     defaultValues: {
-      due_date: new Date(),
+      date: new Date(),
       number: 1,
       index: 0
     }
@@ -61,8 +61,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
         organization_id: organizationId,
         number: data.number,
         index: data.index,
-        due_date: data.due_date.toISOString(),
-        created_by: userData?.user?.id
+        date: data.date.toISOString().split('T')[0] // Solo fecha, sin hora
       }
 
       const { data: result, error } = await supabase
@@ -108,7 +107,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
         <div className="space-y-4">
           <FormField
             control={form.control}
-            name="due_date"
+            name="date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha de Vencimiento</FormLabel>

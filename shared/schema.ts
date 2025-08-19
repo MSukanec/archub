@@ -381,6 +381,11 @@ export const insertMovementSubcontractSchema = createInsertSchema(movement_subco
   created_at: true,
 });
 
+export const insertProjectInstallmentSchema = createInsertSchema(project_installments).omit({
+  id: true,
+  created_at: true,
+});
+
 
 
 export type InsertUserData = z.infer<typeof insertUserDataSchema>;
@@ -409,6 +414,8 @@ export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
 export type MovementSubcontract = typeof movement_subcontracts.$inferSelect;
 export type InsertMovementSubcontract = z.infer<typeof insertMovementSubcontractSchema>;
+export type ProjectInstallment = typeof project_installments.$inferSelect;
+export type InsertProjectInstallment = z.infer<typeof insertProjectInstallmentSchema>;
 
 
 // Subcontracts tables
