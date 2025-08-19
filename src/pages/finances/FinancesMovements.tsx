@@ -61,6 +61,7 @@ import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarCo
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";
+import { MovementKPICards } from "@/components/kpis/MovementKPICards";
 
 interface Movement {
   id: string;
@@ -1346,6 +1347,12 @@ export default function Movements() {
       }}
       wide={true}
     >
+      {/* Movement KPIs */}
+      <MovementKPICards 
+        organizationId={organizationId} 
+        projectId={projectId || undefined} 
+      />
+      
       {processedMovements.length === 0 ? (
         <EmptyState
           icon={<DollarSign className="h-12 w-12" />}
