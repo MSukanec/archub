@@ -184,13 +184,22 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
         label: getCommitmentDisplayName(client)
       }))
 
-    // Create options for installments - formatted as "Cuota 01", "Cuota 02", etc.
+    // Create options for installments - formatted as "Cuota 01 - 19/08/2025", etc.
     const installmentOptions = projectInstallments
       .sort((a, b) => a.number - b.number)
-      .map(installment => ({
-        value: installment.id,
-        label: `Cuota ${installment.number.toString().padStart(2, '0')}`
-      }))
+      .map(installment => {
+        const formattedDate = installment.date 
+          ? new Date(installment.date).toLocaleDateString('es-AR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })
+          : 'Sin fecha'
+        return {
+          value: installment.id,
+          label: `Cuota ${installment.number.toString().padStart(2, '0')} - ${formattedDate}`
+        }
+      })
 
     // Handle commitment change
     const handleCommitmentChange = (index: number, commitmentId: string) => {
@@ -343,36 +352,36 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
 
             {/* Client Payment Summary */}
             {paymentSummary?.client && (
-              <div className="space-y-3 pl-4 border-l-2 border-muted">
-                <h4 className="text-xs font-medium text-muted-foreground">
-                  Información del cliente:
-                </h4>
-                <div className="space-y-2 text-xs text-muted-foreground">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Información del cliente
+                </label>
+                <div className="space-y-1 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                    <span>Compromiso Total: </span>
-                    <span className="font-bold text-foreground">
+                    <span className="text-xs">Compromiso Total: </span>
+                    <span className="font-bold text-foreground text-xs">
                       U$S {paymentSummary.client.committed_amount?.toLocaleString('es-AR') || '0'}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                    <span>Pagado a la fecha: </span>
-                    <span className="font-bold text-green-600">
+                    <span className="text-xs">Pagado a la fecha: </span>
+                    <span className="font-bold text-green-600 text-xs">
                       U$S {paymentSummary.totalPaid.toLocaleString('es-AR')}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                    <span>Saldo pendiente: </span>
-                    <span className="font-bold text-orange-600">
+                    <span className="text-xs">Saldo pendiente: </span>
+                    <span className="font-bold text-orange-600 text-xs">
                       U$S {paymentSummary.remainingAmount.toLocaleString('es-AR')}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                    <span>Último pago: </span>
-                    <span className="font-medium">
+                    <span className="text-xs">Último pago: </span>
+                    <span className="font-medium text-xs">
                       {paymentSummary.lastPaymentDate 
                         ? new Date(paymentSummary.lastPaymentDate).toLocaleDateString('es-AR', {
                             day: '2-digit',
@@ -386,8 +395,8 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                   {paymentSummary.client.unit && (
                     <div className="flex items-center gap-1">
                       <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                      <span>Unidad: </span>
-                      <span className="font-medium">{paymentSummary.client.unit}</span>
+                      <span className="text-xs">Unidad: </span>
+                      <span className="font-medium text-xs">{paymentSummary.client.unit}</span>
                     </div>
                   )}
                 </div>
