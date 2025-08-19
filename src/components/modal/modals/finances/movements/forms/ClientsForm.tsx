@@ -308,7 +308,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-muted-foreground">
-                    Compromiso
+                    Cliente
                   </label>
                   {commitmentRows.length > 1 && (
                     <Button
@@ -326,28 +326,30 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                   value={row.commitment_id}
                   onValueChange={(value) => handleCommitmentChange(index, value)}
                   options={commitmentOptions}
-                  placeholder="Seleccionar compromiso..."
-                  searchPlaceholder="Buscar compromiso..."
-                  emptyMessage={clientsLoading ? "Cargando..." : "No hay compromisos disponibles"}
+                  placeholder="Seleccionar cliente..."
+                  searchPlaceholder="Buscar cliente..."
+                  emptyMessage={clientsLoading ? "Cargando..." : "No hay clientes disponibles"}
                   disabled={clientsLoading}
                 />
               </div>
               
-              {/* Installment Selector */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Cuota
-                </label>
-                <ComboBox
-                  value={row.installment_id}
-                  onValueChange={(value) => handleInstallmentChange(index, value)}
-                  options={installmentOptions}
-                  placeholder="Seleccionar cuota..."
-                  searchPlaceholder="Buscar cuota..."
-                  emptyMessage={installmentsLoading ? "Cargando..." : "No hay cuotas disponibles"}
-                  disabled={installmentsLoading || !row.commitment_id}
-                />
-              </div>
+              {/* Installment Selector - Only show if payment plan exists */}
+              {paymentPlan?.payment_plans && (
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Cuota
+                  </label>
+                  <ComboBox
+                    value={row.installment_id}
+                    onValueChange={(value) => handleInstallmentChange(index, value)}
+                    options={installmentOptions}
+                    placeholder="Seleccionar cuota..."
+                    searchPlaceholder="Buscar cuota..."
+                    emptyMessage={installmentsLoading ? "Cargando..." : "No hay cuotas disponibles"}
+                    disabled={installmentsLoading || !row.commitment_id}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Client Payment Summary */}
