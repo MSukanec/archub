@@ -501,35 +501,20 @@ export default function IndexedInstallmentPlan({
                 </div>
                 
                 {/* Action Buttons */}
-                {(onEditInstallment || onDeleteInstallment) && (
+                {onEditInstallment && (
                   <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
-                      {onEditInstallment && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditInstallment(installment);
-                          }}
-                          className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      )}
-                      {onDeleteInstallment && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteInstallment(installment);
-                          }}
-                          className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditInstallment(installment);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 )}
