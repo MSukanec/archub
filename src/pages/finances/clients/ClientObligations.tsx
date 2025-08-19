@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -288,20 +288,25 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     })
   }, [projectClients, installments, allCurrencies])
 
+  // Sort data alphabetically by client name
+  const sortedCommitmentSummary = useMemo(() => {
+    return [...commitmentSummary].sort((a, b) => {
+      const nameA = (a.contacts?.company_name || 
+                    `${a.contacts?.first_name || ''} ${a.contacts?.last_name || ''}`.trim()).toLowerCase()
+      const nameB = (b.contacts?.company_name || 
+                    `${b.contacts?.first_name || ''} ${b.contacts?.last_name || ''}`.trim()).toLowerCase()
+      return nameA.localeCompare(nameB)
+    })
+  }, [commitmentSummary])
+
   // Table columns for commitments
   const contactSummaryColumns = [
     {
       key: "contact",
       label: "Cliente",
-      width: "16.66%",
+      width: "18%",
       sortable: true,
       sortType: "string" as const,
-      sortKey: (item: any) => {
-        // Custom sort key for proper alphabetical ordering
-        const displayName = item.contacts?.company_name || 
-                           `${item.contacts?.first_name || ''} ${item.contacts?.last_name || ''}`.trim()
-        return displayName.toLowerCase()
-      },
       render: (item: any) => {
         if (!item.contacts) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -318,7 +323,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso",
-      width: "16.66%", 
+      width: "15%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -338,7 +343,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "16.66%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -352,7 +357,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "16.66%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -370,7 +375,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "16.66%",
+      width: "12%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -394,7 +399,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "16.66%",
+      width: "12%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -421,7 +426,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "16.66%",
+      width: "13%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
@@ -553,9 +558,8 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         <div>
           <h3 className="text-sm font-medium text-foreground mb-3">Compromisos de Pago</h3>
           <Table
-            data={commitmentSummary}
+            data={sortedCommitmentSummary}
             columns={contactSummaryColumns}
-            defaultSort={{ key: 'contact', direction: 'asc' }}
             getItemId={(item) => item.id || 'unknown'}
             renderCard={(item) => (
               <ClientSummaryCard 
