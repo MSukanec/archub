@@ -312,7 +312,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso",
-      width: "20%", 
+      width: "15%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -332,7 +332,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "20%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -346,7 +346,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "20%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -362,15 +362,67 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       }
     },
     {
+      key: "paymentPercentage",
+      label: "% de Pago",
+      width: "12%",
+      sortable: true,
+      sortType: "number" as const,
+      render: (item: any) => {
+        const committedAmount = item.committed_amount || 0
+        const totalPaid = item.totalPaid || 0
+        
+        if (committedAmount === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+        
+        const percentage = (totalPaid / committedAmount) * 100
+        const isComplete = percentage >= 100
+        
+        return (
+          <div className={`text-sm font-medium ${isComplete ? 'text-green-600' : 'text-muted-foreground'}`}>
+            {Math.round(percentage)}%
+          </div>
+        )
+      }
+    },
+    {
+      key: "totalPercentage",
+      label: "% del Total",
+      width: "12%",
+      sortable: true,
+      sortType: "number" as const,
+      render: (item: any) => {
+        const committedAmount = item.committed_amount || 0
+        
+        // Calculate total of all commitments
+        const totalCommitments = commitmentSummary.reduce((sum, client) => 
+          sum + (client.committed_amount || 0), 0
+        )
+        
+        if (totalCommitments === 0) {
+          return <div className="text-sm text-muted-foreground">-</div>
+        }
+        
+        const percentage = (committedAmount / totalCommitments) * 100
+        
+        return (
+          <div className="text-sm font-medium">
+            {Math.round(percentage)}%
+          </div>
+        )
+      }
+    },
+    {
       key: "actions",
       label: "Acciones",
-      width: "15%",
+      width: "12%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              className="h-8 w-8"
               onClick={() => {
                 openModal('project-client', {
                   projectId,
@@ -384,7 +436,8 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              className="h-8 w-8"
               onClick={() => {
                 openModal('delete-confirmation', {
                   mode: 'dangerous',
