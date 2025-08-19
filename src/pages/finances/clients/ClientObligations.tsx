@@ -4,12 +4,14 @@ import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import ClientSummaryCard from '@/components/cards/ClientSummaryCard'
 import CurrencyDetailCard from '@/components/cards/CurrencyDetailCard'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { Receipt, Edit2, Trash2 } from 'lucide-react'
+import { Receipt, Edit2, Trash2, Users, DollarSign, CreditCard, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { useClientAnalysis } from '@/hooks/use-client-analysis'
 
 interface ClientObligationsProps {
   projectId: string
@@ -20,6 +22,9 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   const { openModal } = useGlobalModalStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Fetch client analysis for KPIs
+  const { data: clientAnalysis, isLoading: isLoadingAnalysis } = useClientAnalysis(projectId)
 
   // Fetch project clients (commitments) data
   const { data: projectClients = [], isLoading: clientsLoading } = useQuery({
@@ -113,9 +118,9 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
       // Manually fetch currencies, wallets, and users
       if (movements && movements.length > 0) {
-        const currencyIds = [...new Set(movements.map(m => m.currency_id).filter(Boolean))]
-        const walletIds = [...new Set(movements.map(m => m.wallet_id).filter(Boolean))]
-        const userIds = [...new Set(movements.map(m => m.created_by).filter(Boolean))]
+        const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
+        const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
+        const userIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean)))
 
         const [currenciesData, walletsData, usersData] = await Promise.all([
           supabase.from('currencies').select('id, name, code, symbol').in('id', currencyIds),
@@ -124,7 +129,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         ])
 
         // Add related data to movements
-        movements.forEach(movement => {
+        movements.forEach((movement: any) => {
           movement.currency = currenciesData.data?.find(c => c.id === movement.currency_id)
           movement.wallet = walletsData.data?.find(w => w.id === movement.wallet_id)
           movement.creator = usersData.data?.find(u => u.id === movement.created_by)
@@ -158,8 +163,8 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     const clientsMap = new Map<string, any>()
     const currenciesSet = new Set<string>()
     
-    installments.forEach(installment => {
-      installment.movement_clients?.forEach(movementClient => {
+    installments.forEach((installment: any) => {
+      installment.movement_clients?.forEach((movementClient: any) => {
         const projectClient = movementClient.project_clients
         const contact = projectClient?.contacts
         const clientId = projectClient?.client_id || 'unknown'
@@ -250,17 +255,17 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
   // Create commitment summary with payment totals
   const commitmentSummary = React.useMemo(() => {
-    return projectClients.map(client => {
+    return projectClients.map((client: any) => {
       // Find total payments for this client
-      const clientPayments = installments.filter(installment => 
-        installment.movement_clients?.some(mc => mc.project_clients?.client_id === client.client_id)
+      const clientPayments = installments.filter((installment: any) => 
+        installment.movement_clients?.some((mc: any) => mc.project_clients?.client_id === client.client_id)
       )
       
       let totalPaid = 0
       const currency = allCurrencies.find(c => c.id === client.currency_id)
       
-      clientPayments.forEach(payment => {
-        payment.movement_clients?.forEach(mc => {
+      clientPayments.forEach((payment: any) => {
+        payment.movement_clients?.forEach((mc: any) => {
           if (mc.project_clients?.client_id === client.client_id) {
             if (payment.currency_id === client.currency_id) {
               totalPaid += mc.amount || 0
@@ -320,7 +325,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   const contactSummaryColumns = [
     {
       key: "unit",
-      label: "Unidad Funcional",
+      label: "U.F.",
       width: "12%",
       sortable: true,
       sortType: "string" as const,
@@ -352,7 +357,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     },
     {
       key: "commitment",
-      label: "Compromiso",
+      label: "Compromiso Inicial",
       width: "13%", 
       sortable: true,
       sortType: "number" as const,
@@ -583,10 +588,152 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
   return (
     <div className="space-y-6">
-      {/* Tabla de Compromisos de Pago */}
+      {/* KPI Cards */}
+      {clientAnalysis && !isLoadingAnalysis && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Total de compromisos */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Total de compromisos</p>
+                  <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                {/* Mini gráfico de barras - altura fija */}
+                <div className="flex items-end gap-1 h-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-sm flex-1"
+                      style={{
+                        backgroundColor: 'var(--accent)',
+                        height: `${Math.max(30, Math.random() * 100)}%`,
+                        opacity: i < clientAnalysis.totalCommitments ? 1 : 0.3
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                <div>
+                  <p className="text-2xl font-bold">{clientAnalysis.totalCommitments}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Compromisos registrados
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pago a la fecha */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Pago a la fecha</p>
+                  <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                {/* Gráfico de línea de tendencia - altura fija */}
+                <div className="h-8 relative">
+                  <svg className="w-full h-full" viewBox="0 0 100 32">
+                    <path
+                      d="M 0,24 Q 25,20 50,12 T 100,8"
+                      stroke="var(--accent)"
+                      strokeWidth="2"
+                      fill="none"
+                      className="opacity-80"
+                    />
+                    <circle cx="100" cy="8" r="2" fill="var(--accent)" />
+                  </svg>
+                </div>
+                
+                <div>
+                  <p className="text-2xl font-bold">
+                    ${clientAnalysis.totalPaidAmount.toLocaleString('es-AR')}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {clientAnalysis.paymentPercentage.toFixed(1)}% del total
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Saldo restante */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Saldo restante</p>
+                  <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                {/* Barra de progreso de pagos - altura fija */}
+                <div className="h-8 flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min(clientAnalysis.paymentPercentage, 100)}%`,
+                        background: 'linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, var(--accent) 100%)'
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <p className="text-2xl font-bold">
+                    ${clientAnalysis.remainingBalance.toLocaleString('es-AR')}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Pendiente de pago
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* % de pago restante */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">% de pago restante</p>
+                  <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                {/* Gráfico de área llena - altura fija */}
+                <div className="h-8 relative">
+                  <svg className="w-full h-full" viewBox="0 0 100 32">
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8"/>
+                        <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.2"/>
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M 0,32 L 0,${32 - (clientAnalysis.remainingPercentage * 0.3)} Q 25,${20 - (clientAnalysis.remainingPercentage * 0.2)} 50,${16 - (clientAnalysis.remainingPercentage * 0.25)} T 100,${12 - (clientAnalysis.remainingPercentage * 0.2)} L 100,32 Z`}
+                      fill="url(#areaGradient)"
+                    />
+                  </svg>
+                </div>
+                
+                <div>
+                  <p className="text-2xl font-bold">{clientAnalysis.remainingPercentage.toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground">
+                    Pendiente de cobro
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Tabla de Compromisos */}
       {commitmentSummary.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-foreground mb-3">Compromisos de Pago</h3>
           <Table
             data={sortedCommitmentSummary}
             columns={contactSummaryColumns}
