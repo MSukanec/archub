@@ -38,33 +38,36 @@ export function DefaultMovementFields({
 }: DefaultFieldsProps) {
   return (
     <>
-      {/* Fila: Moneda | Billetera */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
-        <FormField
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Moneda *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {currencies?.map((orgCurrency) => (
-                    <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                      {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* CAMPO MONEDA ORIGINAL COMENTADO TEMPORALMENTE */}
+      {/*
+      <FormField
+        control={form.control}
+        name="currency_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Moneda *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {currencies?.map((orgCurrency) => (
+                  <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
+                    {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      */}
 
+      {/* Fila: Billetera | Moneda y Monto */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
           name="wallet_id"
@@ -89,31 +92,33 @@ export function DefaultMovementFields({
             </FormItem>
           )}
         />
+
+        <FormItem>
+          <FormLabel>Moneda y Monto *</FormLabel>
+          <FormControl>
+            <AmountInput
+              value={form.watch('amount') || undefined}
+              currency={form.watch('currency_id') || ''}
+              currencies={currencies?.map(orgCurrency => ({
+                id: orgCurrency.currency?.id || '',
+                name: orgCurrency.currency?.name || 'Sin nombre',
+                symbol: orgCurrency.currency?.symbol || '$'
+              })) || []}
+              onValueChange={(value) => {
+                form.setValue('amount', value || 0)
+              }}
+              onCurrencyChange={(currencyId) => {
+                form.setValue('currency_id', currencyId)
+              }}
+              placeholder="0.00"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
       </div>
 
-      {/* Fila: Monto | Cotización */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Monto *</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+      {/* Fila: Cotización (ancho completo) */}
+      <div className="col-span-2">
         <FormField
           control={form.control}
           name="exchange_rate"
@@ -172,31 +177,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {/* PRUEBA: AMOUNTINPUT - Nueva versión combinada */}
-      <div className="col-span-2">
-        <FormItem>
-          <FormLabel>Monto con Moneda (Prueba AmountInput) *</FormLabel>
-          <FormControl>
-            <AmountInput
-              value={form.watch('amount') || undefined}
-              currency={form.watch('currency_id') || ''}
-              currencies={currencies?.map(orgCurrency => ({
-                id: orgCurrency.currency?.id || '',
-                name: orgCurrency.currency?.name || 'Sin nombre',
-                symbol: orgCurrency.currency?.symbol || '$'
-              })) || []}
-              onValueChange={(value) => {
-                form.setValue('amount', value || 0)
-              }}
-              onCurrencyChange={(currencyId) => {
-                form.setValue('currency_id', currencyId)
-              }}
-              placeholder="0.00"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </div>
+
     </>
   )
 }
