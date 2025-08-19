@@ -25,6 +25,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
   // Fetch client analysis for KPIs
   const { data: clientAnalysis, isLoading: isLoadingAnalysis } = useClientAnalysis(projectId)
+  
+  // Debug logs
+  console.log('🔍 ClientAnalysis Debug:', {
+    projectId,
+    clientAnalysis,
+    isLoadingAnalysis,
+    hasAnalysis: !!clientAnalysis
+  })
 
   // Fetch project clients (commitments) data
   const { data: projectClients = [], isLoading: clientsLoading } = useQuery({
