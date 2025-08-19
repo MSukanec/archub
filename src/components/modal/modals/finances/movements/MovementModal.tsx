@@ -416,6 +416,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           project_clients:project_client_id (
             id,
             client_id,
+            unit,
             contact:client_id (
               first_name,
               last_name,
