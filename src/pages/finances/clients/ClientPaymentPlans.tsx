@@ -53,7 +53,40 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     enabled: !!projectId && !!organizationId && !!supabase
   })
 
-  if (isLoading) {
+  // Fetch existing payment plan for the project
+  const { data: existingPaymentPlan, isLoading: paymentPlanLoading } = useQuery({
+    queryKey: ['project-payment-plan', projectId],
+    queryFn: async () => {
+      if (!supabase || !projectId) return null
+      
+      const { data, error } = await supabase
+        .from('project_payment_plans')
+        .select(`
+          *,
+          payment_plans(
+            id,
+            name,
+            description
+          )
+        `)
+        .eq('project_id', projectId)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found - no payment plan exists
+          return null
+        }
+        console.error('Error fetching payment plan:', error)
+        return null
+      }
+
+      return data
+    },
+    enabled: !!projectId
+  })
+
+  if (isLoading || paymentPlanLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-sm text-muted-foreground">Cargando cuotas...</div>
@@ -75,7 +108,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
               className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
-              Nuevo Plan de Pagos
+              {existingPaymentPlan ? 'Cambiar Plan de Pago' : 'Nuevo Plan de Pagos'}
             </Button>
 
           </div>

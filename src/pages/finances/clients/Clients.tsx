@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Receipt, Plus } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { supabase } from '@/lib/supabase'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
@@ -14,6 +16,39 @@ export function Clients() {
   
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
+
+  // Fetch existing payment plan for the project to determine button text
+  const { data: existingPaymentPlan } = useQuery({
+    queryKey: ['project-payment-plan', projectId],
+    queryFn: async () => {
+      if (!supabase || !projectId) return null
+      
+      const { data, error } = await supabase
+        .from('project_payment_plans')
+        .select(`
+          *,
+          payment_plans(
+            id,
+            name,
+            description
+          )
+        `)
+        .eq('project_id', projectId)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found - no payment plan exists
+          return null
+        }
+        console.error('Error fetching payment plan:', error)
+        return null
+      }
+
+      return data
+    },
+    enabled: !!projectId
+  })
 
   // Crear tabs para el header
   const headerTabs = [
@@ -50,11 +85,12 @@ export function Clients() {
     }),
     ...(activeTab === "monthly-installments" && {
       actionButton: {
-        label: "Nuevo Plan de Pagos",
+        label: existingPaymentPlan ? "Cambiar Plan de Pago" : "Nuevo Plan de Pagos",
         icon: Plus,
         onClick: () => openModal('client-payment-plans', {
           projectId,
-          organizationId
+          organizationId,
+          existingPaymentPlan
         })
       }
     }),
