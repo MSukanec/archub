@@ -168,22 +168,22 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         if (error) throw error
         return result
       } else {
-        // Check if client already exists for this project
+        // Check if the exact combination already exists (same client + same unit)
         const { data: existingClient, error: checkError } = await supabase
           .from('project_clients')
           .select('id, committed_amount, unit')
           .eq('project_id', projectId)
           .eq('client_id', data.client_id)
+          .eq('unit', data.unit || null)
           .maybeSingle()
 
         if (checkError) throw checkError
 
         if (existingClient) {
-          // Client already exists - update the existing record
+          // Exact combination exists - update the existing record
           const { data: result, error } = await supabase
             .from('project_clients')
             .update({
-              unit: data.unit || null,
               committed_amount: data.committed_amount,
               currency_id: data.currency_id
             })
@@ -195,7 +195,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           // Return result with flag indicating it was an update
           return { ...result, wasUpdated: true }
         } else {
-          // Create new client
+          // Create new client (different unit or first time)
           const { data: result, error } = await supabase
             .from('project_clients')
             .insert({
@@ -222,7 +222,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         description: isEditing 
           ? "El compromiso de pago ha sido actualizado exitosamente"
           : wasUpdated 
-            ? "El cliente ya tenía un compromiso. Se actualizó con los nuevos datos."
+            ? "Ya existía un compromiso para esta unidad funcional. Se actualizó con los nuevos datos."
             : "El compromiso de pago del cliente ha sido registrado exitosamente",
       })
       queryClient.invalidateQueries({ queryKey: ['project-clients', organizationId, projectId] })
@@ -267,13 +267,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
   const selectedCurrency = currencies?.find(c => c.currency.id === selectedCurrencyId)
   const currencySymbol = selectedCurrency?.currency?.symbol || '$'
 
-  // Get available contacts (not already clients, but include current client if editing)
-  const availableContacts = organizationContacts?.filter(contact => {
-    if (isEditing && editingClient?.client_id === contact.id) {
-      return true // Allow current client when editing
-    }
-    return !projectClients?.some(client => client.client_id === contact.id)
-  }) || []
+  // Get available contacts (allow all contacts - clients can have multiple commitments)
+  const availableContacts = organizationContacts || []
 
   const viewPanel = (
     <div>
