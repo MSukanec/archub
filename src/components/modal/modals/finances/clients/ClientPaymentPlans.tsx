@@ -229,6 +229,25 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
               form.watch('frequency') === 'trimestral' ? 'Trimestral (cada 3 meses)' : 'No seleccionado'
             }</p>
             <p>• Primera cuota: {form.watch('start_date') ? form.watch('start_date').toLocaleDateString('es-ES') : 'No seleccionada'}</p>
+            {form.watch('start_date') && form.watch('installments_count') && (
+              <p>• Última cuota: {(() => {
+                const startDate = form.watch('start_date');
+                const count = form.watch('installments_count');
+                const frequency = form.watch('frequency');
+                if (!startDate || !count) return 'No calculada';
+                
+                const lastDate = new Date(startDate);
+                const monthsToAdd = frequency === 'quincenal' ? Math.floor((count - 1) * 0.5) : 
+                                  frequency === 'mensual' ? (count - 1) : 
+                                  frequency === 'trimestral' ? (count - 1) * 3 : 0;
+                const daysToAdd = frequency === 'quincenal' ? ((count - 1) % 2) * 15 : 0;
+                
+                lastDate.setMonth(lastDate.getMonth() + monthsToAdd);
+                lastDate.setDate(lastDate.getDate() + daysToAdd);
+                
+                return lastDate.toLocaleDateString('es-ES');
+              })()}</p>
+            )}
           </div>
         </div>
       </form>

@@ -337,6 +337,17 @@ export const movement_subcontracts = pgTable("movement_subcontracts", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+// Project Installments Table
+export const project_installments = pgTable("project_installments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  project_id: uuid("project_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  date: text("date").notNull(), // Fecha de vencimiento de la cuota
+  number: integer("number").notNull(), // Número de cuota
+  index: integer("index").notNull().default(0), // Índice de la cuota
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 
 
 export const insertTaskParameterPositionSchema = createInsertSchema(task_parameter_positions).omit({
