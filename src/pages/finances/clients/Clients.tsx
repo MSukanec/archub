@@ -42,7 +42,11 @@ export function Clients() {
     ...(activeTab === "obligations" && {
       actionButton: {
         label: "Nuevo Aporte",
-        onClick: () => openModal('installment')
+        onClick: () => openModal('installment', {
+          projectId,
+          organizationId,
+          subcategoryId: 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Subcategoría para Aportes de Terceros
+        })
       }
     })
   }
