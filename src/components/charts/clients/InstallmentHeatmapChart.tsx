@@ -11,7 +11,7 @@ interface InstallmentData {
   organization_id: string
   date: string
   number: number
-  index: number
+  index_reference: number
   created_at: string
 }
 
@@ -61,13 +61,13 @@ export default function InstallmentHeatmapChart({
 }: InstallmentHeatmapChartProps) {
   const { data: userData } = useCurrentUser()
 
-  // Fetch installments
+  // Fetch installments - Force fresh data with specific column selection
   const { data: installments, isLoading: installmentsLoading } = useQuery({
     queryKey: ['project-installments', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_installments')
-        .select('*')
+        .select('id, project_id, organization_id, date, number, index, index_reference, created_at, updated_at')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('number', { ascending: true })
@@ -77,9 +77,12 @@ export default function InstallmentHeatmapChart({
         throw error
       }
 
+      console.log('FRESH installments from DB:', data)
       return data as InstallmentData[]
     },
-    enabled: !!projectId && !!organizationId
+    enabled: !!projectId && !!organizationId,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0  // Don't cache
   })
 
   // Fetch client commitments with currency info
@@ -223,8 +226,8 @@ export default function InstallmentHeatmapChart({
       } else {
         // Cuotas siguientes = SALDO AZUL de cuota anterior + porcentaje de aumento
         const previousBalance = previousBalancesByUnit[commitment.id] || 0
-        // Usar el index de la cuota como porcentaje de aumento
-        const percentageIncrease = installment.index || 0
+        // Usar el index_reference de la cuota como porcentaje de aumento
+        const percentageIncrease = installment.index_reference || 0
         updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
       }
       
@@ -333,8 +336,7 @@ export default function InstallmentHeatmapChart({
                       })}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {console.log('DEBUG installment:', installment)}
-                      {installment.index !== undefined && installment.index !== null ? installment.index.toFixed(2) : '0.00'}%
+                      {installment.index_reference !== undefined && installment.index_reference !== null ? installment.index_reference.toFixed(2) : '0.00'}%
                     </div>
                     
                     {/* Action Buttons */}
