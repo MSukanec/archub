@@ -43,6 +43,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
             project_clients(
               id,
               client_id,
+              unit,
               committed_amount,
               currency_id,
               contacts!inner(
@@ -90,12 +91,12 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     enabled: !!organizationId && !!projectId && !!supabase
   })
 
-  // Detailed table columns (Fecha, Contacto, Tipo, Billetera, Monto, Cotización)
+  // Detailed table columns (Fecha, Unidad Funcional, Contacto, Billetera, Monto, Cotización)
   const detailColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "16.7%",
+      width: "15%",
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
@@ -108,9 +109,36 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
       }
     },
     {
+      key: "functional_unit",
+      label: "Unidad Funcional",
+      width: "15%",
+      render: (item: any) => {
+        // Get all functional units from movement_clients
+        const units = item.movement_clients?.map((mc: any) => 
+          mc.project_clients?.unit
+        ).filter(Boolean) || []
+
+        if (units.length === 0) {
+          return <div className="text-sm text-muted-foreground">Sin unidad</div>
+        }
+
+        // Show first unit, indicate if there are more
+        return (
+          <div className="text-sm">
+            {units[0]}
+            {units.length > 1 && (
+              <div className="text-xs text-muted-foreground">
+                +{units.length - 1} más
+              </div>
+            )}
+          </div>
+        )
+      }
+    },
+    {
       key: "contact",
       label: "Contacto",
-      width: "16.7%",
+      width: "20%",
       render: (item: any) => {
         // Get all contacts from movement_clients
         const contacts = item.movement_clients?.map((mc: any) => {
@@ -136,21 +164,9 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
       }
     },
     {
-      key: "subcategory",
-      label: "Tipo",
-      width: "16.7%",
-      render: (item: any) => {
-        return (
-          <div className="text-sm">
-            Aportes de Terceros
-          </div>
-        )
-      }
-    },
-    {
       key: "wallet",
       label: "Billetera",
-      width: "16.7%",
+      width: "20%",
       render: (item: any) => {
         if (!item.wallet?.name) {
           return <div className="text-sm text-muted-foreground">Sin billetera</div>
@@ -166,7 +182,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "amount",
       label: "Monto",
-      width: "16.65%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -183,7 +199,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "16.65%",
+      width: "15%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
