@@ -83,6 +83,19 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       enabled: !!projectId
     })
 
+    // Initialize rows from initial commitments or create one empty row
+    const initializeRows = (): CommitmentRow[] => {
+      if (initialClients.length > 0) {
+        return initialClients.map(client => ({
+          commitment_id: client.project_client_id,
+          installment_id: client.project_installment_id || ''
+        }))
+      }
+      return [{ commitment_id: '', installment_id: '' }]
+    }
+
+    const [commitmentRows, setCommitmentRows] = useState<CommitmentRow[]>(initializeRows())
+
     // Get selected client information for displaying payment status
     const getSelectedClientInfo = (commitmentId: string) => {
       if (!commitmentId) return null
@@ -136,19 +149,6 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
         paymentsCount: payments.length
       }
     }
-
-    // Initialize rows from initial commitments or create one empty row
-    const initializeRows = (): CommitmentRow[] => {
-      if (initialClients.length > 0) {
-        return initialClients.map(client => ({
-          commitment_id: client.project_client_id,
-          installment_id: client.project_installment_id || ''
-        }))
-      }
-      return [{ commitment_id: '', installment_id: '' }]
-    }
-
-    const [commitmentRows, setCommitmentRows] = useState<CommitmentRow[]>(initializeRows())
 
     // Function to get commitment display name (unit + client)
     const getCommitmentDisplayName = (projectClient: any): string => {
