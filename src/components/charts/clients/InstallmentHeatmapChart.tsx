@@ -214,10 +214,6 @@ export default function InstallmentHeatmapChart({
       // Get commitment currency info
       const commitmentCurrency = commitment.currencies || { symbol: '$' }
       
-      // Calculate installment value = total commitment / number of installments
-      const totalInstallments = installments?.length || 1
-      const installmentValue = Math.round((commitment.committed_amount || 0) / totalInstallments)
-      
       // Calculate updated amount (violeta) SECUENCIALMENTE:
       let updatedAmount: number
       
@@ -230,6 +226,11 @@ export default function InstallmentHeatmapChart({
         const percentageIncrease = 0 // Por ahora 0% para todas las cuotas
         updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
       }
+      
+      // Calculate installment value = MONTO VIOLETA / CUOTAS RESTANTES
+      const totalInstallments = installments?.length || 1
+      const remainingInstallments = totalInstallments - installment.number + 1
+      const installmentValue = Math.round(updatedAmount / remainingInstallments)
       
       // Calculate balance = MONTO ACTUALIZADO (violeta) - PAGO (verde)
       const balance = updatedAmount - Math.round(totalPaidInCommitmentCurrency)
