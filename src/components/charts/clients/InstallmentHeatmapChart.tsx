@@ -67,7 +67,7 @@ export default function InstallmentHeatmapChart({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_installments')
-        .select('id, project_id, organization_id, date, number, index, index_reference, created_at, updated_at')
+        .select('id, project_id, organization_id, date, number, index_reference, created_at, updated_at')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('number', { ascending: true })
@@ -82,7 +82,7 @@ export default function InstallmentHeatmapChart({
     },
     enabled: !!projectId && !!organizationId,
     staleTime: 0, // Always fetch fresh data
-    cacheTime: 0  // Don't cache
+    gcTime: 0  // Don't cache
   })
 
   // Fetch client commitments with currency info

@@ -169,38 +169,23 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
 
           <FormField
             control={form.control}
-            name="number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Número de Cuota</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Ej: 1"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="index"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Índice</FormLabel>
+                <FormLabel>Índice de Ajuste</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="Ej: 0"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Ej: 50.00"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -214,15 +199,15 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   const headerContent = (
     <FormModalHeader
       icon={Calendar}
-      title={isEditing ? "Editar Cuota" : "Nueva Cuota"}
-      description={isEditing ? "Modifica los detalles de la cuota existente" : "Crea una nueva cuota para el proyecto"}
+      title="Editar Cuota"
+      description="Modifica la fecha de vencimiento y el índice de ajuste de la cuota"
     />
   )
 
   const footerContent = (
     <FormModalFooter
       onClose={onClose}
-      submitText={isEditing ? "Guardar Cambios" : "Crear Cuota"}
+      submitText="Guardar Cambios"
       onSubmit={form.handleSubmit(handleSubmit)}
       isSubmitting={saveInstallmentMutation.isPending}
     />

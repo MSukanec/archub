@@ -77,13 +77,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
               <Plus className="h-4 w-4" />
               Crear Plan de Cuotas
             </Button>
-            <Button 
-              onClick={() => openModal('client-installment', { projectId, organizationId })}
-              className="flex items-center gap-2 relative z-30"
-            >
-              <Plus className="h-4 w-4" />
-              Nueva Cuota
-            </Button>
+
           </div>
         }
       />
