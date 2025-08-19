@@ -347,7 +347,7 @@ export default function InstallmentHeatmapChart({
               
               return (
                 <div key={installment.number} className="flex border-b border-border">
-                  <div className="group w-32 p-3 text-sm bg-background hover:bg-muted/20 transition-colors relative">
+                  <div className="group w-32 p-3 text-sm hover:bg-muted/10 transition-colors relative">
                     <div className="font-bold mb-1">
                       Cuota {installment.number.toString().padStart(2, '0')}
                     </div>
@@ -399,11 +399,7 @@ export default function InstallmentHeatmapChart({
                   {rowData.map((cellData, colIndex) => (
                     <div
                       key={`${rowIndex}-${colIndex}`}
-                      className={`w-40 p-2 text-center text-xs border-l border-border transition-colors ${
-                        cellData.isPaid
-                          ? 'bg-green-50 dark:bg-green-900/10'
-                          : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-                      }`}
+                      className="w-40 p-2 text-center text-xs border-l border-border transition-colors hover:bg-muted/10"
                     >
                       <div className="space-y-1">
                         {/* Monto Actualizado - Violeta */}
