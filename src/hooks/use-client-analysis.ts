@@ -41,31 +41,37 @@ export function useClientAnalysis(projectId: string | null) {
       const totalCommitments = projectClients?.length || 0
       
       // Agrupar compromisos por moneda
-      const commitmentsByCurrency = (projectClients || []).reduce((acc: Record<string, any>, client: any) => {
-        const currencyId = client.currency_id
-        const amount = client.committed_amount || 0
-        
-        if (!acc[currencyId]) {
-          acc[currencyId] = {
-            totalCommitted: 0,
-            totalPaid: 0,
-            currencyId
+      const commitmentsByCurrency: Record<string, any> = {}
+      
+      // Procesar compromisos
+      if (projectClients) {
+        projectClients.forEach((client: any) => {
+          const currencyId = client.currency_id
+          const amount = client.committed_amount || 0
+          
+          if (!commitmentsByCurrency[currencyId]) {
+            commitmentsByCurrency[currencyId] = {
+              totalCommitted: 0,
+              totalPaid: 0,
+              currencyId
+            }
           }
-        }
-        
-        acc[currencyId].totalCommitted += amount
-        return acc
-      }, {} as Record<string, any>)
+          
+          commitmentsByCurrency[currencyId].totalCommitted += amount
+        })
+      }
 
       // Agrupar pagos por moneda
-      (clientPayments || []).forEach((payment: any) => {
-        const currencyId = payment.currency_id
-        const amount = Math.abs(payment.amount || 0)
-        
-        if (commitmentsByCurrency[currencyId]) {
-          commitmentsByCurrency[currencyId].totalPaid += amount
-        }
-      })
+      if (clientPayments) {
+        clientPayments.forEach((payment: any) => {
+          const currencyId = payment.currency_id
+          const amount = Math.abs(payment.amount || 0)
+          
+          if (commitmentsByCurrency[currencyId]) {
+            commitmentsByCurrency[currencyId].totalPaid += amount
+          }
+        })
+      }
 
       // Calcular métricas por moneda
       const currencyMetrics = Object.values(commitmentsByCurrency).map((currency: any) => {
