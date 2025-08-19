@@ -839,6 +839,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       
+      // IMPORTANTE: Invalidar la nueva vista de pagos que usa InstallmentHeatmapChart
+      queryClient.invalidateQueries({ queryKey: ['movement-payments-view'] })
+      
+      // Invalidar análisis de clientes
+      queryClient.invalidateQueries({ queryKey: ['client-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['client-payment-details'] })
+      queryClient.invalidateQueries({ queryKey: ['client-obligations'] })
+      
       // Invalidar específicamente los clientes del movimiento
       if (result?.id) {
         queryClient.invalidateQueries({ 
@@ -847,7 +855,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
       
       // Esperar un momento para que se actualicen los datos
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise(resolve => setTimeout(resolve, 300))
       
       toast({
         title: isEditing ? 'Movimiento actualizado' : 'Movimiento creado',
