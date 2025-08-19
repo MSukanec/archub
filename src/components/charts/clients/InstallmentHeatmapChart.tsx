@@ -35,7 +35,7 @@ interface ClientInfo {
 interface HeatmapCellData {
   unitId: string
   installmentNumber: number
-  updateDate: string // Actualización
+  updatedAmount: number // Monto actualizado (violeta)
   installmentValue: number // Valor de Cuota
   payment: number // Pago (actual)
   balance: number // Saldo
@@ -218,15 +218,23 @@ export default function InstallmentHeatmapChart({
       
       // Calculate installment value = total commitment / number of installments
       const totalInstallments = installments?.length || 1
-      const installmentValue = (commitment.committed_amount || 0) / totalInstallments
+      const installmentValue = Math.round((commitment.committed_amount || 0) / totalInstallments)
+      const balance = installmentValue - Math.round(totalPaidInCommitmentCurrency)
+      
+      // Calculate updated amount (violeta): balance + percentage increase for this installment
+      // For first installment (0%), it should be the full amount
+      const percentageIncrease = installment.number === 1 ? 0 : 0 // Por ahora 0% para todas las cuotas
+      const updatedAmount = installment.number === 1 
+        ? installmentValue // Primera cuota: monto completo
+        : Math.round(balance * (1 + percentageIncrease / 100)) // Otras cuotas: saldo + porcentaje
       
       rowData.push({
         unitId: commitment.id,
         installmentNumber: installment.number,
-        updateDate: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+        updatedAmount: updatedAmount,
         installmentValue: installmentValue,
-        payment: totalPaidInCommitmentCurrency,
-        balance: installmentValue - totalPaidInCommitmentCurrency, // Saldo = valor cuota - pago
+        payment: Math.round(totalPaidInCommitmentCurrency),
+        balance: balance,
         isPaid: totalPaidInCommitmentCurrency > 0,
         commitmentCurrency: {
           symbol: commitmentCurrency.symbol || '$',
@@ -361,24 +369,24 @@ export default function InstallmentHeatmapChart({
                       }`}
                     >
                       <div className="space-y-1">
-                        {/* Actualización - Violeta */}
+                        {/* Monto Actualizado - Violeta */}
                         <div className="text-violet-600 dark:text-violet-400 font-medium">
-                          {cellData.updateDate}
+                          {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
                         </div>
                         
                         {/* Valor de Cuota - Rojo */}
                         <div className="text-red-600 dark:text-red-400">
-                          {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toFixed(2)}
+                          {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
                         </div>
                         
                         {/* Pago - Verde */}
                         <div className="text-green-600 dark:text-green-400 font-medium">
-                          {cellData.commitmentCurrency.symbol}{cellData.payment.toFixed(2)}
+                          {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
                         </div>
                         
                         {/* Saldo - Azul */}
                         <div className="text-blue-600 dark:text-blue-400">
-                          {cellData.commitmentCurrency.symbol}{cellData.balance.toFixed(2)}
+                          {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
                         </div>
                       </div>
                     </div>
@@ -405,7 +413,7 @@ export default function InstallmentHeatmapChart({
             <div className="text-xs">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-3 h-3 bg-violet-500 rounded"></div>
-                <span className="text-violet-600 dark:text-violet-400">Actualización</span>
+                <span className="text-violet-600 dark:text-violet-400">Monto Actualizado</span>
               </div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-3 h-3 bg-red-500 rounded"></div>
