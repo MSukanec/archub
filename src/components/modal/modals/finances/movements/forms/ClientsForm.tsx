@@ -3,17 +3,21 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, Plus } from 'lucide-react'
 import { useProjectClients } from '@/hooks/use-project-clients'
+import { useProjectInstallments } from '@/hooks/use-project-installments'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 
 export interface CommitmentRow {
   commitment_id: string
+  installment_id: string
 }
 
 export interface CommitmentItem {
   project_client_id: string
   client_name: string
   unit: string
+  project_installment_id: string
+  installment_display: string
 }
 
 export interface ClientsFormHandle {
@@ -32,7 +36,12 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
     const projectId = userData?.preferences?.last_project_id
     const organizationId = userData?.organization?.id
 
-    const { data: projectClients = [], isLoading } = useProjectClients(
+    const { data: projectClients = [], isLoading: clientsLoading } = useProjectClients(
+      projectId,
+      { enabled: !!projectId && !!organizationId }
+    )
+
+    const { data: projectInstallments = [], isLoading: installmentsLoading } = useProjectInstallments(
       projectId,
       { enabled: !!projectId && !!organizationId }
     )
@@ -41,10 +50,11 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
     const initializeRows = (): CommitmentRow[] => {
       if (initialClients.length > 0) {
         return initialClients.map(client => ({
-          commitment_id: client.project_client_id
+          commitment_id: client.project_client_id,
+          installment_id: client.project_installment_id || ''
         }))
       }
-      return [{ commitment_id: '' }]
+      return [{ commitment_id: '', installment_id: '' }]
     }
 
     const [commitmentRows, setCommitmentRows] = useState<CommitmentRow[]>(initializeRows())
@@ -81,10 +91,25 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
         label: getCommitmentDisplayName(client)
       }))
 
+    // Create options for installments - formatted as "Cuota 01", "Cuota 02", etc.
+    const installmentOptions = projectInstallments
+      .sort((a, b) => a.number - b.number)
+      .map(installment => ({
+        value: installment.id,
+        label: `Cuota ${installment.number.toString().padStart(2, '0')}`
+      }))
+
     // Handle commitment change
     const handleCommitmentChange = (index: number, commitmentId: string) => {
       const newRows = [...commitmentRows]
       newRows[index] = { ...newRows[index], commitment_id: commitmentId }
+      setCommitmentRows(newRows)
+    }
+
+    // Handle installment change
+    const handleInstallmentChange = (index: number, installmentId: string) => {
+      const newRows = [...commitmentRows]
+      newRows[index] = { ...newRows[index], installment_id: installmentId }
       setCommitmentRows(newRows)
     }
 
@@ -101,14 +126,18 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
     // Handle confirm
     const handleConfirm = () => {
       const validCommitments = commitmentRows
-        .filter(row => row.commitment_id)
+        .filter(row => row.commitment_id && row.installment_id)
         .map(row => {
           const projectClient = projectClients.find(pc => pc.id === row.commitment_id)
+          const installment = projectInstallments.find(pi => pi.id === row.installment_id)
+          
           if (!projectClient?.contact) {
             return {
               project_client_id: row.commitment_id,
               client_name: 'Cliente desconocido',
-              unit: 'Sin unidad'
+              unit: 'Sin unidad',
+              project_installment_id: row.installment_id,
+              installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : 'Cuota desconocida'
             }
           }
           
@@ -126,7 +155,9 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
           return {
             project_client_id: row.commitment_id,
             client_name: clientName,
-            unit: projectClient.unit || 'Sin unidad'
+            unit: projectClient.unit || 'Sin unidad',
+            project_installment_id: row.installment_id,
+            installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : 'Cuota desconocida'
           }
         })
 
@@ -143,34 +174,49 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
 
     return (
       <div className="space-y-4">
-        {/* Commitment Rows - Single column layout */}
+        {/* Commitment Rows - Two column layout: commitment and installment */}
         {commitmentRows.map((row, index) => (
-          <div key={index} className="flex items-center gap-2">
-            {/* Commitment Selector */}
-            <div className="flex-1">
-              <ComboBox
-                value={row.commitment_id}
-                onValueChange={(value) => handleCommitmentChange(index, value)}
-                options={commitmentOptions}
-                placeholder="Seleccionar compromiso..."
-                searchPlaceholder="Buscar compromiso..."
-                emptyMessage={isLoading ? "Cargando..." : "No hay compromisos disponibles"}
-                disabled={isLoading}
-              />
+          <div key={index} className="space-y-2">
+            <div className="flex items-center gap-2">
+              {/* Commitment Selector */}
+              <div className="flex-1">
+                <ComboBox
+                  value={row.commitment_id}
+                  onValueChange={(value) => handleCommitmentChange(index, value)}
+                  options={commitmentOptions}
+                  placeholder="Seleccionar compromiso..."
+                  searchPlaceholder="Buscar compromiso..."
+                  emptyMessage={clientsLoading ? "Cargando..." : "No hay compromisos disponibles"}
+                  disabled={clientsLoading}
+                />
+              </div>
+              
+              {/* Remove Button */}
+              {commitmentRows.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="default"
+                  onClick={() => removeRow(index)}
+                  className="h-10 w-10 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             
-            {/* Remove Button */}
-            {commitmentRows.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="default"
-                onClick={() => removeRow(index)}
-                className="h-10 w-10 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+            {/* Installment Selector */}
+            <div className="pl-0">
+              <ComboBox
+                value={row.installment_id}
+                onValueChange={(value) => handleInstallmentChange(index, value)}
+                options={installmentOptions}
+                placeholder="Seleccionar cuota..."
+                searchPlaceholder="Buscar cuota..."
+                emptyMessage={installmentsLoading ? "Cargando..." : "No hay cuotas disponibles"}
+                disabled={installmentsLoading || !row.commitment_id}
+              />
+            </div>
           </div>
         ))}
         
