@@ -223,8 +223,8 @@ export default function InstallmentHeatmapChart({
       } else {
         // Cuotas siguientes = SALDO AZUL de cuota anterior + porcentaje de aumento
         const previousBalance = previousBalancesByUnit[commitment.id] || 0
-        // Usar el index_reference de la cuota como porcentaje de aumento
-        const percentageIncrease = installment.index_reference || 0
+        // Usar el index de la cuota como porcentaje de aumento
+        const percentageIncrease = installment.index || 0
         updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
       }
       
