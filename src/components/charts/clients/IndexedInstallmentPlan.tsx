@@ -309,7 +309,6 @@ export default function IndexedInstallmentPlan({
         <div className="mb-4 flex gap-4">
           {/* Información del Plan de Pagos - 50% izquierda */}
           <div className="flex-1 p-3 bg-muted/10 rounded-lg border">
-            <div className="text-xs font-medium mb-2">Plan de Pagos:</div>
             {paymentPlan ? (
               <div className="space-y-1 text-xs">
                 <div>
