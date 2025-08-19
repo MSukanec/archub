@@ -49,7 +49,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
 
     const [commitmentRows, setCommitmentRows] = useState<CommitmentRow[]>(initializeRows())
 
-    // Function to get commitment display name (client + unit)
+    // Function to get commitment display name (unit + client)
     const getCommitmentDisplayName = (projectClient: any): string => {
       if (!projectClient?.contact) return 'Cliente sin nombre'
       
@@ -64,16 +64,22 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
         clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
       }
       
-      // Add unit information if available
+      // Add unit information if available - UNIT FIRST
       const unit = projectClient.unit || 'Sin unidad'
-      return `${clientName} - ${unit}`
+      return `${unit} - ${clientName}`
     }
 
-    // Create options for ComboBox
-    const commitmentOptions = projectClients.map(client => ({
-      value: client.id,
-      label: getCommitmentDisplayName(client)
-    }))
+    // Create options for ComboBox - sorted by unit
+    const commitmentOptions = projectClients
+      .sort((a, b) => {
+        const unitA = a.unit || 'ZZZ' // Put items without unit at the end
+        const unitB = b.unit || 'ZZZ'
+        return unitA.localeCompare(unitB)
+      })
+      .map(client => ({
+        value: client.id,
+        label: getCommitmentDisplayName(client)
+      }))
 
     // Handle commitment change
     const handleCommitmentChange = (index: number, commitmentId: string) => {
@@ -82,10 +88,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       setCommitmentRows(newRows)
     }
 
-    // Add new row
-    const addNewRow = () => {
-      setCommitmentRows([...commitmentRows, { commitment_id: '' }])
-    }
+
 
     // Remove row
     const removeRow = (index: number) => {
@@ -171,19 +174,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
           </div>
         ))}
         
-        {/* Add New Row Button */}
-        <div className="flex justify-center pt-2">
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            onClick={addNewRow}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Agregar Otro Compromiso
-          </Button>
-        </div>
+
       </div>
     )
   }
