@@ -252,7 +252,7 @@ export default function InstallmentHeatmapChart({ projectId, organizationId }: I
                       })}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {installment.index.toFixed(2)}%
+                      {installment.index ? installment.index.toFixed(2) : '0.00'}%
                     </div>
                   </div>
                   {rowData.map((cellData, colIndex) => (
