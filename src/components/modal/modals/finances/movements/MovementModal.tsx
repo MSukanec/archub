@@ -555,7 +555,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData, hasLoadedInitialData])
 
   // Función para cargar personal asignado del movimiento
-  const loadMovementPersonnel = async (movementId: string) => {
+  const loadMovementPersonnel = React.useCallback(async (movementId: string) => {
     try {
       const { data: personnelAssignments, error } = await supabase
         .from('movement_personnel')
@@ -593,10 +593,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     } catch (error) {
       console.error('Error loading personnel assignments:', error)
     }
-  }
+  }, [])
 
   // Función para cargar subcontratos asignados del movimiento
-  const loadMovementSubcontracts = async (movementId: string) => {
+  const loadMovementSubcontracts = React.useCallback(async (movementId: string) => {
     try {
       const { data: subcontractAssignments, error } = await supabase
         .from('movement_subcontracts')
@@ -634,10 +634,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     } catch (error) {
       console.error('Error loading subcontract assignments:', error)
     }
-  }
+  }, [])
 
   // Función para cargar clientes del proyecto asignados al movimiento
-  const loadMovementProjectClients = async (movementId: string) => {
+  const loadMovementProjectClients = React.useCallback(async (movementId: string) => {
     try {
       const { data: clientAssignments, error } = await supabase
         .from('movement_clients')
@@ -677,7 +677,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     } catch (error) {
       console.error('Error loading project client assignments:', error)
     }
-  }
+  }, [])
 
 
 
