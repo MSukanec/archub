@@ -208,3 +208,75 @@ TABLA PROJECT_INSTALLMENTS:
   }
 ]
 
+VISTA MOVEMENT_PAYMENTS_VIEW:
+
+[
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "movement_client_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_client_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_installment_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "installment_number",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "client_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "client_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "wallet_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "wallet_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "currency_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "movement_date",
+    "data_type": "date"
+  },
+  {
+    "column_name": "exchange_rate",
+    "data_type": "numeric"
+  }
+]

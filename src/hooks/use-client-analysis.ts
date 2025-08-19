@@ -29,27 +29,13 @@ export function useClientAnalysis(projectId: string | null) {
 
       if (clientsError) throw clientsError
 
-      // 2. Obtener todos los movimientos del proyecto de tipo egreso (pagos)
-      const { data: movements, error: movementsError } = await supabase
-        .from('movements')
-        .select(`
-          id,
-          amount,
-          currency_id,
-          exchange_rate,
-          movement_clients(
-            id,
-            project_client_id
-          )
-        `)
+      // 2. Obtener todos los pagos usando la nueva vista MOVEMENT_PAYMENTS_VIEW
+      const { data: clientPayments, error: paymentsError } = await supabase
+        .from('movement_payments_view')
+        .select('*')
         .eq('project_id', projectId)
 
-      if (movementsError) throw movementsError
-      
-      // 3. Filtrar solo los movimientos que tienen vinculaciones con project_clients
-      const clientPayments = (movements || []).filter(movement => 
-        movement.movement_clients && movement.movement_clients.length > 0
-      )
+      if (paymentsError) throw paymentsError
 
       // 4. Calcular KPIs
       const totalCommitments = projectClients?.length || 0
@@ -64,9 +50,9 @@ export function useClientAnalysis(projectId: string | null) {
         return sum + amount
       }, 0)
 
-      // Calcular total pagado en ARS - usar solo movimientos vinculados a clientes
-      const totalPaidAmount = clientPayments.reduce((sum, movement) => {
-        return sum + Math.abs(movement.amount || 0)
+      // Calcular total pagado en ARS - usando los datos de la nueva vista
+      const totalPaidAmount = (clientPayments || []).reduce((sum, payment) => {
+        return sum + Math.abs(payment.amount || 0)
       }, 0)
 
       // Calcular saldo restante

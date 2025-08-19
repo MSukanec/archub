@@ -124,27 +124,18 @@ export default function InstallmentHeatmapChart({
     enabled: !!commitments?.length
   })
 
-  // Fetch payments data (movements related to client payments)
+  // Fetch payments data using the new MOVEMENT_PAYMENTS_VIEW
   const { data: payments, isLoading: paymentsLoading } = useQuery({
-    queryKey: ['client-payments-with-units', projectId],
+    queryKey: ['movement-payments-view', projectId, organizationId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('movements')
-        .select(`
-          *,
-          movement_clients (
-            project_client_id,
-            project_clients (
-              unit
-            )
-          )
-        `)
+        .from('movement_payments_view')
+        .select('*')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
-        .eq('subcategory_id', 'f3b96eda-15d5-4c96-ade7-6f53685115d3') // Subcategoría para Aportes de Terceros
 
       if (error) {
-        console.error('Error fetching payments:', error)
+        console.error('Error fetching payments from view:', error)
         throw error
       }
 
@@ -192,20 +183,21 @@ export default function InstallmentHeatmapChart({
     commitments.forEach((commitment) => {
       if (!commitment?.unit) return
       
-      // Find payments for this functional unit and installment
-      const relatedPayments = payments?.filter(payment => 
-        payment.movement_clients?.some((mc: any) => 
-          mc.project_clients?.unit === commitment.unit
-        )
+      // Find payments for this specific functional unit and installment number
+      // Using the new MOVEMENT_PAYMENTS_VIEW which has installment_number and unit fields
+      const installmentPayments = payments?.filter(payment => 
+        payment.unit === commitment.unit && 
+        payment.installment_number === installment.number
       ) || []
       
-      const totalPaid = relatedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+      // Sum the payments specific to this installment
+      const totalPaidThisInstallment = installmentPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
       
       rowData.push({
         unitId: commitment.id,
         installmentNumber: installment.number,
-        amount: totalPaid > 0 ? totalPaid : null,
-        isPaid: totalPaid > 0
+        amount: totalPaidThisInstallment > 0 ? totalPaidThisInstallment : null,
+        isPaid: totalPaidThisInstallment > 0
       })
     })
     

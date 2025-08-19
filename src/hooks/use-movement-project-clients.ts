@@ -53,37 +53,10 @@ export function useMovementProjectClients(movementId?: string) {
 
       console.log('🔍 Fetching movement project client assignments for movement:', movementId)
 
+      // Use MOVEMENT_PAYMENTS_VIEW for simplified queries
       const { data, error } = await supabase
-        .from('movement_clients')
-        .select(`
-          id,
-          movement_id,
-          project_client_id,
-          project_installment_id,
-          created_at,
-          updated_at,
-          project_clients!inner(
-            id,
-            organization_id,
-            project_id,
-            client_id,
-            unit,
-            created_at,
-            contact:client_id(
-              id,
-              first_name,
-              last_name,
-              company_name,
-              email,
-              phone,
-              full_name
-            )
-          ),
-          project_installments:project_installment_id(
-            id,
-            number
-          )
-        `)
+        .from('movement_payments_view')
+        .select('*')
         .eq('movement_id', movementId)
 
       console.log('📊 Movement project client assignments query result:', { data, error, count: data?.length || 0 })
@@ -93,7 +66,38 @@ export function useMovementProjectClients(movementId?: string) {
         throw error
       }
 
-      return (data || []) as MovementProjectClientAssignment[]
+      // Transform MOVEMENT_PAYMENTS_VIEW data to match MovementProjectClientAssignment interface
+      const transformedData = (data || []).map(payment => ({
+        id: payment.movement_client_id,
+        movement_id: payment.movement_id,
+        project_client_id: payment.project_client_id,
+        project_installment_id: payment.project_installment_id,
+        created_at: new Date().toISOString(), // Vista no incluye fechas
+        updated_at: new Date().toISOString(),
+        project_clients: {
+          id: payment.project_client_id,
+          organization_id: payment.organization_id,
+          project_id: payment.project_id,
+          client_id: payment.client_id,
+          unit: payment.unit,
+          created_at: new Date().toISOString(),
+          contact: {
+            id: payment.client_id,
+            first_name: payment.client_name?.split(' ')[0] || '',
+            last_name: payment.client_name?.split(' ').slice(1).join(' ') || '',
+            company_name: '',
+            email: '',
+            phone: '',
+            full_name: payment.client_name
+          }
+        },
+        project_installments: payment.project_installment_id ? {
+          id: payment.project_installment_id,
+          number: payment.installment_number
+        } : null
+      }))
+      
+      return transformedData as MovementProjectClientAssignment[]
     },
     enabled: !!movementId && !!supabase,
     staleTime: 1000 * 60 * 5, // 5 minutos

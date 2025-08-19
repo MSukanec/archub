@@ -72,43 +72,11 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       
       const projectClientsSubcategoryId = 'f3b96eda-15d5-4c96-ade7-6f53685115d3'
       
-      const { data: movements, error } = await supabase
-        .from('movements')
-        .select(`
-          id,
-          movement_date,
-          amount,
-          description,
-          currency_id,
-          wallet_id,
-          project_id,
-          created_by,
-          subcategory_id,
-          exchange_rate,
-          created_at,
-
-          movement_clients!inner(
-            id,
-            project_client_id,
-            project_clients(
-              id,
-              client_id,
-              unit,
-              committed_amount,
-              currency_id,
-              contacts!inner(
-                id,
-                first_name,
-                last_name,
-                company_name,
-                full_name
-              )
-            )
-          )
-        `)
+      const { data: paymentsData, error } = await supabase
+        .from('movement_payments_view')
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('project_id', projectId)
-        .eq('subcategory_id', projectClientsSubcategoryId)
         .order('movement_date', { ascending: false })
 
       if (error) {
@@ -116,27 +84,56 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         throw error
       }
 
-      // Manually fetch currencies, wallets, and users
-      if (movements && movements.length > 0) {
-        const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
-        const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
-        const userIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean)))
+      // Transform payments data to match expected format
+      const movements = (paymentsData || []).map(payment => ({
+        id: payment.movement_id,
+        movement_date: payment.movement_date,
+        amount: payment.amount,
+        description: `${payment.client_name} - ${payment.unit}`,
+        currency_id: payment.currency_id,
+        wallet_id: payment.wallet_id,
+        project_id: payment.project_id,
+        created_by: payment.movement_id, // Temporal, se puede mejorar
+        subcategory_id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3',
+        exchange_rate: payment.exchange_rate,
+        created_at: payment.movement_date,
+        
+        // Add related data directly from the view
+        currency: {
+          id: payment.currency_id,
+          name: payment.currency_name,
+          symbol: '$' // Temporal hasta que esté en la vista
+        },
+        wallet: {
+          id: payment.wallet_id,
+          name: payment.wallet_name
+        },
+        creator: {
+          id: payment.movement_id, // Temporal
+          full_name: 'Usuario', // Temporal
+          email: ''
+        },
+        movement_clients: [{
+          id: payment.movement_client_id,
+          project_client_id: payment.project_client_id,
+          project_clients: {
+            id: payment.project_client_id,
+            client_id: payment.client_id,
+            unit: payment.unit,
+            committed_amount: 0, // No disponible en la vista
+            currency_id: payment.currency_id,
+            contacts: {
+              id: payment.client_id,
+              first_name: payment.client_name?.split(' ')[0] || '',
+              last_name: payment.client_name?.split(' ').slice(1).join(' ') || '',
+              company_name: '',
+              full_name: payment.client_name
+            }
+          }
+        }]
+      }))
 
-        const [currenciesData, walletsData, usersData] = await Promise.all([
-          supabase.from('currencies').select('id, name, code, symbol').in('id', currencyIds),
-          supabase.from('wallets').select('id, name').in('id', walletIds),
-          supabase.from('users').select('id, full_name, email').in('id', userIds)
-        ])
-
-        // Add related data to movements
-        movements.forEach((movement: any) => {
-          movement.currency = currenciesData.data?.find(c => c.id === movement.currency_id)
-          movement.wallet = walletsData.data?.find(w => w.id === movement.wallet_id)
-          movement.creator = usersData.data?.find(u => u.id === movement.created_by)
-        })
-      }
-
-      return movements || []
+      return movements
     },
     enabled: !!organizationId && !!projectId && !!supabase
   })
