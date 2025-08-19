@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Calendar } from 'lucide-react'
+import { Calendar, AlertTriangle } from 'lucide-react'
 import { FormModalLayout } from '../../../form/FormModalLayout'
 import { FormModalHeader } from '../../../form/FormModalHeader'
 import { FormModalFooter } from '../../../form/FormModalFooter'
@@ -9,13 +9,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import DatePicker from '@/components/ui-custom/DatePicker'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Callout } from '@/components/ui-custom/Callout'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { addDays, addMonths, addQuarters } from 'date-fns'
 
 const paymentPlansSchema = z.object({
+  payment_plan_id: z.string({
+    required_error: 'Selecciona el tipo de plan de pagos'
+  }),
   installments_count: z.number().min(1, 'Debe haber al menos 1 cuota').max(100, 'Máximo 100 cuotas'),
   frequency: z.enum(['quincenal', 'mensual', 'trimestral'], {
     required_error: 'Selecciona la frecuencia de pago'
@@ -31,6 +35,7 @@ interface ClientPaymentPlansProps {
   modalData?: {
     projectId?: string
     organizationId?: string
+    existingPaymentPlan?: any
   }
   onClose: () => void
 }
@@ -42,15 +47,41 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
 
   const projectId = modalData?.projectId || userData?.preferences?.last_project_id
   const organizationId = modalData?.organizationId || userData?.organization?.id
+  const existingPaymentPlan = modalData?.existingPaymentPlan
+  const isChangingPlan = !!existingPaymentPlan
+
+  // Fetch available payment plans
+  const { data: paymentPlans = [], isLoading: paymentPlansLoading } = useQuery({
+    queryKey: ['payment-plans'],
+    queryFn: async () => {
+      if (!supabase) return []
+      
+      const { data, error } = await supabase
+        .from('payment_plans')
+        .select('*')
+        .order('name', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching payment plans:', error)
+        return []
+      }
+
+      return data || []
+    }
+  })
 
   const form = useForm<PaymentPlansForm>({
     resolver: zodResolver(paymentPlansSchema),
     defaultValues: {
+      payment_plan_id: '',
       installments_count: 1,
       frequency: 'mensual',
       start_date: new Date()
     }
   })
+
+  // Get selected payment plan for description
+  const selectedPaymentPlan = paymentPlans.find(plan => plan.id === form.watch('payment_plan_id'))
 
   // Function to calculate installment dates
   const calculateInstallmentDates = (startDate: Date, frequency: string, count: number) => {
@@ -80,20 +111,46 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         throw new Error('Faltan datos requeridos')
       }
 
-      // First, check if installments already exist for this project
-      const { data: existingInstallments, error: checkError } = await supabase
-        .from('project_installments')
-        .select('id')
-        .eq('project_id', projectId)
-        .eq('organization_id', organizationId)
+      // If changing plan, delete existing installments and payment plan
+      if (isChangingPlan) {
+        // Delete existing project payment plan
+        const { error: deletePaymentPlanError } = await supabase
+          .from('project_payment_plans')
+          .delete()
+          .eq('project_id', projectId)
 
-      if (checkError) {
-        console.error('Error checking existing installments:', checkError)
-        throw new Error('Error verificando cuotas existentes')
-      }
+        if (deletePaymentPlanError) {
+          console.error('Error deleting existing payment plan:', deletePaymentPlanError)
+          throw new Error('Error eliminando plan de pagos existente')
+        }
 
-      if (existingInstallments && existingInstallments.length > 0) {
-        throw new Error('Ya existen cuotas para este proyecto. Elimine las existentes antes de crear nuevas.')
+        // Delete existing installments
+        const { error: deleteInstallmentsError } = await supabase
+          .from('project_installments')
+          .delete()
+          .eq('project_id', projectId)
+          .eq('organization_id', organizationId)
+
+        if (deleteInstallmentsError) {
+          console.error('Error deleting existing installments:', deleteInstallmentsError)
+          throw new Error('Error eliminando cuotas existentes')
+        }
+      } else {
+        // First, check if installments already exist for this project
+        const { data: existingInstallments, error: checkError } = await supabase
+          .from('project_installments')
+          .select('id')
+          .eq('project_id', projectId)
+          .eq('organization_id', organizationId)
+
+        if (checkError) {
+          console.error('Error checking existing installments:', checkError)
+          throw new Error('Error verificando cuotas existentes')
+        }
+
+        if (existingInstallments && existingInstallments.length > 0) {
+          throw new Error('Ya existen cuotas para este proyecto. Elimine las existentes antes de crear nuevas.')
+        }
       }
 
       // Calculate installment dates
@@ -125,6 +182,21 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         throw new Error('Error creando las cuotas: ' + error.message)
       }
 
+      // Create the project payment plan record
+      const { error: paymentPlanError } = await supabase
+        .from('project_payment_plans')
+        .insert({
+          project_id: projectId,
+          payment_plan_id: data.payment_plan_id,
+          installments_count: data.installments_count,
+          frequency: data.frequency
+        })
+
+      if (paymentPlanError) {
+        console.error('Error creating payment plan:', paymentPlanError)
+        // Continue anyway, as installments were created successfully
+      }
+
       return result
     },
     onSuccess: (data) => {
@@ -136,6 +208,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
       // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['project-installments', projectId] })
       queryClient.invalidateQueries({ queryKey: ['client-monthly-installments', organizationId, projectId] })
+      queryClient.invalidateQueries({ queryKey: ['project-payment-plan', projectId] })
       
       onClose()
     },
@@ -155,7 +228,45 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {isChangingPlan && (
+          <Callout 
+            icon={AlertTriangle}
+            title="Cambio de Plan de Pagos"
+            className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20"
+          >
+            Al crear un nuevo plan de pagos se eliminará el plan actual y todas las cuotas existentes. Esta acción no se puede deshacer.
+          </Callout>
+        )}
+        
         <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="payment_plan_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Plan de Pagos</FormLabel>
+                <FormControl>
+                  <Select 
+                    value={field.value} 
+                    onValueChange={field.onChange}
+                    disabled={paymentPlansLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el tipo de plan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentPlans.map((plan) => (
+                        <SelectItem key={plan.id} value={plan.id}>
+                          {plan.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="frequency"
@@ -221,6 +332,11 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           
           <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
             <p className="font-medium">Resumen del Plan:</p>
+            {selectedPaymentPlan && (
+              <p className="mb-2 text-foreground">
+                <span className="font-medium">{selectedPaymentPlan.name}:</span> {selectedPaymentPlan.description}
+              </p>
+            )}
             <p>• Se crearán {form.watch('installments_count') || 0} cuotas numeradas del 1 al {form.watch('installments_count') || 0}</p>
             <p>• Frecuencia: {
               form.watch('frequency') === 'quincenal' ? 'Cada 15 días' :
@@ -255,8 +371,11 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
 
   const headerContent = (
     <FormModalHeader 
-      title="Crear Plan de Cuotas"
-      description="Configure la frecuencia, cantidad y fecha de inicio para generar automáticamente todas las cuotas del proyecto"
+      title={isChangingPlan ? "Cambiar Plan de Pagos" : "Crear Plan de Pagos"}
+      description={isChangingPlan 
+        ? "Modifica el plan de pagos actual. Se eliminará el plan anterior y se crearán nuevas cuotas."
+        : "Configure el tipo de plan, frecuencia, cantidad y fecha de inicio para generar automáticamente todas las cuotas del proyecto"
+      }
       icon={Calendar}
     />
   )
@@ -265,7 +384,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Crear Cuotas"
+      rightLabel={isChangingPlan ? "Cambiar Plan" : "Crear Cuotas"}
       onRightClick={form.handleSubmit(handleSubmit)}
       submitDisabled={createInstallmentsMutation.isPending}
       showLoadingSpinner={createInstallmentsMutation.isPending}
