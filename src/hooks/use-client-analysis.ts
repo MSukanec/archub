@@ -16,6 +16,7 @@ export function useClientAnalysis(projectId: string | null) {
           unit,
           committed_amount,
           currency_id,
+          exchange_rate,
           contacts!inner(
             id,
             first_name,

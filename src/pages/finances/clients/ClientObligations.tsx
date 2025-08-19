@@ -40,6 +40,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           unit,
           committed_amount,
           currency_id,
+          exchange_rate,
           created_at,
           contacts!inner(
             id,
