@@ -99,7 +99,12 @@ export function MovementKPICards({ organizationId, projectId }: MovementKPICards
     }
   ];
 
-  // Filter out cards that have no movements
+  // If viewing a specific project and it has no movements, hide all KPIs
+  if (projectId && projectBalances.length === 0) {
+    return null;
+  }
+
+  // Otherwise, filter out cards that have no movements
   const cardsWithMovements = kpiCards.filter(card => card.balances.length > 0);
 
   // If no cards have movements, don't render anything
