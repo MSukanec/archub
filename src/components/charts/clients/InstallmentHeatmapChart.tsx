@@ -290,6 +290,29 @@ export default function InstallmentHeatmapChart({
   return (
     <Card>
       <CardContent className="p-6">
+        {/* Leyenda de colores inline */}
+        <div className="mb-4 p-3 bg-muted/20 rounded-lg border">
+          <div className="text-xs font-medium mb-2">Referencias de colores:</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-violet-600 rounded"></div>
+              <span>Actualización</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-red-600 rounded"></div>
+              <span>Valor de cuota</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-green-600 rounded"></div>
+              <span>Pago</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-blue-600 rounded"></div>
+              <span>Saldo</span>
+            </div>
+          </div>
+        </div>
+
         <div className="overflow-x-auto" style={{ maxWidth: '100%' }}>
           <div className="inline-block min-w-full">
             {/* Header row with units */}
@@ -411,39 +434,7 @@ export default function InstallmentHeatmapChart({
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700 rounded"></div>
-              <span>Cuota con pagos</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded"></div>
-              <span>Cuota pendiente</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-xs">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-violet-500 rounded"></div>
-                <span className="text-violet-600 dark:text-violet-400">Monto Actualizado</span>
-              </div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-red-500 rounded"></div>
-                <span className="text-red-600 dark:text-red-400">Valor de Cuota</span>
-              </div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span className="text-green-600 dark:text-green-400">Pago</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-blue-600 dark:text-blue-400">Saldo</span>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </CardContent>
     </Card>
   )

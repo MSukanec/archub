@@ -354,7 +354,7 @@ export const project_installments = pgTable("project_installments", {
   organization_id: uuid("organization_id").notNull(),
   date: text("date").notNull(), // Fecha de vencimiento de la cuota
   number: integer("number").notNull(), // Número de cuota
-  index: integer("index").notNull().default(0), // Índice de la cuota
+  index_reference: integer("index_reference").default(0), // Índice de la cuota
   created_at: timestamp("created_at").defaultNow(),
 });
 
