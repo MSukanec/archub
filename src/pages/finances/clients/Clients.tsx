@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import { Receipt } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentCurrencies } from './ClientPaymentCurrencies'
 import { ClientPaymentDetails } from './ClientPaymentDetails'
@@ -8,6 +10,7 @@ import { ClientPaymentDetails } from './ClientPaymentDetails'
 export function Clients() {
   const [activeTab, setActiveTab] = useState("obligations")
   const { data: userData } = useCurrentUser()
+  const { openModal } = useGlobalModalStore()
   
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
@@ -33,8 +36,15 @@ export function Clients() {
 
   const headerProps = {
     title: "Aportes de Clientes",
+    icon: Receipt,
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    ...(activeTab === "obligations" && {
+      actionButton: {
+        label: "Nuevo Aporte",
+        onClick: () => openModal('installment')
+      }
+    })
   }
 
   if (!projectId || !organizationId) {
