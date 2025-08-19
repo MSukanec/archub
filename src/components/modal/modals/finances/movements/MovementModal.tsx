@@ -104,8 +104,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Debug logs
   React.useEffect(() => {
     if (editingMovement) {
-      console.log('📝 MovementModal: Editing movement data:', editingMovement)
-      console.log('📝 MovementModal: isEditing:', isEditing)
+
     }
   }, [editingMovement, isEditing])
   // Hooks
@@ -326,7 +325,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   React.useEffect(() => {
     if (!movementType) return
     
-    console.log('🔄 MovementType cambió a:', movementType)
+
     
     // Forzar actualización de valores en el formulario activo
     const commonValues = {
@@ -336,26 +335,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       type_id: form.getValues('type_id')
     }
     
-    console.log('🔄 Valores comunes a sincronizar:', commonValues)
+
     
     if (movementType === 'conversion') {
       conversionForm.setValue('movement_date', commonValues.movement_date)
       conversionForm.setValue('description', commonValues.description)
       conversionForm.setValue('created_by', commonValues.created_by)
       conversionForm.setValue('type_id', commonValues.type_id)
-      console.log('✅ Valores sincronizados en conversionForm')
+
     } else if (movementType === 'transfer') {
       transferForm.setValue('movement_date', commonValues.movement_date)
       transferForm.setValue('description', commonValues.description)
       transferForm.setValue('created_by', commonValues.created_by)
       transferForm.setValue('type_id', commonValues.type_id)
-      console.log('✅ Valores sincronizados en transferForm')
+
     }
   }, [movementType, form, conversionForm, transferForm])
 
   // Función para cargar datos específicos de conversión
   const loadConversionData = async (movement: any) => {
-    console.log('🔄 Cargando datos de conversión:', movement)
+
     
     try {
       // Obtener TODOS los movimientos del grupo de conversión y ordenar por amount descendente
@@ -370,7 +369,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         return
       }
 
-      console.log('🔄 Grupo de conversión completo encontrado:', allGroupMovements)
+
 
       // Buscar tipos de egreso e ingreso en los conceptos de movimiento
       const egressType = movementConcepts?.find((concept: any) => 
@@ -389,14 +388,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         return
       }
       
-      console.log('🔍 Lógica corregida de origen/destino por TIPOS:', {
-        originType: egressType?.name,
-        destinationType: ingressType?.name,
-        originAmount: originMovement.amount,
-        destinationAmount: destinationMovement.amount,
-        originCurrency: originMovement.currency_id,
-        destinationCurrency: destinationMovement.currency_id
-      })
+
 
       // Llenar formulario de conversión
       conversionForm.setValue('movement_date', new Date(movement.movement_date))
@@ -414,22 +406,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('wallet_id_to', destinationMovement.wallet_id)
       conversionForm.setValue('amount_to', destinationMovement.amount) // Ya no necesito Math.abs
       
-      console.log('🎯 Valores cargados:', {
-        currency_id_from: originMovement.currency_id,
-        wallet_id_from: originMovement.wallet_id,
-        amount_from: originMovement.amount,
-        currency_id_to: destinationMovement.currency_id,
-        wallet_id_to: destinationMovement.wallet_id,
-        amount_to: destinationMovement.amount,
-        exchange_rate: movement.exchange_rate
-      })
+
       
       // Cotización
       if (movement.exchange_rate) {
         conversionForm.setValue('exchange_rate', movement.exchange_rate)
       }
 
-      console.log('✅ Datos de conversión cargados correctamente')
+
       
     } catch (error) {
       console.error('Error al cargar datos de conversión:', error)
@@ -438,7 +422,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Función para cargar datos específicos de transferencia
   const loadTransferData = async (movement: any) => {
-    console.log('🔄 Cargando datos de transferencia:', movement)
+
     
     try {
       // Buscar el movimiento complementario de la transferencia
@@ -454,7 +438,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         return
       }
 
-      console.log('🔄 Movimiento complementario encontrado:', transferMovements)
+
 
       // Determinar si el movimiento actual es origen o destino
       const isOrigin = movement.amount < 0 // Los egresos son negativos (origen)
@@ -477,7 +461,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       transferForm.setValue('destination_wallet_id', destinationMovement.wallet_id)
       transferForm.setValue('destination_amount', Math.abs(destinationMovement.amount))
 
-      console.log('✅ Datos de transferencia cargados correctamente')
+
       
     } catch (error) {
       console.error('Error al cargar datos de transferencia:', error)
@@ -496,7 +480,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           concept.view_mode?.trim() === "conversion"
         )
         if (conversionConcept) {
-          console.log('🔄 Detectado movimiento de conversión, usando tipo:', conversionConcept.name)
+
           setSelectedTypeId(conversionConcept.id)
           handleTypeChange(conversionConcept.id)
           
@@ -511,7 +495,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           concept.view_mode?.trim() === "transfer"
         )
         if (transferConcept) {
-          console.log('🔄 Detectado movimiento de transferencia, usando tipo:', transferConcept.name)
+
           setSelectedTypeId(transferConcept.id)
           handleTypeChange(transferConcept.id)
           
@@ -522,7 +506,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       } else {
         // Movimiento normal - usar type_id original
-        console.log('🔄 Movimiento normal, usando type_id:', editingMovement.type_id)
+
         setSelectedTypeId(editingMovement.type_id)
         handleTypeChange(editingMovement.type_id)
       }
@@ -644,7 +628,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount,
           project_clients:project_client_id (
             id,
-            contacts:contact_id (
+            contacts (
               first_name,
               last_name
             )
@@ -656,7 +640,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (clientAssignments && clientAssignments.length > 0) {
         const formattedClients = clientAssignments.map((assignment: any) => {
-          const contact = assignment.project_clients?.contact
+          const contact = assignment.project_clients?.contacts
           const contactName = contact 
             ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
             : 'Sin nombre'
@@ -680,13 +664,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
     mutationFn: async (data: BasicMovementForm) => {
-      console.log('🚀 Iniciando creación de movimiento:', {
-        isEditing,
-        editingMovement: editingMovement?.id,
-        selectedClients: selectedClients.length,
-        selectedPersonnel: selectedPersonnel.length,
-        selectedSubcontracts: selectedSubcontracts.length
-      })
+
 
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
@@ -793,10 +771,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
       if (selectedClients && selectedClients.length > 0) {
-        console.log('💾 Guardando clientes del movimiento:', {
-          movement_id: result.id,
-          selectedClients: selectedClients
-        })
+
         
         const projectClientsData = selectedClients.map(client => ({
           movement_id: result.id,
@@ -804,7 +779,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           amount: data.amount // Use the main movement amount
         }))
 
-        console.log('💾 Datos a insertar en movement_clients:', projectClientsData)
+
 
         const { error: projectClientsError } = await supabase
           .from('movement_clients')
@@ -815,7 +790,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           throw projectClientsError
         }
 
-        console.log('✅ Clientes del movimiento guardados correctamente')
+
       }
 
       return result
@@ -854,11 +829,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         ? editingMovement.conversion_group_id 
         : crypto.randomUUID()
       
-      console.log('🔧 Modo conversión:', {
-        isEditing,
-        conversionGroupId,
-        existingGroupId: editingMovement?.conversion_group_id
-      })
+
 
       // Buscar tipos de egreso e ingreso
       const egressType = movementConcepts?.find((concept: any) => 
@@ -869,7 +840,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       )
 
       if (isEditing && editingMovement?.conversion_group_id) {
-        console.log('✏️ Editando conversión existente')
+
         
         // Buscar ambos movimientos de la conversión
         const { data: conversionMovements, error: fetchError } = await supabase
@@ -900,12 +871,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           throw new Error('Error: no se pudieron identificar los movimientos de origen y destino por tipo')
         }
 
-        console.log('🔍 Editando conversión - identificado por TIPOS:', {
-          originType: egressType?.name,
-          destinationType: ingressType?.name,
-          originId: originMovement.id,
-          destinationId: destMovement.id
-        })
+
 
         // Actualizar movimiento de origen (egreso)
         const { error: updateOriginError } = await supabase
@@ -943,11 +909,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (updateDestError) throw updateDestError
 
-        console.log('✅ Conversión actualizada correctamente')
+
         return { id: editingMovement.id, updated: true }
 
       } else {
-        console.log('➕ Creando nueva conversión')
+
         
         // Crear movimiento de egreso
         const egressMovementData = {
@@ -1010,7 +976,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           if (personnelError) throw personnelError
         }
 
-        console.log('✅ Nueva conversión creada correctamente')
+
         return results
       }
     },
