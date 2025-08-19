@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Info, Calendar, DollarSign } from 'lucide-react'
+import { Info, Calendar, DollarSign, Clock } from 'lucide-react'
 
 export interface CommitmentRow {
   commitment_id: string
@@ -64,9 +64,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
             payment_plans(
               id,
               name,
-              description,
-              frequency,
-              installment_count
+              description
             )
           `)
           .eq('project_id', projectId)
@@ -90,6 +88,53 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       if (!commitmentId) return null
       const client = projectClients.find(pc => pc.id === commitmentId)
       return client
+    }
+
+    // Fetch payment information for selected clients
+    const { data: clientPayments = [] } = useQuery({
+      queryKey: ['client-payments', projectId, organizationId, commitmentRows.map(r => r.commitment_id).filter(Boolean)],
+      queryFn: async () => {
+        if (!supabase || !projectId || !organizationId) return []
+        
+        const validCommitmentIds = commitmentRows.map(r => r.commitment_id).filter(Boolean)
+        if (validCommitmentIds.length === 0) return []
+        
+        const { data, error } = await supabase
+          .from('movement_payments_view')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .eq('project_id', projectId)
+          .in('project_client_id', validCommitmentIds)
+          .order('movement_date', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching client payments:', error)
+          return []
+        }
+
+        return data || []
+      },
+      enabled: !!projectId && !!organizationId && commitmentRows.some(r => r.commitment_id)
+    })
+
+    // Calculate payment summary for each client
+    const getClientPaymentSummary = (commitmentId: string) => {
+      if (!commitmentId) return null
+      
+      const client = projectClients.find(pc => pc.id === commitmentId)
+      const payments = clientPayments.filter(p => p.project_client_id === commitmentId)
+      
+      const totalPaid = payments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+      const lastPaymentDate = payments.length > 0 ? payments[0].movement_date : null
+      const remainingAmount = (client?.committed_amount || 0) - totalPaid
+      
+      return {
+        client,
+        totalPaid,
+        lastPaymentDate,
+        remainingAmount,
+        paymentsCount: payments.length
+      }
     }
 
     // Initialize rows from initial commitments or create one empty row
@@ -224,52 +269,50 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       <div className="space-y-4">
         {/* Payment Plan Information */}
         {paymentPlan?.payment_plans && (
-          <Card className="p-4 bg-muted/30 border-muted">
-            <div className="flex items-start gap-3">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5" />
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-medium text-foreground">
-                    Plan de Pagos: {paymentPlan.payment_plans.name}
-                  </h4>
-                  <Badge variant="outline" className="text-xs">
-                    {paymentPlan.payment_plans.frequency}
-                  </Badge>
-                </div>
-                {paymentPlan.payment_plans.description && (
-                  <p className="text-xs text-muted-foreground">
-                    {paymentPlan.payment_plans.description}
-                  </p>
-                )}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>
-                      {paymentPlan.payment_plans.installment_count 
-                        ? `${paymentPlan.payment_plans.installment_count} cuotas` 
-                        : 'Sin límite de cuotas'
-                      }
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="h-3 w-3" />
-                    <span>Selecciona un cliente y cuota para el pago</span>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-3 p-4 bg-muted/30 rounded-md border">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-blue-600" />
+              <h4 className="text-sm font-medium text-foreground">
+                Plan de Pagos Activo: {paymentPlan.payment_plans.name}
+              </h4>
             </div>
-          </Card>
+            {paymentPlan.payment_plans.description && (
+              <p className="text-xs text-muted-foreground pl-6">
+                {paymentPlan.payment_plans.description}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground pl-6">
+              Asigna clientes de proyecto y montos para este movimiento financiero.
+            </p>
+          </div>
         )}
 
         {/* Commitment Rows - Two column layout: commitment and installment */}
         {commitmentRows.map((row, index) => {
-          const selectedClient = getSelectedClientInfo(row.commitment_id)
+          const paymentSummary = getClientPaymentSummary(row.commitment_id)
           
           return (
-          <div key={index} className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div key={index} className="space-y-3">
+            {/* Field Labels and Inputs */}
+            <div className="space-y-3">
               {/* Commitment Selector */}
-              <div className="flex-1">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-foreground">
+                    Compromiso
+                  </label>
+                  {commitmentRows.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeRow(index)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
                 <ComboBox
                   value={row.commitment_id}
                   onValueChange={(value) => handleCommitmentChange(index, value)}
@@ -281,58 +324,85 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                 />
               </div>
               
-              {/* Remove Button */}
-              {commitmentRows.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="default"
-                  onClick={() => removeRow(index)}
-                  className="h-10 w-10 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-            
-            {/* Installment Selector */}
-            <div className="pl-0">
-              <ComboBox
-                value={row.installment_id}
-                onValueChange={(value) => handleInstallmentChange(index, value)}
-                options={installmentOptions}
-                placeholder="Seleccionar cuota..."
-                searchPlaceholder="Buscar cuota..."
-                emptyMessage={installmentsLoading ? "Cargando..." : "No hay cuotas disponibles"}
-                disabled={installmentsLoading || !row.commitment_id}
-              />
+              {/* Installment Selector */}
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-foreground">
+                  Cuota
+                </label>
+                <ComboBox
+                  value={row.installment_id}
+                  onValueChange={(value) => handleInstallmentChange(index, value)}
+                  options={installmentOptions}
+                  placeholder="Seleccionar cuota..."
+                  searchPlaceholder="Buscar cuota..."
+                  emptyMessage={installmentsLoading ? "Cargando..." : "No hay cuotas disponibles"}
+                  disabled={installmentsLoading || !row.commitment_id}
+                />
+              </div>
             </div>
 
-            {/* Client Payment Information */}
-            {selectedClient && (
-              <Card className="p-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-3 w-3 text-green-600" />
-                      <span className="text-xs font-medium text-green-800 dark:text-green-200">
-                        Compromiso Total: 
-                      </span>
-                      <span className="text-xs font-bold text-green-900 dark:text-green-100">
-                        U$S {selectedClient.committed_amount?.toLocaleString('es-AR') || '0'}
-                      </span>
+            {/* Client Payment Summary */}
+            {paymentSummary?.client && (
+              <div className="space-y-2 text-xs text-muted-foreground pl-4 border-l-2 border-muted">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <DollarSign className="h-3 w-3" />
+                      <span className="font-medium">Compromiso Total</span>
                     </div>
-                    {selectedClient.unit && (
-                      <p className="text-xs text-green-700 dark:text-green-300">
-                        Unidad: {selectedClient.unit}
-                      </p>
-                    )}
+                    <div className="font-bold text-foreground">
+                      U$S {paymentSummary.client.committed_amount?.toLocaleString('es-AR') || '0'}
+                    </div>
                   </div>
-                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Activo
-                  </Badge>
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <DollarSign className="h-3 w-3" />
+                      <span className="font-medium">Pagado a la fecha</span>
+                    </div>
+                    <div className="font-bold text-green-600">
+                      U$S {paymentSummary.totalPaid.toLocaleString('es-AR')}
+                    </div>
+                  </div>
                 </div>
-              </Card>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <DollarSign className="h-3 w-3" />
+                      <span className="font-medium">Saldo pendiente</span>
+                    </div>
+                    <div className="font-bold text-orange-600">
+                      U$S {paymentSummary.remainingAmount.toLocaleString('es-AR')}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <Clock className="h-3 w-3" />
+                      <span className="font-medium">Último pago</span>
+                    </div>
+                    <div className="font-medium">
+                      {paymentSummary.lastPaymentDate 
+                        ? new Date(paymentSummary.lastPaymentDate).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })
+                        : 'Sin pagos'
+                      }
+                    </div>
+                  </div>
+                </div>
+                {paymentSummary.client.unit && (
+                  <div className="pt-1 border-t border-muted">
+                    <span className="font-medium">Unidad: </span>
+                    <span>{paymentSummary.client.unit}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Separator between rows */}
+            {index < commitmentRows.length - 1 && (
+              <div className="border-t border-muted mt-4 pt-4"></div>
             )}
           </div>
           )
