@@ -293,9 +293,15 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "contact",
       label: "Cliente",
-      width: "25%",
+      width: "16.66%",
       sortable: true,
       sortType: "string" as const,
+      sortKey: (item: any) => {
+        // Custom sort key for proper alphabetical ordering
+        const displayName = item.contacts?.company_name || 
+                           `${item.contacts?.first_name || ''} ${item.contacts?.last_name || ''}`.trim()
+        return displayName.toLowerCase()
+      },
       render: (item: any) => {
         if (!item.contacts) {
           return <div className="text-sm text-muted-foreground">Sin contacto</div>
@@ -312,7 +318,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "commitment",
       label: "Compromiso",
-      width: "15%", 
+      width: "16.66%", 
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -332,7 +338,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPaid",
       label: "Pago a la Fecha",
-      width: "15%",
+      width: "16.66%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -346,7 +352,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "remainingAmount",
       label: "Monto Restante",
-      width: "15%",
+      width: "16.66%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -364,7 +370,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "paymentPercentage",
       label: "% de Pago",
-      width: "12%",
+      width: "16.66%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -380,7 +386,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className={`text-sm font-medium ${isComplete ? 'text-green-600' : 'text-muted-foreground'}`}>
-            {Math.round(percentage)}%
+            {percentage.toFixed(1)}%
           </div>
         )
       }
@@ -388,7 +394,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "totalPercentage",
       label: "% del Total",
-      width: "12%",
+      width: "16.66%",
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => {
@@ -407,7 +413,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className="text-sm font-medium">
-            {Math.round(percentage)}%
+            {percentage.toFixed(1)}%
           </div>
         )
       }
@@ -415,14 +421,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     {
       key: "actions",
       label: "Acciones",
-      width: "12%",
+      width: "16.66%",
       render: (item: any) => {
         return (
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="icon"
-              className="h-8 w-8"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               onClick={() => {
                 openModal('project-client', {
                   projectId,
@@ -432,12 +438,12 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 })
               }}
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit2 className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
-              size="icon"
-              className="h-8 w-8"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
               onClick={() => {
                 openModal('delete-confirmation', {
                   mode: 'dangerous',
@@ -450,7 +456,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 })
               }}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="w-4 h-4 text-red-500" />
             </Button>
           </div>
         )
