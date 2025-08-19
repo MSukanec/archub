@@ -6,15 +6,14 @@ import { useProjectClients } from '@/hooks/use-project-clients'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 
-export interface ClientRow {
-  client_id: string
-  amount: string
+export interface CommitmentRow {
+  commitment_id: string
 }
 
-export interface ClientItem {
+export interface CommitmentItem {
   project_client_id: string
   client_name: string
-  amount: number
+  unit: string
 }
 
 export interface ClientsFormHandle {
@@ -23,8 +22,8 @@ export interface ClientsFormHandle {
 
 interface ClientsFormProps {
   onClose: () => void
-  onConfirm: (clients: ClientItem[]) => void
-  initialClients?: ClientItem[]
+  onConfirm: (commitments: CommitmentItem[]) => void
+  initialClients?: CommitmentItem[]
 }
 
 export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
@@ -38,81 +37,98 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
       { enabled: !!projectId && !!organizationId }
     )
 
-    // Initialize rows from initial clients or create one empty row
-    const initializeRows = (): ClientRow[] => {
+    // Initialize rows from initial commitments or create one empty row
+    const initializeRows = (): CommitmentRow[] => {
       if (initialClients.length > 0) {
         return initialClients.map(client => ({
-          client_id: client.project_client_id,
-          amount: client.amount.toString()
+          commitment_id: client.project_client_id
         }))
       }
-      return [{ client_id: '', amount: '' }]
+      return [{ commitment_id: '' }]
     }
 
-    const [clientRows, setClientRows] = useState<ClientRow[]>(initializeRows())
+    const [commitmentRows, setCommitmentRows] = useState<CommitmentRow[]>(initializeRows())
 
-    // Function to get client display name
-    const getClientDisplayName = (projectClient: any): string => {
+    // Function to get commitment display name (client + unit)
+    const getCommitmentDisplayName = (projectClient: any): string => {
       if (!projectClient?.contact) return 'Cliente sin nombre'
       
       const { contact } = projectClient
+      let clientName = ''
+      
       if (contact.company_name) {
-        return contact.company_name
+        clientName = contact.company_name
       } else if (contact.full_name) {
-        return contact.full_name
+        clientName = contact.full_name
       } else {
-        return `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
+        clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
       }
+      
+      // Add unit information if available
+      const unit = projectClient.unit || 'Sin unidad'
+      return `${clientName} - ${unit}`
     }
 
     // Create options for ComboBox
-    const clientOptions = projectClients.map(client => ({
+    const commitmentOptions = projectClients.map(client => ({
       value: client.id,
-      label: getClientDisplayName(client)
+      label: getCommitmentDisplayName(client)
     }))
 
-    // Handle client change
-    const handleClientChange = (index: number, clientId: string) => {
-      const newRows = [...clientRows]
-      newRows[index] = { ...newRows[index], client_id: clientId }
-      setClientRows(newRows)
-    }
-
-    // Handle amount change
-    const handleAmountChange = (index: number, amount: string) => {
-      const newRows = [...clientRows]
-      newRows[index] = { ...newRows[index], amount }
-      setClientRows(newRows)
+    // Handle commitment change
+    const handleCommitmentChange = (index: number, commitmentId: string) => {
+      const newRows = [...commitmentRows]
+      newRows[index] = { ...newRows[index], commitment_id: commitmentId }
+      setCommitmentRows(newRows)
     }
 
     // Add new row
     const addNewRow = () => {
-      setClientRows([...clientRows, { client_id: '', amount: '' }])
+      setCommitmentRows([...commitmentRows, { commitment_id: '' }])
     }
 
     // Remove row
     const removeRow = (index: number) => {
-      if (clientRows.length > 1) {
-        const newRows = clientRows.filter((_, i) => i !== index)
-        setClientRows(newRows)
+      if (commitmentRows.length > 1) {
+        const newRows = commitmentRows.filter((_, i) => i !== index)
+        setCommitmentRows(newRows)
       }
     }
 
     // Handle confirm
     const handleConfirm = () => {
-      const validClients = clientRows
-        .filter(row => row.client_id && row.amount && parseFloat(row.amount) > 0)
+      const validCommitments = commitmentRows
+        .filter(row => row.commitment_id)
         .map(row => {
-          const projectClient = projectClients.find(pc => pc.id === row.client_id)
+          const projectClient = projectClients.find(pc => pc.id === row.commitment_id)
+          if (!projectClient?.contact) {
+            return {
+              project_client_id: row.commitment_id,
+              client_name: 'Cliente desconocido',
+              unit: 'Sin unidad'
+            }
+          }
+          
+          const { contact } = projectClient
+          let clientName = ''
+          
+          if (contact.company_name) {
+            clientName = contact.company_name
+          } else if (contact.full_name) {
+            clientName = contact.full_name
+          } else {
+            clientName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Cliente sin nombre'
+          }
+          
           return {
-            project_client_id: row.client_id,
-            client_name: projectClient ? getClientDisplayName(projectClient) : 'Cliente desconocido',
-            amount: parseFloat(row.amount)
+            project_client_id: row.commitment_id,
+            client_name: clientName,
+            unit: projectClient.unit || 'Sin unidad'
           }
         })
 
       if (onConfirm) {
-        onConfirm(validClients)
+        onConfirm(validCommitments)
       }
       onClose()
     }
@@ -124,48 +140,34 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
 
     return (
       <div className="space-y-4">
-        {/* Client Rows - Default two columns */}
-        {clientRows.map((row, index) => (
-          <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">
-            {/* Left Column - Client Selector */}
-            <div>
+        {/* Commitment Rows - Single column layout */}
+        {commitmentRows.map((row, index) => (
+          <div key={index} className="flex items-center gap-2">
+            {/* Commitment Selector */}
+            <div className="flex-1">
               <ComboBox
-                value={row.client_id}
-                onValueChange={(value) => handleClientChange(index, value)}
-                options={clientOptions}
-                placeholder="Seleccionar cliente..."
-                searchPlaceholder="Buscar cliente..."
-                emptyMessage={isLoading ? "Cargando..." : "No hay clientes disponibles"}
+                value={row.commitment_id}
+                onValueChange={(value) => handleCommitmentChange(index, value)}
+                options={commitmentOptions}
+                placeholder="Seleccionar compromiso..."
+                searchPlaceholder="Buscar compromiso..."
+                emptyMessage={isLoading ? "Cargando..." : "No hay compromisos disponibles"}
                 disabled={isLoading}
               />
             </div>
             
-            {/* Right Column - Amount */}
-            <div className="flex items-end gap-2">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                <Input
-                  type="number"
-                  value={row.amount}
-                  onChange={(e) => handleAmountChange(index, e.target.value)}
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  className="text-right pl-8"
-                />
-              </div>
-              {clientRows.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="default"
-                  onClick={() => removeRow(index)}
-                  className="h-10 w-10 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            {/* Remove Button */}
+            {commitmentRows.length > 1 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="default"
+                onClick={() => removeRow(index)}
+                className="h-10 w-10 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         ))}
         
@@ -179,7 +181,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Agregar Otro
+            Agregar Otro Compromiso
           </Button>
         </div>
       </div>
