@@ -50,12 +50,21 @@ export function Clients() {
     }),
     ...(activeTab === "monthly-installments" && {
       actionButton: {
-        label: "Crear Plan de Cuotas",
+        label: "Nueva Cuota",
         icon: Plus,
-        onClick: () => openModal('client-payment-plans', {
+        onClick: () => openModal('client-installment', {
           projectId,
           organizationId
-        })
+        }),
+        additionalButton: {
+          label: "Crear Plan de Cuotas",
+          icon: Plus,
+          onClick: () => openModal('client-payment-plans', {
+            projectId,
+            organizationId
+          }),
+          variant: "secondary" as const
+        }
       }
     }),
     ...(activeTab === "details" && {

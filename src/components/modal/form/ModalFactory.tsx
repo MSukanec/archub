@@ -25,6 +25,7 @@ import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionP
 
 import { ClientPaymentModal } from '../modals/finances/clients/ClientPaymentModal';
 import ClientPaymentPlans from '../modals/finances/clients/ClientPaymentPlans';
+import ClientInstallment from '../modals/finances/clients/ClientInstallment';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
@@ -187,6 +188,8 @@ export function ModalFactory() {
       return <RenewInsuranceFormModal modalData={data} onClose={closeModal} />;
     case 'client-payment-plans':
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
+    case 'client-installment':
+      return <ClientInstallment modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }

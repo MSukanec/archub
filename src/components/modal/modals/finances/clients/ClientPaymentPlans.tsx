@@ -238,6 +238,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
   const headerContent = (
     <FormModalHeader 
       title="Crear Plan de Cuotas"
+      description="Configure la frecuencia, cantidad y fecha de inicio para generar automáticamente todas las cuotas del proyecto"
       icon={Calendar}
     />
   )
