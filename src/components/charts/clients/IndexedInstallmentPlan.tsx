@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Edit, Trash2 } from 'lucide-react'
+import { Loader2, Edit, Trash2, Calendar } from 'lucide-react'
 
 interface InstallmentData {
   id: string
@@ -305,6 +305,29 @@ export default function IndexedInstallmentPlan({
   return (
     <Card>
       <CardContent className="p-6">
+        {/* Header del componente */}
+        <div className="mb-6 flex items-start gap-3 pb-4 border-b border-border">
+          <div className="flex-shrink-0">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'hsl(var(--accent))', opacity: 0.15 }}
+            >
+              <Calendar 
+                className="w-5 h-5" 
+                style={{ color: 'hsl(var(--accent))' }}
+              />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-semibold text-foreground mb-1">
+              Plan de Pagos
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Visualización de cuotas indexadas con estado de pagos por unidad funcional
+            </p>
+          </div>
+        </div>
+
         {/* Header con información del plan y referencias */}
         <div className="mb-4 flex gap-4">
           {/* Información del Plan de Pagos - 50% izquierda */}
