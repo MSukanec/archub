@@ -23,7 +23,7 @@ import { ConstructionSingleTaskModal } from '../modals/construction/Construction
 import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
-import { InstallmentFormModal } from '../modals/finances/InstallmentFormModal';
+import { ClientPaymentModal } from '../modals/finances/clients/ClientPaymentModal';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
@@ -133,7 +133,7 @@ export function ModalFactory() {
         isLoading={data?.isLoading || false}
       />;
     case 'installment':
-      return <InstallmentFormModal modalData={data} onClose={closeModal} />;
+      return <ClientPaymentModal modalData={data} onClose={closeModal} />;
     case 'dependency-connection':
       return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
     case 'budget-task-bulk-add':

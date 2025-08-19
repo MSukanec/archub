@@ -29,7 +29,7 @@ import { useOrganizationWallets } from '@/hooks/use-organization-wallets'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { supabase } from '@/lib/supabase'
 
-const installmentSchema = z.object({
+const clientPaymentSchema = z.object({
   movement_date: z.date({
     required_error: "Fecha es requerida",
   }),
@@ -44,9 +44,9 @@ const installmentSchema = z.object({
   description: z.string().optional(),
 })
 
-type InstallmentForm = z.infer<typeof installmentSchema>
+type ClientPaymentForm = z.infer<typeof clientPaymentSchema>
 
-interface InstallmentFormModalProps {
+interface ClientPaymentModalProps {
   modalData: {
     projectId: string
     organizationId: string
@@ -55,15 +55,15 @@ interface InstallmentFormModalProps {
   onClose: () => void
 }
 
-export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModalProps) {
+export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalProps) {
   const { projectId, organizationId, editingInstallment } = modalData
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
 
-  const form = useForm<InstallmentForm>({
-    resolver: zodResolver(installmentSchema),
+  const form = useForm<ClientPaymentForm>({
+    resolver: zodResolver(clientPaymentSchema),
     defaultValues: {
       movement_date: new Date(),
       contact_id: '',
@@ -198,7 +198,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
 
   // Mutación para crear/actualizar el compromiso
   const createInstallmentMutation = useMutation({
-    mutationFn: async (data: InstallmentForm) => {
+    mutationFn: async (data: ClientPaymentForm) => {
       
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
@@ -322,7 +322,7 @@ export function InstallmentFormModal({ modalData, onClose }: InstallmentFormModa
     }
   })
 
-  const onSubmit = async (data: InstallmentForm) => {
+  const onSubmit = async (data: ClientPaymentForm) => {
     await createInstallmentMutation.mutateAsync(data)
   }
 
