@@ -270,6 +270,40 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
+  // Effect para sincronizar estados cuando se está editando
+  React.useEffect(() => {
+    if (isEditing && editingMovement && movementConcepts) {
+      // Sincronizar type_id y cargar jerarquía
+      if (editingMovement.type_id) {
+        setSelectedTypeId(editingMovement.type_id)
+        handleTypeChange(editingMovement.type_id)
+      }
+      
+      // Sincronizar category_id después de un breve delay para asegurar que las categorías se carguen
+      if (editingMovement.category_id) {
+        setTimeout(() => {
+          setSelectedCategoryId(editingMovement.category_id)
+          form.setValue('category_id', editingMovement.category_id)
+        }, 100)
+      }
+      
+      // Sincronizar subcategory_id después de un breve delay para asegurar que las subcategorías se carguen
+      if (editingMovement.subcategory_id) {
+        setTimeout(() => {
+          setSelectedSubcategoryId(editingMovement.subcategory_id)
+          form.setValue('subcategory_id', editingMovement.subcategory_id)
+        }, 200)
+      }
+
+      // Cargar asignaciones existentes
+      if (editingMovement.id) {
+        loadMovementPersonnel(editingMovement.id)
+        loadMovementSubcontracts(editingMovement.id)
+        loadMovementProjectClients(editingMovement.id)
+      }
+    }
+  }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form])
+
   // Función para cargar personal asignado del movimiento
   const loadMovementPersonnel = async (movementId: string) => {
     try {
