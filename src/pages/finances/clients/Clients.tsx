@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Receipt } from 'lucide-react'
+import { Receipt, Plus } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -43,6 +43,16 @@ export function Clients() {
       actionButton: {
         label: "Nuevo Compromiso",
         onClick: () => openModal('project-client', {
+          projectId,
+          organizationId
+        })
+      }
+    }),
+    ...(activeTab === "monthly-installments" && {
+      actionButton: {
+        label: "Crear Plan de Cuotas",
+        icon: Plus,
+        onClick: () => openModal('client-payment-plans', {
           projectId,
           organizationId
         })

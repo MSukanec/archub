@@ -82,21 +82,9 @@ export function ClientMonthlyInstallments({ projectId, organizationId }: ClientM
     }
   ]
 
-  const handleCreateInstallments = () => {
-    openModal('client-payment-plans', {
-      projectId,
-      organizationId
-    })
-  }
-
   const handleEdit = (item: any) => {
     // TODO: Implement edit functionality
     console.log('Edit installment:', item)
-  }
-
-  const handleDelete = (item: any) => {
-    // TODO: Implement delete functionality  
-    console.log('Delete installment:', item)
   }
 
   if (isLoading) {
@@ -107,56 +95,45 @@ export function ClientMonthlyInstallments({ projectId, organizationId }: ClientM
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header with create button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Plan de Cuotas Mensuales</h3>
-          <p className="text-sm text-muted-foreground">
-            Gestiona las cuotas mensuales del proyecto
-          </p>
-        </div>
-        <Button
-          onClick={handleCreateInstallments}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Crear Plan de Cuotas
-        </Button>
-      </div>
-
-      {/* Installments table */}
-      {installments.length === 0 ? (
+  if (installments.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
         <EmptyState
-          icon={<Calendar className="h-8 w-8" />}
+          icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
           title="No hay cuotas definidas"
           description="Crea un plan de cuotas para comenzar a gestionar los pagos mensuales del proyecto."
           action={
-            <Button onClick={handleCreateInstallments} className="flex items-center gap-2">
+            <Button 
+              onClick={() => openModal('client-payment-plans', { projectId, organizationId })}
+              className="flex items-center gap-2"
+            >
               <Plus className="h-4 w-4" />
               Crear Plan de Cuotas
             </Button>
           }
         />
-      ) : (
-        <Table
-          data={installments}
-          columns={columns}
-          defaultSort={{ key: 'number', direction: 'asc' }}
-          getItemId={(item) => item.id}
-          onCardClick={handleEdit}
-          renderCard={(item) => (
-            <div className="p-4 border rounded-lg space-y-2 cursor-pointer hover:bg-accent/50 transition-colors">
-              <div className="font-medium">Cuota #{item.number}</div>
-              <div className="text-sm text-muted-foreground">
-                Creada: {new Date(item.created_at).toLocaleDateString('es-ES')}
-              </div>
-              <div className="text-sm text-muted-foreground">Estado: Pendiente</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <Table
+        data={installments}
+        columns={columns}
+        defaultSort={{ key: 'number', direction: 'asc' }}
+        getItemId={(item) => item.id}
+        onCardClick={handleEdit}
+        renderCard={(item) => (
+          <div className="p-4 border rounded-lg space-y-2 cursor-pointer hover:bg-accent/50 transition-colors">
+            <div className="font-medium">Cuota #{item.number}</div>
+            <div className="text-sm text-muted-foreground">
+              Creada: {new Date(item.created_at).toLocaleDateString('es-ES')}
             </div>
-          )}
-        />
-      )}
+            <div className="text-sm text-muted-foreground">Estado: Pendiente</div>
+          </div>
+        )}
+      />
     </div>
   )
 }
