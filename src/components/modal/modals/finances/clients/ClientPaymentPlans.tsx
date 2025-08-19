@@ -159,27 +159,6 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         <div className="space-y-4">
           <FormField
             control={form.control}
-            name="installments_count"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cantidad de Cuotas</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="100"
-                    placeholder="Ej: 12"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="frequency"
             render={({ field }) => (
               <FormItem>
@@ -195,6 +174,27 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
                       <SelectItem value="trimestral">Trimestral (cada 3 meses)</SelectItem>
                     </SelectContent>
                   </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="installments_count"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cantidad de Cuotas</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    placeholder="Ej: 12"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -260,6 +260,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
       footerContent={footerContent}
       onClose={onClose}
       isEditing={true}
+      columns={1}
     />
   )
 }
