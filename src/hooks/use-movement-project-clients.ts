@@ -13,7 +13,9 @@ export interface MovementProjectClientAssignment {
     organization_id: string
     project_id: string
     client_id: string
-    is_active: boolean
+    unit?: string
+    committed_amount?: number
+    currency_id?: string
     created_at: string
     contact: {
       id: string
@@ -64,6 +66,9 @@ export function useMovementProjectClients(movementId?: string) {
             organization_id,
             project_id,
             client_id,
+            unit,
+            committed_amount,
+            currency_id,
             created_at,
             contact:client_id!inner(
               id,
@@ -85,7 +90,15 @@ export function useMovementProjectClients(movementId?: string) {
         throw error
       }
 
-      return (data || []) as MovementProjectClientAssignment[]
+      return (data || []).map((item: any) => ({
+        ...item,
+        project_clients: item.project_clients ? {
+          ...item.project_clients,
+          contact: Array.isArray(item.project_clients.contact) 
+            ? item.project_clients.contact[0] 
+            : item.project_clients.contact
+        } : undefined
+      })) as MovementProjectClientAssignment[]
     },
     enabled: !!movementId && !!supabase,
     staleTime: 1000 * 60 * 5, // 5 minutos
