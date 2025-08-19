@@ -182,6 +182,23 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
         }
       }
 
+      // First create the project payment plan record
+      const { data: projectPaymentPlan, error: paymentPlanError } = await supabase
+        .from('project_payment_plans')
+        .insert({
+          project_id: projectId,
+          payment_plan_id: data.payment_plan_id,
+          installments_count: data.installments_count,
+          frequency: data.frequency
+        })
+        .select()
+        .single()
+
+      if (paymentPlanError) {
+        console.error('Error creating payment plan:', paymentPlanError)
+        throw new Error('Error creando el plan de pagos: ' + paymentPlanError.message)
+      }
+
       // Calculate installment dates
       const installmentDates = calculateInstallmentDates(
         data.start_date, 
@@ -197,7 +214,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
           organization_id: organizationId,
           number: i,
           date: installmentDates[i - 1].toISOString().split('T')[0], // Solo fecha, sin hora
-          project_payment_plan: data.payment_plan_id, // Nuevo campo requerido
+          project_payment_plan: projectPaymentPlan.id, // ID del registro en project_payment_plans
           created_by: currentMember?.id // ID del miembro de la organización
         })
       }
@@ -211,21 +228,6 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
       if (error) {
         console.error('Error creating installments:', error)
         throw new Error('Error creando las cuotas: ' + error.message)
-      }
-
-      // Create the project payment plan record
-      const { error: paymentPlanError } = await supabase
-        .from('project_payment_plans')
-        .insert({
-          project_id: projectId,
-          payment_plan_id: data.payment_plan_id,
-          installments_count: data.installments_count,
-          frequency: data.frequency
-        })
-
-      if (paymentPlanError) {
-        console.error('Error creating payment plan:', paymentPlanError)
-        // Continue anyway, as installments were created successfully
       }
 
       return result
