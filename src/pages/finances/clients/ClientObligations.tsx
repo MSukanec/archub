@@ -256,24 +256,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     }
   ]
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-sm text-muted-foreground">Cargando compromisos de pago...</div>
-      </div>
-    )
-  }
-
-  if (installments.length === 0) {
-    return (
-      <EmptyState
-        icon={<Receipt className="h-8 w-8" />}
-        title="Aún no hay compromisos registrados"
-        description="Esta sección muestra los compromisos de pago registrados en el proyecto."
-      />
-    )
-  }
-
   // Create dynamic columns based on available currencies for detail view
   const currencyDetailColumns = React.useMemo(() => {
     if (!availableCurrencies || availableCurrencies.length === 0) return []
@@ -337,6 +319,24 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
     return [...baseColumns, ...currencyColumns]
   }, [availableCurrencies])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-sm text-muted-foreground">Cargando compromisos de pago...</div>
+      </div>
+    )
+  }
+
+  if (installments.length === 0) {
+    return (
+      <EmptyState
+        icon={<Receipt className="h-8 w-8" />}
+        title="Aún no hay compromisos registrados"
+        description="Esta sección muestra los compromisos de pago registrados en el proyecto."
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
