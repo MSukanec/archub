@@ -91,9 +91,15 @@ export default function IndexedInstallmentPlan({
       if (error) throw error
     },
     onSuccess: () => {
-      // Invalidate and refetch related queries
-      queryClient.invalidateQueries({ queryKey: ['project-payment-plan', projectId] })
-      queryClient.invalidateQueries({ queryKey: ['project-installments', projectId] })
+      // Invalidate all related queries with more aggressive cache clearing
+      queryClient.removeQueries({ queryKey: ['project-payment-plan', projectId] })
+      queryClient.removeQueries({ queryKey: ['project-installments', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['project-payment-plan'] })
+      queryClient.invalidateQueries({ queryKey: ['project-installments'] })
+      
+      // Force a refetch to ensure UI updates
+      queryClient.refetchQueries({ queryKey: ['project-payment-plan', projectId] })
+      queryClient.refetchQueries({ queryKey: ['project-installments', projectId] })
       
       toast({
         title: "Plan eliminado",

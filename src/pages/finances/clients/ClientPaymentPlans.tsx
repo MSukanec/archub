@@ -101,7 +101,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     )
   }
 
-  if (installments.length === 0) {
+  if (!existingPaymentPlan) {
     return (
       <EmptyState
         icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
@@ -115,7 +115,7 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
               className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
-              {existingPaymentPlan ? 'Cambiar Plan de Pago' : 'Nuevo Plan de Pagos'}
+              Nuevo Plan de Pagos
             </Button>
 
           </div>
