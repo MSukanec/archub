@@ -643,6 +643,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_clients')
         .select(`
           project_client_id,
+          project_installment_id,
           project_clients:project_client_id (
             id,
             unit,
@@ -668,7 +669,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           return {
             project_client_id: assignment.project_client_id,
             unit: projectClient?.unit || 'N/A',
-            client_name: clientName
+            client_name: clientName,
+            project_installment_id: assignment.project_installment_id,
+            installment_display: assignment.project_installment_id ? 'Cuota asignada' : 'Sin cuota'
           }
         })
 
