@@ -1,0 +1,238 @@
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
+
+interface InstallmentData {
+  id: string
+  project_id: string
+  organization_id: string
+  date: string
+  number: number
+  index: number
+  created_at: string
+}
+
+interface ClientCommitment {
+  id: string
+  project_id: string
+  client_id: string
+  functional_unit: string
+  committed_amount: number
+}
+
+interface HeatmapCellData {
+  functionalUnit: string
+  installmentNumber: number
+  amount: number | null
+  isPaid: boolean
+}
+
+interface InstallmentHeatmapChartProps {
+  projectId: string
+  organizationId: string
+}
+
+export default function InstallmentHeatmapChart({ projectId, organizationId }: InstallmentHeatmapChartProps) {
+  const { data: userData } = useCurrentUser()
+
+  // Fetch installments
+  const { data: installments, isLoading: installmentsLoading } = useQuery({
+    queryKey: ['project-installments', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_installments')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .order('number', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching installments:', error)
+        throw error
+      }
+
+      return data as InstallmentData[]
+    },
+    enabled: !!projectId && !!organizationId
+  })
+
+  // Fetch client commitments
+  const { data: commitments, isLoading: commitmentsLoading } = useQuery({
+    queryKey: ['client-commitments', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_clients')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('functional_unit', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching commitments:', error)
+        throw error
+      }
+
+      return data as ClientCommitment[]
+    },
+    enabled: !!projectId
+  })
+
+  // Fetch payments data (movements related to client payments)
+  const { data: payments, isLoading: paymentsLoading } = useQuery({
+    queryKey: ['client-payments', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('movements')
+        .select(`
+          *,
+          movement_clients (
+            project_client_id,
+            project_clients (
+              functional_unit
+            )
+          )
+        `)
+        .eq('project_id', projectId)
+        .eq('organization_id', organizationId)
+        .eq('subcategory_id', 'f3b96eda-15d5-4c96-ade7-6f53685115d3') // Subcategoría para Aportes de Terceros
+
+      if (error) {
+        console.error('Error fetching payments:', error)
+        throw error
+      }
+
+      return data
+    },
+    enabled: !!projectId && !!organizationId
+  })
+
+  const isLoading = installmentsLoading || commitmentsLoading || paymentsLoading
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Cargando datos del plan de cuotas...</span>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!installments?.length || !commitments?.length) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Plan de Cuotas por Unidad Funcional</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">
+            {!installments?.length && "No hay cuotas definidas"}
+            {!commitments?.length && "No hay unidades funcionales registradas"}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Generate heatmap data
+  const heatmapData: HeatmapCellData[][] = []
+  
+  // Create rows for each functional unit
+  commitments.forEach((commitment, rowIndex) => {
+    const rowData: HeatmapCellData[] = []
+    
+    // Create columns for each installment
+    installments.forEach((installment) => {
+      // Find payments for this functional unit and installment
+      const relatedPayments = payments?.filter(payment => 
+        payment.movement_clients?.some((mc: any) => 
+          mc.project_clients?.functional_unit === commitment.functional_unit
+        )
+      ) || []
+      
+      const totalPaid = relatedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+      
+      rowData.push({
+        functionalUnit: commitment.functional_unit,
+        installmentNumber: installment.number,
+        amount: totalPaid > 0 ? totalPaid : null,
+        isPaid: totalPaid > 0
+      })
+    })
+    
+    heatmapData.push(rowData)
+  })
+
+  const maxInstallmentNumber = Math.max(...installments.map(i => i.number))
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Plan de Cuotas por Unidad Funcional</CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full">
+            {/* Header row with installment numbers */}
+            <div className="flex border-b border-border">
+              <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
+                Unidad Funcional
+              </div>
+              {installments.map((installment) => (
+                <div
+                  key={installment.number}
+                  className="w-20 p-3 bg-muted/50 font-medium text-sm text-center border-l border-border"
+                >
+                  Cuota {installment.number}
+                </div>
+              ))}
+            </div>
+
+            {/* Data rows */}
+            {heatmapData.map((rowData, rowIndex) => (
+              <div key={commitments[rowIndex].id} className="flex border-b border-border">
+                <div className="w-32 p-3 font-medium text-sm bg-background">
+                  {commitments[rowIndex].functional_unit}
+                </div>
+                {rowData.map((cellData, colIndex) => (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className={`w-20 p-3 text-center text-sm border-l border-border transition-colors ${
+                      cellData.isPaid
+                        ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200'
+                        : 'bg-gray-50 dark:bg-gray-800 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {cellData.amount ? (
+                      <div className="font-medium">
+                        ${cellData.amount.toLocaleString()}
+                      </div>
+                    ) : (
+                      <div className="opacity-50">-</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-6 mt-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded"></div>
+            <span>Cuota pagada</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded"></div>
+            <span>Cuota pendiente</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

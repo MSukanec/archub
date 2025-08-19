@@ -2,10 +2,10 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Calendar, Plus } from 'lucide-react'
-import { Table } from '@/components/ui-custom/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
+import InstallmentHeatmapChart from '@/components/charts/clients/InstallmentHeatmapChart'
 
 interface ClientPaymentPlansProps {
   projectId: string
@@ -15,7 +15,7 @@ interface ClientPaymentPlansProps {
 export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentPlansProps) {
   const { openModal } = useGlobalModalStore()
 
-  // Fetch installments data
+  // Fetch installments to check if any exist
   const { data: installments = [], isLoading } = useQuery({
     queryKey: ['project-installments', projectId],
     queryFn: async () => {
@@ -37,55 +37,6 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     },
     enabled: !!projectId && !!organizationId && !!supabase
   })
-
-  const columns = [
-    {
-      key: "number",
-      label: "Número de Cuota",
-      width: "25%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: any) => (
-        <div className="text-sm font-medium">
-          Cuota #{item.number}
-        </div>
-      )
-    },
-    {
-      key: "created_at", 
-      label: "Fecha de Creación",
-      width: "35%",
-      sortable: true,
-      sortType: "date" as const,
-      render: (item: any) => {
-        const date = new Date(item.created_at)
-        return (
-          <div className="text-sm">
-            {date.toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </div>
-        )
-      }
-    },
-    {
-      key: "status",
-      label: "Estado",
-      width: "40%",
-      render: (item: any) => (
-        <div className="text-sm text-muted-foreground">
-          Pendiente
-        </div>
-      )
-    }
-  ]
-
-  const handleEdit = (item: any) => {
-    // TODO: Implement edit functionality
-    console.log('Edit installment:', item)
-  }
 
   if (isLoading) {
     return (
@@ -124,24 +75,5 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     )
   }
 
-  return (
-    <div className="space-y-4">
-      <Table
-        data={installments}
-        columns={columns}
-        defaultSort={{ key: 'number', direction: 'asc' }}
-        getItemId={(item) => item.id}
-        onCardClick={handleEdit}
-        renderCard={(item) => (
-          <div className="p-4 border rounded-lg space-y-2 cursor-pointer hover:bg-accent/50 transition-colors">
-            <div className="font-medium">Cuota #{item.number}</div>
-            <div className="text-sm text-muted-foreground">
-              Creada: {new Date(item.created_at).toLocaleDateString('es-ES')}
-            </div>
-            <div className="text-sm text-muted-foreground">Estado: Pendiente</div>
-          </div>
-        )}
-      />
-    </div>
-  )
+  return <InstallmentHeatmapChart projectId={projectId} organizationId={organizationId} />
 }
