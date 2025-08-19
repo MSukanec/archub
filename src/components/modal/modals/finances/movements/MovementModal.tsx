@@ -1458,8 +1458,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const normalPanel = (
     <Form {...form} key={`normal-${movementType}`}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* LAYOUT DE DOS COLUMNAS: FECHA Y TIPO DE MOVIMIENTO */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* LAYOUT: FECHA 1/3 Y TIPO DE MOVIMIENTO 2/3 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* 1. FECHA */}
           <FormField
             control={form.control}
@@ -1479,8 +1479,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             )}
           />
 
-          {/* 2. TIPO DE MOVIMIENTO CON CASCADINGSELECT */}
-          <FormItem>
+          {/* 2. TIPO DE MOVIMIENTO CON CASCADINGSELECT - OCUPA 2 COLUMNAS */}
+          <FormItem className="md:col-span-2">
             <FormLabel>Tipo de Movimiento *</FormLabel>
             <FormControl>
               <CascadingSelect

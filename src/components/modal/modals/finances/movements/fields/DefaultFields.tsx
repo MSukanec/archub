@@ -2,6 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
+import { AmountInput } from '@/components/ui-custom/AmountInput'
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 
@@ -170,6 +171,32 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
+      {/* PRUEBA: AMOUNTINPUT - Nueva versión combinada */}
+      <div className="col-span-2">
+        <FormItem>
+          <FormLabel>Monto con Moneda (Prueba AmountInput) *</FormLabel>
+          <FormControl>
+            <AmountInput
+              value={form.watch('amount') || undefined}
+              currency={form.watch('currency_id') || ''}
+              currencies={currencies?.map(orgCurrency => ({
+                id: orgCurrency.currency?.id || '',
+                name: orgCurrency.currency?.name || 'Sin nombre',
+                symbol: orgCurrency.currency?.symbol || '$'
+              })) || []}
+              onValueChange={(value) => {
+                form.setValue('amount', value || 0)
+              }}
+              onCurrencyChange={(currencyId) => {
+                form.setValue('currency_id', currencyId)
+              }}
+              placeholder="0.00"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </div>
     </>
   )
 }
