@@ -51,7 +51,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
       return {
         date: new Date(editingInstallment.date),
         number: editingInstallment.number,
-        index: editingInstallment.index || 0
+        index: editingInstallment.index_reference || 0
       }
     }
     return {
@@ -77,7 +77,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
         project_id: projectId,
         organization_id: organizationId,
         number: data.number,
-        index: data.index,
+        index_reference: data.index,
         date: data.date.toISOString().split('T')[0] // Solo fecha, sin hora
       }
 

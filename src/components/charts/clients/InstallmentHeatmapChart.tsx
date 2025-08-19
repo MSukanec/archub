@@ -318,7 +318,7 @@ export default function InstallmentHeatmapChart({
             {/* Header row with units */}
             <div className="flex border-b border-border">
               <div className="w-32 p-3 bg-muted/50 font-medium text-sm">
-                Cuota
+                Cuota / Unidad
               </div>
               {commitments.map((commitment) => commitment?.unit ? (
                 <div
