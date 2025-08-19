@@ -188,36 +188,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
 
-  // Handle type change para detectar conversión (como en el modal original) - MOVED UP
-  const handleTypeChange = React.useCallback((newTypeId: string) => {
-    if (!newTypeId || !movementConcepts) return
-    
-    setSelectedTypeId(newTypeId)
-    
-    // Detectar tipo de movimiento por view_mode 
-    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
-    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-    
-    if (viewMode === "conversion") {
-      setMovementType('conversion')
-    } else if (viewMode === "transfer") {
-      setMovementType('transfer')
-    } else {
-      setMovementType('normal')
-    }
-    
-    // Sincronizar type_id en todos los formularios
-    form.setValue('type_id', newTypeId)
-    conversionForm.setValue('type_id', newTypeId)
-    transferForm.setValue('type_id', newTypeId)
-    
-    // Reset categorías
-    setSelectedCategoryId('')
-    setSelectedSubcategoryId('')
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm, transferForm])
-
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
@@ -268,98 +238,37 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   })
 
-  // Set default values when data loads (like the original modal)
-  React.useEffect(() => {
-    if (defaultCurrency && !form.watch('currency_id')) {
-      form.setValue('currency_id', defaultCurrency)
-    }
-    if (defaultWallet && !form.watch('wallet_id')) {
-      form.setValue('wallet_id', defaultWallet)
-    }
-    if (currentMember?.id && !form.watch('created_by')) {
-      form.setValue('created_by', currentMember.id)
+  // Handle type change para detectar conversión (como en el modal original) - MOVED AFTER FORMS
+  const handleTypeChange = React.useCallback((newTypeId: string) => {
+    if (!newTypeId || !movementConcepts) return
+    
+    setSelectedTypeId(newTypeId)
+    
+    // Detectar tipo de movimiento por view_mode 
+    const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
+    const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+    
+    if (viewMode === "conversion") {
+      setMovementType('conversion')
+    } else if (viewMode === "transfer") {
+      setMovementType('transfer')
+    } else {
+      setMovementType('normal')
     }
     
-    // También actualizar conversion form
-    if (currentMember?.id && !conversionForm.watch('created_by')) {
-      conversionForm.setValue('created_by', currentMember.id)
-    }
-    if (defaultCurrency && !conversionForm.watch('currency_id_from')) {
-      conversionForm.setValue('currency_id_from', defaultCurrency)
-    }
-    if (defaultWallet && !conversionForm.watch('wallet_id_from')) {
-      conversionForm.setValue('wallet_id_from', defaultWallet)
-    }
+    // Sincronizar type_id en todos los formularios
+    form.setValue('type_id', newTypeId)
+    conversionForm.setValue('type_id', newTypeId)
+    transferForm.setValue('type_id', newTypeId)
+    
+    // Reset categorías
+    setSelectedCategoryId('')
+    setSelectedSubcategoryId('')
+    form.setValue('category_id', '')
+    form.setValue('subcategory_id', '')
+  }, [movementConcepts, form, conversionForm, transferForm])
 
-    // También actualizar transfer form
-    if (currentMember?.id && !transferForm.watch('created_by')) {
-      transferForm.setValue('created_by', currentMember.id)
-    }
-    if (defaultCurrency && !transferForm.watch('currency_id')) {
-      transferForm.setValue('currency_id', defaultCurrency)
-    }
-    if (defaultWallet && !transferForm.watch('wallet_id_from')) {
-      transferForm.setValue('wallet_id_from', defaultWallet)
-    }
-
-    // Sincronizar selectedTypeId con los valores de los formularios si no se está editando
-    if (!isEditing) {
-      const normalTypeId = form.watch('type_id')
-      const conversionTypeId = conversionForm.watch('type_id')
-      const transferTypeId = transferForm.watch('type_id')
-      
-      if (normalTypeId && !selectedTypeId) {
-        setSelectedTypeId(normalTypeId)
-      } else if (conversionTypeId && !selectedTypeId) {
-        setSelectedTypeId(conversionTypeId)
-      } else if (transferTypeId && !selectedTypeId) {
-        setSelectedTypeId(transferTypeId)
-      }
-    }
-  }, [defaultCurrency, defaultWallet, currentMember, form, conversionForm, transferForm, selectedTypeId, isEditing])
-
-  // Effect para cargar datos existentes cuando se está editando
-  React.useEffect(() => {
-    if (isEditing && editingMovement) {
-      // Cargar selecciones jerárquicas
-      setSelectedTypeId(editingMovement.type_id || '')
-      setSelectedCategoryId(editingMovement.category_id || '')
-      setSelectedSubcategoryId(editingMovement.subcategory_id || '')
-
-      // Determinar tipo de movimiento
-      if (editingMovement.is_conversion || editingMovement.conversion_group_id) {
-        setMovementType('conversion')
-      } else if (editingMovement.transfer_group_id) {
-        setMovementType('transfer')
-      } else {
-        setMovementType('normal')
-      }
-
-      // Cargar personal asignado si existe
-      if (editingMovement.id) {
-        loadMovementPersonnel(editingMovement.id)
-        loadMovementSubcontracts(editingMovement.id)
-        loadMovementProjectClients(editingMovement.id)
-      }
-    } else {
-      // Para nuevos movimientos, inicializar con valores por defecto
-      setMovementType('normal')
-      setSelectedTypeId('')
-      setSelectedCategoryId('')
-      setSelectedSubcategoryId('')
-    }
-  }, [isEditing, editingMovement])
-
-  // Effect para inicializar selectedTypeId cuando se abre un nuevo modal
-  React.useEffect(() => {
-    if (!isEditing && !selectedTypeId && movementConcepts && movementConcepts.length > 0) {
-      // Buscar el primer tipo disponible (excluyendo system types si es posible)
-      const firstAvailableType = movementConcepts.find((concept: any) => !concept.is_system) || movementConcepts[0]
-      if (firstAvailableType) {
-        handleTypeChange(firstAvailableType.id)
-      }
-    }
-  }, [movementConcepts, selectedTypeId, isEditing, handleTypeChange])
+  // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
 
   // Función para cargar personal asignado del movimiento
   const loadMovementPersonnel = async (movementId: string) => {
