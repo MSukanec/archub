@@ -3,8 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Calendar } from 'lucide-react'
 import { FormModalLayout } from '../../../form/FormModalLayout'
-import { FormModalHeader } from '../../../form/FormModalHeader'
-import { FormModalFooter } from '../../../form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -236,21 +234,30 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
   )
 
   const headerContent = (
-    <FormModalHeader 
-      title="Crear Plan de Cuotas"
-      icon={Calendar}
-    />
+    <div className="flex items-center gap-3">
+      <Calendar className="h-5 w-5 text-accent" />
+      <h2 className="text-lg font-semibold">Crear Plan de Cuotas</h2>
+    </div>
   )
 
   const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel="Crear Cuotas"
-      onRightClick={form.handleSubmit(handleSubmit)}
-      submitDisabled={createInstallmentsMutation.isPending}
-      showLoadingSpinner={createInstallmentsMutation.isPending}
-    />
+    <div className="flex justify-end gap-2">
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        onClick={form.handleSubmit(handleSubmit)}
+        disabled={createInstallmentsMutation.isPending}
+        className="px-4 py-2 text-sm font-medium text-white bg-accent rounded-md hover:bg-accent/90 disabled:opacity-50"
+      >
+        {createInstallmentsMutation.isPending ? 'Creando...' : 'Crear Cuotas'}
+      </button>
+    </div>
   )
 
   return (
