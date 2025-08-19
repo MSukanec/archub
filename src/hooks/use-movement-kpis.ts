@@ -48,11 +48,12 @@ export function useMovementKPIs(organizationId?: string, projectId?: string): Mo
       }>();
 
       movements.forEach(movement => {
-        if (!movement.movement_data?.currency) return;
+        if (!movement.movement_data?.currency || !movement.movement_data?.type) return;
 
         const currency = movement.movement_data.currency;
         const currencyId = currency.id;
         const amount = movement.amount || 0;
+        const typeName = movement.movement_data.type?.name?.toLowerCase() || '';
 
         if (!currencyTotals.has(currencyId)) {
           currencyTotals.set(currencyId, {
@@ -67,12 +68,16 @@ export function useMovementKPIs(organizationId?: string, projectId?: string): Mo
         }
 
         const currencyData = currencyTotals.get(currencyId)!;
-        currencyData.balance += amount;
         currencyData.movementCount += 1;
 
-        if (amount > 0) {
-          currencyData.positiveTotal += amount;
-        } else {
+        // Calculate balance correctly based on movement type
+        if (typeName.includes('ingreso')) {
+          // Ingresos suman al balance
+          currencyData.balance += Math.abs(amount);
+          currencyData.positiveTotal += Math.abs(amount);
+        } else if (typeName.includes('egreso')) {
+          // Egresos restan del balance
+          currencyData.balance -= Math.abs(amount);
           currencyData.negativeTotal += Math.abs(amount);
         }
       });
