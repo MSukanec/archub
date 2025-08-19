@@ -98,13 +98,13 @@ export function ClientPaymentPlans({ projectId, organizationId }: ClientPaymentP
     return (
       <EmptyState
         icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
-        title="No hay cuotas definidas"
-        description="Crea una cuota individual o genera un plan completo para gestionar los pagos mensuales del proyecto."
+        title="No hay plan de pagos"
+        description="Crea un plan de pagos para generar automáticamente todas las cuotas del proyecto con la frecuencia y fechas configuradas."
         action={
           <div className="flex gap-2 relative z-30">
             <Button 
               onClick={() => openModal('client-payment-plans', { projectId, organizationId })}
-              variant="secondary"
+              variant="default"
               className="flex items-center gap-2 relative z-30"
             >
               <Plus className="h-4 w-4" />
