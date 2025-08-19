@@ -93,6 +93,36 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     setPanel('edit')
   }, [])
 
+  // Debug logs para verificar los datos de edición
+  useEffect(() => {
+    if (isEditing && editingClient) {
+      console.log('🔍 ClientObligationModal: Editing client data:', editingClient)
+      console.log('🔍 ClientObligationModal: exchange_rate value:', editingClient.exchange_rate)
+    }
+  }, [isEditing, editingClient])
+
+  // Reinicializar formulario cuando se está editando
+  useEffect(() => {
+    if (isEditing && editingClient) {
+      console.log('🔄 ClientObligationModal: Reinicializando formulario con:', {
+        client_id: editingClient.client_id,
+        unit: editingClient.unit,
+        currency_id: editingClient.currency_id,
+        committed_amount: editingClient.committed_amount,
+        exchange_rate: editingClient.exchange_rate
+      })
+      
+      // Reinicializar todos los campos del formulario
+      form.reset({
+        client_id: editingClient.client_id || '',
+        unit: editingClient.unit || '',
+        currency_id: editingClient.currency_id || userData?.organization_preferences?.default_currency || '',
+        committed_amount: editingClient.committed_amount || 0,
+        exchange_rate: editingClient.exchange_rate || undefined
+      })
+    }
+  }, [isEditing, editingClient, form, userData?.organization_preferences?.default_currency])
+
   // Get organization contacts
   const { data: organizationContacts } = useQuery({
     queryKey: ['organization-contacts', organizationId],
