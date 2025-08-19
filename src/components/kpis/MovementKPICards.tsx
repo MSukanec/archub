@@ -99,9 +99,17 @@ export function MovementKPICards({ organizationId, projectId }: MovementKPICards
     }
   ];
 
+  // Filter out cards that have no movements
+  const cardsWithMovements = kpiCards.filter(card => card.balances.length > 0);
+
+  // If no cards have movements, don't render anything
+  if (cardsWithMovements.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      {kpiCards.map((card, cardIndex) => (
+    <div className={`grid gap-4 mb-6 ${cardsWithMovements.length === 1 ? 'grid-cols-1 max-w-md' : 'grid-cols-1 md:grid-cols-2'}`}>
+      {cardsWithMovements.map((card, cardIndex) => (
         <motion.div
           key={card.title}
           initial={{ opacity: 0, y: 20 }}
