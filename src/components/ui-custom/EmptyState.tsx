@@ -130,7 +130,7 @@ export function EmptyState({
           )}
           
           {action && (
-            <div className="pt-4">
+            <div className="pt-4 flex justify-center">
               {action}
             </div>
           )}
