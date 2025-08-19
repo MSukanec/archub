@@ -244,8 +244,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         
-        {/* Primera columna: Cliente - Unidad */}
-        <div className="space-y-4">
+        {/* Fila: Cliente | Unidad Funcional */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Cliente */}
           <FormField
             control={form.control}
@@ -305,8 +305,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           />
         </div>
 
-        {/* Segunda columna: Moneda - Cantidad */}
-        <div className="space-y-4">
+        {/* Fila: Moneda | Cantidad */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Moneda */}
           <FormField
             control={form.control}
@@ -380,7 +380,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
 
   return (
     <FormModalLayout
-      columns={2}
+      columns={1}
       viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
