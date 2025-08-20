@@ -150,7 +150,7 @@ export function ActionBarMobile() {
               {/* Botón Limpiar Filtros */}
               <div className="pt-2 border-t" style={{ borderColor: 'var(--menues-border)' }}>
                 <Button
-                  variant="outline"
+                  variant="default"
                   onClick={() => {
                     // Usar la función de limpiar filtros de la configuración
                     if (filterConfig.onClearFilters) {
