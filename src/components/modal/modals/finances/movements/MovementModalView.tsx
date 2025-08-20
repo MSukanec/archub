@@ -64,9 +64,26 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
     if (movement._isTransfer) {
       return { type: 'Transferencia', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }
     }
+    
+    // Determinar por categoría del movimiento, no solo por monto
+    const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
+    const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
+    
+    // Si tiene tipo de datos, usarlo para determinar
+    if (typeName.includes('ingreso') || categoryName.includes('ingreso')) {
+      return { type: 'Ingreso', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
+    }
+    
+    // Si es egreso o tiene monto negativo, es egreso
+    if (typeName.includes('egreso') || categoryName.includes('egreso') || movement.amount < 0) {
+      return { type: 'Egreso', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }
+    }
+    
+    // Por defecto, si el monto es positivo y no está clasificado, considerarlo ingreso
     if (movement.amount > 0) {
       return { type: 'Ingreso', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
     }
+    
     return { type: 'Egreso', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }
   }
 
@@ -88,7 +105,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
           {movementTypeInfo.type}
         </Badge>
         <div className="text-right">
-          <div className="text-2xl font-bold text-foreground">
+          <div className={`text-2xl font-bold ${movement.amount < 0 || movement.movement_data?.type?.name?.toLowerCase()?.includes('egreso') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
             {formatAmount(movement.amount, movement.movement_data?.currency?.symbol)}
           </div>
           <div className="text-sm text-muted-foreground">
