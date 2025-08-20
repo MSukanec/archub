@@ -93,14 +93,15 @@ export function ActionBarMobile() {
 
       {/* Filter Popover */}
       {showFilterPopover && filterConfig && (
-        <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
           <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 z-50"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
               borderColor: 'var(--menues-border)',
               width: 'calc(100vw - 32px)',
-              maxWidth: '400px'
+              maxWidth: '400px',
+              zIndex: 60
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -117,12 +118,12 @@ export function ActionBarMobile() {
                 </Button>
               </div>
               
-              {filterConfig.filters?.map((filter: any) => (
-                <div key={filter.key} className="space-y-2">
+              {filterConfig.filters?.map((filter: any, index: number) => (
+                <div key={filter.key || index} className="space-y-2">
                   <Label htmlFor={filter.key} style={{ color: 'var(--menues-fg)' }}>
                     {filter.label}
                   </Label>
-                  <Select value={filter.value} onValueChange={filter.onValueChange}>
+                  <Select value={filter.value || ''} onValueChange={filter.onChange}>
                     <SelectTrigger 
                       style={{ 
                         backgroundColor: 'var(--menues-input-bg)',
@@ -130,11 +131,14 @@ export function ActionBarMobile() {
                         color: 'var(--menues-input-fg)'
                       }}
                     >
-                      <SelectValue placeholder={filter.placeholder} />
+                      <SelectValue placeholder={filter.placeholder || 'Seleccionar...'} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {filter.options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
+                    <SelectContent style={{ zIndex: 70 }}>
+                      {filter.allOptionLabel && (
+                        <SelectItem value="all">{filter.allOptionLabel}</SelectItem>
+                      )}
+                      {filter.options?.map((option: any, optIndex: number) => (
+                        <SelectItem key={option.value || optIndex} value={option.value}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -149,7 +153,7 @@ export function ActionBarMobile() {
 
       {/* Action Bar */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-30 px-4 py-3"
+        className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
         style={{ 
           backgroundColor: 'var(--menues-bg)',
           borderTopColor: 'var(--menues-border)',
