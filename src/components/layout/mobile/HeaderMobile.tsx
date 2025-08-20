@@ -80,15 +80,11 @@ export function HeaderMobile({
             </div>
           </div>
 
-          {/* Right: ONLY Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Right: ONLY Menu Icon */}
+          <Menu 
+            className="w-10 h-10 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
             onClick={openMenu}
-            className="p-2"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
+          />
         </div>
 
         {/* Tabs Row */}
