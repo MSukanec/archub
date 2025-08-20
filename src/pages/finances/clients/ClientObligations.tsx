@@ -810,7 +810,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       {/* Desktop: Table View */}
       {commitmentSummary.length > 0 && !isMobile && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Compromisos Registrados</h3>
           <Table
             data={sortedCommitmentSummary}
             columns={contactSummaryColumns}
@@ -823,7 +822,6 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       {/* Mobile: Row/Card View */}
       {commitmentSummary.length > 0 && isMobile && (
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Compromisos Registrados</h3>
           <div className="space-y-3">
             {sortedCommitmentSummary.map((commitment) => (
               <ClientObligationRow
