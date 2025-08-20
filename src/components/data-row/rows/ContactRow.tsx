@@ -70,7 +70,16 @@ export default function ContactRow({
   // Determine display name - prioritize full_name, fallback to first_name + last_name
   const displayName = full_name || `${first_name} ${last_name || ""}`.trim();
 
-  // Determine subtitle - prioritize email, fallback to company_name
+  // Prepare contact type chips
+  const contactTypeLines = [];
+  if (contact.contact_types && contact.contact_types.length > 0) {
+    contactTypeLines.push({
+      text: contact.contact_types.map(type => type.name).join(', '),
+      tone: 'info' as const
+    });
+  }
+
+  // Determine subtitle - prioritize email
   let subtitle = email || "";
   if (!subtitle && company_name) {
     subtitle = company_name;
@@ -89,6 +98,7 @@ export default function ContactRow({
   const dataRowProps: DataRowCardProps = {
     title: displayName,
     subtitle,
+    lines: contactTypeLines,
     avatarUrl: avatarUrl || undefined,
     avatarFallback,
     selectable,
