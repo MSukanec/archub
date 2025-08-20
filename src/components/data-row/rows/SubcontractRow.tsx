@@ -173,43 +173,41 @@ export default function SubcontractRow({
     ? formatCurrency(subcontract.analysis.pagoALaFecha, subcontract.currency?.symbol)
     : formatCurrency(0, subcontract.currency?.symbol);
 
+  // Formatear saldo
+  const formattedBalance = subcontract.analysis?.saldo 
+    ? formatCurrency(subcontract.analysis.saldo, subcontract.currency?.symbol)
+    : formatCurrency((subcontract.amount_total || 0) - (subcontract.analysis?.pagoALaFecha || 0), subcontract.currency?.symbol);
+
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
-    // Content
+    // Content - Título principal es el nombre del subcontrato
     title: subcontract.title,
     subtitle: subcontract.code ? `Código: ${subcontract.code}` : undefined,
     
     // Leading - Avatar del subcontrato
     avatarFallback: getSubcontractInitials(subcontract),
     
-    // Lines - Información del contratista y pagos
+    // Lines - Información del subcontratista, estado y montos
     lines: [
       {
         text: contractorName,
         tone: subcontract.status === 'awarded' ? 'muted' : 'muted',
-        hintRight: statusText
+        hintRight: `T: ${formattedTotal}`
       },
       {
-        text: `T: ${formattedTotal}`,
+        text: statusText,
+        tone: statusColor === 'success' ? 'success' : statusColor === 'danger' ? 'danger' : 'muted',
+        hintRight: `P: ${formattedPaid}`
+      },
+      {
+        text: " ",
         tone: 'muted' as const,
-        hintRight: subcontract.currency?.code
-      },
-      {
-        text: `P: ${formattedPaid}`,
-        tone: paymentPercentage > 0 ? 'success' : 'muted',
-        hintRight: paymentPercentage > 0 ? `${paymentPercentage.toFixed(1)}%` : '0%'
+        hintRight: `S: ${formattedBalance}`
       }
     ],
     
     // Visual
     borderColor: statusColor,
-    
-    // Trailing - Badge del estado
-    badgeText: statusText,
-    
-    // Amount - monto total
-    amount: subcontract.amount_total,
-    currencyCode: subcontract.currency?.code,
     
     // Behavior
     onClick,
