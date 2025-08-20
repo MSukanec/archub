@@ -94,61 +94,71 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
       <Separator />
 
       {/* Información principal */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fecha */}
-        <div className="flex items-center gap-2 text-sm">
-          <Calendar className="h-4 w-4 text-accent" />
-          <span className="font-medium text-muted-foreground">Fecha:</span>
-          <span className="text-foreground">{formatDate(movement.movement_date)}</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Calendar className="h-4 w-4 text-accent" />
+            Fecha
+          </div>
+          <div className="text-sm text-foreground">
+            {formatDate(movement.movement_date)}
+          </div>
         </div>
 
         {/* Categoría */}
         {movement.movement_data?.category && (
-          <div className="flex items-center gap-2 text-sm">
-            <Tag className="h-4 w-4 text-accent" />
-            <span className="font-medium text-muted-foreground">Categoría:</span>
-            <span className="text-foreground">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Tag className="h-4 w-4 text-accent" />
+              Categoría
+            </div>
+            <div className="text-sm text-foreground">
               {movement.movement_data.type?.name} / {movement.movement_data.category?.name}
               {movement.movement_data?.subcategory && (
                 <span> / {movement.movement_data.subcategory.name}</span>
               )}
-            </span>
+            </div>
           </div>
         )}
 
         {/* Billetera */}
-        <div className="flex items-center gap-2 text-sm">
-          <Wallet className="h-4 w-4 text-accent" />
-          <span className="font-medium text-muted-foreground">Billetera:</span>
-          <span className="text-foreground">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Wallet className="h-4 w-4 text-accent" />
+            Billetera
+          </div>
+          <div className="text-sm text-foreground">
             {movement.movement_data?.wallet?.name || 'No especificada'}
-          </span>
+          </div>
         </div>
 
         {/* Moneda */}
-        <div className="flex items-center gap-2 text-sm">
-          <DollarSign className="h-4 w-4 text-accent" />
-          <span className="font-medium text-muted-foreground">Moneda:</span>
-          <span className="text-foreground">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <DollarSign className="h-4 w-4 text-accent" />
+            Moneda
+          </div>
+          <div className="text-sm text-foreground">
             {movement.movement_data?.currency?.name || 'No especificada'}
             {movement.movement_data?.currency?.symbol && (
               <span className="ml-2 font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
                 {movement.movement_data?.currency?.symbol}
               </span>
             )}
-          </span>
+          </div>
         </div>
-
-
 
         {/* Proyecto */}
         {movement.movement_data?.project && (
-          <div className="flex items-center gap-2 text-sm">
-            <Building className="h-4 w-4 text-accent" />
-            <span className="font-medium text-muted-foreground">Proyecto:</span>
-            <span className="text-foreground">
+          <div className="space-y-2 md:col-span-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Building className="h-4 w-4 text-accent" />
+              Proyecto
+            </div>
+            <div className="text-sm text-foreground">
               {movement.movement_data.project.name}
-            </span>
+            </div>
           </div>
         )}
       </div>
@@ -233,33 +243,45 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
       {(movement.movement_data?.client_name || movement.movement_data?.installment_number) && (
         <>
           <Separator />
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
               <User className="h-4 w-4 text-accent" />
-              Detalles del Cliente
+              Aportes de Clientes
             </h3>
             
             {movement.movement_data?.client_name && (
-              <div className="flex items-center gap-2 text-sm">
-                <User className="h-4 w-4 text-accent" />
-                <span className="font-medium text-muted-foreground">Cliente:</span>
-                <span className="text-foreground">{movement.movement_data.client_name}</span>
-              </div>
-            )}
-            
-            {movement.movement_data?.installment_number && (
-              <div className="flex items-center gap-2 text-sm">
-                <Hash className="h-4 w-4 text-accent" />
-                <span className="font-medium text-muted-foreground">Cuota:</span>
-                <span className="text-foreground">#{movement.movement_data.installment_number}</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <User className="h-4 w-4 text-accent" />
+                  Cliente
+                </div>
+                <div className="text-sm text-foreground">
+                  {movement.movement_data.client_name}
+                </div>
               </div>
             )}
             
             {movement.movement_data?.unit && (
-              <div className="flex items-center gap-2 text-sm">
-                <Building className="h-4 w-4 text-accent" />
-                <span className="font-medium text-muted-foreground">Unidad:</span>
-                <span className="text-foreground">{movement.movement_data.unit}</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Building className="h-4 w-4 text-accent" />
+                  Unidad Funcional
+                </div>
+                <div className="text-sm text-foreground">
+                  {movement.movement_data.unit}
+                </div>
+              </div>
+            )}
+            
+            {movement.movement_data?.installment_number && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Hash className="h-4 w-4 text-accent" />
+                  Cuota
+                </div>
+                <div className="text-sm text-foreground">
+                  #{movement.movement_data.installment_number}
+                </div>
               </div>
             )}
           </div>
