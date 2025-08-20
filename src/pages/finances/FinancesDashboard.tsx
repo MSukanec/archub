@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,12 +17,19 @@ import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { motion } from 'framer-motion'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
+  const { setSidebarContext } = useNavigationStore()
+
+  // Establecer contexto del sidebar al montar el componente
+  useEffect(() => {
+    setSidebarContext('finances')
+  }, [])
   
   // State for view mode toggle
   const [viewMode, setViewMode] = useState<'project' | 'all'>('project')

@@ -53,13 +53,13 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
 import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useOrganizationWallets } from "@/hooks/use-organization-wallets";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectsMap } from "@/hooks/use-projects";
 import { ProjectBadge } from "@/components/ui-custom/ProjectBadge";
 
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { useNavigationStore } from "@/stores/navigationStore";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";

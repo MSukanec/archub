@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Receipt, Plus, Users } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Layout } from '@/components/layout/desktop/Layout'
@@ -8,11 +8,18 @@ import { supabase } from '@/lib/supabase'
 import { ClientObligations } from './ClientObligations'
 import { ClientPaymentPlans } from './ClientPaymentPlans'
 import { ClientPayments } from './ClientPayments'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 export function Clients() {
   const [activeTab, setActiveTab] = useState("obligations")
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Establecer contexto del sidebar al montar el componente
+  useEffect(() => {
+    setSidebarContext('finances')
+  }, [])
   
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id

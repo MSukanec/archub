@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useClientAnalysis } from '@/hooks/use-client-analysis'
 import { useMobile } from '@/hooks/use-mobile'
 import { ClientObligationRow } from '@/components/data-row/rows'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 interface ClientObligationsProps {
   projectId: string
@@ -25,6 +26,12 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const isMobile = useMobile()
+  const { setSidebarContext } = useNavigationStore()
+
+  // Establecer contexto del sidebar al montar el componente
+  useEffect(() => {
+    setSidebarContext('finances')
+  }, [])
 
   // Fetch client analysis for KPIs
   const { data: clientAnalysis, isLoading: isLoadingAnalysis } = useClientAnalysis(projectId)
