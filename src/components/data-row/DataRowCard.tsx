@@ -289,6 +289,19 @@ export default function DataRowCard({
               {subtitle}
             </div>
           )}
+
+          {/* Lines en content section para 3ra línea */}
+          {displayLines.map((line, index) => (
+            <div key={index} className="truncate leading-5">
+              <span className={cn(
+                'text-sm',
+                getToneClasses(line.tone),
+                line.mono && 'font-mono'
+              )}>
+                {line.text}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Trailing Section */}
@@ -303,22 +316,18 @@ export default function DataRowCard({
             </div>
           )}
 
-          {/* Lines auxiliares en el trailing */}
-          {lines.slice(0, 2).map((line, index) => (
-            <div key={index} className="text-right leading-5">
-              <span className={cn(
-                'text-sm',
-                getToneClasses(line.tone),
-                line.mono && 'font-mono'
-              )}>
-                {line.text}
-              </span>
-              {line.hintRight && (
-                <span className="text-xs text-muted-foreground ml-2">
+          {/* HintRight de todas las lines - hasta 3 líneas */}
+          {displayLines.map((line, index) => (
+            line.hintRight && (
+              <div key={index} className="text-right leading-5">
+                <span className={cn(
+                  'text-sm font-mono',
+                  getToneClasses(line.tone)
+                )}>
                   {line.hintRight}
                 </span>
-              )}
-            </div>
+              </div>
+            )
           ))}
 
           {/* Badge */}

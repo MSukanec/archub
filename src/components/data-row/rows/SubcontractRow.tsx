@@ -194,12 +194,12 @@ export default function SubcontractRow({
         hintRight: `T: ${formattedTotal}` // Línea 1 derecha: Total
       },
       {
-        text: "", // Línea vacía izquierda
+        text: "", // Solo hintRight - no texto izquierda
         tone: 'muted' as const,
         hintRight: `P: ${formattedPaid}` // Línea 2 derecha: Pago
       },
       {
-        text: "", // Línea vacía izquierda  
+        text: "", // Solo hintRight - no texto izquierda
         tone: 'muted' as const,
         hintRight: `S: ${formattedBalance}` // Línea 3 derecha: Saldo
       }
