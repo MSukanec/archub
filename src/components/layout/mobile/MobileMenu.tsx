@@ -38,6 +38,9 @@ import {
   User,
   BarChart3,
   Handshake,
+  Search,
+  Tag,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -320,7 +323,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
   ];
 
-  // Submenus para cada sección principal (igual que SidebarSubmenu.tsx)
+  // Submenus para cada sección principal (actualizado según SidebarSubmenu.tsx)
   const submenuContent = {
     perfil: [
       { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
@@ -328,51 +331,62 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/profile/projects' },
       { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
     ],
+    
     organizacion: [
-      { icon: Home, label: 'Resumen', href: '/organization/dashboard' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity', restricted: 'coming_soon' },
+      { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+      { icon: Crown, label: 'Plan', href: '#', type: 'plan' },
     ],
 
-
+    diseno: [
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
+    ],
 
     construccion: [
-      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Calendar, label: 'Cronograma', href: '/construction/schedule' },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: BarChart3, label: 'Análisis de Costos', href: '/construction/cost-analysis' },
     ],
+    
     finanzas: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: HandCoins, label: 'Aportes de Terceros', href: '/finances/installments' },
-      { icon: Handshake, label: 'Subcontratos', href: '/finances/subcontracts' },
       { icon: Users, label: 'Clientes', href: '/finances/clients' },
-      { icon: Settings, label: 'Preferencias', href: '/finances/preferences' },
+      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis' },
+      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements' },
     ],
-    diseno: [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      { icon: Calendar, label: 'Cronograma', href: '/design/timeline' },
-      { icon: Layout, label: 'Tablero', href: '/design/board', restricted: true },
-      { icon: Calculator, label: 'Cómputo', href: '/design/compute', restricted: true },
+
+    recursos: [
+      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
+      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
+      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
+      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
+      { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
     ],
 
     admin: [
-      { icon: Home, label: 'Panel de Administración', href: '/admin/dashboard' },
-      { icon: CheckSquare, label: 'Tareas Generadas', href: '/admin/generated-tasks' },
-      { icon: Package2, label: 'Parámetros de Tareas', href: '/admin/task-parameters' },
-
-      { icon: Package, label: 'Categorías de Tareas', href: '/admin/categories' },
-      { icon: Users, label: 'Usuarios', href: '/admin/users' },
-      { icon: Crown, label: 'Organizaciones', href: '/admin/organizations' },
-      { icon: Shield, label: 'Roles', href: '/admin/roles' },
-      { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts' },
-      { icon: Package, label: 'Materiales', href: '/admin/materials' },
-      { icon: FileText, label: 'Categorías de Materiales', href: '/admin/material-categories' },
+      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
+      { type: 'section', label: 'COMUNIDAD' },
+      { icon: Building, label: 'Organizaciones', href: '/admin/organizations', indent: true },
+      { icon: Users, label: 'Usuarios', href: '/admin/users', indent: true },
+      { icon: History, label: 'Changelog', href: '/admin/changelogs', indent: true },
+      { type: 'section', label: 'TAREAS' },
+      { icon: CheckSquare, label: 'Tareas', href: '/admin/generated-tasks', indent: true },
+      { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters', indent: true },
+      { icon: FileCode, label: 'Plantillas', href: '/admin/task-templates', indent: true },
+      { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories', indent: true },
+      { type: 'section', label: 'FINANZAS' },
+      { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts', indent: true },
+      { type: 'section', label: 'MATERIALES' },
+      { icon: Package, label: 'Productos', href: '/admin/products', indent: true },
+      { icon: Package2, label: 'Materiales', href: '/admin/materials', indent: true },
+      { icon: Tag, label: 'Marcas', href: '/admin/brands', indent: true },
+      { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories', indent: true },
+      { icon: NotebookPen, label: 'Precios de Materiales', href: '/admin/material-prices', indent: true },
     ]
   };
 
@@ -398,6 +412,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       'construccion': 'Construcción',
       'finanzas': 'Finanzas',
       'diseno': 'Diseño',
+      'recursos': 'Recursos',
       'admin': 'Administración'
     };
     
@@ -508,13 +523,30 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             <nav className="space-y-2">
               {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
                 <div key={index}>
-                  {('restricted' in item && item.restricted) ? (
+                  {/* Section Headers */}
+                  {('type' in item && item.type === 'section') ? (
+                    <div className="px-2 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wider">
+                      {item.label}
+                    </div>
+                  ) : ('type' in item && item.type === 'plan') ? (
+                    // Plan component placeholder - just show as disabled for now
+                    <button
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                      disabled
+                    >
+                      {item.icon && <item.icon className="h-5 w-5" />}
+                      {item.label}
+                    </button>
+                  ) : ('restricted' in item && item.restricted) ? (
                     <CustomRestricted reason="coming_soon" functionName={item.label}>
                       <button
-                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                        className={cn(
+                          "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal",
+                          ('indent' in item && item.indent) && "ml-6"
+                        )}
                         disabled
                       >
-                        <item.icon className="h-5 w-5" />
+                        {item.icon && <item.icon className="h-5 w-5" />}
                         {item.label}
                       </button>
                     </CustomRestricted>
@@ -523,17 +555,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        navigate(item.href);
-                        handleCloseMenu();
+                        if (item.href) {
+                          navigate(item.href);
+                          handleCloseMenu();
+                        }
                       }}
                       className={cn(
                         "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
                         location === item.href 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]",
+                        ('indent' in item && item.indent) && "ml-6"
                       )}
                     >
-                      <item.icon className="h-5 w-5" />
+                      {item.icon && <item.icon className="h-5 w-5" />}
                       {item.label}
                     </button>
                   )}
