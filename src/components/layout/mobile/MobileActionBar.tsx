@@ -95,15 +95,14 @@ export function MobileActionBar() {
       {showFilterPopover && filterConfig && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
           <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 z-50 max-h-96 overflow-y-auto"
+            className="fixed inset-0 z-50 overflow-y-auto"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)',
-              width: 'calc(100vw - 32px)', // full width minus padding
-              maxWidth: '400px'
+              borderColor: 'var(--menues-border)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium" style={{ color: 'var(--menues-fg)' }}>Filtros</h3>
               <Button
@@ -153,6 +152,7 @@ export function MobileActionBar() {
                   Limpiar Filtros
                 </Button>
               )}
+            </div>
             </div>
           </div>
         </div>
