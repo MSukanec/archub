@@ -66,7 +66,7 @@ export function DefaultMovementFields({
       />
       */}
 
-      {/* Fila: Billetera | Moneda y Monto */}
+      {/* Fila: Billetera | Cotización */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
           control={form.control}
@@ -93,6 +93,30 @@ export function DefaultMovementFields({
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="exchange_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cotización (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  placeholder="Ej: 1.0000"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Fila: Moneda y Monto (ancho completo) */}
+      <div className="col-span-2">
         <FormItem>
           <FormLabel>Moneda y Monto *</FormLabel>
           <FormControl>
@@ -115,30 +139,6 @@ export function DefaultMovementFields({
           </FormControl>
           <FormMessage />
         </FormItem>
-      </div>
-
-      {/* Fila: Cotización (ancho completo) */}
-      <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name="exchange_rate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cotización (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.0001"
-                  min="0"
-                  placeholder="Ej: 1.0000"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
 
       {/* Botón para Selección de Persona - Solo si showPersonButton es true */}
