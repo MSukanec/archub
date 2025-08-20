@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enhance organizations array with logo_url
       if (userData.organizations && Array.isArray(userData.organizations)) {
-        console.log("🔧 Enhancing organizations with logo_url...");
+
         
         // Get organization IDs for bulk query
         const orgIds = userData.organizations.map((org: any) => org.id);
@@ -99,11 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             logo_url: logoMap.get(org.id) || null
           }));
           
-          console.log("🔧 Enhanced organizations with logos:", userData.organizations.map((org: any) => ({
-            name: org.name,
-            has_logo: !!org.logo_url,
-            logo_url: org.logo_url
-          })));
+
         } else {
           console.error("Error fetching organization logos:", logoError);
         }
