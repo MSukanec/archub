@@ -17,6 +17,7 @@ import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts"
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
+import { SubcontractRow } from '@/components/data-row/rows';
 
 export default function SubcontractList() {
   const { data: userData } = useCurrentUser();
@@ -567,14 +568,27 @@ export default function SubcontractList() {
         </div>
       )}
 
-      {/* Tabla de Subcontratos */}
+      {/* Lista/Tabla de Subcontratos */}
       {filteredSubcontracts.length === 0 ? (
         <EmptyState
           icon={<Package className="w-12 h-12 text-muted-foreground" />}
           title="No hay subcontratos"
           description={searchQuery ? "No se encontraron subcontratos que coincidan con tu búsqueda." : "Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato' para comenzar."}
         />
+      ) : isMobile ? (
+        // Vista móvil - usar SubcontractRow
+        <div className="space-y-2">
+          {filteredSubcontracts.map((subcontract) => (
+            <SubcontractRow
+              key={subcontract.id}
+              subcontract={subcontract}
+              onClick={() => handleView(subcontract.id)}
+              density="compact"
+            />
+          ))}
+        </div>
       ) : (
+        // Vista desktop - usar Table
         <Table 
           data={filteredSubcontracts}
           columns={columns}

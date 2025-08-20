@@ -204,10 +204,11 @@ export default function SubcontractRow({
     borderColor: statusColor,
     
     // Trailing - Badge del estado
-    trailingBadge: {
-      text: statusText,
-      tone: statusColor
-    },
+    badgeText: statusText,
+    
+    // Amount - monto total
+    amount: subcontract.amount_total,
+    currencyCode: subcontract.currency?.code,
     
     // Behavior
     onClick,
