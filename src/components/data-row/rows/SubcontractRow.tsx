@@ -180,23 +180,22 @@ export default function SubcontractRow({
 
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
-    // Content - Título principal es el nombre del subcontrato
+    // Content - Columna 1: Nombre del subcontrato, subcontratista, estado
     title: subcontract.title,
-    subtitle: subcontract.code ? `Código: ${subcontract.code}` : undefined,
+    subtitle: contractorName,
     
-    // Leading - Avatar del subcontrato
-    avatarFallback: getSubcontractInitials(subcontract),
+    // Sin avatar
     
-    // Lines - Información del subcontratista, estado y montos
+    // Lines - Estado y montos alineados
     lines: [
-      {
-        text: contractorName,
-        tone: subcontract.status === 'awarded' ? 'muted' : 'muted',
-        hintRight: `T: ${formattedTotal}`
-      },
       {
         text: statusText,
         tone: statusColor === 'success' ? 'success' : statusColor === 'danger' ? 'danger' : 'muted',
+        hintRight: `T: ${formattedTotal}`
+      },
+      {
+        text: " ",
+        tone: 'muted' as const,
         hintRight: `P: ${formattedPaid}`
       },
       {
