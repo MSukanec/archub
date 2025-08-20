@@ -117,14 +117,15 @@ export default function OrganizationRow({
   className 
 }: OrganizationRowProps) {
   
-  // Props para DataRowCard usando el patrón estándar (sin badge)
+  // Props para DataRowCard usando el patrón estándar con badge como subtitle
   const dataRowProps: DataRowCardProps = {
     // Leading - Avatar de la organización (forzar URL si existe)
     avatarUrl: organization.logo_url || undefined,
     avatarFallback: getOrganizationInitials(organization.name),
     
-    // Content - Solo nombre como título
+    // Content - Nombre como título, espacio para badge en subtitle
     title: organization.name,
+    subtitle: ' ', // Espacio en blanco para reservar el lugar del badge
     
     // Behavior
     onClick,
@@ -140,8 +141,8 @@ export default function OrganizationRow({
     <div className="relative">
       <DataRowCard {...dataRowProps} />
       
-      {/* Plan Badge - debajo del título */}
-      <div className="absolute left-[52px] top-[32px] pointer-events-none z-10">
+      {/* Plan Badge - reemplaza el subtitle */}
+      <div className="absolute left-[52px] top-[22px] pointer-events-none z-10">
         <PlanBadge plan={organization.plan} />
       </div>
       
