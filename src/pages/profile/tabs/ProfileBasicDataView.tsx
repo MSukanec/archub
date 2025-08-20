@@ -4,8 +4,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, UserCircle, Shield } from 'lucide-react'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
+import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye } from 'lucide-react'
 
 import { useState, useEffect } from 'react'
 import { useLocation } from 'wouter'
@@ -201,29 +200,6 @@ export function ProfileBasicDataView({ user }: ProfileBasicDataViewProps) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Feature Introduction */}
-      <FeatureIntroduction
-        title="Gestión de Perfil de Usuario"
-        icon={<UserCircle className="h-6 w-6" />}
-        features={[
-          {
-            icon: <User className="h-4 w-4" />,
-            title: "Información Personal",
-            description: "Administra tu información personal básica como nombre, apellido, país de origen y fecha de nacimiento."
-          },
-          {
-            icon: <Camera className="h-4 w-4" />,
-            title: "Avatar y Personalización", 
-            description: "Sube y personaliza tu foto de perfil para identificarte mejor en la plataforma."
-          },
-          {
-            icon: <Shield className="h-4 w-4" />,
-            title: "Modo de Uso y Seguridad",
-            description: "Define tu perfil profesional y gestiona la seguridad de tu cuenta con opciones de cierre de sesión."
-          }
-        ]}
-      />
-
       {/* Saving indicator */}
       {isSaving && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">
