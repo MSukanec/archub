@@ -106,8 +106,8 @@ export default function OrganizationRow({
   
   // Props para DataRowCard usando el patrón estándar
   const dataRowProps: DataRowCardProps = {
-    // Leading - Avatar de la organización
-    avatarUrl: organization.logo_url,
+    // Leading - Avatar de la organización (forzar URL si existe)
+    avatarUrl: organization.logo_url || undefined,
     avatarFallback: getOrganizationInitials(organization.name),
     
     // Content - Nombre como título, plan como subtitle
@@ -129,11 +129,11 @@ export default function OrganizationRow({
       <DataRowCard {...dataRowProps} />
       
       {/* Trailing customizado con avatares superpuestos */}
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="flex items-center gap-2">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+        <div className="flex items-center">
           <OrganizationTrailing organizationId={organization.id} />
-          {/* Espacio para chevron si existe */}
-          {onClick && <div className="w-4" />}
+          {/* Espacio mínimo para chevron si existe */}
+          {onClick && <div className="w-2" />}
         </div>
       </div>
     </div>
