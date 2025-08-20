@@ -114,8 +114,10 @@ interface MovementModalProps {
 }
 
 export function MovementModal({ modalData, onClose, editingMovement: propEditingMovement, isEditing: propIsEditing }: MovementModalProps) {
-  // Extract editing data from modalData or props
+  // Extract editing and viewing data from modalData or props
   const editingMovement = propEditingMovement || modalData?.editingMovement
+  const viewingMovement = modalData?.viewingMovement
+  const movementData = editingMovement || viewingMovement
   const isEditing = propIsEditing || !!editingMovement
 
   // Hooks
@@ -165,25 +167,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [isInitialLoading, setIsInitialLoading] = React.useState(false)
   const [hasLoadedInitialData, setHasLoadedInitialData] = React.useState(false)
 
-  // Initialize values when editing - AFTER all hooks are declared
+  // Initialize values when editing or viewing - AFTER all hooks are declared
   React.useEffect(() => {
-    if (editingMovement && !hasLoadedInitialData) {
-      console.log('🔧 MovementModal: Initializing editing data', editingMovement)
+    if (movementData && !hasLoadedInitialData) {
+      console.log('🔧 MovementModal: Initializing movement data', movementData)
       
       // Set hierarchical selection states
-      if (editingMovement.type_id) {
-        setSelectedTypeId(editingMovement.type_id)
+      if (movementData.type_id) {
+        setSelectedTypeId(movementData.type_id)
       }
-      if (editingMovement.category_id) {
-        setSelectedCategoryId(editingMovement.category_id)
+      if (movementData.category_id) {
+        setSelectedCategoryId(movementData.category_id)
       }
-      if (editingMovement.subcategory_id) {
-        setSelectedSubcategoryId(editingMovement.subcategory_id)
+      if (movementData.subcategory_id) {
+        setSelectedSubcategoryId(movementData.subcategory_id)
       }
       
       // Determine movement type based on the type_id
-      if (editingMovement.type_id && movementConcepts) {
-        const selectedConcept = movementConcepts.find((concept: any) => concept.id === editingMovement.type_id)
+      if (movementData.type_id && movementConcepts) {
+        const selectedConcept = movementConcepts.find((concept: any) => concept.id === movementData.type_id)
         const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
         
         if (viewMode === "conversion") {
@@ -197,7 +199,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       
       setHasLoadedInitialData(true)
     }
-  }, [editingMovement, movementConcepts, hasLoadedInitialData])
+  }, [movementData, movementConcepts, hasLoadedInitialData])
 
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
