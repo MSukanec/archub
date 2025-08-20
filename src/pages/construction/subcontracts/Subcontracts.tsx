@@ -5,8 +5,9 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-// Importar el componente separado
+// Importar los componentes separados
 import SubcontractList from './SubcontractList';
+import { SubcontractPayments } from './SubcontractPayments';
 
 export default function Subcontracts() {
   const [activeTab, setActiveTab] = useState('lista')
@@ -65,9 +66,16 @@ export default function Subcontracts() {
       <div className="h-full">
         {activeTab === 'lista' && <SubcontractList />}
         
-        {activeTab === 'pagos' && (
+        {activeTab === 'pagos' && userData?.preferences?.last_project_id && userData?.organization?.id && (
+          <SubcontractPayments 
+            projectId={userData.preferences.last_project_id}
+            organizationId={userData.organization.id}
+          />
+        )}
+        
+        {activeTab === 'pagos' && (!userData?.preferences?.last_project_id || !userData?.organization?.id) && (
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Contenido de Pagos - Próximamente</p>
+            <p className="text-muted-foreground">Selecciona un proyecto para ver los pagos de subcontratos</p>
           </div>
         )}
       </div>
