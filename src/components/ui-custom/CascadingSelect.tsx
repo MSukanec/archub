@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface CascadingOption {
   value: string
@@ -196,15 +197,18 @@ export function CascadingSelect({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Botón de volver - solo visible si no estamos en el nivel raíz */}
           {currentLevel > 0 && isOpen && (
-            <div
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation()
                 handleBack()
               }}
-              className="flex-shrink-0 p-1 hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] rounded transition-colors cursor-pointer"
+              className="flex-shrink-0 h-6 w-6 p-0"
             >
               <ArrowLeft className="h-3 w-3" />
-            </div>
+            </Button>
           )}
           
           {/* Texto del valor seleccionado */}
