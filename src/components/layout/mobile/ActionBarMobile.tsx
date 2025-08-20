@@ -146,6 +146,28 @@ export function ActionBarMobile() {
                   </Select>
                 </div>
               ))}
+              
+              {/* Botón Limpiar Filtros */}
+              <div className="pt-2 border-t" style={{ borderColor: 'var(--menues-border)' }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Usar la función de limpiar filtros de la configuración
+                    if (filterConfig.onClearFilters) {
+                      filterConfig.onClearFilters();
+                    }
+                    setShowFilterPopover(false);
+                  }}
+                  className="w-full"
+                  style={{
+                    backgroundColor: 'var(--menues-input-bg)',
+                    borderColor: 'var(--menues-input-border)',
+                    color: 'var(--menues-fg)'
+                  }}
+                >
+                  Limpiar Filtros
+                </Button>
+              </div>
             </div>
           </div>
         </div>
