@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin'
+type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil'
 
 interface NavigationState {
   currentSidebarContext: SidebarContext

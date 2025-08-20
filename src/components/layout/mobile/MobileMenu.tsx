@@ -27,7 +27,7 @@ import {
   Database,
   Layout,
   Images,
-
+  BookOpen,
   HandCoins,
   HardHat,
   Brush,
