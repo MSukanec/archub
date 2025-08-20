@@ -217,14 +217,15 @@ export default function SubcontractList() {
       label: 'Subcontratista',
       render: (subcontract: any) => {
         // Si el subcontrato está adjudicado y tiene contacto
-        if (subcontract.status === 'awarded' && subcontract.contact) {
-          const contactName = subcontract.contact.full_name || 
-            subcontract.contact.company_name ||
-            `${subcontract.contact.first_name || ''} ${subcontract.contact.last_name || ''}`.trim();
+        const contact = subcontract.contact || subcontract.winner_bid?.contacts;
+        if (subcontract.status === 'awarded' && contact) {
+          const contactName = contact.full_name || 
+            contact.company_name ||
+            `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
           return (
             <div>
               <div className="font-medium">{contactName}</div>
-              {subcontract.contact.email && <div className="text-xs text-muted-foreground">{subcontract.contact.email}</div>}
+              {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
             </div>
           );
         }
@@ -241,7 +242,7 @@ export default function SubcontractList() {
         // Fallback para subcontratos adjudicados sin datos de contacto
         return (
           <div className="text-muted-foreground">
-            Sin información de contacto
+            Sin subcontratista
           </div>
         );
       }

@@ -74,11 +74,12 @@ const getSubcontractInitials = (subcontract: Subcontract): string => {
 
 // Helper para obtener el nombre del contratista
 const getContractorName = (subcontract: Subcontract): string => {
-  if (subcontract.status !== 'awarded' || !subcontract.contact) {
+  // Intentar contact directo o contact de la bid ganadora
+  const contact = subcontract.contact || (subcontract as any).winner_bid?.contacts;
+  
+  if (subcontract.status !== 'awarded' || !contact) {
     return 'Sin adjudicar';
   }
-  
-  const contact = subcontract.contact;
   
   if (contact.company_name) {
     return contact.company_name;
@@ -95,7 +96,7 @@ const getContractorName = (subcontract: Subcontract): string => {
     return `${firstName} ${lastName}`.trim();
   }
   
-  return 'Sin información';
+  return 'Sin subcontratista';
 };
 
 // Helper para obtener el color del estado
