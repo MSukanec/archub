@@ -81,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("🔧 Enhancing organizations with logo_url...");
         
         // Get organization IDs for bulk query
-        const orgIds = userData.organizations.map(org => org.id);
+        const orgIds = userData.organizations.map((org: any) => org.id);
         
         // Fetch logo_url for all organizations in one query
         const { data: orgLogos, error: logoError } = await authenticatedSupabase
@@ -91,17 +91,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         if (!logoError && orgLogos) {
           // Create a map for quick lookup
-          const logoMap = new Map(orgLogos.map(org => [org.id, org.logo_url]));
+          const logoMap = new Map(orgLogos.map((org: any) => [org.id, org.logo_url]));
           
           // Add logo_url to each organization
-          userData.organizations = userData.organizations.map(org => ({
+          userData.organizations = userData.organizations.map((org: any) => ({
             ...org,
             logo_url: logoMap.get(org.id) || null
           }));
           
-          console.log("🔧 Enhanced organizations with logos:", userData.organizations.map(org => ({
+          console.log("🔧 Enhanced organizations with logos:", userData.organizations.map((org: any) => ({
             name: org.name,
-            has_logo: !!org.logo_url
+            has_logo: !!org.logo_url,
+            logo_url: org.logo_url
           })));
         } else {
           console.error("Error fetching organization logos:", logoError);

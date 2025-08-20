@@ -125,7 +125,8 @@ export default function OrganizationRow({
   console.log(`OrganizationRow - ${organization.name}:`, {
     logo_url: organization.logo_url,
     has_logo: !!organization.logo_url,
-    logo_length: organization.logo_url?.length
+    logo_length: organization.logo_url?.length,
+    full_organization: organization
   });
   
   // Renderizar un DataRowCard customizado sin positioning absoluto
