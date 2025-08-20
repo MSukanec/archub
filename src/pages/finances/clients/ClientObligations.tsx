@@ -661,7 +661,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                     </p>
                   )}
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {clientAnalysis.totalCommitments} compromisos registrados
+                    {clientAnalysis.totalCommitments} compromisos
                   </p>
                 </div>
               </div>
