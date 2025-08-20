@@ -269,7 +269,17 @@ function Router() {
         </Route>
 
 
-        {/* Profile Routes */}
+        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
+        <Route path="/profile/organizations">
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/profile/preferences">
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        </Route>
         <Route path="/profile">
           <ProtectedRoute>
             <Profile />

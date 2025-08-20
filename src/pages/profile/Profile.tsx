@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { ProfileBasicData } from './ProfileBasicData';
@@ -9,9 +10,22 @@ import { ProfileOrganizations } from './ProfileOrganizations';
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState('Datos Básicos');
-  
+  const [location, setLocation] = useLocation();
   const { data: userData, isLoading } = useCurrentUser();
+  
+  // Determinar el tab activo basado en la URL
+  const getActiveTabFromUrl = (url: string): string => {
+    if (url.includes('/organizations')) return 'Organizaciones';
+    if (url.includes('/preferences')) return 'Preferencias';
+    return 'Datos Básicos';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getActiveTabFromUrl(location));
+  
+  // Sincronizar el tab activo cuando cambie la URL
+  useEffect(() => {
+    setActiveTab(getActiveTabFromUrl(location));
+  }, [location]);
   
   const user = userData?.user;
 
@@ -33,12 +47,27 @@ export default function Profile() {
     }
   ];
 
+  const handleTabChange = (tabId: string) => {
+    // Navegar a la URL correspondiente
+    switch (tabId) {
+      case 'Organizaciones':
+        setLocation('/profile/organizations');
+        break;
+      case 'Preferencias':
+        setLocation('/profile/preferences');
+        break;
+      default:
+        setLocation('/profile');
+        break;
+    }
+  };
+
   const headerProps = {
     icon: User,
     title: user?.full_name || 'Perfil de Usuario',
     subtitle: `${user?.email || 'Usuario'} • Perfil Personal`,
     tabs: headerTabs,
-    onTabChange: (tabId: string) => setActiveTab(tabId)
+    onTabChange: handleTabChange
   };
 
   if (isLoading) {
