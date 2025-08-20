@@ -2,7 +2,7 @@ import DataRowCard, { DataRowCardProps } from '../DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// Interface para el movimiento (basada en el tipo existente)
+// Interface para el movimiento (usando la estructura real de la app)
 interface Movement {
   id: string;
   description: string;
@@ -18,20 +18,28 @@ interface Movement {
   currency_id?: string;
   is_favorite?: boolean;
   
-  // Relaciones expandidas
-  concept?: {
-    name: string;
-    parent?: {
+  // Estructura real de movement_data
+  movement_data?: {
+    type?: {
       name: string;
     };
+    category?: {
+      name: string;
+    };
+    subcategory?: {
+      name: string;
+    };
+    wallet?: {
+      name: string;
+    };
+    currency?: {
+      symbol: string;
+      name: string;
+      code: string;
+    };
   };
-  wallet?: {
-    name: string;
-  };
-  currency?: {
-    symbol: string;
-    name: string;
-  };
+  
+  // Proyecto expandido
   project?: {
     name: string;
   };
@@ -59,35 +67,42 @@ const formatMovementAmount = (amount: number, currencySymbol?: string): string =
   return `${sign}${symbol}${formattedAmount}`;
 };
 
-// Helper para obtener las iniciales del concepto
-const getConceptInitials = (concept?: Movement['concept']): string => {
-  if (!concept) return 'M';
+// Helper para obtener las iniciales del concepto/categoría
+const getConceptInitials = (movement: Movement): string => {
+  const category = movement.movement_data?.category?.name;
+  const subcategory = movement.movement_data?.subcategory?.name;
   
-  // Si tiene padre, usar iniciales del padre + hijo
-  if (concept.parent) {
-    const parentInitial = concept.parent.name[0]?.toUpperCase() || '';
-    const childInitial = concept.name[0]?.toUpperCase() || '';
-    return parentInitial + childInitial;
+  if (category && subcategory) {
+    const categoryInitial = category[0]?.toUpperCase() || '';
+    const subcategoryInitial = subcategory[0]?.toUpperCase() || '';
+    return categoryInitial + subcategoryInitial;
   }
   
-  // Solo concepto, tomar primeras dos letras o primera letra si es una palabra
-  const words = concept.name.split(' ');
-  if (words.length > 1) {
-    return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
+  if (category) {
+    const words = category.split(' ');
+    if (words.length > 1) {
+      return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
+    }
+    return category.slice(0, 2).toUpperCase();
   }
   
-  return concept.name.slice(0, 2).toUpperCase();
+  return 'M';
 };
 
 // Helper para obtener el nombre completo del concepto
-const getConceptFullName = (concept?: Movement['concept']): string => {
-  if (!concept) return 'Sin categoría';
+const getConceptFullName = (movement: Movement): string => {
+  const category = movement.movement_data?.category?.name;
+  const subcategory = movement.movement_data?.subcategory?.name;
   
-  if (concept.parent) {
-    return `${concept.parent.name} • ${concept.name}`;
+  if (category && subcategory) {
+    return `${category} • ${subcategory}`;
   }
   
-  return concept.name;
+  if (category) {
+    return category;
+  }
+  
+  return 'Sin categoría';
 };
 
 export default function MovementRow({ 
@@ -103,14 +118,14 @@ export default function MovementRow({
   const lines = [
     // Línea 1: Importe con formato
     {
-      text: formatMovementAmount(movement.amount, movement.currency?.symbol),
+      text: formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol),
       tone: movement.amount >= 0 ? 'success' as const : 'danger' as const,
       mono: true,
-      hintRight: movement.currency?.name || 'ARS'
+      hintRight: movement.movement_data?.currency?.code || 'ARS'
     },
     // Línea 2: Billetera
     {
-      text: movement.wallet?.name || 'Sin billetera',
+      text: movement.movement_data?.wallet?.name || 'Sin billetera',
       tone: 'muted' as const
     },
     // Línea 3: Proyecto (si se debe mostrar)
@@ -124,11 +139,11 @@ export default function MovementRow({
   const dataRowProps: DataRowCardProps = {
     // Content
     title: movement.description,
-    subtitle: getConceptFullName(movement.concept),
+    subtitle: getConceptFullName(movement),
     lines: lines.slice(0, 3), // Asegurar máximo 3 líneas
     
     // Leading
-    avatarFallback: getConceptInitials(movement.concept),
+    avatarFallback: getConceptInitials(movement),
     
     // Trailing  
     showChevron: !!onClick,

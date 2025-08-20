@@ -44,6 +44,9 @@ import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
+import { MovementRow } from "@/components/data-row";
+import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
+import { Star } from "lucide-react";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -1668,14 +1671,34 @@ export default function Movements() {
               />
             );
           } else {
-            // Render MovementCard for regular movements
+            // Render MovementRow with SwipeableCard for regular movements
             return (
-              <MovementCard
-                movement={transformMovementToCard(item)}
-                onEdit={() => handleEdit(item)}
-                onDelete={() => handleDelete(item)}
-                onToggleFavorite={() => handleToggleFavorite(item)}
-              />
+              <SwipeableCard
+                actions={[
+                  {
+                    label: "Favorito",
+                    icon: <Star className="w-4 h-4" />,
+                    onClick: () => handleToggleFavorite(item)
+                  },
+                  {
+                    label: "Editar",
+                    icon: <Edit className="w-4 h-4" />,
+                    onClick: () => handleEdit(item)
+                  },
+                  {
+                    label: "Eliminar",
+                    icon: <Trash2 className="w-4 h-4" />,
+                    onClick: () => handleDelete(item)
+                  }
+                ]}
+              >
+                <MovementRow
+                  movement={item}
+                  showProject={isGlobalView}
+                  onClick={() => handleEdit(item)}
+                  density="normal"
+                />
+              </SwipeableCard>
             );
           }
         }}
