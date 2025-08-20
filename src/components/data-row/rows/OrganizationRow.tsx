@@ -121,6 +121,13 @@ export default function OrganizationRow({
   className 
 }: OrganizationRowProps) {
   
+  // Debug log para ver los datos de la organización
+  console.log(`OrganizationRow - ${organization.name}:`, {
+    logo_url: organization.logo_url,
+    has_logo: !!organization.logo_url,
+    logo_length: organization.logo_url?.length
+  });
+  
   // Renderizar un DataRowCard customizado sin positioning absoluto
   return (
     <div
@@ -142,9 +149,15 @@ export default function OrganizationRow({
         {/* Leading Section - Avatar */}
         <div className="flex-shrink-0">
           <Avatar className="h-10 w-10">
-            {(organization.logo_url && organization.logo_url.trim() !== '') ? (
-              <AvatarImage src={organization.logo_url} />
-            ) : null}
+            {organization.logo_url && organization.logo_url.trim() !== '' && (
+              <AvatarImage 
+                src={organization.logo_url} 
+                alt={`Logo de ${organization.name}`}
+                className="object-cover"
+                onError={() => console.log(`Failed to load logo for ${organization.name}:`, organization.logo_url)}
+                onLoad={() => console.log(`Successfully loaded logo for ${organization.name}`)}
+              />
+            )}
             <AvatarFallback className="text-xs font-medium">
               {getOrganizationInitials(organization.name)}
             </AvatarFallback>
