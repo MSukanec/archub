@@ -123,21 +123,44 @@ export default function MovementRow({
   const formattedAmount = formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol);
   const currencyCode = movement.movement_data?.currency?.code || 'ARS';
 
+  // Obtener avatar del creador (como en la card vieja)
+  const getCreatorAvatar = () => {
+    // Si hay un campo creator en el movement
+    if (movement.creator?.avatar_url) {
+      return movement.creator.avatar_url;
+    }
+    return undefined;
+  };
+
+  const getCreatorInitials = () => {
+    if (movement.creator?.full_name) {
+      return movement.creator.full_name
+        .split(' ')
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return 'U';
+  };
+
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
     // Content - Solo 2 filas como el viejo diseño
     title: movement.movement_data?.category?.name || 'Sin categoría',
     subtitle: movement.movement_data?.subcategory?.name || '',
     
-    // Leading
-    avatarFallback: getConceptInitials(movement),
+    // Leading - Avatar del usuario creador
+    avatarUrl: getCreatorAvatar(),
+    avatarFallback: getCreatorInitials(),
     
-    // Trailing - Importe y billetera
+    // Trailing - Importe y billetera en el lateral derecho
     lines: [
       {
-        text: `${currencyCode} - ${formattedAmount}`,
+        text: formattedAmount,
         tone: movement.amount >= 0 ? 'success' as const : 'danger' as const,
-        mono: true
+        mono: true,
+        hintRight: currencyCode
       },
       {
         text: movement.movement_data?.wallet?.name || 'Sin billetera',

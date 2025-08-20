@@ -47,14 +47,35 @@ export default function ConversionRow({
     maximumFractionDigits: 2,
   }).format(Math.abs(conversion.to_amount));
 
+  // Obtener avatar del creador
+  const getCreatorAvatar = () => {
+    if (conversion.creator?.avatar_url) {
+      return conversion.creator.avatar_url;
+    }
+    return undefined;
+  };
+
+  const getCreatorInitials = () => {
+    if (conversion.creator?.full_name) {
+      return conversion.creator.full_name
+        .split(' ')
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return 'U';
+  };
+
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
     // Content
     title: 'Conversión',
     subtitle: `${conversion.from_currency} - ${conversion.to_currency}`,
     
-    // Leading
-    avatarFallback: 'C',
+    // Leading - Avatar del usuario creador
+    avatarUrl: getCreatorAvatar(),
+    avatarFallback: getCreatorInitials(),
     
     // Trailing - Importes de conversión
     lines: [

@@ -206,15 +206,15 @@ export default function DataRowCard({
   const getBorderColorClass = (color?: string): string => {
     switch (color) {
       case 'success':
-        return 'border-l-4 border-l-green-500';
+        return 'border-r-4 border-r-green-500';
       case 'danger':
-        return 'border-l-4 border-l-red-500';
+        return 'border-r-4 border-r-red-500';
       case 'warning':
-        return 'border-l-4 border-l-yellow-500';
+        return 'border-r-4 border-r-yellow-500';
       case 'info':
-        return 'border-l-4 border-l-blue-500';
+        return 'border-r-4 border-r-blue-500';
       case 'neutral':
-        return 'border-l-4 border-l-gray-400';
+        return 'border-r-4 border-r-gray-400';
       default:
         return '';
     }
@@ -223,7 +223,7 @@ export default function DataRowCard({
   return (
     <div
       className={cn(
-        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 transition-colors',
+        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 mb-3 transition-colors',
         classes.container,
         // Estados interactivos
         isInteractive && 'cursor-pointer hover:bg-[var(--card-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
@@ -290,24 +290,7 @@ export default function DataRowCard({
             </div>
           )}
 
-          {/* Lines adicionales */}
-          {displayLines.map((line, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <span className={cn(
-                'truncate',
-                classes.line,
-                getToneClasses(line.tone),
-                line.mono && 'font-mono'
-              )}>
-                {line.text}
-              </span>
-              {line.hintRight && (
-                <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
-                  {line.hintRight}
-                </span>
-              )}
-            </div>
-          ))}
+
         </div>
 
         {/* Trailing Section */}
@@ -321,6 +304,24 @@ export default function DataRowCard({
               {formatAmount(amount, currencyCode)}
             </div>
           )}
+
+          {/* Lines auxiliares en el trailing */}
+          {lines.slice(0, 2).map((line, index) => (
+            <div key={index} className="text-right">
+              <span className={cn(
+                'text-sm',
+                getToneClasses(line.tone),
+                line.mono && 'font-mono'
+              )}>
+                {line.text}
+              </span>
+              {line.hintRight && (
+                <span className="text-xs text-muted-foreground ml-2">
+                  {line.hintRight}
+                </span>
+              )}
+            </div>
+          ))}
 
           {/* Badge */}
           {badgeText && (

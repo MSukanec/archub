@@ -41,14 +41,35 @@ export default function TransferRow({
     maximumFractionDigits: 2,
   }).format(Math.abs(transfer.amount));
 
+  // Obtener avatar del creador
+  const getCreatorAvatar = () => {
+    if (transfer.creator?.avatar_url) {
+      return transfer.creator.avatar_url;
+    }
+    return undefined;
+  };
+
+  const getCreatorInitials = () => {
+    if (transfer.creator?.full_name) {
+      return transfer.creator.full_name
+        .split(' ')
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return 'U';
+  };
+
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
     // Content
     title: 'Transferencia',
     subtitle: `${transfer.from_wallet} → ${transfer.to_wallet}`,
     
-    // Leading
-    avatarFallback: 'T',
+    // Leading - Avatar del usuario creador
+    avatarUrl: getCreatorAvatar(),
+    avatarFallback: getCreatorInitials(),
     
     // Trailing - Importe y billeteras
     lines: [
