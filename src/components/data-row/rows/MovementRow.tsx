@@ -114,36 +114,39 @@ export default function MovementRow({
   className 
 }: MovementRowProps) {
   
-  // Construir las líneas adicionales
-  const lines = [
-    // Línea 1: Importe con formato
-    {
-      text: formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol),
-      tone: movement.amount >= 0 ? 'success' as const : 'danger' as const,
-      mono: true,
-      hintRight: movement.movement_data?.currency?.code || 'ARS'
-    },
-    // Línea 2: Billetera
-    {
-      text: movement.movement_data?.wallet?.name || 'Sin billetera',
-      tone: 'muted' as const
-    },
-    // Línea 3: Proyecto (si se debe mostrar)
-    ...(showProject && movement.project ? [{
-      text: movement.project.name,
-      tone: 'info' as const
-    }] : [])
-  ];
+  // Determinar el color del borde basado en el tipo de movimiento
+  const getBorderColor = (amount: number): 'success' | 'danger' => {
+    return amount >= 0 ? 'success' : 'danger';
+  };
+
+  // Formatear importe para trailing
+  const formattedAmount = formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol);
+  const currencyCode = movement.movement_data?.currency?.code || 'ARS';
 
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
-    // Content
-    title: movement.description,
-    subtitle: getConceptFullName(movement),
-    lines: lines.slice(0, 3), // Asegurar máximo 3 líneas
+    // Content - Solo 2 filas como el viejo diseño
+    title: movement.movement_data?.category?.name || 'Sin categoría',
+    subtitle: movement.movement_data?.subcategory?.name || '',
     
     // Leading
     avatarFallback: getConceptInitials(movement),
+    
+    // Trailing - Importe y billetera
+    lines: [
+      {
+        text: `${currencyCode} - ${formattedAmount}`,
+        tone: movement.amount >= 0 ? 'success' as const : 'danger' as const,
+        mono: true
+      },
+      {
+        text: movement.movement_data?.wallet?.name || 'Sin billetera',
+        tone: 'muted' as const
+      }
+    ],
+    
+    // Visual
+    borderColor: getBorderColor(movement.amount),
     
     // Trailing  
     showChevron: !!onClick,

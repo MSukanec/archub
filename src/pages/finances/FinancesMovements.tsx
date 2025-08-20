@@ -44,7 +44,7 @@ import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
 import { transformMovementToCard } from "@/utils/movementCardAdapter";
-import { MovementRow } from "@/components/data-row";
+import { MovementRow, ConversionRow, TransferRow } from "@/components/data-row";
 import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
 import { Star } from "lucide-react";
 
@@ -1641,34 +1641,72 @@ export default function Movements() {
         getItemId={(item) => item.id}
         renderCard={(item: any) => {
           if ('is_conversion_group' in item) {
-            // Render ConversionCard for conversion groups
+            // Render ConversionRow with SwipeableCard for conversion groups
             return (
-              <ConversionCard
-                conversion={item}
-                onEdit={handleEditConversion}
-                onDelete={handleDeleteConversion}
-                onToggleFavorite={(conversionGroup: any) => {
-                  // Toggle favorite for all movements in the group
-                  conversionGroup.movements.forEach((movement: any) => {
-                    handleToggleFavorite(movement);
-                  });
-                }}
-              />
+              <SwipeableCard
+                actions={[
+                  {
+                    label: "Favorito",
+                    icon: <Star className="w-4 h-4" />,
+                    onClick: () => {
+                      // Toggle favorite for all movements in the group
+                      item.movements.forEach((movement: any) => {
+                        handleToggleFavorite(movement);
+                      });
+                    }
+                  },
+                  {
+                    label: "Editar",
+                    icon: <Edit className="w-4 h-4" />,
+                    onClick: () => handleEditConversion(item)
+                  },
+                  {
+                    label: "Eliminar",
+                    icon: <Trash2 className="w-4 h-4" />,
+                    onClick: () => handleDeleteConversion(item)
+                  }
+                ]}
+              >
+                <ConversionRow
+                  conversion={item}
+                  onClick={() => handleEditConversion(item)}
+                  density="normal"
+                />
+              </SwipeableCard>
             );
           } else if ('is_transfer_group' in item) {
-            // Render TransferCard for transfer groups
+            // Render TransferRow with SwipeableCard for transfer groups
             return (
-              <TransferCard
-                transfer={item}
-                onEdit={handleEditTransfer}
-                onDelete={handleDeleteTransfer}
-                onToggleFavorite={(transferGroup: any) => {
-                  // Toggle favorite for all movements in the group
-                  transferGroup.movements.forEach((movement: any) => {
-                    handleToggleFavorite(movement);
-                  });
-                }}
-              />
+              <SwipeableCard
+                actions={[
+                  {
+                    label: "Favorito",
+                    icon: <Star className="w-4 h-4" />,
+                    onClick: () => {
+                      // Toggle favorite for all movements in the group
+                      item.movements.forEach((movement: any) => {
+                        handleToggleFavorite(movement);
+                      });
+                    }
+                  },
+                  {
+                    label: "Editar",
+                    icon: <Edit className="w-4 h-4" />,
+                    onClick: () => handleEditTransfer(item)
+                  },
+                  {
+                    label: "Eliminar",
+                    icon: <Trash2 className="w-4 h-4" />,
+                    onClick: () => handleDeleteTransfer(item)
+                  }
+                ]}
+              >
+                <TransferRow
+                  transfer={item}
+                  onClick={() => handleEditTransfer(item)}
+                  density="normal"
+                />
+              </SwipeableCard>
             );
           } else {
             // Render MovementRow with SwipeableCard for regular movements

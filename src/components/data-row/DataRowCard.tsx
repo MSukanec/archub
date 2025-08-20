@@ -36,6 +36,9 @@ export interface DataRowCardProps {
   badgeText?: string;             // ej: "Pendiente", "Pagado"
   showChevron?: boolean;          // flechita >
 
+  /** Visual */
+  borderColor?: 'success' | 'danger' | 'warning' | 'info' | 'neutral'; // color del borde lateral
+
   /** Comportamiento */
   onClick?: () => void;           // si está presente → cursor-pointer, role="button"
   disabled?: boolean;
@@ -157,6 +160,9 @@ export default function DataRowCard({
   badgeText,
   showChevron = false,
 
+  // Visual props
+  borderColor,
+
   // Behavior props
   onClick,
   disabled = false,
@@ -196,6 +202,24 @@ export default function DataRowCard({
     );
   }
 
+  // Helper para obtener clases de color del borde
+  const getBorderColorClass = (color?: string): string => {
+    switch (color) {
+      case 'success':
+        return 'border-l-4 border-l-green-500';
+      case 'danger':
+        return 'border-l-4 border-l-red-500';
+      case 'warning':
+        return 'border-l-4 border-l-yellow-500';
+      case 'info':
+        return 'border-l-4 border-l-blue-500';
+      case 'neutral':
+        return 'border-l-4 border-l-gray-400';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -207,6 +231,8 @@ export default function DataRowCard({
         disabled && 'opacity-60 cursor-not-allowed',
         // Estado selected
         selected && 'ring-2 ring-accent',
+        // Color del borde lateral
+        getBorderColorClass(borderColor),
         className
       )}
       role={isInteractive ? 'button' : undefined}
