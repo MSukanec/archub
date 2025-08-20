@@ -24,16 +24,16 @@ export function MobileActionBar() {
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
   
-  if (!isMobile || !showActionBar) {
-    return null
-  }
-
-  // Focus search input when popover opens
+  // Focus search input when popover opens - always run this hook
   useEffect(() => {
     if (showSearchPopover && searchInputRef.current) {
       setTimeout(() => searchInputRef.current?.focus(), 100)
     }
   }, [showSearchPopover])
+  
+  if (!isMobile || !showActionBar) {
+    return null
+  }
 
   const handleSearchClick = () => {
     if (actions.search?.onClick) {
