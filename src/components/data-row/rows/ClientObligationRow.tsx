@@ -143,32 +143,24 @@ export default function ClientObligationRow({
     // Leading - Avatar del cliente
     avatarFallback: getClientInitials(obligation),
     
-    // Lines - Información de pagos
+    // Lines - Información de pagos (solo 2 líneas)
     lines: [
       {
-        text: `Compromiso: ${formattedCommitted}`,
+        text: `C: ${formattedCommitted}`,
         tone: 'muted' as const,
         hintRight: obligation.currency?.code
       },
       {
-        text: `Pagado: ${formattedPaid}`,
+        text: `P: ${formattedPaid}`,
         tone: paymentPercentage > 0 ? 'success' : 'muted',
         hintRight: `${paymentPercentage.toFixed(1)}%`
-      },
-      {
-        text: hasOverpayment 
-          ? `Excedente: ${formattedRemaining}` 
-          : `Restante: ${formattedRemaining}`,
-        tone: hasOverpayment ? 'success' : (obligation.remainingAmount > 0 ? 'warning' : 'muted'),
-        hintRight: hasOverpayment ? 'Extra' : undefined
       }
     ],
     
     // Visual
     borderColor: getBorderColor(),
     
-    // Trailing - Badge de estado si está completo
-    badgeText: isComplete ? 'Completo' : (paymentPercentage > 0 ? 'Parcial' : 'Pendiente'),
+    // Trailing - Sin badge para más espacio
     
     // Behavior
     onClick,
