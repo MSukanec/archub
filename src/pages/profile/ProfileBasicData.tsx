@@ -236,7 +236,6 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                 </Avatar>
                 <div className="space-y-2">
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={() => setShowAvatarUpload(!showAvatarUpload)}
                   >
