@@ -83,6 +83,9 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
           <div className="text-2xl font-bold text-foreground">
             {formatAmount(movement.amount, movement.movement_data?.currency?.symbol)}
           </div>
+          <div className="text-sm text-muted-foreground">
+            {movement.movement_data?.wallet?.name || 'Sin billetera'}
+          </div>
           {movement.exchange_rate && (
             <div className="text-sm text-muted-foreground">
               Tipo de cambio: {movement.exchange_rate}
@@ -122,32 +125,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
           </div>
         )}
 
-        {/* Billetera */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Wallet className="h-4 w-4 text-accent" />
-            Billetera
-          </div>
-          <div className="text-sm text-foreground">
-            {movement.movement_data?.wallet?.name || 'No especificada'}
-          </div>
-        </div>
 
-        {/* Moneda */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <DollarSign className="h-4 w-4 text-accent" />
-            Moneda
-          </div>
-          <div className="text-sm text-foreground">
-            {movement.movement_data?.currency?.name || 'No especificada'}
-            {movement.movement_data?.currency?.symbol && (
-              <span className="ml-2 font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
-                {movement.movement_data?.currency?.symbol}
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* Proyecto */}
         {movement.movement_data?.project && (
