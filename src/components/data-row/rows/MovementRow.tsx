@@ -172,7 +172,7 @@ export default function MovementRow({
     borderColor: getBorderColor(movement.amount),
     
     // Trailing  
-    showChevron: !!onClick,
+    showChevron: false,
     
     // Behavior
     onClick,

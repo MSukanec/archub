@@ -223,7 +223,7 @@ export default function DataRowCard({
   return (
     <div
       className={cn(
-        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 mb-3 transition-colors',
+        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-2 transition-colors',
         classes.container,
         // Estados interactivos
         isInteractive && 'cursor-pointer hover:bg-[var(--card-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
@@ -277,7 +277,7 @@ export default function DataRowCard({
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 space-y-0.5">
           {/* Title */}
           <div className={cn('truncate', classes.title)}>
             {title}
@@ -289,12 +289,10 @@ export default function DataRowCard({
               {subtitle}
             </div>
           )}
-
-
         </div>
 
         {/* Trailing Section */}
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+        <div className="flex flex-col items-end space-y-0.5 flex-shrink-0">
           {/* Amount */}
           {amount !== undefined && (
             <div className={cn(
@@ -328,11 +326,6 @@ export default function DataRowCard({
             <div className="px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs">
               {badgeText}
             </div>
-          )}
-
-          {/* Chevron */}
-          {showChevron && (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           )}
         </div>
       </div>

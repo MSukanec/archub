@@ -88,7 +88,7 @@ export default function TransferRow({
     borderColor: 'warning',
     
     // Trailing  
-    showChevron: !!onClick,
+    showChevron: false,
     
     // Behavior
     onClick,

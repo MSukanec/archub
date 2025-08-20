@@ -94,7 +94,7 @@ export default function ConversionRow({
     borderColor: 'info',
     
     // Trailing  
-    showChevron: !!onClick,
+    showChevron: false,
     
     // Behavior
     onClick,
