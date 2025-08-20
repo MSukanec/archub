@@ -4,6 +4,7 @@ import {
   X,
   Building,
   FolderOpen,
+  Folder,
   UserCircle,
   CheckSquare,
   Shield,
@@ -41,6 +42,7 @@ import {
   Search,
   Tag,
   TrendingUp,
+  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -333,9 +335,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     
     organizacion: [
-      { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Home, label: 'Resumen', href: '/dashboard' },
+      { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
-      { icon: Crown, label: 'Plan', href: '#', type: 'plan' },
     ],
 
     diseno: [
@@ -343,10 +346,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
 
     construccion: [
-      { icon: Home, label: 'Resumen de Construcción', href: '/construction/dashboard' },
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Package, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
@@ -369,24 +372,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
 
     admin: [
-      { icon: Home, label: 'Resumen de Administración', href: '/admin/dashboard' },
-      { type: 'section', label: 'COMUNIDAD' },
-      { icon: Building, label: 'Organizaciones', href: '/admin/organizations', indent: true },
-      { icon: Users, label: 'Usuarios', href: '/admin/users', indent: true },
-      { icon: History, label: 'Changelog', href: '/admin/changelogs', indent: true },
-      { type: 'section', label: 'TAREAS' },
-      { icon: CheckSquare, label: 'Tareas', href: '/admin/generated-tasks', indent: true },
-      { icon: Search, label: 'Parámetros de Tareas', href: '/admin/task-parameters', indent: true },
-      { icon: FileCode, label: 'Plantillas', href: '/admin/task-templates', indent: true },
-      { icon: Tag, label: 'Categorías de Tareas', href: '/admin/categories', indent: true },
-      { type: 'section', label: 'FINANZAS' },
-      { icon: DollarSign, label: 'Conceptos de Movimientos', href: '/admin/movement-concepts', indent: true },
-      { type: 'section', label: 'MATERIALES' },
-      { icon: Package, label: 'Productos', href: '/admin/products', indent: true },
-      { icon: Package2, label: 'Materiales', href: '/admin/materials', indent: true },
-      { icon: Tag, label: 'Marcas', href: '/admin/brands', indent: true },
-      { icon: Package, label: 'Categorías de Materiales', href: '/admin/material-categories', indent: true },
-      { icon: NotebookPen, label: 'Precios de Materiales', href: '/admin/material-prices', indent: true },
+      { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
+      { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
+      { icon: Database, label: 'Materiales', href: '/admin/materials' },
+      { icon: Settings, label: 'General', href: '/admin/general' },
     ]
   };
 
