@@ -1,7 +1,6 @@
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Settings, UserCircle, Palette, Shield, Monitor } from 'lucide-react'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
@@ -11,11 +10,11 @@ import { useToast } from '@/hooks/use-toast'
 import { useSidebarStore, useSecondarySidebarStore } from '@/stores/sidebarStore'
 import { useThemeStore } from '@/stores/themeStore'
 
-interface ProfilePreferencesViewProps {
+interface ProfilePreferencesProps {
   user: any;
 }
 
-export function ProfilePreferencesView({ user }: ProfilePreferencesViewProps) {
+export function ProfilePreferences({ user }: ProfilePreferencesProps) {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore()
@@ -103,19 +102,6 @@ export function ProfilePreferencesView({ user }: ProfilePreferencesViewProps) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Feature Introduction */}
-      <FeatureIntroduction
-        title="Configuración de Preferencias"
-        icon={<UserCircle className="h-6 w-6" />}
-        features={[
-          {
-            icon: <Settings className="h-4 w-4" />,
-            title: "Preferencias de Aplicación",
-            description: "Configura el tema visual (claro/oscuro) y el comportamiento de la barra lateral según tus preferencias."
-          }
-        ]}
-      />
-
       {/* Saving indicator */}
       {isSaving && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground justify-center">

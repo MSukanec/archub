@@ -2,9 +2,9 @@ import { useState } from "react";
 import { User } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { ProfileBasicDataView } from './tabs/ProfileBasicDataView';
-import { ProfilePreferencesView } from './tabs/ProfilePreferencesView';
-import { ProfileOrganizationsView } from './tabs/ProfileOrganizationsView';
+import { ProfileBasicData } from './ProfileBasicData';
+import { ProfilePreferences } from './ProfilePreferences';
+import { ProfileOrganizations } from './ProfileOrganizations';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 
@@ -63,9 +63,9 @@ export default function Profile() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {activeTab === 'Datos Básicos' && <ProfileBasicDataView user={user} />}
-      {activeTab === 'Preferencias' && <ProfilePreferencesView user={user} />}
-      {activeTab === 'Organizaciones' && <ProfileOrganizationsView user={user} />}
+      {activeTab === 'Datos Básicos' && <ProfileBasicData user={user} />}
+      {activeTab === 'Preferencias' && <ProfilePreferences user={user} />}
+      {activeTab === 'Organizaciones' && <ProfileOrganizations user={user} />}
     </Layout>
   );
 }

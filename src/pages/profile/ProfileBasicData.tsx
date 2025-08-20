@@ -20,11 +20,11 @@ interface Country {
   code: string;
 }
 
-interface ProfileBasicDataViewProps {
+interface ProfileBasicDataProps {
   user: any;
 }
 
-export function ProfileBasicDataView({ user }: ProfileBasicDataViewProps) {
+export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const [, navigate] = useLocation()

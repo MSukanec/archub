@@ -224,11 +224,11 @@ export function OrganizationList() {
   )
 }
 
-interface ProfileOrganizationsViewProps {
+interface ProfileOrganizationsProps {
   user: any;
 }
 
-export function ProfileOrganizationsView({ user }: ProfileOrganizationsViewProps) {
+export function ProfileOrganizations({ user }: ProfileOrganizationsProps) {
   return (
     <OrganizationList />
   );
