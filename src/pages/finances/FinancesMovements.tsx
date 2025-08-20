@@ -40,10 +40,8 @@ import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
 
-import MovementCard from "@/components/cards/MovementCard";
 import ConversionCard from "@/components/cards/ConversionCard";
 import TransferCard, { TransferGroup } from "@/components/cards/TransferCard";
-import { transformMovementToCard } from "@/utils/movementCardAdapter";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/data-row";
 import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
 import { Star } from "lucide-react";
