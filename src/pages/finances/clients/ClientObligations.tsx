@@ -12,6 +12,7 @@ import { Receipt, Edit2, Trash2, Users, DollarSign, CreditCard, TrendingUp } fro
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useClientAnalysis } from '@/hooks/use-client-analysis'
+import { useMobile } from '@/hooks/use-mobile'
 
 interface ClientObligationsProps {
   projectId: string
@@ -22,6 +23,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
   const { openModal } = useGlobalModalStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const isMobile = useMobile()
 
   // Fetch client analysis for KPIs
   const { data: clientAnalysis, isLoading: isLoadingAnalysis } = useClientAnalysis(projectId)
@@ -587,18 +589,18 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
     <div className="space-y-6">
       {/* KPI Cards */}
       {clientAnalysis && !isLoadingAnalysis && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           {/* Total de compromisos */}
           <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Total de compromisos</p>
-                  <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>Total de compromisos</p>
+                  <Users className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Mini gráfico de barras - muestra distribución real de compromisos */}
-                <div className="flex items-end gap-1 h-8">
+                <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
                   {(() => {
                     // Calcular la distribución de compromisos por cliente
                     const clientCommitments = projectClients
@@ -646,18 +648,18 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                       {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
-                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                          <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
                             {currency?.symbol || '$'} {metric.totalCommitted.toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
-                    <p className="text-2xl font-bold">
+                    <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                       ${clientAnalysis.totalCommittedAmount.toLocaleString('es-AR')}
                     </p>
                   )}
-                  <p className="text-xs text-muted-foreground">
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     {clientAnalysis.totalCommitments} compromisos registrados
                   </p>
                 </div>
@@ -667,15 +669,15 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
           {/* Pago a la fecha */}
           <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Pago a la fecha</p>
-                  <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>Pago a la fecha</p>
+                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de línea de tendencia - altura fija */}
-                <div className="h-8 relative">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <path
                       d="M 0,24 Q 25,20 50,12 T 100,8"
@@ -694,14 +696,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                       {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
-                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                          <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
                             {currency?.symbol || '$'} {metric.totalPaid.toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
-                    <p className="text-2xl font-bold">
+                    <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                       ${clientAnalysis.totalPaidAmount.toLocaleString('es-AR')}
                     </p>
                   )}
@@ -715,15 +717,15 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
           {/* Saldo restante */}
           <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Saldo restante</p>
-                  <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>Saldo restante</p>
+                  <CreditCard className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Barra de progreso de pagos - altura fija */}
-                <div className="h-8 flex items-center">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} flex items-center`}>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
@@ -741,14 +743,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                       {clientAnalysis.currencyMetrics.map((metric: any, index: number) => {
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
-                          <p key={metric.currencyId} className={`${index === 0 ? 'text-2xl' : 'text-lg'} font-bold`}>
+                          <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
                             {currency?.symbol || '$'} {metric.remainingBalance.toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
-                    <p className="text-2xl font-bold">
+                    <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                       ${clientAnalysis.remainingBalance.toLocaleString('es-AR')}
                     </p>
                   )}
@@ -762,15 +764,15 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
 
           {/* % de pago restante */}
           <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">% de pago restante</p>
-                  <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>% de pago restante</p>
+                  <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de área llena - altura fija */}
-                <div className="h-8 relative">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -786,7 +788,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">{clientAnalysis.remainingPercentage.toFixed(0)}%</p>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{clientAnalysis.remainingPercentage.toFixed(0)}%</p>
                   <p className="text-xs text-muted-foreground">
                     Pendiente de cobro
                   </p>
