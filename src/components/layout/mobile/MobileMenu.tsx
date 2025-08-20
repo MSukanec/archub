@@ -586,29 +586,47 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </button>
 
             {expandedProjectSelector && (
-              <div 
-                className="fixed bottom-20 left-4 right-4 border rounded-xl shadow-lg h-[50vh] overflow-y-auto z-50 p-1"
-                style={{ 
-                  backgroundColor: 'var(--menues-bg)',
-                  borderColor: 'var(--menues-border)',
-                }}
-              >
-                <div className="px-2 py-1 text-xs font-medium border-b border-[var(--menues-border)] mb-1" style={{ color: 'var(--menues-fg)' }}>
-                  Proyecto
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setExpandedProjectSelector(false)}>
+                <div 
+                  className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border overflow-y-auto"
+                  style={{ 
+                    backgroundColor: 'var(--menues-bg)',
+                    borderColor: 'var(--menues-border)',
+                    width: 'calc(100vw - 32px)',
+                    maxWidth: '400px',
+                    maxHeight: '50vh',
+                    zIndex: 60
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Proyectos</h3>
+                    <button
+                      onClick={() => setExpandedProjectSelector(false)}
+                      className="h-8 w-8 p-0 rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--menues-fg)' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {projectsData?.map((project: any) => (
+                      <button
+                        key={project.id}
+                        onClick={() => {
+                          projectMutation.mutate(project.id);
+                          setExpandedProjectSelector(false);
+                        }}
+                        className="w-full px-3 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-lg"
+                        style={{ color: 'var(--menues-fg)' }}
+                      >
+                        {project.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                {projectsData?.map((project: any) => (
-                  <button
-                    key={project.id}
-                    onClick={() => {
-                      projectMutation.mutate(project.id);
-                      setExpandedProjectSelector(false);
-                    }}
-                    className="w-full px-2 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-xl shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
-                    style={{ color: 'var(--menues-fg)' }}
-                  >
-                    {project.name}
-                  </button>
-                ))}
               </div>
             )}
           </div>
