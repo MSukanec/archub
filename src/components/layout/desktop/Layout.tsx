@@ -105,31 +105,43 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
-      <HeaderMobile {...headerProps} />
+      {isMobile && headerProps?.tabs && headerProps.tabs.length > 1 ? (
+        <HeaderMobile {...headerProps}>
+          <main
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+          >
+            {children}
+          </main>
+        </HeaderMobile>
+      ) : (
+        <>
+          <HeaderMobile {...headerProps} />
+          
+          {/* Header Desktop - Hidden on mobile */}
+          <div className="hidden md:block">
+            <Header {...headerProps} />
+          </div>
 
-      {/* Header Desktop - Hidden on mobile */}
-      <div className="hidden md:block">
-        <Header {...headerProps} />
-      </div>
+          <main
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 md:px-12 md:py-6 pb-12 ${
+              // Calculate top padding based on new double-row header (h-20)
+              "md:pt-24" // h-20 header + 4 units padding
+            } ${
+              // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
+              isMainDocked || isMainHovered
+                ? "md:ml-[264px]" // 264px main sidebar when expanded
+                : "md:ml-[40px]" // 40px main sidebar when collapsed
+            } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+          >
+            <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
+              {children}
+            </div>
+          </main>
+        </>
+      )}
 
-      <main
-        className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 md:px-12 md:py-6 pb-12 ${
-          // Calculate top padding based on new double-row header (h-20)
-          "md:pt-24" // h-20 header + 4 units padding
-        } ${
-          // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
-          isMainDocked || isMainHovered
-            ? "md:ml-[264px]" // 264px main sidebar when expanded
-            : "md:ml-[40px]" // 40px main sidebar when collapsed
-        } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
-      >
-        <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
-          {children}
-        </div>
-      </main>
-
-      {/* Mobile Action Bar - Solo visible en mobile */}
-      <ActionBarMobile />
+      {/* Mobile Action Bar - Only visible on mobile when enabled */}
+      {isMobile && <ActionBarMobile />}
     </div>
   );
 }

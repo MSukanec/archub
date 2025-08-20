@@ -46,6 +46,7 @@ Preferred communication style: Simple, everyday language.
 - **Resources Reorganization**: Replaced unified Library page with separate pages for Documentation, Gallery, and Contacts in Resources section. Eliminated tabs in favor of dedicated pages accessible through sub-sidebar navigation (August 2025).
 - **Profile Organizations Refactor**: Split ProfileOrganizations.tsx into Organizations.tsx with tab-based interface containing OrganizationList.tsx and OrganizationBasicData.tsx components (August 2025).
 - **Organization Dashboard Restructure**: Completely restructured organization management from tabs to dashboard architecture. Renamed src/pages/organization/tabs to /dashboard, moved Organization.tsx to dashboard/Dashboard.tsx, and renamed all components from "Organization*" prefix to "Dashboard*" prefix. Updated routing in App.tsx to use new Dashboard component. This provides cleaner separation of concerns and improved maintainability (August 2025).
+- **Mobile Swipe Navigation**: Implemented swipe gesture support for tab navigation on mobile. Added useSwipe hook and SwipeContainer component to detect horizontal swipe gestures. Updated HeaderMobile and Layout components to automatically enable swipe-to-change-tabs functionality when multiple tabs are present. Users can now swipe left/right on mobile to navigate between tabs seamlessly (August 2025).
 
 ## External Dependencies
 
