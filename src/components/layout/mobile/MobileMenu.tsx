@@ -315,25 +315,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       label: 'Recursos', 
       defaultRoute: '/recursos/documentacion',
       isActive: currentSidebarContext === 'recursos' || location.startsWith('/recursos')
-    },
-    { 
-      id: 'perfil', 
-      icon: User, 
-      label: 'Perfil', 
-      defaultRoute: '/profile/data',
-      isActive: currentSidebarContext === 'perfil' || location.startsWith('/profile')
     }
   ];
 
   // Submenus para cada sección principal (actualizado según SidebarSubmenu.tsx)
   const submenuContent = {
-    perfil: [
-      { icon: UserCircle, label: 'Datos Básicos', href: '/profile/data' },
-      { icon: Settings, label: 'Preferencias', href: '/profile/settings' },
-      { icon: FolderOpen, label: 'Gestión de Proyectos', href: '/profile/projects' },
-      { icon: Building, label: 'Gestión de Organizaciones', href: '/profile/organizations' },
-    ],
-    
     organizacion: [
       { icon: Home, label: 'Resumen', href: '/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
@@ -395,7 +381,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (currentView === 'main') return 'Menú Principal';
     
     const titleMap = {
-      'perfil': 'Perfil',
       'organizacion': 'Organización', 
       'proyecto': 'Proyecto',
       'construccion': 'Construcción',
