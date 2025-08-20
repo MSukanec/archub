@@ -76,7 +76,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
     <div className="space-y-6">
       {/* Header con tipo de movimiento y monto principal */}
       <div className="flex items-center justify-between">
-        <Badge className={movementTypeInfo.color}>
+        <Badge className={`${movementTypeInfo.color} px-4 py-2 text-base font-medium`}>
           {movementTypeInfo.type}
         </Badge>
         <div className="text-right">
@@ -139,22 +139,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
           </span>
         </div>
 
-        {/* Creado por */}
-        <div className="flex items-center gap-2 text-sm">
-          <User className="h-4 w-4 text-accent" />
-          <span className="font-medium text-muted-foreground">Creado por:</span>
-          <div className="flex items-center gap-2">
-            <Avatar className="h-5 w-5">
-              <AvatarImage src={movement.creator?.avatar_url} />
-              <AvatarFallback className="text-xs">
-                {movement.creator?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-foreground">
-              {movement.creator?.full_name || 'Usuario desconocido'}
-            </span>
-          </div>
-        </div>
+
 
         {/* Proyecto */}
         {movement.movement_data?.project && (
@@ -281,20 +266,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
         </>
       )}
 
-      <Separator />
 
-      {/* Metadatos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
-        <div>
-          <div className="flex items-center gap-2">
-            <Hash className="h-3 w-3" />
-            ID: {movement.id}
-          </div>
-        </div>
-        <div className="text-right">
-          Creado: {formatDate(movement.created_at)}
-        </div>
-      </div>
     </div>
   )
 
