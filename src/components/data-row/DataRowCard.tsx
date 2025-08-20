@@ -277,26 +277,26 @@ export default function DataRowCard({
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 min-w-0 space-y-0.5">
+        <div className="flex-1 min-w-0">
           {/* Title */}
-          <div className={cn('truncate', classes.title)}>
+          <div className={cn('truncate leading-5', classes.title)}>
             {title}
           </div>
 
           {/* Subtitle */}
           {subtitle && (
-            <div className={cn('truncate text-muted-foreground', classes.subtitle)}>
+            <div className={cn('truncate text-muted-foreground leading-5', classes.subtitle)}>
               {subtitle}
             </div>
           )}
         </div>
 
         {/* Trailing Section */}
-        <div className="flex flex-col items-end space-y-0.5 flex-shrink-0">
+        <div className="flex flex-col items-end flex-shrink-0">
           {/* Amount */}
           {amount !== undefined && (
             <div className={cn(
-              'font-mono text-sm font-medium',
+              'font-mono text-sm font-medium leading-5',
               getToneClasses(amountTone)
             )}>
               {formatAmount(amount, currencyCode)}
@@ -305,7 +305,7 @@ export default function DataRowCard({
 
           {/* Lines auxiliares en el trailing */}
           {lines.slice(0, 2).map((line, index) => (
-            <div key={index} className="text-right">
+            <div key={index} className="text-right leading-5">
               <span className={cn(
                 'text-sm',
                 getToneClasses(line.tone),
