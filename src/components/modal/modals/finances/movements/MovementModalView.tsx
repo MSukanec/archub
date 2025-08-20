@@ -53,7 +53,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
   // Helper para formatear monto
   const formatAmount = (amount: number, currencySymbol?: string) => {
     const symbol = currencySymbol || '$'
-    return `${symbol}${Math.abs(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    return `${symbol} ${Math.abs(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 
   // Determinar tipo de movimiento y color
@@ -74,6 +74,14 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
 
   const viewPanel = (
     <div className="space-y-6">
+      {/* Fecha arriba */}
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="h-4 w-4 text-accent" />
+          {formatDate(movement.movement_date)}
+        </div>
+      </div>
+      
       {/* Header con tipo de movimiento y monto principal */}
       <div className="flex items-center justify-between">
         <Badge className={`${movementTypeInfo.color} px-4 py-2 text-base font-medium`}>
@@ -98,17 +106,6 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
 
       {/* Información principal */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Fecha */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Calendar className="h-4 w-4 text-accent" />
-            Fecha
-          </div>
-          <div className="text-sm text-foreground">
-            {formatDate(movement.movement_date)}
-          </div>
-        </div>
-
         {/* Categoría */}
         {movement.movement_data?.category && (
           <div className="space-y-2">
@@ -125,11 +122,9 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
           </div>
         )}
 
-
-
         {/* Proyecto */}
         {movement.movement_data?.project && (
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Building className="h-4 w-4 text-accent" />
               Proyecto
@@ -283,15 +278,6 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
       onLeftClick={onClose}
       rightLabel="Editar"
       onRightClick={handleEdit}
-      // Botón adicional para eliminar si se proporciona la función
-      extraButtons={onDelete ? [
-        {
-          label: "Eliminar",
-          onClick: () => onDelete(movement),
-          variant: "destructive" as const,
-          icon: Trash2
-        }
-      ] : undefined}
     />
   )
 
