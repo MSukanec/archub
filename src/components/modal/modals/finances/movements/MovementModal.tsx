@@ -1817,7 +1817,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       />
 
       {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-      {getActionButton(selectedCategoryId)}
+      {getActionButton(selectedSubcategoryId)}
     </div>
   )
 
