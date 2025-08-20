@@ -48,10 +48,10 @@ const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
   
   return (
     <div className={cn(
-      'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
-      planName === 'free' ? 'bg-[var(--plan-free-bg)]/10 text-[var(--plan-free-bg)] border border-[var(--plan-free-bg)]/20' : '',
-      planName === 'pro' ? 'bg-[var(--plan-pro-bg)]/10 text-[var(--plan-pro-bg)] border border-[var(--plan-pro-bg)]/20' : '',
-      planName === 'teams' ? 'bg-[var(--plan-teams-bg)]/10 text-[var(--plan-teams-bg)] border border-[var(--plan-teams-bg)]/20' : ''
+      'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white',
+      planName === 'free' ? 'bg-[var(--plan-free-bg)]' : '',
+      planName === 'pro' ? 'bg-[var(--plan-pro-bg)]' : '',
+      planName === 'teams' ? 'bg-[var(--plan-teams-bg)]' : ''
     )}>
       {planName === 'free' && <Star className="w-3 h-3" />}
       {planName === 'pro' && <Crown className="w-3 h-3" />}
