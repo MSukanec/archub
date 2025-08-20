@@ -21,6 +21,7 @@ export function HeaderMobile({
   const getCurrentSectionLabel = () => {
     if (location === "/") return "Gestión de Organizaciones";
     if (location.startsWith("/design")) return "Diseño";
+    if (location.startsWith("/construction/subcontracts")) return "Subcontratos";
     if (location.startsWith("/construction")) return "Construcción";
     if (location.startsWith("/finances")) return "Finanzas";
     if (location.startsWith("/recursos")) return "Recursos";
