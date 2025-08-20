@@ -426,20 +426,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header con botón de cierre */}
+        {/* Header con título ARCHUB y botón de cierre */}
         <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--menues-border)]">
-          {currentView !== 'main' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToMain}
-              className="text-[var(--menues-fg)] p-2"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
-            </Button>
-          )}
-          <div className="flex-1" />
+          <h1 className="text-lg font-semibold text-[var(--menues-fg)]">
+            ARCHUB
+          </h1>
           <Button
             variant="ghost"
             size="sm"
@@ -454,9 +445,26 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         <div className="flex-1 px-4 py-2 overflow-y-auto">
           {/* Título de la sección actual */}
           <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
-            <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
-              {getCurrentViewTitle()}
-            </h2>
+            {currentView !== 'main' ? (
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
+                  {getCurrentViewTitle()}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackToMain}
+                  className="text-[var(--menues-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver
+                </Button>
+              </div>
+            ) : (
+              <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
+                {getCurrentViewTitle()}
+              </h2>
+            )}
           </div>
           {currentView === 'main' ? (
             // Menu principal - solo botones principales
@@ -627,12 +635,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               className="p-0 border-0 bg-transparent hover:scale-105 transition-transform duration-150"
             >
               <Avatar className="h-12 w-12 shadow-button-normal hover:shadow-button-hover transition-shadow duration-150">
-                <AvatarImage 
-                  src={userData?.user?.avatar_url || userData?.user?.user_metadata?.avatar_url} 
-                  className="object-cover"
-                  onError={() => console.log('Avatar load failed, user data:', userData?.user)}
-                  onLoad={() => console.log('Avatar loaded successfully')}
-                />
+                {(userData?.user?.avatar_url && userData.user.avatar_url.trim() !== '') && (
+                  <AvatarImage 
+                    src={userData.user.avatar_url} 
+                    className="object-cover"
+                  />
+                )}
                 <AvatarFallback className="text-sm font-medium bg-[var(--accent)] text-white">
                   {userData?.user?.email?.substring(0, 2).toUpperCase() || 'U'}
                 </AvatarFallback>
