@@ -807,8 +807,21 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         </div>
       )}
 
-      {/* Lista de Compromisos usando DataRowCard */}
-      {commitmentSummary.length > 0 && (
+      {/* Desktop: Table View */}
+      {commitmentSummary.length > 0 && !isMobile && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-foreground">Compromisos Registrados</h3>
+          <Table
+            data={sortedCommitmentSummary}
+            columns={contactSummaryColumns}
+            defaultSort={{ key: 'committed_amount', direction: 'desc' }}
+            getItemId={(item) => item.id || 'unknown'}
+          />
+        </div>
+      )}
+
+      {/* Mobile: Row/Card View */}
+      {commitmentSummary.length > 0 && isMobile && (
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-foreground mb-4">Compromisos Registrados</h3>
           <div className="space-y-3">
@@ -824,7 +837,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                     isEditing: true
                   })
                 }}
-                density={isMobile ? 'compact' : 'normal'}
+                density="compact"
               />
             ))}
           </div>
