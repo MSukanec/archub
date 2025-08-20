@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Building, Users, FileText, BarChart3, Shield, Zap, Star, ArrowRight, Github, LogOut } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const features = [
   {
@@ -46,7 +47,8 @@ const stats = [
 ];
 
 export default function Landing() {
-  const { user, loading, initialized, initialize, logout } = useAuthStore();
+  const { user: authUser, loading: authLoading, initialized, initialize, logout } = useAuthStore();
+  const { data: userData, isLoading: userDataLoading, error: userDataError } = useCurrentUser();
 
   useEffect(() => {
     if (!initialized) {
@@ -54,11 +56,23 @@ export default function Landing() {
     }
   }, [initialize, initialized]);
 
-  const getUserInitials = (user: any) => {
-    if (!user) return "U";
-    const name = user.user_metadata?.full_name || user.email || "Usuario";
+  // If auth user exists but userData failed to load (user doesn't exist in DB), logout
+  useEffect(() => {
+    if (authUser && userDataError && !userDataLoading) {
+      console.log('User exists in auth but not in database, logging out...');
+      logout();
+    }
+  }, [authUser, userDataError, userDataLoading, logout]);
+
+  const getUserInitials = (userData: any) => {
+    if (!userData?.user) return "U";
+    const name = userData.user.full_name || userData.user.email || "Usuario";
     return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
   };
+
+  // Determine if user is properly authenticated (exists in both auth and database)
+  const isAuthenticated = authUser && userData && !userDataError;
+  const loading = authLoading || userDataLoading;
 
   return (
     <div className="min-h-screen dark" style={{ 
@@ -104,8 +118,8 @@ export default function Landing() {
             {/* Navegación derecha */}
             <div className="flex items-center space-x-4">
               {!loading && (
-                user ? (
-                  // Usuario autenticado
+                isAuthenticated ? (
+                  // Usuario autenticado y existe en la base de datos
                   <div className="flex items-center space-x-3">
                     <Link href="/dashboard">
                       <Button 
@@ -123,7 +137,7 @@ export default function Landing() {
 
                     <div className="flex items-center space-x-2 group relative">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarImage src={userData?.user?.avatar_url} />
                         <AvatarFallback 
                           className="text-xs"
                           style={{ 
@@ -131,7 +145,7 @@ export default function Landing() {
                             color: 'var(--text-default)' 
                           }}
                         >
-                          {getUserInitials(user)}
+                          {getUserInitials(userData)}
                         </AvatarFallback>
                       </Avatar>
                       
@@ -153,7 +167,7 @@ export default function Landing() {
                     </div>
                   </div>
                 ) : (
-                  // Usuario no autenticado
+                  // Usuario no autenticado o no existe en la base de datos
                   <div className="flex items-center space-x-3">
                     <Link href="/login">
                       <Button 
