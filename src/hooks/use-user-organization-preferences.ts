@@ -6,7 +6,6 @@ interface UserOrganizationPreferences {
   id: string
   user_id: string
   organization_id: string
-  last_project_id: string | null
   created_at: string
   updated_at: string
 }
@@ -46,17 +45,15 @@ export function useUpdateUserOrganizationPreferences() {
 
   return useMutation({
     mutationFn: async ({ 
-      organizationId, 
-      lastProjectId 
+      organizationId
     }: { 
       organizationId: string
-      lastProjectId: string | null 
     }) => {
       if (!userId) {
         throw new Error('User not authenticated')
       }
 
-      console.log("🔧 Updating user organization preferences", { userId, organizationId, lastProjectId });
+      console.log("🔧 Updating user organization preferences", { userId, organizationId });
 
       const response = await fetch('/api/user/update-organization-preferences', {
         method: 'POST',
@@ -66,7 +63,6 @@ export function useUpdateUserOrganizationPreferences() {
         },
         body: JSON.stringify({
           organization_id: organizationId,
-          last_project_id: lastProjectId,
         }),
       })
 
@@ -89,7 +85,4 @@ export function useUpdateUserOrganizationPreferences() {
   })
 }
 
-export function useGetLastProjectForOrganization(organizationId: string | undefined) {
-  const { data: preferences } = useUserOrganizationPreferences(organizationId)
-  return preferences?.last_project_id || null
-}
+// Removed useGetLastProjectForOrganization since last_project_id no longer exists
