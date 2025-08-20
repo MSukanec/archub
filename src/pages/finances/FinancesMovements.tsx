@@ -342,6 +342,10 @@ export default function Movements() {
     openModal('movement', { editingMovement: movement });
   };
 
+  const handleView = (movement: Movement) => {
+    openModal('movement', { viewingMovement: movement });
+  };
+
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
     // For conversions, we need to set special data so the modal can handle it
     const egresoMovement = conversionGroup.movements.find(m => 
@@ -358,6 +362,21 @@ export default function Movements() {
     openModal('movement', { editingMovement: conversionMovement as any });
   };
 
+  const handleViewConversion = (conversionGroup: ConversionGroup) => {
+    // Find the first egreso movement as main data
+    const egresoMovement = conversionGroup.movements.find(m => m.amount < 0);
+    if (!egresoMovement) return;
+    
+    // Add conversion metadata to the movement
+    const conversionMovement = {
+      ...egresoMovement,
+      _isConversion: true,
+      _conversionData: conversionGroup
+    };
+    
+    openModal('movement', { viewingMovement: conversionMovement as any });
+  };
+
   const handleEditTransfer = (transferGroup: TransferGroup) => {
     // For transfers, we need to set special data so the modal can handle it
     const egresoMovement = transferGroup.movements.find(m => 
@@ -372,6 +391,21 @@ export default function Movements() {
     };
     
     openModal('movement', { editingMovement: transferMovement as any });
+  };
+
+  const handleViewTransfer = (transferGroup: TransferGroup) => {
+    // Find the first egreso movement as main data
+    const egresoMovement = transferGroup.movements.find(m => m.amount < 0);
+    if (!egresoMovement) return;
+    
+    // Add transfer metadata to the movement
+    const transferMovement = {
+      ...egresoMovement,
+      _isTransfer: true,
+      _transferData: transferGroup
+    };
+    
+    openModal('movement', { viewingMovement: transferMovement as any });
   };
 
   const handleDelete = (movement: Movement) => {
@@ -1669,7 +1703,7 @@ export default function Movements() {
               >
                 <ConversionRow
                   conversion={item}
-                  onClick={() => handleEditConversion(item)}
+                  onClick={() => handleViewConversion(item)}
                   density="normal"
                 />
               </SwipeableCard>
@@ -1703,7 +1737,7 @@ export default function Movements() {
               >
                 <TransferRow
                   transfer={item}
-                  onClick={() => handleEditTransfer(item)}
+                  onClick={() => handleViewTransfer(item)}
                   density="normal"
                 />
               </SwipeableCard>
@@ -1733,7 +1767,7 @@ export default function Movements() {
                 <MovementRow
                   movement={item}
                   showProject={isGlobalView}
-                  onClick={() => handleEdit(item)}
+                  onClick={() => handleView(item)}
                   density="normal"
                 />
               </SwipeableCard>
