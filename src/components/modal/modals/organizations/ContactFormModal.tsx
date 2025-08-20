@@ -241,6 +241,9 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
       }
     },
     onSuccess: () => {
+      // Invalidate contacts query with correct organization ID
+      queryClient.invalidateQueries({ queryKey: ['contacts', userData?.organization?.id] });
+      // Also invalidate broader contacts queries that might exist
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       toast({
         title: isEditing ? "Contacto actualizado" : "Contacto creado",
