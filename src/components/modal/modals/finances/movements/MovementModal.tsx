@@ -1319,75 +1319,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const conversionPanel = (
     <Form {...conversionForm} key={`conversion-${movementType}`}>
       <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
-        {/* 1. FECHA */}
-        <FormField
-          control={conversionForm.control}
-          name="movement_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha *</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Seleccionar fecha..."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 2. TIPO DE MOVIMIENTO */}
-        <FormField
-          control={conversionForm.control}
-          name="type_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Movimiento *</FormLabel>
-              <Select 
-                value={selectedTypeId} 
-                onValueChange={(value) => {
-                  handleTypeChange(value)
-                  field.onChange(value)
-                }}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {movementConcepts?.map((concept) => (
-                    <SelectItem key={concept.id} value={concept.id}>
-                      {concept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* 3. DESCRIPCIÓN (TEXTAREA) */}
-        <FormField
-          control={conversionForm.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción de la conversión..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
         {getActionButton(selectedCategoryId)}
 
@@ -1773,12 +1704,267 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     </Form>
   )
 
-  // Panel condicional
-  const editPanel = movementType === 'conversion' 
-    ? conversionPanel 
-    : movementType === 'transfer' 
-      ? transferPanel 
-      : normalPanel
+  // Campos comunes (siempre los mismos)
+  const commonFields = (
+    <div className="space-y-4">
+      {/* LAYOUT: FECHA 1/3 Y TIPO DE MOVIMIENTO 2/3 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 1. FECHA */}
+        <FormField
+          control={form.control}
+          name="movement_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha *</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* 2. TIPO DE MOVIMIENTO CON CASCADINGSELECT - OCUPA 2 COLUMNAS */}
+        <FormItem className="md:col-span-2">
+          <FormLabel>Tipo de Movimiento *</FormLabel>
+          <FormControl>
+            <CascadingSelect
+              options={transformConceptsToOptions(movementConcepts || [])}
+              value={[selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean)}
+              onValueChange={(values) => {
+                console.log('🎯 CascadingSelect values:', values)
+                
+                const typeId = values[0] || ''
+                const categoryId = values[1] || ''
+                const subcategoryId = values[2] || ''
+                
+                // Actualizar estados
+                setSelectedTypeId(typeId)
+                setSelectedCategoryId(categoryId)
+                setSelectedSubcategoryId(subcategoryId)
+                
+                // Actualizar formularios según el tipo activo
+                if (movementType === 'conversion') {
+                  conversionForm.setValue('type_id', typeId)
+                  conversionForm.setValue('category_id', categoryId)
+                  conversionForm.setValue('subcategory_id', subcategoryId)
+                } else if (movementType === 'transfer') {
+                  transferForm.setValue('type_id', typeId)
+                  transferForm.setValue('category_id', categoryId)
+                  transferForm.setValue('subcategory_id', subcategoryId)
+                } else {
+                  form.setValue('type_id', typeId)
+                  form.setValue('category_id', categoryId)
+                  form.setValue('subcategory_id', subcategoryId)
+                }
+                
+                // Solo aplicar lógica de detección de tipo sin resetear categorías
+                if (typeId && movementConcepts) {
+                  const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
+                  const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+                  
+                  if (viewMode === "conversion") {
+                    setMovementType('conversion')
+                  } else if (viewMode === "transfer") {
+                    setMovementType('transfer')
+                  } else {
+                    setMovementType('normal')
+                  }
+                }
+              }}
+              placeholder="Seleccionar tipo de movimiento..."
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </div>
+
+      {/* 3. DESCRIPCIÓN (TEXTAREA) */}
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descripción</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder={
+                  movementType === 'conversion' 
+                    ? "Descripción de la conversión..." 
+                    : movementType === 'transfer'
+                      ? "Descripción de la transferencia..."
+                      : "Descripción del movimiento..."
+                }
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e)
+                  // Sincronizar con otros formularios
+                  if (movementType === 'conversion') {
+                    conversionForm.setValue('description', e.target.value)
+                  } else if (movementType === 'transfer') {
+                    transferForm.setValue('description', e.target.value)
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
+      {getActionButton(selectedCategoryId)}
+    </div>
+  )
+
+  // Panel unificado con campos comunes arriba y específicos abajo
+  const editPanel = (
+    <Form {...form} key={`unified-${movementType}`}>
+      <form onSubmit={(e) => {
+        e.preventDefault()
+        if (movementType === 'conversion') {
+          conversionForm.handleSubmit(onSubmitConversion)()
+        } else if (movementType === 'transfer') {
+          transferForm.handleSubmit(onSubmitTransfer)()
+        } else {
+          form.handleSubmit(onSubmit)()
+        }
+      }} className="space-y-4">
+        
+        {/* CAMPOS COMUNES (siempre iguales) */}
+        {commonFields}
+
+        {/* CAMPOS ESPECÍFICOS según tipo */}
+        {movementType === 'conversion' && (
+          <ConversionFields
+            form={conversionForm}
+            currencies={currencies || []}
+            wallets={wallets || []}
+            members={members || []}
+            concepts={movementConcepts || []}
+            movement={undefined}
+          />
+        )}
+
+        {movementType === 'transfer' && (
+          <TransferFields
+            form={transferForm}
+            currencies={currencies || []}
+            wallets={wallets || []}
+            members={members || []}
+            concepts={movementConcepts || []}
+          />
+        )}
+
+        {movementType === 'normal' && (
+          <>
+            {/* Mostrar resúmenes si hay personal/subcontratos/clientes seleccionados */}
+            {selectedPersonnel && selectedPersonnel.length > 0 && (
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Personal seleccionado:
+                </div>
+                <div className="space-y-1">
+                  {selectedPersonnel.map((person, index) => (
+                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                      <div>{person.first_name} {person.last_name}</div>
+                      <div className="text-right">${person.amount.toFixed(2)}</div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+                    <div className="font-medium">Total:</div>
+                    <div className="text-right font-bold">
+                      ${selectedPersonnel.reduce((sum, person) => sum + person.amount, 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedSubcontracts && selectedSubcontracts.length > 0 && (
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Subcontratos seleccionados:
+                </div>
+                <div className="space-y-1">
+                  {selectedSubcontracts.map((subcontract, index) => (
+                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                      <div>{subcontract.name}</div>
+                      <div className="text-right">${subcontract.amount.toFixed(2)}</div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+                    <div className="font-medium">Total:</div>
+                    <div className="text-right font-bold">
+                      ${selectedSubcontracts.reduce((sum, subcontract) => sum + subcontract.amount, 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedClients && selectedClients.length > 0 && (
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Clientes seleccionados:
+                </div>
+                <div className="space-y-1">
+                  {selectedClients.map((client, index) => (
+                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                      <div>{client.client_name}</div>
+                      <div className="text-right">${client.amount.toFixed(2)}</div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+                    <div className="font-medium">Total:</div>
+                    <div className="text-right font-bold">
+                      ${selectedClients.reduce((sum, client) => sum + client.amount, 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedPartnerWithdrawals && selectedPartnerWithdrawals.length > 0 && (
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Retiros de socios seleccionados:
+                </div>
+                <div className="space-y-1">
+                  {selectedPartnerWithdrawals.map((pw, index) => (
+                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
+                      <div>{pw.partner_name}</div>
+                      <div className="text-right">${pw.amount.toFixed(2)}</div>
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
+                    <div className="font-medium">Total:</div>
+                    <div className="text-right font-bold">
+                      ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + pw.amount, 0).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DefaultMovementFields
+              form={form}
+              currencies={currencies || []}
+              wallets={wallets || []}
+            />
+          </>
+        )}
+      </form>
+    </Form>
+  )
 
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
