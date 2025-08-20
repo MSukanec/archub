@@ -11,7 +11,8 @@ import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
 import ClientObligationModal from '../modals/finances/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
-import { MovementModal } from '../modals/finances/movements/MovementModal';
+import { MovementModal } from '../modals/finances/movements/MovementModal'
+import { MovementModalView } from '../modals/finances/movements/MovementModalView';
 import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
 import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
 
@@ -87,6 +88,8 @@ export function ModalFactory() {
       return <DocumentFolderFormModal modalData={data} onClose={closeModal} />;
     case 'movement':
       return <MovementModal modalData={data} onClose={closeModal} />;
+    case 'movement-view':
+      return <MovementModalView modalData={data} onClose={closeModal} />;
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
     case 'organization-movement-concept':

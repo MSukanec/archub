@@ -343,7 +343,7 @@ export default function Movements() {
   };
 
   const handleView = (movement: Movement) => {
-    openModal('movement', { viewingMovement: movement });
+    openModal('movement-view', { viewingMovement: movement });
   };
 
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
@@ -374,7 +374,7 @@ export default function Movements() {
       _conversionData: conversionGroup
     };
     
-    openModal('movement', { viewingMovement: conversionMovement as any });
+    openModal('movement-view', { viewingMovement: conversionMovement as any });
   };
 
   const handleEditTransfer = (transferGroup: TransferGroup) => {
@@ -405,7 +405,7 @@ export default function Movements() {
       _transferData: transferGroup
     };
     
-    openModal('movement', { viewingMovement: transferMovement as any });
+    openModal('movement-view', { viewingMovement: transferMovement as any });
   };
 
   const handleDelete = (movement: Movement) => {
