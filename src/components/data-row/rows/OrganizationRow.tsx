@@ -38,9 +38,23 @@ const getOrganizationInitials = (orgName: string): string => {
   return orgName.slice(0, 2).toUpperCase();
 };
 
-// Helper para formatear el plan como badge text
-const formatPlanText = (plan?: Organization['plan']): string => {
-  return plan?.name || 'Free';
+// Componente PlanBadge con iconos y colores
+const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
+  const planName = plan?.name?.toLowerCase() || 'free';
+  
+  return (
+    <div className={`
+      inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
+      ${planName === 'free' ? 'bg-[var(--plan-free-bg)]/10 text-[var(--plan-free-bg)] border border-[var(--plan-free-bg)]/20' : ''}
+      ${planName === 'pro' ? 'bg-[var(--plan-pro-bg)]/10 text-[var(--plan-pro-bg)] border border-[var(--plan-pro-bg)]/20' : ''}
+      ${planName === 'teams' ? 'bg-[var(--plan-teams-bg)]/10 text-[var(--plan-teams-bg)] border border-[var(--plan-teams-bg)]/20' : ''}
+    `}>
+      {planName === 'free' && <Star className="w-3 h-3" />}
+      {planName === 'pro' && <Crown className="w-3 h-3" />}
+      {planName === 'teams' && <Zap className="w-3 h-3" />}
+      <span className="capitalize">{plan?.name || 'Free'}</span>
+    </div>
+  );
 };
 
 // Componente customizado para el trailing con avatares superpuestos
@@ -103,15 +117,14 @@ export default function OrganizationRow({
   className 
 }: OrganizationRowProps) {
   
-  // Props para DataRowCard usando el patrón estándar
+  // Props para DataRowCard usando el patrón estándar (sin badge)
   const dataRowProps: DataRowCardProps = {
     // Leading - Avatar de la organización (forzar URL si existe)
     avatarUrl: organization.logo_url || undefined,
     avatarFallback: getOrganizationInitials(organization.name),
     
-    // Content - Nombre como título, plan como badge
+    // Content - Solo nombre como título
     title: organization.name,
-    badgeText: formatPlanText(organization.plan),
     
     // Behavior
     onClick,
@@ -126,6 +139,11 @@ export default function OrganizationRow({
   return (
     <div className="relative">
       <DataRowCard {...dataRowProps} />
+      
+      {/* Plan Badge - debajo del título */}
+      <div className="absolute left-[52px] top-[32px] pointer-events-none z-10">
+        <PlanBadge plan={organization.plan} />
+      </div>
       
       {/* Trailing customizado con avatares superpuestos */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
