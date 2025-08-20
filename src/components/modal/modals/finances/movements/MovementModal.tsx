@@ -229,18 +229,56 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
-      movement_date: parseMovementDate(editingMovement?.movement_date),
-      created_by: editingMovement?.created_by || currentMember?.id || '',
-      type_id: editingMovement?.type_id || '',
-      category_id: editingMovement?.category_id || '',
-      subcategory_id: editingMovement?.subcategory_id || '',
-      description: editingMovement?.description || '',
-      currency_id: editingMovement?.currency_id || defaultCurrency || '',
-      wallet_id: editingMovement?.wallet_id || defaultWallet || '',
-      amount: editingMovement?.amount || 0,
-      exchange_rate: editingMovement?.exchange_rate || undefined
+      movement_date: new Date(),
+      created_by: '',
+      type_id: '',
+      category_id: '',
+      subcategory_id: '',
+      description: '',
+      currency_id: '',
+      wallet_id: '',
+      amount: 0,
+      exchange_rate: undefined
     }
   })
+
+  // Efecto para re-inicializar el formulario cuando los datos asíncronos estén disponibles
+  React.useEffect(() => {
+    // Solo proceder cuando tengamos los datos mínimos necesarios
+    if (!userData?.user?.id || !currentMember?.id) return
+    if (!currencies?.length || !wallets?.length) return
+    
+    // Re-inicializar valores del formulario con datos disponibles
+    if (!isEditing) {
+      // Para nuevos movimientos, usar valores por defecto
+      form.reset({
+        movement_date: new Date(),
+        created_by: currentMember.id,
+        type_id: '',
+        category_id: '',
+        subcategory_id: '',
+        description: '',
+        currency_id: defaultCurrency || currencies[0]?.currency?.id || '',
+        wallet_id: defaultWallet || wallets[0]?.id || '',
+        amount: 0,
+        exchange_rate: undefined
+      })
+    } else {
+      // Para edición, usar datos del movimiento
+      form.reset({
+        movement_date: parseMovementDate(editingMovement?.movement_date),
+        created_by: editingMovement?.created_by || currentMember.id,
+        type_id: editingMovement?.type_id || '',
+        category_id: editingMovement?.category_id || '',
+        subcategory_id: editingMovement?.subcategory_id || '',
+        description: editingMovement?.description || '',
+        currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id || '',
+        wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id || '',
+        amount: editingMovement?.amount || 0,
+        exchange_rate: editingMovement?.exchange_rate || undefined
+      })
+    }
+  }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
 
   // Conversion form (como en el modal original)
   const conversionForm = useForm<ConversionForm>({
