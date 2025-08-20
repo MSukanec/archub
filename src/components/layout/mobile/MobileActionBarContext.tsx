@@ -9,11 +9,9 @@ interface ActionBarAction {
 }
 
 interface ActionBarActions {
-  slot1?: ActionBarAction  // Dashboard de proyectos (fijo)
-  slot2?: ActionBarAction  // Search
-  slot3?: ActionBarAction  // Crear (verde, principal)
-  slot4?: ActionBarAction  // Filtros
-  slot5?: ActionBarAction  // Limpiar filtros
+  search?: ActionBarAction     // Search
+  create?: ActionBarAction     // Crear (verde, principal)
+  filter?: ActionBarAction     // Filtros
 }
 
 interface MobileActionBarContextType {
@@ -22,6 +20,16 @@ interface MobileActionBarContextType {
   clearActions: () => void
   showActionBar: boolean
   setShowActionBar: (show: boolean) => void
+  // Search popover state
+  showSearchPopover: boolean
+  setShowSearchPopover: (show: boolean) => void
+  searchValue: string
+  setSearchValue: (value: string) => void
+  // Filter popover state
+  showFilterPopover: boolean
+  setShowFilterPopover: (show: boolean) => void
+  filterConfig?: any
+  setFilterConfig: (config: any) => void
 }
 
 const MobileActionBarContext = createContext<MobileActionBarContextType | undefined>(undefined)
@@ -29,10 +37,21 @@ const MobileActionBarContext = createContext<MobileActionBarContextType | undefi
 export function MobileActionBarProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ActionBarActions>({})
   const [showActionBar, setShowActionBar] = useState(false)
+  
+  // Search state
+  const [showSearchPopover, setShowSearchPopover] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  
+  // Filter state
+  const [showFilterPopover, setShowFilterPopover] = useState(false)
+  const [filterConfig, setFilterConfig] = useState<any>(null)
 
   const clearActions = () => {
     setActions({})
     setShowActionBar(false)
+    setShowSearchPopover(false)
+    setShowFilterPopover(false)
+    setSearchValue('')
   }
 
   return (
@@ -41,7 +60,15 @@ export function MobileActionBarProvider({ children }: { children: ReactNode }) {
       setActions,
       clearActions,
       showActionBar,
-      setShowActionBar
+      setShowActionBar,
+      showSearchPopover,
+      setShowSearchPopover,
+      searchValue,
+      setSearchValue,
+      showFilterPopover,
+      setShowFilterPopover,
+      filterConfig,
+      setFilterConfig
     }}>
       {children}
     </MobileActionBarContext.Provider>
