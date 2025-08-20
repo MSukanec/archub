@@ -128,7 +128,7 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
               type="button"
               disabled={disabled}
               className={cn(
-                "flex w-[80px] text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-l-md transition-all duration-150 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
+                "flex w-[90px] md:w-[80px] text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-l-md transition-all duration-150 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px] md:min-h-auto",
                 "border-r-0 justify-between items-center",
                 !selectedCurrency && "text-[var(--input-placeholder)]"
               )}

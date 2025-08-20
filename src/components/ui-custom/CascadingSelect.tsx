@@ -189,7 +189,7 @@ export function CascadingSelect({
         onClick={handleTriggerClick}
         disabled={disabled}
         className={cn(
-          "flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60",
+          "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 min-h-[44px] md:min-h-auto",
           selectedPath.length === 0 && "text-[var(--input-placeholder)]",
           className
         )}
