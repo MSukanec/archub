@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Building2, FolderOpen, DollarSign, Coins } from "lucide-react";
 import { useMovementKPIs, CurrencyBalance } from "@/hooks/use-movement-kpis";
+import { useIsMobile } from "@/hooks/use-mobile.tsx";
 
 interface MovementKPICardsProps {
   organizationId?: string;
@@ -11,7 +12,7 @@ interface MovementKPICardsProps {
 }
 
 // Component to render a single currency balance
-const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number }> = ({ balance, index }) => {
+const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number, isMobile: boolean }> = ({ balance, index, isMobile }) => {
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
@@ -36,12 +37,12 @@ const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number }
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.1, duration: 0.2 }}
-      className="flex items-center justify-between py-1"
+      className={`flex items-center justify-between ${isMobile ? 'py-0.5' : 'py-1'}`}
     >
-      <span className="text-xs font-medium text-muted-foreground">
+      <span className={`font-medium text-muted-foreground ${isMobile ? 'text-xs' : 'text-xs'}`}>
         {balance.currencyCode}
       </span>
-      <span className={`text-xs font-bold ${getBalanceColor(balance.balance)}`}>
+      <span className={`font-bold ${getBalanceColor(balance.balance)} ${isMobile ? 'text-xs' : 'text-xs'}`}>
         {getBalanceSign(balance.balance)}{formatAmount(balance.balance)}
       </span>
     </motion.div>
@@ -50,30 +51,31 @@ const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number }
 
 export function MovementKPICards({ organizationId, projectId }: MovementKPICardsProps) {
   const { projectBalances, organizationBalances, isLoading } = useMovementKPIs(organizationId, projectId);
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}>
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-          <CardContent className="p-6">
-            <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-8 bg-muted rounded w-1/2"></div>
-              <div className="space-y-2">
-                <div className="h-3 bg-muted rounded"></div>
-                <div className="h-3 bg-muted rounded"></div>
+          <CardContent className={isMobile ? "p-3" : "p-6"}>
+            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
+              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
+              <div className={`bg-muted rounded ${isMobile ? 'h-6 w-3/4' : 'h-8 w-1/2'}`}></div>
+              <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-          <CardContent className="p-6">
-            <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-8 bg-muted rounded w-1/2"></div>
-              <div className="space-y-2">
-                <div className="h-3 bg-muted rounded"></div>
-                <div className="h-3 bg-muted rounded"></div>
+          <CardContent className={isMobile ? "p-3" : "p-6"}>
+            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
+              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
+              <div className={`bg-muted rounded ${isMobile ? 'h-6 w-3/4' : 'h-8 w-1/2'}`}></div>
+              <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
               </div>
             </div>
           </CardContent>
@@ -112,8 +114,15 @@ export function MovementKPICards({ organizationId, projectId }: MovementKPICards
     return null;
   }
 
+  const getGridClasses = () => {
+    if (isMobile) {
+      return 'grid-cols-2';
+    }
+    return cardsWithMovements.length === 1 ? 'grid-cols-1 max-w-md' : 'grid-cols-1 md:grid-cols-2';
+  };
+
   return (
-    <div className={`grid gap-4 mb-6 ${cardsWithMovements.length === 1 ? 'grid-cols-1 max-w-md' : 'grid-cols-1 md:grid-cols-2'}`}>
+    <div className={`grid gap-3 mb-4 ${getGridClasses()}`}>
       {cardsWithMovements.map((card, cardIndex) => (
         <motion.div
           key={card.title}
@@ -122,53 +131,56 @@ export function MovementKPICards({ organizationId, projectId }: MovementKPICards
           transition={{ duration: 0.3, delay: cardIndex * 0.1 }}
         >
           <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-4">
+            <CardContent className={isMobile ? "p-3" : "p-6"}>
+              <div className={`flex items-center gap-2 ${isMobile ? 'mb-2' : 'mb-4'}`}>
                 <div className="flex-shrink-0">
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    className={`rounded-lg flex items-center justify-center ${isMobile ? 'w-7 h-7' : 'w-10 h-10'}`}
                     style={{ backgroundColor: `${card.color}20`, color: card.color }}
                   >
-                    <card.icon className="w-5 h-5" />
+                    <card.icon className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-foreground">
-                    {card.title}
+                  <h3 className={`font-medium text-foreground ${isMobile ? 'text-xs leading-tight' : 'text-sm'}`}>
+                    {isMobile ? card.title.replace('Balance del ', '').replace('Balance de la ', '') : card.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Balances por moneda
-                  </p>
+                  {!isMobile && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Balances por moneda
+                    </p>
+                  )}
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className={isMobile ? "space-y-0.5" : "space-y-1"}>
                 {card.balances.length === 0 ? (
-                  <div className="text-center py-4">
-                    <Coins className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-xs text-muted-foreground">
-                      {card.emptyMessage}
+                  <div className={`text-center ${isMobile ? 'py-2' : 'py-4'}`}>
+                    <Coins className={`mx-auto text-muted-foreground mb-1 ${isMobile ? 'w-5 h-5' : 'w-8 h-8 mb-2'}`} />
+                    <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                      {isMobile ? 'Sin movimientos' : card.emptyMessage}
                     </p>
                   </div>
                 ) : (
-                  card.balances.slice(0, 3).map((balance, index) => (
+                  card.balances.slice(0, isMobile ? 2 : 3).map((balance, index) => (
                     <CurrencyBalanceBadge 
                       key={balance.currency} 
                       balance={balance} 
-                      index={index} 
+                      index={index}
+                      isMobile={isMobile}
                     />
                   ))
                 )}
 
-                {card.balances.length > 3 && (
+                {card.balances.length > (isMobile ? 2 : 3) && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="pt-2 mt-2 border-t border-border"
+                    className={`border-t border-border ${isMobile ? 'pt-1 mt-1' : 'pt-2 mt-2'}`}
                   >
-                    <Badge variant="secondary" className="text-xs">
-                      +{card.balances.length - 3} moneda{card.balances.length - 3 > 1 ? 's' : ''} más
+                    <Badge variant="secondary" className={isMobile ? "text-xs px-1 py-0" : "text-xs"}>
+                      +{card.balances.length - (isMobile ? 2 : 3)} más
                     </Badge>
                   </motion.div>
                 )}
@@ -179,10 +191,10 @@ export function MovementKPICards({ organizationId, projectId }: MovementKPICards
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="mt-4 pt-3 border-t border-border"
+                  className={`border-t border-border ${isMobile ? 'mt-2 pt-1' : 'mt-4 pt-3'}`}
                 >
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Total movimientos:</span>
+                  <div className={`flex justify-between text-muted-foreground ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                    <span>{isMobile ? 'Total:' : 'Total movimientos:'}</span>
                     <span className="font-medium">
                       {card.balances.reduce((sum, b) => sum + b.movementCount, 0)}
                     </span>
