@@ -87,26 +87,10 @@ export function Clients() {
         clearActions();
       }
     };
-  }, [isMobile, navigate, openModal, setActions, setShowActionBar, clearActions])
+  }, [isMobile]) // Remove unstable function dependencies
 
-  // Configure search and filter for mobile
-  useEffect(() => {
-    if (isMobile) {
-      // Basic search configuration - the search functionality will be handled by the child components
-      setFilterConfig({
-        filters: [
-          {
-            label: 'Buscar compromisos',
-            value: mobileSearchValue,
-            onChange: setMobileSearchValue,
-            placeholder: 'Buscar por cliente...',
-            allOptionLabel: 'Todos los clientes',
-            options: []
-          }
-        ]
-      });
-    }
-  }, [isMobile, mobileSearchValue, setMobileSearchValue, setFilterConfig])
+  // Note: Search and filter functionality is handled automatically by the MobileActionBar component
+  // The buttons don't need special configuration - the popovers are built into the ActionBar
   
   const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
