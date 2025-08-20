@@ -21,9 +21,7 @@ const CurrencyBalanceBadge: React.FC<{ balance: CurrencyBalance, index: number, 
   };
 
   const getBalanceColor = (amount: number) => {
-    if (amount > 0) return "text-green-600";
-    if (amount < 0) return "text-red-600";
-    return "text-muted-foreground";
+    return "text-foreground";
   };
 
   const getBalanceSign = (amount: number) => {
