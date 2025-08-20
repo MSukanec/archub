@@ -18,6 +18,8 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
+import { OrganizationRow } from '@/components/data-row/rows'
+import { useMobile } from '@/hooks/use-mobile'
 
 // Componente para una sola tarjeta de organización
 function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, onDelete }: {
@@ -191,21 +193,33 @@ export function OrganizationList() {
 
 
 
+  const isMobile = useMobile()
+
   return (
     <div className="space-y-6">
 
       {/* Lista de organizaciones */}
-      <div className="space-y-2">
+      <div className={isMobile ? "space-y-2" : "space-y-2"}>
         {organizations.map((organization) => (
-          <OrganizationCard
-            key={organization.id}
-            organization={organization}
-            isSelected={selectedOrganization === organization.id}
-            onSelect={handleSelect}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          isMobile ? (
+            <OrganizationRow
+              key={organization.id}
+              organization={organization}
+              onClick={() => handleSelect(organization.id)}
+              selected={selectedOrganization === organization.id}
+              density="normal"
+            />
+          ) : (
+            <OrganizationCard
+              key={organization.id}
+              organization={organization}
+              isSelected={selectedOrganization === organization.id}
+              onSelect={handleSelect}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )
         ))}
         
         {organizations.length === 0 && (
