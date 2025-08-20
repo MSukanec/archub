@@ -628,8 +628,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             >
               <Avatar className="h-12 w-12 shadow-button-normal hover:shadow-button-hover transition-shadow duration-150">
                 <AvatarImage 
-                  src={userData?.user?.user_metadata?.avatar_url} 
+                  src={userData?.user?.avatar_url || userData?.user?.user_metadata?.avatar_url} 
                   className="object-cover"
+                  onError={() => console.log('Avatar load failed, user data:', userData?.user)}
+                  onLoad={() => console.log('Avatar loaded successfully')}
                 />
                 <AvatarFallback className="text-sm font-medium bg-[var(--accent)] text-white">
                   {userData?.user?.email?.substring(0, 2).toUpperCase() || 'U'}
