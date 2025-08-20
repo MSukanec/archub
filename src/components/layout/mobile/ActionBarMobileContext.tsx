@@ -9,9 +9,11 @@ interface ActionBarAction {
 }
 
 interface ActionBarActions {
+  home?: ActionBarAction       // Inicio (nuevo)
   search?: ActionBarAction     // Search
-  create?: ActionBarAction     // Crear (verde, principal)
+  create?: ActionBarAction     // Crear (principal)
   filter?: ActionBarAction     // Filtros
+  notifications?: ActionBarAction  // Notificaciones (nuevo)
 }
 
 interface ActionBarMobileContextType {

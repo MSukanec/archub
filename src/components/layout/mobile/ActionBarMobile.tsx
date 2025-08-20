@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
-import { Search, Filter, X } from 'lucide-react'
+import { Search, Filter, X, Home, Bell } from 'lucide-react'
 import { useLocation } from 'wouter'
 
 export function ActionBarMobile() {
@@ -149,52 +149,65 @@ export function ActionBarMobile() {
 
       {/* Action Bar */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-30 px-4 py-3 flex items-center justify-center gap-6"
+        className="fixed bottom-0 left-0 right-0 z-30 px-4 py-3"
         style={{ 
           backgroundColor: 'var(--menues-bg)',
           borderTopColor: 'var(--menues-border)',
           borderTopWidth: '1px'
         }}
       >
-        {/* Secondary Actions (Icons only, larger, no borders) */}
-        <div className="flex items-center gap-8">
-          {/* Search */}
+        {/* 5 slots when create action exists, 4 slots when it doesn't */}
+        <div className={`flex items-center justify-between ${actions.create ? 'px-4' : 'px-8'}`}>
+          {/* Slot 1: Home */}
+          {actions.home && (
+            <button
+              onClick={actions.home.onClick}
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              {actions.home.icon}
+            </button>
+          )}
+
+          {/* Slot 2: Search */}
           {actions.search && (
             <button
               onClick={handleSearchClick}
-              className="flex items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Search className="h-6 w-6 text-gray-600 dark:text-gray-400" />
             </button>
           )}
 
-          {/* Filter */}
+          {/* Slot 3: Create (Central, only if exists) */}
+          {actions.create && (
+            <button
+              onClick={actions.create.onClick}
+              className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
+              style={{ backgroundColor: 'var(--accent)' }}
+            >
+              {actions.create.icon}
+            </button>
+          )}
+
+          {/* Slot 4: Filter */}
           {actions.filter && (
             <button
               onClick={handleFilterClick}
-              className="flex items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Filter className="h-6 w-6 text-gray-600 dark:text-gray-400" />
             </button>
           )}
-        </div>
 
-        {/* Primary Action (Central, prominent) */}
-        {actions.create && (
-          <Button
-            onClick={actions.create.onClick}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 shadow-lg"
-            size="lg"
-          >
-            {actions.create.icon}
-          </Button>
-        )}
-
-        {/* Additional secondary actions can go here */}
-        <div className="flex items-center gap-8">
-          {/* Placeholder for additional icons */}
-          <div className="w-12 h-12" /> {/* Spacer for symmetry */}
-          <div className="w-12 h-12" /> {/* Spacer for symmetry */}
+          {/* Slot 5: Notifications */}
+          {actions.notifications && (
+            <button
+              onClick={actions.notifications.onClick}
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              {actions.notifications.icon}
+            </button>
+          )}
         </div>
       </div>
     </>

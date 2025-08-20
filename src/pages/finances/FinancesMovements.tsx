@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet } from "lucide-react";
+import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -550,6 +550,15 @@ export default function Movements() {
   useEffect(() => {
     if (isMobile) {
       setActions({
+        home: {
+          id: 'home',
+          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Inicio',
+          onClick: () => {
+            // Navigate to dashboard
+            window.location.href = '/organization';
+          },
+        },
         search: {
           id: 'search',
           icon: <Search className="h-5 w-5" />,
@@ -572,7 +581,16 @@ export default function Movements() {
           onClick: () => {
             // Popover is handled in MobileActionBar
           },
-        }
+        },
+        notifications: {
+          id: 'notifications',
+          icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Notificaciones',
+          onClick: () => {
+            // TODO: implement notifications
+            console.log('Notifications clicked');
+          },
+        },
       });
       setShowActionBar(true);
     }
