@@ -1,7 +1,7 @@
 import React from 'react';
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
+import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown, Star, Zap } from 'lucide-react';
+import { Star, Crown, Zap } from 'lucide-react';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 // Interface para la organización (usando la estructura real de la app)
@@ -38,17 +38,21 @@ const getOrganizationInitials = (orgName: string): string => {
   return orgName.slice(0, 2).toUpperCase();
 };
 
-// Componente PlanBadge con iconos y colores
+
+
+
+
+// Componente PlanBadge local para mostrar el plan de la organización
 const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
   const planName = plan?.name?.toLowerCase() || 'free';
   
   return (
-    <div className={`
-      inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
-      ${planName === 'free' ? 'bg-[var(--plan-free-bg)]/10 text-[var(--plan-free-bg)] border border-[var(--plan-free-bg)]/20' : ''}
-      ${planName === 'pro' ? 'bg-[var(--plan-pro-bg)]/10 text-[var(--plan-pro-bg)] border border-[var(--plan-pro-bg)]/20' : ''}
-      ${planName === 'teams' ? 'bg-[var(--plan-teams-bg)]/10 text-[var(--plan-teams-bg)] border border-[var(--plan-teams-bg)]/20' : ''}
-    `}>
+    <div className={cn(
+      'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
+      planName === 'free' ? 'bg-[var(--plan-free-bg)]/10 text-[var(--plan-free-bg)] border border-[var(--plan-free-bg)]/20' : '',
+      planName === 'pro' ? 'bg-[var(--plan-pro-bg)]/10 text-[var(--plan-pro-bg)] border border-[var(--plan-pro-bg)]/20' : '',
+      planName === 'teams' ? 'bg-[var(--plan-teams-bg)]/10 text-[var(--plan-teams-bg)] border border-[var(--plan-teams-bg)]/20' : ''
+    )}>
       {planName === 'free' && <Star className="w-3 h-3" />}
       {planName === 'pro' && <Crown className="w-3 h-3" />}
       {planName === 'teams' && <Zap className="w-3 h-3" />}
@@ -117,36 +121,50 @@ export default function OrganizationRow({
   className 
 }: OrganizationRowProps) {
   
-  // Props para DataRowCard usando el patrón estándar
-  const dataRowProps: DataRowCardProps = {
-    // Leading - Avatar de la organización con lógica mejorada para logo
-    avatarUrl: (organization.logo_url && organization.logo_url.trim() !== '') ? organization.logo_url : undefined,
-    avatarFallback: getOrganizationInitials(organization.name),
-    
-    // Content - Solo nombre como título
-    title: organization.name,
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    showChevron: !!onClick,
-    'data-testid': `organization-row-${organization.id}`
-  };
-
-  // Renderizar DataRowCard base y el trailing customizado encima
+  // Renderizar un DataRowCard customizado sin positioning absoluto
   return (
-    <div className="relative">
-      <DataRowCard {...dataRowProps} />
-      
-      {/* Plan Badge - debajo del título con espaciado correcto */}
-      <div className="absolute left-[52px] top-[32px] pointer-events-none z-10">
-        <PlanBadge plan={organization.plan} />
-      </div>
-      
-      {/* Trailing customizado con avatares superpuestos */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+    <div
+      className={cn(
+        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-3 transition-colors shadow-lg',
+        'py-3 gap-3',
+        // Estados interactivos
+        onClick && 'cursor-pointer hover:bg-[var(--card-hover-bg)] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+        // Estado selected
+        selected && 'ring-2 ring-accent',
+        className
+      )}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      data-testid={`organization-row-${organization.id}`}
+    >
+      <div className="flex items-center gap-3">
+        {/* Leading Section - Avatar */}
+        <div className="flex-shrink-0">
+          <Avatar className="h-10 w-10">
+            {(organization.logo_url && organization.logo_url.trim() !== '') ? (
+              <AvatarImage src={organization.logo_url} />
+            ) : null}
+            <AvatarFallback className="text-xs font-medium">
+              {getOrganizationInitials(organization.name)}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0">
+          {/* Title */}
+          <div className="truncate leading-5 font-bold text-sm">
+            {organization.name}
+          </div>
+
+          {/* Plan Badge como subtitle */}
+          <div className="mt-1">
+            <PlanBadge plan={organization.plan} />
+          </div>
+        </div>
+
+        {/* Trailing Section - Avatares */}
         <div className="flex items-center">
           <OrganizationTrailing organizationId={organization.id} />
           {/* Espacio mínimo para chevron si existe */}
