@@ -453,6 +453,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing user_id or organization_id" });
       }
 
+      console.log("🔧 Fetching user organization preferences for:", { user_id, organization_id });
+
+      // First try to get existing preferences
       const { data, error } = await supabase
         .from('user_organization_preferences')
         .select('*')
@@ -462,12 +465,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error) {
         if (error.code === 'PGRST116') { // No rows found
-          return res.status(404).json({ error: "Preferences not found" });
+          console.log("🔧 No preferences found, creating default ones for new user");
+          
+          // Create default preferences for new user
+          const { data: newPreferences, error: createError } = await supabase
+            .from('user_organization_preferences')
+            .upsert(
+              {
+                user_id,
+                organization_id,
+                last_project_id: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              },
+              {
+                onConflict: 'user_id,organization_id'
+              }
+            )
+            .select()
+            .single();
+
+          if (createError) {
+            console.error("Error creating default user organization preferences:", createError);
+            return res.status(500).json({ error: "Failed to create organization preferences" });
+          }
+
+          console.log("🔧 Successfully created default preferences:", newPreferences);
+          return res.json(newPreferences);
         }
         console.error("Error fetching user organization preferences:", error);
         return res.status(500).json({ error: "Failed to fetch organization preferences" });
       }
 
+      console.log("🔧 Found existing preferences:", data);
       res.json(data);
     } catch (error) {
       console.error("Error fetching organization preferences:", error);
