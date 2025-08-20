@@ -618,17 +618,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               )}
             </div>
 
-            {/* Avatar Button - Fixed size */}
+            {/* Avatar Button - Direct circular avatar as button */}
             <button
               onClick={() => {
                 navigate('/profile');
                 handleCloseMenu();
               }}
-              className="h-12 w-12 flex items-center justify-center rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+              className="p-0 border-0 bg-transparent hover:scale-105 transition-transform duration-150"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={userData?.user?.user_metadata?.avatar_url} />
-                <AvatarFallback className="text-xs font-medium">
+              <Avatar className="h-12 w-12 shadow-button-normal hover:shadow-button-hover transition-shadow duration-150">
+                <AvatarImage 
+                  src={userData?.user?.user_metadata?.avatar_url} 
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-sm font-medium bg-[var(--accent)] text-white">
                   {userData?.user?.email?.substring(0, 2).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
