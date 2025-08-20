@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useClientAnalysis } from '@/hooks/use-client-analysis'
 import { useMobile } from '@/hooks/use-mobile'
+import { ClientObligationRow } from '@/components/data-row/rows'
 
 interface ClientObligationsProps {
   projectId: string
@@ -799,20 +800,27 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         </div>
       )}
 
-      {/* Tabla de Compromisos */}
+      {/* Lista de Compromisos usando DataRowCard */}
       {commitmentSummary.length > 0 && (
-        <div>
-          <Table
-            data={sortedCommitmentSummary}
-            columns={contactSummaryColumns}
-            getItemId={(item) => item.id || 'unknown'}
-            renderCard={(item) => (
-              <ClientSummaryCard 
-                item={item} 
-                allCurrencies={allCurrencies}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Compromisos Registrados</h3>
+          <div className="space-y-3">
+            {sortedCommitmentSummary.map((commitment) => (
+              <ClientObligationRow
+                key={commitment.id}
+                obligation={commitment}
+                onClick={() => {
+                  openModal('project-client', {
+                    projectId,
+                    organizationId,
+                    editingClient: commitment,
+                    isEditing: true
+                  })
+                }}
+                density={isMobile ? 'compact' : 'normal'}
               />
-            )}
-          />
+            ))}
+          </div>
         </div>
       )}
 
