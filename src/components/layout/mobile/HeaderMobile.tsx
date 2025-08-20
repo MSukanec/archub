@@ -82,7 +82,7 @@ export function HeaderMobile({
 
           {/* Right: ONLY Menu Icon */}
           <Menu 
-            className="w-10 h-10 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
+            className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
             onClick={openMenu}
           />
         </div>
