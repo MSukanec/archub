@@ -180,28 +180,28 @@ export default function SubcontractRow({
 
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
-    // Content - Columna 1: Nombre del subcontrato, subcontratista, estado
-    title: subcontract.title,
-    subtitle: contractorName,
+    // Content - TRES LÍNEAS en columna izquierda
+    title: subcontract.title, // Línea 1: Nombre del subcontrato (en negrita automáticamente)
+    subtitle: contractorName, // Línea 2: Subcontratista  
     
-    // Sin avatar
+    // NO avatar
     
-    // Lines - Estado y montos alineados
+    // Lines - Línea 3 en izquierda + TRES montos en derecha
     lines: [
       {
-        text: statusText,
+        text: statusText, // Línea 3 izquierda: Estado
         tone: statusColor === 'success' ? 'success' : statusColor === 'danger' ? 'danger' : 'muted',
-        hintRight: `T: ${formattedTotal}`
+        hintRight: `T: ${formattedTotal}` // Línea 1 derecha: Total
       },
       {
-        text: " ",
+        text: "", // Línea vacía izquierda
         tone: 'muted' as const,
-        hintRight: `P: ${formattedPaid}`
+        hintRight: `P: ${formattedPaid}` // Línea 2 derecha: Pago
       },
       {
-        text: " ",
+        text: "", // Línea vacía izquierda  
         tone: 'muted' as const,
-        hintRight: `S: ${formattedBalance}`
+        hintRight: `S: ${formattedBalance}` // Línea 3 derecha: Saldo
       }
     ],
     
