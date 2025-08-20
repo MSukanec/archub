@@ -571,64 +571,83 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           )}
         </div>
 
-        {/* Footer with project selector - Fixed at bottom */}
+        {/* Footer with project selector and avatar - Fixed at bottom */}
         <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          {/* Project Selector Button - Full width */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setExpandedProjectSelector(!expandedProjectSelector);
-              }}
-              className="w-full h-12 flex items-center justify-between px-3 rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
-            >
-              <span className="text-sm font-medium truncate">{currentProjectName}</span>
-              <FolderOpen className="h-5 w-5 ml-2 flex-shrink-0" />
-            </button>
+          {/* Project Selector and Avatar Row */}
+          <div className="flex items-center gap-3">
+            {/* Project Selector Button - Takes most space */}
+            <div className="relative flex-1">
+              <button
+                onClick={() => {
+                  setExpandedProjectSelector(!expandedProjectSelector);
+                }}
+                className="w-full h-12 flex items-center justify-between px-3 rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+              >
+                <span className="text-sm font-medium truncate">{currentProjectName}</span>
+                <FolderOpen className="h-5 w-5 ml-2 flex-shrink-0" />
+              </button>
 
-            {expandedProjectSelector && (
-              <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setExpandedProjectSelector(false)}>
-                <div 
-                  className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border overflow-y-auto"
-                  style={{ 
-                    backgroundColor: 'var(--menues-bg)',
-                    borderColor: 'var(--menues-border)',
-                    width: 'calc(100vw - 32px)',
-                    maxWidth: '400px',
-                    maxHeight: '50vh',
-                    zIndex: 60
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Proyectos</h3>
-                    <button
-                      onClick={() => setExpandedProjectSelector(false)}
-                      className="h-8 w-8 p-0 rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--menues-fg)' }}>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {projectsData?.map((project: any) => (
+              {expandedProjectSelector && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setExpandedProjectSelector(false)}>
+                  <div 
+                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border overflow-y-auto"
+                    style={{ 
+                      backgroundColor: 'var(--menues-bg)',
+                      borderColor: 'var(--menues-border)',
+                      width: 'calc(100vw - 32px)',
+                      maxWidth: '400px',
+                      maxHeight: '50vh',
+                      zIndex: 60
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Proyectos</h3>
                       <button
-                        key={project.id}
-                        onClick={() => {
-                          projectMutation.mutate(project.id);
-                          setExpandedProjectSelector(false);
-                        }}
-                        className="w-full px-3 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-lg"
-                        style={{ color: 'var(--menues-fg)' }}
+                        onClick={() => setExpandedProjectSelector(false)}
+                        className="h-8 w-8 p-0 rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
                       >
-                        {project.name}
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--menues-fg)' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
-                    ))}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {projectsData?.map((project: any) => (
+                        <button
+                          key={project.id}
+                          onClick={() => {
+                            projectMutation.mutate(project.id);
+                            setExpandedProjectSelector(false);
+                          }}
+                          className="w-full px-3 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-lg"
+                          style={{ color: 'var(--menues-fg)' }}
+                        >
+                          {project.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Avatar Button - Fixed size */}
+            <button
+              onClick={() => {
+                navigate('/profile');
+                handleCloseMenu();
+              }}
+              className="h-12 w-12 flex items-center justify-center rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={userData?.user?.user_metadata?.avatar_url} />
+                <AvatarFallback className="text-xs font-medium">
+                  {userData?.user?.email?.substring(0, 2).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </button>
           </div>
         </div>
       </div>
