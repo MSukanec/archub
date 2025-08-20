@@ -3,6 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AmountInput } from '@/components/ui-custom/AmountInput'
 
 import UserSelector from '@/components/ui-custom/UserSelector'
 
@@ -29,55 +30,6 @@ interface Props {
 export function TransferFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
     <div className="space-y-4">
-
-        {/* Moneda y Cantidad en la misma línea */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Moneda *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {currencies?.map((orgCurrency) => (
-                      <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                        {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cantidad *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
         {/* Billeteras Origen y Destino */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -130,6 +82,32 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Moneda y Monto */}
+        <div className="col-span-2">
+          <FormItem>
+            <FormLabel>Moneda y Monto *</FormLabel>
+            <FormControl>
+              <AmountInput
+                value={form.watch('amount') || undefined}
+                currency={form.watch('currency_id') || ''}
+                currencies={currencies?.map(orgCurrency => ({
+                  id: orgCurrency.currency?.id || '',
+                  name: orgCurrency.currency?.name || 'Sin nombre',
+                  symbol: orgCurrency.currency?.symbol || '$'
+                })) || []}
+                onValueChange={(value) => {
+                  form.setValue('amount', value || 0)
+                }}
+                onCurrencyChange={(currencyId) => {
+                  form.setValue('currency_id', currencyId)
+                }}
+                placeholder="0.00"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         </div>
 
 
