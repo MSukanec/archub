@@ -186,22 +186,25 @@ export default function SubcontractRow({
     
     // NO avatar
     
-    // Lines - Línea 3 en izquierda + TRES montos en derecha
+    // Lines - Línea 3 en izquierda + TRES montos en derecha con colores
     lines: [
       {
         text: statusText, // Línea 3 izquierda: Estado
         tone: statusColor === 'success' ? 'success' : statusColor === 'danger' ? 'danger' : 'muted',
-        hintRight: `T: ${formattedTotal}` // Línea 1 derecha: Total
+        hintRight: `T: ${formattedTotal}`, // Línea 1 derecha: Total
+        hintRightColor: '#8B5CF6' // Violeta para Total
       },
       {
         text: "", // Solo hintRight - no texto izquierda
         tone: 'muted' as const,
-        hintRight: `P: ${formattedPaid}` // Línea 2 derecha: Pago
+        hintRight: `P: ${formattedPaid}`, // Línea 2 derecha: Pago
+        hintRightColor: '#10B981' // Verde para Pago
       },
       {
         text: "", // Solo hintRight - no texto izquierda
         tone: 'muted' as const,
-        hintRight: `S: ${formattedBalance}` // Línea 3 derecha: Saldo
+        hintRight: `S: ${formattedBalance}`, // Línea 3 derecha: Saldo
+        hintRightColor: '#3B82F6' // Azul para Saldo
       }
     ],
     

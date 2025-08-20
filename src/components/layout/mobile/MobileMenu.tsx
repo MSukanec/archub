@@ -531,7 +531,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       <button
                         className={cn(
                           "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal",
-                          ('indent' in item && item.indent) && "ml-6"
+                          ('indent' in item && !!item.indent) && "ml-6"
                         )}
                         disabled
                       >
@@ -554,7 +554,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         location === item.href 
                           ? "bg-[hsl(76,100%,40%)] text-white" 
                           : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]",
-                        ('indent' in item && item.indent) && "ml-6"
+                        ('indent' in item && !!item.indent) && "ml-6"
                       )}
                     >
                       {item.icon && <item.icon className="h-5 w-5" />}

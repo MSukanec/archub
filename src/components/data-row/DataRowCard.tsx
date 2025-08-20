@@ -12,6 +12,8 @@ export type Line = {
   tone?: 'muted' | 'success' | 'warning' | 'danger' | 'info';
   /** hint pequeño a la derecha (ej. código de moneda, %), opcional */
   hintRight?: string;
+  /** Color personalizado para hintRight */
+  hintRightColor?: string;
   /** si true, renderizar como monoespaciado (importe) */
   mono?: boolean;
 };
@@ -279,7 +281,7 @@ export default function DataRowCard({
         {/* Content Section */}
         <div className="flex-1 min-w-0">
           {/* Title */}
-          <div className={cn('truncate leading-5', classes.title)}>
+          <div className={cn('truncate leading-5 font-bold', classes.title)}>
             {title}
           </div>
 
@@ -320,10 +322,13 @@ export default function DataRowCard({
           {displayLines.map((line, index) => (
             line.hintRight && (
               <div key={index} className="text-right leading-5">
-                <span className={cn(
-                  'text-sm font-mono',
-                  getToneClasses(line.tone)
-                )}>
+                <span 
+                  className={cn(
+                    'text-sm font-mono',
+                    !line.hintRightColor && getToneClasses(line.tone)
+                  )}
+                  style={line.hintRightColor ? { color: line.hintRightColor } : undefined}
+                >
                   {line.hintRight}
                 </span>
               </div>
