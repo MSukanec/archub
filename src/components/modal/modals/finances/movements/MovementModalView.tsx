@@ -93,119 +93,106 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
 
       <Separator />
 
-      {/* Información básica */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Información principal */}
+      <div className="space-y-3">
         {/* Fecha */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            Fecha
-          </div>
-          <div className="text-sm text-foreground">
-            {formatDate(movement.movement_date)}
-          </div>
+        <div className="flex items-center gap-2 text-sm">
+          <Calendar className="h-4 w-4 text-accent" />
+          <span className="font-medium text-muted-foreground">Fecha:</span>
+          <span className="text-foreground">{formatDate(movement.movement_date)}</span>
         </div>
 
-        {/* Creado por */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <User className="h-4 w-4" />
-            Creado por
-          </div>
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={movement.creator?.avatar_url} />
-              <AvatarFallback className="text-xs">
-                {movement.creator?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-foreground">
-              {movement.creator?.full_name || 'Usuario desconocido'}
+        {/* Categoría */}
+        {movement.movement_data?.category && (
+          <div className="flex items-center gap-2 text-sm">
+            <Tag className="h-4 w-4 text-accent" />
+            <span className="font-medium text-muted-foreground">Categoría:</span>
+            <span className="text-foreground">
+              {movement.movement_data.type?.name} / {movement.movement_data.category?.name}
+              {movement.movement_data?.subcategory && (
+                <span> / {movement.movement_data.subcategory.name}</span>
+              )}
             </span>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Descripción */}
-      {movement.description && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <FileText className="h-4 w-4" />
-            Descripción
-          </div>
-          <div className="text-sm text-foreground bg-muted/20 p-3 rounded-md">
-            {movement.description}
-          </div>
-        </div>
-      )}
-
-      <Separator />
-
-      {/* Detalles del movimiento */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Billetera */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Wallet className="h-4 w-4" />
-            Billetera
-          </div>
-          <div className="text-sm text-foreground">
+        <div className="flex items-center gap-2 text-sm">
+          <Wallet className="h-4 w-4 text-accent" />
+          <span className="font-medium text-muted-foreground">Billetera:</span>
+          <span className="text-foreground">
             {movement.movement_data?.wallet?.name || 'No especificada'}
-          </div>
+          </span>
         </div>
 
         {/* Moneda */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <DollarSign className="h-4 w-4" />
-            Moneda
-          </div>
-          <div className="text-sm text-foreground">
+        <div className="flex items-center gap-2 text-sm">
+          <DollarSign className="h-4 w-4 text-accent" />
+          <span className="font-medium text-muted-foreground">Moneda:</span>
+          <span className="text-foreground">
             {movement.movement_data?.currency?.name || 'No especificada'}
             {movement.movement_data?.currency?.symbol && (
               <span className="ml-2 font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
                 {movement.movement_data?.currency?.symbol}
               </span>
             )}
+          </span>
+        </div>
+
+        {/* Creado por */}
+        <div className="flex items-center gap-2 text-sm">
+          <User className="h-4 w-4 text-accent" />
+          <span className="font-medium text-muted-foreground">Creado por:</span>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={movement.creator?.avatar_url} />
+              <AvatarFallback className="text-xs">
+                {movement.creator?.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-foreground">
+              {movement.creator?.full_name || 'Usuario desconocido'}
+            </span>
           </div>
         </div>
 
-        {/* Categoría */}
-        {movement.movement_data?.category && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Tag className="h-4 w-4" />
-              Categoría
-            </div>
-            <div className="text-sm text-foreground">
-              {movement.movement_data.type?.name} / {movement.movement_data.category?.name}
-              {movement.movement_data?.subcategory && (
-                <span> / {movement.movement_data.subcategory.name}</span>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Proyecto */}
         {movement.movement_data?.project && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Building className="h-4 w-4" />
-              Proyecto
-            </div>
-            <div className="text-sm text-foreground">
+          <div className="flex items-center gap-2 text-sm">
+            <Building className="h-4 w-4 text-accent" />
+            <span className="font-medium text-muted-foreground">Proyecto:</span>
+            <span className="text-foreground">
               {movement.movement_data.project.name}
-            </div>
+            </span>
           </div>
         )}
       </div>
 
-      {/* Información de conversión */}
+      {/* Descripción */}
+      {movement.description && (
+        <>
+          <Separator />
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <FileText className="h-4 w-4 text-accent" />
+              Descripción
+            </div>
+            <div className="text-sm text-foreground bg-muted/20 p-3 rounded-md">
+              {movement.description}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Detalles adicionales - Conversión */}
       {movement._isConversion && movement._conversionData && (
         <>
           <Separator />
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground">Detalles de la Conversión</h3>
+            <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <DollarSign className="h-4 w-4 text-accent" />
+              Detalles de la Conversión
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {movement._conversionData.movements?.map((mov: any, index: number) => (
                 <div key={mov.id} className="p-3 border rounded-md">
@@ -227,12 +214,15 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
         </>
       )}
 
-      {/* Información de transferencia */}
+      {/* Detalles adicionales - Transferencia */}
       {movement._isTransfer && movement._transferData && (
         <>
           <Separator />
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground">Detalles de la Transferencia</h3>
+            <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Wallet className="h-4 w-4 text-accent" />
+              Detalles de la Transferencia
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {movement._transferData.movements?.map((mov: any, index: number) => (
                 <div key={mov.id} className="p-3 border rounded-md">
@@ -250,6 +240,43 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
                 </div>
               ))}
             </div>
+          </div>
+        </>
+      )}
+
+      {/* Detalles adicionales - Cliente y Cuota (si existen) */}
+      {(movement.movement_data?.client_name || movement.movement_data?.installment_number) && (
+        <>
+          <Separator />
+          <div className="space-y-3">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <User className="h-4 w-4 text-accent" />
+              Detalles del Cliente
+            </h3>
+            
+            {movement.movement_data?.client_name && (
+              <div className="flex items-center gap-2 text-sm">
+                <User className="h-4 w-4 text-accent" />
+                <span className="font-medium text-muted-foreground">Cliente:</span>
+                <span className="text-foreground">{movement.movement_data.client_name}</span>
+              </div>
+            )}
+            
+            {movement.movement_data?.installment_number && (
+              <div className="flex items-center gap-2 text-sm">
+                <Hash className="h-4 w-4 text-accent" />
+                <span className="font-medium text-muted-foreground">Cuota:</span>
+                <span className="text-foreground">#{movement.movement_data.installment_number}</span>
+              </div>
+            )}
+            
+            {movement.movement_data?.unit && (
+              <div className="flex items-center gap-2 text-sm">
+                <Building className="h-4 w-4 text-accent" />
+                <span className="font-medium text-muted-foreground">Unidad:</span>
+                <span className="text-foreground">{movement.movement_data.unit}</span>
+              </div>
+            )}
           </div>
         </>
       )}
