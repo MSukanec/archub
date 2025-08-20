@@ -3,6 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AmountInput } from '@/components/ui-custom/AmountInput'
 
 import UserSelector from '@/components/ui-custom/UserSelector'
 
@@ -43,33 +44,8 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             <label className="text-sm font-medium leading-none">Datos de Origen (Egreso)</label>
           </div>
           
-          {/* Moneda y Billetera en la misma fila */}
+          {/* Billetera y Moneda y Monto en la misma fila */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="currency_id_from"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda Origen *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {currencies?.map((orgCurrency) => (
-                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="wallet_id_from"
@@ -94,29 +70,30 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                 </FormItem>
               )}
             />
-          </div>
 
-          {/* Cantidad en fila separada */}
-          <FormField
-            control={form.control}
-            name="amount_from"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cantidad Origen *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormItem>
+              <FormLabel>Moneda y Monto Origen *</FormLabel>
+              <FormControl>
+                <AmountInput
+                  value={form.watch('amount_from') || undefined}
+                  currency={form.watch('currency_id_from') || ''}
+                  currencies={currencies?.map(orgCurrency => ({
+                    id: orgCurrency.currency?.id || '',
+                    name: orgCurrency.currency?.name || 'Sin nombre',
+                    symbol: orgCurrency.currency?.symbol || '$'
+                  })) || []}
+                  onValueChange={(value) => {
+                    form.setValue('amount_from', value || 0)
+                  }}
+                  onCurrencyChange={(currencyId) => {
+                    form.setValue('currency_id_from', currencyId)
+                  }}
+                  placeholder="0.00"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
         </div>
 
         {/* Sección DESTINO */}
@@ -128,33 +105,8 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             <label className="text-sm font-medium leading-none">Datos de Destino (Ingreso)</label>
           </div>
           
-          {/* Moneda y Billetera en la misma fila */}
+          {/* Billetera y Moneda y Monto en la misma fila */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="currency_id_to"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda Destino *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {currencies?.map((orgCurrency) => (
-                        <SelectItem key={orgCurrency.currency?.id} value={orgCurrency.currency?.id || ''}>
-                          {orgCurrency.currency?.name || 'Sin nombre'} ({orgCurrency.currency?.symbol || '$'})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="wallet_id_to"
@@ -179,29 +131,31 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                 </FormItem>
               )}
             />
+
+            <FormItem>
+              <FormLabel>Moneda y Monto Destino *</FormLabel>
+              <FormControl>
+                <AmountInput
+                  value={form.watch('amount_to') || undefined}
+                  currency={form.watch('currency_id_to') || ''}
+                  currencies={currencies?.map(orgCurrency => ({
+                    id: orgCurrency.currency?.id || '',
+                    name: orgCurrency.currency?.name || 'Sin nombre',
+                    symbol: orgCurrency.currency?.symbol || '$'
+                  })) || []}
+                  onValueChange={(value) => {
+                    form.setValue('amount_to', value || 0)
+                  }}
+                  onCurrencyChange={(currencyId) => {
+                    form.setValue('currency_id_to', currencyId)
+                  }}
+                  placeholder="0.00"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           </div>
 
-          {/* Cantidad en fila separada */}
-          <FormField
-            control={form.control}
-            name="amount_to"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cantidad Destino *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           {/* Cotización */}
           <FormField
             control={form.control}
