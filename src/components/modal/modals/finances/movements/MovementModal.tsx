@@ -118,12 +118,39 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const editingMovement = propEditingMovement || modalData?.editingMovement
   const isEditing = propIsEditing || !!editingMovement
 
-  // Debug logs
+  // Initialize values when editing
   React.useEffect(() => {
-    if (editingMovement) {
-
+    if (editingMovement && !hasLoadedInitialData) {
+      console.log('🔧 MovementModal: Initializing editing data', editingMovement)
+      
+      // Set hierarchical selection states
+      if (editingMovement.type_id) {
+        setSelectedTypeId(editingMovement.type_id)
+      }
+      if (editingMovement.category_id) {
+        setSelectedCategoryId(editingMovement.category_id)
+      }
+      if (editingMovement.subcategory_id) {
+        setSelectedSubcategoryId(editingMovement.subcategory_id)
+      }
+      
+      // Determine movement type based on the type_id
+      if (editingMovement.type_id && movementConcepts) {
+        const selectedConcept = movementConcepts.find((concept: any) => concept.id === editingMovement.type_id)
+        const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+        
+        if (viewMode === "conversion") {
+          setMovementType('conversion')
+        } else if (viewMode === "transfer") {
+          setMovementType('transfer')
+        } else {
+          setMovementType('normal')
+        }
+      }
+      
+      setHasLoadedInitialData(true)
     }
-  }, [editingMovement, isEditing])
+  }, [editingMovement, movementConcepts, hasLoadedInitialData])
   // Hooks
   const { data: userData } = useCurrentUser()
   const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
@@ -1734,7 +1761,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           <FormControl>
             <CascadingSelect
               options={transformConceptsToOptions(movementConcepts || [])}
-              value={[selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean)}
+              value={React.useMemo(() => [selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean), [selectedTypeId, selectedCategoryId, selectedSubcategoryId])}
               onValueChange={(values) => {
                 console.log('🎯 CascadingSelect values:', values)
                 
@@ -1762,8 +1789,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   form.setValue('subcategory_id', subcategoryId)
                 }
                 
-                // Solo aplicar lógica de detección de tipo sin resetear categorías
-                if (typeId && movementConcepts) {
+                // Solo aplicar lógica de detección de tipo sin resetear categorías - Pero no durante la carga inicial
+                if (typeId && movementConcepts && hasLoadedInitialData) {
                   const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
                   const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
                   
