@@ -228,7 +228,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
     // Handle confirm
     const handleConfirm = () => {
       const validCommitments = commitmentRows
-        .filter(row => row.commitment_id && row.installment_id)
+        .filter(row => row.commitment_id && (row.installment_id || !paymentPlan?.payment_plans))
         .map(row => {
           const projectClient = projectClients.find(pc => pc.id === row.commitment_id)
           const installment = projectInstallments.find(pi => pi.id === row.installment_id)
@@ -238,8 +238,8 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
               project_client_id: row.commitment_id,
               client_name: 'Cliente desconocido',
               unit: 'Sin unidad',
-              project_installment_id: row.installment_id,
-              installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : 'Cuota desconocida'
+              project_installment_id: row.installment_id || '',
+              installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : (row.installment_id ? 'Cuota desconocida' : 'Sin cuota')
             }
           }
           
@@ -258,8 +258,8 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
             project_client_id: row.commitment_id,
             client_name: clientName,
             unit: projectClient.unit || 'Sin unidad',
-            project_installment_id: row.installment_id,
-            installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : 'Cuota desconocida'
+            project_installment_id: row.installment_id || '',
+            installment_display: installment ? `Cuota ${installment.number.toString().padStart(2, '0')}` : (row.installment_id ? 'Cuota desconocida' : 'Sin cuota')
           }
         })
 
