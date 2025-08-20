@@ -16,11 +16,13 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from '@tanstack/react-query';
+import { useMobile } from '@/hooks/use-mobile';
 
 export default function SubcontractList() {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
+  const isMobile = useMobile();
   
   // Estado para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
@@ -411,18 +413,20 @@ export default function SubcontractList() {
     <div className="space-y-6">
       {/* KPI Cards */}
       {kpiData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
           {/* Total Subcontratos */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Total Subcontratos</p>
-                  <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Subcontratos' : 'Total Subcontratos'}
+                  </p>
+                  <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Mini gráfico de barras - altura fija */}
-                <div className="flex items-end gap-1 h-8">
+                <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
@@ -437,9 +441,9 @@ export default function SubcontractList() {
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">{kpiData.totalSubcontracts}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {kpiData.awardedCount} adjudicados • {kpiData.pendingCount} pendientes
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalSubcontracts}</p>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    {kpiData.awardedCount} adjudicados
                   </p>
                 </div>
               </div>
@@ -447,16 +451,18 @@ export default function SubcontractList() {
           </Card>
 
           {/* Valor Adjudicado */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Valor Adjudicado</p>
-                  <Award className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Adjudicado' : 'Valor Adjudicado'}
+                  </p>
+                  <Award className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de línea de tendencia - altura fija */}
-                <div className="h-8 relative">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <path
                       d="M 0,24 Q 25,20 50,12 T 100,8"
@@ -470,7 +476,7 @@ export default function SubcontractList() {
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                     {currencyView === 'pesificado' 
                       ? `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
                       : currencyView === 'dolarizado'
@@ -478,8 +484,8 @@ export default function SubcontractList() {
                       : `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
                     }
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}% del total
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
@@ -487,16 +493,18 @@ export default function SubcontractList() {
           </Card>
 
           {/* Saldo Restante */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Saldo Restante</p>
-                  <CreditCard className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Saldo' : 'Saldo Restante'}
+                  </p>
+                  <CreditCard className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Barra de progreso de pagos - altura fija */}
-                <div className="h-8 flex items-center">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} flex items-center`}>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
@@ -509,11 +517,11 @@ export default function SubcontractList() {
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                     ${(kpiData.remainingBalanceARS || 0).toLocaleString('es-AR')}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Pendiente de pago
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    Pendiente
                   </p>
                 </div>
               </div>
@@ -521,16 +529,18 @@ export default function SubcontractList() {
           </Card>
 
           {/* Estado General */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Estado General</p>
-                  <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Estado' : 'Estado General'}
+                  </p>
+                  <Users className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de área llena - altura fija */}
-                <div className="h-8 relative">
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -546,9 +556,9 @@ export default function SubcontractList() {
                 </div>
                 
                 <div>
-                  <p className="text-2xl font-bold">{kpiData.awardedPercentage.toFixed(0)}%</p>
-                  <p className="text-xs text-muted-foreground">
-                    Tasa de adjudicación
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.awardedPercentage.toFixed(0)}%</p>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    Adjudicación
                   </p>
                 </div>
               </div>
