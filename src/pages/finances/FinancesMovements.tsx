@@ -463,23 +463,23 @@ export default function Movements() {
   };
 
   // Get unique types, categories, and subcategories from actual data
-  const availableTypes = Array.from(
+  const availableTypes = useMemo(() => Array.from(
     new Set(movements.map((m) => m.movement_data?.type?.name).filter(Boolean)),
-  );
+  ), [movements]);
 
-  const availableCategories = Array.from(
+  const availableCategories = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.category?.name).filter(Boolean),
     ),
-  );
+  ), [movements]);
 
 
 
-  const availableSubcategories = Array.from(
+  const availableSubcategories = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
     ),
-  );
+  ), [movements]);
 
   // Get subcategories filtered by selected category
   const getSubcategoriesForCategory = (categoryName: string) => {
@@ -497,17 +497,17 @@ export default function Movements() {
 
   const filteredSubcategories = getSubcategoriesForCategory(filterByCategory);
 
-  const availableCurrencies = Array.from(
+  const availableCurrencies = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
     ),
-  );
+  ), [movements]);
 
-  const availableWallets = Array.from(
+  const availableWallets = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
     ),
-  );
+  ), [movements]);
 
   // Configure mobile action bar when page mounts (after all data is available)
   useEffect(() => {
@@ -613,7 +613,7 @@ export default function Movements() {
         clearActions();
       }
     };
-  }, [isMobile, filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets, movements]);
+  }, [isMobile, filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets]);
 
 
 
