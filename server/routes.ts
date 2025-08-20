@@ -76,6 +76,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
+      // Enhance organizations array with logo_url
+      if (userData.organizations && Array.isArray(userData.organizations)) {
+        console.log("🔧 Enhancing organizations with logo_url...");
+        
+        // Get organization IDs for bulk query
+        const orgIds = userData.organizations.map(org => org.id);
+        
+        // Fetch logo_url for all organizations in one query
+        const { data: orgLogos, error: logoError } = await authenticatedSupabase
+          .from('organizations')
+          .select('id, logo_url')
+          .in('id', orgIds);
+          
+        if (!logoError && orgLogos) {
+          // Create a map for quick lookup
+          const logoMap = new Map(orgLogos.map(org => [org.id, org.logo_url]));
+          
+          // Add logo_url to each organization
+          userData.organizations = userData.organizations.map(org => ({
+            ...org,
+            logo_url: logoMap.get(org.id) || null
+          }));
+          
+          console.log("🔧 Enhanced organizations with logos:", userData.organizations.map(org => ({
+            name: org.name,
+            has_logo: !!org.logo_url
+          })));
+        } else {
+          console.error("Error fetching organization logos:", logoError);
+        }
+      }
+      
       console.log("Returning user data:", userData);
       res.json(userData);
     } catch (error) {
