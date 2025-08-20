@@ -53,14 +53,15 @@ export function ActionBarMobile() {
     <>
       {/* Search Popover */}
       {showSearchPopover && (
-        <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowSearchPopover(false)}>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowSearchPopover(false)}>
           <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 z-50"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
               borderColor: 'var(--menues-border)',
               width: 'calc(100vw - 32px)', // full width minus padding
-              maxWidth: '400px'
+              maxWidth: '400px',
+              zIndex: 60
             }}
             onClick={(e) => e.stopPropagation()}
           >
