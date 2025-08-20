@@ -36,22 +36,79 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
     ...props 
   }, ref) => {
     const [open, setOpen] = React.useState(false)
-    const [inputValue, setInputValue] = React.useState(value?.toString() || '')
+    const [inputValue, setInputValue] = React.useState('')
+    const [isEditing, setIsEditing] = React.useState(false)
 
     const selectedCurrency = currencies.find(c => c.id === currency)
 
+    // Formatear número con separador de miles
+    const formatNumber = (num: number): string => {
+      return num.toLocaleString('es-AR', { maximumFractionDigits: 2, useGrouping: true })
+        .replace(/,/g, '.') // Usar punto como separador de miles
+        .replace(/\.(\d{2})$/, ',$1') // Usar coma para decimales
+    }
+
+    // Extraer número limpio del string formateado
+    const parseFormattedNumber = (str: string): number | undefined => {
+      if (!str) return undefined
+      // Remover todo excepto números y la última coma (decimales)
+      const lastComma = str.lastIndexOf(',')
+      let cleanStr = str.replace(/[^0-9,]/g, '')
+      
+      if (lastComma !== -1 && lastComma === cleanStr.lastIndexOf(',')) {
+        // Hay decimales, convertir la coma final a punto
+        cleanStr = cleanStr.replace(/,/g, '').slice(0, -2) + '.' + cleanStr.slice(-2)
+      } else {
+        // Sin decimales, remover todas las comas
+        cleanStr = cleanStr.replace(/,/g, '')
+      }
+      
+      const num = parseFloat(cleanStr)
+      return isNaN(num) ? undefined : num
+    }
+
+    // Actualizar valor mostrado cuando cambia el valor externo
     React.useEffect(() => {
-      setInputValue(value?.toString() || '')
-    }, [value])
+      if (!isEditing) {
+        if (value !== undefined && value !== null) {
+          setInputValue(formatNumber(value))
+        } else {
+          setInputValue('')
+        }
+      }
+    }, [value, isEditing])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputVal = e.target.value
       setInputValue(inputVal)
       
+      // Solo permitir números, puntos y comas
+      const sanitized = inputVal.replace(/[^0-9.,]/g, '')
+      if (sanitized !== inputVal) {
+        setInputValue(sanitized)
+        return
+      }
+      
       // Parse the number
-      const numericValue = inputVal === '' ? undefined : parseFloat(inputVal)
+      const numericValue = parseFormattedNumber(sanitized)
       if (onValueChange) {
         onValueChange(numericValue)
+      }
+    }
+
+    const handleFocus = () => {
+      setIsEditing(true)
+      // Al hacer foco, mostrar el número sin formateo para fácil edición
+      if (value !== undefined && value !== null) {
+        setInputValue(value.toString())
+      }
+    }
+
+    const handleBlur = () => {
+      setIsEditing(false)
+      // Al perder foco, aplicar el formateo
+      if (value !== undefined && value !== null) {
+        setInputValue(formatNumber(value))
       }
     }
 
@@ -120,11 +177,12 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
         <input
           {...props}
           ref={ref}
-          type="number"
-          step="0.01"
-          min="0"
+          type="text"
+          inputMode="decimal"
           value={inputValue}
           onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
