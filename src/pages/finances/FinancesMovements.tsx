@@ -174,111 +174,7 @@ export default function Movements() {
     }
   }, [mobileSearchValue, isMobile]);
 
-  // Configure mobile action bar when page mounts
-  useEffect(() => {
-    if (isMobile) {
-      // Configure filter options
-      setFilterConfig({
-        filters: [
-          {
-            label: 'Filtrar por tipo',
-            value: filterByType,
-            onChange: setFilterByType,
-            placeholder: 'Todos los tipos',
-            allOptionLabel: 'Todos los tipos',
-            options: availableTypes.map(type => ({ value: type!, label: type! }))
-          },
-          {
-            label: 'Filtrar por categoría',
-            value: filterByCategory,
-            onChange: setFilterByCategory,
-            placeholder: 'Todas las categorías',
-            allOptionLabel: 'Todas las categorías',
-            options: availableCategories.map(category => ({ value: category!, label: category! }))
-          },
-          {
-            label: 'Filtrar por subcategoría',
-            value: filterBySubcategory,
-            onChange: setFilterBySubcategory,
-            placeholder: 'Todas las subcategorías',
-            allOptionLabel: 'Todas las subcategorías',
-            options: availableSubcategories
-              .filter(subcategory => {
-                if (filterByCategory === "all") return true;
-                const relevantMovements = movements.filter(m => 
-                  m.movement_data?.category?.name === filterByCategory
-                );
-                return relevantMovements.some(m => 
-                  m.movement_data?.subcategory?.name === subcategory
-                );
-              })
-              .map(subcategory => ({ value: subcategory!, label: subcategory! }))
-          },
-          {
-            label: 'Filtrar por moneda',
-            value: filterByCurrency,
-            onChange: setFilterByCurrency,
-            placeholder: 'Todas las monedas',
-            allOptionLabel: 'Todas las monedas',
-            options: availableCurrencies.map(currency => ({ value: currency!, label: currency! }))
-          },
-          {
-            label: 'Filtrar por billetera',
-            value: filterByWallet,
-            onChange: setFilterByWallet,
-            placeholder: 'Todas las billeteras',
-            allOptionLabel: 'Todas las billeteras',
-            options: availableWallets.map(wallet => ({ value: wallet!, label: wallet! }))
-          }
-        ],
-        onClearFilters: () => {
-          setSearchValue("");
-          setMobileSearchValue("");
-          setFilterByType("all");
-          setFilterByCategory("all");
-          setFilterBySubcategory("all");
-          setFilterByScope("all");
-          setFilterByFavorites("all");
-          setFilterByCurrency("all");
-          setFilterByWallet("all");
-        }
-      });
 
-      setActions({
-        search: {
-          id: 'search',
-          icon: <Search className="h-5 w-5" />,
-          label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
-        create: {
-          id: 'create',
-          icon: <Plus className="h-6 w-6" />,
-          label: 'Nuevo Movimiento',
-          onClick: () => openModal('movement'),
-          variant: 'primary'
-        },
-        filter: {
-          id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
-          label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        }
-      });
-      setShowActionBar(true);
-    }
-
-    // Cleanup when component unmounts
-    return () => {
-      if (isMobile) {
-        clearActions();
-      }
-    };
-  }, [isMobile, filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets]);
 
   // Filter states
   const [filterByType, setFilterByType] = useState("all");
@@ -612,6 +508,112 @@ export default function Movements() {
       movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
     ),
   );
+
+  // Configure mobile action bar when page mounts (after all data is available)
+  useEffect(() => {
+    if (isMobile) {
+      // Configure filter options
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por tipo',
+            value: filterByType,
+            onChange: setFilterByType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: availableTypes.map(type => ({ value: type!, label: type! }))
+          },
+          {
+            label: 'Filtrar por categoría',
+            value: filterByCategory,
+            onChange: setFilterByCategory,
+            placeholder: 'Todas las categorías',
+            allOptionLabel: 'Todas las categorías',
+            options: availableCategories.map(category => ({ value: category!, label: category! }))
+          },
+          {
+            label: 'Filtrar por subcategoría',
+            value: filterBySubcategory,
+            onChange: setFilterBySubcategory,
+            placeholder: 'Todas las subcategorías',
+            allOptionLabel: 'Todas las subcategorías',
+            options: availableSubcategories
+              .filter(subcategory => {
+                if (filterByCategory === "all") return true;
+                const relevantMovements = movements.filter(m => 
+                  m.movement_data?.category?.name === filterByCategory
+                );
+                return relevantMovements.some(m => 
+                  m.movement_data?.subcategory?.name === subcategory
+                );
+              })
+              .map(subcategory => ({ value: subcategory!, label: subcategory! }))
+          },
+          {
+            label: 'Filtrar por moneda',
+            value: filterByCurrency,
+            onChange: setFilterByCurrency,
+            placeholder: 'Todas las monedas',
+            allOptionLabel: 'Todas las monedas',
+            options: availableCurrencies.map(currency => ({ value: currency!, label: currency! }))
+          },
+          {
+            label: 'Filtrar por billetera',
+            value: filterByWallet,
+            onChange: setFilterByWallet,
+            placeholder: 'Todas las billeteras',
+            allOptionLabel: 'Todas las billeteras',
+            options: availableWallets.map(wallet => ({ value: wallet!, label: wallet! }))
+          }
+        ],
+        onClearFilters: () => {
+          setSearchValue("");
+          setMobileSearchValue("");
+          setFilterByType("all");
+          setFilterByCategory("all");
+          setFilterBySubcategory("all");
+          setFilterByScope("all");
+          setFilterByFavorites("all");
+          setFilterByCurrency("all");
+          setFilterByWallet("all");
+        }
+      });
+
+      setActions({
+        search: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nuevo Movimiento',
+          onClick: () => openModal('movement'),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        }
+      });
+      setShowActionBar(true);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [isMobile, filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets, movements]);
 
 
 
