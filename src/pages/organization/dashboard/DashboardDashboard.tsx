@@ -20,50 +20,42 @@ export function DashboardDashboard({ organization }: DashboardDashboardProps) {
         {/* Welcome Card - Full Width */}
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent"></div>
-          <CardContent className="relative p-6">
-            <div className="flex items-center gap-6">
+          <CardContent className="relative p-4 md:p-6">
+            <div className="flex flex-col md:flex-row items-center md:items-center gap-4 md:gap-6">
               {/* Organization Avatar */}
               <div className="flex-shrink-0">
                 {organization?.logo_url ? (
                   <img 
                     src={organization.logo_url} 
                     alt={organization.name}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-accent/20"
+                    className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-accent/20"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/20">
-                    <Building className="w-8 h-8 text-accent" />
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent/20">
+                    <Building className="w-6 h-6 md:w-8 md:h-8 text-accent" />
                   </div>
                 )}
               </div>
 
               {/* Welcome Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl font-bold text-foreground">
+              <div className="flex-1 text-center md:text-left">
+                <div className="mb-2">
+                  <h1 className="text-xl md:text-2xl font-bold text-foreground">
                     ¡Bienvenido a {organization?.name || 'tu organización'}!
                   </h1>
                 </div>
-                <p className="text-muted-foreground mb-3">
+                <p className="text-muted-foreground text-sm md:text-base mb-3">
                   Estás gestionando las operaciones de construcción. Desde aquí puedes acceder rápidamente a todas las funciones principales.
                 </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
                     <span>{format(currentTime, "HH:mm", { locale: es })}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    <span>{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
+                    <span className="text-center sm:text-left">{format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Status Badge */}
-              <div className="flex-shrink-0">
-                <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  Sistema Activo
                 </div>
               </div>
             </div>
