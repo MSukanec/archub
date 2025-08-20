@@ -55,10 +55,13 @@ export function MobileActionBar() {
       {showSearchPopover && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowSearchPopover(false)}>
           <div 
-            className="fixed bottom-20 left-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50"
+            className="fixed left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-4 z-50"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)'
+              borderColor: 'var(--menues-border)',
+              bottom: '90px', // 20px action bar height + 70px space above
+              width: 'calc(100vw - 32px)', // full width minus padding
+              maxWidth: '400px'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -93,10 +96,13 @@ export function MobileActionBar() {
       {showFilterPopover && filterConfig && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
           <div 
-            className="fixed bottom-20 left-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50 max-h-96 overflow-y-auto"
+            className="fixed left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-4 z-50 max-h-96 overflow-y-auto"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)'
+              borderColor: 'var(--menues-border)',
+              bottom: '90px', // 20px action bar height + 70px space above
+              width: 'calc(100vw - 32px)', // full width minus padding
+              maxWidth: '400px'
             }}
             onClick={(e) => e.stopPropagation()}
           >

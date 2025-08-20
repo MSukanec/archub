@@ -509,10 +509,48 @@ export default function Movements() {
     ),
   ), [movements]);
 
-  // Configure mobile action bar when page mounts (after all data is available)
+  // Configure mobile action bar - separate into setup and config updates
   useEffect(() => {
     if (isMobile) {
-      // Configure filter options
+      setActions({
+        search: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nuevo Movimiento',
+          onClick: () => openModal('movement'),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        }
+      });
+      setShowActionBar(true);
+    }
+
+    // Cleanup when component unmounts
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [isMobile]); // Only depend on isMobile
+
+  // Separate effect for filter configuration to avoid loops
+  useEffect(() => {
+    if (isMobile && availableTypes.length > 0) {
       setFilterConfig({
         filters: [
           {
@@ -578,42 +616,8 @@ export default function Movements() {
           setFilterByWallet("all");
         }
       });
-
-      setActions({
-        search: {
-          id: 'search',
-          icon: <Search className="h-5 w-5" />,
-          label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
-        create: {
-          id: 'create',
-          icon: <Plus className="h-6 w-6" />,
-          label: 'Nuevo Movimiento',
-          onClick: () => openModal('movement'),
-          variant: 'primary'
-        },
-        filter: {
-          id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
-          label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        }
-      });
-      setShowActionBar(true);
     }
-
-    // Cleanup when component unmounts
-    return () => {
-      if (isMobile) {
-        clearActions();
-      }
-    };
-  }, [isMobile, filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets]);
+  }, [filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets, isMobile]);
 
 
 
