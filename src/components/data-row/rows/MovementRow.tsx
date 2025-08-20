@@ -115,8 +115,22 @@ export default function MovementRow({
 }: MovementRowProps) {
   
   // Determinar el color del borde basado en el tipo de movimiento
-  const getBorderColor = (amount: number): 'success' | 'danger' => {
-    return amount >= 0 ? 'success' : 'danger';
+  const getBorderColor = (movement: Movement): 'success' | 'danger' => {
+    const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
+    const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
+    
+    // Si es ingreso, color verde
+    if (typeName.includes('ingreso') || categoryName.includes('ingreso')) {
+      return 'success';
+    }
+    
+    // Si es egreso o monto negativo, color rojo
+    if (typeName.includes('egreso') || categoryName.includes('egreso') || movement.amount < 0) {
+      return 'danger';
+    }
+    
+    // Por defecto, si monto positivo, verde
+    return movement.amount >= 0 ? 'success' : 'danger';
   };
 
   // Formatear importe para trailing
@@ -126,22 +140,22 @@ export default function MovementRow({
   // Obtener avatar del creador (como en la card vieja)
   const getCreatorAvatar = () => {
     // Si hay un campo creator en el movement
-    if (movement.creator?.avatar_url) {
-      return movement.creator.avatar_url;
+    if ((movement as any).creator?.avatar_url) {
+      return (movement as any).creator.avatar_url;
     }
     return undefined;
   };
 
   const getCreatorInitials = () => {
-    if (movement.creator?.full_name) {
-      return movement.creator.full_name
+    if ((movement as any).creator?.full_name) {
+      return (movement as any).creator.full_name
         .split(' ')
-        .map(word => word.charAt(0))
+        .map((word: string) => word.charAt(0))
         .join('')
         .toUpperCase()
         .slice(0, 2);
     }
-    return 'U';
+    return 'A';
   };
 
   // Props para DataRowCard
@@ -158,7 +172,7 @@ export default function MovementRow({
     lines: [
       {
         text: formattedAmount,
-        tone: movement.amount >= 0 ? 'success' as const : 'danger' as const,
+        tone: getBorderColor(movement),
         mono: true,
         hintRight: currencyCode
       },
@@ -169,7 +183,7 @@ export default function MovementRow({
     ],
     
     // Visual
-    borderColor: getBorderColor(movement.amount),
+    borderColor: getBorderColor(movement),
     
     // Trailing  
     showChevron: false,
