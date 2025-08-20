@@ -105,7 +105,7 @@ type Line = {
 ## Cómo Crear Wrappers Específicos
 
 ### Paso 1: Crear archivo wrapper
-Ubicación: `src/components/data-row/[seccion]/[Entidad]Row.tsx`
+Ubicación: `src/components/data-row/rows/[Entidad]Row.tsx`
 
 ### Paso 2: Implementar transformación de datos
 ```typescript
