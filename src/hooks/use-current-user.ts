@@ -98,7 +98,7 @@ interface UserData {
 }
 
 export function useCurrentUser(forceRefresh?: boolean) {
-  const { user: authUser } = useAuthStore()
+  const { user: authUser, loading: authLoading } = useAuthStore()
 
   return useQuery<UserData>({
     queryKey: ['current-user'],
@@ -117,6 +117,11 @@ export function useCurrentUser(forceRefresh?: boolean) {
       let token = sessionData?.session?.access_token
       
       if (!token || !sessionData?.session) {
+        // Don't try to refresh during logout process
+        if (authLoading) {
+          throw new Error('User is logging out')
+        }
+        
         // Try to refresh the session
         const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
         if (refreshError || !refreshData?.session?.access_token) {
@@ -149,8 +154,14 @@ export function useCurrentUser(forceRefresh?: boolean) {
 
       return userData as UserData
     },
-    enabled: !!authUser,
-    retry: 3,
+    enabled: !!authUser && !authLoading,
+    retry: (failureCount, error) => {
+      // Don't retry if user is logging out or not authenticated
+      if (authLoading || !authUser || error.message.includes('logging out')) {
+        return false
+      }
+      return failureCount < 2
+    },
     staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // No cache when force refresh
   })
 }

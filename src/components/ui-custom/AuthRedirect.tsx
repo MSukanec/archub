@@ -13,19 +13,24 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
   const [location, navigate] = useLocation();
 
   useEffect(() => {
-    if (!initialized || loading || userDataLoading) return;
+    if (!initialized || loading || userDataLoading) {
+      console.log('AuthRedirect: Waiting for initialization', { initialized, loading, userDataLoading });
+      return;
+    }
 
     const publicRoutes = ['/', '/login', '/register', '/forgot-password'];
     const isPublicRoute = publicRoutes.includes(location);
 
     // If user is authenticated and tries to access public routes, redirect to dashboard
     if (user && isPublicRoute) {
+      console.log('AuthRedirect: Authenticated user accessing public route, redirecting to dashboard');
       navigate('/dashboard');
       return;
     }
 
     // If user is not authenticated and tries to access protected routes, redirect to login
     if (!user && !isPublicRoute) {
+      console.log('AuthRedirect: Unauthenticated user accessing protected route, redirecting to login');
       navigate('/login');
       return;
     }
@@ -69,6 +74,7 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
 
   // Show loading while checking auth state
   if (!initialized || loading) {
+    console.log('AuthRedirect: Showing loading spinner', { initialized, loading });
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>

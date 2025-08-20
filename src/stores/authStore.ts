@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { queryClient } from "@/lib/queryClient";
 
 interface AuthState {
   user: User | null;
@@ -146,8 +147,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error("Supabase client not initialized");
       return;
     }
-    await supabase.auth.signOut();
-    set({ user: null });
+    
+    console.log('🔧 AuthStore: Starting logout process');
+    
+    // Set loading state and clear user immediately
+    set({ loading: true, user: null });
+    
+    try {
+      await supabase.auth.signOut();
+      console.log('🔧 AuthStore: Logout completed successfully');
+      
+      // Clear all React Query cache to prevent stale queries
+      queryClient.clear();
+      console.log('🔧 AuthStore: Cleared React Query cache');
+      
+    } catch (error) {
+      console.error('🔧 AuthStore: Error during logout:', error);
+    } finally {
+      // Ensure state is properly cleared
+      set({ user: null, loading: false });
+      console.log('🔧 AuthStore: Logout process finished');
+    }
   },
 
   setCompletingOnboarding: (completing: boolean) => {
