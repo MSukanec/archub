@@ -11,7 +11,7 @@ interface Organization {
   is_active: boolean;
   is_system?: boolean;
   logo_url?: string;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
   plan?: {
     id: string;
@@ -60,6 +60,18 @@ const OrganizationTrailing = ({ organizationId }: { organizationId: string }) =>
     <div className="flex items-center">
       {/* Mostrar hasta 3 avatares superpuestos más grandes */}
       <div className="flex -space-x-2">
+        {/* Mostrar contador "+X" al INICIO si hay más de 3 miembros */}
+        {members.length > 3 && (
+          <div 
+            className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center relative"
+            style={{ zIndex: 13 }}
+          >
+            <span className="text-xs font-medium text-muted-foreground">
+              +{members.length - 3}
+            </span>
+          </div>
+        )}
+        {/* Mostrar los primeros 3 avatares */}
         {members.slice(0, 3).map((member, index) => (
           <Avatar 
             key={member.id} 
@@ -79,16 +91,6 @@ const OrganizationTrailing = ({ organizationId }: { organizationId: string }) =>
             )}
           </Avatar>
         ))}
-        {members.length > 3 && (
-          <div 
-            className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center relative"
-            style={{ zIndex: 7 }}
-          >
-            <span className="text-xs font-medium text-muted-foreground">
-              +{members.length - 3}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
