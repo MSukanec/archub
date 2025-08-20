@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
-import { MobileActionBarProvider } from "@/components/layout/mobile/MobileActionBarContext";
+import { ActionBarMobileProvider } from "@/components/layout/mobile/ActionBarMobileContext";
 import { AuthRedirect } from "@/components/ui-custom/AuthRedirect";
 import { ProtectedRoute } from "@/components/ui-custom/ProtectedRoute";
 import { AdminProtectedRoute } from "@/components/ui-custom/AdminProtectedRoute";
@@ -345,12 +345,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <MobileActionBarProvider>
+        <ActionBarMobileProvider>
           <ProjectContextInitializer />
           <Toaster />
           <Router />
           <ModalFactory />
-        </MobileActionBarProvider>
+        </ActionBarMobileProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

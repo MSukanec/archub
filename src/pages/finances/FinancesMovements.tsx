@@ -60,7 +60,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
+import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";
@@ -162,7 +162,7 @@ export default function Movements() {
     setFilterConfig,
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
-  } = useMobileActionBar();
+  } = useActionBarMobile();
   const isMobile = useMobile();
 
   // Set sidebar context to finances when component mounts

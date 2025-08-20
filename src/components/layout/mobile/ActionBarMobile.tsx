@@ -4,12 +4,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { Search, Filter, X } from 'lucide-react'
 import { useLocation } from 'wouter'
 
-export function MobileActionBar() {
+export function ActionBarMobile() {
   const { 
     actions, 
     showActionBar,
@@ -20,7 +20,7 @@ export function MobileActionBar() {
     showFilterPopover,
     setShowFilterPopover,
     filterConfig
-  } = useMobileActionBar()
+  } = useActionBarMobile()
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
   
@@ -73,16 +73,16 @@ export function MobileActionBar() {
                 onChange={(e) => setSearchValue(e.target.value)}
                 className="flex-1"
                 style={{ 
-                  backgroundColor: 'var(--card-bg)',
-                  borderColor: 'var(--card-border)',
-                  color: 'var(--menues-fg)'
+                  backgroundColor: 'var(--menues-input-bg)',
+                  borderColor: 'var(--menues-input-border)',
+                  color: 'var(--menues-input-fg)'
                 }}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSearchPopover(false)}
-                style={{ color: 'var(--menues-fg)' }}
+                className="h-8 w-8 p-0"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -95,41 +95,44 @@ export function MobileActionBar() {
       {showFilterPopover && filterConfig && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
           <div 
-            className="fixed inset-0 z-50 overflow-y-auto"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 z-50"
             style={{ 
               backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)'
+              borderColor: 'var(--menues-border)',
+              width: 'calc(100vw - 32px)',
+              maxWidth: '400px'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium" style={{ color: 'var(--menues-fg)' }}>Filtros</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFilterPopover(false)}
-                style={{ color: 'var(--menues-fg)' }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            
             <div className="space-y-4">
-              {filterConfig.filters?.map((filter: any, index: number) => (
-                <div key={index}>
-                  <Label className="text-xs font-medium text-muted-foreground">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Filtros</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFilterPopover(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {filterConfig.filters?.map((filter: any) => (
+                <div key={filter.key} className="space-y-2">
+                  <Label htmlFor={filter.key} style={{ color: 'var(--menues-fg)' }}>
                     {filter.label}
                   </Label>
-                  <Select 
-                    value={filter.value} 
-                    onValueChange={filter.onChange}
-                  >
-                    <SelectTrigger className="mt-1">
+                  <Select value={filter.value} onValueChange={filter.onValueChange}>
+                    <SelectTrigger 
+                      style={{ 
+                        backgroundColor: 'var(--menues-input-bg)',
+                        borderColor: 'var(--menues-input-border)',
+                        color: 'var(--menues-input-fg)'
+                      }}
+                    >
                       <SelectValue placeholder={filter.placeholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{filter.allOptionLabel}</SelectItem>
                       {filter.options?.map((option: any) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -139,20 +142,6 @@ export function MobileActionBar() {
                   </Select>
                 </div>
               ))}
-              
-              {filterConfig.onClearFilters && (
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={() => {
-                    filterConfig.onClearFilters()
-                    setShowFilterPopover(false)
-                  }}
-                >
-                  Limpiar Filtros
-                </Button>
-              )}
-            </div>
             </div>
           </div>
         </div>
@@ -160,54 +149,57 @@ export function MobileActionBar() {
 
       {/* Action Bar */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-50 border-t"
+        className="fixed bottom-0 left-0 right-0 z-30 px-4 py-3 flex items-center justify-center gap-6"
         style={{ 
           backgroundColor: 'var(--menues-bg)',
-          borderColor: 'var(--menues-border)'
+          borderTopColor: 'var(--menues-border)',
+          borderTopWidth: '1px'
         }}
       >
-        <div className="flex items-center justify-around px-6 py-3">
-          {/* Search Button */}
+        {/* Secondary Actions (Icons only, larger, no borders) */}
+        <div className="flex items-center gap-8">
+          {/* Search */}
           {actions.search && (
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
+            <button
               onClick={handleSearchClick}
-              style={{ color: 'var(--menues-fg)' }}
+              className="flex items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Search className="h-5 w-5" />
-              <span className="text-xs font-medium">Buscar</span>
-            </Button>
+              <Search className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            </button>
           )}
 
-          {/* Create Button (centro, verde) */}
-          {actions.create && (
-            <Button
-              className="h-14 w-14 rounded-full shadow-lg flex flex-col items-center justify-center"
-              style={{ 
-                backgroundColor: 'var(--accent)',
-                color: 'white'
-              }}
-              onClick={actions.create.onClick}
-            >
-              {actions.create.icon}
-            </Button>
-          )}
-
-          {/* Filter Button */}
+          {/* Filter */}
           {actions.filter && (
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center gap-1 h-16 w-16 hover:opacity-80"
+            <button
               onClick={handleFilterClick}
-              style={{ color: 'var(--menues-fg)' }}
+              className="flex items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Filter className="h-5 w-5" />
-              <span className="text-xs font-medium">Filtros</span>
-            </Button>
+              <Filter className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            </button>
           )}
+        </div>
+
+        {/* Primary Action (Central, prominent) */}
+        {actions.create && (
+          <Button
+            onClick={actions.create.onClick}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 shadow-lg"
+            size="lg"
+          >
+            {actions.create.icon}
+          </Button>
+        )}
+
+        {/* Additional secondary actions can go here */}
+        <div className="flex items-center gap-8">
+          {/* Placeholder for additional icons */}
+          <div className="w-12 h-12" /> {/* Spacer for symmetry */}
+          <div className="w-12 h-12" /> {/* Spacer for symmetry */}
         </div>
       </div>
     </>
   )
 }
+
+// Legacy export for backward compatibility during transition
+export const MobileActionBar = ActionBarMobile

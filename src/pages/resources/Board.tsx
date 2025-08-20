@@ -15,8 +15,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
-import { MobileActionBarProvider, useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext';
-import { MobileActionBar } from '@/components/layout/mobile/MobileActionBar';
+import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 
 import { Card } from '@/components/ui/card';
 
@@ -24,7 +24,7 @@ function BoardContent() {
 
 
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
-  const { setActions, setShowActionBar } = useMobileActionBar();
+  const { setActions, setShowActionBar } = useActionBarMobile();
   const { openModal } = useGlobalModalStore();
   
   const { data: userData } = useCurrentUser();
@@ -62,30 +62,24 @@ function BoardContent() {
   // Configure mobile action bar
   useEffect(() => {
     setActions({
-      slot2: {
+      search: {
         id: 'search',
         icon: <Search className="h-5 w-5" />,
         label: 'Buscar',
         onClick: () => {} // TODO: implement search
       },
-      slot3: {
+      create: {
         id: 'create',
         icon: <Plus className="h-6 w-6" />,
         label: 'Nueva Lista',
         onClick: () => openModal('list', { boardId: currentBoardId }),
         variant: 'primary'
       },
-      slot4: {
+      filter: {
         id: 'filter',
         icon: <Filter className="h-5 w-5" />,
         label: 'Filtros',
         onClick: () => {} // TODO: implement filters
-      },
-      slot5: {
-        id: 'clear',
-        icon: <X className="h-5 w-5" />,
-        label: 'Limpiar',
-        onClick: () => {} // TODO: implement clear filters
       }
     });
     setShowActionBar(true);
@@ -251,46 +245,26 @@ function BoardContent() {
       <div className="space-y-6">
         {/* ActionBar Desktop - Solo selector de tableros */}
       <ActionBar
-        filters={[
-          {
-            key: 'board',
-            label: 'Tablero',
-            icon: Kanban,
-            value: selectedBoard?.name || '',
-            setValue: (boardName: string) => {
-              const board = boards.find(b => b.name === boardName);
-              if (board) {
-                handleBoardChange(board.id);
-              }
-            },
-            options: boards.map(board => board.name),
-            defaultLabel: 'Selecciona un tablero'
+        selectedValue={selectedBoard?.name || ''}
+        onValueChange={(boardName: string) => {
+          const board = boards.find(b => b.name === boardName);
+          if (board) {
+            handleBoardChange(board.id);
           }
-        ]}
-        actions={[
-          {
-            label: 'Editar',
-            icon: Edit,
-            onClick: () => {
-              if (selectedBoard) {
-                handleEditBoard(selectedBoard)
-              }
-            },
-            variant: 'ghost' as const,
-            enabled: !!selectedBoard
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => {
-              if (currentBoardId) {
-                handleDeleteBoard(currentBoardId)
-              }
-            },
-            variant: 'ghost' as const,
-            enabled: !!currentBoardId
+        }}
+        onEdit={() => {
+          if (selectedBoard) {
+            handleEditBoard(selectedBoard)
           }
-        ]}
+        }}
+        onDelete={() => {
+          if (currentBoardId) {
+            handleDeleteBoard(currentBoardId)
+          }
+        }}
+        placeholder="Selecciona un tablero"
+        options={boards.map(board => ({ value: board.name, label: board.name }))}
+        disabled={boards.length === 0}
       />
       
       {selectedBoard && (
@@ -313,9 +287,9 @@ function BoardContent() {
 
 export default function OrganizationBoard() {
   return (
-    <MobileActionBarProvider>
+    <ActionBarMobileProvider>
       <BoardContent />
-      <MobileActionBar />
-    </MobileActionBarProvider>
+      <ActionBarMobile />
+    </ActionBarMobileProvider>
   );
 }

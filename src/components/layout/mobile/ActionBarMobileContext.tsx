@@ -14,7 +14,7 @@ interface ActionBarActions {
   filter?: ActionBarAction     // Filtros
 }
 
-interface MobileActionBarContextType {
+interface ActionBarMobileContextType {
   actions: ActionBarActions
   setActions: (actions: ActionBarActions) => void
   clearActions: () => void
@@ -32,9 +32,9 @@ interface MobileActionBarContextType {
   setFilterConfig: (config: any) => void
 }
 
-const MobileActionBarContext = createContext<MobileActionBarContextType | undefined>(undefined)
+const ActionBarMobileContext = createContext<ActionBarMobileContextType | undefined>(undefined)
 
-export function MobileActionBarProvider({ children }: { children: ReactNode }) {
+export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ActionBarActions>({})
   const [showActionBar, setShowActionBar] = useState(false)
   
@@ -55,30 +55,33 @@ export function MobileActionBarProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <MobileActionBarContext.Provider value={{
-      actions,
-      setActions,
-      clearActions,
-      showActionBar,
-      setShowActionBar,
-      showSearchPopover,
-      setShowSearchPopover,
-      searchValue,
-      setSearchValue,
-      showFilterPopover,
-      setShowFilterPopover,
-      filterConfig,
-      setFilterConfig
-    }}>
+    <ActionBarMobileContext.Provider
+      value={{
+        actions,
+        setActions,
+        clearActions,
+        showActionBar,
+        setShowActionBar,
+        showSearchPopover,
+        setShowSearchPopover,
+        searchValue,
+        setSearchValue,
+        showFilterPopover,
+        setShowFilterPopover,
+        filterConfig,
+        setFilterConfig
+      }}
+    >
       {children}
-    </MobileActionBarContext.Provider>
+    </ActionBarMobileContext.Provider>
   )
 }
 
-export function useMobileActionBar() {
-  const context = useContext(MobileActionBarContext)
+export function useActionBarMobile() {
+  const context = useContext(ActionBarMobileContext)
   if (context === undefined) {
-    throw new Error('useMobileActionBar must be used within a MobileActionBarProvider')
+    throw new Error('useActionBarMobile must be used within an ActionBarMobileProvider')
   }
   return context
 }
+

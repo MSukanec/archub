@@ -28,7 +28,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ContactCardMobile from '@/components/cards/contacts/ContactCardMobile'
-import { useMobileActionBar } from '@/components/layout/mobile/MobileActionBarContext'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 
 
@@ -54,7 +54,7 @@ export default function Contacts() {
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { setActions, setShowActionBar, clearActions } = useMobileActionBar()
+  const { setActions, setShowActionBar, clearActions } = useActionBarMobile()
   const isMobile = useMobile()
 
   // Cargar tipos de contacto de la base de datos
@@ -64,7 +64,7 @@ export default function Contacts() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        slot2: {
+        search: {
           id: 'search',
           icon: <Search className="h-5 w-5" />,
           label: 'Buscar',
@@ -75,28 +75,19 @@ export default function Contacts() {
             }
           }
         },
-        slot3: {
+        create: {
           id: 'create',
           icon: <UserPlus className="h-6 w-6" />,
           label: 'Crear Contacto',
           onClick: () => openModal('contact', { isEditing: false }),
           variant: 'primary'
         },
-        slot4: {
+        filter: {
           id: 'filter',
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
             console.log('Toggle filtros')
-          }
-        },
-        slot5: {
-          id: 'clear',
-          icon: <X className="h-5 w-5" />,
-          label: 'Limpiar',
-          onClick: () => {
-            setSearchValue('')
-            setFilterByType('all')
           }
         }
       })
@@ -461,7 +452,7 @@ export default function Contacts() {
         showHeaderSearch: true,
         headerSearchValue: searchValue,
         onHeaderSearchChange: setSearchValue,
-        showFilter: true,
+        showFilters: true,
         renderFilterContent: () => (
           <div className="space-y-3 p-3">
             <div>

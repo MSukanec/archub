@@ -10,8 +10,8 @@ import {
   useSecondarySidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { MobileActionBar } from "@/components/layout/mobile/MobileActionBar";
-import { useMobileActionBar } from "@/components/layout/mobile/MobileActionBarContext";
+import { ActionBarMobile } from "@/components/layout/mobile/ActionBarMobile";
+import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
 
@@ -69,7 +69,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } =
     useSecondarySidebarStore();
   const { activeSidebarSection } = useNavigationStore();
-  const { showActionBar } = useMobileActionBar();
+  const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
 
   const isSecondaryExpanded =
@@ -129,7 +129,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </main>
 
       {/* Mobile Action Bar - Solo visible en mobile */}
-      <MobileActionBar />
+      <ActionBarMobile />
     </div>
   );
 }
