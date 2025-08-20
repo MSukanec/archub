@@ -814,7 +814,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           <Table
             data={sortedCommitmentSummary}
             columns={contactSummaryColumns}
-            defaultSort={{ key: 'committed_amount', direction: 'desc' }}
+            defaultSort={{ key: 'unit', direction: 'asc' }}
             getItemId={(item) => item.id || 'unknown'}
           />
         </div>
