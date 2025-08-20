@@ -108,7 +108,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       {isMobile && headerProps?.tabs && headerProps.tabs.length > 1 ? (
         <HeaderMobile {...headerProps}>
           <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {children}
           </main>
@@ -123,7 +123,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </div>
 
           <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-3 py-3 md:px-12 md:py-6 pb-12 ${
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 md:px-12 md:py-6 pb-12 ${
               // Calculate top padding based on new double-row header (h-20)
               "md:pt-24" // h-20 header + 4 units padding
             } ${
