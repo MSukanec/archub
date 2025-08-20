@@ -1627,13 +1627,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             {selectedPersonnel.map((person, index) => (
               <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                 <div className="truncate">{person.contact_name}</div>
-                <div className="text-right font-medium">${person.amount.toFixed(2)}</div>
+                <div className="text-right font-medium">${(person.amount || 0).toFixed(2)}</div>
               </div>
             ))}
             <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
               <div className="font-medium">Total:</div>
               <div className="text-right font-bold">
-                ${selectedPersonnel.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+                ${selectedPersonnel.reduce((sum, p) => sum + (p.amount || 0), 0).toFixed(2)}
               </div>
             </div>
           </div>
@@ -1646,13 +1646,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             {selectedSubcontracts.map((subcontract, index) => (
               <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                 <div className="truncate">{subcontract.contact_name}</div>
-                <div className="text-right font-medium">${subcontract.amount.toFixed(2)}</div>
+                <div className="text-right font-medium">${(subcontract.amount || 0).toFixed(2)}</div>
               </div>
             ))}
             <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
               <div className="font-medium">Total:</div>
               <div className="text-right font-bold">
-                ${selectedSubcontracts.reduce((sum, s) => sum + s.amount, 0).toFixed(2)}
+                ${selectedSubcontracts.reduce((sum, s) => sum + (s.amount || 0), 0).toFixed(2)}
               </div>
             </div>
           </div>
@@ -1682,13 +1682,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             {selectedPartnerWithdrawals.map((partnerWithdrawal, index) => (
               <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                 <div className="truncate">{partnerWithdrawal.partner_name}</div>
-                <div className="text-right font-medium">${partnerWithdrawal.amount.toFixed(2)}</div>
+                <div className="text-right font-medium">${(partnerWithdrawal.amount || 0).toFixed(2)}</div>
               </div>
             ))}
             <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
               <div className="font-medium">Total:</div>
               <div className="text-right font-bold">
-                ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + pw.amount, 0).toFixed(2)}
+                ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
               </div>
             </div>
           </div>
@@ -1873,13 +1873,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   {selectedPersonnel.map((person, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                       <div>{person.first_name} {person.last_name}</div>
-                      <div className="text-right">${person.amount.toFixed(2)}</div>
+                      <div className="text-right">${(person.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
                     <div className="font-medium">Total:</div>
                     <div className="text-right font-bold">
-                      ${selectedPersonnel.reduce((sum, person) => sum + person.amount, 0).toFixed(2)}
+                      ${selectedPersonnel.reduce((sum, person) => sum + (person.amount || 0), 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -1896,13 +1896,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   {selectedSubcontracts.map((subcontract, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                       <div>{subcontract.name}</div>
-                      <div className="text-right">${subcontract.amount.toFixed(2)}</div>
+                      <div className="text-right">${(subcontract.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
                     <div className="font-medium">Total:</div>
                     <div className="text-right font-bold">
-                      ${selectedSubcontracts.reduce((sum, subcontract) => sum + subcontract.amount, 0).toFixed(2)}
+                      ${selectedSubcontracts.reduce((sum, subcontract) => sum + (subcontract.amount || 0), 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -1919,13 +1919,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   {selectedClients.map((client, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                       <div>{client.client_name}</div>
-                      <div className="text-right">${client.amount.toFixed(2)}</div>
+                      <div className="text-right">${(client.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
                     <div className="font-medium">Total:</div>
                     <div className="text-right font-bold">
-                      ${selectedClients.reduce((sum, client) => sum + client.amount, 0).toFixed(2)}
+                      ${selectedClients.reduce((sum, client) => sum + (client.amount || 0), 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -1942,13 +1942,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   {selectedPartnerWithdrawals.map((pw, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                       <div>{pw.partner_name}</div>
-                      <div className="text-right">${pw.amount.toFixed(2)}</div>
+                      <div className="text-right">${(pw.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
                     <div className="font-medium">Total:</div>
                     <div className="text-right font-bold">
-                      ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + pw.amount, 0).toFixed(2)}
+                      ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
