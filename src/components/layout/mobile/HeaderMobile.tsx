@@ -5,14 +5,24 @@ import { useLocation } from "wouter";
 import { MobileMenu } from "./MobileMenu";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 
+interface Tab {
+  id: string;
+  label: string;
+  isActive: boolean;
+}
+
 interface HeaderMobileProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
+  tabs?: Tab[];
+  onTabChange?: (tabId: string) => void;
 }
 
 export function HeaderMobile({
   icon,
   title,
+  tabs,
+  onTabChange,
 }: HeaderMobileProps = {}) {
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
 
@@ -48,35 +58,61 @@ export function HeaderMobile({
 
   return (
     <>
-      <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-[var(--menues-border)] bg-[var(--layout-bg)] sticky top-0 z-50">
-        {/* Left: Title */}
-        <div className="flex-1 flex items-center justify-start px-2">
-          <div className="flex items-center space-x-3">
-            {/* Siempre mostrar icono - usar el prop o el automático */}
-            <div className="flex-shrink-0">
-              {icon ? (
-                <div className="text-[var(--accent)]">
-                  {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType)}
-                </div>
-              ) : (
-                getBreadcrumbIcon()
-              )}
+      <div className="md:hidden sticky top-0 z-50 bg-[var(--layout-bg)] border-b border-[var(--menues-border)]">
+        {/* Main Header Row */}
+        <div className="flex items-center justify-between h-14 px-4">
+          {/* Left: Title */}
+          <div className="flex-1 flex items-center justify-start px-2">
+            <div className="flex items-center space-x-3">
+              {/* Siempre mostrar icono - usar el prop o el automático */}
+              <div className="flex-shrink-0">
+                {icon ? (
+                  <div className="text-[var(--accent)]">
+                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType)}
+                  </div>
+                ) : (
+                  getBreadcrumbIcon()
+                )}
+              </div>
+              <h1 className="text-lg font-normal text-[var(--layout-text)] truncate">
+                {title || getCurrentSectionLabel()}
+              </h1>
             </div>
-            <h1 className="text-lg font-normal text-[var(--layout-text)] truncate">
-              {title || getCurrentSectionLabel()}
-            </h1>
           </div>
+
+          {/* Right: ONLY Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={openMenu}
+            className="p-2"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
         </div>
 
-        {/* Right: ONLY Menu Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={openMenu}
-          className="p-2"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
+        {/* Tabs Row */}
+        {tabs && tabs.length > 0 && (
+          <div className="px-4 pb-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange?.(tab.id)}
+                  className={`
+                    px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200
+                    ${tab.isActive 
+                      ? 'bg-[var(--accent)] text-white' 
+                      : 'bg-[var(--card-bg)] text-[var(--menues-fg)] border border-[var(--menues-border)] hover:bg-[var(--card-hover-bg)]'
+                    }
+                  `}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Menu */}
