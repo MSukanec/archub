@@ -1,7 +1,7 @@
 import React from 'react';
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown } from 'lucide-react';
+import { Crown, Star, Zap } from 'lucide-react';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 // Interface para la organización (usando la estructura real de la app)
@@ -38,10 +38,9 @@ const getOrganizationInitials = (orgName: string): string => {
   return orgName.slice(0, 2).toUpperCase();
 };
 
-// Helper para formatear el plan como texto con ícono
+// Helper para formatear el plan como badge text
 const formatPlanText = (plan?: Organization['plan']): string => {
-  const planName = plan?.name || 'Free';
-  return `👑 ${planName}`;
+  return plan?.name || 'Free';
 };
 
 // Componente customizado para el trailing con avatares superpuestos
@@ -110,9 +109,9 @@ export default function OrganizationRow({
     avatarUrl: organization.logo_url || undefined,
     avatarFallback: getOrganizationInitials(organization.name),
     
-    // Content - Nombre como título, plan como subtitle
+    // Content - Nombre como título, plan como badge
     title: organization.name,
-    subtitle: formatPlanText(organization.plan),
+    badgeText: formatPlanText(organization.plan),
     
     // Behavior
     onClick,
