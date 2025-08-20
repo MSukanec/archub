@@ -192,7 +192,7 @@ export default function DataRowCard({
     return (
       <div 
         className={cn(
-          'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4',
+          'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 shadow-lg',
           className
         )}
         data-testid={testId}
@@ -223,10 +223,10 @@ export default function DataRowCard({
   return (
     <div
       className={cn(
-        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-2 transition-colors',
+        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-3 transition-colors shadow-lg',
         classes.container,
         // Estados interactivos
-        isInteractive && 'cursor-pointer hover:bg-[var(--card-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+        isInteractive && 'cursor-pointer hover:bg-[var(--card-hover-bg)] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         // Estado disabled
         disabled && 'opacity-60 cursor-not-allowed',
         // Estado selected
