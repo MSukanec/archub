@@ -75,7 +75,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [isClosing, setIsClosing] = useState(false);
   
   // Estado para determinar si estamos en menu principal o submenu
-  const [currentView, setCurrentView] = useState<'main' | string>('main');
+  // Detectar automáticamente la sección basada en la ruta actual
+  const getInitialView = () => {
+    if (location.startsWith('/organization') || location === '/' || location === '/dashboard') return 'organizacion';
+    if (location.startsWith('/design')) return 'diseno';
+    if (location.startsWith('/construction')) return 'construccion';
+    if (location.startsWith('/finances')) return 'finanzas';
+    if (location.startsWith('/recursos')) return 'recursos';
+    if (location.startsWith('/admin')) return 'admin';
+    return 'main';
+  };
+  
+  const [currentView, setCurrentView] = useState<'main' | string>(getInitialView());
   
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -85,13 +96,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     };
   }, []);
   
-  // Resetear vista al main cuando se cierre el menú
-  const { isOpen } = useMobileMenuStore();
+  // Actualizar vista cuando cambie la ubicación
   useEffect(() => {
-    if (!isOpen && currentView !== 'main') {
-      setCurrentView('main');
-    }
-  }, [isOpen, currentView]);
+    const newView = getInitialView();
+    setCurrentView(newView);
+  }, [location]);
 
   const queryClient = useQueryClient();
 
