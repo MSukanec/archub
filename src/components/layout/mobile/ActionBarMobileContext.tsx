@@ -32,6 +32,9 @@ interface ActionBarMobileContextType {
   setShowFilterPopover: (show: boolean) => void
   filterConfig?: any
   setFilterConfig: (config: any) => void
+  // Notifications popover state
+  showNotificationsPopover: boolean
+  setShowNotificationsPopover: (show: boolean) => void
 }
 
 const ActionBarMobileContext = createContext<ActionBarMobileContextType | undefined>(undefined)
@@ -47,12 +50,16 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
   // Filter state
   const [showFilterPopover, setShowFilterPopover] = useState(false)
   const [filterConfig, setFilterConfig] = useState<any>(null)
+  
+  // Notifications state
+  const [showNotificationsPopover, setShowNotificationsPopover] = useState(false)
 
   const clearActions = () => {
     setActions({})
     setShowActionBar(false)
     setShowSearchPopover(false)
     setShowFilterPopover(false)
+    setShowNotificationsPopover(false)
     setSearchValue('')
   }
 
@@ -71,7 +78,9 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
         showFilterPopover,
         setShowFilterPopover,
         filterConfig,
-        setFilterConfig
+        setFilterConfig,
+        showNotificationsPopover,
+        setShowNotificationsPopover
       }}
     >
       {children}

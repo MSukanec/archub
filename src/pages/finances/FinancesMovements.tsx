@@ -556,7 +556,7 @@ export default function Movements() {
           label: 'Inicio',
           onClick: () => {
             // Navigate to dashboard
-            window.location.href = '/organization';
+            navigate('/dashboard');
           },
         },
         search: {
@@ -587,8 +587,7 @@ export default function Movements() {
           icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
           label: 'Notificaciones',
           onClick: () => {
-            // TODO: implement notifications
-            console.log('Notifications clicked');
+            // Popover is handled in MobileActionBar
           },
         },
       });

@@ -19,7 +19,9 @@ export function ActionBarMobile() {
     setSearchValue,
     showFilterPopover,
     setShowFilterPopover,
-    filterConfig
+    filterConfig,
+    showNotificationsPopover,
+    setShowNotificationsPopover
   } = useActionBarMobile()
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -47,6 +49,13 @@ export function ActionBarMobile() {
       actions.filter.onClick()
     }
     setShowFilterPopover(true)
+  }
+
+  const handleNotificationsClick = () => {
+    if (actions.notifications?.onClick) {
+      actions.notifications.onClick()
+    }
+    setShowNotificationsPopover(true)
   }
 
   return (
@@ -174,6 +183,47 @@ export function ActionBarMobile() {
         </div>
       )}
 
+      {/* Notifications Popover */}
+      {showNotificationsPopover && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowNotificationsPopover(false)}>
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
+            style={{ 
+              backgroundColor: 'var(--menues-bg)',
+              borderColor: 'var(--menues-border)',
+              width: 'calc(100vw - 32px)',
+              maxWidth: '400px',
+              zIndex: 60
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Notificaciones</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotificationsPopover(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Empty state */}
+              <div className="py-8 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <Bell className="h-8 w-8 text-gray-400" />
+                  <p style={{ color: 'var(--menues-fg)' }} className="text-sm">
+                    Sin notificaciones
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action Bar */}
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
@@ -229,7 +279,7 @@ export function ActionBarMobile() {
           {/* Slot 5: Notifications */}
           {actions.notifications && (
             <button
-              onClick={actions.notifications.onClick}
+              onClick={handleNotificationsClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               {actions.notifications.icon}
