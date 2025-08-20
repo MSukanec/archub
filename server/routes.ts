@@ -474,6 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               {
                 user_id,
                 organization_id,
+                last_project_id: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               },
@@ -625,14 +626,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user organization preferences endpoint
   app.post("/api/user/update-organization-preferences", async (req, res) => {
     try {
-      const { organization_id } = req.body;
+      const { organization_id, last_project_id } = req.body;
       const user_id = req.headers['x-user-id'];
 
       if (!organization_id || !user_id) {
         return res.status(400).json({ error: "Missing organization_id or user_id" });
       }
 
-      console.log("🔧 Updating user organization preferences", { user_id, organization_id });
+      console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
 
       const { data, error } = await supabase
         .from('user_organization_preferences')
@@ -640,6 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             user_id,
             organization_id,
+            last_project_id,
             updated_at: new Date().toISOString()
           },
           {
