@@ -18,7 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-ghost-text)] border border-[var(--menues-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-ghost-hover-text)] hover:border-[var(--menues-border)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg border border-[var(--menues-border)] [&_svg]:size-4",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg border border-[var(--menues-border)] [&_svg]:size-4 px-4 py-2",
         "ghost-flat":
           "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 [&_svg]:size-4",
         "ghost-search":
@@ -30,7 +30,7 @@ const buttonVariants = cva(
         sm: "text-sm md:text-xs px-4 md:px-3 py-2.5 md:py-1.5 min-h-[40px] md:min-h-auto gap-2", 
         lg: "text-base px-6 py-4 md:py-3 min-h-[48px] md:min-h-auto gap-2",
         icon: "h-9 w-9 p-0",
-        "icon-sm": "h-4 w-4 p-0",
+        "icon-sm": "h-4 w-4 !p-0",
       },
     },
     defaultVariants: {

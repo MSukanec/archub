@@ -548,6 +548,7 @@ export default function ConstructionBudgets() {
                 budgetTask: item,
                 mode: 'edit'
               })}
+              className="!p-0"
             >
               <Edit className="h-3 w-3" />
             </Button>
@@ -555,7 +556,7 @@ export default function ConstructionBudgets() {
               variant="ghost"
               size="icon-sm"
               onClick={() => handleDeleteTask(item.id)}
-              className="text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive !p-0"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
