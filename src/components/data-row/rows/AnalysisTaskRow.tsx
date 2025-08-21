@@ -46,11 +46,9 @@ export default function AnalysisTaskRow({
       {/* DIV SUPERIOR - Información completa */}
       <div className="flex flex-col gap-2 w-full">
         {/* DIV SUPERIOR 1: Rubro (Unidad) */}
-        {task.category_name && (
-          <div className="text-xs text-[var(--text-secondary)] font-medium">
-            {task.category_name}{task.unit_name && ` (${task.unit_name})`}
-          </div>
-        )}
+        <div className="text-xs text-[var(--text-secondary)] font-medium">
+          {task.category_name || 'Sin categoría'}{task.unit_name && ` (${task.unit_name})`}
+        </div>
         
         {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
         <div className="text-sm font-medium text-[var(--text-primary)]">
