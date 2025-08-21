@@ -1,4 +1,5 @@
 import React from 'react'
+import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
 
 interface ContactAttachmentsFormProps {
   contactId: string;
@@ -8,9 +9,11 @@ interface ContactAttachmentsFormProps {
 export function ContactAttachmentsForm({ contactId, contact }: ContactAttachmentsFormProps) {
   return (
     <div className="space-y-6">
-      <div className="text-center text-muted-foreground">
-        <p>La funcionalidad de archivos adjuntos estará disponible próximamente.</p>
-      </div>
+      <ContactAttachmentsPanel 
+        contactId={contactId} 
+        contact={contact}
+        showUpload={true}
+      />
     </div>
   )
 }
