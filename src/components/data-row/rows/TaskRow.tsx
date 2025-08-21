@@ -39,9 +39,9 @@ export default function TaskRow({
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}
       <div className="flex flex-col gap-2 w-full">
-        {/* DIV SUPERIOR 1: Rubro (Unidad) */}
+        {/* DIV SUPERIOR 1: Fase - Rubro (Unidad) */}
         <div className="text-xs text-[var(--text-secondary)] font-bold">
-          {task.category_name || 'Sin categoría'}{task.task?.unit_symbol && ` (${task.task.unit_symbol})`}
+          {task.phase_name && `${task.phase_name} - `}{task.category_name || 'Sin categoría'}{task.task?.unit_symbol && ` (${task.task.unit_symbol})`}
         </div>
         
         {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
