@@ -699,3 +699,5 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
     />
   );
 }
+
+export default ContactFormModal;

@@ -6,7 +6,8 @@ import { GalleryFormModal } from '../modals/project/GalleryFormModal';
 import { BoardFormModal } from '../modals/organizations/BoardFormModal';
 import { CardFormModal } from '../modals/organizations/CardFormModal';
 import { ListFormModal } from '../modals/organizations/ListFormModal';
-import { ContactFormModal } from '../modals/organizations/ContactFormModal';
+import ContactModal from '../modals/resources/ContactModal'
+import { ContactModalView } from '../modals/resources/ContactModalView'
 import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
 import ClientObligationModal from '../modals/finances/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
@@ -77,7 +78,12 @@ export function ModalFactory() {
     case 'list':
       return <ListFormModal modalData={data} onClose={closeModal} />;
     case 'contact':
-      return <ContactFormModal modalData={data} onClose={closeModal} />;
+      // Si está en modo vista, mostrar ContactModalView
+      if (data?.viewingContact) {
+        return <ContactModalView modalData={data} onClose={closeModal} />;
+      }
+      // En cualquier otro caso (crear/editar), mostrar ContactModal
+      return <ContactModal modalData={data} onClose={closeModal} />;
     case 'project':
       return <ProjectFormModal modalData={data} onClose={closeModal} />;
     case 'project-client':

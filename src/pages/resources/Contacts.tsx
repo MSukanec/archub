@@ -494,38 +494,7 @@ export default function Contacts() {
         headerSearchValue: searchValue,
         onHeaderSearchChange: setSearchValue,
         showFilters: true,
-        renderFilterContent: () => (
-          <div className="space-y-3 p-3">
-            <div>
-              <Label className="text-xs font-medium mb-2 block">Ordenar</Label>
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Ordenar por..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name_asc">Nombre (A-Z)</SelectItem>
-                  <SelectItem value="name_desc">Nombre (Z-A)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs font-medium mb-2 block">Tipo</Label>
-              <Select value={filterByType} onValueChange={setFilterByType}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Filtrar por tipo..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tipos</SelectItem>
-                  {contactTypes?.map((type) => (
-                    <SelectItem key={type.id} value={type.name.toLowerCase()}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        ),
+
         isHeaderFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
         showHeaderClearFilters: sortBy !== 'name_asc' || filterByType !== 'all' || searchValue !== '',
         onHeaderClearFilters: () => {
@@ -571,7 +540,7 @@ export default function Contacts() {
                                 contact={contact}
                                 onEdit={handleEditContact}
                                 onDelete={handleDeleteContact}
-                                onClick={setSelectedContact}
+                                onClick={(contact) => openModal('contact', { viewingContact: contact })}
                               />
                             ) : (
                               <ContactCardDesktop
