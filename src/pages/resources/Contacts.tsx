@@ -55,7 +55,7 @@ export default function Contacts() {
   const { data: contacts = [], isLoading: contactsLoading } = useContacts()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { setActions, setShowActionBar, clearActions } = useActionBarMobile()
+  const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile()
   const isMobile = useMobile()
   const [, navigate] = useLocation()
 
@@ -115,6 +115,30 @@ export default function Contacts() {
       }
     }
   }, [isMobile])
+
+  // Configure mobile filters
+  useEffect(() => {
+    if (isMobile && contactTypes && contactTypes.length > 0) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Filtrar por tipo de contacto',
+            value: filterByType,
+            onChange: setFilterByType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: contactTypes.map(type => ({ value: type.name.toLowerCase(), label: type.name }))
+          }
+        ],
+        onClearFilters: () => {
+          setSearchValue("");
+          setFilterByType("all");
+          setSortBy('name_asc');
+          setShowSearch(false);
+        }
+      });
+    }
+  }, [isMobile, contactTypes, filterByType, setFilterConfig]);
 
   // Limpiar estado cuando cambia la organización
   React.useEffect(() => {
