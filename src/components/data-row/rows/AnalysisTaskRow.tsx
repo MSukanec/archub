@@ -57,9 +57,12 @@ export default function AnalysisTaskRow({
           )}
         </div>
         
-        {/* Costos en 3 columnas */}
-        <div className="grid grid-cols-3 gap-3 mt-1">
-          <div className="flex flex-col">
+        {/* Línea divisoria */}
+        <div className="border-t border-[var(--border)]"></div>
+        
+        {/* Costos en 3 columnas ocupando todo el ancho */}
+        <div className="grid grid-cols-3 gap-0 w-full">
+          <div className="flex flex-col pr-2">
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
               MO:
             </span>
@@ -67,16 +70,16 @@ export default function AnalysisTaskRow({
               $ 0.00
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">
+          <div className="flex flex-col px-2">
+            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
               MAT:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
               $ 0.00
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-green-600 dark:text-green-400">
+          <div className="flex flex-col pl-2">
+            <span className="text-xs font-medium text-[var(--text-primary)]">
               TOT:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
