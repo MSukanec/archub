@@ -42,6 +42,7 @@ interface ContactAttachmentsPanelProps {
   contact: {
     avatar_attachment_id?: string;
   };
+  showUpload?: boolean;
 }
 
 const categoryLabels = {
@@ -60,7 +61,7 @@ const categoryColors = {
   other: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
 };
 
-export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmentsPanelProps) {
+export function ContactAttachmentsPanel({ contactId, contact, showUpload = true }: ContactAttachmentsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('photo');
   
   const { data: userData } = useCurrentUser();
@@ -101,7 +102,8 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
           await createAttachment.mutateAsync({
             contactId,
             file: file,
-            category: selectedCategory as 'photo' | 'dni_front' | 'dni_back' | 'document' | 'other'
+            category: selectedCategory as 'photo' | 'dni_front' | 'dni_back' | 'document' | 'other',
+            createdBy: userData?.user?.id || ''
           });
           
           toast({
@@ -211,7 +213,8 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
       {/* Header con título y botón alineados */}
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Archivos y Media</label>
-        <Popover>
+        {showUpload && (
+          <Popover>
           <PopoverTrigger asChild>
             <Button variant="default" size="sm" className="gap-2">
               <Upload className="w-4 h-4" />
@@ -248,6 +251,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
             </div>
           </PopoverContent>
         </Popover>
+        )}
       </div>
 
       {/* Galería de archivos */}
@@ -258,7 +262,7 @@ export function ContactAttachmentsPanel({ contactId, contact }: ContactAttachmen
           description="Los archivos que subas aparecerán aquí organizados en una galería visual"
         />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {attachments.map((attachment) => (
             <div key={attachment.id} className="group relative aspect-square rounded-lg overflow-hidden border bg-muted/30 hover:bg-muted/50 transition-colors">
               {/* Contenido del archivo */}

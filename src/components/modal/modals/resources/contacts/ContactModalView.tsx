@@ -259,6 +259,7 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
         <ContactAttachmentsPanel 
           contactId={contact.id} 
           contact={contact}
+          showUpload={false}
         />
       </div>
     </div>
