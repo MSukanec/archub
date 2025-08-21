@@ -330,10 +330,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-accent" />
-          <div className="flex-1">
-            <h3 className="text-sm font-medium">Información de la Tarea</h3>
-            <p className="text-xs text-muted-foreground">Configuración general de la tarea personalizada</p>
-          </div>
+          <h3 className="text-sm font-medium">Información de la Tarea</h3>
         </div>
         <div className="space-y-4 pl-6">
           <div>
@@ -368,10 +365,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Settings className="h-4 w-4 text-accent" />
-          <div className="flex-1">
-            <h3 className="text-sm font-medium">Parámetros de la Tarea</h3>
-            <p className="text-xs text-muted-foreground">Define las características específicas de la tarea</p>
-          </div>
+          <h3 className="text-sm font-medium">Parámetros de la Tarea</h3>
         </div>
         <div className="pl-6">
           {/* Temporarily commented out while implementing template-based parameters
@@ -403,10 +397,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 text-accent" />
-          <div className="flex-1">
-            <h3 className="text-sm font-medium">Materiales</h3>
-            <p className="text-xs text-muted-foreground">Configura los materiales necesarios para esta tarea (opcional)</p>
-          </div>
+          <h3 className="text-sm font-medium">Materiales</h3>
         </div>
         
         <div className="pl-6 space-y-4">
