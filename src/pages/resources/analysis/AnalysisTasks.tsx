@@ -139,7 +139,7 @@ export default function AnalysisTasks() {
       data={filteredTasks}
       isLoading={tasksLoading}
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-      mobileComponent={(task: any) => (
+      renderCard={(task: any) => (
         <AnalysisTaskRow
           task={task}
           onEdit={() => openModal('parametric-task', { taskId: task.id })}
