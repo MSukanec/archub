@@ -85,19 +85,11 @@ const CurrencyMobileSimple: React.FC<{
       transition={{ delay: index * 0.1, duration: 0.3 }}
       className="flex-1 min-w-0"
     >
-      {/* Row layout: Icon + Currency Code + Amount */}
+      {/* Row layout: Currency Code + Amount */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-6 h-6 rounded-md flex items-center justify-center"
-            style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
-          >
-            <DollarSign className="w-3 h-3" />
-          </div>
-          <h4 className="font-bold text-foreground text-sm">
-            {currency.currencyCode}
-          </h4>
-        </div>
+        <h4 className="font-bold text-foreground text-sm">
+          {currency.currencyCode}
+        </h4>
         
         <span className={`font-bold text-base ${getBalanceColor(currency.totalBalance)}`}>
           {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
