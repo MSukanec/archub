@@ -357,15 +357,17 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
             </div>
           </div>
           
-          <Button 
-            onClick={handleAddMaterial}
-            disabled={!selectedMaterialId || !materialAmount || isLoading}
-            variant="outline"
-            size="sm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Material
-          </Button>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleAddMaterial}
+              disabled={!selectedMaterialId || !materialAmount || isLoading}
+              variant="default"
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Material
+            </Button>
+          </div>
           
           {/* Materials List */}
           {taskMaterials.length > 0 && (
