@@ -43,7 +43,8 @@ export default function Projects() {
   const { 
     setActions, 
     setShowActionBar, 
-    clearActions 
+    clearActions,
+    setFilterConfig 
   } = useActionBarMobile()
   const isMobile = useMobile()
 
@@ -399,42 +400,7 @@ export default function Projects() {
           id: 'filter', 
           label: 'Filtros', 
           icon: <Filter className="h-6 w-6" />,
-          onClick: () => {},
-          filterConfig: {
-            filters: [
-              {
-                key: 'type',
-                label: 'Tipo de proyecto',
-                value: filterByType,
-                onChange: setFilterByType,
-                allOptionLabel: 'Todos los tipos',
-                placeholder: 'Seleccionar tipo...',
-                options: [
-                  { value: 'vivienda', label: 'Vivienda' },
-                  { value: 'obra nueva', label: 'Obra Nueva' },
-                  { value: 'remodelacion', label: 'Remodelación' },
-                  { value: 'mantenimiento', label: 'Mantenimiento' },
-                  { value: 'consultoria', label: 'Consultoría' }
-                ]
-              },
-              {
-                key: 'status',
-                label: 'Modalidad',
-                value: filterByStatus,
-                onChange: setFilterByStatus,
-                allOptionLabel: 'Todas las modalidades',
-                placeholder: 'Seleccionar modalidad...',
-                options: [
-                  { value: 'activo', label: 'Activo' },
-                  { value: 'completado', label: 'Completado' },
-                  { value: 'pausado', label: 'Pausado' },
-                  { value: 'cancelado', label: 'Cancelado' },
-                  { value: 'planificacion', label: 'Planificación' }
-                ]
-              }
-            ],
-            onClearFilters: handleClearFilters
-          }
+          onClick: () => {}
         },
         notifications: { 
           id: 'notifications', 
@@ -454,14 +420,55 @@ export default function Projects() {
         clearActions()
       }
     }
-  }, [isMobile, activeTab, openModal, filterByType, filterByStatus])
+  }, [isMobile, activeTab, openModal])
+
+  // Configure filter config separately like in movements page
+  useEffect(() => {
+    if (isMobile && activeTab === 'projects') {
+      setFilterConfig({
+        filters: [
+          {
+            key: 'type',
+            label: 'Tipo de proyecto',
+            value: filterByType,
+            onChange: setFilterByType,
+            allOptionLabel: 'Todos los tipos',
+            placeholder: 'Seleccionar tipo...',
+            options: [
+              { value: 'vivienda', label: 'Vivienda' },
+              { value: 'obra nueva', label: 'Obra Nueva' },
+              { value: 'remodelacion', label: 'Remodelación' },
+              { value: 'mantenimiento', label: 'Mantenimiento' },
+              { value: 'consultoria', label: 'Consultoría' }
+            ]
+          },
+          {
+            key: 'status',
+            label: 'Modalidad',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            allOptionLabel: 'Todas las modalidades',
+            placeholder: 'Seleccionar modalidad...',
+            options: [
+              { value: 'activo', label: 'Activo' },
+              { value: 'completado', label: 'Completado' },
+              { value: 'pausado', label: 'Pausado' },
+              { value: 'cancelado', label: 'Cancelado' },
+              { value: 'planificacion', label: 'Planificación' }
+            ]
+          }
+        ],
+        onClearFilters: handleClearFilters
+      })
+    }
+  }, [isMobile, activeTab, filterByType, filterByStatus, setFilterConfig])
 
   const headerProps = {
     title: "Gestión de Proyectos",
     icon: Folder,
     breadcrumb: [
       { name: "Perfil", href: "/profile/data" },
-      { name: "Gestión de Proyectos", href: "/profile/projects" }
+      { name: "Gestión de Proyectos", href: "/organization/projects" }
     ],
     tabs: [
       {

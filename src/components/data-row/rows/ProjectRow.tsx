@@ -58,7 +58,8 @@ export default function ProjectRow({
     onClick,
     selected,
     density,
-    className: `${className} ${isActive ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`,
+    className,
+    activeBorder: isActive,
   };
 
   return (
@@ -97,7 +98,7 @@ export default function ProjectRow({
             
             {/* Badge activo únicamente si es el proyecto activo */}
             {isActive && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[hsl(var(--accent))] text-white">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--accent))' }}>
                 Activo
               </span>
             )}

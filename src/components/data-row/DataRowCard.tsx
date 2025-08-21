@@ -22,6 +22,7 @@ export interface DataRowCardProps {
   
   /** Visual */
   borderColor?: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
+  activeBorder?: boolean; // Borde activo con color --accent
 
   /** Comportamiento */
   onClick?: () => void;
@@ -102,6 +103,7 @@ export default function DataRowCard({
   selected,
   columns = 3,
   borderColor,
+  activeBorder,
   onClick,
   disabled = false,
   loading = false,
@@ -153,6 +155,8 @@ export default function DataRowCard({
         selected && 'ring-2 ring-accent',
         // Color del borde lateral
         getBorderColorClass(borderColor),
+        // Borde activo con --accent
+        activeBorder && 'border-2 border-[hsl(var(--accent))] shadow-md',
         className
       )}
       role={isInteractive ? 'button' : undefined}
