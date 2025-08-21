@@ -42,26 +42,12 @@ export default function AnalysisTasks() {
     }
   }, [mobileSearchValue, isMobile])
 
-  // Configure mobile action bar
+  // Configure mobile action bar - only set what's needed
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: {
-          id: 'home',
-          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
-          label: 'Inicio',
-          onClick: () => {
-            // Navigate to dashboard - handled by Layout
-          },
-        },
-        search: {
-          id: 'search',
-          icon: <Search className="h-5 w-5" />,
-          label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
+        home: { id: 'home', label: 'Inicio', onClick: () => {} },
+        search: { id: 'search', label: 'Buscar', onClick: () => {} },
         create: {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
@@ -69,22 +55,8 @@ export default function AnalysisTasks() {
           onClick: () => openModal('parametric-task'),
           variant: 'primary'
         },
-        filter: {
-          id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
-          label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
-        notifications: {
-          id: 'notifications',
-          icon: <Bell className="h-5 w-5" />,
-          label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
-        },
+        filter: { id: 'filter', label: 'Filtros', onClick: () => {} },
+        notifications: { id: 'notifications', label: 'Notificaciones', onClick: () => {} },
       })
       setShowActionBar(true)
     }
