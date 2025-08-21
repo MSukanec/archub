@@ -295,9 +295,6 @@ export function TaskList({
           );
         } else if (groupingType === 'rubros-phases') {
           // Para "Por Fases y Rubros" - calcular suma de subtotales
-          const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-          
-          // Calcular suma de subtotales (simulado - en producción usar TaskTotalSubtotal)
           const formatCurrency = (amount: number) => {
             return new Intl.NumberFormat('es-AR', {
               style: 'currency',
@@ -316,14 +313,14 @@ export function TaskList({
           
           return (
             <>
-              <div className="col-span-1 truncate text-sm font-medium">
+              <div className="truncate text-sm font-medium">
                 {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
               </div>
-              <div className="col-span-1"></div>
-              <div className="col-span-1 text-center">{totalQuantity.toFixed(2)}</div>
-              <div className="col-span-1"></div>
-              <div className="col-span-1 text-right font-medium">{formatCurrency(totalSubtotal)}</div>
-              <div className="col-span-1"></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div className="text-right font-medium">{formatCurrency(totalSubtotal)}</div>
+              <div></div>
             </>
           );
         } else {
