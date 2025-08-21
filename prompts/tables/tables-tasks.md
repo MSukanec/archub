@@ -308,6 +308,10 @@ TABLA TASKS:
   {
     "column_name": "task_template_id",
     "data_type": "uuid"
+  },
+  {
+    "column_name": "is_completed",
+    "data_type": "boolean"
   }
 ]
 
