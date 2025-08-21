@@ -563,8 +563,8 @@ export function Table<T = any>({
           </div>
         ) : paginatedData.map((item, index) =>
           renderCard ? (
-            // Use custom card renderer if provided
-            <div key={getItemId(item)} onClick={() => onCardClick?.(item)}>
+            // Use custom card renderer if provided  
+            <div key={getItemId(item)} className="mb-2" onClick={() => onCardClick?.(item)}>
               {renderCard(item)}
             </div>
           ) : (
