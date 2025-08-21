@@ -48,12 +48,14 @@ export default function Tasks() {
     updated_at: task.updated_at,
     phase_name: task.phase_name,
     category_name: task.category_name, // Pasar directamente desde la vista
+    custom_name: task.custom_name, // Pasar directamente desde la vista
+    unit: task.unit, // Pasar directamente desde la vista
     task: {
       id: task.task_id,
       code: task.task_id, // Usar task_id como code por compatibilidad
       display_name: task.custom_name,
       category_name: task.category_name,
-      unit_name: task.unit_name,
+      unit_name: task.unit,
       rubro_name: null, // No disponible en la vista
     }
   }))
