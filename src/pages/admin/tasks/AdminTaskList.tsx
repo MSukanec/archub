@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/ui-custom/Table'
-import { ActionBarDesktop } from '@/components/layout/desktop/ActionBarDesktop'
+
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -256,7 +256,7 @@ const AdminTaskList = () => {
       label: 'Nombre Paramétrico', 
       width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
-        <div className="text-sm text-muted-foreground">
+        <div className="font-medium">
           {task.name_rendered || 'Sin nombre paramétrico'}
         </div>
       )

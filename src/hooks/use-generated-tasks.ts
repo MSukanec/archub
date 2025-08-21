@@ -20,6 +20,7 @@ export interface GeneratedTask {
   subcategory_name?: string;
   organization_id?: string;
   is_system: boolean;
+  is_completed?: boolean;
   created_at: string;
   updated_at: string;
 }
