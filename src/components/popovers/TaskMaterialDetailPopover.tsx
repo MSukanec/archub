@@ -65,10 +65,9 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
-                size="sm"
+                variant="ghost-icon"
+                size="icon-sm"
                 onClick={() => setIsOpen(false)}
-                className="h-5 w-5 p-0"
               >
                 <X className="h-3 w-3" />
               </Button>

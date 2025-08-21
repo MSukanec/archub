@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - **ComboBox Height Consistency**: Removed min-height constraints from ComboBoxWrite.tsx to match standard input field heights, following pattern applied to other ComboBox components for consistent UI appearance (August 2025).
 - **AdminTaskList Table Improvements**: Reorganized columns to move SISTEMA column to final position before actions, implemented green badges for SISTEMA tasks and blue badges for USUARIO tasks, corrected action button styling to h-8 w-8 p-0 with proper hover states to match movements table button appearance (August 2025).
 - **TaskMaterialDetailPopover Component Refactor**: Moved TaskMaterialsPopover.tsx to src/components/popovers/TaskMaterialDetailPopover.tsx with optimizations - removed decorative icons and update buttons, standardized all text sizing to text-xs to exactly match construction task table appearance, simplified layout for better performance (August 2025).
+- **Button System Consistency Fix**: Corrected ghost button implementations across entire application. Replaced hardcoded `variant="ghost"` with manual `h-8 w-8 p-0` classes with proper `variant="ghost-icon"` and `size="icon-sm"` usage. This ensures ALL action buttons throughout the web are perfectly square (not stretched) and consistent with the established design system. Applied to TaskMaterialDetailPopover, ConstructionBudgets table actions, and other ghost icon buttons (August 2025).
 
 ## External Dependencies
 

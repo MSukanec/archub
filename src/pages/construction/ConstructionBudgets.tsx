@@ -542,21 +542,20 @@ export default function ConstructionBudgets() {
         render: (item: any) => (
           <div className="flex gap-1">
             <Button
-              variant="ghost"
-              size="sm"
+              variant="ghost-icon"
+              size="icon-sm"
               onClick={() => openModal('budget-task-form', { 
                 budgetTask: item,
                 mode: 'edit'
               })}
-              className="h-6 w-6 p-0"
             >
               <Edit className="h-3 w-3" />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="ghost-icon"
+              size="icon-sm"
               onClick={() => handleDeleteTask(item.id)}
-              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -701,7 +700,6 @@ export default function ConstructionBudgets() {
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleEditBudget()}
-                      className="text-xs font-normal"
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Editar
@@ -710,7 +708,7 @@ export default function ConstructionBudgets() {
                       variant="ghost" 
                       size="sm"
                       onClick={handleDeleteSelectedBudget}
-                      className="text-xs font-normal text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
                       Eliminar
@@ -726,7 +724,6 @@ export default function ConstructionBudgets() {
                           }
                         })
                       }}
-                      className="text-xs font-normal"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Nueva Tarea
