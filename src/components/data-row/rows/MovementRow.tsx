@@ -168,13 +168,13 @@ export default function MovementRow({
     avatarUrl: getCreatorAvatar(),
     avatarFallback: getCreatorInitials(),
     
-    // Trailing - Moneda/Monto y Billetera en líneas separadas
+    // Trailing - Importe como amount/currencyCode (dos columnas automáticas)
+    amount: movement.amount,
+    currencyCode: currencyCode,
+    amountTone: getBorderColor(movement) === 'success' ? 'success' : 'danger',
+    
+    // Lines solo para la billetera
     lines: [
-      {
-        text: `${currencyCode} ${formattedAmount}`,
-        tone: getBorderColor(movement),
-        mono: true
-      },
       {
         text: movement.movement_data?.wallet?.name || 'Sin billetera',
         tone: 'muted' as const
