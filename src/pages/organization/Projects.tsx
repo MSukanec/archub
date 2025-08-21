@@ -36,7 +36,8 @@ export default function Projects() {
   const [, navigate] = useLocation()
 
   // Filter states
-  const [filterByType, setFilterByType] = useState('all')
+  const [filterByProjectType, setFilterByProjectType] = useState('all')
+  const [filterByModality, setFilterByModality] = useState('all')
   const [filterByStatus, setFilterByStatus] = useState('all')
 
   // Mobile action bar
@@ -225,15 +226,21 @@ export default function Projects() {
   
   // Apply filters
   const filteredProjects = projectsWithActive.filter(project => {
-    const matchesType = filterByType === 'all' || 
-      (project.description?.toLowerCase().includes(filterByType.toLowerCase())) ||
-      (project.project_data?.client_name?.toLowerCase().includes(filterByType.toLowerCase())) ||
-      (project.status?.toLowerCase() === filterByType.toLowerCase());
+    // Filter by project type
+    const matchesProjectType = filterByProjectType === 'all' || 
+      project.project_data?.project_type_id === filterByProjectType ||
+      project.project_data?.project_type?.name?.toLowerCase().includes(filterByProjectType.toLowerCase());
     
+    // Filter by modality
+    const matchesModality = filterByModality === 'all' || 
+      project.project_data?.modality_id === filterByModality ||
+      project.project_data?.modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
+    
+    // Filter by status
     const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();
 
-    return matchesType && matchesStatus;
+    return matchesProjectType && matchesModality && matchesStatus;
   })
   
   // Put active project first
@@ -243,7 +250,8 @@ export default function Projects() {
   ] : filteredProjects
 
   const handleClearFilters = () => {
-    setFilterByType('all')
+    setFilterByProjectType('all')
+    setFilterByModality('all')
     setFilterByStatus('all')
   }
 
@@ -428,10 +436,10 @@ export default function Projects() {
       setFilterConfig({
         filters: [
           {
-            key: 'type',
+            key: 'project_type',
             label: 'Tipo de proyecto',
-            value: filterByType,
-            onChange: setFilterByType,
+            value: filterByProjectType,
+            onChange: setFilterByProjectType,
             allOptionLabel: 'Todos los tipos',
             placeholder: 'Seleccionar tipo...',
             options: [
@@ -443,10 +451,10 @@ export default function Projects() {
             ]
           },
           {
-            key: 'status',
+            key: 'modality',
             label: 'Modalidad',
-            value: filterByStatus,
-            onChange: setFilterByStatus,
+            value: filterByModality,
+            onChange: setFilterByModality,
             allOptionLabel: 'Todas las modalidades',
             placeholder: 'Seleccionar modalidad...',
             options: [
@@ -456,12 +464,27 @@ export default function Projects() {
               { value: 'cancelado', label: 'Cancelado' },
               { value: 'planificacion', label: 'Planificación' }
             ]
+          },
+          {
+            key: 'status',
+            label: 'Estado',
+            value: filterByStatus,
+            onChange: setFilterByStatus,
+            allOptionLabel: 'Todos los estados',
+            placeholder: 'Seleccionar estado...',
+            options: [
+              { value: 'active', label: 'En proceso' },
+              { value: 'completed', label: 'Completado' },
+              { value: 'paused', label: 'Pausado' },
+              { value: 'cancelled', label: 'Cancelado' },
+              { value: 'planning', label: 'Planificación' }
+            ]
           }
         ],
         onClearFilters: handleClearFilters
       })
     }
-  }, [isMobile, activeTab, filterByType, filterByStatus, setFilterConfig])
+  }, [isMobile, activeTab, filterByProjectType, filterByModality, filterByStatus, setFilterConfig])
 
   const headerProps = {
     title: "Gestión de Proyectos",
