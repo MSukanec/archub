@@ -16,7 +16,7 @@ import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap, ArrowLeft,
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
-import { ParametricTaskBuilder } from "@/components/ui-custom/ParametricTaskBuilder";
+import { ParametricTaskBuilder } from "@/components/ui-custom/admin/tasks/ParametricTaskBuilder";
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 import { useTopLevelCategories, useUnits } from "@/hooks/use-task-categories";
 
