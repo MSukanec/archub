@@ -1944,13 +1944,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   {selectedClients.map((client, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
                       <div>{client.client_name}</div>
-                      <div className="text-right">${(client.amount || 0).toFixed(2)}</div>
+                      <div className="text-right">${client.planned_amount?.toFixed(2) || '0.00'}</div>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
                     <div className="font-medium">Total:</div>
                     <div className="text-right font-bold">
-                      ${selectedClients.reduce((sum, client) => sum + (client.amount || 0), 0).toFixed(2)}
+                      ${selectedClients.reduce((sum, client) => sum + (client.planned_amount || 0), 0).toFixed(2)}
                     </div>
                   </div>
                 </div>
