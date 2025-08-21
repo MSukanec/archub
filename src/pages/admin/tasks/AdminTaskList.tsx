@@ -224,24 +224,6 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'is_system', 
-      label: 'Sistema', 
-      width: '100px',
-      render: (task: GeneratedTask) => (
-        <div className="flex justify-center">
-          {task.is_system ? (
-            <Badge variant="secondary" className="text-xs">
-              Sistema
-            </Badge>
-          ) : (
-            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-              Usuario
-            </Badge>
-          )}
-        </div>
-      )
-    },
-    { 
       key: 'element_category_name', 
       label: 'Rubro', 
       width: '12%',
@@ -284,6 +266,24 @@ const AdminTaskList = () => {
       )
     },
     { 
+      key: 'is_system', 
+      label: 'Sistema', 
+      width: '100px',
+      render: (task: GeneratedTask) => (
+        <div className="flex justify-center">
+          {task.is_system ? (
+            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+              Sistema
+            </Badge>
+          ) : (
+            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
+              Usuario
+            </Badge>
+          )}
+        </div>
+      )
+    },
+    { 
       key: 'actions', 
       label: 'Acciones', 
       width: '120px',
@@ -293,7 +293,7 @@ const AdminTaskList = () => {
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(task)}
-            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+            className="px-2 py-1 h-auto hover:bg-blue-100 hover:text-blue-600"
             title="Editar tarea"
           >
             <Edit className="h-4 w-4" />
@@ -302,7 +302,7 @@ const AdminTaskList = () => {
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(task)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="px-2 py-1 h-auto text-red-600 hover:text-red-700 hover:bg-red-50"
             title="Eliminar tarea"
           >
             <Trash2 className="h-4 w-4" />
