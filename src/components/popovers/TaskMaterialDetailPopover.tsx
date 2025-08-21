@@ -121,17 +121,19 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                     );
                   })}
                 </div>
-
-                {/* Total */}
-                <div className="flex items-center justify-between py-3 border-t border-[var(--card-border)]">
-                  <span className="text-xs font-semibold text-gray-900 uppercase">TOTAL POR UNIDAD:</span>
-                  <div className="text-xs font-semibold text-gray-900 text-right" style={{ minWidth: '80px' }}>
-                    ${totalPerUnit.toLocaleString()}
-                  </div>
-                </div>
               </>
             )}
           </div>
+
+          {/* Footer - Solo se muestra si hay materiales */}
+          {!isLoading && materials.length > 0 && (
+            <div className="px-3 py-2 flex items-center justify-between border-t border-[var(--card-border)]">
+              <span className="text-xs font-semibold text-gray-900 uppercase">TOTAL POR UNIDAD:</span>
+              <div className="text-xs font-semibold text-gray-900 text-right" style={{ minWidth: '80px' }}>
+                ${totalPerUnit.toLocaleString()}
+              </div>
+            </div>
+          )}
         </div>
       </PopoverContent>
       </Popover>
