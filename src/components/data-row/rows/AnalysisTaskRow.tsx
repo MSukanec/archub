@@ -47,7 +47,7 @@ export default function AnalysisTaskRow({
       <div className="flex flex-col gap-2 w-full">
         {/* DIV SUPERIOR 1: Rubro (Unidad) */}
         <div className="text-xs text-[var(--text-secondary)] font-medium">
-          {task.category_name || 'Sin categoría'}{task.unit_name && ` (${task.unit_name})`}
+          {task.element_category_name || 'Sin categoría'}{task.unit_name && ` (${task.unit_name})`}
         </div>
         
         {/* DIV SUPERIOR 2: Nombre completo de la tarea */}

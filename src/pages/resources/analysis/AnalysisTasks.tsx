@@ -26,7 +26,7 @@ export default function AnalysisTasks() {
       
       switch (groupingType) {
         case 'rubros':
-          groupKey = task.category_name || 'Sin rubro';
+          groupKey = task.element_category_name || 'Sin rubro';
           break;
         default:
           groupKey = '';
@@ -42,12 +42,12 @@ export default function AnalysisTasks() {
   // Columnas base para la tabla
   const baseColumns = [
     {
-      key: 'category_name',
+      key: 'element_category_name',
       label: 'Rubro',
       width: '20%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
-          {task.category_name || 'Sin rubro'}
+          {task.element_category_name || 'Sin rubro'}
         </Badge>
       )
     },
@@ -118,7 +118,7 @@ export default function AnalysisTasks() {
     
     // Para agrupación por rubros, filtrar la columna de rubro
     return baseColumns.filter(column => {
-      if (groupingType === 'rubros' && column.key === 'category_name') return false;
+      if (groupingType === 'rubros' && column.key === 'element_category_name') return false;
       return true;
     });
   }, [groupingType]);
