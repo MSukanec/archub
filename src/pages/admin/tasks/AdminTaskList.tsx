@@ -206,6 +206,42 @@ const AdminTaskList = () => {
   // Table columns configuration
   const baseColumns = [
     { 
+      key: 'is_completed', 
+      label: 'Completa', 
+      width: '120px',
+      render: (task: GeneratedTask) => (
+        <div className="flex justify-center">
+          {task.is_completed ? (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+              Completado
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+              Incompleto
+            </span>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'is_system', 
+      label: 'Sistema', 
+      width: '100px',
+      render: (task: GeneratedTask) => (
+        <div className="flex justify-center">
+          {task.is_system ? (
+            <Badge variant="secondary" className="text-xs">
+              Sistema
+            </Badge>
+          ) : (
+            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+              Usuario
+            </Badge>
+          )}
+        </div>
+      )
+    },
+    { 
       key: 'element_category_name', 
       label: 'Rubro', 
       width: '12%',
@@ -226,21 +262,8 @@ const AdminTaskList = () => {
       label: 'Tarea', 
       width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
-        <div className="space-y-1">
-          <div className="font-medium">
-            {task.display_name || 'Sin nombre'}
-          </div>
-          <div>
-            {task.is_system ? (
-              <Badge variant="secondary" className="text-xs">
-                Sistema
-              </Badge>
-            ) : (
-              <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                Usuario
-              </Badge>
-            )}
-          </div>
+        <div className="font-medium">
+          {task.display_name || 'Sin nombre'}
         </div>
       )
     },
