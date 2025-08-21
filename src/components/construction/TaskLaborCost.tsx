@@ -1,10 +1,20 @@
+import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+
 interface TaskLaborCostProps {
   task: any
 }
 
 export default function TaskLaborCost({ task }: TaskLaborCostProps) {
-  // Por ahora mostraremos un placeholder hasta que se implemente el sistema de costos de mano de obra
-  const laborCostPerUnit = 0; // TODO: Implementar cálculo real de costo de mano de obra
+  // Use task.id if available (for GeneratedTask), otherwise fallback to task.task_id (for construction tasks)
+  const taskId = task.id || task.task_id
+  const { data: materials = [], isLoading } = useTaskMaterials(taskId)
+
+  // Calcular total por unidad usando material_view.computed_unit_price (mismo cálculo que el popover)
+  const totalPerUnit = materials.reduce((sum, material) => {
+    const unitPrice = material.material_view?.computed_unit_price || 0;
+    const quantity = material.amount || 0;
+    return sum + (quantity * unitPrice);
+  }, 0)
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -15,13 +25,17 @@ export default function TaskLaborCost({ task }: TaskLaborCostProps) {
     }).format(amount)
   }
 
-  if (laborCostPerUnit === 0) {
+  if (isLoading) {
+    return <span className="text-xs text-muted-foreground">–</span>
+  }
+
+  if (totalPerUnit === 0) {
     return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
     <span className="text-xs font-medium text-foreground">
-      {formatCost(laborCostPerUnit)}
+      {formatCost(totalPerUnit)}
     </span>
   )
 }
