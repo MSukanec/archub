@@ -100,6 +100,20 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
           {displayName}
         </h2>
 
+        {/* Tipos de contacto debajo del nombre */}
+        {contact.contact_types && contact.contact_types.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            {contact.contact_types.map((type: any) => (
+              <Badge
+                key={type.id}
+                className="bg-accent text-white"
+              >
+                {type.name}
+              </Badge>
+            ))}
+          </div>
+        )}
+
         {/* Badge de Usuario de Archub si está vinculado */}
         {contact.linked_user && (
           <div className="flex items-center justify-center gap-1 mb-4">
@@ -144,25 +158,6 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
       </div>
 
       <Separator />
-
-      {/* Tipos de contacto */}
-      {contact.contact_types && contact.contact_types.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">
-            Tipos de contacto
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {contact.contact_types.map((type: any) => (
-              <Badge
-                key={type.id}
-                className="bg-accent text-white"
-              >
-                {type.name}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Información de contacto */}
       <div className="grid grid-cols-1 gap-4">
