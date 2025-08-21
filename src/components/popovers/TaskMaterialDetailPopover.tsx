@@ -17,7 +17,6 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
   const { data: materials = [], isLoading } = useTaskMaterials(taskId)
 
 
-
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;

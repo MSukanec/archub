@@ -135,7 +135,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         setParameterOrder(existingParamOrder)
       }
     }
-  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder, categories, units])
+  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
 
   // Mutations
   const createTaskMutation = useCreateGeneratedTask()
