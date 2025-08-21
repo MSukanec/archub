@@ -8,6 +8,7 @@ import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import ConstructionTaskCard from '@/components/cards/ConstructionTaskCard'
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal'
+import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost'
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
@@ -139,18 +140,8 @@ export function TaskList({
       label: 'Costo por Unidad',
       render: (task: any) => (
         <div className="flex items-center justify-center gap-2">
-          <TaskMaterialsSubtotal task={task} />
-          <div>
-            <TaskMaterialDetailPopover task={task} showCost={false} />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={() => {}}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
+          <TaskMaterialsUnitCost task={task} />
+          <TaskMaterialDetailPopover task={task} showCost={false} />
         </div>
       ),
       width: '10%',
