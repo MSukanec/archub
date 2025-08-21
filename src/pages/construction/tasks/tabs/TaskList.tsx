@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
-import { CheckSquare, Edit, Trash2, Plus } from 'lucide-react'
+import { CheckSquare, Edit, Trash2, Plus, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -316,7 +316,15 @@ export function TaskList({
               </div>
               <div></div>
               <div></div>
-              <div></div>
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="text-left font-medium">{formatCurrency(totalSubtotal)}</div>
               <div></div>
             </>
