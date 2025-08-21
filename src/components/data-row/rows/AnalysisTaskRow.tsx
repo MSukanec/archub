@@ -45,17 +45,10 @@ export default function AnalysisTaskRow({
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}
       <div className="flex flex-col gap-2 w-full">
-        {/* DIV SUPERIOR 1: Rubro - Unidad */}
+        {/* DIV SUPERIOR 1: Rubro (Unidad) */}
         {task.category_name && (
-          <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-xs">
-              {task.category_name}
-            </Badge>
-            {task.unit_name && (
-              <span className="text-xs text-[var(--text-secondary)]">
-                {task.unit_name}
-              </span>
-            )}
+          <div className="text-xs text-[var(--text-secondary)] font-medium">
+            {task.category_name}{task.unit_name && ` (${task.unit_name})`}
           </div>
         )}
         
@@ -86,7 +79,7 @@ export default function AnalysisTaskRow({
             </span>
           </div>
           <div className="flex flex-col text-center">
-            <span className="text-xs font-medium text-[var(--text-primary)]">
+            <span className="text-xs font-bold text-[var(--text-primary)]">
               TOT:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
