@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AmountInput } from '@/components/ui-custom/AmountInput'
+import { AmountInput } from '@/components/ui-custom/general/AmountInput'
 
 import UserSelector from '@/components/ui-custom/UserSelector'
 

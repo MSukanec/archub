@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
-import { AmountInput } from '@/components/ui-custom/AmountInput'
+import { AmountInput } from '@/components/ui-custom/general/AmountInput'
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 
