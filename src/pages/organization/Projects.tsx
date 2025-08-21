@@ -14,7 +14,6 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import ProjectRow from '@/components/data-row/rows/ProjectRow'
-import ProjectFilterPopover from '@/components/popovers/ProjectFilterPopover'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,7 +38,6 @@ export default function Projects() {
   // Filter states
   const [filterByType, setFilterByType] = useState('all')
   const [filterByStatus, setFilterByStatus] = useState('all')
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Mobile action bar
   const { 
@@ -401,8 +399,42 @@ export default function Projects() {
           id: 'filter', 
           label: 'Filtros', 
           icon: <Filter className="h-6 w-6" />,
-          onClick: () => setIsFilterOpen(!isFilterOpen),
-          isActive: isFilterOpen
+          onClick: () => {},
+          filterConfig: {
+            filters: [
+              {
+                key: 'type',
+                label: 'Tipo de proyecto',
+                value: filterByType,
+                onChange: setFilterByType,
+                allOptionLabel: 'Todos los tipos',
+                placeholder: 'Seleccionar tipo...',
+                options: [
+                  { value: 'vivienda', label: 'Vivienda' },
+                  { value: 'obra nueva', label: 'Obra Nueva' },
+                  { value: 'remodelacion', label: 'Remodelación' },
+                  { value: 'mantenimiento', label: 'Mantenimiento' },
+                  { value: 'consultoria', label: 'Consultoría' }
+                ]
+              },
+              {
+                key: 'status',
+                label: 'Modalidad',
+                value: filterByStatus,
+                onChange: setFilterByStatus,
+                allOptionLabel: 'Todas las modalidades',
+                placeholder: 'Seleccionar modalidad...',
+                options: [
+                  { value: 'activo', label: 'Activo' },
+                  { value: 'completado', label: 'Completado' },
+                  { value: 'pausado', label: 'Pausado' },
+                  { value: 'cancelado', label: 'Cancelado' },
+                  { value: 'planificacion', label: 'Planificación' }
+                ]
+              }
+            ],
+            onClearFilters: handleClearFilters
+          }
         },
         notifications: { 
           id: 'notifications', 
@@ -422,7 +454,7 @@ export default function Projects() {
         clearActions()
       }
     }
-  }, [isMobile, activeTab, openModal])
+  }, [isMobile, activeTab, openModal, filterByType, filterByStatus])
 
   const headerProps = {
     title: "Gestión de Proyectos",
@@ -467,21 +499,6 @@ export default function Projects() {
         {/* Tab: Proyectos */}
         {activeTab === 'projects' && (
           <>
-            {/* Filter Popover - Only visible on mobile when action bar is present */}
-            {isMobile && (
-              <ProjectFilterPopover
-                filterByType={filterByType}
-                onFilterByTypeChange={setFilterByType}
-                filterByStatus={filterByStatus}
-                onFilterByStatusChange={setFilterByStatus}
-                onClearFilters={handleClearFilters}
-                open={isFilterOpen}
-                onOpenChange={setIsFilterOpen}
-              >
-                <div /> {/* Invisible trigger, controlled by action bar */}
-              </ProjectFilterPopover>
-            )}
-
             {/* ProjectHeroCard - Show for active project */}
             {activeProjectId && (
               <ProjectHeroCard 
