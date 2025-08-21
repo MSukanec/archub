@@ -5,7 +5,7 @@ interface TaskMaterialsUnitCostProps {
 }
 
 export default function TaskMaterialsUnitCost({ task }: TaskMaterialsUnitCostProps) {
-  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id)
+  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id)
 
   // Calcular SOLO el costo por unidad (sin multiplicar por cantidad)
   const costPerUnit = materials.reduce((sum, material) => {

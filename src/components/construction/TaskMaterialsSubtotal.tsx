@@ -5,7 +5,7 @@ interface TaskMaterialsSubtotalProps {
 }
 
 export default function TaskMaterialsSubtotal({ task }: TaskMaterialsSubtotalProps) {
-  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id)
+  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id)
 
   // Calcular subtotal: (costo por unidad) * cantidad de la tarea
   const costPerUnit = materials.reduce((sum, material) => {
