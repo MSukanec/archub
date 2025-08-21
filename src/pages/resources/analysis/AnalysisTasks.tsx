@@ -77,8 +77,8 @@ export default function AnalysisTasks() {
             // Popover is handled in MobileActionBar
           },
         },
-        notification: {
-          id: 'notification',
+        notifications: {
+          id: 'notifications',
           icon: <Bell className="h-5 w-5" />,
           label: 'Notificaciones',
           onClick: () => {
