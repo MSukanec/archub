@@ -160,7 +160,7 @@ export default function MovementRow({
 
   // Props para DataRowCard
   const dataRowProps: DataRowCardProps = {
-    // Content - Solo 2 filas como el viejo diseño
+    // Content - Categoria y subcategoria en el medio
     title: movement.movement_data?.category?.name || 'Sin categoría',
     subtitle: movement.movement_data?.subcategory?.name || '',
     
@@ -168,13 +168,12 @@ export default function MovementRow({
     avatarUrl: getCreatorAvatar(),
     avatarFallback: getCreatorInitials(),
     
-    // Trailing - Importe y billetera en el lateral derecho
+    // Trailing - Moneda/Monto y Billetera en líneas separadas
     lines: [
       {
-        text: formattedAmount,
+        text: `${currencyCode} ${formattedAmount}`,
         tone: getBorderColor(movement),
-        mono: true,
-        hintRight: currencyCode
+        mono: true
       },
       {
         text: movement.movement_data?.wallet?.name || 'Sin billetera',
