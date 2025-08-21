@@ -78,7 +78,7 @@ const AdminTaskList = () => {
     openModal('delete-confirmation', {
       title: 'Eliminar Tarea',
       description: `Para confirmar la eliminación, escribe el nombre exacto de la tarea.`,
-      itemName: task.display_name || task.code,
+      itemName: task.custom_name || task.name_rendered || task.code,
       itemType: 'tarea',
       destructiveActionText: 'Eliminar Tarea',
       onConfirm: () => deleteGeneratedTaskMutation.mutate(task.id),
@@ -301,7 +301,7 @@ const AdminTaskList = () => {
     },
     { 
       key: 'is_system', 
-      label: 'SISTEMA', 
+      label: 'Sistema', 
       width: '100px',
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
