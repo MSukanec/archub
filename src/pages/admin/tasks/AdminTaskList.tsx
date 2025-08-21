@@ -18,6 +18,8 @@ import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
 import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
+import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
+import TaskLaborCost from '@/components/construction/TaskLaborCost'
 
 const AdminTaskList = () => {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
@@ -266,18 +268,40 @@ const AdminTaskList = () => {
       )
     },
     { 
+      key: 'labor_cost', 
+      label: 'M.O.', 
+      width: '8%',
+      render: (task: GeneratedTask) => (
+        <div className="text-center">
+          <TaskLaborCost task={task} />
+        </div>
+      ),
+      sortable: false
+    },
+    { 
+      key: 'material_details', 
+      label: '', 
+      width: '8%',
+      render: (task: GeneratedTask) => (
+        <div className="flex items-center justify-center gap-2">
+          <TaskMaterialDetailPopover task={task} showCost={false} />
+        </div>
+      ),
+      sortable: false
+    },
+    { 
       key: 'is_system', 
-      label: 'Sistema', 
+      label: 'SISTEMA', 
       width: '100px',
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
             <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-              Sistema
+              SISTEMA
             </Badge>
           ) : (
             <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
-              Usuario
+              USUARIO
             </Badge>
           )}
         </div>
@@ -293,19 +317,19 @@ const AdminTaskList = () => {
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(task)}
-            className="hover:bg-[var(--button-ghost-hover-bg)]"
+            className="h-8 w-8 p-0"
             title="Editar tarea"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(task)}
-            className="hover:bg-[var(--button-ghost-hover-bg)]"
+            className="h-8 w-8 p-0"
             title="Eliminar tarea"
           >
-            <Trash2 className="w-4 h-4 text-red-500" />
+            <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         </div>
       )
