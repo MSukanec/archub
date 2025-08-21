@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover';
+import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
+import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
 // Interface para la tarea de construcción
 interface TaskRowProps {
@@ -50,11 +52,11 @@ export default function TaskRow({
         {/* LÍNEA DIVISORIA */}
         <div className="border-t border-[var(--border)] w-full"></div>
         
-        {/* DIV INFERIOR: 3 columnas CANT C.U. SUBT. */}
+        {/* DIV INFERIOR: 3 columnas Cantidad, Costo Unitario, Subtotal */}
         <div className="grid grid-cols-3 gap-2 w-full">
           <div className="flex flex-col text-center">
             <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
-              CANT
+              Cantidad
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
               {(task.quantity || 0).toFixed(2)}
@@ -62,19 +64,19 @@ export default function TaskRow({
           </div>
           <div className="flex flex-col text-center">
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-              C.U.
+              Costo Unitario
             </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              $ 0.00
-            </span>
+            <div className="text-xs text-[var(--text-secondary)]">
+              <TaskMaterialsSubtotal task={task} />
+            </div>
           </div>
           <div className="flex flex-col text-center">
             <span className="text-xs font-bold text-[var(--text-primary)]">
-              SUBT.
+              Subtotal
             </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              $ 0.00
-            </span>
+            <div className="text-xs text-[var(--text-secondary)]">
+              <TaskTotalSubtotal task={task} />
+            </div>
           </div>
         </div>
       </div>
