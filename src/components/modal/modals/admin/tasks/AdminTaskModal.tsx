@@ -142,19 +142,28 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       if (actualTask.task_template_id) {
         setTaskTemplateId(actualTask.task_template_id)
       }
-      // Use element_category_id if category_id is not available
-      const categoryToUse = actualTask.category_id || actualTask.element_category_id
-      if (categoryToUse) {
-        setCategoryId(categoryToUse)
+      
+      // Find category ID by name from TASKS_VIEW
+      if (actualTask.category && categories.length > 0) {
+        const foundCategory = categories.find(cat => cat.name === actualTask.category)
+        if (foundCategory) {
+          setCategoryId(foundCategory.id)
+        }
       }
-      if (actualTask.unit_id) {
-        setUnitId(actualTask.unit_id)
+      
+      // Find unit ID by name from TASKS_VIEW
+      if (actualTask.unit && units.length > 0) {
+        const foundUnit = units.find(unit => unit.name === actualTask.unit)
+        if (foundUnit) {
+          setUnitId(foundUnit.id)
+        }
       }
+      
       if (actualTask.is_completed !== undefined) {
         setIsCompleted(actualTask.is_completed)
       }
     }
-  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
+  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder, categories, units])
 
   // Mutations
   const createTaskMutation = useCreateGeneratedTask()
