@@ -111,7 +111,7 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
         <div className="flex justify-center gap-3">
           {contact.phone && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleCall}
               className="flex items-center gap-2"
@@ -123,7 +123,7 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
           
           {contact.email && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleEmail}
               className="flex items-center gap-2"
@@ -134,7 +134,7 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
           )}
           
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleShare}
             className="flex items-center gap-2"
@@ -260,30 +260,6 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
       title="Detalle del Contacto"
       description="Información completa del contacto"
       icon={User}
-      rightActions={
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleEdit}
-            className="flex items-center gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Editar
-          </Button>
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(contact)}
-              className="flex items-center gap-2 text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-              Eliminar
-            </Button>
-          )}
-        </div>
-      }
     />
   )
 
