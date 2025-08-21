@@ -55,7 +55,7 @@ export default function TaskRow({
         {/* DIV INFERIOR: 3 columnas Cantidad, Costo Unitario, Subtotal */}
         <div className="grid grid-cols-3 gap-2 w-full">
           <div className="flex flex-col text-center">
-            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            <span className="text-xs font-medium text-[var(--text-primary)]">
               Cantidad
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
@@ -63,7 +63,7 @@ export default function TaskRow({
             </span>
           </div>
           <div className="flex flex-col text-center">
-            <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+            <span className="text-xs font-medium text-[var(--text-primary)]">
               Costo Unitario
             </span>
             <div className="text-xs text-[var(--text-secondary)]">
