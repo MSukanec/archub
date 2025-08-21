@@ -2,23 +2,17 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
-import { Eye, X, Package, RotateCcw } from 'lucide-react'
+import { Eye, X, Package } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 
-interface TaskMaterialsPopoverProps {
+interface TaskMaterialDetailsProps {
   task: any
   showCost?: boolean
 }
 
-export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPopoverProps) {
+export function TaskMaterialDetails({ task, showCost = false }: TaskMaterialDetailsProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { data: materials = [], isLoading } = useTaskMaterials(task.task_id)
-
-  const handleReplaceMaterial = (materialId: string) => {
-    // TODO: Abrir modal de selección de producto
-    console.log('Reemplazar material:', materialId)
-  }
 
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
@@ -61,11 +55,11 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
         sideOffset={10}
       >
         <div className="relative">
-          {/* Header - Con ícono, sin descripción */}
+          {/* Header */}
           <div className="px-3 py-3 flex items-center justify-between border-b border-[var(--card-border)]">
             <div className="flex items-center gap-2 flex-1">
               <Package className="h-4 w-4 text-[var(--accent)]" />
-              <h2 className="text-sm font-medium text-[var(--card-fg)]">
+              <h2 className="text-sm font-semibold text-[var(--card-fg)]">
                 Materiales por unidad
               </h2>
             </div>
@@ -104,20 +98,13 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
                     const unitName = material.material_view?.unit_of_computation || 'UD';
                     
                     return (
-                      <div key={material.id} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0">
-                        {/* Icono del material */}
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <Package className="h-4 w-4 text-blue-600" />
-                          </div>
-                        </div>
-                        
+                      <div key={material.id} className="flex items-start justify-between py-2 border-b border-gray-100 last:border-b-0">
                         {/* Información del material */}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-900 leading-tight">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <div className="text-sm font-semibold text-gray-900 leading-tight">
                             {material.material_view?.name || 'Material sin nombre'}
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                             <span>{quantity} {unitName}</span>
                             <span>•</span>
                             <span className="font-mono">
@@ -126,32 +113,19 @@ export function TaskMaterialsPopover({ task, showCost = false }: TaskMaterialsPo
                           </div>
                         </div>
                         
-                        {/* Precio total y botón */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">
-                              {subtotal > 0 ? `$${subtotal.toLocaleString()}` : '–'}
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleReplaceMaterial(material.id)}
-                            className="h-7 w-7 p-0 hover:bg-blue-50 hover:text-blue-600"
-                            title="Reemplazar por producto real"
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                          </Button>
+                        {/* Precio total */}
+                        <div className="text-sm text-gray-900 flex-shrink-0">
+                          {subtotal > 0 ? `$${subtotal.toLocaleString()}` : '–'}
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Total - Misma altura que header */}
+                {/* Total */}
                 <div className="px-3 py-3 flex items-center justify-between border-t border-[var(--card-border)]">
-                  <span className="font-semibold text-sm text-gray-900">Total por unidad:</span>
-                  <Badge variant="secondary" className="font-mono text-sm px-3 py-1">
+                  <span className="text-sm font-semibold text-gray-900">Total por unidad:</span>
+                  <Badge variant="secondary" className="font-mono text-sm font-semibold px-3 py-1">
                     ${totalPerUnit.toLocaleString()}
                   </Badge>
                 </div>

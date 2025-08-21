@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Content Padding**: Standardized mobile content padding to match header padding (px-4/16px) for consistent visual alignment. Updated Layout component to use consistent horizontal padding across mobile header and content areas (August 2025).
 - **ComboBox Height Consistency**: Removed min-height constraints from ComboBoxWrite.tsx to match standard input field heights, following pattern applied to other ComboBox components for consistent UI appearance (August 2025).
 - **AdminTaskList Table Improvements**: Reorganized columns to move SISTEMA column to final position before actions, implemented green badges for SISTEMA tasks and blue badges for USUARIO tasks, corrected action button styling to h-8 w-8 p-0 with proper hover states to match movements table button appearance (August 2025).
+- **TaskMaterialDetails Component Refactor**: Moved TaskMaterialsPopover.tsx to src/components/popovers/TaskMaterialDetails.tsx with optimizations - removed decorative icons and update buttons, standardized text sizing to match construction task list (names in bold, details without bold), simplified layout for better performance (August 2025).
 
 ## External Dependencies
 
