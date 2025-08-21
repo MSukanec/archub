@@ -41,7 +41,13 @@ export function TaskList({
           groupKey = task.category_name || 'Sin rubro';
           break;
         case 'tasks':
-          groupKey = task.task?.display_name || task.task?.code || 'Sin nombre';
+          const customName = task.custom_name || task.task?.display_name;
+          // Solo mostrar si existe custom_name y no es un UUID
+          if (customName && !customName.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            groupKey = customName;
+          } else {
+            groupKey = task.task?.display_name || 'Sin nombre';
+          }
           break;
         case 'rubros-phases':
           groupKey = `${task.category_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
@@ -102,7 +108,14 @@ export function TaskList({
     {
       key: 'display_name',
       label: 'Tarea',
-      render: (task: any) => task.task?.display_name || task.task?.code || 'Sin nombre',
+      render: (task: any) => {
+        const customName = task.custom_name || task.task?.display_name;
+        // Solo mostrar si existe custom_name y no es un UUID
+        if (customName && !customName.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+          return customName;
+        }
+        return task.task?.display_name || 'Sin nombre';
+      },
       width: 'auto'
     },
     {
