@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
-import { Zap, Plus, Trash2 } from 'lucide-react'
+import { Zap, Plus, Trash2, FileText, Settings, Package } from 'lucide-react'
 
 interface AdminTaskModalProps {
   modalData?: {
@@ -278,69 +278,97 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
 
   // EditPanel - all form content
   const editPanel = (
-    <div className="space-y-4">
-      {/* Task Parameters */}
-      <div>
-        <Label className="text-sm font-medium mb-3 block">Parámetros de la Tarea</Label>
-        <ParametricTaskBuilder 
-          onSelectionChange={setSelections}
-          onPreviewChange={setTaskPreview}
-          onOrderChange={setParameterOrder}
-          initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
-          initialParameterOrder={existingParamOrder || null}
-        />
+    <div className="space-y-6">
+      {/* Tarea Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-accent" />
+          <div className="flex-1">
+            <h3 className="text-sm font-medium">Información de la Tarea</h3>
+            <p className="text-xs text-muted-foreground">Configuración general de la tarea personalizada</p>
+          </div>
+        </div>
+        <div className="text-xs text-muted-foreground pl-6">
+          Próximamente: campos adicionales para configurar la tarea
+        </div>
+      </div>
+
+      {/* Task Parameters Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Settings className="h-4 w-4 text-accent" />
+          <div className="flex-1">
+            <h3 className="text-sm font-medium">Parámetros de la Tarea</h3>
+            <p className="text-xs text-muted-foreground">Define las características específicas de la tarea</p>
+          </div>
+        </div>
+        <div className="pl-6">
+          <ParametricTaskBuilder 
+            onSelectionChange={setSelections}
+            onPreviewChange={setTaskPreview}
+            onOrderChange={setParameterOrder}
+            initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
+            initialParameterOrder={existingParamOrder || null}
+          />
+        </div>
       </div>
 
       {/* Materials Section */}
       <div className="space-y-4">
-        <Label className="text-sm font-medium">Materiales (Opcional)</Label>
-        
-        {/* Add Material Form */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="material-select">Material</Label>
-            <ComboBox
-              options={materialOptions}
-              value={selectedMaterialId}
-              onValueChange={setSelectedMaterialId}
-              placeholder="Buscar material..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="material-amount">Cantidad</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="material-amount"
-                type="number"
-                value={materialAmount}
-                onChange={(e) => setMaterialAmount(e.target.value)}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-              />
-              {selectedMaterialUnit && (
-                <Badge variant="outline" className="text-xs">
-                  {selectedMaterialUnit}
-                </Badge>
-              )}
-            </div>
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-accent" />
+          <div className="flex-1">
+            <h3 className="text-sm font-medium">Materiales</h3>
+            <p className="text-xs text-muted-foreground">Configura los materiales necesarios para esta tarea (opcional)</p>
           </div>
         </div>
         
-        <Button 
-          onClick={handleAddMaterial}
-          disabled={!selectedMaterialId || !materialAmount || isLoading}
-          variant="outline"
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Material
-        </Button>
-        
-        {/* Materials List */}
-        {taskMaterials.length > 0 && (
-          <div className="space-y-2">
+        <div className="pl-6 space-y-4">
+          {/* Add Material Form */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="material-select">Material</Label>
+              <ComboBox
+                options={materialOptions}
+                value={selectedMaterialId}
+                onValueChange={setSelectedMaterialId}
+                placeholder="Buscar material..."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="material-amount">Cantidad</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="material-amount"
+                  type="number"
+                  value={materialAmount}
+                  onChange={(e) => setMaterialAmount(e.target.value)}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
+                {selectedMaterialUnit && (
+                  <Badge variant="outline" className="text-xs">
+                    {selectedMaterialUnit}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleAddMaterial}
+            disabled={!selectedMaterialId || !materialAmount || isLoading}
+            variant="outline"
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Material
+          </Button>
+          
+          {/* Materials List */}
+          {taskMaterials.length > 0 && (
             <div className="space-y-2">
               {taskMaterials.map((material, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -370,8 +398,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
