@@ -297,7 +297,7 @@ export function EditableParametersTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-5 w-5 p-0"
+                className=""
                 onClick={() => toggleExpanded(param.id)}
               >
                 {param.isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}

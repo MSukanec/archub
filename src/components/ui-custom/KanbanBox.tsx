@@ -278,7 +278,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                             <Button
                                               variant="ghost"
                                               size="icon-sm"
-                                              className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
+                                              className=" flex-shrink-0 mt-0.5"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleToggleCompleted(card.id, !card.is_completed);
