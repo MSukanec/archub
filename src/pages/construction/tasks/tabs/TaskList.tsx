@@ -119,12 +119,17 @@ export function TaskList({
       width: 'auto'
     },
     {
-      key: 'quantity_with_unit',
+      key: 'unit',
+      label: 'Unidad',
+      render: (task: any) => task.unit || '-',
+      width: '8%'
+    },
+    {
+      key: 'quantity',
       label: 'Cantidad',
       render: (task: any) => {
         const quantity = task.quantity || 0;
-        const unit = task.task?.unit_symbol || '';
-        return unit ? `${quantity} ${unit}` : quantity.toString();
+        return quantity.toFixed(2);
       },
       width: '8%'
     },

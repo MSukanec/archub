@@ -10,6 +10,7 @@ export interface ConstructionTaskView {
   task_id: string;
   custom_name: string;
   category_name: string;
+  unit: string; // Nueva columna agregada desde la vista
   quantity: number; // real en DB, number en TS
   start_date: string | null; // date en DB, string en TS
   end_date: string | null; // date en DB, string en TS
@@ -18,7 +19,6 @@ export interface ConstructionTaskView {
   phase_name: string | null;
   created_at: string; // timestamp with time zone en DB, string en TS
   updated_at: string; // timestamp with time zone en DB, string en TS
-  unit_name?: string; // Para mostrar la unidad junto con la cantidad
 }
 
 // Hook específico para la vista CONSTRUCTION_TASKS_VIEW optimizada para cronograma
