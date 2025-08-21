@@ -485,8 +485,8 @@ export function Header({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className={`h-8 w-8 p-0 ${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
+                  size="icon-sm"
+                  className={`${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
                 >
                   <Filter className="h-4 w-4" />
                 </Button>
