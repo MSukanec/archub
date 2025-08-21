@@ -25,7 +25,7 @@ const AdminTaskList = () => {
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
-  const [groupingType, setGroupingType] = useState<'none' | 'rubros'>('none')
+  const [groupingType, setGroupingType] = useState<'none' | 'rubros'>('rubros')
 
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
