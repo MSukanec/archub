@@ -17,6 +17,7 @@ import { TemplateParametersSelector } from '@/components/ui-custom/admin/tasks/T
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
@@ -419,12 +420,12 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           
           <div>
             <Label htmlFor="custom-name">Nombre Personalizado</Label>
-            <Input
+            <Textarea
               id="custom-name"
-              type="text"
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               placeholder="Nombre personalizado para la tarea..."
+              rows={3}
             />
           </div>
         </div>
