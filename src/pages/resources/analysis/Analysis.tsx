@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams } from 'wouter'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { BarChart3, TableIcon, Users, Package, DollarSign, Plus } from 'lucide-react'
@@ -9,7 +10,18 @@ import AnalysisMaterials from './AnalysisMaterials'
 import AnalysisOverheads from './AnalysisOverheads'
 
 export default function Analysis() {
-  const [activeTab, setActiveTab] = useState("tareas")
+  const { tab } = useParams<{ tab?: string }>()
+  
+  // Map URL params to internal tab IDs
+  const getInitialTab = () => {
+    if (tab === 'tasks') return 'tareas'
+    if (tab === 'labor') return 'mano-obra'  
+    if (tab === 'materials') return 'materiales'
+    if (tab === 'overheads') return 'indirectos'
+    return 'tareas' // default
+  }
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab())
 
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()

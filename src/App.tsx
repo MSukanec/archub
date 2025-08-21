@@ -233,6 +233,16 @@ function Router() {
             <Analysis />
           </ProtectedRoute>
         </Route>
+        <Route path="/resources/analysis">
+          <ProtectedRoute>
+            <Analysis />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/resources/analysis/:tab?">
+          <ProtectedRoute>
+            <Analysis />
+          </ProtectedRoute>
+        </Route>
 
 
         {/* Finances Routes */}
