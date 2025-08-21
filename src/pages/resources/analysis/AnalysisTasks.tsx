@@ -46,8 +46,18 @@ export default function AnalysisTasks() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: { id: 'home', label: 'Inicio', onClick: () => {} },
-        search: { id: 'search', label: 'Buscar', onClick: () => {} },
+        home: { 
+          id: 'home', 
+          label: 'Inicio', 
+          icon: <Home className="h-6 w-6" />,
+          onClick: () => {} 
+        },
+        search: { 
+          id: 'search', 
+          label: 'Buscar', 
+          icon: <Search className="h-6 w-6" />,
+          onClick: () => {} 
+        },
         create: {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
@@ -55,8 +65,18 @@ export default function AnalysisTasks() {
           onClick: () => openModal('parametric-task'),
           variant: 'primary'
         },
-        filter: { id: 'filter', label: 'Filtros', onClick: () => {} },
-        notifications: { id: 'notifications', label: 'Notificaciones', onClick: () => {} },
+        filter: { 
+          id: 'filter', 
+          label: 'Filtros', 
+          icon: <Filter className="h-6 w-6" />,
+          onClick: () => {} 
+        },
+        notifications: { 
+          id: 'notifications', 
+          label: 'Notificaciones', 
+          icon: <Bell className="h-6 w-6" />,
+          onClick: () => {} 
+        },
       })
       setShowActionBar(true)
     }
@@ -99,8 +119,7 @@ export default function AnalysisTasks() {
       filtered = filtered.filter(task => 
         task.unit_name?.toLowerCase().includes(searchTerm) ||
         task.element_category_name?.toLowerCase().includes(searchTerm) ||
-        task.labor_cost?.toString().includes(searchTerm) ||
-        task.material_cost?.toString().includes(searchTerm)
+        task.name_rendered?.toLowerCase().includes(searchTerm)
       )
     }
     
@@ -127,7 +146,7 @@ export default function AnalysisTasks() {
     {
       key: 'element_category_name',
       label: 'Rubro',
-      width: '20%',
+      width: '15%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
           {task.element_category_name || 'Sin rubro'}
@@ -137,7 +156,7 @@ export default function AnalysisTasks() {
     {
       key: 'name_rendered',
       label: 'Tarea',
-      width: '60%',
+      width: '40%',
       render: (task: any) => (
         <span className="text-sm font-medium">{task.name_rendered}</span>
       )
@@ -145,10 +164,36 @@ export default function AnalysisTasks() {
     {
       key: 'unit_name',
       label: 'Unidad',
-      width: '10%',
+      width: '8%',
       render: (task: any) => (
         <Badge variant="secondary" className="text-xs">
           {task.unit_name || 'N/A'}
+        </Badge>
+      )
+    },
+    {
+      key: 'is_completed',
+      label: 'Completado',
+      width: '10%',
+      render: (task: any) => (
+        <Badge 
+          variant={task.is_completed ? "default" : "outline"}
+          className="text-xs"
+        >
+          {task.is_completed ? 'SI' : 'NO'}
+        </Badge>
+      )
+    },
+    {
+      key: 'is_system',
+      label: 'Sistema',
+      width: '10%',
+      render: (task: any) => (
+        <Badge 
+          variant={task.is_system ? "default" : "secondary"}
+          className={`text-xs ${task.is_system ? 'bg-green-100 text-green-800 border-green-200' : 'bg-blue-100 text-blue-800 border-blue-200'}`}
+        >
+          {task.is_system ? 'SISTEMA' : 'USUARIO'}
         </Badge>
       )
     },
@@ -162,9 +207,9 @@ export default function AnalysisTasks() {
             variant="ghost"
             size="sm"
             onClick={() => openModal('parametric-task', { taskId: task.id })}
-            className="h-7 w-7 p-0"
+            className="h-8 w-8 p-0"
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-4 w-4" />
           </Button>
           {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
           {!task.is_system && task.organization_id === userData?.organization?.id && (
@@ -182,9 +227,9 @@ export default function AnalysisTasks() {
                   }
                 })
               }}
-              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
