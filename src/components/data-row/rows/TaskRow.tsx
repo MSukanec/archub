@@ -39,14 +39,44 @@ export default function TaskRow({
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}
       <div className="flex flex-col gap-2 w-full">
-        {/* DIV SUPERIOR 1: Fase - Rubro (Unidad) */}
-        <div className="text-xs text-[var(--text-secondary)] font-bold">
-          {task.phase_name && `${task.phase_name} - `}{task.category_name || 'Sin categoría'}{(task.unit || task.task?.unit_symbol) && ` (${task.unit || task.task?.unit_symbol})`}
-        </div>
-        
-        {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
-        <div className="text-sm font-medium text-[var(--text-primary)]">
-          {task.custom_name || task.task?.name || 'Sin nombre'}
+        {/* HEADER CON NOMBRE Y ACCIONES */}
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            {/* DIV SUPERIOR 1: Fase - Rubro (Unidad) */}
+            <div className="text-xs text-[var(--text-secondary)] font-bold">
+              {task.phase_name && `${task.phase_name} - `}{task.category_name || 'Sin categoría'}{(task.unit || task.task?.unit_symbol) && ` (${task.unit || task.task?.unit_symbol})`}
+            </div>
+            
+            {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
+            <div className="text-sm font-medium text-[var(--text-primary)]">
+              {task.custom_name || task.task?.name || 'Sin nombre'}
+            </div>
+          </div>
+          
+          {/* BOTONES DE ACCIONES */}
+          <div className="flex gap-1 ml-2">
+            <TaskMaterialDetailPopover task={task} showCost={false} />
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(task)}
+                className="h-8 w-8 p-0"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(task.id)}
+                className="h-8 w-8 p-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* LÍNEA DIVISORIA */}
