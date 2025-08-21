@@ -353,6 +353,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
     
+    console.log('🔧 HandleTypeChange - selectedConcept:', selectedConcept)
+    console.log('🔧 HandleTypeChange - viewMode (trimmed):', `"${viewMode}"`)
+    console.log('🔧 HandleTypeChange - current movementType:', movementType)
+    
     // Obtener valores actuales de campos comunes del formulario activo
     const getCurrentCommonValues = () => {
       if (movementType === 'conversion') {
@@ -394,14 +398,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     transferForm.setValue('description', commonValues.description)
     transferForm.setValue('created_by', commonValues.created_by)
     
-    // Cambiar tipo de movimiento DESPUÉS de sincronizar
-    if (viewMode === "conversion") {
-      setMovementType('conversion')
-    } else if (viewMode === "transfer") {
-      setMovementType('transfer')
-    } else {
-      setMovementType('normal')
-    }
+    // Cambiar tipo de movimiento DESPUÉS de sincronizar - con comparación más robusta
+    const newMovementType = viewMode.includes("conversion") ? 'conversion' : 
+                           viewMode.includes("transfer") ? 'transfer' : 'normal'
+    
+    console.log('🔧 HandleTypeChange - setting movementType to:', newMovementType)
+    setMovementType(newMovementType)
     
     // Reset categorías
     setSelectedCategoryId('')
