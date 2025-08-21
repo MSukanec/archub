@@ -49,6 +49,7 @@ Preferred communication style: Simple, everyday language.
 - **Mobile Swipe Navigation**: Implemented swipe gesture support for tab navigation on mobile. Added useSwipe hook and SwipeContainer component to detect horizontal swipe gestures. Updated HeaderMobile and Layout components to automatically enable swipe-to-change-tabs functionality when multiple tabs are present. Users can now swipe left/right on mobile to navigate between tabs seamlessly (August 2025).
 - **Mobile Content Padding**: Standardized mobile content padding to match header padding (px-4/16px) for consistent visual alignment. Updated Layout component to use consistent horizontal padding across mobile header and content areas (August 2025).
 - **ComboBox Height Consistency**: Removed min-height constraints from ComboBoxWrite.tsx to match standard input field heights, following pattern applied to other ComboBox components for consistent UI appearance (August 2025).
+- **AdminTaskList Table Improvements**: Reorganized columns to move SISTEMA column to final position before actions, implemented green badges for SISTEMA tasks and blue badges for USUARIO tasks, corrected action button styling to h-8 w-8 p-0 with proper hover states to match movements table button appearance (August 2025).
 
 ## External Dependencies
 

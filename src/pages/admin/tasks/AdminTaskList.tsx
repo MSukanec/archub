@@ -293,7 +293,7 @@ const AdminTaskList = () => {
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(task)}
-            className="px-2 py-1 h-auto hover:bg-blue-100 hover:text-blue-600"
+            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             title="Editar tarea"
           >
             <Edit className="h-4 w-4" />
@@ -302,10 +302,10 @@ const AdminTaskList = () => {
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(task)}
-            className="px-2 py-1 h-auto text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
             title="Eliminar tarea"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         </div>
       )
