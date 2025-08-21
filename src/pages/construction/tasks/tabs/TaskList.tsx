@@ -252,10 +252,10 @@ export function TaskList({
     
     // Filtrar columnas base para otros tipos de agrupación
     return baseColumns.filter(column => {
-      if (groupingType === 'rubros' && column.key === 'rubro_name') return false;
+      if (groupingType === 'rubros' && column.key === 'category_name') return false;
       if (groupingType === 'phases' && column.key === 'phase') return false;
-      if (groupingType === 'rubros-phases' && (column.key === 'rubro_name' || column.key === 'phase')) return false;
-      if (groupingType === 'phases-rubros' && (column.key === 'rubro_name' || column.key === 'phase')) return false;
+      if (groupingType === 'rubros-phases' && (column.key === 'category_name' || column.key === 'phase')) return false;
+      if (groupingType === 'phases-rubros' && (column.key === 'category_name' || column.key === 'phase')) return false;
       return true;
     });
   }, [groupingType]);
