@@ -19,7 +19,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
 import { SubcontractRow } from '@/components/data-row/rows';
 
-export default function SubcontractList() {
+interface SubcontractListProps {
+  filterByStatus?: string;
+  filterByType?: string;
+}
+
+export default function SubcontractList({ filterByStatus = 'all', filterByType = 'all' }: SubcontractListProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
@@ -158,13 +163,27 @@ export default function SubcontractList() {
     };
   });
 
-  // Filtrar subcontratos por búsqueda
+  // Filtrar subcontratos por búsqueda y filtros móviles
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
+    // Búsqueda por texto
     const searchLower = searchQuery.toLowerCase();
     const titleMatch = subcontract.title?.toLowerCase().includes(searchLower);
     const codeMatch = subcontract.code?.toLowerCase().includes(searchLower);
+    const searchMatch = !searchQuery || titleMatch || codeMatch;
     
-    return titleMatch || codeMatch;
+    // Filtro por status
+    const statusMatch = filterByStatus === 'all' || subcontract.status === filterByStatus;
+    
+    // Filtro por tipo (asumiendo que se puede determinar del título o descripción)
+    let typeMatch = true;
+    if (filterByType !== 'all') {
+      const titleLower = (subcontract.title || '').toLowerCase();
+      const descriptionLower = (subcontract.description || '').toLowerCase();
+      typeMatch = titleLower.includes(filterByType.toLowerCase()) || 
+                  descriptionLower.includes(filterByType.toLowerCase());
+    }
+    
+    return searchMatch && statusMatch && typeMatch;
   });
 
   // Router navigation
