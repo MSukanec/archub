@@ -18,9 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-[var(--button-secondary-bg)] text-[var(--button-ghost-text)] border border-[var(--menues-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-ghost-hover-text)] hover:border-[var(--menues-border)] rounded-lg px-4 py-2 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 border border-[var(--menues-border)] gap-2 text-xs font-normal [&_svg]:size-4",
-        "ghost-icon":
-          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg h-8 w-8 p-0 border border-[var(--menues-border)] [&_svg]:size-4",
+          "bg-[var(--button-ghost-bg)] text-[var(--button-ghost-text)] hover:bg-[var(--button-ghost-hover-bg)] hover:text-[var(--button-ghost-hover-text)] rounded-lg border border-[var(--menues-border)] [&_svg]:size-4",
         "ghost-flat":
           "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg px-4 py-2 [&_svg]:size-4",
         "ghost-search":
@@ -28,9 +26,9 @@ const buttonVariants = cva(
         link: "text-accent underline-offset-4 hover:underline px-4 py-2",
       },
       size: {
-        default: "text-sm px-4 py-3 md:py-2 min-h-[44px] md:min-h-auto",
-        sm: "text-sm md:text-xs px-4 md:px-3 py-2.5 md:py-1.5 min-h-[40px] md:min-h-auto",
-        lg: "text-base px-6 py-4 md:py-3 min-h-[48px] md:min-h-auto",
+        default: "text-sm px-4 py-3 md:py-2 min-h-[44px] md:min-h-auto gap-2",
+        sm: "text-sm md:text-xs px-4 md:px-3 py-2.5 md:py-1.5 min-h-[40px] md:min-h-auto gap-2", 
+        lg: "text-base px-6 py-4 md:py-3 min-h-[48px] md:min-h-auto gap-2",
         icon: "h-11 md:h-9 w-11 md:w-9 p-0",
         "icon-sm": "h-10 md:h-8 w-10 md:w-8 p-0",
       },

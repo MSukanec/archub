@@ -542,7 +542,7 @@ export default function ConstructionBudgets() {
         render: (item: any) => (
           <div className="flex gap-1">
             <Button
-              variant="ghost-icon"
+              variant="ghost"
               size="icon-sm"
               onClick={() => openModal('budget-task-form', { 
                 budgetTask: item,
@@ -552,7 +552,7 @@ export default function ConstructionBudgets() {
               <Edit className="h-3 w-3" />
             </Button>
             <Button
-              variant="ghost-icon"
+              variant="ghost"
               size="icon-sm"
               onClick={() => handleDeleteTask(item.id)}
               className="text-destructive hover:text-destructive"
