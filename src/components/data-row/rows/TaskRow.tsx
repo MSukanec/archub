@@ -50,8 +50,16 @@ export default function TaskRow({
         {/* LÍNEA DIVISORIA */}
         <div className="border-t border-[var(--border)] w-full"></div>
         
-        {/* DIV INFERIOR: 2 columnas C.U. SUBT. */}
-        <div className="grid grid-cols-2 gap-2 w-full">
+        {/* DIV INFERIOR: 3 columnas CANT C.U. SUBT. */}
+        <div className="grid grid-cols-3 gap-2 w-full">
+          <div className="flex flex-col text-center">
+            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+              CANT
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {(task.quantity || 0).toFixed(2)}
+            </span>
+          </div>
           <div className="flex flex-col text-center">
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
               C.U.
