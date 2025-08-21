@@ -49,12 +49,29 @@ export function useGeneratedTasks() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('task_view')
-        .select(`*`)
+        .from('tasks')
+        .select(`
+          *,
+          units:unit_id(name),
+          categories:category_id(name),
+          element_categories:element_category_id(name),
+          subcategories:subcategory_id(name)
+        `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as GeneratedTask[];
+      
+      // Map the data to include related field names
+      const mappedData = data?.map(task => ({
+        ...task,
+        unit_name: task.units?.name,
+        category_name: task.categories?.name,
+        element_category_name: task.element_categories?.name,
+        subcategory_name: task.subcategories?.name,
+        display_name: task.custom_name || task.name_rendered || 'Sin nombre'
+      })) || [];
+      
+      return mappedData as GeneratedTask[];
     }
   });
 }
