@@ -12,7 +12,6 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import ProjectItem from '@/components/cards/ProjectItem'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import ProjectRow from '@/components/data-row/rows/ProjectRow'
 import { Label } from '@/components/ui/label'
@@ -398,7 +397,7 @@ export default function Projects() {
         clearActions()
       }
     }
-  }, [isMobile, activeTab, openModal, setActions, setShowActionBar, clearActions])
+  }, [isMobile, activeTab, openModal])
 
   const headerProps = {
     title: "Gestión de Proyectos",
