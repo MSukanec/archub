@@ -178,49 +178,74 @@ export default function SubcontractRow({
     ? formatCurrency(subcontract.analysis.saldo, subcontract.currency?.symbol)
     : formatCurrency((subcontract.amount_total || 0) - (subcontract.analysis?.pagoALaFecha || 0), subcontract.currency?.symbol);
 
-  // Props para DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    // Content - TRES LÍNEAS en columna izquierda
-    title: subcontract.title, // Línea 1: Nombre del subcontrato (en negrita automáticamente)
-    subtitle: contractorName, // Línea 2: Subcontratista  
-    
-    // NO avatar
-    
-    // Lines - Línea 3 en izquierda + TRES montos en derecha con colores
-    lines: [
-      {
-        text: statusText, // Línea 3 izquierda: Estado
-        tone: statusColor === 'success' ? 'success' : statusColor === 'danger' ? 'danger' : 'muted',
-        hintRight: `T: ${formattedTotal}`, // Línea 1 derecha: Total
-        hintRightColor: '#8B5CF6' // Violeta para Total
-      },
-      {
-        text: "", // Solo hintRight - no texto izquierda
-        tone: 'muted' as const,
-        hintRight: `P: ${formattedPaid}`, // Línea 2 derecha: Pago
-        hintRightColor: '#10B981' // Verde para Pago
-      },
-      {
-        text: "", // Solo hintRight - no texto izquierda
-        tone: 'muted' as const,
-        hintRight: `S: ${formattedBalance}`, // Línea 3 derecha: Saldo
-        hintRightColor: '#3B82F6' // Azul para Saldo
-      }
-    ],
-    
-    // Visual
-    borderColor: statusColor,
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    showChevron: !!onClick,
-    'data-testid': `subcontract-row-${subcontract.id}`
-  };
+  // Contenido interno del card usando el nuevo sistema
+  const cardContent = (
+    <>
+      {/* Columna de contenido (principal) */}
+      <div className="flex-1 min-w-0">
+        {/* Línea 1: Título del subcontrato */}
+        <div className="font-semibold text-sm truncate">
+          {subcontract.title}
+        </div>
+        
+        {/* Línea 2: Subcontratista */}
+        <div className="text-muted-foreground text-sm truncate">
+          {contractorName}
+        </div>
+        
+        {/* Línea 3: Estado */}
+        <div className={`text-sm truncate ${
+          statusColor === 'success' ? 'text-green-600' : 
+          statusColor === 'danger' ? 'text-red-600' : 
+          statusColor === 'warning' ? 'text-yellow-600' : 
+          'text-muted-foreground'
+        }`}>
+          {statusText}
+        </div>
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Columna trailing (tres líneas de montos) */}
+      <div className="flex flex-col items-end flex-shrink-0">
+        {/* Línea 1: Total */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs" style={{ color: '#8B5CF6' }}>T:</span>
+          <span className="font-mono text-sm" style={{ color: '#8B5CF6' }}>
+            {formattedTotal}
+          </span>
+        </div>
+        
+        {/* Línea 2: Pagado */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs" style={{ color: '#10B981' }}>P:</span>
+          <span className="font-mono text-sm" style={{ color: '#10B981' }}>
+            {formattedPaid}
+          </span>
+        </div>
+        
+        {/* Línea 3: Saldo */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs" style={{ color: '#3B82F6' }}>S:</span>
+          <span className="font-mono text-sm" style={{ color: '#3B82F6' }}>
+            {formattedBalance}
+          </span>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarFallback={getSubcontractInitials(subcontract)}
+      borderColor={statusColor}
+      onClick={onClick}
+      selected={selected}
+      density={density}
+      className={className}
+      data-testid={`subcontract-row-${subcontract.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 
 // Export del tipo para uso externo
