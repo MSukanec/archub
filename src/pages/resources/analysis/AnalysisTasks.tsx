@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { TableIcon, Edit, Trash2 } from 'lucide-react'
+import { TableIcon, Edit, Trash2, Search, Filter, Plus, Home } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -9,6 +9,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { AnalysisTaskRow } from '@/components/data-row/rows'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
 
 export default function AnalysisTasks() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -16,12 +18,113 @@ export default function AnalysisTasks() {
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
   
+  // Search state
+  const [searchValue, setSearchValue] = useState("")
+  
+  // Mobile action bar
+  const { 
+    setActions, 
+    setShowActionBar, 
+    clearActions, 
+    setFilterConfig,
+    searchValue: mobileSearchValue,
+    setSearchValue: setMobileSearchValue
+  } = useActionBarMobile()
+  const isMobile = useMobile()
+  
   // Estado para agrupación - por defecto "Por Rubros"
   const [groupingType, setGroupingType] = useState('rubros')
 
-  // Filtrar tareas y agregar groupKey
+  // Sync search values between mobile and desktop
+  useEffect(() => {
+    if (isMobile && mobileSearchValue !== searchValue) {
+      setSearchValue(mobileSearchValue)
+    }
+  }, [mobileSearchValue, isMobile])
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        home: {
+          id: 'home',
+          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Inicio',
+          onClick: () => {
+            // Navigate to dashboard - handled by Layout
+          },
+        },
+        search: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        create: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nueva Tarea',
+          onClick: () => openModal('parametric-task'),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+      })
+      setShowActionBar(true)
+    }
+
+    return () => {
+      if (isMobile) {
+        clearActions()
+      }
+    }
+  }, [isMobile])
+
+  // Configure filter options
+  useEffect(() => {
+    if (isMobile) {
+      setFilterConfig({
+        filters: [
+          {
+            label: 'Agrupación',
+            value: groupingType,
+            onChange: setGroupingType,
+            placeholder: 'Seleccionar agrupación',
+            allOptionLabel: 'Sin agrupar',
+            options: [
+              { value: 'none', label: 'Sin agrupar' },
+              { value: 'rubros', label: 'Por rubros' }
+            ]
+          }
+        ]
+      })
+    }
+  }, [isMobile, groupingType])
+
+  // Filtrar tareas y agregar groupKey con búsqueda
   const filteredTasks = useMemo(() => {
-    return tasks.map(task => {
+    let filtered = tasks
+    
+    // Aplicar filtro de búsqueda
+    if (searchValue.trim()) {
+      const searchTerm = searchValue.toLowerCase()
+      filtered = filtered.filter(task => 
+        task.unit_name?.toLowerCase().includes(searchTerm) ||
+        task.element_category_name?.toLowerCase().includes(searchTerm) ||
+        task.labor_cost?.toString().includes(searchTerm) ||
+        task.material_cost?.toString().includes(searchTerm)
+      )
+    }
+    
+    return filtered.map(task => {
       let groupKey = '';
       
       switch (groupingType) {
@@ -37,7 +140,7 @@ export default function AnalysisTasks() {
         groupKey
       };
     });
-  }, [tasks, groupingType]);
+  }, [tasks, groupingType, searchValue]);
 
   // Columnas base para la tabla
   const baseColumns = [
