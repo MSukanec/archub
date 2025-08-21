@@ -1494,7 +1494,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   const categoryId = values[1] || ''
                   const subcategoryId = values[2] || ''
                   
-                  console.log('🎯 CascadingSelect - typeId:', typeId, 'selectedTypeId:', selectedTypeId)
+                  console.log('🎯 Step 1 - typeId extracted:', typeId)
+                  console.log('🎯 Step 2 - selectedTypeId current:', selectedTypeId)
+                  console.log('🎯 Step 3 - About to update categories')
                   
                   // Actualizar estados de categorías
                   setSelectedCategoryId(categoryId)
@@ -1504,10 +1506,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   form.setValue('category_id', categoryId)
                   form.setValue('subcategory_id', subcategoryId)
                   
+                  console.log('🎯 Step 4 - Categories updated, checking typeId:', !!typeId)
+                  
                   // SIEMPRE llamar a handleTypeChange cuando hay un typeId válido
                   if (typeId) {
-                    console.log('🎯 CascadingSelect - calling handleTypeChange with:', typeId)
+                    console.log('🎯 Step 5 - CALLING handleTypeChange with typeId:', typeId)
                     handleTypeChange(typeId)
+                    console.log('🎯 Step 6 - handleTypeChange called successfully')
+                  } else {
+                    console.log('🎯 Step 5 - No typeId, skipping handleTypeChange')
                   }
                 }}
                 placeholder="Seleccionar tipo..."
