@@ -241,7 +241,7 @@ export function ActionBarMobile() {
               onClick={actions.home.onClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              {actions.home.icon}
+              <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />
             </button>
           )}
 
