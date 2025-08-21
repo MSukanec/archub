@@ -4,6 +4,7 @@ import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCr
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
+import { useTaskCategories } from '@/hooks/use-task-categories'
 import { supabase } from '@/lib/supabase'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
@@ -16,6 +17,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 
 import { Zap, Plus, Trash2, FileText, Settings, Package } from 'lucide-react'
 
@@ -68,6 +70,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [materialAmount, setMaterialAmount] = useState<string>('')
   const [customName, setCustomName] = useState<string>('')
   const [taskTemplateId, setTaskTemplateId] = useState<string>('')
+  const [categoryId, setCategoryId] = useState<string>('')
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -126,12 +130,18 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         setParameterOrder(existingParamOrder)
       }
       
-      // Load existing custom_name and task_template_id
+      // Load existing custom_name, task_template_id, category_id, and is_completed
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
       }
       if (actualTask.task_template_id) {
         setTaskTemplateId(actualTask.task_template_id)
+      }
+      if (actualTask.category_id) {
+        setCategoryId(actualTask.category_id)
+      }
+      if (actualTask.is_completed !== undefined) {
+        setIsCompleted(actualTask.is_completed)
       }
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
@@ -151,6 +161,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   
   // Task templates data
   const { data: taskTemplates = [] } = useTaskTemplates()
+  
+  // Task categories data
+  const { data: categories = [] } = useTaskCategories()
 
   // Initialize task materials when editing
   React.useEffect(() => {
@@ -231,11 +244,13 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           param_order: parameterOrder
         })
         
-        // Update custom_name and task_template_id separately since the hook doesn't support them
-        if (customName || taskTemplateId) {
+        // Update custom_name, task_template_id, category_id, and is_completed separately since the hook doesn't support them
+        if (customName || taskTemplateId || categoryId || isCompleted !== undefined) {
           const updateData: any = {}
           if (customName) updateData.custom_name = customName
           if (taskTemplateId) updateData.task_template_id = taskTemplateId
+          if (categoryId) updateData.category_id = categoryId
+          updateData.is_completed = isCompleted
           
           const { error: updateError } = await supabase
             .from('tasks')
@@ -257,15 +272,20 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         })
         taskId = result.new_task?.id
         
-        // Update task_template_id separately since the hook doesn't support it yet
-        if (taskId && taskTemplateId) {
+        // Update task_template_id, category_id, and is_completed separately since the hook doesn't support them yet
+        if (taskId && (taskTemplateId || categoryId || isCompleted !== undefined)) {
+          const updateData: any = {}
+          if (taskTemplateId) updateData.task_template_id = taskTemplateId
+          if (categoryId) updateData.category_id = categoryId
+          updateData.is_completed = isCompleted
+          
           const { error: updateError } = await supabase
             .from('tasks')
-            .update({ task_template_id: taskTemplateId })
+            .update(updateData)
             .eq('id', taskId)
           
           if (updateError) {
-            console.error('Error updating task_template_id:', updateError)
+            console.error('Error updating additional task fields:', updateError)
             throw updateError
           }
         }
@@ -333,6 +353,38 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           <h3 className="text-sm font-medium">Información de la Tarea</h3>
         </div>
         <div className="space-y-4 pl-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="task-template">Plantilla</Label>
+              <ComboBox
+                value={taskTemplateId}
+                onValueChange={setTaskTemplateId}
+                options={taskTemplates.map(template => ({
+                  value: template.id,
+                  label: template.name
+                }))}
+                placeholder="Seleccionar plantilla..."
+                searchPlaceholder="Buscar plantilla..."
+                emptyMessage="No se encontraron plantillas"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="task-category">Rubro</Label>
+              <ComboBox
+                value={categoryId}
+                onValueChange={setCategoryId}
+                options={(categories || []).map(category => ({
+                  value: category.id,
+                  label: category.name
+                }))}
+                placeholder="Seleccionar rubro..."
+                searchPlaceholder="Buscar rubro..."
+                emptyMessage="No se encontraron rubros"
+              />
+            </div>
+          </div>
+          
           <div>
             <Label htmlFor="custom-name">Nombre Personalizado</Label>
             <Input
@@ -341,21 +393,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               placeholder="Nombre personalizado para la tarea..."
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="task-template">Plantilla</Label>
-            <ComboBox
-              value={taskTemplateId}
-              onValueChange={setTaskTemplateId}
-              options={taskTemplates.map(template => ({
-                value: template.id,
-                label: template.name
-              }))}
-              placeholder="Seleccionar plantilla..."
-              searchPlaceholder="Buscar plantilla..."
-              emptyMessage="No se encontraron plantillas"
             />
           </div>
         </div>
@@ -478,6 +515,21 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
               ))}
             </div>
           )}
+        </div>
+      </div>
+      
+      {/* Task Completion Status */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="is-completed">Tarea Completada</Label>
+            <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
+          </div>
+          <Switch
+            id="is-completed"
+            checked={isCompleted}
+            onCheckedChange={setIsCompleted}
+          />
         </div>
       </div>
     </div>
