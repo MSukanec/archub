@@ -56,9 +56,9 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
       >
         <div className="relative">
           {/* Header */}
-          <div className="px-3 py-3 flex items-center justify-between border-b border-[var(--card-border)]">
+          <div className="px-3 py-2 flex items-center justify-between border-b border-[var(--card-border)]">
             <div className="flex items-center gap-2 flex-1">
-              <Package className="h-4 w-4 text-[var(--accent)]" />
+              <Package className="h-3 w-3 text-[var(--accent)]" />
               <h2 className="text-xs font-semibold text-[var(--card-fg)]">
                 Materiales por unidad
               </h2>
@@ -68,7 +68,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -90,7 +90,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
             ) : (
               <>
                 {/* Lista de materiales con scroll si hay más de 5 */}
-                <div className={`space-y-3 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
+                <div className={`space-y-1 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
                   {materials.map((material) => {
                     const quantity = material.amount || 0;
                     const unitPrice = material.material_view?.computed_unit_price || 0;
@@ -98,13 +98,13 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                     const unitName = material.material_view?.unit_of_computation || 'UD';
                     
                     return (
-                      <div key={material.id} className="flex items-start justify-between py-2 border-b border-gray-100 last:border-b-0">
+                      <div key={material.id} className="flex items-start justify-between py-1 border-b border-gray-100 last:border-b-0">
                         {/* Información del material */}
                         <div className="flex-1 min-w-0 pr-4">
                           <div className="text-xs font-semibold text-gray-900 leading-tight">
                             {material.material_view?.name || 'Material sin nombre'}
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                             <span>{quantity} {unitName}</span>
                             <span>•</span>
                             <span className="font-mono">
@@ -114,7 +114,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                         </div>
                         
                         {/* Precio total */}
-                        <div className="text-xs text-gray-900 flex-shrink-0">
+                        <div className="text-xs text-gray-900 flex-shrink-0 text-right" style={{ minWidth: '80px' }}>
                           {subtotal > 0 ? `$${subtotal.toLocaleString()}` : '–'}
                         </div>
                       </div>
@@ -123,11 +123,11 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                 </div>
 
                 {/* Total */}
-                <div className="px-3 py-3 flex items-center justify-between border-t border-[var(--card-border)]">
-                  <span className="text-xs font-semibold text-gray-900">Total por unidad:</span>
-                  <Badge variant="secondary" className="font-mono text-xs font-semibold px-3 py-1">
+                <div className="flex items-center justify-between py-2 border-t border-[var(--card-border)] mt-2">
+                  <span className="text-xs font-semibold text-gray-900 uppercase">TOTAL POR UNIDAD:</span>
+                  <div className="text-xs font-semibold text-gray-900 text-right" style={{ minWidth: '80px' }}>
                     ${totalPerUnit.toLocaleString()}
-                  </Badge>
+                  </div>
                 </div>
               </>
             )}
