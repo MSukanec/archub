@@ -121,43 +121,43 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
             <span className="text-sm text-green-600 font-medium">Usuario de Archub</span>
           </div>
         )}
-
-        {/* Botones de acción rápida */}
-        <div className="flex justify-center gap-3">
-          {contact.phone && (
-            <Button
-              variant="default"
-              size="icon"
-              onClick={handleCall}
-              className="h-10 w-10"
-            >
-              <Phone className="h-4 w-4" />
-            </Button>
-          )}
-          
-          {contact.email && (
-            <Button
-              variant="default"
-              size="icon"
-              onClick={handleEmail}
-              className="h-10 w-10"
-            >
-              <Mail className="h-4 w-4" />
-            </Button>
-          )}
-          
-          <Button
-            variant="default"
-            size="icon"
-            onClick={handleShare}
-            className="h-10 w-10"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       <Separator />
+
+      {/* Botones de acción */}
+      <div className={`grid gap-3 ${contact.phone && contact.email ? 'grid-cols-3' : contact.phone || contact.email ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {contact.phone && (
+          <Button
+            variant="default"
+            onClick={handleCall}
+            className="flex items-center gap-2 py-3"
+          >
+            <Phone className="h-4 w-4" />
+            Llamar
+          </Button>
+        )}
+        
+        {contact.email && (
+          <Button
+            variant="default"
+            onClick={handleEmail}
+            className="flex items-center gap-2 py-3"
+          >
+            <Mail className="h-4 w-4" />
+            Email
+          </Button>
+        )}
+        
+        <Button
+          variant="default"
+          onClick={handleShare}
+          className="flex items-center gap-2 py-3"
+        >
+          <Share2 className="h-4 w-4" />
+          Compartir
+        </Button>
+      </div>
 
       {/* Información de contacto */}
       <div className="grid grid-cols-1 gap-4">
