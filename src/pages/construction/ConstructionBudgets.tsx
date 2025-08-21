@@ -22,7 +22,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 // Removed direct Supabase import - now using server endpoints
 import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
-import { TaskMaterialDetails } from '@/components/popovers/TaskMaterialDetails'
+import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
 
 import { Input } from '@/components/ui/input'
 
@@ -511,7 +511,7 @@ export default function ConstructionBudgets() {
         width: '8%',
         render: (item: any) => (
           <div className="flex items-center justify-center">
-            <TaskMaterialDetails task={{ task_id: item.task_id }} showCost={true} />
+            <TaskMaterialDetailPopover task={{ task_id: item.task_id }} showCost={true} />
           </div>
         ),
         sortable: false
