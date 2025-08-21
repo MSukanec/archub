@@ -62,7 +62,7 @@ export function ActionBarMobile() {
     <>
       {/* Search Popover */}
       {showSearchPopover && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowSearchPopover(false)}>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowSearchPopover(false)}>
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
@@ -103,7 +103,7 @@ export function ActionBarMobile() {
 
       {/* Filter Popover */}
       {showFilterPopover && filterConfig && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowFilterPopover(false)}>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowFilterPopover(false)}>
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
@@ -180,7 +180,7 @@ export function ActionBarMobile() {
 
       {/* Notifications Popover */}
       {showNotificationsPopover && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowNotificationsPopover(false)}>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setShowNotificationsPopover(false)}>
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
