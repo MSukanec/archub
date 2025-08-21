@@ -43,8 +43,8 @@ export default function AnalysisTaskRow({
 
   return (
     <DataRowCard {...rowProps}>
-      {/* Columna 1: Información completa */}
-      <div className="flex flex-col gap-2 col-span-2">
+      {/* Información completa ocupando todo el ancho */}
+      <div className="w-full flex flex-col gap-2">
         {/* Título de la tarea */}
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-[var(--text-primary)] line-clamp-2">
@@ -56,36 +56,36 @@ export default function AnalysisTaskRow({
             </Badge>
           )}
         </div>
-        
-        {/* Línea divisoria */}
-        <div className="border-t border-[var(--border)]"></div>
-        
-        {/* Costos en 3 columnas ocupando todo el ancho */}
-        <div className="grid grid-cols-3 gap-0 w-full">
-          <div className="flex flex-col pr-2">
-            <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-              MO:
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              $ 0.00
-            </span>
-          </div>
-          <div className="flex flex-col px-2">
-            <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
-              MAT:
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              $ 0.00
-            </span>
-          </div>
-          <div className="flex flex-col pl-2">
-            <span className="text-xs font-medium text-[var(--text-primary)]">
-              TOT:
-            </span>
-            <span className="text-xs text-[var(--text-secondary)]">
-              $ 0.00
-            </span>
-          </div>
+      </div>
+      
+      {/* Línea divisoria ocupando todo el ancho de la card */}
+      <div className="col-span-full border-t border-[var(--border)] -mx-3 mb-2"></div>
+      
+      {/* Costos en 3 columnas ocupando todo el ancho */}
+      <div className="col-span-full grid grid-cols-3 gap-0 -mx-3">
+        <div className="flex flex-col px-3">
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+            MO:
+          </span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            $ 0.00
+          </span>
+        </div>
+        <div className="flex flex-col px-3">
+          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            MAT:
+          </span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            $ 0.00
+          </span>
+        </div>
+        <div className="flex flex-col px-3">
+          <span className="text-xs font-medium text-[var(--text-primary)]">
+            TOT:
+          </span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            $ 0.00
+          </span>
         </div>
       </div>
     </DataRowCard>
