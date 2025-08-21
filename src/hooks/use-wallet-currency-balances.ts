@@ -1,177 +1,131 @@
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useMemo } from "react";
+import { useMovements } from "./use-movements";
 
-interface WalletCurrencyBalance {
-  wallet: string
-  currency: string
-  balance: number
-  state: 'Positivo' | 'Negativo' | 'Neutro'
+export interface WalletCurrencyBalance {
+  wallet: string;
+  currency: string;
+  currencyCode: string;
+  balance: number;
+  movementCount: number;
 }
 
-export function useWalletCurrencyBalances(
-  organizationId: string | undefined, 
-  projectId: string | undefined, 
-  timePeriod: string = 'desde-siempre'
-) {
-  return useQuery({
-    queryKey: ['wallet-currency-balances', organizationId, projectId, timePeriod],
-    queryFn: async (): Promise<WalletCurrencyBalance[]> => {
-      if (!organizationId || !supabase) return []
+export interface CurrencyGroupedData {
+  currencyCode: string;
+  currencyName: string;
+  wallets: WalletCurrencyBalance[];
+  totalBalance: number;
+  totalMovements: number;
+}
 
-      try {
-        // Get movements with all necessary joins
-        let movementsQuery = supabase
-          .from('movements')
-          .select(`
-            amount,
-            wallet_id,
-            currency_id,
-            type_id,
-            movement_date
-          `)
-          .eq('organization_id', organizationId)
-          .not('wallet_id', 'is', null)
-          .not('currency_id', 'is', null)
+export interface WalletCurrencyKPIs {
+  projectBalances: CurrencyGroupedData[];
+  organizationBalances: CurrencyGroupedData[];
+  topTwoCurrencies: CurrencyGroupedData[];
+  isLoading: boolean;
+}
 
-        if (projectId) {
-          movementsQuery = movementsQuery.eq('project_id', projectId)
+export function useWalletCurrencyBalances(organizationId?: string, projectId?: string): WalletCurrencyKPIs {
+  // Get all organization movements (without project filter)
+  const { data: organizationMovements, isLoading: isLoadingOrgMovements } = useMovements(
+    organizationId,
+    undefined // No project filter to get all movements
+  );
+
+  // Get project-specific movements
+  const { data: projectMovements, isLoading: isLoadingProjectMovements } = useMovements(
+    organizationId,
+    projectId
+  );
+
+  const isLoading = isLoadingOrgMovements || isLoadingProjectMovements;
+
+  const kpis = useMemo(() => {
+    // Helper function to calculate wallet-currency balances
+    const calculateWalletCurrencyBalances = (movements: any[]): CurrencyGroupedData[] => {
+      if (!movements || movements.length === 0) return [];
+
+      const walletCurrencyMap = new Map<string, WalletCurrencyBalance>();
+      const currencyMovementCounts = new Map<string, number>();
+
+      movements.forEach(movement => {
+        if (!movement.movement_data?.currency || !movement.movement_data?.wallet || !movement.movement_data?.type) return;
+
+        const currency = movement.movement_data.currency;
+        const wallet = movement.movement_data.wallet;
+        const currencyCode = currency.code || currency.name;
+        const walletName = wallet.name;
+        const amount = movement.amount || 0;
+        const typeName = movement.movement_data.type?.name?.toLowerCase() || '';
+
+        // Count movements per currency
+        currencyMovementCounts.set(currencyCode, (currencyMovementCounts.get(currencyCode) || 0) + 1);
+
+        const key = `${walletName}-${currencyCode}`;
+
+        if (!walletCurrencyMap.has(key)) {
+          walletCurrencyMap.set(key, {
+            wallet: walletName,
+            currency: currency.name,
+            currencyCode: currencyCode,
+            balance: 0,
+            movementCount: 0,
+          });
         }
 
-        // Apply date filtering based on timePeriod
-        if (timePeriod !== 'desde-siempre') {
-          const now = new Date()
-          let startDate: Date
+        const walletCurrencyData = walletCurrencyMap.get(key)!;
+        walletCurrencyData.movementCount += 1;
 
-          switch (timePeriod) {
-            case 'mes':
-              startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-              break
-            case 'trimestre':
-              startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1)
-              break
-            case 'semestre':
-              startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1)
-              break
-            case 'año':
-              startDate = new Date(now.getFullYear(), 0, 1)
-              break
-            default:
-              startDate = new Date(0) // Desde siempre
-          }
+        // Calculate balance correctly based on movement type
+        if (typeName.includes('ingreso')) {
+          // Ingresos suman al balance
+          walletCurrencyData.balance += Math.abs(amount);
+        } else if (typeName.includes('egreso')) {
+          // Egresos restan del balance
+          walletCurrencyData.balance -= Math.abs(amount);
+        }
+      });
 
-          if (timePeriod !== 'desde-siempre') {
-            movementsQuery = movementsQuery.gte('movement_date', startDate.toISOString().split('T')[0])
-          }
+      // Group by currency
+      const currencyGroups = new Map<string, CurrencyGroupedData>();
+      
+      walletCurrencyMap.forEach(walletCurrency => {
+        const currencyCode = walletCurrency.currencyCode;
+        
+        if (!currencyGroups.has(currencyCode)) {
+          currencyGroups.set(currencyCode, {
+            currencyCode: currencyCode,
+            currencyName: walletCurrency.currency,
+            wallets: [],
+            totalBalance: 0,
+            totalMovements: currencyMovementCounts.get(currencyCode) || 0,
+          });
         }
 
-        const { data: movements, error } = await movementsQuery
+        const currencyGroup = currencyGroups.get(currencyCode)!;
+        currencyGroup.wallets.push(walletCurrency);
+        currencyGroup.totalBalance += walletCurrency.balance;
+      });
 
-        if (error) throw error
-        if (!movements || movements.length === 0) {
-          console.log('No movements found for wallet-currency balances')
-          return []
-        }
+      // Sort currencies by total movement count (most movements first)
+      return Array.from(currencyGroups.values()).sort((a, b) => b.totalMovements - a.totalMovements);
+    };
 
-        console.log('Movements found for wallet-currency analysis:', movements.length)
+    // Calculate project balances
+    const projectBalances = projectMovements ? calculateWalletCurrencyBalances(projectMovements) : [];
 
-        // Get unique IDs to fetch related data
-        const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
-        const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean)))
-        const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
+    // Calculate organization balances  
+    const organizationBalances = organizationMovements ? calculateWalletCurrencyBalances(organizationMovements) : [];
 
-        console.log('Wallet IDs from movements:', walletIds)
-        console.log('Currency IDs from movements:', currencyIds)
-        console.log('Type IDs from movements:', typeIds)
+    // Get top 2 currencies with most movements from organization balances
+    const topTwoCurrencies = organizationBalances.slice(0, 2);
 
-        // Fetch related data in parallel - usar organization_wallets para obtener los nombres de billeteras
-        const [walletsResult, currenciesResult, conceptsResult] = await Promise.all([
-          supabase
-            .from('organization_wallets')
-            .select('id, wallets(name)')
-            .in('id', walletIds),
-          supabase.from('currencies').select('id, name').in('id', currencyIds),
-          supabase.from('movement_concepts').select('id, name').in('id', typeIds)
-        ])
+    return {
+      projectBalances,
+      organizationBalances,
+      topTwoCurrencies,
+      isLoading,
+    };
+  }, [organizationMovements, projectMovements, isLoading]);
 
-        console.log('Wallets fetched from organization_wallets:', walletsResult.data)
-        console.log('Currencies fetched:', currenciesResult.data)
-        console.log('Concepts fetched:', conceptsResult.data)
-
-        // Create lookup maps
-        const walletsMap = new Map()
-        walletsResult.data?.forEach(orgWallet => {
-          // Acceder al nombre de la billetera desde la relación anidada
-          const walletName = orgWallet.wallets?.name || 'Sin nombre'
-          walletsMap.set(orgWallet.id, walletName)
-        })
-
-        const currenciesMap = new Map()
-        currenciesResult.data?.forEach(currency => {
-          currenciesMap.set(currency.id, currency.name)
-        })
-
-        const conceptsMap = new Map()
-        conceptsResult.data?.forEach(concept => {
-          conceptsMap.set(concept.id, concept.name)
-        })
-
-        // Calculate balances by wallet + currency combination
-        const balanceMap = new Map<string, {
-          wallet: string
-          currency: string
-          balance: number
-        }>()
-
-        movements.forEach(movement => {
-          const walletName = walletsMap.get(movement.wallet_id) || 'Sin billetera'
-          const currencyName = currenciesMap.get(movement.currency_id) || 'Sin moneda'
-          const amount = movement.amount || 0
-          const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
-          
-          const key = `${walletName}|${currencyName}`
-          
-          if (!balanceMap.has(key)) {
-            balanceMap.set(key, {
-              wallet: walletName,
-              currency: currencyName,
-              balance: 0
-            })
-          }
-
-          const balanceEntry = balanceMap.get(key)!
-          
-          // Apply movement based on type
-          if (typeName.includes('ingreso')) {
-            balanceEntry.balance += Math.abs(amount)
-          } else if (typeName.includes('egreso')) {
-            balanceEntry.balance -= Math.abs(amount)
-          }
-        })
-
-        // Convert to result array with state classification
-        const result: WalletCurrencyBalance[] = Array.from(balanceMap.values())
-          .map(entry => ({
-            wallet: entry.wallet,
-            currency: entry.currency,
-            balance: entry.balance,
-            state: entry.balance > 0 ? 'Positivo' : entry.balance < 0 ? 'Negativo' : 'Neutro'
-          }))
-          .sort((a, b) => {
-            // Sort by wallet name first, then by currency
-            if (a.wallet !== b.wallet) {
-              return a.wallet.localeCompare(b.wallet)
-            }
-            return a.currency.localeCompare(b.currency)
-          })
-
-        console.log('Final wallet-currency balance data:', result)
-        return result
-
-      } catch (error) {
-        console.error('Error in useWalletCurrencyBalances:', error)
-        return []
-      }
-    },
-    enabled: !!organizationId
-  })
+  return kpis;
 }

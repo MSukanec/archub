@@ -27,7 +27,7 @@ import Projects from "@/pages/organization/Projects";
 
 
 import FinancesDashboard from "@/pages/finances/FinancesDashboard";
-import FinancesMovements from "@/pages/finances/FinancesMovements";
+import Movements from "@/pages/finances/movements/Movements";
 import FinancesAnalysis from "@/pages/finances/FinancesAnalysis";
 import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
 import { Clients } from "@/pages/finances/clients/Clients";
@@ -248,7 +248,7 @@ function Router() {
         </Route>
         <Route path="/finances/movements">
           <ProtectedRoute>
-            <FinancesMovements />
+            <Movements />
           </ProtectedRoute>
         </Route>
         <Route path="/finances/analysis">

@@ -61,7 +61,7 @@ import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";
-import { MovementKPICards } from "@/components/kpis/MovementKPICards";
+import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
 
 interface Movement {
   id: string;
@@ -1511,7 +1511,7 @@ export default function Movements() {
       ) : (
         <>
           {/* Movement KPIs - Solo mostrar cuando hay datos */}
-          <MovementKPICards 
+          <MovementKPICardsWithWallets 
             organizationId={organizationId} 
             projectId={projectId || undefined} 
           />
