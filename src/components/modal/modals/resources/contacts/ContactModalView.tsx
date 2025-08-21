@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Eye, Edit, Trash2, Phone, Mail, Share2, Building, MapPin, Globe, User, FileText } from 'lucide-react'
+import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
 import { cn } from '@/lib/utils'
 
 interface ContactModalViewProps {
@@ -252,6 +253,14 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
           </div>
         </div>
       )}
+
+      {/* Archivos y Media */}
+      <div>
+        <ContactAttachmentsPanel 
+          contactId={contact.id} 
+          contact={contact}
+        />
+      </div>
     </div>
   )
 
