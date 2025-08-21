@@ -538,15 +538,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       transferForm.setValue('created_by', movement.created_by)
       transferForm.setValue('type_id', selectedTypeId)
       
-      // Datos de origen
-      transferForm.setValue('origin_currency_id', originMovement.currency_id)
-      transferForm.setValue('origin_wallet_id', originMovement.wallet_id)
-      transferForm.setValue('origin_amount', Math.abs(originMovement.amount))
-      
-      // Datos de destino
-      transferForm.setValue('destination_currency_id', destinationMovement.currency_id)
-      transferForm.setValue('destination_wallet_id', destinationMovement.wallet_id)
-      transferForm.setValue('destination_amount', Math.abs(destinationMovement.amount))
+      // Datos de origen y destino para transferencia
+      transferForm.setValue('currency_id', originMovement.currency_id)
+      transferForm.setValue('wallet_id_from', originMovement.wallet_id)
+      transferForm.setValue('wallet_id_to', destinationMovement.wallet_id)
+      transferForm.setValue('amount', Math.abs(originMovement.amount))
 
 
       
@@ -1781,12 +1777,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 // Actualizar formularios según el tipo activo
                 if (movementType === 'conversion') {
                   conversionForm.setValue('type_id', typeId)
-                  conversionForm.setValue('category_id', categoryId)
-                  conversionForm.setValue('subcategory_id', subcategoryId)
+                  // Los formularios de conversión no tienen category_id/subcategory_id
                 } else if (movementType === 'transfer') {
                   transferForm.setValue('type_id', typeId)
-                  transferForm.setValue('category_id', categoryId)
-                  transferForm.setValue('subcategory_id', subcategoryId)
+                  // Los formularios de transferencia no tienen category_id/subcategory_id
                 } else {
                   form.setValue('type_id', typeId)
                   form.setValue('category_id', categoryId)
@@ -1903,7 +1897,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 <div className="space-y-1">
                   {selectedPersonnel.map((person, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{person.first_name} {person.last_name}</div>
+                      <div>{person.contact_name}</div>
                       <div className="text-right">${(person.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
@@ -1926,7 +1920,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 <div className="space-y-1">
                   {selectedSubcontracts.map((subcontract, index) => (
                     <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{subcontract.name}</div>
+                      <div>{subcontract.contact_name}</div>
                       <div className="text-right">${(subcontract.amount || 0).toFixed(2)}</div>
                     </div>
                   ))}
