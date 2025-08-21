@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { TableIcon, Edit, Trash2, Search, Filter, Plus, Home } from 'lucide-react'
+import { TableIcon, Edit, Trash2, Search, Filter, Plus, Home, Bell } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -73,6 +73,14 @@ export default function AnalysisTasks() {
           id: 'filter',
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
+        notification: {
+          id: 'notification',
+          icon: <Bell className="h-5 w-5" />,
+          label: 'Notificaciones',
           onClick: () => {
             // Popover is handled in MobileActionBar
           },
