@@ -39,7 +39,10 @@ const clientObligationSchema = z.object({
   unit: z.string().optional(),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
-  exchange_rate: z.number().min(0.01, 'Tasa de cambio debe ser mayor a 0').optional()
+  exchange_rate: z.union([
+    z.number().min(0.01, 'Tasa de cambio debe ser mayor a 0'),
+    z.undefined()
+  ]).optional()
 })
 
 type ClientObligationForm = z.infer<typeof clientObligationSchema>
@@ -421,7 +424,10 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
                     placeholder="1.00"
                     {...field}
                     value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    onChange={(e) => {
+                      const value = e.target.value.trim()
+                      field.onChange(value === '' ? undefined : parseFloat(value) || undefined)
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
