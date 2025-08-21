@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
-import { Folder, Plus, Settings, ImageIcon, FileText, Users, MapPin } from 'lucide-react'
+import { Folder, Plus, Settings, ImageIcon, FileText, Users, MapPin, Home, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -20,6 +20,8 @@ import { Textarea } from '@/components/ui/textarea'
 import ProjectHeroImage from '@/components/ui-custom/ProjectHeroImage'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { queryClient } from '@/lib/queryClient'
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
+import { useMobile } from '@/hooks/use-mobile'
 
 export default function Projects() {
   const { openModal } = useGlobalModalStore()
@@ -32,6 +34,14 @@ export default function Projects() {
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
+
+  // Mobile action bar
+  const { 
+    setActions, 
+    setShowActionBar, 
+    clearActions 
+  } = useActionBarMobile()
+  const isMobile = useMobile()
 
   // Mark active project using useUserOrganizationPreferences hook
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
@@ -339,6 +349,35 @@ export default function Projects() {
       })
     }
   })
+
+  // Configure mobile action bar only for projects tab
+  useEffect(() => {
+    if (isMobile && activeTab === 'projects') {
+      setActions({
+        home: { id: 'home', label: 'Inicio', onClick: () => {} },
+        search: { id: 'search', label: 'Buscar', onClick: () => {} },
+        create: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nuevo Proyecto',
+          onClick: () => openModal('project', {}),
+          variant: 'primary'
+        },
+        filter: { id: 'filter', label: 'Filtros', onClick: () => {} },
+        notifications: { id: 'notifications', label: 'Notificaciones', onClick: () => {} },
+      })
+      setShowActionBar(true)
+    } else if (isMobile) {
+      // Clear action bar for other tabs
+      clearActions()
+    }
+
+    return () => {
+      if (isMobile && activeTab === 'projects') {
+        clearActions()
+      }
+    }
+  }, [isMobile, activeTab, openModal, setActions, setShowActionBar, clearActions])
 
   const headerProps = {
     title: "Gestión de Proyectos",
