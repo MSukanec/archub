@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -25,6 +25,7 @@ const AdminTaskList = () => {
   const [sortBy, setSortBy] = useState('created_at')
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
+  const [groupingType, setGroupingType] = useState<'none' | 'rubros'>('none')
 
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
@@ -49,6 +50,22 @@ const AdminTaskList = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 
+  // Process tasks for grouping
+  const processedTasks = useMemo(() => {
+    if (groupingType === 'none') {
+      return filteredGeneratedTasks;
+    }
+    
+    if (groupingType === 'rubros') {
+      return filteredGeneratedTasks.map(task => ({
+        ...task,
+        groupKey: task.element_category_name || 'Sin rubro'
+      }));
+    }
+    
+    return filteredGeneratedTasks;
+  }, [filteredGeneratedTasks, groupingType])
+
   const handleEdit = (generatedTask: GeneratedTask) => {
     console.log('📝 Editando tarea:', generatedTask);
     const modalData = { task: generatedTask, isEditing: true };
@@ -71,6 +88,7 @@ const AdminTaskList = () => {
     setSearchValue('')
     setSortBy('created_at')
     setTypeFilter('all')
+    setGroupingType('none')
   }
 
   // Tree functionality for parameters
@@ -186,34 +204,11 @@ const AdminTaskList = () => {
   }
 
   // Table columns configuration
-  const columns = [
-    { 
-      key: 'code', 
-      label: 'Código', 
-      width: '8%',
-      render: (task: GeneratedTask) => (
-        <div className="space-y-1">
-          <div className="font-mono text-sm font-medium">
-            {task.code}
-          </div>
-          <div>
-            {task.is_system ? (
-              <Badge variant="secondary" className="text-xs">
-                Sistema
-              </Badge>
-            ) : (
-              <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                Usuario
-              </Badge>
-            )}
-          </div>
-        </div>
-      )
-    },
+  const baseColumns = [
     { 
       key: 'element_category_name', 
       label: 'Rubro', 
-      width: '10%',
+      width: '12%',
       render: (task: GeneratedTask) => (
         <div>
           {task.element_category_name ? (
@@ -231,15 +226,28 @@ const AdminTaskList = () => {
       label: 'Tarea', 
       width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
-        <div className="font-medium">
-          {task.display_name || 'Sin nombre'}
+        <div className="space-y-1">
+          <div className="font-medium">
+            {task.display_name || 'Sin nombre'}
+          </div>
+          <div>
+            {task.is_system ? (
+              <Badge variant="secondary" className="text-xs">
+                Sistema
+              </Badge>
+            ) : (
+              <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+                Usuario
+              </Badge>
+            )}
+          </div>
         </div>
       )
     },
     { 
       key: 'unit_name', 
       label: 'Unidad', 
-      width: '5%',
+      width: '8%',
       render: (task: GeneratedTask) => (
         <div>
           {task.unit_name ? (
@@ -253,21 +261,11 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'created_at', 
-      label: 'Fecha', 
-      width: '10%',
-      render: (task: GeneratedTask) => (
-        <div className="text-sm text-muted-foreground">
-          {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
-      )
-    },
-    { 
       key: 'actions', 
       label: 'Acciones', 
-      width: '10%',
+      width: '120px',
       render: (task: GeneratedTask) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -291,15 +289,31 @@ const AdminTaskList = () => {
     }
   ]
 
+  // Dynamic columns based on grouping
+  const columns = useMemo(() => {
+    if (groupingType === 'rubros') {
+      // Hide the Rubro column when grouping by rubros
+      return baseColumns.filter(column => column.key !== 'element_category_name');
+    }
+    return baseColumns;
+  }, [groupingType])
+
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className="p-0">
           <Table
-            data={filteredGeneratedTasks}
+            data={processedTasks}
             columns={columns}
             isLoading={isLoading}
+            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
+              tabs: ['Sin Agrupar', 'Por Rubros'],
+              activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',
+              onTabChange: (tab: string) => {
+                if (tab === 'Sin Agrupar') setGroupingType('none')
+                else if (tab === 'Por Rubros') setGroupingType('rubros')
+              },
               showSearch: true,
               searchValue: searchValue,
               onSearchChange: setSearchValue,
@@ -322,9 +336,14 @@ const AdminTaskList = () => {
                   </div>
                 </div>
               ),
-              showClearFilters: typeFilter !== 'all',
+              showClearFilters: typeFilter !== 'all' || groupingType !== 'none',
               onClearFilters: clearFilters,
             }}
+            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+              </div>
+            )}
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-20" />
