@@ -169,11 +169,6 @@ export function ActionBarMobile() {
                     setShowFilterPopover(false);
                   }}
                   className="w-full"
-                  style={{
-                    backgroundColor: 'var(--menues-input-bg)',
-                    borderColor: 'var(--menues-input-border)',
-                    color: 'var(--menues-fg)'
-                  }}
                 >
                   Limpiar Filtros
                 </Button>
