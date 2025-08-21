@@ -14,6 +14,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectItem from '@/components/cards/ProjectItem'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
+import ProjectRow from '@/components/data-row/rows/ProjectRow'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -354,8 +355,18 @@ export default function Projects() {
   useEffect(() => {
     if (isMobile && activeTab === 'projects') {
       setActions({
-        home: { id: 'home', label: 'Inicio', onClick: () => {} },
-        search: { id: 'search', label: 'Buscar', onClick: () => {} },
+        home: { 
+          id: 'home', 
+          label: 'Inicio', 
+          icon: <Home className="h-6 w-6" />,
+          onClick: () => {} 
+        },
+        search: { 
+          id: 'search', 
+          label: 'Buscar', 
+          icon: <Search className="h-6 w-6" />,
+          onClick: () => {} 
+        },
         create: {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
@@ -363,8 +374,18 @@ export default function Projects() {
           onClick: () => openModal('project', {}),
           variant: 'primary'
         },
-        filter: { id: 'filter', label: 'Filtros', onClick: () => {} },
-        notifications: { id: 'notifications', label: 'Notificaciones', onClick: () => {} },
+        filter: { 
+          id: 'filter', 
+          label: 'Filtros', 
+          icon: <Filter className="h-6 w-6" />,
+          onClick: () => {} 
+        },
+        notifications: { 
+          id: 'notifications', 
+          label: 'Notificaciones', 
+          icon: <Bell className="h-6 w-6" />,
+          onClick: () => {} 
+        },
       })
       setShowActionBar(true)
     } else if (isMobile) {
@@ -432,16 +453,14 @@ export default function Projects() {
 
             {/* Projects List */}
             {sortedProjects.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
                 {sortedProjects.map((project) => (
-                  <ProjectItem
+                  <ProjectRow
                     key={project.id}
                     project={project}
-                    onEdit={handleEdit}
-                    onDelete={handleDeleteClick}
-                    onSelect={(project) => handleSelectProject(project.id)}
-                    onNavigateToBasicData={handleNavigateToBasicData}
-                    isActiveProject={project.id === userOrgPrefs?.last_project_id}
+                    onClick={() => handleSelectProject(project.id)}
+                    isActive={project.id === userOrgPrefs?.last_project_id}
+                    density="normal"
                   />
                 ))}
               </div>
