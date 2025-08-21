@@ -18,7 +18,8 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
 
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
-    const unitPrice = material.material_view?.computed_unit_price || 0;
+    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
+    const unitPrice = materialView?.computed_unit_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
@@ -98,16 +99,17 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                 <div className={`space-y-1 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
                   {materials.map((material) => {
                     const quantity = material.amount || 0;
-                    const unitPrice = material.material_view?.computed_unit_price || 0;
+                    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
+                    const unitPrice = materialView?.computed_unit_price || 0;
                     const subtotal = quantity * unitPrice;
-                    const unitName = material.material_view?.unit_of_computation || 'UD';
+                    const unitName = materialView?.unit_of_computation || 'UD';
                     
                     return (
                       <div key={material.id} className="flex items-start justify-between py-1 border-b border-gray-100 last:border-b-0">
                         {/* Información del material */}
                         <div className="flex-1 min-w-0 pr-4">
                           <div className="text-xs font-semibold text-[var(--card-fg)] leading-tight">
-                            {material.material_view?.name || 'Material sin nombre'}
+                            {materialView?.name || 'Material sin nombre'}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-[var(--muted-fg)] mt-0.5">
                             <span>{quantity} {unitName}</span>
