@@ -81,75 +81,58 @@ export default function ContactRow({
     ? getInitials(linked_user.full_name)
     : getInitials(displayName);
 
-  // Create custom contact card with badges (similar to OrganizationRow approach)
-  const contactCard = (
-    <div
-      className={cn(
-        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-3 transition-colors shadow-lg',
-        'py-3 gap-3',
-        // Estados interactivos
-        onClick && 'cursor-pointer hover:bg-[var(--card-hover-bg)] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-        // Estado selected
-        selected && 'ring-2 ring-accent'
-      )}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onClick={onClick ? () => onClick(contact) : undefined}
-    >
-      <div className="flex items-center gap-3">
-        {/* Leading Section - Avatar */}
-        <div className="flex-shrink-0">
-          <Avatar className="h-10 w-10">
-            {avatarUrl && avatarUrl.trim() !== '' && (
-              <AvatarImage 
-                src={avatarUrl} 
-                alt={`Avatar de ${displayName}`}
-                className="object-cover"
-              />
-            )}
-            <AvatarFallback className="text-xs font-medium">
-              {avatarFallback}
-            </AvatarFallback>
-          </Avatar>
+  // Contenido interno del card usando el nuevo sistema
+  const cardContent = (
+    <>
+      {/* Columna de contenido (principal) */}
+      <div className="flex-1 min-w-0">
+        {/* Title */}
+        <div className="font-semibold text-sm truncate">
+          {displayName}
         </div>
 
-        {/* Content Section */}
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <div className="truncate leading-5 font-bold text-sm">
-            {displayName}
+        {/* Subtitle */}
+        {subtitle && (
+          <div className="text-muted-foreground text-sm truncate">
+            {subtitle}
           </div>
+        )}
 
-          {/* Subtitle */}
-          {subtitle && (
-            <div className="text-xs text-muted-foreground mt-0.5 truncate">
-              {subtitle}
-            </div>
-          )}
-
-          {/* Contact Type Badges */}
-          {contact.contact_types && contact.contact_types.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {contact.contact_types.map((type) => (
-                <span
-                  key={type.id}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-[var(--accent)]"
-                >
-                  {type.name}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Trailing Section - Chevron */}
-        {(showChevron || onClick) && (
-          <div className="flex items-center">
-            <div className="w-2" />
+        {/* Contact Type Badges */}
+        {contact.contact_types && contact.contact_types.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {contact.contact_types.map((type) => (
+              <span
+                key={type.id}
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-[var(--accent)]"
+              >
+                {type.name}
+              </span>
+            ))}
           </div>
         )}
       </div>
-    </div>
+
+      {/* Trailing section - Solo espacio para chevron si es necesario */}
+      {(showChevron || onClick) && (
+        <div className="flex items-center">
+          <div className="w-2" />
+        </div>
+      )}
+    </>
+  );
+
+  // Usar el nuevo DataRowCard
+  const contactCard = (
+    <DataRowCard
+      avatarUrl={avatarUrl && avatarUrl.trim() !== '' ? avatarUrl : undefined}
+      avatarFallback={avatarFallback}
+      selected={selected}
+      density={density}
+      onClick={onClick ? () => onClick(contact) : undefined}
+    >
+      {cardContent}
+    </DataRowCard>
   );
 
   // If swipe is enabled and we have edit/delete handlers, wrap in SwipeableCard
