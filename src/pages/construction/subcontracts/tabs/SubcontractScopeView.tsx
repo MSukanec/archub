@@ -101,7 +101,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => handleEditTask(item)}
           >
@@ -109,7 +109,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" text-destructive hover:text-destructive"
             onClick={() => handleDeleteTask(item)}
           >

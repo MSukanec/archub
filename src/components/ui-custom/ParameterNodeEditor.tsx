@@ -77,7 +77,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
             </CardTitle>
             <div className="flex items-center gap-1 ml-2">
               <Button
-                size="icon-sm"
+                size="sm"
                 variant="ghost"
                 className=""
                 onClick={(e) => {
@@ -89,7 +89,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                 <Copy className="h-3 w-3" />
               </Button>
               <Button
-                size="icon-sm"
+                size="sm"
                 variant="ghost"
                 className=""
                 onClick={(e) => {
@@ -102,7 +102,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               </Button>
               {hasParentDependencies && onConfigureVisibility && (
                 <Button
-                  size="icon-sm"
+                  size="sm"
                   variant="ghost"
                   className=""
                   onClick={(e) => {
@@ -115,7 +115,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                 </Button>
               )}
               <Button
-                size="icon-sm"
+                size="sm"
                 variant="ghost"
                 className=" text-destructive hover:text-destructive"
                 onClick={(e) => {
@@ -493,7 +493,7 @@ function AddParameterButton() {
     <Button 
       onClick={handleAddParameter}
       className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
-      size="icon-sm"
+      size="sm"
       title="Agregar parámetro al canvas"
     >
       <Plus className="w-4 h-4" />

@@ -99,7 +99,7 @@ const AdminActionsList = () => {
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(taskKind)}
             className=""
           >
@@ -107,7 +107,7 @@ const AdminActionsList = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(taskKind)}
             className=" text-destructive hover:text-destructive"
           >

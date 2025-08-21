@@ -236,7 +236,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                 </Avatar>
                 <div className="space-y-2">
                   <Button
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => setShowAvatarUpload(!showAvatarUpload)}
                   >
                     Cambiar
@@ -381,7 +381,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                     
                     <Button
                       onClick={() => navigate('/select-mode')}
-                      size="icon-sm"
+                      size="sm"
                       style={{
                         backgroundColor: 'var(--accent)',
                         color: 'var(--accent-foreground)'
@@ -426,7 +426,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="icon-sm">
+                  <Button variant="destructive" size="sm">
                     Cerrar sesión
                   </Button>
                 </AlertDialogTrigger>

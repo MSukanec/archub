@@ -103,7 +103,7 @@ export function HierarchicalTree({
                         <CollapsibleTrigger asChild>
                           <Button 
                             variant="ghost" 
-                            size="icon-sm" 
+                            size="sm" 
                             className=" hover:bg-accent"
                           >
                             {isExpanded ? (
@@ -123,7 +123,7 @@ export function HierarchicalTree({
                         <CollapsibleTrigger asChild>
                           <Button 
                             variant="ghost" 
-                            size="icon-sm" 
+                            size="sm" 
                             className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             {isExpanded ? (
@@ -188,7 +188,7 @@ export function HierarchicalTree({
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="ghost" 
-                          size="icon-sm" 
+                          size="sm" 
                           className=" opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <MoreVertical className="h-4 w-4" />

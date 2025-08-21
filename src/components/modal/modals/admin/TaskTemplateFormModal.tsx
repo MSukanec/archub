@@ -108,7 +108,7 @@ function SortableParameterItem({
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onRequiredChange(templateParam.id, !templateParam?.is_required)}
             className={`h-7 w-7 p-0 ${
               templateParam?.is_required 
@@ -125,7 +125,7 @@ function SortableParameterItem({
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onDelete(templateParam.id)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
           >

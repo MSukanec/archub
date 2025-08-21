@@ -146,7 +146,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             {!isRoot && (
               <Button 
                 variant="ghost" 
-                size="icon-sm" 
+                size="sm" 
                 onClick={navigateBack}
                 className="p-1 h-8 w-8"
               >
@@ -160,7 +160,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                   {index > 0 && <span className="text-muted-foreground">/</span>}
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => navigateTo(index)}
                     className="h-8 px-2 font-medium"
                     disabled={index === navigation.length - 1}
@@ -175,7 +175,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
           {/* Nueva Carpeta Button */}
           <Button 
             variant="default" 
-            size="icon-sm" 
+            size="sm" 
             onClick={openNewFolderModal}
             className="h-8 px-3 text-xs"
           >
@@ -207,7 +207,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className=" hover:bg-primary/10"
                       onClick={(e) => openEditFolderModal(folder, e)}
                     >
@@ -215,7 +215,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className=" hover:bg-destructive/10"
                       onClick={(e) => openDeleteFolderModal(folder, e)}
                     >
@@ -251,7 +251,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className=" hover:bg-primary/10"
                       onClick={(e) => openEditFolderModal(folder, e)}
                     >
@@ -259,7 +259,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className=" hover:bg-destructive/10"
                       onClick={(e) => openDeleteFolderModal(folder, e)}
                     >
@@ -285,7 +285,7 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
               <Button
                 key={document.id}
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => onDocumentSelect?.(document)}
                 className="h-8 px-3 text-xs font-normal flex items-center justify-between w-full text-left"
               >

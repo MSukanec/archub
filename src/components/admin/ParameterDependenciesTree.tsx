@@ -24,7 +24,7 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
         {hasChildren && (
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => setIsExpanded(!isExpanded)}
           >
@@ -57,7 +57,7 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => {
               // TODO: Implementar modal para crear dependencia
@@ -68,7 +68,7 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => {
               openModal('task-parameter', {
@@ -123,7 +123,7 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => {
               // TODO: Implementar modal para editar dependencia
@@ -134,7 +134,7 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" text-destructive hover:text-destructive"
             onClick={() => {
               openModal('delete-confirmation', {

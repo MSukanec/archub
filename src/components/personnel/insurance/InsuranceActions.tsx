@@ -38,7 +38,7 @@ export function InsuranceActions({ insurance }: InsuranceActionsProps) {
     <div className="flex items-center gap-1">
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         onClick={handleEdit}
         className=""
       >
@@ -47,7 +47,7 @@ export function InsuranceActions({ insurance }: InsuranceActionsProps) {
       
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         onClick={handleRenew}
         className=""
       >
@@ -56,7 +56,7 @@ export function InsuranceActions({ insurance }: InsuranceActionsProps) {
       
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         onClick={handleDelete}
         className=" text-destructive hover:text-destructive"
       >

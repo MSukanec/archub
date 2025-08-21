@@ -106,7 +106,7 @@ export default function SwipeableCard({
             variant={
               action.variant === "destructive" ? "destructive" : "secondary"
             }
-            size="icon-sm"
+            size="sm"
             className={`
               h-full rounded-none border-0 flex-col gap-1 px-4
               ${

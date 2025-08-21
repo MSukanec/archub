@@ -109,7 +109,7 @@ export default function Landing() {
                   <div className="flex items-center space-x-3">
                     <Link href="/dashboard">
                       <Button 
-                        size="icon-sm" 
+                        size="sm" 
                         className="h-8 px-3"
                         style={{ 
                           backgroundColor: 'var(--accent)', 
@@ -158,7 +158,7 @@ export default function Landing() {
                     <Link href="/login">
                       <Button 
                         variant="ghost" 
-                        size="icon-sm" 
+                        size="sm" 
                         className="h-8 px-3"
                         style={{ 
                           backgroundColor: 'var(--button-ghost-bg)',
@@ -172,7 +172,7 @@ export default function Landing() {
                     
                     <Link href="/register">
                       <Button 
-                        size="icon-sm" 
+                        size="sm" 
                         className="h-8 px-3"
                         style={{ 
                           backgroundColor: 'var(--accent)', 

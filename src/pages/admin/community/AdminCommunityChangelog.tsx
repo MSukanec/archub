@@ -177,7 +177,7 @@ const AdminCommunityChangelog = () => {
         <div className="flex items-center space-x-2">
           <Button 
             variant="ghost" 
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(entry)}
             className=""
           >
@@ -185,7 +185,7 @@ const AdminCommunityChangelog = () => {
           </Button>
           <Button 
             variant="ghost" 
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(entry)}
             className=" text-red-600 hover:text-red-700"
           >

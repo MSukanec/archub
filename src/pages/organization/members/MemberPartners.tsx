@@ -181,7 +181,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm" className="">
+                              <Button variant="ghost" size="sm" className="">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>

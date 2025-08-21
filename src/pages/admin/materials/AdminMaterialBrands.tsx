@@ -110,7 +110,7 @@ const AdminMaterialBrands = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(brand)}
             className="h-7 w-7 p-0"
           >
@@ -118,7 +118,7 @@ const AdminMaterialBrands = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(brand)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >

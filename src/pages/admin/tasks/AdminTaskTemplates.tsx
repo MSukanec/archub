@@ -114,7 +114,7 @@ const AdminTaskTemplates = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => openModal('task-template', { template })}
           >
@@ -122,7 +122,7 @@ const AdminTaskTemplates = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => {
               openModal('delete-confirmation', {
@@ -214,7 +214,7 @@ const AdminTaskTemplates = () => {
                   <div className="p-3 space-y-2">
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className="w-full justify-start text-xs"
                       onClick={() => setGroupBy('none')}
                     >
@@ -222,7 +222,7 @@ const AdminTaskTemplates = () => {
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       className="w-full justify-start text-xs"
                       onClick={() => setGroupBy('category')}
                     >

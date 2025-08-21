@@ -37,7 +37,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
           className=" ml-1 opacity-60 hover:opacity-100"
         >
           <Eye className="h-3 w-3" />
@@ -60,7 +60,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => setIsOpen(false)}
                 className=""
               >

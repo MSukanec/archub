@@ -100,7 +100,7 @@ export default function FinancesDashboard() {
             <div className="flex bg-muted rounded-lg p-1">
               <Button
                 variant={viewMode === 'project' ? 'default' : 'ghost'}
-                size="icon-sm"
+                size="sm"
                 onClick={() => setViewMode('project')}
                 className="h-8 px-3"
               >
@@ -109,7 +109,7 @@ export default function FinancesDashboard() {
               </Button>
               <Button
                 variant={viewMode === 'all' ? 'default' : 'ghost'}
-                size="icon-sm"
+                size="sm"
                 onClick={() => setViewMode('all')}
                 className="h-8 px-3"
               >

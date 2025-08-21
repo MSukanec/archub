@@ -51,7 +51,7 @@ export function GanttLeftPanel({
           {onEdit && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
@@ -64,7 +64,7 @@ export function GanttLeftPanel({
           {onDelete && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);

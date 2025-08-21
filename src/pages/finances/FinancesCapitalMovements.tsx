@@ -572,7 +572,7 @@ export default function FinancesCapitalMovements() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(item)}
             className=""
           >
@@ -580,7 +580,7 @@ export default function FinancesCapitalMovements() {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(item)}
             className=" text-destructive hover:text-destructive"
           >

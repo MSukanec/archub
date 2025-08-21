@@ -498,7 +498,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               {uploadedFiles.map((file, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
                   <span className="text-sm">{file}</span>
-                  <Button variant="ghost" size="icon-sm">
+                  <Button variant="ghost" size="sm">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -531,7 +531,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon-sm">Editar</Button>
+                    <Button variant="ghost" size="sm">Editar</Button>
                     <Button variant="ghost" size="icon-sm" onClick={() => removeEvent(event.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -574,7 +574,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                     <div className="flex gap-2">
                       <Button 
                         variant="ghost" 
-                        size="icon-sm"
+                        size="sm"
                         onClick={() => {
                           const newAttendees = attendees.filter((_, i) => i !== index);
                           setAttendees(newAttendees);
@@ -614,7 +614,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon-sm">Editar</Button>
+                    <Button variant="ghost" size="sm">Editar</Button>
                     <Button variant="ghost" size="icon-sm" onClick={() => removeEquipment(item.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>

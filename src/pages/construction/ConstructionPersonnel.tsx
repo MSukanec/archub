@@ -454,7 +454,7 @@ export default function ConstructionPersonnel() {
                       <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           onClick={() => openModal('personnel', { personnel: record })}
                           className=""
                         >
@@ -462,7 +462,7 @@ export default function ConstructionPersonnel() {
                         </Button>
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           onClick={() => openModal('delete-confirmation', {
                             title: 'Eliminar Personal',
                             message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,

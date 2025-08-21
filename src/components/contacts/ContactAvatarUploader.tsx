@@ -125,7 +125,7 @@ export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploa
         <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="flex gap-1">
             <Button
-              size="icon-sm"
+              size="sm"
               variant="secondary"
               onClick={handleUploadClick}
               className=""
@@ -133,7 +133,7 @@ export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploa
               <Upload className="w-3 h-3" />
             </Button>
             <Button
-              size="icon-sm"
+              size="sm"
               variant="secondary"
               onClick={handleCameraClick}
               className=""

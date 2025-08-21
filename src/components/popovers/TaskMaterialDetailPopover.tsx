@@ -42,7 +42,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" hover:bg-blue-50 hover:text-blue-600"
           >
             <Eye className="h-4 w-4" />
@@ -66,7 +66,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => setIsOpen(false)}
               >
                 <X className="h-3 w-3" />

@@ -442,7 +442,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </h1>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={handleCloseMenu}
             className="text-[var(--menues-fg)] p-2"
           >
@@ -461,7 +461,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </h2>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   onClick={handleBackToMain}
                   className="text-[var(--menues-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
                 >

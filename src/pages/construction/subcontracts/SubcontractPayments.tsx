@@ -284,7 +284,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
             </div>
             <Button 
               onClick={() => openModal('movement')}
-              size="icon-sm"
+              size="sm"
               className="gap-2"
             >
               <Plus className="w-4 h-4" />

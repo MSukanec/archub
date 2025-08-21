@@ -153,7 +153,7 @@ export default function Documentation() {
                             <Button
                               key={doc.id}
                               variant={selectedDocument?.id === doc.id ? "secondary" : "ghost"}
-                              size="icon-sm"
+                              size="sm"
                               onClick={() => handleDocumentSelect(doc)}
                               className={cn(
                                 "h-8 px-3 text-xs font-normal flex items-center justify-between w-full text-left",

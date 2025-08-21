@@ -202,7 +202,7 @@ const AdminMaterialMateriales = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className="hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(material)}
           >
@@ -210,7 +210,7 @@ const AdminMaterialMateriales = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className="text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDuplicate(material)}
           >
@@ -218,7 +218,7 @@ const AdminMaterialMateriales = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className="text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(material)}
           >

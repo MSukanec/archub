@@ -48,7 +48,7 @@ export function HelpPopover({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
           className={cn(
             "h-auto w-auto p-1 rounded-full hover:bg-transparent",
             className
@@ -92,7 +92,7 @@ export function HelpPopover({
               {secondaryActionText && (
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:underline"
                   onClick={handleSecondaryAction}
                 >
@@ -102,7 +102,7 @@ export function HelpPopover({
               
               {primaryActionText && (
                 <Button
-                  size="icon-sm"
+                  size="sm"
                   className="h-8 px-4 text-xs"
                   onClick={handlePrimaryAction}
                 >

@@ -178,7 +178,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             <>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 className="h-8 px-2 text-xs"
                 onClick={() => handleSaveTask(item.id, item)}
               >
@@ -186,7 +186,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 className="h-8 px-2 text-xs"
                 onClick={handleCancelEdit}
               >
@@ -196,7 +196,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
           ) : (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=""
               onClick={() => handleEditTask(item.id)}
             >

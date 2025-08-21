@@ -1328,7 +1328,7 @@ export default function Movements() {
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => {
                   // Toggle favorite for all movements in the group
                   item.movements.forEach(movement => {
@@ -1341,7 +1341,7 @@ export default function Movements() {
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleEditConversion(item)}
                 className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
@@ -1349,7 +1349,7 @@ export default function Movements() {
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleDeleteConversion(item)}
                 className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
@@ -1366,7 +1366,7 @@ export default function Movements() {
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => {
                   // Toggle favorite for all movements in the group
                   item.movements.forEach(movement => {
@@ -1379,7 +1379,7 @@ export default function Movements() {
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleEditTransfer(item)}
                 className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
@@ -1387,7 +1387,7 @@ export default function Movements() {
               </Button>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => handleDeleteTransfer(item)}
                 className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
@@ -1402,7 +1402,7 @@ export default function Movements() {
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => handleToggleFavorite(item)}
               className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
@@ -1410,7 +1410,7 @@ export default function Movements() {
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => handleEdit(item)}
               className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
@@ -1418,7 +1418,7 @@ export default function Movements() {
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => handleDelete(item)}
               className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >

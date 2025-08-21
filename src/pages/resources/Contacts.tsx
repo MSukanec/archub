@@ -376,7 +376,7 @@ export default function Contacts() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation()
               navigator.clipboard.writeText(`${contact.full_name || `${contact.first_name} ${contact.last_name}`}\nEmail: ${contact.email || 'N/A'}\nTeléfono: ${contact.phone || 'N/A'}\nEmpresa: ${contact.company_name || 'N/A'}`)
@@ -391,7 +391,7 @@ export default function Contacts() {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation()
               openModal('contact', { editingContact: contact, isEditing: true })
@@ -402,7 +402,7 @@ export default function Contacts() {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation()
               handleDeleteContact(contact)

@@ -41,7 +41,7 @@ function TaskCard({ task, onToggleCompleted }: { task: Task; onToggleCompleted: 
           {/* Checkbox/Check Icon */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=" flex-shrink-0 mt-0.5"
             onClick={() => onToggleCompleted(task.id, !isCompleted)}
           >

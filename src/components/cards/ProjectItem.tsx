@@ -50,7 +50,7 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
             {/* Edit and Delete buttons */}
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className="h-7 w-7 p-0"
               onClick={(e) => {
                 e.stopPropagation();
@@ -61,7 +61,7 @@ export default function ProjectItem({ project, onEdit, onDelete, onSelect, onNav
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className="h-7 w-7 p-0 text-destructive hover:text-destructive"
               onClick={(e) => {
                 e.stopPropagation();

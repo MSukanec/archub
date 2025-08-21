@@ -463,7 +463,7 @@ export default function ConstructionLogs() {
                       <div className="flex items-center gap-2 ml-4">
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleFavorite(siteLog.id);
@@ -475,7 +475,7 @@ export default function ConstructionLogs() {
                         
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             openModal('site-log', { data: siteLog });
@@ -487,7 +487,7 @@ export default function ConstructionLogs() {
                         
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteSiteLog(siteLog);

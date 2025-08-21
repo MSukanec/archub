@@ -323,7 +323,7 @@ const AdminCommunityOrganizations = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(organization)}
             className="h-7 w-7 p-0"
           >
@@ -331,7 +331,7 @@ const AdminCommunityOrganizations = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(organization)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >

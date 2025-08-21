@@ -213,7 +213,7 @@ const AdminMaterialProducts = () => {
           {product.url ? (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => window.open(product.url, '_blank')}
               className="h-7 px-2 text-blue-600 hover:text-blue-700"
             >
@@ -235,7 +235,7 @@ const AdminMaterialProducts = () => {
           {product.image_url ? (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => {
                 setLightboxImages([product.image_url!])
                 openLightbox(0)
@@ -272,7 +272,7 @@ const AdminMaterialProducts = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(product)}
             className="h-7 w-7 p-0"
           >
@@ -280,7 +280,7 @@ const AdminMaterialProducts = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDuplicate(product)}
             className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
           >
@@ -288,7 +288,7 @@ const AdminMaterialProducts = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(product)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >

@@ -147,7 +147,7 @@ export function Gallery({
           <div className="flex items-center gap-1">
             <Button
               variant={fileTypeFilter === 'Todo' ? "secondary" : "ghost"}
-              size="icon-sm"
+              size="sm"
               onClick={() => setFileTypeFilter('Todo')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -158,7 +158,7 @@ export function Gallery({
             </Button>
             <Button
               variant={fileTypeFilter === 'Imágenes' ? "secondary" : "ghost"}
-              size="icon-sm"
+              size="sm"
               onClick={() => setFileTypeFilter('Imágenes')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -169,7 +169,7 @@ export function Gallery({
             </Button>
             <Button
               variant={fileTypeFilter === 'Videos' ? "secondary" : "ghost"}
-              size="icon-sm"
+              size="sm"
               onClick={() => setFileTypeFilter('Videos')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -184,7 +184,7 @@ export function Gallery({
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => {
                 console.log("Search clicked - TODO: Implement search modal");
               }}
@@ -197,7 +197,7 @@ export function Gallery({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className={cn(
                     "h-8 px-3 text-xs",
                     activeFiltersCount > 0 && "bg-secondary text-secondary-foreground"
@@ -254,7 +254,7 @@ export function Gallery({
             </Popover>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
               className="h-8 px-3 text-xs"
               title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
@@ -269,7 +269,7 @@ export function Gallery({
             {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={clearFilters}
                 className="h-8 px-3 text-xs"
               >
@@ -322,7 +322,7 @@ export function Gallery({
                     {onEdit && (
                       <Button
                         variant="secondary"
-                        size="icon-sm"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(file);
@@ -335,7 +335,7 @@ export function Gallery({
                     {onDownload && (
                       <Button
                         variant="secondary"
-                        size="icon-sm"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDownload(file);
@@ -348,7 +348,7 @@ export function Gallery({
                     {onDelete && (
                       <Button
                         variant="secondary"
-                        size="icon-sm"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete(file);
@@ -418,7 +418,7 @@ export function Gallery({
                       {onEdit && (
                         <Button
                           variant="secondary"
-                          size="icon-sm"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit(file);
@@ -431,7 +431,7 @@ export function Gallery({
                       {onDownload && (
                         <Button
                           variant="secondary"
-                          size="icon-sm"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDownload(file);
@@ -444,7 +444,7 @@ export function Gallery({
                       {onDelete && (
                         <Button
                           variant="secondary"
-          size="icon-sm"
+          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete(file);

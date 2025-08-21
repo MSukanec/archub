@@ -249,7 +249,7 @@ export function ImageViewer({
           {/* Zoom controls */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
             className=""
@@ -269,7 +269,7 @@ export function ImageViewer({
           
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
             className=""
@@ -283,7 +283,7 @@ export function ImageViewer({
           {/* Rotation controls */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={rotateLeft}
             className=""
             title="Rotar izquierda"
@@ -293,7 +293,7 @@ export function ImageViewer({
 
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={rotateRight}
             className=""
             title="Rotar derecha"
@@ -306,7 +306,7 @@ export function ImageViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={fitToWidth}
             className=""
             title="Ajustar al ancho"
@@ -316,7 +316,7 @@ export function ImageViewer({
 
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={downloadImage}
             className=""
             title="Descargar"
@@ -327,7 +327,7 @@ export function ImageViewer({
           {onExpand && (
             <Button 
               variant="ghost" 
-              size="icon-sm" 
+              size="sm" 
               onClick={onExpand}
               className=""
               title="Expandir"

@@ -177,7 +177,7 @@ export function TaskListView({
         <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onEditTask(task)}
             className=""
           >
@@ -185,7 +185,7 @@ export function TaskListView({
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onDeleteTask(task.id)}
             className=""
           >

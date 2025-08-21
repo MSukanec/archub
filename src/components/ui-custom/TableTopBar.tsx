@@ -71,7 +71,7 @@ export function TableTopBar({
             <Button
               key={tab}
               variant={activeTab === tab ? "secondary" : "ghost"}
-              size="icon-sm"
+              size="sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -130,7 +130,7 @@ export function TableTopBar({
                   {/* Icono dentro del input */}
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     className="absolute right-0 hover:bg-transparent"
                     onClick={() => {
                       setIsSearchExpanded(!isSearchExpanded);
@@ -152,7 +152,7 @@ export function TableTopBar({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className={cn(
                     isSortActive ? "button-secondary-pressed" : ""
                   )}
@@ -172,7 +172,7 @@ export function TableTopBar({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className={cn(
                     isFilterActive ? "button-secondary-pressed" : ""
                   )}
@@ -190,7 +190,7 @@ export function TableTopBar({
           {showClearFilters && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={onClearFilters}
               title="Limpiar filtros"
             >
@@ -202,7 +202,7 @@ export function TableTopBar({
           {showExport && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={onExport}
               disabled={isExporting}
               title="Exportar a Excel"

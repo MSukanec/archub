@@ -487,7 +487,7 @@ export function TemplateNameBuilder({
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
-                size="icon-sm" 
+                size="sm" 
                 className="h-8"
                 disabled={availableParameters.length === 0}
               >
@@ -527,7 +527,7 @@ export function TemplateNameBuilder({
           <Button 
             type="button"
             variant="outline" 
-            size="icon-sm" 
+            size="sm" 
             className="h-8"
             onClick={addTextElement}
           >

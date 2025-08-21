@@ -222,7 +222,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                     <Button
                       type="button"
                       variant="secondary"
-                      size="icon-sm"
+                      size="sm"
                       onClick={() => {
                         const currentValue = field.value || '';
                         const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;

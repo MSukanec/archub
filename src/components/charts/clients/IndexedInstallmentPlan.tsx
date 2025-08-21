@@ -366,7 +366,7 @@ export default function IndexedInstallmentPlan({
             <div className="flex-shrink-0">
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => openModal('delete-confirmation', {
                   mode: 'dangerous',
                   title: 'Eliminar Plan de Pagos',
@@ -512,7 +512,7 @@ export default function IndexedInstallmentPlan({
                     <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEditInstallment(installment);

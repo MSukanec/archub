@@ -1563,7 +1563,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
                               <Button
                                 type="button"
                                 variant="outline"
-                                size="icon-sm"
+                                size="sm"
                                 className="w-full"
                                 onClick={() => handleCreateNewCategory(fieldName, value)}
                               >
@@ -1711,7 +1711,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
             </Badge>
             <Button
               variant="outline"
-              size="icon-sm"
+              size="sm"
               onClick={() => {
                 if (selectedRows.size === parsedData.rows.length) {
                   setSelectedRows(new Set())

@@ -93,7 +93,7 @@ const AdminTaskParameters = () => {
           <div className="flex justify-end">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className="h-8 px-2"
               onClick={() => {
                 openModal('task-parameter-option', { parameterId });
@@ -181,7 +181,7 @@ const AdminTaskParameters = () => {
         render: (value: TaskParameterOption) => (
           <div className="flex items-center gap-2">
             <Button
-              size="icon-sm"
+              size="sm"
               variant="ghost"
               onClick={() => {
                 openModal('task-parameter-option', {
@@ -194,7 +194,7 @@ const AdminTaskParameters = () => {
               <Edit className="h-3 w-3" />
             </Button>
             <Button
-              size="icon-sm"
+              size="sm"
               variant="ghost"
               className="text-destructive hover:text-destructive"
               onClick={() => {
@@ -221,7 +221,7 @@ const AdminTaskParameters = () => {
         <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className="h-8 px-2"
             onClick={() => {
               openModal('task-parameter-option', { parameterId });

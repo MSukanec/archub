@@ -67,7 +67,7 @@ function ConceptRow({
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             className=""
             onClick={() => hasChildren && onToggleExpand(concept.id)}
             disabled={!hasChildren}
@@ -115,7 +115,7 @@ function ConceptRow({
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onEdit(concept)}
             className=" text-muted-foreground hover:text-foreground"
           >
@@ -124,7 +124,7 @@ function ConceptRow({
           
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => onDelete(concept.id)}
             className=" text-muted-foreground hover:text-destructive"
           >

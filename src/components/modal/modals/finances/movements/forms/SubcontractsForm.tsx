@@ -155,7 +155,7 @@ export const SubcontractsForm = forwardRef<SubcontractsFormHandle, SubcontractsF
           <Button
             type="button"
             variant="default"
-            size="icon-sm"
+            size="sm"
             onClick={addNewRow}
             className="flex items-center gap-2"
           >

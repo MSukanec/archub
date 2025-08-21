@@ -193,7 +193,7 @@ export function UserGrowthChart() {
               <Button
                 key={periodType}
                 variant={period === periodType ? "default" : "outline"}
-                size="icon-sm"
+                size="sm"
                 onClick={() => setPeriod(periodType)}
                 className="text-xs"
               >

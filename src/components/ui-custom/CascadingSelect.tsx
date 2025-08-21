@@ -200,7 +200,7 @@ export function CascadingSelect({
             <Button
               type="button"
               variant="default"
-              size="icon-sm"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation()
                 handleBack()

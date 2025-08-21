@@ -47,7 +47,7 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
     <div className="flex items-center gap-1">
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         onClick={handleView}
         className=""
         title="Ver certificado"
@@ -57,7 +57,7 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
       
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         onClick={handleDownload}
         className=""
         title="Descargar certificado"

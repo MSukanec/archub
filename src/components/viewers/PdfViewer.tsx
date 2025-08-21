@@ -318,7 +318,7 @@ export function PdfViewer({
           {/* Page navigation */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={prevPage}
             disabled={state.page <= 1}
             className=""
@@ -334,7 +334,7 @@ export function PdfViewer({
           
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={nextPage}
             disabled={state.page >= state.numPages}
             className=""
@@ -347,7 +347,7 @@ export function PdfViewer({
           {/* Zoom */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
             className=""
@@ -366,7 +366,7 @@ export function PdfViewer({
           
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
             className=""
@@ -379,7 +379,7 @@ export function PdfViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={fitToWidth}
             className=""
             title="Ajustar al ancho"
@@ -389,7 +389,7 @@ export function PdfViewer({
 
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={downloadPdf}
             className=""
             title="Descargar"
@@ -399,7 +399,7 @@ export function PdfViewer({
           
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={openInNewTab}
             className=""
             title="Compartir"
@@ -411,7 +411,7 @@ export function PdfViewer({
           {onExpand && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={onExpand}
               className=""
               title="Expandir"

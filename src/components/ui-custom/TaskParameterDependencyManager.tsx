@@ -301,7 +301,7 @@ export function TaskParameterDependencyManager() {
               <span>Crear Nueva Dependencia</span>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={() => {
                   setIsCreating(false);
                   setNewDependency({
@@ -468,7 +468,7 @@ export function TaskParameterDependencyManager() {
                     <div className="flex items-center gap-3">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         className=""
                         onClick={() => toggleDependencyExpansion(dependency.id)}
                       >
@@ -497,7 +497,7 @@ export function TaskParameterDependencyManager() {
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         className=" text-destructive hover:text-destructive"
                         onClick={() => deleteDependencyMutation.mutate(dependency.id)}
                         disabled={deleteDependencyMutation.isPending}

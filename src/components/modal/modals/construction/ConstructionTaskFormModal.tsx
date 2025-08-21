@@ -740,7 +740,7 @@ export function ConstructionTaskFormModal({
                       <Button
                         type="button"
                         variant="default"
-                        size="icon-sm"
+                        size="sm"
                         onClick={() => {
                           // Navegar al subform
                           setPanel('subform');
@@ -872,7 +872,7 @@ export function ConstructionTaskFormModal({
                       <div className="w-8">
                         <Button
                           variant="ghost"
-                          size="icon-sm"
+                          size="sm"
                           className=""
                           onClick={() => {
                             setSelectedTasks(prev => prev.filter((_, i) => i !== index));

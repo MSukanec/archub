@@ -296,7 +296,7 @@ export function EditableParametersTable() {
             {param.children.length > 0 && (
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 className="h-5 w-5 p-0"
                 onClick={() => toggleExpanded(param.id)}
               >
@@ -318,8 +318,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm"
                   autoFocus
                 />
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <span 
@@ -345,8 +345,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm"
                   autoFocus
                 />
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <Badge 
@@ -379,8 +379,8 @@ export function EditableParametersTable() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -422,8 +422,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm w-16"
                   autoFocus
                 />
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
-                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <span 
@@ -446,7 +446,7 @@ export function EditableParametersTable() {
           <div className="col-span-2 flex items-center gap-1 justify-end">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=""
               onClick={() => openModal('task-parameter', { parameter: param })}
             >
@@ -454,7 +454,7 @@ export function EditableParametersTable() {
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=""
               onClick={() => {
                 // TODO: Implementar duplicar
@@ -465,7 +465,7 @@ export function EditableParametersTable() {
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=" text-destructive hover:text-destructive"
               onClick={() => {
                 openModal('delete-confirmation', {

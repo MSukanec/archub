@@ -474,7 +474,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=" hover:bg-[var(--button-ghost-hover-bg)]"
               onClick={() => {
                 openModal('project-client', {
@@ -489,7 +489,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=" hover:bg-[var(--button-ghost-hover-bg)]"
               onClick={() => {
                 openModal('delete-confirmation', {

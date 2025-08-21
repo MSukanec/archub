@@ -161,7 +161,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                             )}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon-sm">
+                                <Button variant="ghost" size="sm">
                                   <MoreHorizontal className="h-3 w-3" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -394,7 +394,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button
                                                           variant="ghost"
-                                                          size="icon-sm"
+                                                          size="sm"
                                                           className="bg-white/90 shadow-sm hover:bg-white"
                                                           onClick={(e) => {
                                                             e.stopPropagation();
@@ -407,7 +407,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                           <AlertDialogTrigger asChild>
                                                             <Button
                                                               variant="ghost"
-                                                              size="icon-sm"
+                                                              size="sm"
                                                               className="bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
                                                               onClick={(e) => e.stopPropagation()}
                                                             >
@@ -439,7 +439,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                                         {/* Completion Checkbox */}
                                                         <Button
                                                           variant="ghost"
-                                                          size="icon-sm"
+                                                          size="sm"
                                                           className="flex-shrink-0 mt-0.5"
                                                           onClick={(e) => {
                                                             e.stopPropagation();

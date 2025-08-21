@@ -153,7 +153,7 @@ export const PersonnelForm = forwardRef<PersonnelFormHandle, PersonnelFormProps>
           <Button
             type="button"
             variant="default"
-            size="icon-sm"
+            size="sm"
             onClick={addNewRow}
             className="flex items-center gap-2"
           >

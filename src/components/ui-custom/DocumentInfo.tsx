@@ -192,7 +192,7 @@ export function DocumentInfo({
       <div className="px-4 py-3 border-t border-[var(--card-border)]">
         <div className="flex items-center justify-center gap-2">
           <Button 
-            size="icon-sm" 
+            size="sm" 
             variant="ghost" 
             onClick={onDownload}
             className=""
@@ -201,7 +201,7 @@ export function DocumentInfo({
             <Download className="h-4 w-4" />
           </Button>
           <Button 
-            size="icon-sm" 
+            size="sm" 
             variant="ghost" 
             onClick={onShare}
             className=""
@@ -210,7 +210,7 @@ export function DocumentInfo({
             <Share2 className="h-4 w-4" />
           </Button>
           <Button 
-            size="icon-sm" 
+            size="sm" 
             variant="ghost" 
             onClick={() => {
               console.log('Opening document edit modal');
@@ -226,7 +226,7 @@ export function DocumentInfo({
             <Edit3 className="h-4 w-4" />
           </Button>
           <Button 
-            size="icon-sm" 
+            size="sm" 
             variant="ghost" 
             onClick={() => {
               console.log('Opening delete confirmation modal');

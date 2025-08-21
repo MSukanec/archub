@@ -464,7 +464,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       onClick={() => removeFile(index)}
                       className=""
                     >

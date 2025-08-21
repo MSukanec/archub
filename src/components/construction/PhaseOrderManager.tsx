@@ -115,7 +115,7 @@ export function PhaseOrderManager({
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="sm"
                             onClick={() => onEdit(phase)}
                             disabled={isUpdating}
                           >
@@ -123,7 +123,7 @@ export function PhaseOrderManager({
                           </Button>
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="sm"
                             onClick={() => onDelete(phase.project_phase_id || phase.id)}
                             disabled={isUpdating}
                           >

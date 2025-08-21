@@ -351,7 +351,7 @@ export function UnifiedViewer({
             <>
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={prevPage}
                 disabled={state.page <= 1}
                 className=""
@@ -367,7 +367,7 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={nextPage}
                 disabled={state.page >= state.numPages}
                 className=""
@@ -382,7 +382,7 @@ export function UnifiedViewer({
           {/* Zoom Controls */}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
             className=""
@@ -401,7 +401,7 @@ export function UnifiedViewer({
           
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
             className=""
@@ -416,7 +416,7 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={rotateLeft}
                 className=""
                 title="Rotar izquierda"
@@ -426,7 +426,7 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="sm"
                 onClick={rotateRight}
                 className=""
                 title="Rotar derecha"
@@ -441,7 +441,7 @@ export function UnifiedViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={zoom100}
             className=""
             title="Ajustar"
@@ -451,7 +451,7 @@ export function UnifiedViewer({
 
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={downloadFile}
             className=""
             title="Descargar"
@@ -461,7 +461,7 @@ export function UnifiedViewer({
           
           <Button 
             variant="ghost" 
-            size="icon-sm" 
+            size="sm" 
             onClick={openInNewTab}
             className=""
             title="Abrir en nueva pestaña"
@@ -472,7 +472,7 @@ export function UnifiedViewer({
           {onExpand && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={onExpand}
               className=""
               title="Expandir"

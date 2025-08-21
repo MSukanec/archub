@@ -233,7 +233,7 @@ export function Header({
           {showBackButton && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={onBackClick}
               className="h-8 px-2 text-sm font-normal text-muted-foreground hover:text-foreground"
             >
@@ -263,7 +263,7 @@ export function Header({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className="h-8 px-3 text-xs font-normal flex items-center gap-1"
                 >
                   <Folder className="w-4 h-4" />
@@ -309,7 +309,7 @@ export function Header({
                         Crea tu primer proyecto para comenzar
                       </div>
                       <Button
-                        size="icon-sm"
+                        size="sm"
                         onClick={() => {
                           navigate("/profile/projects");
                         }}
@@ -419,7 +419,7 @@ export function Header({
                   
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     className=" hover:bg-transparent flex-shrink-0"
                     onClick={() => {
                       setIsSearchExpanded(!isSearchExpanded);
@@ -441,7 +441,7 @@ export function Header({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className=""
                   title="Vista de moneda"
                 >
@@ -452,7 +452,7 @@ export function Header({
                 <div className="space-y-1">
                   <Button
                     variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
-                    size="icon-sm"
+                    size="sm"
                     className="w-full justify-start h-8"
                     onClick={() => onCurrencyViewChange('discriminado')}
                   >
@@ -460,7 +460,7 @@ export function Header({
                   </Button>
                   <Button
                     variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
-                    size="icon-sm"
+                    size="sm"
                     className="w-full justify-start h-8"
                     onClick={() => onCurrencyViewChange('pesificado')}
                   >
@@ -468,7 +468,7 @@ export function Header({
                   </Button>
                   <Button
                     variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
-                    size="icon-sm"
+                    size="sm"
                     className="w-full justify-start h-8"
                     onClick={() => onCurrencyViewChange('dolarizado')}
                   >
@@ -485,7 +485,7 @@ export function Header({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   className={`h-8 w-8 p-0 ${isHeaderFilterActive ? "button-secondary-pressed" : ""}`}
                 >
                   <Filter className="h-4 w-4" />
@@ -501,7 +501,7 @@ export function Header({
           {showHeaderClearFilters && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className=""
               onClick={onHeaderClearFilters}
               title="Limpiar filtros"
@@ -519,7 +519,7 @@ export function Header({
           {actionButton?.additionalButton && (
             <Button
               variant={actionButton.additionalButton.variant || "ghost"}
-              size="icon-sm"
+              size="sm"
               onClick={actionButton.additionalButton.onClick}
               className="h-8 px-3 text-xs font-normal"
             >
@@ -533,7 +533,7 @@ export function Header({
           {actionButton && (
             <Button
               variant="default"
-              size="icon-sm"
+              size="sm"
               onClick={actionButton.onClick}
               className="h-8 px-3 text-xs font-normal"
             >

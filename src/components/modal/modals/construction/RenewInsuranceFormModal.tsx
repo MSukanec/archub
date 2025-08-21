@@ -253,7 +253,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             <Button
               type="button"
               variant="outline"
-              size="icon-sm"
+              size="sm"
               onClick={() => fileInputRef.current?.click()}
             >
               Seleccionar archivo

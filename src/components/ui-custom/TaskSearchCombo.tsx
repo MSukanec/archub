@@ -95,7 +95,7 @@ export function TaskSearchCombo({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              size="icon-sm"
+              size="sm"
               className={cn(
                 // Usar EXACTAMENTE las mismas clases que el input de búsqueda
                 "flex items-center justify-center text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60 disabled:cursor-not-allowed",
@@ -118,7 +118,7 @@ export function TaskSearchCombo({
                 {activeFiltersCount > 0 && (
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => onFiltersChange({ origin: 'all' })}
                     className="h-6 px-2 text-xs"
                   >
@@ -266,7 +266,7 @@ export function TaskSearchCombo({
                 {searchQuery && (
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     className="absolute right-1 top-1/2 -translate-y-1/2 hover:bg-accent/20"
                     onClick={() => {
                       if (onSearchChange) {

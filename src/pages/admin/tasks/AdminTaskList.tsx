@@ -119,7 +119,7 @@ const AdminTaskList = () => {
           <div className="flex items-center space-x-3 flex-1">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               className="p-0 h-6 w-6"
               onClick={() => toggleParameterExpanded(parameter.id)}
               disabled={!hasOptions}
@@ -150,7 +150,7 @@ const AdminTaskList = () => {
           <div className="flex items-center space-x-1">
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => openModal('task-parameter', { parameter, isEditing: true })}
               className="hover:bg-accent text-muted-foreground hover:text-foreground"
               title="Editar"
@@ -187,7 +187,7 @@ const AdminTaskList = () => {
                 <div className="flex items-center space-x-1">
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => openModal('task-parameter-option', { option, parameter, isEditing: true })}
                     className="hover:bg-accent text-muted-foreground hover:text-foreground"
                     title="Editar"
@@ -291,7 +291,7 @@ const AdminTaskList = () => {
         <div className="flex items-center justify-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(task)}
             className="hover:bg-[var(--button-ghost-hover-bg)]"
             title="Editar tarea"
@@ -300,7 +300,7 @@ const AdminTaskList = () => {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(task)}
             className="hover:bg-[var(--button-ghost-hover-bg)]"
             title="Eliminar tarea"

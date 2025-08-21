@@ -180,7 +180,7 @@ export function AvatarUploader({
           <div className="flex items-center gap-2 mt-2">
             <Button
               variant="default"
-              size="icon-sm"
+              size="sm"
               onClick={() => setShowUpload(!showUpload)}
               disabled={isUploading}
             >
@@ -205,7 +205,7 @@ export function AvatarUploader({
                 </div>
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   onClick={() => setShowUpload(false)}
                   disabled={isUploading}
                 >

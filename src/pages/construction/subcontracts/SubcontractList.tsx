@@ -376,7 +376,7 @@ export default function SubcontractList() {
         <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleView(subcontract.id)}
             className=""
           >
@@ -384,7 +384,7 @@ export default function SubcontractList() {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleEdit(subcontract)}
             className=""
           >
@@ -392,7 +392,7 @@ export default function SubcontractList() {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             onClick={() => handleDelete(subcontract)}
             className=" text-red-600 hover:text-red-700 hover:bg-red-50"
           >

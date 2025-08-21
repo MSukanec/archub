@@ -314,7 +314,7 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon-sm"
+                      size="sm"
                       onClick={() => removeRow(index)}
                       className=""
                     >

@@ -262,7 +262,7 @@ export function MemberList({ organization }: MemberListProps) {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon-sm" className="">
+                            <Button variant="ghost" size="sm" className="">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -371,7 +371,7 @@ export function MemberList({ organization }: MemberListProps) {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon-sm" className="">
+                            <Button variant="ghost" size="sm" className="">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -453,14 +453,14 @@ export function MemberList({ organization }: MemberListProps) {
                       <div className="flex gap-2">
                         <Button 
                           variant="outline" 
-                          size="icon-sm"
+                          size="sm"
                           onClick={() => resendInviteMutation.mutate(invite.id)}
                         >
                           Reenviar
                         </Button>
                         <Button 
                           variant="outline" 
-                          size="icon-sm" 
+                          size="sm" 
                           className="text-red-600 hover:text-red-700"
                           onClick={() => revokeInviteMutation.mutate(invite.id)}
                         >
@@ -510,14 +510,14 @@ export function MemberList({ organization }: MemberListProps) {
                       <div className="flex gap-2">
                         <Button 
                           variant="outline" 
-                          size="icon-sm"
+                          size="sm"
                           onClick={() => resendInviteMutation.mutate(invite.id)}
                         >
                           Reenviar invitación
                         </Button>
                         <Button 
                           variant="outline" 
-                          size="icon-sm" 
+                          size="sm" 
                           className="text-red-600 hover:text-red-700"
                           onClick={() => revokeInviteMutation.mutate(invite.id)}
                         >

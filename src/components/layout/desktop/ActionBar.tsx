@@ -40,7 +40,7 @@ export function ActionBar({
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
           onClick={onEdit}
           disabled={!selectedValue || disabled}
           className="h-8 px-3"
@@ -51,7 +51,7 @@ export function ActionBar({
         
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
           onClick={onDelete}
           disabled={!selectedValue || disabled}
           className="h-8 px-3 text-destructive hover:text-destructive"

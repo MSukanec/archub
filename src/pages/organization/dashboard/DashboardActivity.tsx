@@ -136,7 +136,7 @@ export function DashboardActivity() {
       width: '10%',
       render: (activity: any) => (
         <Button 
-          size="icon-sm" 
+          size="sm" 
           variant="ghost"
           onClick={(e) => {
             e.stopPropagation();
