@@ -54,7 +54,7 @@ const WalletBalanceItem: React.FC<{
   );
 };
 
-// Component to render currency column with wallets
+// Component to render currency column with wallets (desktop version)
 const CurrencyColumn: React.FC<{ 
   currency: CurrencyGroupedData; 
   index: number; 
@@ -79,6 +79,37 @@ const CurrencyColumn: React.FC<{
     return "";
   };
 
+  // For mobile, render simplified view (only totals)
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: index * 0.1, duration: 0.3 }}
+        className="flex-1 min-w-0"
+      >
+        {/* Simple currency total for mobile */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-4 h-4 rounded-sm flex items-center justify-center"
+              style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
+            >
+              <DollarSign className="w-2.5 h-2.5" />
+            </div>
+            <span className="text-xs font-medium text-foreground">
+              {currency.currencyCode}
+            </span>
+          </div>
+          <span className={`font-bold text-sm ${getBalanceColor(currency.totalBalance)}`}>
+            {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
+          </span>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Desktop version with full wallet details
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -87,38 +118,38 @@ const CurrencyColumn: React.FC<{
       className="flex-1 min-w-0"
     >
       {/* Currency header */}
-      <div className={`flex items-center gap-2 ${isMobile ? 'mb-2' : 'mb-3'}`}>
+      <div className="flex items-center gap-2 mb-3">
         <div 
-          className={`rounded-md flex items-center justify-center ${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`}
+          className="rounded-md flex items-center justify-center w-8 h-8"
           style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
         >
-          <DollarSign className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
+          <DollarSign className="w-4 h-4" />
         </div>
-        <h4 className={`font-bold text-foreground ${isMobile ? 'text-sm' : 'text-base'}`}>
+        <h4 className="font-bold text-foreground text-base">
           {currency.currencyCode}
         </h4>
       </div>
 
       {/* Wallet balances */}
-      <div className={isMobile ? "space-y-0.5 mb-2" : "space-y-1 mb-3"}>
+      <div className="space-y-1 mb-3">
         {currency.wallets.map((wallet, walletIndex) => (
           <WalletBalanceItem
             key={`${wallet.wallet}-${wallet.currencyCode}`}
             wallet={wallet.wallet}
             balance={wallet.balance}
             index={walletIndex}
-            isMobile={isMobile}
+            isMobile={false}
           />
         ))}
       </div>
 
       {/* Divider and total */}
-      <div className={`border-t border-border ${isMobile ? 'pt-1' : 'pt-2'}`}>
+      <div className="border-t border-border pt-2">
         <div className="flex items-center justify-between">
-          <span className={`font-medium text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
+          <span className="font-medium text-muted-foreground text-sm">
             Total:
           </span>
-          <span className={`font-bold ${getBalanceColor(currency.totalBalance)} ${isMobile ? 'text-sm' : 'text-base'}`}>
+          <span className={`font-bold text-base ${getBalanceColor(currency.totalBalance)}`}>
             {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
           </span>
         </div>
@@ -261,7 +292,7 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
                   </p>
                 </div>
               ) : (
-                <div className="flex gap-4">
+                <div className={isMobile ? "space-y-2" : "flex gap-4"}>
                   {card.balances.map((currency, index) => (
                     <CurrencyColumn
                       key={currency.currencyCode}
