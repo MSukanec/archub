@@ -242,12 +242,12 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'display_name', 
+      key: 'custom_name', 
       label: 'Tarea', 
       width: 'minmax(0, 1fr)',
       render: (task: GeneratedTask) => (
         <div className="font-medium">
-          {task.display_name || 'Sin nombre'}
+          {task.custom_name || 'Sin nombre personalizado'}
         </div>
       )
     },
