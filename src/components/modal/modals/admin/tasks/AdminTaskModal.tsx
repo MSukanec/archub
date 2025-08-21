@@ -10,6 +10,7 @@ import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { ParametricTaskBuilder } from '@/components/ui-custom/admin/tasks/ParametricTaskBuilder'
+import { TemplateParametersSelector } from '@/components/ui-custom/admin/tasks/TemplateParametersSelector'
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -373,6 +374,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           </div>
         </div>
         <div className="pl-6">
+          {/* Temporarily commented out while implementing template-based parameters
           <ParametricTaskBuilder 
             onSelectionChange={setSelections}
             onPreviewChange={setTaskPreview}
@@ -380,6 +382,20 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
             initialParameters={existingParamValues ? JSON.stringify(existingParamValues) : null}
             initialParameterOrder={existingParamOrder || null}
           />
+          */}
+          
+          {taskTemplateId ? (
+            <TemplateParametersSelector
+              templateId={taskTemplateId}
+              onSelectionChange={setSelections}
+              onPreviewChange={setTaskPreview}
+              initialValues={existingParamValues}
+            />
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              Selecciona una plantilla para configurar sus parámetros
+            </div>
+          )}
         </div>
       </div>
 
