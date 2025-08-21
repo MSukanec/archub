@@ -1,11 +1,11 @@
 import React from 'react'
 
-interface ContactAttachmentsSubformProps {
+interface ContactAttachmentsFormProps {
   contactId: string;
   contact: any;
 }
 
-export function ContactAttachmentsSubform({ contactId, contact }: ContactAttachmentsSubformProps) {
+export function ContactAttachmentsForm({ contactId, contact }: ContactAttachmentsFormProps) {
   return (
     <div className="space-y-6">
       <div className="text-center text-muted-foreground">
