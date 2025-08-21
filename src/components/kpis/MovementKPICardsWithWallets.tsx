@@ -85,21 +85,20 @@ const CurrencyMobileSimple: React.FC<{
       transition={{ delay: index * 0.1, duration: 0.3 }}
       className="flex-1 min-w-0"
     >
-      {/* Currency header with icon */}
-      <div className="flex items-center gap-2 mb-1">
-        <div 
-          className="w-6 h-6 rounded-md flex items-center justify-center"
-          style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
-        >
-          <DollarSign className="w-3 h-3" />
+      {/* Row layout: Icon + Currency Code + Amount */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-6 h-6 rounded-md flex items-center justify-center"
+            style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
+          >
+            <DollarSign className="w-3 h-3" />
+          </div>
+          <h4 className="font-bold text-foreground text-sm">
+            {currency.currencyCode}
+          </h4>
         </div>
-        <h4 className="font-bold text-foreground text-sm">
-          {currency.currencyCode}
-        </h4>
-      </div>
-
-      {/* Total amount only */}
-      <div className="text-left">
+        
         <span className={`font-bold text-base ${getBalanceColor(currency.totalBalance)}`}>
           {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
         </span>
@@ -315,51 +314,24 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
                   </p>
                 </div>
               ) : (
-                <>
-                  <div className="flex gap-4">
-                    {card.balances.map((currency, index) => (
-                      isMobile ? (
-                        <CurrencyMobileSimple
-                          key={currency.currencyCode}
-                          currency={currency}
-                          index={index}
-                        />
-                      ) : (
-                        <CurrencyColumn
-                          key={currency.currencyCode}
-                          currency={currency}
-                          index={index}
-                          isMobile={isMobile}
-                        />
-                      )
-                    ))}
-                  </div>
-                  
-                  {/* Total general en mobile */}
-                  {isMobile && card.balances.length > 0 && (
-                    <div className="border-t border-border pt-2 mt-3">
-                      <div className="text-center">
-                        <span className="text-xs text-muted-foreground">Total: </span>
-                        <span className="font-bold text-sm text-foreground">
-                          {card.balances.map(currency => {
-                            const formatAmount = (amount: number) => {
-                              return new Intl.NumberFormat('es-AR', {
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                              }).format(Math.abs(amount));
-                            };
-                            const getBalanceSign = (amount: number) => {
-                              if (amount > 0) return "+";
-                              if (amount < 0) return "-";
-                              return "";
-                            };
-                            return `${getBalanceSign(currency.totalBalance)}${formatAmount(currency.totalBalance)} ${currency.currencyCode}`;
-                          }).join(', ')}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </>
+                <div className={isMobile ? "space-y-2" : "flex gap-4"}>
+                  {card.balances.map((currency, index) => (
+                    isMobile ? (
+                      <CurrencyMobileSimple
+                        key={currency.currencyCode}
+                        currency={currency}
+                        index={index}
+                      />
+                    ) : (
+                      <CurrencyColumn
+                        key={currency.currencyCode}
+                        currency={currency}
+                        index={index}
+                        isMobile={isMobile}
+                      />
+                    )
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
