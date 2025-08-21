@@ -58,7 +58,7 @@ export function SubcontractBidFormModal({
   const [currentPanel, setCurrentPanel] = useState<'edit' | 'subform'>('edit');
   const [currentSubform, setCurrentSubform] = useState<string | null>(null);
   
-  // Obtener miembros de la organización para el created_by - usando el mismo hook que MovementFormModal
+  // Obtener miembros de la organización para el created_by
   const { data: members } = useOrganizationMembers(userData?.organization?.id);
   const { data: contacts, isLoading: isContactsLoading } = useContacts();
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
