@@ -504,7 +504,7 @@ export default function Contacts() {
         {/* Columna izquierda - Lista de contactos */}
         <div className="col-span-1 overflow-hidden">
           {/* Lista de contactos agrupada por letra */}
-          <div className="h-full overflow-y-auto scrollbar-hide p-4">
+          <div className="h-full overflow-y-auto scrollbar-hide">
             {/* Contenido para la tab de Personas */}
             {activeTab === "personas" && (
               <>
