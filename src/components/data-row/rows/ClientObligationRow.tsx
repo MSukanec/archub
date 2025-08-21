@@ -134,44 +134,57 @@ export default function ClientObligationRow({
   const formattedPaid = formatCurrency(obligation.totalPaid, obligation.currency?.symbol);
   const formattedRemaining = formatCurrency(Math.abs(obligation.remainingAmount), obligation.currency?.symbol);
 
-  // Props para DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    // Content
-    title: getClientDisplayName(obligation),
-    subtitle: obligation.unit ? `Unidad: ${obligation.unit}` : undefined,
-    
-    // Leading - Avatar del cliente
-    avatarFallback: getClientInitials(obligation),
-    
-    // Lines - Información de pagos (solo 2 líneas)
-    lines: [
-      {
-        text: `C: ${formattedCommitted}`,
-        tone: 'muted' as const,
-        hintRight: obligation.currency?.code
-      },
-      {
-        text: `P: ${formattedPaid}`,
-        tone: paymentPercentage > 0 ? 'success' : 'muted',
-        hintRight: `${paymentPercentage.toFixed(1)}%`
-      }
-    ],
-    
-    // Visual
-    borderColor: getBorderColor(),
-    
-    // Trailing - Sin badge para más espacio
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    showChevron: !!onClick,
-    'data-testid': `client-obligation-row-${obligation.id}`
-  };
+  // Contenido interno del card
+  const cardContent = (
+    <>
+      {/* Columna de contenido (medio) */}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm truncate">
+          {getClientDisplayName(obligation)}
+        </div>
+        {obligation.unit && (
+          <div className="text-muted-foreground text-sm truncate">
+            Unidad: {obligation.unit}
+          </div>
+        )}
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Columna trailing */}
+      <div className="flex flex-col items-end flex-shrink-0">
+        {/* Línea 1: Comprometido */}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-sm">C:</span>
+          <span className="font-mono text-sm">{formattedCommitted}</span>
+          <span className="text-xs text-muted-foreground">{obligation.currency?.code}</span>
+        </div>
+        
+        {/* Línea 2: Pagado y porcentaje */}
+        <div className="flex items-center gap-2">
+          <span className={`text-sm ${paymentPercentage > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>P:</span>
+          <span className={`font-mono text-sm ${paymentPercentage > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+            {formattedPaid}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {paymentPercentage.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarFallback={getClientInitials(obligation)}
+      borderColor={getBorderColor()}
+      onClick={onClick}
+      selected={selected}
+      density={density}
+      className={className}
+      data-testid={`client-obligation-row-${obligation.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 
 // Export del tipo para uso externo
