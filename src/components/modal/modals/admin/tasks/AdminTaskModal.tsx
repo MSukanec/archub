@@ -3,6 +3,8 @@ import { toast } from '@/hooks/use-toast'
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useTaskTemplates } from '@/hooks/use-task-templates'
+import { supabase } from '@/lib/supabase'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -63,6 +65,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [taskMaterials, setTaskMaterials] = useState<Array<{id?: string, material_id: string, amount: number, material_name?: string, unit_name?: string}>>([])
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('')
   const [materialAmount, setMaterialAmount] = useState<string>('')
+  const [customName, setCustomName] = useState<string>('')
+  const [taskTemplateId, setTaskTemplateId] = useState<string>('')
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -120,6 +124,14 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       if (existingParamOrder) {
         setParameterOrder(existingParamOrder)
       }
+      
+      // Load existing custom_name and task_template_id
+      if (actualTask.custom_name) {
+        setCustomName(actualTask.custom_name)
+      }
+      if (actualTask.task_template_id) {
+        setTaskTemplateId(actualTask.task_template_id)
+      }
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
 
@@ -135,6 +147,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Materials data
   const { data: materials = [] } = useMaterials()
   const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
+  
+  // Task templates data
+  const { data: taskTemplates = [] } = useTaskTemplates()
 
   // Initialize task materials when editing
   React.useEffect(() => {
@@ -214,14 +229,45 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           input_param_values: paramValues,
           param_order: parameterOrder
         })
+        
+        // Update custom_name and task_template_id separately since the hook doesn't support them
+        if (customName || taskTemplateId) {
+          const updateData: any = {}
+          if (customName) updateData.custom_name = customName
+          if (taskTemplateId) updateData.task_template_id = taskTemplateId
+          
+          const { error: updateError } = await supabase
+            .from('tasks')
+            .update(updateData)
+            .eq('id', actualTask.id)
+          
+          if (updateError) {
+            console.error('Error updating custom fields:', updateError)
+            throw updateError
+          }
+        }
         taskId = actualTask.id
       } else {
         // Create new task
         const result = await createTaskMutation.mutateAsync({
           param_values: paramValues,
-          param_order: parameterOrder
+          param_order: parameterOrder,
+          custom_name: customName || undefined
         })
         taskId = result.new_task?.id
+        
+        // Update task_template_id separately since the hook doesn't support it yet
+        if (taskId && taskTemplateId) {
+          const { error: updateError } = await supabase
+            .from('tasks')
+            .update({ task_template_id: taskTemplateId })
+            .eq('id', taskId)
+          
+          if (updateError) {
+            console.error('Error updating task_template_id:', updateError)
+            throw updateError
+          }
+        }
       }
 
       // Save materials if any
@@ -288,8 +334,32 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
             <p className="text-xs text-muted-foreground">Configuración general de la tarea personalizada</p>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground pl-6">
-          Próximamente: campos adicionales para configurar la tarea
+        <div className="space-y-4 pl-6">
+          <div>
+            <Label htmlFor="custom-name">Nombre Personalizado</Label>
+            <Input
+              id="custom-name"
+              type="text"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="Nombre personalizado para la tarea..."
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="task-template">Plantilla</Label>
+            <ComboBox
+              value={taskTemplateId}
+              onValueChange={setTaskTemplateId}
+              options={taskTemplates.map(template => ({
+                value: template.id,
+                label: template.name
+              }))}
+              placeholder="Seleccionar plantilla..."
+              searchPlaceholder="Buscar plantilla..."
+              emptyMessage="No se encontraron plantillas"
+            />
+          </div>
         </div>
       </div>
 

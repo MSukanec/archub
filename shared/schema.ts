@@ -279,6 +279,7 @@ export const tasks = pgTable("tasks", {
   param_order: text("param_order").array(), // Array con el orden de parámetros
   name_rendered: text("name_rendered"),
   custom_name: text("custom_name"),
+  task_template_id: uuid("task_template_id"),
   is_system: boolean("is_system").default(true),
   organization_id: uuid("organization_id"),
   unit_id: uuid("unit_id"),
