@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 
-import { Zap, Plus, Trash2, FileText, Settings, Package } from 'lucide-react'
+import { Zap, Plus, Trash2, FileText, Settings, Package, Edit2 } from 'lucide-react'
 
 interface AdminTaskModalProps {
   modalData?: {
@@ -41,6 +41,105 @@ interface ParameterSelection {
   parameterLabel: string
   optionName: string
   optionLabel: string
+}
+
+interface MaterialEditRowProps {
+  material: any
+  index: number
+  onEdit: (material: any) => void
+  onRemove: () => void
+  disabled: boolean
+}
+
+function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: MaterialEditRowProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editAmount, setEditAmount] = useState(material.amount.toString())
+
+  const handleSaveEdit = () => {
+    const newAmount = parseFloat(editAmount)
+    if (newAmount > 0) {
+      onEdit({ ...material, amount: newAmount })
+      setIsEditing(false)
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditAmount(material.amount.toString())
+    setIsEditing(false)
+  }
+
+  return (
+    <div className="py-2">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="font-medium text-sm leading-tight">
+            {material.material_name}
+          </p>
+          {!isEditing && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {material.amount} {material.unit_name}
+            </p>
+          )}
+          {isEditing && (
+            <div className="flex items-center gap-2 mt-1">
+              <Input
+                type="number"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+                className="h-7 text-xs w-20"
+                step="0.01"
+                min="0"
+                autoFocus
+              />
+              <span className="text-xs text-muted-foreground">{material.unit_name}</span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+                  disabled={disabled}
+                >
+                  ✓
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelEdit}
+                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                  disabled={disabled}
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          {!isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+              disabled={disabled}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemove}
+            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+            disabled={disabled}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
@@ -76,6 +175,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [categoryId, setCategoryId] = useState<string>('')
   const [unitId, setUnitId] = useState<string>('')
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null)
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -244,6 +344,14 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   }, [existingTaskMaterials])
 
   // Add material to local state
+  // Handle edit material function
+  const handleEditMaterial = (index: number, updatedMaterial: any) => {
+    setTaskMaterials(prev => prev.map((material, i) => 
+      i === index ? { ...material, amount: updatedMaterial.amount } : material
+    ));
+    setEditingMaterialIndex(null);
+  };
+
   const handleAddMaterial = () => {
     if (!selectedMaterialId || !materialAmount) {
       toast({
@@ -537,33 +645,21 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           
           {/* Materials List */}
           {taskMaterials.length > 0 && (
-            <div className="space-y-2">
+            <div className="divide-y divide-border">
               {taskMaterials.map((material, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{material.material_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {material.amount} {material.unit_name}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={async () => {
-                      if (material.id) {
-                        try {
-                          await deleteTaskMaterialMutation.mutateAsync(material.id);
-                        } catch (error) {
-                          console.error('❌ Error deleting material:', error);
-                          return;
-                        }
-                      }
-                      setTaskMaterials(prev => prev.filter((_, i) => i !== index))
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <MaterialEditRow
+                  key={index}
+                  material={material}
+                  index={index}
+                  onEdit={(updatedMaterial) => handleEditMaterial(index, updatedMaterial)}
+                  onRemove={() => {
+                    if (material.id) {
+                      deleteTaskMaterialMutation.mutateAsync(material.id).catch(console.error);
+                    }
+                    setTaskMaterials(prev => prev.filter((_, i) => i !== index));
+                  }}
+                  disabled={isLoading}
+                />
               ))}
             </div>
           )}
