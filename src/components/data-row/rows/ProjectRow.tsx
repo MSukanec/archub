@@ -34,33 +34,15 @@ interface ProjectRowProps {
   isActive?: boolean; // Para marcar el proyecto activo
 }
 
-// Helper para obtener las iniciales del proyecto
-const getProjectInitials = (project: Project): string => {
-  const words = project.name.trim().split(/\s+/);
-  if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase();
+// Helper para obtener el tipo de proyecto basado en el estado
+const getProjectType = (project: Project): string => {
+  if (project.description) {
+    return project.description;
   }
-  return words.slice(0, 2).map(word => word.charAt(0)).join('').toUpperCase();
-};
-
-// Helper para obtener el color de estado
-const getStatusColor = (status: string): string => {
-  switch (status?.toLowerCase()) {
-    case 'activo':
-    case 'active':
-      return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20';
-    case 'completado':
-    case 'completed':
-      return 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20';
-    case 'pausado':
-    case 'paused':
-      return 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20';
-    case 'cancelado':
-    case 'cancelled':
-      return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20';
-    default:
-      return 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/20';
+  if (project.project_data?.client_name) {
+    return project.project_data.client_name;
   }
+  return project.status || 'Proyecto';
 };
 
 export default function ProjectRow({ 
@@ -81,92 +63,43 @@ export default function ProjectRow({
 
   return (
     <DataRowCard {...baseProps}>
-      {/* Avatar con iniciales */}
-      <div className={`
-        flex-shrink-0 flex items-center justify-center rounded-lg
-        bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold
-        ${density === 'compact' ? 'w-8 h-8 text-xs' : 
-          density === 'comfortable' ? 'w-12 h-12 text-sm' : 'w-10 h-10 text-xs'}
-      `}>
-        {getProjectInitials(project)}
-      </div>
-
-      {/* Contenido principal */}
+      {/* Contenido con dos columnas */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between">
-          {/* Información principal */}
+        <div className="flex items-center justify-between">
+          {/* COLUMNA IZQUIERDA: Nombre y Tipo */}
           <div className="flex-1 min-w-0">
             {/* Nombre del proyecto */}
-            <div className="flex items-center gap-2">
-              <p className={`
-                font-medium text-foreground truncate
-                ${density === 'compact' ? 'text-sm' : 'text-sm'}
-              `}>
-                {project.name}
-                {isActive && (
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    Activo
-                  </span>
-                )}
-              </p>
-            </div>
+            <p className={`
+              font-medium text-foreground truncate
+              ${density === 'compact' ? 'text-sm' : 'text-sm'}
+            `}>
+              {project.name}
+            </p>
 
-            {/* Descripción/Cliente */}
-            <div className="flex items-center gap-2 mt-1">
-              <p className={`
-                text-muted-foreground truncate
-                ${density === 'compact' ? 'text-xs' : 'text-sm'}
-              `}>
-                {project.description || project.project_data?.client_name || 'Sin descripción'}
-              </p>
-              
-              {/* Estado */}
-              <span className={`
-                inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                ${getStatusColor(project.status)}
-              `}>
-                {project.status || 'Sin estado'}
-              </span>
-            </div>
-
-            {/* Información adicional (ubicación/fecha) */}
-            {density !== 'compact' && (
-              <div className="flex items-center gap-4 mt-1">
-                {project.project_data?.city && (
-                  <span className="text-xs text-muted-foreground">
-                    📍 {project.project_data.city}
-                    {project.project_data.state && `, ${project.project_data.state}`}
-                  </span>
-                )}
-                
-                <span className="text-xs text-muted-foreground">
-                  Creado {format(new Date(project.created_at), 'dd MMM yyyy', { locale: es })}
-                </span>
-              </div>
-            )}
+            {/* Tipo del proyecto */}
+            <p className={`
+              text-muted-foreground truncate mt-1
+              ${density === 'compact' ? 'text-xs' : 'text-sm'}
+            `}>
+              {getProjectType(project)}
+            </p>
           </div>
 
-          {/* Información lateral */}
-          <div className="flex-shrink-0 text-right ml-4">
-            {/* Fecha de actualización o creación */}
+          {/* COLUMNA DERECHA: Fecha de creación y Badge activo */}
+          <div className="flex-shrink-0 text-right ml-4 flex flex-col items-end gap-1">
+            {/* Fecha de creación */}
             <p className={`
               text-muted-foreground
               ${density === 'compact' ? 'text-xs' : 'text-sm'}
             `}>
-              {project.updated_at 
-                ? format(new Date(project.updated_at), 'dd/MM/yy', { locale: es })
-                : format(new Date(project.created_at), 'dd/MM/yy', { locale: es })
-              }
+              {format(new Date(project.created_at), 'dd/MM/yy', { locale: es })}
             </p>
             
-            {/* Estado activo/inactivo */}
-            {density !== 'compact' && (
-              <div className="mt-1">
-                <span className={`
-                  inline-flex items-center w-2 h-2 rounded-full
-                  ${project.is_active ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}
-                `} />
-              </div>
+            {/* Badge activo únicamente si es el proyecto activo */}
+            {isActive && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[hsl(var(--accent))] text-white">
+                Activo
+              </span>
             )}
           </div>
         </div>
