@@ -16,6 +16,16 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
   const taskId = task.id || task.task_id
   const { data: materials = [], isLoading } = useTaskMaterials(taskId)
 
+  // Debug logging
+  console.log('🔍 TaskMaterialDetailPopover Debug:', {
+    taskId,
+    task_id: task.task_id,
+    task_full_id: task.id,
+    materialsCount: materials.length,
+    materials: materials.slice(0, 2), // First 2 materials for debugging
+    isLoading
+  })
+
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;

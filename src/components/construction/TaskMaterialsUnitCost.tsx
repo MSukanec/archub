@@ -9,7 +9,9 @@ export default function TaskMaterialsUnitCost({ task }: TaskMaterialsUnitCostPro
 
   // Calcular SOLO el costo por unidad (sin multiplicar por cantidad)
   const costPerUnit = materials.reduce((sum, material) => {
-    const unitPrice = material.material_view?.computed_unit_price || 0;
+    // material_view puede ser array o objeto
+    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
+    const unitPrice = materialView?.computed_unit_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
