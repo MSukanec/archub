@@ -290,18 +290,22 @@ const AdminTaskList = () => {
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-1">
           <Button
-            variant="ghost-icon"
+            variant="ghost"
+            size="icon-sm"
             onClick={() => handleEdit(task)}
+            className="hover:bg-[var(--button-ghost-hover-bg)]"
             title="Editar tarea"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="w-4 h-4" />
           </Button>
           <Button
-            variant="ghost-icon"
+            variant="ghost"
+            size="icon-sm"
             onClick={() => handleDelete(task)}
+            className="hover:bg-[var(--button-ghost-hover-bg)]"
             title="Eliminar tarea"
           >
-            <Trash2 className="h-4 w-4 text-red-500" />
+            <Trash2 className="w-4 h-4 text-red-500" />
           </Button>
         </div>
       )
