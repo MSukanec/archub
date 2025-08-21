@@ -71,7 +71,7 @@ export function ComboBoxMultiSelect({
             type="button"
             role="combobox"
             aria-expanded={open}
-            className="flex w-full items-center justify-between text-xs leading-tight py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1"
+            className="flex w-full items-center justify-between text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1"
           >
             <span className={cn(
               "truncate text-left",
@@ -116,7 +116,7 @@ export function ComboBoxMultiSelect({
             return option ? (
               <Badge
                 key={v}
-                className="text-xs bg-[var(--accent)] text-white cursor-pointer hover:bg-[var(--accent)]/80 transition-colors flex items-center gap-1"
+                className="text-sm md:text-xs bg-[var(--accent)] text-white cursor-pointer hover:bg-[var(--accent)]/80 transition-colors flex items-center gap-1"
                 onClick={() => handleRemove(v)}
               >
                 {option.label}
