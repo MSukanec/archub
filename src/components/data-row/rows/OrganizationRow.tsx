@@ -1,4 +1,5 @@
 import React from 'react';
+import DataRowCard from '../DataRowCard';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Crown, Zap } from 'lucide-react';
@@ -121,63 +122,44 @@ export default function OrganizationRow({
   className 
 }: OrganizationRowProps) {
   
-
-  
-  // Renderizar un DataRowCard customizado sin positioning absoluto
-  return (
-    <div
-      className={cn(
-        'w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 mb-3 transition-colors shadow-lg',
-        'py-3 gap-3',
-        // Estados interactivos
-        onClick && 'cursor-pointer hover:bg-[var(--card-hover-bg)] hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-        // Estado selected
-        selected && 'ring-2 ring-accent',
-        className
-      )}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
-      data-testid={`organization-row-${organization.id}`}
-    >
-      <div className="flex items-center gap-3">
-        {/* Leading Section - Avatar */}
-        <div className="flex-shrink-0">
-          <Avatar className="h-10 w-10">
-            {organization.logo_url && organization.logo_url.trim() !== '' && (
-              <AvatarImage 
-                src={organization.logo_url} 
-                alt={`Logo de ${organization.name}`}
-                className="object-cover"
-              />
-            )}
-            <AvatarFallback className="text-xs font-medium">
-              {getOrganizationInitials(organization.name)}
-            </AvatarFallback>
-          </Avatar>
+  // Contenido interno del card usando el nuevo sistema
+  const cardContent = (
+    <>
+      {/* Columna de contenido (principal) */}
+      <div className="flex-1 min-w-0">
+        {/* Title */}
+        <div className="font-semibold text-sm truncate">
+          {organization.name}
         </div>
 
-        {/* Content Section */}
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <div className="truncate leading-5 font-bold text-sm">
-            {organization.name}
-          </div>
-
-          {/* Plan Badge como subtitle */}
-          <div className="mt-1">
-            <PlanBadge plan={organization.plan} />
-          </div>
-        </div>
-
-        {/* Trailing Section - Avatares */}
-        <div className="flex items-center">
-          <OrganizationTrailing organizationId={organization.id} />
-          {/* Espacio mínimo para chevron si existe */}
-          {onClick && <div className="w-2" />}
+        {/* Plan Badge como subtitle */}
+        <div className="mt-1">
+          <PlanBadge plan={organization.plan} />
         </div>
       </div>
-    </div>
+
+      {/* Trailing Section - Avatares */}
+      <div className="flex items-center">
+        <OrganizationTrailing organizationId={organization.id} />
+        {/* Espacio mínimo para chevron si existe */}
+        {onClick && <div className="w-2" />}
+      </div>
+    </>
+  );
+
+  // Usar el nuevo DataRowCard
+  return (
+    <DataRowCard
+      avatarUrl={organization.logo_url && organization.logo_url.trim() !== '' ? organization.logo_url : undefined}
+      avatarFallback={getOrganizationInitials(organization.name)}
+      selected={selected}
+      density={density}
+      onClick={onClick}
+      className={className}
+      data-testid={`organization-row-${organization.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
   );
 }
 
