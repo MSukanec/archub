@@ -103,9 +103,9 @@ export function TaskMultiSelector({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => removeTask(task.id)}
-                  className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
+                  className="hover:bg-red-100 hover:text-red-600"
                 >
                   <X className="w-3 h-3" />
                 </Button>

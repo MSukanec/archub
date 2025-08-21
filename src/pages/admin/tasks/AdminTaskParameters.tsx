@@ -181,9 +181,8 @@ const AdminTaskParameters = () => {
         render: (value: TaskParameterOption) => (
           <div className="flex items-center gap-2">
             <Button
-              size="sm"
+              size="icon-sm"
               variant="ghost"
-              className="h-6 w-6 p-0"
               onClick={() => {
                 openModal('task-parameter-option', {
                   parameterId: parameter.id,
@@ -195,9 +194,9 @@ const AdminTaskParameters = () => {
               <Edit className="h-3 w-3" />
             </Button>
             <Button
-              size="sm"
+              size="icon-sm"
               variant="ghost"
-              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive"
               onClick={() => {
                 openModal('delete-confirmation', {
                   title: 'Eliminar Opción',

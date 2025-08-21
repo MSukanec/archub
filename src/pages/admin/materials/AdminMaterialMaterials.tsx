@@ -202,24 +202,24 @@ const AdminMaterialMateriales = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            size="icon-sm"
+            className="hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(material)}
           >
             <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
+            size="icon-sm"
+            className="text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDuplicate(material)}
           >
             <Copy className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+            size="icon-sm"
+            className="text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(material)}
           >
             <Trash2 className="h-3 w-3" />

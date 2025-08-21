@@ -150,9 +150,9 @@ const AdminTaskList = () => {
           <div className="flex items-center space-x-1">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => openModal('task-parameter', { parameter, isEditing: true })}
-              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              className="hover:bg-accent text-muted-foreground hover:text-foreground"
               title="Editar"
             >
               <Edit className="h-3 w-3" />
@@ -187,9 +187,9 @@ const AdminTaskList = () => {
                 <div className="flex items-center space-x-1">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => openModal('task-parameter-option', { option, parameter, isEditing: true })}
-                    className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                    className="hover:bg-accent text-muted-foreground hover:text-foreground"
                     title="Editar"
                   >
                     <Edit className="h-3 w-3" />
