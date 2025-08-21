@@ -48,30 +48,31 @@ export function useGeneratedTasks() {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          units:unit_id(name),
-          categories:category_id(name),
-          element_categories:element_category_id(name),
-          subcategories:subcategory_id(name)
-        `)
+      // Get main data from task_view
+      const { data: viewData, error: viewError } = await supabase
+        .from('task_view')
+        .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (viewError) throw viewError;
       
-      // Map the data to include related field names
-      const mappedData = data?.map(task => ({
+      // Get is_completed from tasks table
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('id, is_completed');
+      
+      if (tasksError) throw tasksError;
+      
+      // Create a map for quick lookup
+      const completionMap = new Map(tasksData?.map(task => [task.id, task.is_completed]) || []);
+      
+      // Merge the data
+      const mergedData = viewData?.map(task => ({
         ...task,
-        unit_name: task.units?.name,
-        category_name: task.categories?.name,
-        element_category_name: task.element_categories?.name,
-        subcategory_name: task.subcategories?.name,
-        display_name: task.custom_name || task.name_rendered || 'Sin nombre'
+        is_completed: completionMap.get(task.id) || false
       })) || [];
       
-      return mappedData as GeneratedTask[];
+      return mergedData as GeneratedTask[];
     }
   });
 }
