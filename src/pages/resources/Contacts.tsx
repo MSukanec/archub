@@ -495,8 +495,6 @@ export default function Contacts() {
         onHeaderSearchChange: setSearchValue,
         showFilters: true,
 
-        isHeaderFilterActive: sortBy !== 'name_asc' || filterByType !== 'all',
-        showHeaderClearFilters: sortBy !== 'name_asc' || filterByType !== 'all' || searchValue !== '',
         onHeaderClearFilters: () => {
           setSearchValue("");
           setSortBy('name_asc');

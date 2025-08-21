@@ -5,12 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserPlus, User, Mail, Phone, Building2, MapPin, FileText, Search, Check, X, Link, Unlink } from "lucide-react";
 
-import { FormModalLayout } from "../../form/FormModalLayout";
-import { FormModalHeader } from "../../form/FormModalHeader";
-import { FormModalFooter } from "../../form/FormModalFooter";
-import { FormSubsectionButton } from "../../form/FormSubsectionButton";
-import { useModalPanelStore } from "../../form/modalPanelStore";
-import { ContactAttachmentsSubform } from "./contact-forms/ContactAttachmentsSubform";
+import { FormModalLayout } from "../../../form/FormModalLayout";
+import { FormModalHeader } from "../../../form/FormModalHeader";
+import { FormModalFooter } from "../../../form/FormModalFooter";
+import { FormSubsectionButton } from "../../../form/FormSubsectionButton";
+import { useModalPanelStore } from "../../../form/modalPanelStore";
+import { ContactAttachmentsSubform } from "../contact-forms/ContactAttachmentsSubform";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

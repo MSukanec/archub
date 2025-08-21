@@ -6,8 +6,8 @@ import { GalleryFormModal } from '../modals/project/GalleryFormModal';
 import { BoardFormModal } from '../modals/organizations/BoardFormModal';
 import { CardFormModal } from '../modals/organizations/CardFormModal';
 import { ListFormModal } from '../modals/organizations/ListFormModal';
-import ContactModal from '../modals/resources/ContactModal'
-import { ContactModalView } from '../modals/resources/ContactModalView'
+import ContactModal from '../modals/resources/contacts/ContactModal'
+import { ContactModalView } from '../modals/resources/contacts/ContactModalView'
 import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
 import ClientObligationModal from '../modals/finances/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
