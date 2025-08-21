@@ -1486,62 +1486,59 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 onValueChange={(values) => {
                   console.log('🎯 CascadingSelect values:', values)
                   
-                  try {
-                    const typeId = values[0] || ''
-                    const categoryId = values[1] || ''
-                    const subcategoryId = values[2] || ''
+                  const typeId = values[0] || ''
+                  const categoryId = values[1] || ''
+                  const subcategoryId = values[2] || ''
+                  
+                  console.log('🎯 Step 1 - typeId extracted:', typeId)
+                  console.log('🎯 Step 2 - current selectedTypeId:', selectedTypeId)
+                  
+                  // SIEMPRE actualizar los estados de categorías
+                  setSelectedCategoryId(categoryId)
+                  setSelectedSubcategoryId(subcategoryId)
+                  
+                  // SIEMPRE actualizar formulario
+                  form.setValue('category_id', categoryId)
+                  form.setValue('subcategory_id', subcategoryId)
+                  
+                  console.log('🎯 Step 3 - Form and states updated')
+                  
+                  // CAMBIO CLAVE: SIEMPRE procesar el typeId, sin importar si es diferente
+                  if (typeId) {
+                    console.log('🎯 Step 4 - Processing typeId (ALWAYS):', typeId)
+                    setSelectedTypeId(typeId)
                     
-                    console.log('🎯 Step 1 - typeId extracted:', typeId)
-                    
-                    // Actualizar estados de categorías
-                    setSelectedCategoryId(categoryId)
-                    setSelectedSubcategoryId(subcategoryId)
-                    
-                    console.log('🎯 Step 2 - States updated')
-                    
-                    // Actualizar formulario
-                    form.setValue('category_id', categoryId)
-                    form.setValue('subcategory_id', subcategoryId)
-                    
-                    console.log('🎯 Step 3 - Form updated')
-                    
-                    // Actualizar selectedTypeId y detectar tipo de movimiento
-                    if (typeId && typeId !== selectedTypeId) {
-                      console.log('🎯 Step 4 - Setting new typeId:', typeId)
-                      setSelectedTypeId(typeId)
+                    // Detectar tipo de movimiento por view_mode 
+                    if (movementConcepts) {
+                      const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
+                      console.log('🎯 Step 5 - Found concept:', selectedConcept?.name, 'view_mode:', selectedConcept?.view_mode)
                       
-                      // Detectar tipo de movimiento por view_mode 
-                      if (movementConcepts) {
-                        const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
-                        console.log('🎯 Step 5 - Found concept:', selectedConcept?.name, 'view_mode:', selectedConcept?.view_mode)
+                      if (selectedConcept?.view_mode) {
+                        const viewMode = selectedConcept.view_mode.trim()
+                        console.log('🎯 Step 6 - Processing view_mode:', `"${viewMode}"`)
                         
-                        if (selectedConcept?.view_mode) {
-                          const viewMode = selectedConcept.view_mode.trim()
-                          console.log('🎯 Step 6 - Processing view_mode:', `"${viewMode}"`)
-                          
-                          if (viewMode.includes("conversion")) {
-                            console.log('🎯 Step 7 - Setting movement type to CONVERSION')
-                            setMovementType('conversion')
-                          } else if (viewMode.includes("transfer")) {
-                            console.log('🎯 Step 7 - Setting movement type to TRANSFER')
-                            setMovementType('transfer')
-                          } else {
-                            console.log('🎯 Step 7 - Setting movement type to NORMAL')
-                            setMovementType('normal')
-                          }
+                        if (viewMode.includes("conversion")) {
+                          console.log('🎯 Step 7 - Setting movement type to CONVERSION')
+                          setMovementType('conversion')
+                        } else if (viewMode.includes("transfer")) {
+                          console.log('🎯 Step 7 - Setting movement type to TRANSFER')  
+                          setMovementType('transfer')
                         } else {
-                          console.log('🎯 Step 6 - No view_mode, setting to NORMAL')
+                          console.log('🎯 Step 7 - Setting movement type to NORMAL')
                           setMovementType('normal')
                         }
+                      } else {
+                        console.log('🎯 Step 6 - No view_mode, setting to NORMAL')
+                        setMovementType('normal')
                       }
                     } else {
-                      console.log('🎯 Step 4 - Same typeId, skipping update')
+                      console.log('🎯 Step 5 - No movementConcepts available')
                     }
-                    
-                    console.log('🎯 Step FINAL - Callback completed successfully')
-                  } catch (error) {
-                    console.error('🎯 ERROR in CascadingSelect callback:', error)
+                  } else {
+                    console.log('🎯 Step 4 - No typeId provided')
                   }
+                  
+                  console.log('🎯 Step FINAL - Callback completed successfully')
                 }}
                 placeholder="Seleccionar tipo..."
               />
