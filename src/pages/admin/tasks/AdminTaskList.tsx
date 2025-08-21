@@ -252,6 +252,16 @@ const AdminTaskList = () => {
       )
     },
     { 
+      key: 'name_rendered', 
+      label: 'Nombre Paramétrico', 
+      width: 'minmax(0, 1fr)',
+      render: (task: GeneratedTask) => (
+        <div className="text-sm text-muted-foreground">
+          {task.name_rendered || 'Sin nombre paramétrico'}
+        </div>
+      )
+    },
+    { 
       key: 'unit_name', 
       label: 'Unidad', 
       width: '8%',
