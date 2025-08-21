@@ -45,6 +45,18 @@ const getProjectType = (project: Project): string => {
   return project.status || 'Proyecto';
 };
 
+// Función helper para mapear status a texto legible
+const getStatusText = (status: string): string => {
+  const statusMap: { [key: string]: string } = {
+    'active': 'En proceso',
+    'completed': 'Completado',
+    'paused': 'Pausado',
+    'cancelled': 'Cancelado',
+    'planning': 'Planificación'
+  };
+  return statusMap[status] || status;
+};
+
 export default function ProjectRow({ 
   project, 
   onClick, 
@@ -77,12 +89,12 @@ export default function ProjectRow({
               {project.name}
             </p>
 
-            {/* Tipo del proyecto */}
+            {/* Status del proyecto */}
             <p className={`
               text-muted-foreground truncate mt-1
               ${density === 'compact' ? 'text-xs' : 'text-sm'}
             `}>
-              {getProjectType(project)}
+              {getStatusText(project.status)}
             </p>
           </div>
 
@@ -98,7 +110,13 @@ export default function ProjectRow({
             
             {/* Badge activo únicamente si es el proyecto activo */}
             {isActive && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--accent))' }}>
+              <span 
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" 
+                style={{ 
+                  backgroundColor: 'hsl(76, 100%, 40%)',
+                  color: 'white'
+                }}
+              >
                 Activo
               </span>
             )}

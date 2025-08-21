@@ -155,10 +155,11 @@ export default function DataRowCard({
         selected && 'ring-2 ring-accent',
         // Color del borde lateral
         getBorderColorClass(borderColor),
-        // Borde activo con --accent
-        activeBorder && 'border-2 border-[hsl(var(--accent))] shadow-md',
+        // Borde activo con --accent - aplicado con style
+        activeBorder && 'border-2 shadow-md',
         className
       )}
+      style={activeBorder ? { borderColor: 'hsl(76, 100%, 40%)' } : undefined}
       role={isInteractive ? 'button' : undefined}
       tabIndex={isInteractive ? 0 : undefined}
       onClick={isInteractive ? onClick : undefined}
