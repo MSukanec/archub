@@ -185,26 +185,84 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
   const { projectBalances, organizationBalances, isLoading } = useWalletCurrencyBalances(organizationId, projectId);
   const isMobile = useIsMobile();
 
+  // Mobile: renderizado simple
+  if (isMobile) {
+    if (isLoading) {
+      return (
+        <div className="mb-4 space-y-1">
+          <div className="animate-pulse">
+            <div className="bg-muted rounded h-4 w-24"></div>
+          </div>
+          <div className="animate-pulse">
+            <div className="bg-muted rounded h-4 w-28"></div>
+          </div>
+        </div>
+      );
+    }
+
+    // Obtener balances consolidados (proyecto + organización)
+    const allBalances = projectId ? projectBalances : organizationBalances;
+    
+    if (allBalances.length === 0) {
+      return null;
+    }
+
+    const formatAmount = (amount: number) => {
+      return new Intl.NumberFormat('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(Math.abs(amount));
+    };
+
+    const getBalanceSign = (amount: number) => {
+      if (amount > 0) return "+";
+      if (amount < 0) return "-";
+      return "";
+    };
+
+    const getBalanceColor = (amount: number) => {
+      if (amount > 0) return "text-green-600";
+      if (amount < 0) return "text-red-600";
+      return "text-muted-foreground";
+    };
+
+    return (
+      <div className="mb-4 space-y-1">
+        {allBalances.slice(0, 2).map((currency) => (
+          <div key={currency.currencyCode} className="flex items-center justify-between">
+            <span className="font-medium text-foreground text-sm">
+              {currency.currencyCode}
+            </span>
+            <span className={`font-bold text-sm ${getBalanceColor(currency.totalBalance)}`}>
+              {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: renderizado completo con tarjetas
   if (isLoading) {
     return (
-      <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}>
+      <div className="grid gap-3 mb-4 grid-cols-1 md:grid-cols-2">
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-          <CardContent className={isMobile ? "p-3" : "p-6"}>
-            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
-              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-3">
+              <div className="bg-muted rounded h-4 w-1/3"></div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                  <div className="bg-muted rounded h-4 w-12 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="bg-muted rounded h-3"></div>
+                    <div className="bg-muted rounded h-3"></div>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                  <div className="bg-muted rounded h-4 w-12 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="bg-muted rounded h-3"></div>
+                    <div className="bg-muted rounded h-3"></div>
                   </div>
                 </div>
               </div>
@@ -212,22 +270,22 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
           </CardContent>
         </Card>
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
-          <CardContent className={isMobile ? "p-3" : "p-6"}>
-            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
-              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-3">
+              <div className="bg-muted rounded h-4 w-1/3"></div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                  <div className="bg-muted rounded h-4 w-12 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="bg-muted rounded h-3"></div>
+                    <div className="bg-muted rounded h-3"></div>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                  <div className="bg-muted rounded h-4 w-12 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="bg-muted rounded h-3"></div>
+                    <div className="bg-muted rounded h-3"></div>
                   </div>
                 </div>
               </div>
