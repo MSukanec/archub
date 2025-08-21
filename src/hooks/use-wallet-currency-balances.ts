@@ -85,13 +85,10 @@ export function useWalletCurrencyBalances(organizationId?: string, projectId?: s
         }
       });
 
-      // Group by currency and filter out wallets with 0 balance
+      // Group by currency
       const currencyGroups = new Map<string, CurrencyGroupedData>();
       
       walletCurrencyMap.forEach(walletCurrency => {
-        // Skip wallets with 0 balance to avoid showing empty wallets
-        if (walletCurrency.balance === 0) return;
-        
         const currencyCode = walletCurrency.currencyCode;
         
         if (!currencyGroups.has(currencyCode)) {
