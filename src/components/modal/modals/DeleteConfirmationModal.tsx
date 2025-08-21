@@ -345,12 +345,12 @@ export default function DeleteConfirmationModal({
         <Button
           type="button"
           disabled={isLoading}
-          className={`w-3/4 relative overflow-hidden transition-all duration-75 ${
+          className={`w-3/4 relative overflow-hidden transition-all duration-75 text-white ${
             isLoading 
-              ? 'bg-destructive/70 text-destructive-foreground cursor-not-allowed' 
+              ? 'bg-destructive/70 cursor-not-allowed' 
               : isPressed
-                ? 'bg-destructive text-destructive-foreground' 
-                : 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                ? 'bg-destructive' 
+                : 'bg-destructive hover:bg-destructive/90'
           }`}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
