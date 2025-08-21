@@ -15,6 +15,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { AmountInput } from '@/components/ui-custom/AmountInput'
 
 interface Contact {
   id: string
@@ -37,7 +38,7 @@ const clientObligationSchema = z.object({
   client_id: z.string().min(1, 'Cliente es requerido'),
   unit: z.string().optional(),
   currency_id: z.string().min(1, 'Moneda es requerida'),
-  committed_amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
+  amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   exchange_rate: z.number().min(0.01, 'Tasa de cambio debe ser mayor a 0').optional()
 })
 
@@ -70,7 +71,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
       client_id: editingClient?.client_id || '',
       unit: editingClient?.unit || '',
       currency_id: editingClient?.currency_id || userData?.organization_preferences?.default_currency || '',
-      committed_amount: editingClient?.committed_amount || 0,
+      amount: editingClient?.committed_amount || 0,
       exchange_rate: editingClient?.exchange_rate || undefined
     }
   })
@@ -108,7 +109,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         client_id: editingClient.client_id,
         unit: editingClient.unit,
         currency_id: editingClient.currency_id,
-        committed_amount: editingClient.committed_amount,
+        amount: editingClient.committed_amount,
         exchange_rate: editingClient.exchange_rate
       })
       
@@ -117,7 +118,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         client_id: editingClient.client_id || '',
         unit: editingClient.unit || '',
         currency_id: editingClient.currency_id || userData?.organization_preferences?.default_currency || '',
-        committed_amount: editingClient.committed_amount || 0,
+        amount: editingClient.committed_amount || 0,
         exchange_rate: editingClient.exchange_rate || undefined
       })
     }
@@ -191,7 +192,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           .update({
             client_id: data.client_id,
             unit: data.unit || null,
-            committed_amount: data.committed_amount,
+            committed_amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || null
           })
@@ -217,7 +218,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           const { data: result, error } = await supabase
             .from('project_clients')
             .update({
-              committed_amount: data.committed_amount,
+              committed_amount: data.amount,
               currency_id: data.currency_id,
               exchange_rate: data.exchange_rate || null
             })
@@ -236,7 +237,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
               project_id: projectId,
               client_id: data.client_id,
               unit: data.unit || null,
-              committed_amount: data.committed_amount,
+              committed_amount: data.amount,
               currency_id: data.currency_id,
               exchange_rate: data.exchange_rate || null,
               organization_id: organizationId
@@ -280,7 +281,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
         client_id: editingClient.client_id || '',
         unit: editingClient.unit || '',
         currency_id: editingClient.currency_id || userData?.organization_preferences?.default_currency || '',
-        committed_amount: editingClient.committed_amount || 0,
+        amount: editingClient.committed_amount || 0,
         exchange_rate: editingClient.exchange_rate || undefined
       })
     }
@@ -298,10 +299,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
     }
   }
 
-  // Get selected currency symbol
-  const selectedCurrencyId = form.watch('currency_id')
-  const selectedCurrency = currencies?.find(c => c.currency.id === selectedCurrencyId)
-  const currencySymbol = selectedCurrency?.currency?.symbol || '$'
+
 
   // Get available contacts (allow all contacts - clients can have multiple commitments)
   const availableContacts = organizationContacts || []
@@ -382,65 +380,32 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           />
         </div>
 
-        {/* Fila: Moneda | Cantidad */}
+        {/* Fila: Moneda y Monto | Tasa de Cambio */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Moneda */}
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-medium">Moneda</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una moneda" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies?.map(currency => (
-                        <SelectItem key={currency.currency.id} value={currency.currency.id}>
-                          {currency.currency.symbol} - {currency.currency.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Moneda y Monto */}
+          <FormItem>
+            <FormLabel className="text-xs font-medium">Moneda y Monto</FormLabel>
+            <FormControl>
+              <AmountInput
+                value={form.watch('amount') || undefined}
+                currency={form.watch('currency_id') || ''}
+                currencies={currencies?.map(orgCurrency => ({
+                  id: orgCurrency.currency?.id || '',
+                  name: orgCurrency.currency?.name || 'Sin nombre',
+                  symbol: orgCurrency.currency?.symbol || '$'
+                })) || []}
+                onValueChange={(value) => {
+                  form.setValue('amount', value || 0)
+                }}
+                onCurrencyChange={(currencyId) => {
+                  form.setValue('currency_id', currencyId)
+                }}
+                placeholder="0.00"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
 
-          {/* Cantidad */}
-          <FormField
-            control={form.control}
-            name="committed_amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-medium">Cantidad</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-                      {currencySymbol}
-                    </span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      className="pl-8"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Fila: Tasa de Cambio */}
-        <div className="grid grid-cols-1 gap-4">
           {/* Tasa de Cambio */}
           <FormField
             control={form.control}
@@ -464,6 +429,8 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
             )}
           />
         </div>
+
+
 
       </form>
     </Form>
