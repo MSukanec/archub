@@ -11,7 +11,7 @@ import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtot
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
-import { TaskRow } from '@/components/data-row/rows/TaskRow'
+import TaskRow from '@/components/data-row/rows/TaskRow'
 
 interface TaskListProps {
   tasks: any[]
