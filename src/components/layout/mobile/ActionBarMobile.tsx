@@ -239,10 +239,10 @@ export function ActionBarMobile() {
           {actions.home && (
             <button
               onClick={actions.home.onClick}
-              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
             >
               <Home 
-                className="h-6 w-6 transition-colors" 
+                className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
                   color: 'var(--text-secondary)' 
                 }} 
@@ -254,10 +254,10 @@ export function ActionBarMobile() {
           {actions.search && (
             <button
               onClick={handleSearchClick}
-              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
             >
               <Search 
-                className="h-6 w-6 transition-colors" 
+                className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
                   color: showSearchPopover ? 'var(--accent)' : 'var(--text-secondary)' 
                 }} 
@@ -280,10 +280,10 @@ export function ActionBarMobile() {
           {actions.filter && (
             <button
               onClick={handleFilterClick}
-              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
             >
               <Filter 
-                className="h-6 w-6 transition-colors" 
+                className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
                   color: showFilterPopover ? 'var(--accent)' : 'var(--text-secondary)' 
                 }} 
@@ -295,10 +295,10 @@ export function ActionBarMobile() {
           {actions.notifications && (
             <button
               onClick={handleNotificationsClick}
-              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
             >
               <Bell 
-                className="h-6 w-6 transition-colors" 
+                className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
                   color: showNotificationsPopover ? 'var(--accent)' : 'var(--text-secondary)' 
                 }} 
