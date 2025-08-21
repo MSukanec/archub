@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore"
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore"
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout"
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
+import { Button } from "@/components/ui/button"
 
 interface ReplacementOption {
   label: string
@@ -50,6 +51,12 @@ export default function DeleteConfirmationModal({
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
   const [inputValue, setInputValue] = useState<string>('')
+  
+  // Estados para el botón de mantener presionado (modo dangerous)
+  const [isPressed, setIsPressed] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const pressStartTime = useRef<number>(0)
 
   // Always set to edit panel since this is a form modal
   const { setPanel } = useModalPanelStore()
@@ -57,6 +64,69 @@ export default function DeleteConfirmationModal({
   useEffect(() => {
     setPanel('edit')  // Always edit for form modals as per README.md
   }, [setPanel])
+
+  // Manejar el timer del botón presionado
+  useEffect(() => {
+    if (isPressed && mode === 'dangerous') {
+      pressStartTime.current = Date.now()
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - pressStartTime.current
+        const newProgress = Math.min(elapsed / 4000, 1) // 4 segundos = 100%
+        
+        setProgress(newProgress)
+        
+        if (newProgress >= 1) {
+          // Completado - ejecutar acción
+          handlePressComplete()
+          return
+        }
+        
+        timerRef.current = setTimeout(updateProgress, 16) // ~60fps
+      }
+      
+      updateProgress()
+    } else {
+      // Resetear progreso si se suelta antes de completar
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      setProgress(0)
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [isPressed, mode])
+
+  const handlePressComplete = () => {
+    setIsPressed(false)
+    setProgress(0)
+    
+    const confirmFunction = onConfirm || onDelete
+    if (confirmFunction) {
+      confirmFunction()
+      closeModal()
+    }
+  }
+
+  const handleMouseDown = () => {
+    if (mode === 'dangerous' && !isLoading) {
+      setIsPressed(true)
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsPressed(false)
+  }
+
+  const handleMouseLeave = () => {
+    setIsPressed(false)
+  }
 
   const handleSubmit = () => {
     if (mode === 'simple') {
@@ -111,9 +181,16 @@ export default function DeleteConfirmationModal({
   const isSubmitDisabled = () => {
     if (isLoading) return true
     
+    // En modo dangerous ahora nunca está deshabilitado - se controla por presionado
+    if (mode === 'dangerous') {
+      return false
+    }
+    
+    /* COMENTADO: Lógica anterior que requería escribir texto
     if (mode === 'dangerous') {
       return inputValue.trim() !== (itemName || '').trim()
     }
+    */
     
     if (mode === 'replace' && actionType === 'replace') {
       return !selectedReplacementId
@@ -143,7 +220,24 @@ export default function DeleteConfirmationModal({
         </div>
       </div>
 
-      {/* Dangerous mode input */}
+      {/* Dangerous mode - Hold to delete */}
+      {mode === 'dangerous' && itemName && (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive font-medium">
+                Esta acción no se puede deshacer
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Para confirmar, mantené presionado el botón "Eliminar" por 4 segundos
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Dangerous mode input - COMENTADO: Ya no se usa la funcionalidad de escribir texto
       {mode === 'dangerous' && itemName && (
         <div className="space-y-3">
           <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
@@ -166,6 +260,7 @@ export default function DeleteConfirmationModal({
           />
         </div>
       )}
+      */}
 
       {/* Replace mode controls */}
       {mode === 'replace' && (
@@ -235,7 +330,65 @@ export default function DeleteConfirmationModal({
     />
   );
 
-  const footerContent = (
+  // Botón personalizado para modo dangerous con progreso visual
+  const customDangerousButton = mode === 'dangerous' ? (
+    <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
+      <div className="flex gap-2 w-full">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleCancel}
+          className="w-1/4"
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="button"
+          disabled={isLoading}
+          className={`w-3/4 relative overflow-hidden transition-all duration-75 ${
+            isLoading 
+              ? 'bg-destructive/70 text-destructive-foreground cursor-not-allowed' 
+              : isPressed
+                ? 'bg-destructive text-destructive-foreground' 
+                : 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+          }`}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            background: isPressed 
+              ? `linear-gradient(to right, 
+                  hsl(var(--destructive)) 0%, 
+                  hsl(var(--destructive)) ${progress * 100}%, 
+                  hsl(var(--destructive)/0.7) ${progress * 100}%, 
+                  hsl(var(--destructive)/0.7) 100%)`
+              : undefined
+          }}
+        >
+          <span className="relative z-10">
+            {isLoading 
+              ? 'Eliminando...' 
+              : isPressed 
+                ? `Mantené presionado... ${Math.round(progress * 100)}%`
+                : 'Mantener Presionado para Eliminar'
+            }
+          </span>
+          {/* Barra de progreso visual adicional */}
+          {isPressed && (
+            <div 
+              className="absolute inset-0 bg-red-600/30 transition-all duration-75 ease-linear"
+              style={{
+                transform: `scaleX(${progress})`,
+                transformOrigin: 'left center'
+              }}
+            />
+          )}
+        </Button>
+      </div>
+    </div>
+  ) : null;
+
+  const footerContent = mode === 'dangerous' ? customDangerousButton : (
     <FormModalFooter
       cancelText="Cancelar"
       onLeftClick={handleCancel}
