@@ -14,6 +14,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import ProjectRow from '@/components/data-row/rows/ProjectRow'
+import ProjectFilterPopover from '@/components/popovers/ProjectFilterPopover'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,6 +35,11 @@ export default function Projects() {
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
+
+  // Filter states
+  const [filterByType, setFilterByType] = useState('all')
+  const [filterByStatus, setFilterByStatus] = useState('all')
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Mobile action bar
   const { 
@@ -218,11 +224,29 @@ export default function Projects() {
     is_active: project.id === activeProjectId
   }))
   
+  // Apply filters
+  const filteredProjects = projectsWithActive.filter(project => {
+    const matchesType = filterByType === 'all' || 
+      (project.description?.toLowerCase().includes(filterByType.toLowerCase())) ||
+      (project.project_data?.client_name?.toLowerCase().includes(filterByType.toLowerCase())) ||
+      (project.status?.toLowerCase() === filterByType.toLowerCase());
+    
+    const matchesStatus = filterByStatus === 'all' || 
+      project.status?.toLowerCase() === filterByStatus.toLowerCase();
+
+    return matchesType && matchesStatus;
+  })
+  
   // Put active project first
   const sortedProjects = activeProjectId ? [
-    ...projectsWithActive.filter(project => project.id === activeProjectId),
-    ...projectsWithActive.filter(project => project.id !== activeProjectId)
-  ] : projectsWithActive
+    ...filteredProjects.filter(project => project.id === activeProjectId),
+    ...filteredProjects.filter(project => project.id !== activeProjectId)
+  ] : filteredProjects
+
+  const handleClearFilters = () => {
+    setFilterByType('all')
+    setFilterByStatus('all')
+  }
 
   // Mutación para seleccionar proyecto  
   const selectProjectMutation = useMutation({
@@ -377,7 +401,8 @@ export default function Projects() {
           id: 'filter', 
           label: 'Filtros', 
           icon: <Filter className="h-6 w-6" />,
-          onClick: () => {} 
+          onClick: () => setIsFilterOpen(!isFilterOpen),
+          isActive: isFilterOpen
         },
         notifications: { 
           id: 'notifications', 
@@ -442,6 +467,21 @@ export default function Projects() {
         {/* Tab: Proyectos */}
         {activeTab === 'projects' && (
           <>
+            {/* Filter Popover - Only visible on mobile when action bar is present */}
+            {isMobile && (
+              <ProjectFilterPopover
+                filterByType={filterByType}
+                onFilterByTypeChange={setFilterByType}
+                filterByStatus={filterByStatus}
+                onFilterByStatusChange={setFilterByStatus}
+                onClearFilters={handleClearFilters}
+                open={isFilterOpen}
+                onOpenChange={setIsFilterOpen}
+              >
+                <div /> {/* Invisible trigger, controlled by action bar */}
+              </ProjectFilterPopover>
+            )}
+
             {/* ProjectHeroCard - Show for active project */}
             {activeProjectId && (
               <ProjectHeroCard 
