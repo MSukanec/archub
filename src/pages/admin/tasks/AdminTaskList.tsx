@@ -42,9 +42,9 @@ const AdminTaskList = () => {
     .filter((task: GeneratedTask) => {
       // Search filter - search in task name
       const matchesSearch = !searchValue || 
-        task.display_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        (task.custom_name || task.name_rendered)?.toLowerCase().includes(searchValue.toLowerCase()) ||
         task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.element_category_name?.toLowerCase().includes(searchValue.toLowerCase())
+        task.category?.toLowerCase().includes(searchValue.toLowerCase())
       
       return matchesSearch
     })
@@ -61,7 +61,7 @@ const AdminTaskList = () => {
     if (groupingType === 'rubros') {
       return filteredGeneratedTasks.map(task => ({
         ...task,
-        groupKey: task.element_category_name || 'Sin rubro'
+        groupKey: task.category || 'Sin rubro'
       }));
     }
     
@@ -226,14 +226,14 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'element_category_name', 
+      key: 'category', 
       label: 'Rubro', 
       width: '12%',
       render: (task: GeneratedTask) => (
         <div>
-          {task.element_category_name ? (
+          {task.category ? (
             <Badge variant="outline" className="text-xs">
-              {task.element_category_name}
+              {task.category}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin rubro</span>
@@ -262,14 +262,14 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'unit_name', 
+      key: 'unit', 
       label: 'Unidad', 
       width: '8%',
       render: (task: GeneratedTask) => (
         <div>
-          {task.unit_name ? (
+          {task.unit ? (
             <Badge variant="secondary" className="text-xs">
-              {task.unit_name}
+              {task.unit}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin unidad</span>

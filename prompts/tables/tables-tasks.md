@@ -111,87 +111,6 @@ TABLA TASK_CATEGORIES:
   }
 ]
 
-TABLA (VISTA) TASK_VIEW:
-
-[
-  {
-    "column_name": "id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone"
-  },
-  {
-    "column_name": "param_values",
-    "data_type": "jsonb"
-  },
-  {
-    "column_name": "param_order",
-    "data_type": "ARRAY"
-  },
-  {
-    "column_name": "name_rendered",
-    "data_type": "text"
-  },
-  {
-    "column_name": "custom_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "code",
-    "data_type": "text"
-  },
-  {
-    "column_name": "is_system",
-    "data_type": "boolean"
-  },
-  {
-    "column_name": "organization_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "unit_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "unit_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "element_category_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "element_category_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "subcategory_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "subcategory_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "category_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "category_name",
-    "data_type": "text"
-  },
-  {
-    "column_name": "display_name",
-    "data_type": "text"
-  }
-]
-
 TABLA TASK_PARAMETER_DEPENDENCIES
 
 [
@@ -472,5 +391,62 @@ TABLA TASK_TEMPLATE_PARAMETERS:
   {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
+  }
+]
+
+VISTA TASKS_VIEW:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "param_values",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "param_order",
+    "data_type": "ARRAY"
+  },
+  {
+    "column_name": "name_rendered",
+    "data_type": "text"
+  },
+  {
+    "column_name": "custom_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_completed",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "category",
+    "data_type": "text"
   }
 ]

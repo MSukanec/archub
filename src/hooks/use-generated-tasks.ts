@@ -9,18 +9,11 @@ export interface GeneratedTask {
   param_order?: string[]; // Array of parameter slugs in order
   name_rendered: string;
   custom_name?: string;
-  display_name: string;
-  unit_id?: string;
-  unit_name?: string;
-  category_id?: string;
-  category_name?: string;
-  element_category_id?: string;
-  element_category_name?: string;
-  subcategory_id?: string;
-  subcategory_name?: string;
   organization_id?: string;
   is_system: boolean;
   is_completed?: boolean;
+  unit: string;
+  category: string;
   created_at: string;
   updated_at: string;
 }
@@ -49,29 +42,12 @@ export function useGeneratedTasks() {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          units:unit_id(name),
-          categories:category_id(name),
-          element_categories:element_category_id(name),
-          subcategories:subcategory_id(name)
-        `)
+        .from('tasks_view')
+        .select(`*`)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      
-      // Map the data to include related field names
-      const mappedData = data?.map(task => ({
-        ...task,
-        unit_name: task.units?.name,
-        category_name: task.categories?.name,
-        element_category_name: task.element_categories?.name,
-        subcategory_name: task.subcategories?.name,
-        display_name: task.custom_name || task.name_rendered || 'Sin nombre'
-      })) || [];
-      
-      return mappedData as GeneratedTask[];
+      return data as GeneratedTask[];
     }
   });
 }
