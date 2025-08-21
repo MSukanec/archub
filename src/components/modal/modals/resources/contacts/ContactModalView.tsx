@@ -112,36 +112,33 @@ export function ContactModalView({ modalData, onClose, onEdit, onDelete }: Conta
         <div className="flex justify-center gap-3">
           {contact.phone && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant="default"
+              size="icon"
               onClick={handleCall}
-              className="flex items-center gap-2"
+              className="h-10 w-10"
             >
               <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline">Llamar</span>
             </Button>
           )}
           
           {contact.email && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant="default"
+              size="icon"
               onClick={handleEmail}
-              className="flex items-center gap-2"
+              className="h-10 w-10"
             >
               <Mail className="h-4 w-4" />
-              <span className="hidden sm:inline">Email</span>
             </Button>
           )}
           
           <Button
-            variant="ghost"
-            size="sm"
+            variant="default"
+            size="icon"
             onClick={handleShare}
-            className="flex items-center gap-2"
+            className="h-10 w-10"
           >
             <Share2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Compartir</span>
           </Button>
         </div>
       </div>
