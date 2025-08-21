@@ -12,7 +12,9 @@ interface TaskMaterialDetailPopoverProps {
 
 export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMaterialDetailPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id)
+  // Use task.id if available (for GeneratedTask), otherwise fallback to task.task_id (for construction tasks)
+  const taskId = task.id || task.task_id
+  const { data: materials = [], isLoading } = useTaskMaterials(taskId)
 
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
