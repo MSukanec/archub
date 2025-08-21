@@ -138,8 +138,9 @@ export function TaskList({
       key: 'unit_cost',
       label: 'Costo por Unidad',
       render: (task: any) => (
-        <div className="text-center">
+        <div className="flex items-center justify-center gap-2">
           <TaskMaterialsSubtotal task={task} />
+          <TaskMaterialDetailPopover task={task} showCost={false} />
         </div>
       ),
       width: '10%',
@@ -166,7 +167,6 @@ export function TaskList({
       label: 'Acciones',
       render: (task: any) => (
         <div className="flex gap-1 justify-center">
-          <TaskMaterialDetailPopover task={task} showCost={false} />
           <Button
             variant="ghost"
             size="sm"
@@ -316,15 +316,7 @@ export function TaskList({
               </div>
               <div></div>
               <div></div>
-              <div className="flex items-center justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </div>
+              <div></div>
               <div className="text-left font-medium">{formatCurrency(totalSubtotal)}</div>
               <div></div>
             </>
