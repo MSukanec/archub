@@ -15,3 +15,5 @@ export type { Subcontract } from './SubcontractRow';
 
 export { default as OrganizationRow } from './OrganizationRow';
 export type { Organization } from './OrganizationRow';
+
+export { default as AnalysisTaskRow } from './AnalysisTaskRow';

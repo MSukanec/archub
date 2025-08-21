@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { AnalysisTaskRow } from '@/components/data-row/rows'
 
 export default function AnalysisTasks() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -138,6 +139,25 @@ export default function AnalysisTasks() {
       data={filteredTasks}
       isLoading={tasksLoading}
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+      mobileComponent={(task: any) => (
+        <AnalysisTaskRow
+          task={task}
+          onEdit={() => openModal('parametric-task', { taskId: task.id })}
+          onDelete={
+            !task.is_system && task.organization_id === userData?.organization?.id
+              ? () => showDeleteConfirmation({
+                  title: "Eliminar tarea",
+                  description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
+                  itemName: task.name_rendered || 'esta tarea',
+                  onConfirm: () => {
+                    // TODO: Implementar eliminación de tarea
+                    console.log('Eliminar tarea:', task.id)
+                  }
+                })
+              : undefined
+          }
+        />
+      )}
       topBar={{
         tabs: ['Sin Agrupar', 'Por Rubros'],
         activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',
