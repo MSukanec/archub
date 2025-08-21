@@ -61,44 +61,48 @@ export default function TransferRow({
     return 'U';
   };
 
-  // Props para DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    // Content
-    title: 'Transferencia',
-    subtitle: `${transfer.from_wallet} → ${transfer.to_wallet}`,
-    
-    // Leading - Avatar del usuario creador
-    avatarUrl: getCreatorAvatar(),
-    avatarFallback: getCreatorInitials(),
-    
-    // Trailing - Importe y billeteras
-    lines: [
-      {
-        text: `$${amountFormatted}`,
-        tone: 'neutral' as const,
-        mono: true
-      },
-      {
-        text: `${transfer.from_wallet} → ${transfer.to_wallet}`,
-        tone: 'muted' as const
-      }
-    ],
-    
-    // Visual - amarillo para transferencias
-    borderColor: 'warning',
-    
-    // Trailing  
-    showChevron: false,
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    'data-testid': `transfer-row-${transfer.id}`
-  };
+  // Contenido interno del card
+  const cardContent = (
+    <>
+      {/* Columna de contenido (medio) */}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm truncate">
+          Transferencia
+        </div>
+        <div className="text-muted-foreground text-sm truncate">
+          {transfer.from_wallet} → {transfer.to_wallet}
+        </div>
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Columna trailing */}
+      <div className="flex flex-col items-end flex-shrink-0">
+        {/* Línea 1: Importe */}
+        <div className="font-mono text-sm font-medium">
+          ${amountFormatted}
+        </div>
+        
+        {/* Línea 2: Billeteras */}
+        <div className="text-muted-foreground text-sm">
+          {transfer.from_wallet} → {transfer.to_wallet}
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarUrl={getCreatorAvatar()}
+      avatarFallback={getCreatorInitials()}
+      borderColor="warning"
+      onClick={onClick}
+      selected={selected}
+      density={density}
+      className={className}
+      data-testid={`transfer-row-${transfer.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 
 // Export del tipo para uso externo

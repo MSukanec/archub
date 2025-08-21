@@ -1,87 +1,52 @@
 import React from 'react';
-import { Check, ChevronRight } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export type Density = 'compact' | 'normal' | 'comfortable';
 
-export type Line = {
-  /** Texto principal de la línea (puede incluir valores dinámicos) */
-  text: string;
-  /** Color semántico opcional: 'muted' | 'success' | 'warning' | 'danger' | 'info' */
-  tone?: 'muted' | 'success' | 'warning' | 'danger' | 'info';
-  /** hint pequeño a la derecha (ej. código de moneda, %), opcional */
-  hintRight?: string;
-  /** Color personalizado para hintRight */
-  hintRightColor?: string;
-  /** si true, renderizar como monoespaciado (importe) */
-  mono?: boolean;
-};
-
 export interface DataRowCardProps {
-  /** Leading slot */
+  /** Contenido de las columnas */
+  children: React.ReactNode;
+  
+  /** Avatar en la primera columna (opcional) */
   avatarUrl?: string;
-  avatarFallback?: string;        // ej: "A"
-  iconName?: string;              // si no hay avatar, usar ícono (lucide)
-  selectable?: boolean;           // muestra checkbox a la izquierda
+  avatarFallback?: string;
+  
+  /** Checkbox de selección (opcional) */
+  selectable?: boolean;
   selected?: boolean;
 
-  /** Content slot */
-  title: string;                  // línea principal (negrita)
-  subtitle?: string;              // línea secundaria (muted)
-  lines?: Line[];                 // hasta 3 líneas auxiliares (validar máx.)
-
-  /** Trailing slot */
-  amount?: number;                // importe numérico
-  currencyCode?: string;          // ej: ARS, USD
-  amountTone?: 'neutral' | 'success' | 'danger'; // color del importe
-  badgeText?: string;             // ej: "Pendiente", "Pagado"
-  showChevron?: boolean;          // flechita >
-
+  /** Layout */
+  columns?: 2 | 3;  // por defecto 3 (avatar + content + trailing), si no hay avatar se auto-reduce a 2
+  
   /** Visual */
-  borderColor?: 'success' | 'danger' | 'warning' | 'info' | 'neutral'; // color del borde lateral
+  borderColor?: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
 
   /** Comportamiento */
-  onClick?: () => void;           // si está presente → cursor-pointer, role="button"
+  onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
-  density?: Density;              // default: 'normal'
+  density?: Density;
   className?: string;
   'data-testid'?: string;
 }
 
-// Helper para formatear importes
-const formatAmount = (amount: number, currencyCode?: string): string => {
-  if (currencyCode) {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: currencyCode,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  }
-  
-  return new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
-};
-
-// Mapeo de tones a clases Tailwind
-const getToneClasses = (tone?: string): string => {
-  switch (tone) {
-    case 'muted':
-      return 'text-muted-foreground';
+// Helper para obtener clases de color del borde
+const getBorderColorClass = (color?: string): string => {
+  switch (color) {
     case 'success':
-      return 'text-green-600 dark:text-green-400';
-    case 'warning':
-      return 'text-yellow-600 dark:text-yellow-400';
+      return 'border-r-4 border-r-green-500';
     case 'danger':
-      return 'text-red-600 dark:text-red-400';
+      return 'border-r-4 border-r-red-500';
+    case 'warning':
+      return 'border-r-4 border-r-yellow-500';
     case 'info':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'border-r-4 border-r-blue-500';
+    case 'neutral':
+      return 'border-r-4 border-r-gray-400';
     default:
-      return 'text-foreground';
+      return '';
   }
 };
 
@@ -92,28 +57,16 @@ const getDensityClasses = (density: Density = 'normal') => {
       return {
         container: 'py-2 gap-2',
         avatar: 'h-8 w-8',
-        icon: 'h-4 w-4',
-        title: 'text-sm',
-        subtitle: 'text-xs',
-        line: 'text-xs',
       };
     case 'comfortable':
       return {
         container: 'py-4 gap-4',
         avatar: 'h-12 w-12',
-        icon: 'h-6 w-6',
-        title: 'text-base',
-        subtitle: 'text-sm',
-        line: 'text-sm',
       };
     default: // normal
       return {
         container: 'py-3 gap-3',
         avatar: 'h-10 w-10',
-        icon: 'h-5 w-5',
-        title: 'text-sm font-semibold',
-        subtitle: 'text-sm',
-        line: 'text-sm',
       };
   }
 };
@@ -122,64 +75,47 @@ const LoadingSkeleton: React.FC<{ density: Density }> = ({ density }) => {
   const classes = getDensityClasses(density);
   
   return (
-    <div className={cn('flex items-center', classes.container)}>
-      {/* Avatar skeleton */}
-      <div className={cn('rounded-full bg-muted animate-pulse', classes.avatar)} />
+    <div className={cn('flex items-center gap-3', classes.container)}>
+      {/* Avatar */}
+      <div className={classes.avatar} style={{ background: '#f1f5f9', borderRadius: '50%' }}></div>
       
-      {/* Content skeleton */}
+      {/* Content */}
       <div className="flex-1 space-y-2">
-        <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-        <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
-        <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+        <div className="h-4 bg-muted rounded"></div>
+        <div className="h-3 bg-muted rounded w-3/4"></div>
       </div>
       
-      {/* Trailing skeleton */}
+      {/* Trailing */}
       <div className="space-y-2">
-        <div className="h-4 bg-muted rounded animate-pulse w-16" />
-        <div className="h-3 bg-muted rounded animate-pulse w-12" />
+        <div className="h-4 bg-muted rounded w-16"></div>
+        <div className="h-3 bg-muted rounded w-12"></div>
       </div>
     </div>
   );
 };
 
 export default function DataRowCard({
-  // Leading props
+  children,
   avatarUrl,
   avatarFallback,
-  iconName,
-  selectable = false,
-  selected = false,
-
-  // Content props
-  title,
-  subtitle,
-  lines = [],
-
-  // Trailing props
-  amount,
-  currencyCode,
-  amountTone = 'neutral',
-  badgeText,
-  showChevron = false,
-
-  // Visual props
+  selectable,
+  selected,
+  columns = 3,
   borderColor,
-
-  // Behavior props
   onClick,
   disabled = false,
   loading = false,
   density = 'normal',
   className,
-  'data-testid': testId,
+  'data-testid': testId
 }: DataRowCardProps) {
   const classes = getDensityClasses(density);
   
-  // Limitar lines a máximo 3
-  const displayLines = lines.slice(0, 3);
-  
   // Determinar si es interactivo
   const isInteractive = onClick && !disabled;
+  
+  // Auto-ajustar columnas si no hay avatar
+  const hasAvatar = !!(avatarUrl || avatarFallback);
   
   // Manejar eventos de teclado para accesibilidad
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -204,24 +140,6 @@ export default function DataRowCard({
     );
   }
 
-  // Helper para obtener clases de color del borde
-  const getBorderColorClass = (color?: string): string => {
-    switch (color) {
-      case 'success':
-        return 'border-r-4 border-r-green-500';
-      case 'danger':
-        return 'border-r-4 border-r-red-500';
-      case 'warning':
-        return 'border-r-4 border-r-yellow-500';
-      case 'info':
-        return 'border-r-4 border-r-blue-500';
-      case 'neutral':
-        return 'border-r-4 border-r-gray-400';
-      default:
-        return '';
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -244,104 +162,32 @@ export default function DataRowCard({
       data-testid={testId}
     >
       <div className="flex items-center gap-3">
-        {/* Leading Section */}
-        <div className="flex items-center gap-3">
-          {/* Checkbox para selección */}
-          {selectable && (
-            <div className="flex-shrink-0">
-              <div className={cn(
-                'flex items-center justify-center w-4 h-4 border-2 rounded',
-                selected 
-                  ? 'bg-accent border-accent text-accent-foreground' 
-                  : 'border-muted-foreground'
-              )}>
-                {selected && <Check className="h-3 w-3" />}
-              </div>
-            </div>
-          )}
-
-          {/* Avatar o Ícono */}
-          {(avatarUrl || avatarFallback) && (
-            <Avatar className={classes.avatar}>
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback className="text-xs font-medium">
-                {avatarFallback}
-              </AvatarFallback>
-            </Avatar>
-          )}
-          
-          {/* TODO: Implementar iconName cuando sea necesario */}
-          {iconName && !avatarUrl && !avatarFallback && (
-            <div className={cn('text-muted-foreground', classes.icon)}>
-              {/* Aquí se renderizaría el ícono de lucide basado en iconName */}
-            </div>
-          )}
-        </div>
-
-        {/* Content Section */}
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <div className={cn('truncate leading-5 font-bold', classes.title)}>
-            {title}
-          </div>
-
-          {/* Subtitle */}
-          {subtitle && (
-            <div className={cn('truncate text-muted-foreground leading-5', classes.subtitle)}>
-              {subtitle}
-            </div>
-          )}
-
-          {/* Lines en content section para 3ra línea */}
-          {displayLines.map((line, index) => (
-            <div key={index} className="truncate leading-5">
-              <span className={cn(
-                'text-sm',
-                getToneClasses(line.tone),
-                line.mono && 'font-mono'
-              )}>
-                {line.text}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Trailing Section */}
-        <div className="flex flex-col items-end flex-shrink-0">
-          {/* Amount */}
-          {amount !== undefined && (
+        {/* Checkbox para selección */}
+        {selectable && (
+          <div className="flex-shrink-0">
             <div className={cn(
-              'font-mono text-sm font-medium leading-5',
-              getToneClasses(amountTone)
+              'flex items-center justify-center w-4 h-4 border-2 rounded',
+              selected 
+                ? 'bg-accent border-accent text-accent-foreground' 
+                : 'border-muted-foreground'
             )}>
-              {formatAmount(amount, currencyCode)}
+              {selected && <Check className="h-3 w-3" />}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* HintRight de todas las lines - hasta 3 líneas */}
-          {displayLines.map((line, index) => (
-            line.hintRight && (
-              <div key={index} className="text-right leading-5">
-                <span 
-                  className={cn(
-                    'text-sm font-mono',
-                    !line.hintRightColor && getToneClasses(line.tone)
-                  )}
-                  style={line.hintRightColor ? { color: line.hintRightColor } : undefined}
-                >
-                  {line.hintRight}
-                </span>
-              </div>
-            )
-          ))}
+        {/* Avatar (primera columna si existe) */}
+        {hasAvatar && (
+          <Avatar className={classes.avatar}>
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback className="text-xs font-medium">
+              {avatarFallback}
+            </AvatarFallback>
+          </Avatar>
+        )}
 
-          {/* Badge */}
-          {badgeText && (
-            <div className="px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs">
-              {badgeText}
-            </div>
-          )}
-        </div>
+        {/* Contenido - Los hijos manejan su propio layout */}
+        {children}
       </div>
     </div>
   );

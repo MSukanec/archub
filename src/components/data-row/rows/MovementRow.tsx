@@ -158,44 +158,55 @@ export default function MovementRow({
     return 'A';
   };
 
-  // Props para DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    // Content - Categoria y subcategoria en el medio
-    title: movement.movement_data?.category?.name || 'Sin categoría',
-    subtitle: movement.movement_data?.subcategory?.name || '',
-    
-    // Leading - Avatar del usuario creador
-    avatarUrl: getCreatorAvatar(),
-    avatarFallback: getCreatorInitials(),
-    
-    // Trailing - Importe como amount/currencyCode (dos columnas automáticas)
-    amount: movement.amount,
-    currencyCode: currencyCode,
-    amountTone: getBorderColor(movement) === 'success' ? 'success' : 'danger',
-    
-    // Lines solo para la billetera
-    lines: [
-      {
-        text: movement.movement_data?.wallet?.name || 'Sin billetera',
-        tone: 'muted' as const
-      }
-    ],
-    
-    // Visual
-    borderColor: getBorderColor(movement),
-    
-    // Trailing  
-    showChevron: false,
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    'data-testid': `movement-row-${movement.id}`
-  };
+  // Contenido interno del card
+  const cardContent = (
+    <>
+      {/* Columna de contenido (medio) */}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm truncate">
+          {movement.movement_data?.category?.name || 'Sin categoría'}
+        </div>
+        {movement.movement_data?.subcategory?.name && (
+          <div className="text-muted-foreground text-sm truncate">
+            {movement.movement_data?.subcategory?.name}
+          </div>
+        )}
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Columna trailing (dos líneas) */}
+      <div className="flex flex-col items-end flex-shrink-0">
+        {/* Línea 1: Moneda y monto en dos columnas */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{currencyCode}</span>
+          <span className={`font-mono text-sm font-bold ${
+            getBorderColor(movement) === 'success' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {formattedAmount}
+          </span>
+        </div>
+        
+        {/* Línea 2: Billetera */}
+        <div className="text-muted-foreground text-sm">
+          {movement.movement_data?.wallet?.name || 'Sin billetera'}
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarUrl={getCreatorAvatar()}
+      avatarFallback={getCreatorInitials()}
+      borderColor={getBorderColor(movement)}
+      onClick={onClick}
+      selected={selected}
+      density={density}
+      className={className}
+      data-testid={`movement-row-${movement.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 
 // Export del tipo para uso externo

@@ -67,44 +67,48 @@ export default function ConversionRow({
     return 'U';
   };
 
-  // Props para DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    // Content
-    title: 'Conversión',
-    subtitle: `${conversion.from_currency} - ${conversion.to_currency}`,
-    
-    // Leading - Avatar del usuario creador
-    avatarUrl: getCreatorAvatar(),
-    avatarFallback: getCreatorInitials(),
-    
-    // Trailing - Importes de conversión
-    lines: [
-      {
-        text: `$${fromAmountFormatted} → $${toAmountFormatted}`,
-        tone: 'info' as const,
-        mono: true
-      },
-      {
-        text: `${conversion.from_currency} → ${conversion.to_currency}`,
-        tone: 'muted' as const
-      }
-    ],
-    
-    // Visual - azul para conversiones
-    borderColor: 'info',
-    
-    // Trailing  
-    showChevron: false,
-    
-    // Behavior
-    onClick,
-    selected,
-    density,
-    className,
-    'data-testid': `conversion-row-${conversion.id}`
-  };
+  // Contenido interno del card
+  const cardContent = (
+    <>
+      {/* Columna de contenido (medio) */}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm truncate">
+          Conversión
+        </div>
+        <div className="text-muted-foreground text-sm truncate">
+          {conversion.from_currency} - {conversion.to_currency}
+        </div>
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Columna trailing */}
+      <div className="flex flex-col items-end flex-shrink-0">
+        {/* Línea 1: Importes de conversión */}
+        <div className="text-blue-600 font-mono text-sm font-medium">
+          ${fromAmountFormatted} → ${toAmountFormatted}
+        </div>
+        
+        {/* Línea 2: Monedas */}
+        <div className="text-muted-foreground text-sm">
+          {conversion.from_currency} → {conversion.to_currency}
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarUrl={getCreatorAvatar()}
+      avatarFallback={getCreatorInitials()}
+      borderColor="info"
+      onClick={onClick}
+      selected={selected}
+      density={density}
+      className={className}
+      data-testid={`conversion-row-${conversion.id}`}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 
 // Export del tipo para uso externo
