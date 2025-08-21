@@ -241,7 +241,12 @@ export function ActionBarMobile() {
               onClick={actions.home.onClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              <Home 
+                className="h-6 w-6 transition-colors" 
+                style={{ 
+                  color: 'var(--text-secondary)' 
+                }} 
+              />
             </button>
           )}
 
@@ -251,7 +256,12 @@ export function ActionBarMobile() {
               onClick={handleSearchClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Search className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              <Search 
+                className="h-6 w-6 transition-colors" 
+                style={{ 
+                  color: showSearchPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                }} 
+              />
             </button>
           )}
 
@@ -272,7 +282,12 @@ export function ActionBarMobile() {
               onClick={handleFilterClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Filter className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              <Filter 
+                className="h-6 w-6 transition-colors" 
+                style={{ 
+                  color: showFilterPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                }} 
+              />
             </button>
           )}
 
@@ -282,7 +297,12 @@ export function ActionBarMobile() {
               onClick={handleNotificationsClick}
               className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              <Bell 
+                className="h-6 w-6 transition-colors" 
+                style={{ 
+                  color: showNotificationsPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                }} 
+              />
             </button>
           )}
         </div>
