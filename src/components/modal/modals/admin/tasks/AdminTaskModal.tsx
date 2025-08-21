@@ -75,6 +75,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [taskTemplateId, setTaskTemplateId] = useState<string>('')
   const [categoryId, setCategoryId] = useState<string>('')
   const [unitId, setUnitId] = useState<string>('')
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -148,6 +149,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       }
       if (actualTask.unit_id) {
         setUnitId(actualTask.unit_id)
+      }
+      if (actualTask.is_completed !== undefined) {
+        setIsCompleted(actualTask.is_completed)
       }
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
@@ -255,16 +259,14 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         // Update existing task
         const updateData: any = {
           custom_name: customName,
+          category_id: categoryId || null,
           unit_id: unitId || null,
-          task_template_id: taskTemplateId || null
-        }
-        
-        // Only update category_id if it's the actual column, not element_category_id
-        if (categoryId) {
-          updateData.category_id = categoryId
+          task_template_id: taskTemplateId || null,
+          is_completed: isCompleted
         }
         
         console.log('🔧 Updating task with data:', updateData)
+        console.log('🔧 Current isCompleted value:', isCompleted)
         
         const { error: updateError } = await supabase
           .from('tasks')
