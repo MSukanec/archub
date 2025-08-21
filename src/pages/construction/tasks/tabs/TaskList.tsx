@@ -12,19 +12,19 @@ import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 
-interface TaskListViewProps {
+interface TaskListProps {
   tasks: any[]
   isLoading: boolean
   onEditTask: (task: any) => void
   onDeleteTask: (taskId: string) => void
 }
 
-export function TaskListView({ 
+export function TaskList({ 
   tasks, 
   isLoading, 
   onEditTask, 
   onDeleteTask 
-}: TaskListViewProps) {
+}: TaskListProps) {
   const [groupingType, setGroupingType] = useState('phases')
   const [isExporting, setIsExporting] = useState(false)
 
@@ -38,16 +38,16 @@ export function TaskListView({
           groupKey = task.phase_name || 'Sin fase';
           break;
         case 'rubros':
-          groupKey = task.task?.rubro_name || 'Sin rubro';
+          groupKey = task.category_name || 'Sin rubro';
           break;
         case 'tasks':
           groupKey = task.task?.display_name || task.task?.code || 'Sin nombre';
           break;
         case 'rubros-phases':
-          groupKey = `${task.task?.rubro_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
+          groupKey = `${task.category_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
           break;
         case 'phases-rubros':
-          groupKey = `${task.phase_name || 'Sin fase'} - ${task.task?.rubro_name || 'Sin rubro'}`;
+          groupKey = `${task.phase_name || 'Sin fase'} - ${task.category_name || 'Sin rubro'}`;
           break;
         default:
           groupKey = '';
@@ -94,9 +94,9 @@ export function TaskListView({
       width: '15%'
     },
     {
-      key: 'rubro_name',
+      key: 'category_name',
       label: 'Rubro',
-      render: (task: any) => task.task?.rubro_name || 'Sin rubro',
+      render: (task: any) => task.category_name || 'Sin rubro',
       width: '10%'
     },
     {

@@ -134,7 +134,66 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       if (existingParamOrder) {
         setParameterOrder(existingParamOrder)
       }
+    }
+  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder, categories, units])
+
+  // Mutations
+  const createTaskMutation = useCreateGeneratedTask()
+  const updateTaskMutation = useUpdateGeneratedTask()
+  const createTaskMaterialMutation = useCreateTaskMaterial()
+  const deleteTaskMaterialMutation = useDeleteTaskMaterial()
+  
+  // Current user data
+  const { data: userData } = useCurrentUser()
+  
+  // Query client for cache invalidation
+  const queryClient = useQueryClient()
+  
+  // Materials data
+  const { data: materials = [] } = useMaterials()
+  const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
+  
+  // Task templates data
+  const { data: taskTemplates = [] } = useTaskTemplates()
+  
+  // Task categories data
+  const { data: categories = [] } = useTaskCategories()
+  
+  // Units data
+  const { data: units = [] } = useUnits()
+
+  // Initialize existing task values
+  React.useEffect(() => {
+    if (isEditingMode && actualTask && existingParamValues) {
+
+      const loadedSelections: ParameterSelection[] = []
       
+      if (existingParamValues && typeof existingParamValues === 'object') {
+        Object.entries(existingParamValues).forEach(([parameterSlug, optionSlug]) => {
+          if (typeof optionSlug === 'string') {
+            loadedSelections.push({
+              parameterId: '',
+              optionId: '',
+              parameterSlug,
+              parameterLabel: parameterSlug,
+              optionName: optionSlug,
+              optionLabel: optionSlug
+            })
+          }
+        })
+      }
+      
+      setSelections(loadedSelections)
+      
+      if (existingParamOrder) {
+        setParameterOrder(existingParamOrder)
+      }
+    }
+  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
+
+  // Load form data when task and reference data is available
+  React.useEffect(() => {
+    if (isEditingMode && actualTask) {
       // Load existing custom_name, task_template_id, category_id, and is_completed
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
@@ -163,32 +222,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         setIsCompleted(actualTask.is_completed)
       }
     }
-  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder, categories, units])
-
-  // Mutations
-  const createTaskMutation = useCreateGeneratedTask()
-  const updateTaskMutation = useUpdateGeneratedTask()
-  const createTaskMaterialMutation = useCreateTaskMaterial()
-  const deleteTaskMaterialMutation = useDeleteTaskMaterial()
-  
-  // Current user data
-  const { data: userData } = useCurrentUser()
-  
-  // Query client for cache invalidation
-  const queryClient = useQueryClient()
-  
-  // Materials data
-  const { data: materials = [] } = useMaterials()
-  const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
-  
-  // Task templates data
-  const { data: taskTemplates = [] } = useTaskTemplates()
-  
-  // Task categories data
-  const { data: categories = [] } = useTaskCategories()
-  
-  // Units data
-  const { data: units = [] } = useUnits()
+  }, [isEditingMode, actualTask, categories, units])
 
   // Initialize task materials when editing
   React.useEffect(() => {

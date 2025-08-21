@@ -12,7 +12,7 @@ import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 
 // Import tab components
-import { TaskListView } from './tabs/TaskListView'
+import { TaskList } from './tabs/TaskList'
 import { TaskPhases } from './tabs/TaskPhases'
 import { TaskSchedule } from './tabs/TaskSchedule'
 
@@ -38,7 +38,7 @@ export default function Tasks() {
   // Usar la misma fuente que el cronograma para consistencia
   const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
   
-  // Transformar las tareas de la vista para que sean compatibles con el componente TaskListView
+  // Transformar las tareas de la vista para que sean compatibles con el componente TaskList
   const tasks = tasksView.map(task => ({
     id: task.id,
     project_id: task.project_id,
@@ -258,7 +258,7 @@ export default function Tasks() {
     <Layout headerProps={headerProps} wide={true}>
       <div>
         {activeTab === "tasks" && (
-          <TaskListView
+          <TaskList
             tasks={tasks}
             isLoading={isLoading}
             onEditTask={handleEditTask}
