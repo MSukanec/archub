@@ -17,10 +17,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useContacts } from '@/hooks/use-contacts'
 import { useContactTypes } from '@/hooks/use-contact-types'
-import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building, MapPin, Globe, Share, ExternalLink, FileText, Contact } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, CheckCircle, Send, Search, Filter, X, UserPlus, Phone, Mail, Share2, Building, MapPin, Globe, Share, ExternalLink, FileText, Contact, Home, Bell } from 'lucide-react'
 import { SelectableGhostButton } from '@/components/ui-custom/SelectableGhostButton'
 import { FILTER_ICONS } from '@/constants/actionBarConstants'
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -56,6 +57,7 @@ export default function Contacts() {
   const queryClient = useQueryClient()
   const { setActions, setShowActionBar, clearActions } = useActionBarMobile()
   const isMobile = useMobile()
+  const [, navigate] = useLocation()
 
   // Cargar tipos de contacto de la base de datos
   const { data: contactTypes = [] } = useContactTypes()
@@ -64,15 +66,20 @@ export default function Contacts() {
   useEffect(() => {
     if (isMobile) {
       setActions({
+        home: {
+          id: 'home',
+          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Inicio',
+          onClick: () => {
+            navigate('/dashboard');
+          },
+        },
         search: {
           id: 'search',
           icon: <Search className="h-5 w-5" />,
           label: 'Buscar',
           onClick: () => {
-            const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement
-            if (searchInput) {
-              searchInput.focus()
-            }
+            setShowSearch(true);
           }
         },
         create: {
@@ -87,15 +94,25 @@ export default function Contacts() {
           icon: <Filter className="h-5 w-5" />,
           label: 'Filtros',
           onClick: () => {
-            console.log('Toggle filtros')
+            // Popover is handled in MobileActionBar
           }
-        }
+        },
+        notifications: {
+          id: 'notifications',
+          icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Notificaciones',
+          onClick: () => {
+            // Popover is handled in MobileActionBar
+          },
+        },
       })
       setShowActionBar(true)
     }
 
     return () => {
-      clearActions()
+      if (isMobile) {
+        clearActions()
+      }
     }
   }, [isMobile])
 
