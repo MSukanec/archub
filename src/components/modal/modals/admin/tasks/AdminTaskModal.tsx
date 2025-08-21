@@ -265,6 +265,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           is_completed: isCompleted
         }
         
+        console.log('🔧 Updating task with data:', updateData)
+        console.log('🔧 Current isCompleted value:', isCompleted)
+        
         const { error: updateError } = await supabase
           .from('tasks')
           .update(updateData)
@@ -291,6 +294,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           param_order: [], // Empty array since we're not using parameters
           name_rendered: null // NULL since we're not using parametric generation
         }
+        
+        console.log('🔧 Creating task with data:', newTask)
+        console.log('🔧 Current isCompleted value:', isCompleted)
         
         const { data, error } = await supabase
           .from('tasks')
