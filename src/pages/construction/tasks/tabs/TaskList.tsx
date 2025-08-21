@@ -140,7 +140,17 @@ export function TaskList({
       render: (task: any) => (
         <div className="flex items-center justify-center gap-2">
           <TaskMaterialsSubtotal task={task} />
-          <TaskMaterialDetailPopover task={task} showCost={false} />
+          <div>
+            <TaskMaterialDetailPopover task={task} showCost={false} />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => {}}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ),
       width: '10%',
