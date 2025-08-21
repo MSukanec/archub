@@ -107,6 +107,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Effect to load existing task data when editing
   useEffect(() => {
     if (isEditingMode && actualTask && existingParamValues) {
+      console.log('🔧 Loading task data for editing:', actualTask)
       const loadedSelections: ParameterSelection[] = []
       
       if (existingParamValues && typeof existingParamValues === 'object') {
@@ -137,8 +138,10 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       if (actualTask.task_template_id) {
         setTaskTemplateId(actualTask.task_template_id)
       }
-      if (actualTask.category_id) {
-        setCategoryId(actualTask.category_id)
+      // Use element_category_id if category_id is not available
+      const categoryToUse = actualTask.category_id || actualTask.element_category_id
+      if (categoryToUse) {
+        setCategoryId(categoryToUse)
       }
       if (actualTask.is_completed !== undefined) {
         setIsCompleted(actualTask.is_completed)
