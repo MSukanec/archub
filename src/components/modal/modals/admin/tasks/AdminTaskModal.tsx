@@ -491,8 +491,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         <div className="pl-6 space-y-4">
           {/* Add Material Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
               <Label htmlFor="material-select">Material</Label>
               <ComboBox
                 options={materialOptions}
@@ -502,7 +502,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
               />
             </div>
             
-            <div>
+            <div className="col-span-1">
               <Label htmlFor="material-amount">Cantidad</Label>
               <div className="flex items-center gap-2">
                 <Input
