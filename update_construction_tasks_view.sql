@@ -1,7 +1,7 @@
 -- 1) Por las dudas, borro la vista si existe
 drop view if exists public.construction_tasks_view;
 
--- 2) Creo la vista con las columnas solicitadas
+-- 2) Creo la vista con las columnas solicitadas incluyendo custom_name
 create view public.construction_tasks_view as
 select
   ct.id,                                   -- construction_tasks

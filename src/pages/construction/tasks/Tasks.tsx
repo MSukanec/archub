@@ -51,7 +51,7 @@ export default function Tasks() {
     task: {
       id: task.task_id,
       code: task.task_id, // Usar task_id como code por compatibilidad
-      display_name: task.name_rendered,
+      display_name: task.custom_name,
       category_name: task.category_name,
       unit_name: task.unit_name,
       rubro_name: null, // No disponible en la vista

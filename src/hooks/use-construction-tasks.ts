@@ -8,7 +8,7 @@ export interface ConstructionTaskView {
   organization_id: string; // Nueva columna agregada
   project_id: string;
   task_id: string;
-  name_rendered: string;
+  custom_name: string;
   category_name: string;
   quantity: number; // real en DB, number en TS
   start_date: string | null; // date en DB, string en TS
