@@ -632,8 +632,7 @@ export const ParametricTaskBuilder = forwardRef<
   return (
     <div className="space-y-6">
       {/* Badges de parámetros seleccionados */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium">Configuración de parámetros</Label>
+      <div>
         <div className="flex flex-wrap gap-2">
           {getOrderedParameters().map(paramId => {
             const parameter = parameters.find(p => p.id === paramId)
