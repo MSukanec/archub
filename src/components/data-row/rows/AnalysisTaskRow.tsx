@@ -34,7 +34,7 @@ export default function AnalysisTaskRow({
 }: AnalysisTaskRowProps) {
   
   const rowProps: Omit<DataRowCardProps, 'children'> = {
-    columns: 2,
+    columns: 1, // Una sola columna ya que ocupamos todo el ancho
     onClick,
     selected,
     density,
@@ -43,8 +43,9 @@ export default function AnalysisTaskRow({
 
   return (
     <DataRowCard {...rowProps}>
-      {/* Columna 1: Información principal */}
-      <div className="flex flex-col gap-1">
+      {/* Columna 1: Información completa */}
+      <div className="flex flex-col gap-2 col-span-2">
+        {/* Título de la tarea */}
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-[var(--text-primary)] line-clamp-2">
             {task.name_rendered}
@@ -56,46 +57,33 @@ export default function AnalysisTaskRow({
           )}
         </div>
         
-        {task.unit_name && (
-          <div className="flex items-center gap-1 mt-1">
-            <span className="text-xs text-[var(--text-secondary)]">
-              Unidad:
+        {/* Costos en 3 columnas */}
+        <div className="grid grid-cols-3 gap-3 mt-1">
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+              MO:
             </span>
-            <Badge variant="secondary" className="text-xs">
-              {task.unit_name}
-            </Badge>
+            <span className="text-xs text-[var(--text-secondary)]">
+              $ 0.00
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Columna 2: Acciones */}
-      <div className="flex items-center justify-end gap-1">
-        {onEdit && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-        )}
-        {onDelete && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="text-[var(--text-secondary)] hover:text-destructive"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        )}
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">
+              MAT:
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              $ 0.00
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-green-600 dark:text-green-400">
+              TOT:
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              $ 0.00
+            </span>
+          </div>
+        </div>
       </div>
     </DataRowCard>
   );

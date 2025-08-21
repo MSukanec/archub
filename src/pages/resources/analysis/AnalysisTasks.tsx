@@ -142,20 +142,7 @@ export default function AnalysisTasks() {
       renderCard={(task: any) => (
         <AnalysisTaskRow
           task={task}
-          onEdit={() => openModal('parametric-task', { taskId: task.id })}
-          onDelete={
-            !task.is_system && task.organization_id === userData?.organization?.id
-              ? () => showDeleteConfirmation({
-                  title: "Eliminar tarea",
-                  description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
-                  itemName: task.name_rendered || 'esta tarea',
-                  onConfirm: () => {
-                    // TODO: Implementar eliminación de tarea
-                    console.log('Eliminar tarea:', task.id)
-                  }
-                })
-              : undefined
-          }
+          onClick={() => openModal('parametric-task', { taskId: task.id })}
         />
       )}
       topBar={{
