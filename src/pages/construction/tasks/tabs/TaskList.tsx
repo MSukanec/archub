@@ -25,7 +25,7 @@ export function TaskList({
   onEditTask, 
   onDeleteTask 
 }: TaskListProps) {
-  const [groupingType, setGroupingType] = useState('phases')
+  const [groupingType, setGroupingType] = useState('rubros-phases')
   const [isExporting, setIsExporting] = useState(false)
 
   // Filtrar tareas según búsqueda y agregar groupKey
@@ -134,57 +134,29 @@ export function TaskList({
       width: '8%'
     },
     {
-      key: 'labor_cost',
-      label: 'Costo Mo.',
-      render: (task: any) => (
-        <div className="text-center">
-          <TaskLaborCost task={task} />
-        </div>
-      ),
-      width: '8%',
-      sortable: false
-    },
-    {
-      key: 'labor_subtotal',
-      label: 'Subt. Mo.',
-      render: (task: any) => (
-        <div className="text-center">
-          <TaskLaborSubtotal task={task} />
-        </div>
-      ),
-      width: '8%',
-      sortable: false
-    },
-    {
-      key: 'material_details',
-      label: 'Costo Mat.',
-      render: (task: any) => (
-        <div className="flex items-center justify-center gap-2">
-          <TaskMaterialDetailPopover task={task} showCost={true} />
-        </div>
-      ),
-      width: '8%',
-      sortable: false
-    },
-    {
-      key: 'material_subtotal',
-      label: 'Subt. Mat.',
+      key: 'unit_cost',
+      label: 'Costo por Unidad',
       render: (task: any) => (
         <div className="text-center">
           <TaskMaterialsSubtotal task={task} />
         </div>
       ),
-      width: '8%',
+      width: '10%',
       sortable: false
     },
     {
       key: 'total_subtotal',
       label: 'Subtotal',
-      render: (task: any) => (
-        <div className="text-center">
-          <TaskTotalSubtotal task={task} />
-        </div>
-      ),
+      render: (task: any) => {
+        const quantity = task.quantity || 0;
+        // Obtener el costo por unidad del componente TaskMaterialsSubtotal
+        // Por ahora usamos TaskTotalSubtotal que debería ser cantidad * costo unitario
+        return (
+          <div className="text-center">
+            <TaskTotalSubtotal task={task} />
+          </div>
+        );
+      },
       width: '10%',
       sortable: false
     },
@@ -193,6 +165,7 @@ export function TaskList({
       label: 'Acciones',
       render: (task: any) => (
         <div className="flex gap-1 justify-center">
+          <TaskMaterialDetailPopover task={task} showCost={false} />
           <Button
             variant="ghost"
             size="sm"

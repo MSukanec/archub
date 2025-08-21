@@ -33,6 +33,9 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
     }).format(amount)
   }
 
+  // Solo mostrar si hay materiales o si showCost es true
+  const shouldShow = showCost || (materials && materials.length > 0);
+
   return (
     <>
       {showCost && totalPerUnit > 0 && (
@@ -40,16 +43,17 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
           {formatCost(totalPerUnit)}
         </span>
       )}
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className=" hover:bg-blue-50 hover:text-blue-600"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
+      {shouldShow && (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className=" hover:bg-blue-50 hover:text-blue-600"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
       <PopoverContent 
         className="w-96 p-0" 
         align="center"
@@ -138,8 +142,9 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
             </div>
           )}
         </div>
-      </PopoverContent>
-      </Popover>
+        </PopoverContent>
+        </Popover>
+      )}
     </>
   )
 }
