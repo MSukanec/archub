@@ -73,7 +73,7 @@ export function TaskMultiSelector({
           type="button"
           onClick={() => addTask(selectedTaskId)}
           disabled={!selectedTaskId}
-          size="sm"
+          size="icon-sm"
           className="px-3"
         >
           <Package className="w-4 h-4 mr-1" />

@@ -107,7 +107,7 @@ export default function AnalysisMaterials() {
           {product.url ? (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => window.open(product.url, '_blank')}
               className="h-7 px-2 text-blue-600 hover:text-blue-700"
             >
@@ -129,7 +129,7 @@ export default function AnalysisMaterials() {
           {product.image_url ? (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => {
                 setLightboxImages([product.image_url!])
                 openLightbox(0)
@@ -197,7 +197,7 @@ export default function AnalysisMaterials() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => handleEdit(product)}
             className="h-7 w-7 p-0"
           >
@@ -205,7 +205,7 @@ export default function AnalysisMaterials() {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => handleDuplicate(product)}
             className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
           >
@@ -213,7 +213,7 @@ export default function AnalysisMaterials() {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => handleDelete(product)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >

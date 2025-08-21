@@ -119,7 +119,7 @@ const AdminTaskList = () => {
           <div className="flex items-center space-x-3 flex-1">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               className="p-0 h-6 w-6"
               onClick={() => toggleParameterExpanded(parameter.id)}
               disabled={!hasOptions}

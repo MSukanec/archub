@@ -132,7 +132,7 @@ export function OrganizationRecentProjects() {
           </CardTitle>
           <Button
             variant="outline"
-            size="sm"
+            size="icon-sm"
             onClick={() => navigate('/profile/projects')}
             className="text-sm"
           >

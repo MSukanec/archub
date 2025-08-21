@@ -24,8 +24,8 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
         {hasChildren && (
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? (
@@ -57,8 +57,8 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => {
               // TODO: Implementar modal para crear dependencia
               console.log('Crear dependencia para:', node.parameterId)
@@ -68,8 +68,8 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => {
               openModal('task-parameter', {
                 parameter: {
@@ -123,8 +123,8 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => {
               // TODO: Implementar modal para editar dependencia
               console.log('Editar dependencia:', dependency.dependencyId)
@@ -134,8 +134,8 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+            size="icon-sm"
+            className=" text-destructive hover:text-destructive"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Dependencia',

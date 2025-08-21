@@ -291,9 +291,9 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={() => removeFile(index)}
-                        className="h-8 w-8 p-0"
+                        className=""
                       >
                         <X className="h-4 w-4" />
                       </Button>

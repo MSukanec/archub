@@ -454,21 +454,21 @@ export default function ConstructionPersonnel() {
                       <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={() => openModal('personnel', { personnel: record })}
-                          className="h-8 w-8 p-0"
+                          className=""
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={() => openModal('delete-confirmation', {
                             title: 'Eliminar Personal',
                             message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
                             onConfirm: () => handleDeletePersonnel(record.id)
                           })}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          className=" text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

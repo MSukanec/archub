@@ -280,7 +280,7 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
 
           {/* Export Button */}
           {onExportAttendance && (
-            <Button onClick={onExportAttendance} variant="outline" size="sm">
+            <Button onClick={onExportAttendance} variant="outline" size="icon-sm">
               <Download className="w-4 h-4 mr-2" />
               Exportar
             </Button>

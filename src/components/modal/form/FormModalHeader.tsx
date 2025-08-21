@@ -30,7 +30,7 @@ export function FormModalHeader({
         {showBackButton && onBackClick && (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={onBackClick}
             className="flex items-center gap-2"
           >

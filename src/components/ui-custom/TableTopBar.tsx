@@ -71,7 +71,7 @@ export function TableTopBar({
             <Button
               key={tab}
               variant={activeTab === tab ? "secondary" : "ghost"}
-              size="sm"
+              size="icon-sm"
               onClick={() => onTabChange?.(tab)}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -130,8 +130,8 @@ export function TableTopBar({
                   {/* Icono dentro del input */}
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 h-8 w-8 p-0 hover:bg-transparent"
+                    size="icon-sm"
+                    className="absolute right-0 hover:bg-transparent"
                     onClick={() => {
                       setIsSearchExpanded(!isSearchExpanded);
                       if (!isSearchExpanded) {
@@ -152,9 +152,8 @@ export function TableTopBar({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   className={cn(
-                    "h-8 w-8 p-0",
                     isSortActive ? "button-secondary-pressed" : ""
                   )}
                 >
@@ -173,9 +172,8 @@ export function TableTopBar({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   className={cn(
-                    "h-8 w-8 p-0",
                     isFilterActive ? "button-secondary-pressed" : ""
                   )}
                 >
@@ -192,8 +190,7 @@ export function TableTopBar({
           {showClearFilters && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
+              size="icon-sm"
               onClick={onClearFilters}
               title="Limpiar filtros"
             >
@@ -205,8 +202,7 @@ export function TableTopBar({
           {showExport && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
+              size="icon-sm"
               onClick={onExport}
               disabled={isExporting}
               title="Exportar a Excel"

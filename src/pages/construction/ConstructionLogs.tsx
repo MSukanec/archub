@@ -463,36 +463,36 @@ export default function ConstructionLogs() {
                       <div className="flex items-center gap-2 ml-4">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleFavorite(siteLog.id);
                           }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
+                          className=" hover:bg-transparent group"
                         >
                           <Star className={`h-4 w-4 transition-colors ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground group-hover:text-yellow-500'}`} />
                         </Button>
                         
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             openModal('site-log', { data: siteLog });
                           }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
+                          className=" hover:bg-transparent group"
                         >
                           <Edit className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                         </Button>
                         
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteSiteLog(siteLog);
                           }}
-                          className="h-8 w-8 p-0 hover:bg-transparent group"
+                          className=" hover:bg-transparent group"
                         >
                           <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500 transition-colors" />
                         </Button>

@@ -123,9 +123,9 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
               </p>
             </div>
             <div className="flex gap-1">
-              <Button variant="outline" size="sm" disabled>Semana</Button>
-              <Button variant="outline" size="sm" disabled>Mes</Button>
-              <Button variant="outline" size="sm" disabled>Año</Button>
+              <Button variant="outline" size="icon-sm" disabled>Semana</Button>
+              <Button variant="outline" size="icon-sm" disabled>Mes</Button>
+              <Button variant="outline" size="icon-sm" disabled>Año</Button>
             </div>
           </div>
         </CardHeader>
@@ -156,21 +156,21 @@ export function ActivityChart({ data, isLoading, timePeriod, onTimePeriodChange 
           <div className="flex gap-1">
             <Button 
               variant={timePeriod === 'week' ? "default" : "outline"} 
-              size="sm"
+              size="icon-sm"
               onClick={() => onTimePeriodChange && onTimePeriodChange('week')}
             >
               Semana
             </Button>
             <Button 
               variant={timePeriod === 'month' ? "default" : "outline"} 
-              size="sm"
+              size="icon-sm"
               onClick={() => onTimePeriodChange && onTimePeriodChange('month')}
             >
               Mes
             </Button>
             <Button 
               variant={timePeriod === 'year' ? "default" : "outline"} 
-              size="sm"
+              size="icon-sm"
               onClick={() => onTimePeriodChange && onTimePeriodChange('year')}
             >
               Año

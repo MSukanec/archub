@@ -108,7 +108,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="icon-sm"
                   className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 p-0"
                 >
                   <MoreHorizontal className="w-4 h-4 text-white" />
@@ -142,7 +142,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
             
             {isActiveProject ? (
               <Button 
-                size="sm"
+                size="icon-sm"
                 className="text-xs font-medium px-3 py-1 h-7 text-white"
                 style={{ backgroundColor: 'var(--accent)' }}
                 onClick={(e) => {
@@ -155,7 +155,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
             ) : (
               <Button 
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 className="text-xs font-medium px-3 py-1 h-7"
                 onClick={(e) => {
                   e.stopPropagation();

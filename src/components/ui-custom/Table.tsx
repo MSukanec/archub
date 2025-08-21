@@ -662,7 +662,7 @@ export function Table<T = any>({
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-sm"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
@@ -704,7 +704,7 @@ export function Table<T = any>({
                     <Button
                       key={pageNum}
                       variant={pageNum === currentPage ? "default" : "outline"}
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => setCurrentPage(pageNum)}
                       className="min-w-[32px]"
                     >
@@ -716,7 +716,7 @@ export function Table<T = any>({
 
               <Button
                 variant="outline"
-                size="sm"
+                size="icon-sm"
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }

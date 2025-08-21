@@ -239,7 +239,7 @@ function FolderItemWithSubfolders({
               <div className="hidden sm:flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => openModal('document-folder', { 
                     parentId: folder.id,
                     parentName: folder.name
@@ -251,7 +251,7 @@ function FolderItemWithSubfolders({
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => openModal('document-upload', { 
                     defaultFolderId: folder.id 
                   })}
@@ -262,21 +262,21 @@ function FolderItemWithSubfolders({
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => openModal('document-folder', { 
                     folderId: folder.id,
                     folderName: folder.name,
                     parentId: folder.parent_id,
                     mode: 'edit'
                   })}
-                  className="h-8 w-8 p-0"
+                  className=""
                   title="Editar carpeta"
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => openModal('delete-confirmation', {
                     mode: 'simple',
                     title: 'Eliminar Carpeta',
@@ -289,7 +289,7 @@ function FolderItemWithSubfolders({
                     },
                     isLoading: isDeleting
                   })}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                  className=" text-red-500 hover:text-red-700"
                   title="Eliminar carpeta"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -300,7 +300,7 @@ function FolderItemWithSubfolders({
               <div className="sm:hidden">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                    <Button variant="ghost" size="icon-sm" className="h-9 w-9 p-0">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -386,7 +386,7 @@ function FolderItemWithSubfolders({
                     <div className="mt-2">
                       <Button
                         variant="default"
-                        size="sm"
+                        size="icon-sm"
                         onClick={() => openModal('document-upload', { 
                           defaultFolderId: folder.id 
                         })}
@@ -476,7 +476,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             <div className="hidden sm:flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => openModal('document-folder', { 
                   parentId: folder.id,
                   parentName: folder.name
@@ -488,7 +488,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => openModal('document-upload', { 
                   defaultFolderId: folder.id 
                 })}
@@ -499,7 +499,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => openModal('document-folder', { 
                   folderId: folder.id,
                   folderName: folder.name,
@@ -513,7 +513,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => openModal('delete-confirmation', {
                   mode: 'simple',
                   title: 'Eliminar Subcarpeta',
@@ -537,7 +537,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
             <div className="sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="icon-sm" className="">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -602,7 +602,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                   <div className="mt-2">
                     <Button
                       variant="default"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => openModal('document-upload', { 
                         defaultFolderId: folder.id 
                       })}
@@ -691,7 +691,7 @@ function GroupItem({ group, folderId, isExpanded, onToggle, onDocumentSelect }: 
               <div className="mt-3">
                 <Button
                   variant="default"
-                  size="sm"
+                  size="icon-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     openModal('document-upload', { 
@@ -829,8 +829,8 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
           {/* Primary action - Download */}
           <Button 
             variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 p-0 hover:bg-blue-50 sm:h-6 sm:w-6"
+            size="icon-sm" 
+            className=" hover:bg-blue-50 sm:h-6 sm:w-6"
             onClick={handleDownload}
             title="Descargar archivo"
           >
@@ -842,8 +842,8 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-gray-50 sm:h-6 sm:w-6"
+                size="icon-sm" 
+                className=" hover:bg-gray-50 sm:h-6 sm:w-6"
                 title="Más opciones"
               >
                 <MoreVertical className="h-4 w-4 sm:h-3 sm:w-3" />

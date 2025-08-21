@@ -216,7 +216,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
         {showUpload && (
           <Popover>
           <PopoverTrigger asChild>
-            <Button variant="default" size="sm" className="gap-2">
+            <Button variant="default" size="icon-sm" className="gap-2">
               <Upload className="w-4 h-4" />
               Subir Archivos
             </Button>
@@ -284,7 +284,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      size="sm"
+                      size="icon-sm"
                       variant="default"
                       title="Opciones"
                       className="bg-black/60 hover:bg-black/80"
@@ -296,7 +296,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                     <div className="space-y-1">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={() => handleDownload(attachment)}
                         className="w-full justify-start gap-2"
                       >
@@ -306,7 +306,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                       
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={() => handleCopyLink(attachment)}
                         className="w-full justify-start gap-2"
                       >
@@ -317,7 +317,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                       {attachment.mime_type.startsWith('image/') && (
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={() => handleSetAsAvatar(attachment)}
                           disabled={attachment.id === contact.avatar_attachment_id}
                           className="w-full justify-start gap-2"
@@ -331,7 +331,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                         <AlertDialogTrigger asChild>
                           <Button 
                             variant="ghost" 
-                            size="sm" 
+                            size="icon-sm" 
                             className="w-full justify-start gap-2 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4" />

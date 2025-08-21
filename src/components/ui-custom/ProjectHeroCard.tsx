@@ -122,7 +122,7 @@ export default function ProjectHeroCard({ project, organizationId, onImageUpdate
       />
       <Button
         variant="ghost"
-        size="sm"
+        size="icon-sm"
         className="absolute top-4 right-4 h-8 w-8 p-0 bg-white/10 hover:bg-white/20 text-white border border-white/20 disabled:opacity-50 cursor-pointer z-50"
         type="button"
         onClick={(e) => {

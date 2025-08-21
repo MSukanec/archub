@@ -54,7 +54,7 @@ function ConceptItem({
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             className="p-0 h-6 w-6"
             onClick={() => onToggleExpanded(concept.id)}
             disabled={!hasChildren}
@@ -108,8 +108,8 @@ function ConceptItem({
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => onCreateChild(concept)}
             title="Crear concepto hijo"
           >
@@ -117,8 +117,8 @@ function ConceptItem({
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => onEdit(concept)}
             title="Editar concepto"
           >
@@ -126,8 +126,8 @@ function ConceptItem({
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            size="icon-sm"
+            className=" text-destructive hover:text-destructive"
             onClick={() => onDelete(concept.id)}
             title="Eliminar concepto"
           >

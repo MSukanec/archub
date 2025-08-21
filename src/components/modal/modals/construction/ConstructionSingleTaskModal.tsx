@@ -324,7 +324,7 @@ export function ConstructionSingleTaskModal({
                     <Button
                       type="button"
                       variant="default"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => {
                         toast({
                           title: "Próximamente",

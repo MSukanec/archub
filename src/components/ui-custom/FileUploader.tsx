@@ -164,8 +164,8 @@ export function FileUploader({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/90 hover:bg-destructive text-destructive-foreground"
+                    size="icon-sm"
+                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/90 hover:bg-destructive text-destructive-foreground"
                     onClick={() => removeFile(index)}
                   >
                     <X className="h-3 w-3" />

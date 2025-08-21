@@ -314,9 +314,9 @@ export const ClientsForm = forwardRef<ClientsFormHandle, ClientsFormProps>(
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => removeRow(index)}
-                      className="h-6 w-6 p-0"
+                      className=""
                     >
                       <X className="h-3 w-3" />
                     </Button>

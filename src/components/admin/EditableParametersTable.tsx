@@ -296,7 +296,7 @@ export function EditableParametersTable() {
             {param.children.length > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 className="h-5 w-5 p-0"
                 onClick={() => toggleExpanded(param.id)}
               >
@@ -318,8 +318,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm"
                   autoFocus
                 />
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <span 
@@ -345,8 +345,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm"
                   autoFocus
                 />
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <Badge 
@@ -379,8 +379,8 @@ export function EditableParametersTable() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -422,8 +422,8 @@ export function EditableParametersTable() {
                   className="h-6 text-sm w-16"
                   autoFocus
                 />
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleSave}>✓</Button>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={handleCancel}>✕</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleSave}>✓</Button>
+                <Button size="icon-sm" variant="ghost" className="" onClick={handleCancel}>✕</Button>
               </div>
             ) : (
               <span 
@@ -446,16 +446,16 @@ export function EditableParametersTable() {
           <div className="col-span-2 flex items-center gap-1 justify-end">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              size="icon-sm"
+              className=""
               onClick={() => openModal('task-parameter', { parameter: param })}
             >
               <Edit className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              size="icon-sm"
+              className=""
               onClick={() => {
                 // TODO: Implementar duplicar
                 console.log('Duplicar parámetro:', param.id)
@@ -465,8 +465,8 @@ export function EditableParametersTable() {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+              size="icon-sm"
+              className=" text-destructive hover:text-destructive"
               onClick={() => {
                 openModal('delete-confirmation', {
                   title: 'Eliminar Parámetro',

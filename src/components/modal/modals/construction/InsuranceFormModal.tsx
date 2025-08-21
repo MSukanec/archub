@@ -366,7 +366,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="icon-sm"
               onClick={() => fileInputRef.current?.click()}
             >
               Seleccionar archivo

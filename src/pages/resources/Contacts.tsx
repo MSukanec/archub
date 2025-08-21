@@ -376,7 +376,7 @@ export default function Contacts() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={(e) => {
               e.stopPropagation()
               navigator.clipboard.writeText(`${contact.full_name || `${contact.first_name} ${contact.last_name}`}\nEmail: ${contact.email || 'N/A'}\nTeléfono: ${contact.phone || 'N/A'}\nEmpresa: ${contact.company_name || 'N/A'}`)
@@ -385,29 +385,29 @@ export default function Contacts() {
                 description: "Los datos del contacto se han copiado al portapapeles"
               })
             }}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <Share2 className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={(e) => {
               e.stopPropagation()
               openModal('contact', { editingContact: contact, isEditing: true })
             }}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={(e) => {
               e.stopPropagation()
               handleDeleteContact(contact)
             }}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            className=" text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

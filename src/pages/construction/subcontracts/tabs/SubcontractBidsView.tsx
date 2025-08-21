@@ -283,8 +283,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           {subcontract?.winner_bid_id !== item.id && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
+              size="icon-sm"
+              className=""
               style={{ color: 'var(--accent)' }}
               onClick={() => handleSelectWinner(item)}
               title="Seleccionar como ganadora"
@@ -294,8 +294,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           )}
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => handleEditBid(item)}
             title="Editar oferta"
           >
@@ -303,8 +303,8 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            size="icon-sm"
+            className=" text-destructive hover:text-destructive"
             onClick={() => handleDeleteBid(item)}
             title="Eliminar oferta"
           >

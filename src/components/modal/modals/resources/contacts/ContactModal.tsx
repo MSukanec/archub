@@ -363,7 +363,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={handleUnlinkUser}
             >
               <Unlink className="h-4 w-4" />

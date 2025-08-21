@@ -1328,30 +1328,30 @@ export default function Movements() {
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => {
                   // Toggle favorite for all movements in the group
                   item.movements.forEach(movement => {
                     handleToggleFavorite(movement);
                   });
                 }}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => handleEditConversion(item)}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Pencil className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => handleDeleteConversion(item)}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
@@ -1366,30 +1366,30 @@ export default function Movements() {
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => {
                   // Toggle favorite for all movements in the group
                   item.movements.forEach(movement => {
                     handleToggleFavorite(movement);
                   });
                 }}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Heart className={`w-4 h-4 ${isGroupFavorited ? 'fill-current text-red-500' : ''}`} />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => handleEditTransfer(item)}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Pencil className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => handleDeleteTransfer(item)}
-                className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
@@ -1402,25 +1402,25 @@ export default function Movements() {
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => handleToggleFavorite(item)}
-              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Heart className={`w-4 h-4 ${item.is_favorite ? 'fill-current text-red-500' : ''}`} />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => handleEdit(item)}
-              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Pencil className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => handleDelete(item)}
-              className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
             </Button>

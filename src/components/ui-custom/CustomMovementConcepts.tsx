@@ -194,10 +194,10 @@ export function CustomMovementConcepts({
                         {childConcept.organization_id === organizationId && (
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon-sm"
                             onClick={() => deleteConceptMutation.mutate(childConcept.id)}
                             disabled={deleteConceptMutation.isPending}
-                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                            className=" text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

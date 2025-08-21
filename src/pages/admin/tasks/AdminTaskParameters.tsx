@@ -93,7 +93,7 @@ const AdminTaskParameters = () => {
           <div className="flex justify-end">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               className="h-8 px-2"
               onClick={() => {
                 openModal('task-parameter-option', { parameterId });
@@ -221,7 +221,7 @@ const AdminTaskParameters = () => {
         <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             className="h-8 px-2"
             onClick={() => {
               openModal('task-parameter-option', { parameterId });

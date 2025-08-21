@@ -76,7 +76,7 @@ export default function AnalysisTasks() {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => openModal('parametric-task', { taskId: task.id })}
             className="h-7 w-7 p-0"
           >
@@ -86,7 +86,7 @@ export default function AnalysisTasks() {
           {!task.is_system && task.organization_id === userData?.organization?.id && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => {
                 showDeleteConfirmation({
                   title: "Eliminar tarea",

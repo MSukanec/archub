@@ -90,9 +90,9 @@ export function ActionBarMobile() {
               />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => setShowSearchPopover(false)}
-                className="h-8 w-8 p-0"
+                className=""
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -120,9 +120,9 @@ export function ActionBarMobile() {
                 <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Filtros</h3>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => setShowFilterPopover(false)}
-                  className="h-8 w-8 p-0"
+                  className=""
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -202,9 +202,9 @@ export function ActionBarMobile() {
                 <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Notificaciones</h3>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => setShowNotificationsPopover(false)}
-                  className="h-8 w-8 p-0"
+                  className=""
                 >
                   <X className="h-4 w-4" />
                 </Button>

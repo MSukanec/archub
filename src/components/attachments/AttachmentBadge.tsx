@@ -47,9 +47,9 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
     <div className="flex items-center gap-1">
       <Button
         variant="ghost"
-        size="sm"
+        size="icon-sm"
         onClick={handleView}
-        className="h-8 w-8 p-0"
+        className=""
         title="Ver certificado"
       >
         <Eye className="h-4 w-4" />
@@ -57,9 +57,9 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
       
       <Button
         variant="ghost"
-        size="sm"
+        size="icon-sm"
         onClick={handleDownload}
-        className="h-8 w-8 p-0"
+        className=""
         title="Descargar certificado"
       >
         <Download className="h-4 w-4" />

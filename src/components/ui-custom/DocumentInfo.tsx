@@ -192,25 +192,25 @@ export function DocumentInfo({
       <div className="px-4 py-3 border-t border-[var(--card-border)]">
         <div className="flex items-center justify-center gap-2">
           <Button 
-            size="sm" 
+            size="icon-sm" 
             variant="ghost" 
             onClick={onDownload}
-            className="h-8 w-8 p-0"
+            className=""
             title="Descargar"
           >
             <Download className="h-4 w-4" />
           </Button>
           <Button 
-            size="sm" 
+            size="icon-sm" 
             variant="ghost" 
             onClick={onShare}
-            className="h-8 w-8 p-0"
+            className=""
             title="Compartir"
           >
             <Share2 className="h-4 w-4" />
           </Button>
           <Button 
-            size="sm" 
+            size="icon-sm" 
             variant="ghost" 
             onClick={() => {
               console.log('Opening document edit modal');
@@ -220,13 +220,13 @@ export function DocumentInfo({
                 folderId: document.folder_id 
               });
             }}
-            className="h-8 w-8 p-0"
+            className=""
             title="Editar"
           >
             <Edit3 className="h-4 w-4" />
           </Button>
           <Button 
-            size="sm" 
+            size="icon-sm" 
             variant="ghost" 
             onClick={() => {
               console.log('Opening delete confirmation modal');
@@ -247,7 +247,7 @@ export function DocumentInfo({
                 }
               });
             }}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            className=" text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
             title="Eliminar"
           >
             <Trash2 className="h-4 w-4" />

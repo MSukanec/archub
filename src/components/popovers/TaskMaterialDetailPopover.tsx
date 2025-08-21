@@ -42,8 +42,8 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+            size="icon-sm"
+            className=" hover:bg-blue-50 hover:text-blue-600"
           >
             <Eye className="h-4 w-4" />
           </Button>

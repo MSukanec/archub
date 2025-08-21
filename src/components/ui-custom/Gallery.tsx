@@ -147,7 +147,7 @@ export function Gallery({
           <div className="flex items-center gap-1">
             <Button
               variant={fileTypeFilter === 'Todo' ? "secondary" : "ghost"}
-              size="sm"
+              size="icon-sm"
               onClick={() => setFileTypeFilter('Todo')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -158,7 +158,7 @@ export function Gallery({
             </Button>
             <Button
               variant={fileTypeFilter === 'Imágenes' ? "secondary" : "ghost"}
-              size="sm"
+              size="icon-sm"
               onClick={() => setFileTypeFilter('Imágenes')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -169,7 +169,7 @@ export function Gallery({
             </Button>
             <Button
               variant={fileTypeFilter === 'Videos' ? "secondary" : "ghost"}
-              size="sm"
+              size="icon-sm"
               onClick={() => setFileTypeFilter('Videos')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
@@ -184,7 +184,7 @@ export function Gallery({
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => {
                 console.log("Search clicked - TODO: Implement search modal");
               }}
@@ -197,7 +197,7 @@ export function Gallery({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   className={cn(
                     "h-8 px-3 text-xs",
                     activeFiltersCount > 0 && "bg-secondary text-secondary-foreground"
@@ -254,7 +254,7 @@ export function Gallery({
             </Popover>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
               className="h-8 px-3 text-xs"
               title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
@@ -269,7 +269,7 @@ export function Gallery({
             {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={clearFilters}
                 className="h-8 px-3 text-xs"
               >
@@ -322,12 +322,12 @@ export function Gallery({
                     {onEdit && (
                       <Button
                         variant="secondary"
-                        size="sm"
+                        size="icon-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(file);
                         }}
-                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                        className=" bg-white/90 hover:bg-white"
                       >
                         <Edit className="w-3 h-3 text-gray-700" />
                       </Button>
@@ -335,12 +335,12 @@ export function Gallery({
                     {onDownload && (
                       <Button
                         variant="secondary"
-                        size="sm"
+                        size="icon-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDownload(file);
                         }}
-                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                        className=" bg-white/90 hover:bg-white"
                       >
                         <Download className="w-3 h-3 text-gray-700" />
                       </Button>
@@ -348,12 +348,12 @@ export function Gallery({
                     {onDelete && (
                       <Button
                         variant="secondary"
-                        size="sm"
+                        size="icon-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete(file);
                         }}
-                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                        className=" bg-white/90 hover:bg-white"
                       >
                         <Trash2 className="w-3 h-3 text-red-500" />
                       </Button>
@@ -418,12 +418,12 @@ export function Gallery({
                       {onEdit && (
                         <Button
                           variant="secondary"
-                          size="sm"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit(file);
                           }}
-                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                          className=" bg-white/90 hover:bg-white"
                         >
                           <Edit className="w-3 h-3 text-gray-700" />
                         </Button>
@@ -431,12 +431,12 @@ export function Gallery({
                       {onDownload && (
                         <Button
                           variant="secondary"
-                          size="sm"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDownload(file);
                           }}
-                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                          className=" bg-white/90 hover:bg-white"
                         >
                           <Download className="w-3 h-3 text-gray-700" />
                         </Button>
@@ -444,12 +444,12 @@ export function Gallery({
                       {onDelete && (
                         <Button
                           variant="secondary"
-          size="sm"
+          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete(file);
                           }}
-                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                          className=" bg-white/90 hover:bg-white"
                         >
                           <Trash2 className="w-3 h-3 text-red-500" />
                         </Button>

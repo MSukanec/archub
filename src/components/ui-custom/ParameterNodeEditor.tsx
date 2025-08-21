@@ -77,9 +77,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
             </CardTitle>
             <div className="flex items-center gap-1 ml-2">
               <Button
-                size="sm"
+                size="icon-sm"
                 variant="ghost"
-                className="h-6 w-6 p-0"
+                className=""
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicate(parameter.id);
@@ -89,9 +89,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                 <Copy className="h-3 w-3" />
               </Button>
               <Button
-                size="sm"
+                size="icon-sm"
                 variant="ghost"
-                className="h-6 w-6 p-0"
+                className=""
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(parameter.id);
@@ -102,9 +102,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               </Button>
               {hasParentDependencies && onConfigureVisibility && (
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="ghost"
-                  className="h-6 w-6 p-0"
+                  className=""
                   onClick={(e) => {
                     e.stopPropagation();
                     onConfigureVisibility(parameter.id);
@@ -115,9 +115,9 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
                 </Button>
               )}
               <Button
-                size="sm"
+                size="icon-sm"
                 variant="ghost"
-                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                className=" text-destructive hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(id);
@@ -493,7 +493,7 @@ function AddParameterButton() {
     <Button 
       onClick={handleAddParameter}
       className="absolute top-4 right-4 z-10 rounded-full w-10 h-10 p-0"
-      size="sm"
+      size="icon-sm"
       title="Agregar parámetro al canvas"
     >
       <Plus className="w-4 h-4" />

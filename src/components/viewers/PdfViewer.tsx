@@ -318,10 +318,10 @@ export function PdfViewer({
           {/* Page navigation */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={prevPage}
             disabled={state.page <= 1}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ChevronLeft className="w-4 h-4" />
           </Button>
@@ -334,10 +334,10 @@ export function PdfViewer({
           
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={nextPage}
             disabled={state.page >= state.numPages}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
@@ -347,10 +347,10 @@ export function PdfViewer({
           {/* Zoom */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -366,10 +366,10 @@ export function PdfViewer({
           
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -379,9 +379,9 @@ export function PdfViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={fitToWidth}
-            className="h-8 w-8 p-0"
+            className=""
             title="Ajustar al ancho"
           >
             <Maximize className="w-4 h-4" />
@@ -389,9 +389,9 @@ export function PdfViewer({
 
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={downloadPdf}
-            className="h-8 w-8 p-0"
+            className=""
             title="Descargar"
           >
             <Download className="w-4 h-4" />
@@ -399,9 +399,9 @@ export function PdfViewer({
           
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={openInNewTab}
-            className="h-8 w-8 p-0"
+            className=""
             title="Compartir"
           >
             <ExternalLink className="w-4 h-4" />
@@ -411,9 +411,9 @@ export function PdfViewer({
           {onExpand && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={onExpand}
-              className="h-8 w-8 p-0"
+              className=""
               title="Expandir"
             >
               <Maximize2 className="w-4 h-4" />

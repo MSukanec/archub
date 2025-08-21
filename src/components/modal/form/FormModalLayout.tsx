@@ -124,7 +124,7 @@ export function FormModalLayout({
             {headerContent}
             <Button
               variant="ghost-flat"
-              size="sm"
+              size="icon-sm"
               onClick={handleClose}
               className="absolute top-1/2 right-4 transform -translate-y-1/2 h-8 w-8 p-0"
             >

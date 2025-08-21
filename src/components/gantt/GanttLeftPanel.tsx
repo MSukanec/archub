@@ -51,12 +51,12 @@ export function GanttLeftPanel({
           {onEdit && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
               }}
-              className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+              className=" hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Edit className="w-3 h-3" />
             </Button>
@@ -64,12 +64,12 @@ export function GanttLeftPanel({
           {onDelete && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);
               }}
-              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+              className=" text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             >
               <Trash2 className="w-3 h-3" />
             </Button>

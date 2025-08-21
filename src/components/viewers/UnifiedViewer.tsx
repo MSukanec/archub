@@ -351,10 +351,10 @@ export function UnifiedViewer({
             <>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={prevPage}
                 disabled={state.page <= 1}
-                className="h-8 w-8 p-0"
+                className=""
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -367,10 +367,10 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={nextPage}
                 disabled={state.page >= state.numPages}
-                className="h-8 w-8 p-0"
+                className=""
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -382,10 +382,10 @@ export function UnifiedViewer({
           {/* Zoom Controls */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -401,10 +401,10 @@ export function UnifiedViewer({
           
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -416,9 +416,9 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={rotateLeft}
-                className="h-8 w-8 p-0"
+                className=""
                 title="Rotar izquierda"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -426,9 +426,9 @@ export function UnifiedViewer({
               
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={rotateRight}
-                className="h-8 w-8 p-0"
+                className=""
                 title="Rotar derecha"
               >
                 <RotateCw className="w-4 h-4" />
@@ -441,9 +441,9 @@ export function UnifiedViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={zoom100}
-            className="h-8 w-8 p-0"
+            className=""
             title="Ajustar"
           >
             <Maximize className="w-4 h-4" />
@@ -451,9 +451,9 @@ export function UnifiedViewer({
 
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={downloadFile}
-            className="h-8 w-8 p-0"
+            className=""
             title="Descargar"
           >
             <Download className="w-4 h-4" />
@@ -461,9 +461,9 @@ export function UnifiedViewer({
           
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={openInNewTab}
-            className="h-8 w-8 p-0"
+            className=""
             title="Abrir en nueva pestaña"
           >
             <ExternalLink className="w-4 h-4" />
@@ -472,9 +472,9 @@ export function UnifiedViewer({
           {onExpand && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={onExpand}
-              className="h-8 w-8 p-0"
+              className=""
               title="Expandir"
             >
               <Maximize2 className="w-4 h-4" />

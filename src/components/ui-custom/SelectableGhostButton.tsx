@@ -56,7 +56,7 @@ export function SelectableGhostButton({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           className={buttonClassName}
           disabled={disabled}
         >

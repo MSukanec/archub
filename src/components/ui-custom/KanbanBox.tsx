@@ -253,8 +253,8 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                             </Button>
                                             <Button
                                               variant="ghost"
-                                              size="sm"
-                                              className="h-6 w-6 p-0 bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
+                                              size="icon-sm"
+                                              className="bg-white/90 shadow-sm hover:bg-white text-red-500 hover:text-red-600"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 openModal('delete-confirmation', {
@@ -277,7 +277,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
                                             {/* Completion Checkbox */}
                                             <Button
                                               variant="ghost"
-                                              size="sm"
+                                              size="icon-sm"
                                               className="h-5 w-5 p-0 flex-shrink-0 mt-0.5"
                                               onClick={(e) => {
                                                 e.stopPropagation();

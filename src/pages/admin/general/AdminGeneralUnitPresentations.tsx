@@ -149,7 +149,7 @@ const AdminGeneralUnitPresentations = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => handleEdit(unitPresentation)}
             className="h-7 w-7 p-0"
           >
@@ -157,7 +157,7 @@ const AdminGeneralUnitPresentations = () => {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => handleDelete(unitPresentation)}
             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
           >

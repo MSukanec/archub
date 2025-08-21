@@ -367,7 +367,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
                   </div>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     onClick={async () => {
                       if (material.id) {
                         try {

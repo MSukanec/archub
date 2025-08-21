@@ -366,7 +366,7 @@ export default function IndexedInstallmentPlan({
             <div className="flex-shrink-0">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => openModal('delete-confirmation', {
                   mode: 'dangerous',
                   title: 'Eliminar Plan de Pagos',
@@ -376,7 +376,7 @@ export default function IndexedInstallmentPlan({
                   onConfirm: () => deletePaymentPlanMutation.mutate(paymentPlan.id),
                   isLoading: deletePaymentPlanMutation.isPending
                 })}
-                className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
+                className=" text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
               >
                 <Trash2 className="w-3 h-3" />
               </Button>
@@ -512,12 +512,12 @@ export default function IndexedInstallmentPlan({
                     <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEditInstallment(installment);
                         }}
-                        className="h-6 w-6 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+                        className=" hover:bg-[var(--button-ghost-hover-bg)]"
                       >
                         <Edit className="w-3 h-3" />
                       </Button>

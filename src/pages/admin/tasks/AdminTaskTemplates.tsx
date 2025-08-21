@@ -114,16 +114,16 @@ const AdminTaskTemplates = () => {
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            size="icon-sm"
+            className=" hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => openModal('task-template', { template })}
           >
             <Edit className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-[var(--button-ghost-hover-bg)]"
+            size="icon-sm"
+            className=" hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => {
               openModal('delete-confirmation', {
                 title: 'Eliminar Plantilla',
@@ -214,7 +214,7 @@ const AdminTaskTemplates = () => {
                   <div className="p-3 space-y-2">
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       className="w-full justify-start text-xs"
                       onClick={() => setGroupBy('none')}
                     >
@@ -222,7 +222,7 @@ const AdminTaskTemplates = () => {
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       className="w-full justify-start text-xs"
                       onClick={() => setGroupBy('category')}
                     >

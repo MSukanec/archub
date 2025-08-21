@@ -157,7 +157,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
               </div>
               <Button 
                 className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-[var(--accent-foreground)]"
-                size="sm"
+                size="icon-sm"
                 onClick={() => navigate(card.route)}
               >
                 {card.buttonText}

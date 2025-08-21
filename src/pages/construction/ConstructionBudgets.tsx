@@ -698,7 +698,7 @@ export default function ConstructionBudgets() {
                   <>
                     <Button 
                       variant="ghost" 
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => handleEditBudget()}
                     >
                       <Edit className="w-4 h-4 mr-1" />
@@ -706,7 +706,7 @@ export default function ConstructionBudgets() {
                     </Button>
                     <Button 
                       variant="ghost" 
-                      size="sm"
+                      size="icon-sm"
                       onClick={handleDeleteSelectedBudget}
                       className="text-destructive hover:text-destructive"
                     >
@@ -715,7 +715,7 @@ export default function ConstructionBudgets() {
                     </Button>
                     <Button 
                       variant="ghost" 
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => {
                         openModal('budget-task-bulk-add', { 
                           budgetId: selectedBudget.id,

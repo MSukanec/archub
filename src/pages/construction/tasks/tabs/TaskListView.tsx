@@ -177,17 +177,17 @@ export function TaskListView({
         <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => onEditTask(task)}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => onDeleteTask(task.id)}
-            className="h-8 w-8 p-0"
+            className=""
           >
             <Trash2 className="h-4 w-4" />
           </Button>

@@ -164,7 +164,7 @@ export function TaskBulkSelector({
                       <div className="flex items-center space-x-1">
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon-sm"
                           className="h-7 w-7 p-0"
                           onClick={() => adjustQuantity(task.id, -1)}
                           disabled={quantity <= 0.01}
@@ -186,7 +186,7 @@ export function TaskBulkSelector({
                         />
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon-sm"
                           className="h-7 w-7 p-0"
                           onClick={() => adjustQuantity(task.id, 1)}
                         >

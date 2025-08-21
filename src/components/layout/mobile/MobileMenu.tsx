@@ -442,7 +442,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           </h1>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={handleCloseMenu}
             className="text-[var(--menues-fg)] p-2"
           >
@@ -461,7 +461,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </h2>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={handleBackToMain}
                   className="text-[var(--menues-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
                 >
@@ -607,7 +607,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Proyectos</h3>
                       <button
                         onClick={() => setExpandedProjectSelector(false)}
-                        className="h-8 w-8 p-0 rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
+                        className=" rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--menues-fg)' }}>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

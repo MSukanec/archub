@@ -200,12 +200,12 @@ export function CascadingSelect({
             <Button
               type="button"
               variant="default"
-              size="sm"
+              size="icon-sm"
               onClick={(e) => {
                 e.stopPropagation()
                 handleBack()
               }}
-              className="flex-shrink-0 h-6 w-6 p-0"
+              className="flex-shrink-0"
             >
               <ArrowLeft className="h-3 w-3" />
             </Button>

@@ -67,8 +67,8 @@ function ConceptRow({
           {/* Expand/Collapse Button */}
           <Button
             variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
+            size="icon-sm"
+            className=""
             onClick={() => hasChildren && onToggleExpand(concept.id)}
             disabled={!hasChildren}
           >
@@ -115,18 +115,18 @@ function ConceptRow({
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => onEdit(concept)}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            className=" text-muted-foreground hover:text-foreground"
           >
             <Edit className="h-4 w-4" />
           </Button>
           
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => onDelete(concept.id)}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            className=" text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

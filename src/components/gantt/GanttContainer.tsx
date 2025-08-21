@@ -775,7 +775,7 @@ export function GanttContainer({
                               e.stopPropagation();
                               onItemEdit(item);
                             }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            className=" flex items-center justify-center rounded hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
                             <Edit className="w-3 h-3" />
                           </button>
@@ -786,7 +786,7 @@ export function GanttContainer({
                               e.stopPropagation();
                               onItemDelete(item);
                             }}
-                            className="h-6 w-6 p-0 flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
+                            className=" flex items-center justify-center rounded text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)] transition-colors"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>

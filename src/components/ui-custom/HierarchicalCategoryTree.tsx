@@ -137,9 +137,9 @@ export function HierarchicalCategoryTree({
             {onCreateChild && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => onCreateChild(category)}
-                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                className=" hover:bg-accent text-muted-foreground hover:text-foreground"
                 title="Crear categoría hija"
               >
                 <Plus className="h-3 w-3" />
@@ -150,9 +150,9 @@ export function HierarchicalCategoryTree({
             {category.code && category.code.length === 3 && onAddTaskGroup && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => onAddTaskGroup(category)}
-                className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                className=" hover:bg-accent text-muted-foreground hover:text-foreground"
                 title="Agregar Grupo de Tareas"
               >
                 <Layers className="h-3 w-3" />
@@ -161,9 +161,9 @@ export function HierarchicalCategoryTree({
             
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => onEdit(category)}
-              className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+              className=" hover:bg-accent text-muted-foreground hover:text-foreground"
               title="Editar"
             >
               <Edit className="h-3 w-3" />
@@ -171,9 +171,9 @@ export function HierarchicalCategoryTree({
             
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => onDelete(category.id)}
-              className="h-6 w-6 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+              className=" hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
               title="Eliminar"
             >
               <Trash2 className="h-3 w-3" />
@@ -229,9 +229,9 @@ export function HierarchicalCategoryTree({
                   {onEditTaskGroup && (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => onEditTaskGroup(taskGroup, category)}
-                      className="h-6 w-6 p-0 hover:bg-accent text-muted-foreground hover:text-foreground"
+                      className=" hover:bg-accent text-muted-foreground hover:text-foreground"
                       title="Editar"
                     >
                       <Edit className="h-3 w-3" />
@@ -241,9 +241,9 @@ export function HierarchicalCategoryTree({
                   {onDeleteTaskGroup && (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => onDeleteTaskGroup(taskGroup.id)}
-                      className="h-6 w-6 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                      className=" hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                       title="Eliminar"
                     >
                       <Trash2 className="h-3 w-3" />

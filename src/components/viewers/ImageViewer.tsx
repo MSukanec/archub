@@ -249,10 +249,10 @@ export function ImageViewer({
           {/* Zoom controls */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomOut}
             disabled={state.scale <= 0.1}
-            className="h-8 w-8 p-0"
+            className=""
             title="Reducir zoom"
           >
             <ZoomOut className="w-4 h-4" />
@@ -269,10 +269,10 @@ export function ImageViewer({
           
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={zoomIn}
             disabled={state.scale >= 3.0}
-            className="h-8 w-8 p-0"
+            className=""
             title="Aumentar zoom"
           >
             <ZoomIn className="w-4 h-4" />
@@ -283,9 +283,9 @@ export function ImageViewer({
           {/* Rotation controls */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={rotateLeft}
-            className="h-8 w-8 p-0"
+            className=""
             title="Rotar izquierda"
           >
             <RotateCcw className="w-4 h-4" />
@@ -293,9 +293,9 @@ export function ImageViewer({
 
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={rotateRight}
-            className="h-8 w-8 p-0"
+            className=""
             title="Rotar derecha"
           >
             <RotateCw className="w-4 h-4" />
@@ -306,9 +306,9 @@ export function ImageViewer({
           {/* Actions */}
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={fitToWidth}
-            className="h-8 w-8 p-0"
+            className=""
             title="Ajustar al ancho"
           >
             <Maximize className="w-4 h-4" />
@@ -316,9 +316,9 @@ export function ImageViewer({
 
           <Button 
             variant="ghost" 
-            size="sm" 
+            size="icon-sm" 
             onClick={downloadImage}
-            className="h-8 w-8 p-0"
+            className=""
             title="Descargar"
           >
             <Download className="w-4 h-4" />
@@ -327,9 +327,9 @@ export function ImageViewer({
           {onExpand && (
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="icon-sm" 
               onClick={onExpand}
-              className="h-8 w-8 p-0"
+              className=""
               title="Expandir"
             >
               <ExternalLink className="w-4 h-4" />

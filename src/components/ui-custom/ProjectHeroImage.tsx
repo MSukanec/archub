@@ -166,7 +166,7 @@ export default function ProjectHeroImage({
             <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
               <div className="flex gap-2">
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="secondary"
                   onClick={() => document.getElementById('hero-image-input')?.click()}
                   disabled={isUploading}
@@ -176,7 +176,7 @@ export default function ProjectHeroImage({
                   Cambiar
                 </Button>
                 <Button
-                  size="sm"
+                  size="icon-sm"
                   variant="destructive"
                   onClick={() => removeMutation.mutate()}
                   disabled={removeMutation.isPending}
