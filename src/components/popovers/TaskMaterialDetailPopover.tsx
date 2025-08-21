@@ -34,18 +34,8 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
     }).format(amount)
   }
 
-  // Debug: agregar logging para entender el estado
-  console.log('TaskMaterialDetailPopover Debug:', {
-    taskId,
-    materialsLength: materials?.length,
-    isLoading,
-    showCost,
-    task: task?.id || task?.task_id
-  });
-
   // Solo mostrar si hay materiales o si showCost es true
-  // Temporalmente mostrar siempre para debug
-  const shouldShow = true; // showCost || (!isLoading && materials && materials.length > 0);
+  const shouldShow = showCost || (!isLoading && materials && materials.length > 0);
 
   return (
     <>

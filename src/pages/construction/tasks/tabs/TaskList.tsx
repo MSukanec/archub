@@ -11,6 +11,7 @@ import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtot
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
+import { TaskRow } from '@/components/data-row/rows/TaskRow'
 
 interface TaskListProps {
   tasks: any[]
@@ -243,73 +244,52 @@ export function TaskList({
     )
   }
 
+  // Renderizar usando TaskRow en lugar de Table
   return (
-    <Table
-      columns={columns}
-      data={finalTasks}
-      isLoading={isLoading}
-      mode="construction"
-      groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-      topBar={{
-        tabs: ['Sin Agrupar', 'Por Fases', 'Por Rubros', 'Por Tareas', 'Por Fases y Rubros', 'Por Rubros y Tareas'],
-        activeTab: groupingType === 'none' ? 'Sin Agrupar' : 
-                  groupingType === 'phases' ? 'Por Fases' :
-                  groupingType === 'rubros' ? 'Por Rubros' :
-                  groupingType === 'tasks' ? 'Por Tareas' :
-                  groupingType === 'rubros-phases' ? 'Por Fases y Rubros' : 'Por Rubros y Tareas',
-        onTabChange: (tab: string) => {
-          if (tab === 'Sin Agrupar') setGroupingType('none')
-          else if (tab === 'Por Fases') setGroupingType('phases')
-          else if (tab === 'Por Rubros') setGroupingType('rubros')
-          else if (tab === 'Por Tareas') setGroupingType('tasks')
-          else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
-          else setGroupingType('phases-rubros')
-        },
-        showExport: true,
-        onExport: handleExportToExcel,
-        isExporting: isExporting
-      }}
-      renderCard={(task: any) => (
-        <ConstructionTaskCard
-          key={task.id}
-          task={task}
-          onEdit={onEditTask}
-          onDelete={(taskToDelete) => onDeleteTask(taskToDelete.id)}
-        />
-      )}
-      renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-        if (groupingType === 'tasks') {
-          // Para agrupación por rubros y tareas, calcular suma de cantidades
-          const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
-          const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
-          const rubroName = groupRows[0]?.task?.rubro_name || '';
-          
+    <div className="space-y-4">
+      {/* Top Bar con tabs */}
+      <div className="flex flex-wrap gap-2 border-b">
+        {['Sin Agrupar', 'Por Fases', 'Por Rubros', 'Por Tareas', 'Por Fases y Rubros', 'Por Rubros y Tareas'].map((tab) => {
+          const isActive = 
+            (tab === 'Sin Agrupar' && groupingType === 'none') ||
+            (tab === 'Por Fases' && groupingType === 'phases') ||
+            (tab === 'Por Rubros' && groupingType === 'rubros') ||
+            (tab === 'Por Tareas' && groupingType === 'tasks') ||
+            (tab === 'Por Fases y Rubros' && groupingType === 'rubros-phases') ||
+            (tab === 'Por Rubros y Tareas' && groupingType === 'phases-rubros');
+
           return (
-            <>
-              <div className="col-span-1 truncate">
-                {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
-              </div>
-              <div className="col-span-1">{unitSymbol}</div>
-              <div className="col-span-1">{totalQuantity.toFixed(2)}</div>
-            </>
+            <Button
+              key={tab}
+              variant={isActive ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                if (tab === 'Sin Agrupar') setGroupingType('none')
+                else if (tab === 'Por Fases') setGroupingType('phases')
+                else if (tab === 'Por Rubros') setGroupingType('rubros')
+                else if (tab === 'Por Tareas') setGroupingType('tasks')
+                else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
+                else setGroupingType('phases-rubros')
+              }}
+              className="mb-2"
+            >
+              {tab}
+            </Button>
           );
-        } else {
-          return (
-            <>
-              <div className="col-span-full text-sm font-medium">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
-              </div>
-            </>
-          );
-        }
-      }}
-      emptyState={
-        <EmptyState
-          icon={<CheckSquare className="h-8 w-8" />}
-          title="No hay tareas que coincidan"
-          description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
-        />
-      }
-    />
+        })}
+      </div>
+
+      {/* Contenido de tareas */}
+      <div className="space-y-2">
+        {finalTasks.map((task, index) => (
+          <TaskRow
+            key={task.id || index}
+            task={task}
+            onEdit={onEditTask}
+            onDelete={onDeleteTask}
+          />
+        ))}
+      </div>
+    </div>
   )
 }
