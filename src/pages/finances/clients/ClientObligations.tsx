@@ -388,7 +388,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className="text-sm font-medium">
-            {item.currency?.symbol || '$'} {Math.round(committedAmount).toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.floor(committedAmount).toLocaleString()}
           </div>
         )
       }
@@ -402,7 +402,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       render: (item: any) => {
         return (
           <div className="text-sm">
-            {item.currency?.symbol || '$'} {Math.round(item.totalPaid || 0).toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.floor(item.totalPaid || 0).toLocaleString()}
           </div>
         )
       }
@@ -419,7 +419,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
         
         return (
           <div className={`text-sm font-medium ${isNegative ? 'text-green-600' : 'text-muted-foreground'}`}>
-            {item.currency?.symbol || '$'} {Math.round(Math.abs(remaining)).toLocaleString()}
+            {item.currency?.symbol || '$'} {Math.floor(Math.abs(remaining)).toLocaleString()}
             {isNegative && ' (excedente)'}
           </div>
         )
@@ -574,7 +574,7 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
           return <div className="text-sm text-muted-foreground">-</div>
         }
 
-        const formattedAmount = Math.round(currencyData.amount).toLocaleString()
+        const formattedAmount = Math.floor(currencyData.amount).toLocaleString()
         return (
           <div className="text-sm font-medium">
             {currencyData.currency?.symbol || currencyCode} {formattedAmount}
@@ -668,14 +668,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
-                            {currency?.symbol || '$'} {metric.totalCommitted.toLocaleString('es-AR')}
+                            {currency?.symbol || '$'} {Math.floor(metric.totalCommitted).toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
                     <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                      ${clientAnalysis.totalCommittedAmount.toLocaleString('es-AR')}
+                      ${Math.floor(clientAnalysis.totalCommittedAmount).toLocaleString('es-AR')}
                     </p>
                   )}
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
@@ -716,14 +716,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
-                            {currency?.symbol || '$'} {metric.totalPaid.toLocaleString('es-AR')}
+                            {currency?.symbol || '$'} {Math.floor(metric.totalPaid).toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
                     <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                      ${clientAnalysis.totalPaidAmount.toLocaleString('es-AR')}
+                      ${Math.floor(clientAnalysis.totalPaidAmount).toLocaleString('es-AR')}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
@@ -763,14 +763,14 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
                         const currency = allCurrencies.find(c => c.id === metric.currencyId)
                         return (
                           <p key={metric.currencyId} className={`${index === 0 ? (isMobile ? 'text-lg' : 'text-2xl') : (isMobile ? 'text-sm' : 'text-lg')} font-bold`}>
-                            {currency?.symbol || '$'} {metric.remainingBalance.toLocaleString('es-AR')}
+                            {currency?.symbol || '$'} {Math.floor(metric.remainingBalance).toLocaleString('es-AR')}
                           </p>
                         )
                       })}
                     </div>
                   ) : (
                     <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                      ${clientAnalysis.remainingBalance.toLocaleString('es-AR')}
+                      ${Math.floor(clientAnalysis.remainingBalance).toLocaleString('es-AR')}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
