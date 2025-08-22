@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Table } from '@/components/ui-custom/Table'
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useGeneratedTasks, useDeleteGeneratedTask, type GeneratedTask } from '@/hooks/use-generated-tasks'
+import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
@@ -36,6 +36,7 @@ const AdminTaskList = () => {
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
   const { data: parameters = [] } = useTaskParametersAdmin()
+  const { data: taskUsageCount = {} } = useTaskUsageCount()
 
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
@@ -210,9 +211,9 @@ const AdminTaskList = () => {
     { 
       key: 'is_completed', 
       label: 'Completa', 
-      width: '120px',
+      width: '140px',
       render: (task: GeneratedTask) => (
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-1">
           {task.is_completed ? (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Completado
@@ -220,6 +221,11 @@ const AdminTaskList = () => {
           ) : (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
               Incompleto
+            </span>
+          )}
+          {taskUsageCount[task.id] && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              ({taskUsageCount[task.id]})
             </span>
           )}
         </div>
