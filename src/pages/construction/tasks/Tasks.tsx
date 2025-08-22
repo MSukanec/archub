@@ -215,14 +215,12 @@ export default function Tasks() {
   // Mobile action bar configuration
   useEffect(() => {
     if (isMobile) {
-      setActions({
+      const actions = {
         home: {
           id: 'home',
           icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
           label: 'Inicio',
-          onClick: () => {
-            navigate('/dashboard');
-          },
+          onClick: () => navigate('/dashboard'),
         },
         search: {
           id: 'search',
@@ -243,7 +241,7 @@ export default function Tasks() {
               handleAddPhase()
             }
           },
-          variant: 'primary'
+          variant: 'primary' as const
         },
         filter: {
           id: 'filter',
@@ -261,76 +259,63 @@ export default function Tasks() {
             // Popover is handled in MobileActionBar
           },
         },
-      });
+      };
+      
+      setActions(actions);
       setShowActionBar(true);
 
-      // Search will be handled by the MobileActionBar component
-
       // Configure filters based on active tab
-      if (activeTab === 'tasks') {
-        setFilterConfig({
-          title: 'Filtros de Tareas',
-          filters: [
-            {
-              key: 'phase',
-              label: 'Fase',
-              type: 'select',
-              options: projectPhases.map(phase => ({ value: phase.id, label: phase.name })),
-              value: '',
-              placeholder: 'Todas las fases'
-            },
-            {
-              key: 'category',
-              label: 'Rubro',
-              type: 'select',
-              options: [], // TODO: Add category options
-              value: '',
-              placeholder: 'Todos los rubros'
-            }
-          ],
-          onApplyFilters: (filters) => {
-            // TODO: Implement filter functionality
-            console.log('Applied filters:', filters);
+      const filterConfig = activeTab === 'tasks' ? {
+        title: 'Filtros de Tareas',
+        filters: [
+          {
+            key: 'phase',
+            label: 'Fase',
+            type: 'select' as const,
+            options: projectPhases.map(phase => ({ value: phase.id, label: phase.name })),
+            value: '',
+            placeholder: 'Todas las fases'
           },
-          onClearFilters: () => {
-            // TODO: Implement clear filters
-            console.log('Cleared filters');
+          {
+            key: 'category',
+            label: 'Rubro',
+            type: 'select' as const,
+            options: [],
+            value: '',
+            placeholder: 'Todos los rubros'
           }
-        });
-      } else if (activeTab === 'phases') {
-        setFilterConfig({
-          title: 'Filtros de Fases',
-          filters: [
-            {
-              key: 'status',
-              label: 'Estado',
-              type: 'select',
-              options: [
-                { value: 'active', label: 'Activa' },
-                { value: 'completed', label: 'Completada' },
-                { value: 'pending', label: 'Pendiente' }
-              ],
-              value: '',
-              placeholder: 'Todos los estados'
-            }
-          ],
-          onApplyFilters: (filters) => {
-            console.log('Applied phase filters:', filters);
-          },
-          onClearFilters: () => {
-            console.log('Cleared phase filters');
+        ],
+        onApplyFilters: (filters: any) => console.log('Applied filters:', filters),
+        onClearFilters: () => console.log('Cleared filters')
+      } : {
+        title: 'Filtros de Fases',
+        filters: [
+          {
+            key: 'status',
+            label: 'Estado',
+            type: 'select' as const,
+            options: [
+              { value: 'active', label: 'Activa' },
+              { value: 'completed', label: 'Completada' },
+              { value: 'pending', label: 'Pendiente' }
+            ],
+            value: '',
+            placeholder: 'Todos los estados'
           }
-        });
-      }
+        ],
+        onApplyFilters: (filters: any) => console.log('Applied phase filters:', filters),
+        onClearFilters: () => console.log('Cleared phase filters')
+      };
+      
+      setFilterConfig(filterConfig);
     }
 
-    // Cleanup when component unmounts
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
-  }, [isMobile, activeTab, navigate, handleAddSingleTask, handleAddPhase]);  // Fixed dependencies
+  }, [isMobile, activeTab]); // Simplified dependencies
 
   // Crear tabs para el header
   const headerTabs = [
