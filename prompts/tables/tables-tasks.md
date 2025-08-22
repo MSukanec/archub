@@ -231,6 +231,10 @@ TABLA TASKS:
   {
     "column_name": "is_completed",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "task_division_id",
+    "data_type": "uuid"
   }
 ]
 
@@ -448,5 +452,42 @@ VISTA TASKS_VIEW:
   {
     "column_name": "category",
     "data_type": "text"
+  }
+]
+
+TABLA TASK_DIVISIONS:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "name_en",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
   }
 ]

@@ -7,7 +7,7 @@ import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useTaskCategories } from '@/hooks/use-task-categories'
 import { useUnits } from '@/hooks/use-units'
 import { supabase } from '@/lib/supabase'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
 
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
@@ -173,6 +173,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [customName, setCustomName] = useState<string>('')
   const [taskTemplateId, setTaskTemplateId] = useState<string>('')
   const [categoryId, setCategoryId] = useState<string>('')
+  const [taskDivisionId, setTaskDivisionId] = useState<string>('')
   const [unitId, setUnitId] = useState<string>('')
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
   const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null)
@@ -262,6 +263,27 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Units data
   const { data: units = [] } = useUnits()
 
+  // Task divisions data
+  const { data: taskDivisions = [] } = useQuery({
+    queryKey: ['task-divisions'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('task_divisions')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching task divisions:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!supabase
+  })
+
   // Initialize existing task values
   React.useEffect(() => {
     if (isEditingMode && actualTask && existingParamValues) {
@@ -320,6 +342,11 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       
       if (actualTask.is_completed !== undefined) {
         setIsCompleted(actualTask.is_completed)
+      }
+      
+      // Load task_division_id if exists
+      if (actualTask.task_division_id) {
+        setTaskDivisionId(actualTask.task_division_id)
       }
     }
   }, [isEditingMode, actualTask, categories, units])
@@ -413,6 +440,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           category_id: categoryId || null,
           unit_id: unitId || null,
           task_template_id: taskTemplateId || null,
+          task_division_id: taskDivisionId || null,
           is_completed: isCompleted
         }
         
@@ -440,6 +468,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           category_id: categoryId || null,
           unit_id: unitId || null,
           task_template_id: taskTemplateId || null,
+          task_division_id: taskDivisionId || null,
           organization_id: null, // Always NULL as specified
           is_system: true, // Always TRUE as specified
           is_completed: isCompleted,
@@ -547,6 +576,21 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
             />
           </div>
           
+          <div>
+            <Label htmlFor="task-division">División</Label>
+            <ComboBox
+              value={taskDivisionId}
+              onValueChange={setTaskDivisionId}
+              options={taskDivisions.map(division => ({
+                value: division.id,
+                label: division.name
+              }))}
+              placeholder="Seleccionar división..."
+              searchPlaceholder="Buscar división..."
+              emptyMessage="No se encontraron divisiones"
+            />
+          </div>
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="task-category">Rubro</Label>
@@ -587,6 +631,19 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
               onChange={(e) => setCustomName(e.target.value)}
               placeholder="Nombre personalizado para la tarea..."
               rows={3}
+            />
+          </div>
+          
+          {/* Task Completion Status - moved here before materials */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="is-completed">Tarea Completada</Label>
+              <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
+            </div>
+            <Switch
+              id="is-completed"
+              checked={isCompleted}
+              onCheckedChange={setIsCompleted}
             />
           </div>
         </div>
@@ -670,20 +727,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         </div>
       </div>
       
-      {/* Task Completion Status */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="is-completed">Tarea Completada</Label>
-            <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
-          </div>
-          <Switch
-            id="is-completed"
-            checked={isCompleted}
-            onCheckedChange={setIsCompleted}
-          />
-        </div>
-      </div>
+
     </div>
   );
 
