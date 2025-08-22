@@ -330,7 +330,7 @@ export default function Tasks() {
         clearActions();
       }
     };
-  }, [isMobile, activeTab, projectPhases]);  // Update when activeTab or projectPhases change
+  }, [isMobile, activeTab, navigate, handleAddSingleTask, handleAddPhase]);  // Fixed dependencies
 
   // Crear tabs para el header
   const headerTabs = [

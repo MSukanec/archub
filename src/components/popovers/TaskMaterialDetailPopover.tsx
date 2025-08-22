@@ -53,7 +53,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
           </Button>
         </PopoverTrigger>
       <PopoverContent 
-        className="w-screen h-auto max-h-[80vh] p-0 md:w-96 md:h-auto" 
+        className="w-screen h-screen max-h-screen p-0 md:w-96 md:h-auto md:max-h-[80vh]" 
         align="center"
         side="top"
         sideOffset={0}
