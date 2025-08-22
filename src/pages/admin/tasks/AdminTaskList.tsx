@@ -213,7 +213,7 @@ const AdminTaskList = () => {
       label: 'Completa', 
       width: '140px',
       render: (task: GeneratedTask) => (
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center justify-center gap-1">
           {task.is_completed ? (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               Completado
@@ -224,7 +224,7 @@ const AdminTaskList = () => {
             </span>
           )}
           {taskUsageCount[task.id] && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            <span className="text-xs font-medium text-muted-foreground">
               ({taskUsageCount[task.id]})
             </span>
           )}
