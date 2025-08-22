@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -21,6 +21,7 @@ const AdminMaterialMateriales = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [groupingType, setGroupingType] = useState<'none' | 'categories'>('categories')
   
   const { openModal } = useGlobalModalStore()
 
@@ -65,6 +66,22 @@ const AdminMaterialMateriales = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
+
+  // Process materials for grouping
+  const processedMaterials = useMemo(() => {
+    if (groupingType === 'none') {
+      return sortedMaterials;
+    }
+    
+    if (groupingType === 'categories') {
+      return sortedMaterials.map(material => ({
+        ...material,
+        groupKey: material.category?.name || 'Sin categoría'
+      }));
+    }
+    
+    return sortedMaterials;
+  }, [sortedMaterials, groupingType])
 
   const handleEdit = (material: Material) => {
     openModal('material-form', { editingMaterial: material })
@@ -113,9 +130,11 @@ const AdminMaterialMateriales = () => {
     setSearchValue('')
     setSortBy('name')
     setCategoryFilter('all')
+    setGroupingType('categories')
   }
 
-  const columns = [
+  // Table columns configuration - hide 'Categoría' column when grouped by categories
+  const baseColumns = [
     {
       key: 'is_completed',
       label: 'Completado',
@@ -137,59 +156,62 @@ const AdminMaterialMateriales = () => {
     {
       key: 'name',
       label: 'Material',
+      width: 'minmax(0, 1fr)',
       render: (material: Material) => (
-        <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium text-sm">{material.name}</span>
+        <div className="font-medium text-xs">
+          {material.name}
         </div>
       )
     },
-    {
+    ...(groupingType !== 'categories' ? [{
       key: 'category_id',
       label: 'Categoría',
+      width: '12%',
       render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {buildCategoryPath(material.category_id)}
-        </span>
+        <div>
+          {material.category?.name ? (
+            <Badge variant="outline" className="text-xs">
+              {material.category.name}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin categoría</span>
+          )}
+        </div>
       )
-    },
+    }] : []),
     {
       key: 'provider',
       label: 'Proveedor',
       width: '10%',
       render: (material: Material) => (
         <span className="text-xs text-muted-foreground">
-          {material.provider || 'N/A'}
+          {material.provider || '–'}
         </span>
       )
     },
     {
       key: 'unit_id',
-      label: 'Unidad de Cómputo',
+      label: 'Unidad',
       width: '8%',
       render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.unit?.name || 'N/A'}
-        </span>
-      )
-    },
-    {
-      key: 'default_unit_presentation_id',
-      label: 'Unidad de Venta por Defecto',
-      width: '10%',
-      render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.default_unit_presentation?.name || 'N/A'}
-        </span>
+        <div>
+          {material.unit?.name ? (
+            <Badge variant="secondary" className="text-xs">
+              {material.unit.name}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin unidad</span>
+          )}
+        </div>
       )
     },
     {
       key: 'base_price_override',
-      label: 'Precio por Defecto',
+      label: 'Precio',
       width: '8%',
       render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.base_price_override ? `$${material.base_price_override.toLocaleString()}` : 'N/A'}
+        <span className="text-xs font-medium">
+          {material.base_price_override ? `$${material.base_price_override.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
         </span>
       )
     },
@@ -197,46 +219,93 @@ const AdminMaterialMateriales = () => {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '5%',
+      width: '120px',
       render: (material: Material) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleEdit(material)}
+            className="h-8 w-8 p-0"
+            title="Editar material"
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="text-blue-600 hover:text-blue-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDuplicate(material)}
+            className="h-8 w-8 p-0"
+            title="Duplicar material"
           >
-            <Copy className="h-3 w-3" />
+            <Copy className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="text-red-600 hover:text-red-700 hover:bg-[var(--button-ghost-hover-bg)]"
             onClick={() => handleDelete(material)}
+            className="h-8 w-8 p-0"
+            title="Eliminar material"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         </div>
       )
     }
   ]
 
+  // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
+  const columns = baseColumns;
+
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className="p-0">
           <Table
-            data={sortedMaterials}
+            data={processedMaterials}
             columns={columns}
             isLoading={isLoading}
+            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            topBar={{
+              tabs: ['Sin Agrupar', 'Por Categorías'],
+              activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+              onTabChange: (tab: string) => {
+                if (tab === 'Sin Agrupar') setGroupingType('none')
+                else if (tab === 'Por Categorías') setGroupingType('categories')
+              },
+              showSearch: true,
+              searchValue: searchValue,
+              onSearchChange: setSearchValue,
+              showFilter: true,
+              isFilterActive: categoryFilter !== 'all',
+              renderFilterContent: () => (
+                <div className="space-y-3 p-2 min-w-[200px]">
+                  <div>
+                    <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                    <Select value={categoryFilter} onValueChange={(value: string) => setCategoryFilter(value)}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Todas las categorías" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas las categorías</SelectItem>
+                        {categories.map((category: any) => (
+                          <SelectItem key={category.id} value={category.name.toLowerCase()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ),
+              showClearFilters: categoryFilter !== 'all' || groupingType !== 'categories',
+              onClearFilters: clearFilters,
+            }}
+            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
+              </div>
+            )}
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-4 opacity-20" />
