@@ -274,18 +274,29 @@ export function ClientObligations({ projectId, organizationId }: ClientObligatio
       clientPayments.forEach((payment: any) => {
         payment.movement_clients?.forEach((mc: any) => {
           if (mc.project_client_id === client.id) {
-            if (payment.currency_id === client.currency_id) {
-              totalPaid += payment.amount || 0
+            // Determinar la moneda del pago y del compromiso
+            const paymentCurrency = allCurrencies.find(c => c.id === payment.currency_id)
+            const commitmentCurrency = allCurrencies.find(c => c.id === client.currency_id)
+            
+            const paymentCurrencyCode = paymentCurrency?.code || 'USD'
+            const commitmentCurrencyCode = commitmentCurrency?.code || 'USD'
+            
+            const amount = payment.amount || 0
+            const exchangeRate = payment.exchange_rate || 1
+            
+            // REGLA CRÍTICA: Convertir todo a la moneda del compromiso
+            if (paymentCurrencyCode === commitmentCurrencyCode) {
+              // Misma moneda - agregar directamente
+              totalPaid += amount
+            } else if (paymentCurrencyCode === 'USD' && commitmentCurrencyCode === 'ARS') {
+              // Pago en USD, compromiso en ARS - convertir a ARS multiplicando
+              totalPaid += amount * exchangeRate
+            } else if (paymentCurrencyCode === 'ARS' && commitmentCurrencyCode === 'USD') {
+              // Pago en ARS, compromiso en USD - convertir a USD dividiendo
+              totalPaid += amount / exchangeRate
             } else {
-              // Convert to client currency if different
-              const exchangeRate = payment.exchange_rate || 1
-              if (payment.currency?.code === 'USD' && currency?.code === 'ARS') {
-                totalPaid += (payment.amount || 0) * exchangeRate
-              } else if (payment.currency?.code === 'ARS' && currency?.code === 'USD') {
-                totalPaid += (payment.amount || 0) / exchangeRate
-              } else {
-                totalPaid += payment.amount || 0
-              }
+              // Otras monedas - usar monto original como fallback
+              totalPaid += amount
             }
           }
         })

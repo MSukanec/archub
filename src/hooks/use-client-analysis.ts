@@ -7,6 +7,13 @@ export function useClientAnalysis(projectId: string | null) {
     queryFn: async () => {
       if (!projectId || !supabase) return null
 
+      // Fetch all currencies for conversion
+      const { data: allCurrencies, error: currenciesError } = await supabase
+        .from('currencies')
+        .select('id, code, name, symbol')
+      
+      if (currenciesError) throw currenciesError
+
       // 1. Obtener todos los compromisos de clientes del proyecto
       const { data: projectClients, error: clientsError } = await supabase
         .from('project_clients')
@@ -61,15 +68,38 @@ export function useClientAnalysis(projectId: string | null) {
         })
       }
 
-      // Agrupar pagos por moneda
+      // Agrupar pagos por moneda - CONVERTIR A LA MONEDA DEL COMPROMISO
       if (clientPayments) {
         clientPayments.forEach((payment: any) => {
-          const currencyId = payment.currency_id
+          // Buscar la moneda del pago desde allCurrencies usando el payment.currency_id
+          const paymentCurrency = allCurrencies?.find((c: any) => c.id === payment.currency_id)
+          const paymentCurrencyCode = paymentCurrency?.code || 'USD' // Default a USD si no se encuentra
           const amount = Math.abs(payment.amount || 0)
+          const exchangeRate = payment.exchange_rate || 1
           
-          if (commitmentsByCurrency[currencyId]) {
-            commitmentsByCurrency[currencyId].totalPaid += amount
-          }
+          // Para cada compromiso (moneda), convertir este pago a esa moneda
+          Object.keys(commitmentsByCurrency).forEach(commitmentCurrencyId => {
+            const commitmentCurrency = allCurrencies?.find((c: any) => c.id === commitmentCurrencyId)
+            const commitmentCurrencyCode = commitmentCurrency?.code
+            
+            let convertedAmount = 0
+            
+            if (paymentCurrencyCode === commitmentCurrencyCode) {
+              // Misma moneda - sin conversión
+              convertedAmount = amount
+            } else if (paymentCurrencyCode === 'USD' && commitmentCurrencyCode === 'ARS') {
+              // Pago en USD, compromiso en ARS - multiplicar por tipo de cambio
+              convertedAmount = amount * exchangeRate
+            } else if (paymentCurrencyCode === 'ARS' && commitmentCurrencyCode === 'USD') {
+              // Pago en ARS, compromiso en USD - dividir por tipo de cambio
+              convertedAmount = amount / exchangeRate
+            } else {
+              // Otras monedas - usar el monto original como fallback
+              convertedAmount = amount
+            }
+            
+            commitmentsByCurrency[commitmentCurrencyId].totalPaid += convertedAmount
+          })
         })
       }
 
