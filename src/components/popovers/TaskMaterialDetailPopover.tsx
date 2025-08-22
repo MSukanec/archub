@@ -42,6 +42,15 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
           {formatCost(totalPerUnit)}
         </span>
       )}
+      
+      {/* Mobile overlay backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black bg-opacity-75 md:hidden" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -53,11 +62,11 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
           </Button>
         </PopoverTrigger>
       <PopoverContent 
-        className="w-screen h-screen max-h-screen p-0 md:w-96 md:h-auto md:max-h-[80vh]" 
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-32px)] max-w-sm h-auto max-h-[70vh] p-0 z-[60] overflow-hidden md:static md:transform-none md:w-96 md:h-auto md:max-h-[80vh]" 
         align="center"
         side="top"
-        sideOffset={0}
-        avoidCollisions={true}
+        sideOffset={10}
+        avoidCollisions={false}
       >
         <div className="relative">
           {/* Header */}
