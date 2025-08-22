@@ -418,6 +418,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         console.log('🔧 Updating task with data:', updateData)
         console.log('🔧 Current isCompleted value:', isCompleted)
+        console.log('🔧 CategoryId value:', categoryId)
+        console.log('🔧 UnitId value:', unitId)
         
         const { error: updateError } = await supabase
           .from('tasks')
@@ -448,6 +450,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         console.log('🔧 Creating task with data:', newTask)
         console.log('🔧 Current isCompleted value:', isCompleted)
+        console.log('🔧 CategoryId value:', categoryId)
+        console.log('🔧 UnitId value:', unitId)
         
         const { data, error } = await supabase
           .from('tasks')
