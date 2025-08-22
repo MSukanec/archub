@@ -205,7 +205,7 @@ const AdminTaskList = () => {
     )
   }
 
-  // Table columns configuration
+  // Table columns configuration - hide 'Rubro' column when grouped by rubros
   const baseColumns = [
     { 
       key: 'is_completed', 
@@ -225,7 +225,7 @@ const AdminTaskList = () => {
         </div>
       )
     },
-    { 
+    ...(groupingType !== 'rubros' ? [{ 
       key: 'category', 
       label: 'Rubro', 
       width: '12%',
@@ -240,7 +240,7 @@ const AdminTaskList = () => {
           )}
         </div>
       )
-    },
+    }] : []),
     { 
       key: 'custom_name', 
       label: 'Tarea', 
@@ -346,14 +346,8 @@ const AdminTaskList = () => {
     }
   ]
 
-  // Dynamic columns based on grouping
-  const columns = useMemo(() => {
-    if (groupingType === 'rubros') {
-      // Hide the Rubro column when grouping by rubros
-      return baseColumns.filter(column => column.key !== 'element_category_name');
-    }
-    return baseColumns;
-  }, [groupingType])
+  // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
+  const columns = baseColumns;
 
   return (
     <div className="space-y-6">
