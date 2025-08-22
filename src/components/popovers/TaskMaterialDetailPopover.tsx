@@ -53,10 +53,10 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
           </Button>
         </PopoverTrigger>
       <PopoverContent 
-        className="w-[95vw] max-w-96 p-0 md:w-96" 
+        className="w-screen h-auto max-h-[80vh] p-0 md:w-96 md:h-auto" 
         align="center"
         side="top"
-        sideOffset={10}
+        sideOffset={0}
         avoidCollisions={true}
       >
         <div className="relative">
