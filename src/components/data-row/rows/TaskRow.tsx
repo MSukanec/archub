@@ -1,7 +1,4 @@
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye } from 'lucide-react';
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover';
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
@@ -9,8 +6,6 @@ import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 // Interface para la tarea de construcción
 interface TaskRowProps {
   task: any;
-  onEdit?: (task: any) => void;
-  onDelete?: (taskId: string) => void;
   onClick?: () => void;
   selected?: boolean;
   density?: 'compact' | 'normal' | 'comfortable';
@@ -19,8 +14,6 @@ interface TaskRowProps {
 
 export default function TaskRow({
   task,
-  onEdit,
-  onDelete,
   onClick,
   selected = false,
   density = 'normal',
@@ -28,7 +21,7 @@ export default function TaskRow({
 }: TaskRowProps) {
   
   const rowProps: Omit<DataRowCardProps, 'children'> = {
-    columns: 1, // Una sola columna ya que ocupamos todo el ancho
+    columns: 2, // Cambiado a 2 para cumplir con el tipo
     onClick,
     selected,
     density,
@@ -53,29 +46,9 @@ export default function TaskRow({
             </div>
           </div>
           
-          {/* BOTONES DE ACCIONES */}
-          <div className="flex gap-1 ml-2">
+          {/* POPOVER DE MATERIALES - SOLO PARA VISTA */}
+          <div className="ml-2">
             <TaskMaterialDetailPopover task={task} showCost={false} />
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(task)}
-                className="h-8 w-8 p-0"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(task.id)}
-                className="h-8 w-8 p-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         </div>
         

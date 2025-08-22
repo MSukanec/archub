@@ -275,8 +275,6 @@ export function TaskList({
         <TaskRow
           key={task.id}
           task={task}
-          onEdit={onEditTask}
-          onDelete={(taskId) => onDeleteTask(taskId)}
         />
       )}
       renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
