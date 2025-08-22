@@ -124,6 +124,8 @@ export function useCreateMaterial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
       toast({
         title: "Material creado",
         description: "El material se ha creado exitosamente.",
@@ -168,6 +170,8 @@ export function useUpdateMaterial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
       toast({
         title: "Material actualizado",
         description: "El material se ha actualizado exitosamente.",
@@ -246,6 +250,8 @@ export function useCreateMaterialPrice() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material-prices'] })
       queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
     },
     onError: (error) => {
       console.error('Error creating material price:', error)
@@ -311,6 +317,8 @@ export function useUpdateMaterialPrice() {
       queryClient.invalidateQueries({ queryKey: ['materials'] })
       queryClient.invalidateQueries({ queryKey: ['material-prices'] })
       queryClient.invalidateQueries({ queryKey: ['material-price'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
     },
     onError: (error) => {
       console.error('Error updating material price:', error)

@@ -106,6 +106,9 @@ export function useCreateMaterialPrice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
       toast({
         title: 'Precio agregado',
         description: 'El precio del material se agregó correctamente.',
@@ -148,6 +151,9 @@ export function useUpdateMaterialPrice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
       toast({
         title: 'Precio actualizado',
         description: 'El precio del material se actualizó correctamente.',
@@ -183,6 +189,9 @@ export function useDeleteMaterialPrice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['material-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['material-view'] })
       toast({
         title: 'Precio eliminado',
         description: 'El precio del material se eliminó correctamente.',
