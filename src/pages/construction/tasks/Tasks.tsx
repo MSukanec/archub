@@ -212,19 +212,6 @@ export default function Tasks() {
     })
   }
 
-  // Stable callbacks para evitar dependencias infinitas
-  const handleNavigateHome = useCallback(() => {
-    navigate('/dashboard')
-  }, [navigate])
-
-  const handleCreateAction = useCallback(() => {
-    if (activeTab === 'tasks') {
-      handleAddSingleTask()
-    } else if (activeTab === 'phases') {
-      handleAddPhase()
-    }
-  }, [activeTab, handleAddSingleTask, handleAddPhase])
-
   // Mobile action bar configuration
   useEffect(() => {
     if (!isMobile) return
@@ -234,7 +221,7 @@ export default function Tasks() {
         id: 'home',
         icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
         label: 'Inicio',
-        onClick: handleNavigateHome,
+        onClick: () => navigate('/dashboard'),
       },
       search: {
         id: 'search',
@@ -248,7 +235,13 @@ export default function Tasks() {
         id: 'create',
         icon: <Plus className="h-6 w-6" />,
         label: activeTab === 'tasks' ? 'Nueva Tarea' : activeTab === 'phases' ? 'Nueva Fase' : 'Crear',
-        onClick: handleCreateAction,
+        onClick: () => {
+          if (activeTab === 'tasks') {
+            handleAddSingleTask()
+          } else if (activeTab === 'phases') {
+            handleAddPhase()
+          }
+        },
         variant: 'primary' as const
       },
       filter: {
@@ -280,7 +273,7 @@ export default function Tasks() {
           key: 'phase',
           label: 'Fase',
           type: 'select' as const,
-          options: projectPhases.map(phase => ({ value: phase.id, label: phase.name })),
+          options: [],
           value: '',
           placeholder: 'Todas las fases'
         },
@@ -320,7 +313,7 @@ export default function Tasks() {
     return () => {
       clearActions()
     }
-  }, [isMobile, activeTab, handleNavigateHome, handleCreateAction, projectPhases, setActions, setShowActionBar, setFilterConfig, clearActions])
+  }, [isMobile, activeTab]) // Solo dependencias primitivas
 
 
 
