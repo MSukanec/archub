@@ -31,7 +31,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
       style: 'currency',
       currency: 'ARS',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 2
     }).format(amount)
   }
 
@@ -112,14 +112,14 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                             <span>{quantity} {unitName}</span>
                             <span>•</span>
                             <span className="font-mono">
-                              {unitPrice > 0 ? `$${unitPrice.toLocaleString()}` : '–'}
+                              {unitPrice > 0 ? `$${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
                             </span>
                           </div>
                         </div>
                         
                         {/* Precio total */}
                         <div className="text-xs text-[var(--card-fg)] flex-shrink-0 text-right" style={{ minWidth: '80px' }}>
-                          {subtotal > 0 ? `$${subtotal.toLocaleString()}` : '–'}
+                          {subtotal > 0 ? `$${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
                         </div>
                       </div>
                     );
@@ -136,7 +136,7 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
                 <span className="text-xs font-semibold text-[var(--card-fg)] uppercase">TOTAL POR UNIDAD:</span>
               </div>
               <div className="text-xs font-semibold text-[var(--card-fg)] text-right" style={{ minWidth: '80px' }}>
-                ${totalPerUnit.toLocaleString()}
+                ${totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
               </div>
             </div>
           )}
