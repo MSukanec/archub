@@ -1,21 +1,19 @@
 import { useState } from 'react'
+import { Eye, Package, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
-import { Eye, X, Package } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
-interface TaskMaterialDetailPopoverProps {
+export interface TaskMaterialDetailPopoverProps {
   task: any
   showCost?: boolean
 }
 
-export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMaterialDetailPopoverProps) {
+export const TaskMaterialDetailPopover = ({ task, showCost = false }: TaskMaterialDetailPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false)
+
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
   const taskId = task.task_id || task.id
   const { data: materials = [], isLoading } = useTaskMaterials(taskId)
-
 
   // Calcular total por unidad usando material_view.computed_unit_price
   const totalPerUnit = materials.reduce((sum, material) => {
@@ -43,116 +41,112 @@ export function TaskMaterialDetailPopover({ task, showCost = false }: TaskMateri
         </span>
       )}
       
-      {/* Mobile overlay backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-50 bg-black bg-opacity-75 md:hidden" 
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-      
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
-      <PopoverContent 
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-32px)] max-w-sm h-auto max-h-[70vh] p-0 z-[60] overflow-hidden md:static md:transform-none md:w-96 md:h-auto md:max-h-[80vh]" 
-        align="center"
-        side="top"
-        sideOffset={10}
-        avoidCollisions={false}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+        onClick={() => setIsOpen(true)}
       >
-        <div className="relative">
-          {/* Header */}
-          <div className="px-3 py-2 flex items-center justify-between border-b border-[var(--card-border)]">
-            <div className="flex items-center gap-2 flex-1">
-              <Package className="h-3 w-3 text-[var(--accent)]" />
-              <h2 className="text-xs font-semibold text-[var(--card-fg)]">
-                Materiales por unidad
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
+        <Eye className="h-4 w-4" />
+      </Button>
 
-          {/* Content */}
-          <div className="p-4">
-            {isLoading ? (
-              <div className="text-center py-3">
-                <div className="text-xs text-muted-foreground">Cargando materiales...</div>
-              </div>
-            ) : materials.length === 0 ? (
-              <div className="text-center py-3">
-                <div className="text-xs text-muted-foreground">
-                  No hay materiales definidos para esta tarea
+      {/* Mobile popover with backdrop - same pattern as ActionBarMobile filter */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75" onClick={() => setIsOpen(false)}>
+          <div 
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg border"
+            style={{ 
+              backgroundColor: 'var(--menues-bg)',
+              borderColor: 'var(--menues-border)',
+              width: 'calc(100vw - 32px)',
+              maxWidth: '400px',
+              maxHeight: '70vh',
+              zIndex: 60,
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              {/* Header */}
+              <div className="px-3 py-2 flex items-center justify-between border-b" style={{ borderColor: 'var(--menues-border)' }}>
+                <div className="flex items-center gap-2 flex-1">
+                  <Package className="h-3 w-3" style={{ color: 'var(--accent)' }} />
+                  <h2 className="text-xs font-semibold" style={{ color: 'var(--menues-fg)' }}>
+                    Materiales por unidad
+                  </h2>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
-            ) : (
-              <>
-                {/* Lista de materiales con scroll si hay más de 5 */}
-                <div className={`space-y-1 ${materials.length > 5 ? 'max-h-64 overflow-y-auto pr-1' : ''}`}>
-                  {materials.map((material) => {
-                    const quantity = material.amount || 0;
-                    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
-                    const unitPrice = materialView?.computed_unit_price || 0;
-                    const subtotal = quantity * unitPrice;
-                    const unitName = materialView?.unit_of_computation || 'UD';
-                    
-                    return (
-                      <div key={material.id} className="flex items-start justify-between py-1 border-b border-gray-100 last:border-b-0">
-                        {/* Información del material */}
-                        <div className="flex-1 min-w-0 pr-4">
-                          <div className="text-xs font-semibold text-[var(--card-fg)] leading-tight">
-                            {materialView?.name || 'Material sin nombre'}
+
+              {/* Content */}
+              <div className="p-4" style={{ maxHeight: 'calc(70vh - 120px)', overflow: 'auto' }}>
+                {isLoading ? (
+                  <div className="text-center py-3">
+                    <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>Cargando materiales...</div>
+                  </div>
+                ) : materials.length === 0 ? (
+                  <div className="text-center py-3">
+                    <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>
+                      No hay materiales definidos para esta tarea
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {materials.map((material) => {
+                      const quantity = material.amount || 0;
+                      const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
+                      const unitPrice = materialView?.computed_unit_price || 0;
+                      const subtotal = quantity * unitPrice;
+                      const unitName = materialView?.unit_of_computation || 'UD';
+                      
+                      return (
+                        <div key={material.id} className="flex items-start justify-between py-1 border-b last:border-b-0" style={{ borderColor: 'var(--menues-border)' }}>
+                          {/* Información del material */}
+                          <div className="flex-1 min-w-0 pr-4">
+                            <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
+                              {materialView?.name || 'Material sin nombre'}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
+                              <span>{quantity} {unitName}</span>
+                              <span>•</span>
+                              <span className="font-mono">
+                                {unitPrice > 0 ? `$${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-[var(--muted-fg)] mt-0.5">
-                            <span>{quantity} {unitName}</span>
-                            <span>•</span>
-                            <span className="font-mono">
-                              {unitPrice > 0 ? `$${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-                            </span>
+                          
+                          {/* Precio total */}
+                          <div className="text-xs flex-shrink-0 text-right" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                            {subtotal > 0 ? `$${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
                           </div>
                         </div>
-                        
-                        {/* Precio total */}
-                        <div className="text-xs text-[var(--card-fg)] flex-shrink-0 text-right" style={{ minWidth: '80px' }}>
-                          {subtotal > 0 ? `$${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-          {/* Footer - Solo se muestra si hay materiales */}
-          {!isLoading && materials.length > 0 && (
-            <div className="px-3 py-3 flex items-center justify-between border-t border-[var(--card-border)]">
-              <div className="flex items-center gap-2 flex-1">
-                <span className="text-xs font-semibold text-[var(--card-fg)] uppercase">TOTAL POR UNIDAD:</span>
-              </div>
-              <div className="text-xs font-semibold text-[var(--card-fg)] text-right" style={{ minWidth: '80px' }}>
-                ${totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </div>
+              {/* Footer - Solo se muestra si hay materiales */}
+              {!isLoading && materials.length > 0 && (
+                <div className="px-3 py-3 flex items-center justify-between border-t" style={{ borderColor: 'var(--menues-border)' }}>
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--menues-fg)' }}>TOTAL POR UNIDAD:</span>
+                  </div>
+                  <div className="text-xs font-semibold text-right" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                    ${totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-        </PopoverContent>
-        </Popover>
+      )}
     </>
   )
 }
