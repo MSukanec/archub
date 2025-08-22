@@ -75,9 +75,6 @@ export default function TaskRow({
             </div>
           </div>
           <div className="flex flex-col items-center justify-center">
-            <span className="text-xs font-medium text-[var(--text-primary)] mb-1">
-              Ver
-            </span>
             <TaskMaterialDetailPopover task={task} showCost={false} />
           </div>
         </div>
