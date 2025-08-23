@@ -458,223 +458,213 @@ export default function IndexedInstallmentPlan({
           </div>
         )}
 
-        {/* Unified scrollable container */}
+        {/* Fixed left column + scrollable right area */}
         <div className="flex">
-          {/* Fixed left column - stays visible */}
-          <div className="w-48 flex-shrink-0">
-            {/* Fixed column header */}
-            <div className="border-b border-border p-3 font-medium text-sm">
+          {/* Fixed left column header */}
+          <div className="w-32 border-b border-border">
+            <div className="p-3 font-medium text-sm">
               Cuota / Unidad
             </div>
-            
-            {/* Fixed column data rows */}
-            {heatmapData.map((rowData, rowIndex) => {
-              const installment = installments[rowIndex]
-              if (!installment) return null
-              
-              return (
-                <div key={`fixed-${installment.number}`} className="group border-b border-border p-3 text-sm transition-colors relative">
-                  <div className="font-bold mb-1">
-                    Cuota {installment.number.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-xs text-muted-foreground mb-1">
-                    {new Date(installment.date).toLocaleDateString('es-ES', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {installment.index_reference !== undefined && installment.index_reference !== null ? installment.index_reference.toFixed(2) : '0.00'}%
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  {onEditInstallment && (
-                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditInstallment(installment);
-                          }}
-                          className=" hover:bg-[var(--button-ghost-hover-bg)]"
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
           </div>
           
-          {/* Single scrollable area for all unit columns */}
-          <div className={`flex-1 ${isMobile ? 'overflow-x-auto' : 'overflow-x-scroll'}`} style={!isMobile ? { 
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'var(--border) transparent'
-          } : {}}>
-            <div style={{ minWidth: 'max-content' }}>
-              {/* Header row for unit columns */}
-              <div className="border-b border-border">
-                <div className="flex">
-                  {commitments?.length ? (
-                    isMobile ? (
-                      // Mobile: show only current column
-                      <div
-                        key={commitments[mobileColumnIndex].id}
-                        className="flex-1 p-3 bg-muted/50 text-sm text-center border-l border-border"
-                      >
-                        <div className="font-bold text-xs mb-1">
-                          {commitments[mobileColumnIndex].unit || 'Sin U.F.'}
-                        </div>
-                        <div className="text-xs text-muted-foreground mb-1">
-                          {getClientDisplayName(commitments[mobileColumnIndex])}
-                        </div>
-                        {formatCommittedAmount(commitments[mobileColumnIndex]) && (
-                          <div className="text-xs font-medium text-foreground">
-                            {formatCommittedAmount(commitments[mobileColumnIndex])}
-                          </div>
-                        )}
+          {/* Scrollable right area header */}
+          <div className="flex-1 overflow-x-auto">
+            <div className="flex" style={{ minWidth: 'max-content' }}>
+              {commitments?.length ? (
+                isMobile ? (
+                  // Mobile: show only current column
+                  <div
+                    key={commitments[mobileColumnIndex].id}
+                    className={`${isMobile ? 'flex-1' : 'w-60'} p-3 bg-muted/50 text-sm text-center border-l border-border`}
+                  >
+                    <div className="font-bold text-xs mb-1">
+                      {commitments[mobileColumnIndex].unit || 'Sin U.F.'}
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {getClientDisplayName(commitments[mobileColumnIndex])}
+                    </div>
+                    {formatCommittedAmount(commitments[mobileColumnIndex]) && (
+                      <div className="text-xs font-medium text-foreground">
+                        {formatCommittedAmount(commitments[mobileColumnIndex])}
                       </div>
+                    )}
+                  </div>
+                ) : (
+                  // Desktop: show all columns with wider width
+                  commitments.map((commitment) => (
+                    <div
+                      key={commitment.id}
+                      className="w-60 p-3 bg-muted/50 text-sm text-center border-l border-border"
+                    >
+                      <div className="font-bold text-xs mb-1">
+                        {commitment.unit || 'Sin U.F.'}
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {getClientDisplayName(commitment)}
+                      </div>
+                      {formatCommittedAmount(commitment) && (
+                        <div className="text-xs font-medium text-foreground">
+                          {formatCommittedAmount(commitment)}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )
+              ) : (
+                <div className={`${isMobile ? 'flex-1' : 'w-60'} p-3 bg-muted/50 text-sm text-center border-l border-border`}>
+                  <div className="text-xs text-muted-foreground">
+                    No hay compromisos registrados
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Data rows - each row is an installment */}
+        {heatmapData.map((rowData, rowIndex) => {
+          const installment = installments[rowIndex]
+          if (!installment) return null
+          
+          return (
+            <div key={installment.number} className="flex border-b border-border">
+              {/* Fixed left column - installment info */}
+              <div className="group w-32 p-3 text-sm transition-colors relative">
+                <div className="font-bold mb-1">
+                  Cuota {installment.number.toString().padStart(2, '0')}
+                </div>
+                <div className="text-xs text-muted-foreground mb-1">
+                  {new Date(installment.date).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                  })}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {installment.index_reference !== undefined && installment.index_reference !== null ? installment.index_reference.toFixed(2) : '0.00'}%
+                </div>
+                
+                {/* Action Buttons */}
+                {onEditInstallment && (
+                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-background border border-border rounded-md px-1 py-1 flex items-center gap-1 shadow-sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditInstallment(installment);
+                        }}
+                        className=" hover:bg-[var(--button-ghost-hover-bg)]"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Scrollable right area - unit data */}
+              <div className="flex-1 overflow-x-auto">
+                <div className="flex" style={{ minWidth: 'max-content' }}>
+                  {rowData.length > 0 ? (
+                    isMobile ? (
+                      // Mobile: show only current column data
+                      rowData[mobileColumnIndex] && (
+                        <div
+                          key={`${rowIndex}-${mobileColumnIndex}`}
+                          className="flex-1 p-3 text-xs border-l border-border"
+                        >
+                          <div className="space-y-1">
+                            {/* Actualización - Violeta */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-foreground font-medium">Actualización:</span>
+                              <span className="text-foreground font-medium text-right">
+                                {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].updatedAmount.toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {/* Valor de Cuota - Rojo */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-red-600 dark:text-red-400">Valor de Cuota:</span>
+                              <span className="text-red-600 dark:text-red-400 text-right">
+                                {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].installmentValue.toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {/* Pago - Verde */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-600 dark:text-green-400">Pago:</span>
+                              <span className="text-green-600 dark:text-green-400 text-right">
+                                {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].payment.toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {/* Saldo - Azul */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-foreground">Saldo:</span>
+                              <span className="text-foreground text-right">
+                                {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].balance.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
                     ) : (
                       // Desktop: show all columns with wider width
-                      commitments.map((commitment) => (
+                      rowData.map((cellData, colIndex) => (
                         <div
-                          key={commitment.id}
-                          className="w-60 p-3 bg-muted/50 text-sm text-center border-l border-border"
+                          key={`${rowIndex}-${colIndex}`}
+                          className="w-60 p-3 text-xs border-l border-border"
                         >
-                          <div className="font-bold text-xs mb-1">
-                            {commitment.unit || 'Sin U.F.'}
-                          </div>
-                          <div className="text-xs text-muted-foreground mb-1">
-                            {getClientDisplayName(commitment)}
-                          </div>
-                          {formatCommittedAmount(commitment) && (
-                            <div className="text-xs font-medium text-foreground">
-                              {formatCommittedAmount(commitment)}
+                          <div className="space-y-1">
+                            {/* Actualización - Violeta */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-foreground font-medium">Actualización:</span>
+                              <span className="text-foreground font-medium text-right">
+                                {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
+                              </span>
                             </div>
-                          )}
+                            
+                            {/* Valor de Cuota - Rojo */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-red-600 dark:text-red-400">Valor de Cuota:</span>
+                              <span className="text-red-600 dark:text-red-400 text-right">
+                                {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {/* Pago - Verde */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-600 dark:text-green-400">Pago:</span>
+                              <span className="text-green-600 dark:text-green-400 text-right">
+                                {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {/* Saldo - Azul */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-foreground">Saldo:</span>
+                              <span className="text-foreground text-right">
+                                {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       ))
                     )
                   ) : (
-                    <div className="w-60 p-3 bg-muted/50 text-sm text-center border-l border-border">
-                      <div className="text-xs text-muted-foreground">
-                        No hay compromisos registrados
+                    <div className={`${isMobile ? 'flex-1' : 'w-60'} p-3 text-xs border-l border-border`}>
+                      <div className="text-center text-muted-foreground">
+                        Sin datos
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-              
-              {/* Data rows for unit columns */}
-              {heatmapData.map((rowData, rowIndex) => {
-                const installment = installments[rowIndex]
-                if (!installment) return null
-                
-                return (
-                  <div key={`data-${installment.number}`} className="border-b border-border">
-                    <div className="flex">
-                      {rowData.length > 0 ? (
-                        isMobile ? (
-                          // Mobile: show only current column data
-                          rowData[mobileColumnIndex] && (
-                            <div className="flex-1 p-3 text-xs border-l border-border">
-                              <div className="space-y-1">
-                                {/* Actualización - Negro */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-foreground font-medium">Actualización:</span>
-                                  <span className="text-foreground font-medium text-right">
-                                    {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].updatedAmount.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Valor de Cuota - Rojo */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-red-600 dark:text-red-400">Valor de Cuota:</span>
-                                  <span className="text-red-600 dark:text-red-400 text-right">
-                                    {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].installmentValue.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Pago - Verde */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-green-600 dark:text-green-400">Pago:</span>
-                                  <span className="text-green-600 dark:text-green-400 text-right">
-                                    {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].payment.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Saldo - Negro */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-foreground">Saldo:</span>
-                                  <span className="text-foreground text-right">
-                                    {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].balance.toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        ) : (
-                          // Desktop: show all columns with wider width
-                          rowData.map((cellData, colIndex) => (
-                            <div
-                              key={`${rowIndex}-${colIndex}`}
-                              className="w-60 p-3 text-xs border-l border-border"
-                            >
-                              <div className="space-y-1">
-                                {/* Actualización - Negro */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-foreground font-medium">Actualización:</span>
-                                  <span className="text-foreground font-medium text-right">
-                                    {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Valor de Cuota - Rojo */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-red-600 dark:text-red-400">Valor de Cuota:</span>
-                                  <span className="text-red-600 dark:text-red-400 text-right">
-                                    {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Pago - Verde */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-green-600 dark:text-green-400">Pago:</span>
-                                  <span className="text-green-600 dark:text-green-400 text-right">
-                                    {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
-                                  </span>
-                                </div>
-                                
-                                {/* Saldo - Negro */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-foreground">Saldo:</span>
-                                  <span className="text-foreground text-right">
-                                    {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )
-                      ) : (
-                        <div className="w-60 p-3 text-xs border-l border-border">
-                          <div className="text-center text-muted-foreground">
-                            Sin datos
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
             </div>
-          </div>
-        </div>
+          )
+        })}
 
 
       </CardContent>
