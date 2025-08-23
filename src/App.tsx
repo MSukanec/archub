@@ -35,7 +35,7 @@ import { Clients } from "@/pages/finances/clients/Clients";
 
 import Preferences from "@/pages/organization/Preferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
-import ConstructionLogs from "@/pages/construction/ConstructionLogs";
+import Logs from "@/pages/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
@@ -210,7 +210,7 @@ function Router() {
         </Route>
         <Route path="/construction/logs">
           <ProtectedRoute>
-            <ConstructionLogs />
+            <Logs />
           </ProtectedRoute>
         </Route>
         <Route path="/construction/personnel">
