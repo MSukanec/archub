@@ -173,7 +173,7 @@ export function MediaForm({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header con título y botón */}
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
