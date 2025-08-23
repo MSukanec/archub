@@ -572,70 +572,41 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             }}
           />
           
-          {/* Lista de archivos para subir y existentes */}
-          {(filesToUpload.length > 0 || siteLogFiles.length > 0) && (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                {filesToUpload.length > 0 && `${filesToUpload.length} archivo(s) para subir`}
-                {filesToUpload.length > 0 && siteLogFiles.length > 0 && " • "}
-                {siteLogFiles.length > 0 && `${siteLogFiles.length} archivo(s) existente(s)`}
-              </p>
-              
-              {/* Archivos para subir */}
-              {filesToUpload.map((fileInput, index) => (
-                <div key={`new-${index}`} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">{fileInput.file.name}</span>
-                    <Badge variant="secondary" className="text-xs">Nuevo</Badge>
+          {/* Mini-galería de imágenes */}
+          {(() => {
+            // Filtrar solo imágenes de ambas fuentes
+            const existingImages = siteLogFiles.filter(file => file.file_type === 'image');
+            const newImages = filesToUpload.filter(fileInput => fileInput.file.type.startsWith('image/'));
+            const totalImages = existingImages.length + newImages.length;
+            
+            if (totalImages === 0) return null;
+            
+            return (
+              <div className="grid grid-cols-5 gap-2">
+                {/* Imágenes existentes */}
+                {existingImages.map((file) => (
+                  <div key={`existing-${file.id}`} className="aspect-square rounded overflow-hidden">
+                    <img
+                      src={file.file_url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon-sm"
-                    onClick={() => {
-                      const newFiles = filesToUpload.filter((_, i) => i !== index);
-                      setFilesToUpload(newFiles);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              
-              {/* Archivos existentes */}
-              {siteLogFiles.map((file) => (
-                <div key={`existing-${file.id}`} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm">{file.file_name}</span>
+                ))}
+                
+                {/* Imágenes nuevas para subir */}
+                {newImages.map((fileInput, index) => (
+                  <div key={`new-${index}`} className="aspect-square rounded overflow-hidden">
+                    <img
+                      src={URL.createObjectURL(fileInput.file)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => window.open(file.file_url, '_blank')}
-                    >
-                      Ver
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon-sm"
-                      onClick={async () => {
-                        // Esta funcionalidad ahora está en MediaForm
-                        // Para simplificar, solo mostramos mensaje de que la función se movió
-                        toast({
-                          title: "Función movida",
-                          description: "Esta funcionalidad ahora se maneja desde el subformulario de medios.",
-                        });
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Eventos */}
