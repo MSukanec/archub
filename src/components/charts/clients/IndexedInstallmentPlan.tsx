@@ -388,10 +388,10 @@ export default function IndexedInstallmentPlan({
           )}
         </div>
 
-        {/* Header con información del plan y referencias */}
-        <div className="mb-4 flex gap-4">
-          {/* Información del Plan de Pagos - 50% izquierda */}
-          <div className="flex-1 p-3 bg-muted/10 rounded-lg border">
+        {/* Header con información del plan */}
+        <div className="mb-4">
+          {/* Información del Plan de Pagos */}
+          <div className="p-3 bg-muted/10 rounded-lg border">
             {paymentPlan ? (
               <div className="space-y-1 text-xs">
                 <div>
@@ -419,29 +419,6 @@ export default function IndexedInstallmentPlan({
             ) : (
               <div className="text-xs text-muted-foreground">Plan no configurado</div>
             )}
-          </div>
-
-          {/* Referencias de colores - 50% derecha */}
-          <div className="flex-1 p-3 bg-muted/20 rounded-lg border">
-            <div className="text-xs font-medium mb-2">Referencias de colores:</div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-violet-600 rounded"></div>
-                <span>Actualización</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-red-600 rounded"></div>
-                <span>Valor de cuota</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-600 rounded"></div>
-                <span>Pago</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-blue-600 rounded"></div>
-                <span>Saldo</span>
-              </div>
-            </div>
           </div>
         </div>
 
