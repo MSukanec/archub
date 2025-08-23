@@ -70,64 +70,64 @@ export function ModalFactory() {
     case 'partner':
       return <PartnerModal editingPartner={data?.editingPartner} onClose={closeModal} />;
     case 'gallery':
-      return <GalleryFormModal modalData={data} onClose={closeModal} />;
+      return <GalleryFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'board':
-      return <BoardFormModal modalData={data} onClose={closeModal} />;
+      return <BoardFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'card':
-      return <CardFormModal modalData={data} onClose={closeModal} />;
+      return <CardFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'list':
-      return <ListFormModal modalData={data} onClose={closeModal} />;
+      return <ListFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'contact':
       // Si está en modo vista, mostrar ContactModalView
       if (data?.viewingContact) {
         return <ContactModalView modalData={data} onClose={closeModal} />;
       }
       // En cualquier otro caso (crear/editar), mostrar ContactModal
-      return <ContactModal modalData={data} onClose={closeModal} />;
+      return <ContactModal modalData={data || undefined} onClose={closeModal} />;
     case 'project':
-      return <ProjectFormModal modalData={data} onClose={closeModal} />;
+      return <ProjectFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'project-client':
-      return <ClientObligationModal modalData={data} onClose={closeModal} />;
+      return <ClientObligationModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-upload':
-      return <DocumentUploadFormModal modalData={data} onClose={closeModal} />;
+      return <DocumentUploadFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-folder':
-      return <DocumentFolderFormModal modalData={data} onClose={closeModal} />;
+      return <DocumentFolderFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement':
-      return <MovementModal modalData={data} onClose={closeModal} />;
+      return <MovementModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement-view':
-      return <MovementModalView modalData={data} onClose={closeModal} />;
+      return <MovementModalView modalData={data || {}} onClose={closeModal} />;
     case 'movement-concept':
-      return <MovementConceptFormModal modalData={data} onClose={closeModal} />;
+      return <MovementConceptFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'organization-movement-concept':
-      return <OrganizationMovementConceptFormModal modalData={data} onClose={closeModal} />;
+      return <OrganizationMovementConceptFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement-import':
-      return <MovementImportStepModal modalData={data} onClose={closeModal} />;
+      return <MovementImportStepModal modalData={data || undefined} onClose={closeModal} />;
     case 'budget':
-      return <BudgetFormModal modalData={data} onClose={closeModal} />;
+      return <BudgetFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'construction-task':
-      return <ConstructionTaskFormModal modalData={data} onClose={closeModal} />;
+      return <ConstructionTaskFormModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-single-task':
-      return <ConstructionSingleTaskModal modalData={data} onClose={closeModal} />;
+      return <ConstructionSingleTaskModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-task-schedule':
-      return <ConstructionTaskScheduleModal modalData={data} onClose={closeModal} />;
+      return <ConstructionTaskScheduleModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-phase':
-      return <ConstructionPhaseFormModal modalData={data} onClose={closeModal} />;
+      return <ConstructionPhaseFormModal modalData={data || {}} onClose={closeModal} />;
     case 'organization':
-      return <OrganizationFormModal modalData={data} onClose={closeModal} />;
+      return <OrganizationFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'material-form':
-      return <MaterialFormModal modalData={data} onClose={closeModal} />;
+      return <MaterialFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'material-category-form':
-      return <MaterialCategoryFormModal modalData={data} onClose={closeModal} />;
+      return <MaterialCategoryFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'brand-form':
-      return <BrandFormModal modalData={data} onClose={closeModal} />;
+      return <BrandFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'product-form':
-      return <ProductFormModal modalData={data} onClose={closeModal} />;
+      return <ProductFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'unit-presentation-form':
-      return <UnitPresentationFormModal modalData={data} onClose={closeModal} />;
+      return <UnitPresentationFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'delete-confirmation':
       return <DeleteConfirmationModal 
@@ -144,57 +144,57 @@ export function ModalFactory() {
         isLoading={data?.isLoading || false}
       />;
     case 'installment':
-      return <ClientPaymentModal modalData={data} onClose={closeModal} />;
+      return <ClientPaymentModal modalData={data || {}} onClose={closeModal} />;
     case 'dependency-connection':
-      return <DependencyConnectionModal modalData={data} onClose={closeModal} />;
+      return <DependencyConnectionModal modalData={data || {}} onClose={closeModal} />;
     case 'budget-task-bulk-add':
-      return <BudgetTaskFormModal modalData={data} onClose={closeModal} />;
+      return <BudgetTaskFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'task-category':
-      return <TaskCategoryFormModal modalData={data} onClose={closeModal} />;
+      return <TaskCategoryFormModal modalData={data || undefined} onClose={closeModal} />;
 
     case 'task-parameter':
-      return <TaskParameterFormModal modalData={data} onClose={closeModal} />;
+      return <TaskParameterFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'task-parameter-option':
       return <TaskParameterOptionFormModal modalType="task-parameter-option" />;
     case 'task-template':
-      return <TaskTemplateFormModal modalData={data} onClose={closeModal} />;
+      return <TaskTemplateFormModal modalData={data || undefined} onClose={closeModal} />;
 
 
     case 'parametric-task':
-      return <AdminTaskModal modalData={data} onClose={closeModal} />;
+      return <AdminTaskModal modalData={data || undefined} onClose={closeModal} />;
 
 
     case 'admin-user':
-      return <UserFormModal modalData={data} onClose={closeModal} />;
+      return <UserFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'admin-organization':
-      return <OrganizationFormModal modalData={data} onClose={closeModal} />;
+      return <OrganizationFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'profile-organization':
-      return <ProfileOrganizationFormModal modalData={data} onClose={closeModal} />;
+      return <ProfileOrganizationFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'changelog-entry':
-      return <ChangelogFormModal modalData={data} onClose={closeModal} />;
+      return <ChangelogFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'site-log':
-      return <SiteLogFormModal data={data} />;
+      return <SiteLogFormModal data={data || {}} />;
     case 'attendance':
-      return <AttendanceFormModal modalData={data} onClose={closeModal} />;
+      return <AttendanceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'personnel':
-      return <PersonnelFormModal data={data} />;
+      return <PersonnelFormModal data={data || {}} />;
     case 'parameter-visibility-config':
       return <ParameterVisibilityConfigModal />;
     case 'add-parameter-to-canvas':
       return <AddParameterToCanvasModal />;
     case 'subcontract':
-      return <SubcontractFormModal modalData={data} onClose={closeModal} />;
+      return <SubcontractFormModal modalData={data || {}} onClose={closeModal} />;
     case 'subcontract-bid':
-      return <SubcontractBidFormModal modalData={data} onClose={closeModal} />;
+      return <SubcontractBidFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'subcontract-award':
-      return <SubcontractAwardModal modalData={data} onClose={closeModal} />;
+      return <SubcontractAwardModal modalData={data || undefined} onClose={closeModal} />;
     case 'subcontract-task':
-      return <SubcontractTaskFormModal modalData={data} onClose={closeModal} />;
+      return <SubcontractTaskFormModal modalData={data || undefined} onClose={closeModal} />;
 
     case 'insurance':
-      return <InsuranceFormModal modalData={data} onClose={closeModal} />;
+      return <InsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'renew-insurance':
-      return <RenewInsuranceFormModal modalData={data} onClose={closeModal} />;
+      return <RenewInsuranceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'client-payment-plans':
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
     case 'client-installment':

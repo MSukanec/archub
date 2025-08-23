@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
-import { useGlobalModalStore } from "../../../form/useGlobalModalStore";
+import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 
 interface AttendeeData {
   id: string;
