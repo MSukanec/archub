@@ -25,8 +25,8 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 import { uploadSiteLogFiles, type SiteLogFileInput } from "@/utils/uploadSiteLogFiles";
-import { PersonnelForm } from "./PersonnelForm";
-import { MediaForm } from "./MediaForm";
+import { PersonnelForm } from "./forms/PersonnelForm";
+import { MediaForm } from "./forms/MediaForm";
 
 // Schema basado en el modal original con valores exactos del enum
 const siteLogSchema = z.object({
