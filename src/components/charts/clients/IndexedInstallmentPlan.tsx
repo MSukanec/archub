@@ -567,11 +567,8 @@ export default function IndexedInstallmentPlan({
                 )}
               </div>
               
-              {/* Scrollable right area - unit data */}
-              <div className={`flex-1 ${isMobile ? 'overflow-x-auto' : 'overflow-x-scroll'}`} style={!isMobile ? { 
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'var(--border) transparent'
-              } : {}}>
+              {/* Right area - unit data (no individual scroll) */}
+              <div className="flex-1">
                 <div className="flex" style={{ minWidth: 'max-content' }}>
                   {rowData.length > 0 ? (
                     isMobile ? (
