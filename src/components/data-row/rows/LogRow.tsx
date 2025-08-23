@@ -221,44 +221,6 @@ export default function LogRow({
     </DataRowCard>
   );
 
-  // Si swipe está habilitado y hay handlers de acción, envolver en SwipeableCard
-  if (enableSwipe && (onToggleFavorite || onEdit || onDelete)) {
-    const swipeActions = [];
-    
-    if (onToggleFavorite) {
-      swipeActions.push({
-        label: siteLog.is_favorite ? "Quitar Favorito" : "Marcar Favorito",
-        icon: <Star className="w-4 h-4" />,
-        variant: "default" as const,
-        onClick: () => onToggleFavorite(siteLog.id),
-      });
-    }
-    
-    if (onEdit) {
-      swipeActions.push({
-        label: "Editar",
-        icon: <Edit className="w-4 h-4" />,
-        variant: "default" as const,
-        onClick: () => onEdit(siteLog),
-      });
-    }
-    
-    if (onDelete) {
-      swipeActions.push({
-        label: "Eliminar",
-        icon: <Trash2 className="w-4 h-4" />,
-        variant: "destructive" as const,
-        onClick: () => onDelete(siteLog),
-      });
-    }
-
-    return (
-      <SwipeableCard actions={swipeActions}>
-        {logCard}
-      </SwipeableCard>
-    );
-  }
-
   return logCard;
 }
 
