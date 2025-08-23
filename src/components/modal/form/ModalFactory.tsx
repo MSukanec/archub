@@ -46,7 +46,7 @@ import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
 import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
-import { SiteLogFormModal } from '../modals/construction/SiteLogFormModal';
+import { SiteLogFormModal } from '../modals/construction/logs/SiteLogFormModal';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
 import { PersonnelFormModal } from '../modals/construction/PersonnelFormModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
