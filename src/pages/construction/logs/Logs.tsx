@@ -158,11 +158,6 @@ function useSiteLogs(projectId: string | undefined, organizationId: string | und
 }
 
 export default function Logs() {
-  const [searchValue, setSearchValue] = useState("");
-  const [sortBy, setSortBy] = useState("date_recent");
-  const [filterByType, setFilterByType] = useState("all");
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [publicOnly, setPublicOnly] = useState(false);
   const { openModal } = useGlobalModalStore();
 
   const [timePeriod, setTimePeriod] = useState<'days' | 'weeks' | 'months'>('days');
@@ -189,25 +184,6 @@ export default function Logs() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Filtrar bitácoras según los criterios
-  let filteredSiteLogs = siteLogs?.filter((log: any) => {
-    const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
-    
-    if (filterByType !== "all" && log.entry_type !== filterByType) return false;
-    if (favoritesOnly && !log.is_favorite) return false;
-    if (publicOnly && !log.is_public) return false;
-    
-    return matchesSearch;
-  }) || [];
-
-  // Ordenar bitácoras
-  if (sortBy === "date_recent") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(b.log_date).getTime() - new Date(a.log_date).getTime());
-  } else if (sortBy === "date_old") {
-    filteredSiteLogs.sort((a: any, b: any) => new Date(a.log_date).getTime() - new Date(b.log_date).getTime());
-  } else if (sortBy === "type") {
-    filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
-  }
 
   // Mutation para eliminar bitácora
   const deleteSiteLogMutation = useMutation({
@@ -327,40 +303,24 @@ export default function Logs() {
 
   return (
     <Layout headerProps={headerProps}>
-      <div>
-      {filteredSiteLogs.length === 0 ? (
-        <EmptyState
-          icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-          title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-          description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
-            ? 'Prueba ajustando los filtros de búsqueda' 
-            : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
-          }
-        />
-      ) : (
-        <>
-          {/* Tab Content Based on activeTab */}
-          <div className="space-y-6">
-            {activeTab === "bitacoras" && (
-              <LogEntries 
-                filteredSiteLogs={filteredSiteLogs}
-                toggleFavorite={toggleFavorite}
-                handleEditSiteLog={handleEditSiteLog}
-                handleDeleteSiteLog={handleDeleteSiteLog}
-              />
-            )}
+      <div className="space-y-6">
+        {activeTab === "bitacoras" && (
+          <LogEntries 
+            siteLogs={siteLogs}
+            toggleFavorite={toggleFavorite}
+            handleEditSiteLog={handleEditSiteLog}
+            handleDeleteSiteLog={handleDeleteSiteLog}
+          />
+        )}
 
-            {activeTab === "graficos" && (
-              <LogCharts 
-                siteLogTimelineData={siteLogTimelineData}
-                timelineLoading={timelineLoading}
-                timePeriod={timePeriod}
-                setTimePeriod={setTimePeriod}
-              />
-            )}
-          </div>
-        </>
-      )}
+        {activeTab === "graficos" && (
+          <LogCharts 
+            siteLogTimelineData={siteLogTimelineData}
+            timelineLoading={timelineLoading}
+            timePeriod={timePeriod}
+            setTimePeriod={setTimePeriod}
+          />
+        )}
       </div>
     </Layout>
   );

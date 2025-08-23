@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Star, ChevronDown, ChevronRight, Edit, Trash2, Image, Video } from "lucide-react";
+import { Star, ChevronDown, ChevronRight, Edit, Trash2, Image, Video, Home, Search, Plus, Filter, Bell, FileText } from "lucide-react";
+import { useLocation } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,8 @@ import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/ImageLig
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
 import SiteLogCard from "@/components/cards/SiteLogCard";
+import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
+import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 // Entry types enum with their icons and labels
 const entryTypes = {
@@ -38,22 +41,158 @@ const weatherTypes = {
   hail: { icon: Star, label: "Granizo" }
 };
 
+// Entry type options for filters
+const entryTypeOptions = [
+  { value: "avance_de_obra", label: "Avance de obra" },
+  { value: "visita_tecnica", label: "Visita técnica" },
+  { value: "problema_detectado", label: "Problema detectado" },
+  { value: "pedido_material", label: "Pedido material" },
+  { value: "nota_climatica", label: "Nota climática" },
+  { value: "decision", label: "Decisión" },
+  { value: "inspeccion", label: "Inspección" },
+  { value: "foto_diaria", label: "Foto diaria" },
+  { value: "registro_general", label: "Registro general" }
+];
+
 interface LogEntriesProps {
-  filteredSiteLogs: any[];
+  siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
 
 export default function LogEntries({ 
-  filteredSiteLogs, 
+  siteLogs, 
   toggleFavorite, 
   handleEditSiteLog, 
   handleDeleteSiteLog 
 }: LogEntriesProps) {
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [sortBy, setSortBy] = useState("date_recent");
+  const [filterByType, setFilterByType] = useState("all");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [publicOnly, setPublicOnly] = useState(false);
+  
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
+  const { setActions, setShowActionBar, clearActions, setFilterConfig, searchValue: mobileSearchValue, setSearchValue: setMobileSearchValue } = useActionBarMobile();
+  const [, navigate] = useLocation();
+
+  // Configure mobile action bar
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        home: {
+          id: 'home',
+          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          label: 'Inicio',
+          onClick: () => {
+            navigate('/dashboard');
+          },
+        },
+        search: {
+          id: 'search',
+          icon: <Search className="h-5 w-5" />,
+          label: 'Buscar',
+          onClick: () => {}
+        },
+        create: {
+          id: 'create',
+          icon: <Plus className="h-6 w-6" />,
+          label: 'Nueva Bitácora',
+          onClick: () => openModal('site-log'),
+          variant: 'primary'
+        },
+        filter: {
+          id: 'filter',
+          icon: <Filter className="h-5 w-5" />,
+          label: 'Filtros',
+          onClick: () => {}
+        },
+        notifications: {
+          id: 'notifications',
+          icon: <Bell className="h-5 w-5" />,
+          label: 'Notificaciones',
+          onClick: () => {}
+        }
+      });
+      
+      setFilterConfig({
+        filters: [
+          {
+            key: 'type',
+            label: 'Tipo de entrada',
+            value: filterByType,
+            onChange: setFilterByType,
+            placeholder: 'Todos los tipos',
+            allOptionLabel: 'Todos los tipos',
+            options: entryTypeOptions
+          },
+          {
+            key: 'sort',
+            label: 'Ordenar por',
+            value: sortBy,
+            onChange: setSortBy,
+            placeholder: 'Seleccionar orden',
+            options: [
+              { value: 'date_recent', label: 'Fecha (más recientes)' },
+              { value: 'date_old', label: 'Fecha (más antiguos)' },
+              { value: 'type', label: 'Tipo de entrada' }
+            ]
+          }
+        ],
+        switches: [
+          {
+            key: 'favorites',
+            label: 'Solo favoritos',
+            checked: favoritesOnly,
+            onChange: setFavoritesOnly
+          },
+          {
+            key: 'public',
+            label: 'Solo públicos',
+            checked: publicOnly,
+            onChange: setPublicOnly
+          }
+        ]
+      });
+      
+      setShowActionBar(true);
+    }
+    
+    return () => {
+      if (isMobile) {
+        clearActions();
+        setShowActionBar(false);
+      }
+    };
+  }, [isMobile, filterByType, sortBy, favoritesOnly, publicOnly]);
+
+  // Sync mobile search with local search
+  useEffect(() => {
+    setSearchValue(mobileSearchValue);
+  }, [mobileSearchValue]);
+
+  // Filtrar bitácoras según los criterios
+  const filteredSiteLogs = siteLogs?.filter((log: any) => {
+    const matchesSearch = log.comments?.toLowerCase().includes(searchValue.toLowerCase()) || "";
+    
+    if (filterByType !== "all" && log.entry_type !== filterByType) return false;
+    if (favoritesOnly && !log.is_favorite) return false;
+    if (publicOnly && !log.is_public) return false;
+    
+    return matchesSearch;
+  }) || [];
+
+  // Ordenar bitácoras
+  if (sortBy === "date_recent") {
+    filteredSiteLogs.sort((a: any, b: any) => new Date(b.log_date).getTime() - new Date(a.log_date).getTime());
+  } else if (sortBy === "date_old") {
+    filteredSiteLogs.sort((a: any, b: any) => new Date(a.log_date).getTime() - new Date(b.log_date).getTime());
+  } else if (sortBy === "type") {
+    filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
+  }
 
   // Auto-expand the most recent entry when data loads
   useEffect(() => {
@@ -70,8 +209,18 @@ export default function LogEntries({
 
   return (
     <>
-      <div className="space-y-3">
-        {filteredSiteLogs.map((siteLog: any) => {
+      {filteredSiteLogs.length === 0 ? (
+        <EmptyState
+          icon={<FileText className="w-12 h-12 text-muted-foreground" />}
+          title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+          description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+            ? 'Prueba ajustando los filtros de búsqueda' 
+            : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
+          }
+        />
+      ) : (
+        <div className="space-y-3">
+          {filteredSiteLogs.map((siteLog: any) => {
           const entryTypeConfig = entryTypes[siteLog.entry_type as keyof typeof entryTypes];
           const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
           const isExpanded = expandedLogId === siteLog.id;
@@ -356,8 +505,9 @@ export default function LogEntries({
               </Card>
             </Collapsible>
           );
-        })}
-      </div>
+          })}
+        </div>
+      )}
 
       {/* Image Lightbox */}
       <ImageLightbox
