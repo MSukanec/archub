@@ -125,23 +125,25 @@ export default function LogRow({
   
   const hasAttachments = totalFiles > 0 || totalEvents > 0 || totalAttendees > 0 || totalEquipment > 0;
 
+  // Filtrar solo imágenes de los archivos
+  const imageFiles = siteLog.files?.filter(file => 
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+  ) || [];
+
   // Contenido del card usando el nuevo sistema
   const cardContent = (
     <>
       {/* Columna de contenido principal */}
       <div className="flex-1 min-w-0">
-        {/* Nombre del creador y tipo de entrada */}
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-semibold text-sm truncate">
-            {creatorName}
-          </span>
-          <Badge variant="secondary" className={`text-xs ${entryTypeConfig.color}`}>
+        {/* Tipo de entrada en negrita (donde antes estaba el nombre) */}
+        <div className="mb-1">
+          <span className="font-semibold text-sm">
             {entryTypeConfig.label}
-          </Badge>
+          </span>
         </div>
 
         {/* Fecha y clima */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           <span>
             {format(new Date(siteLog.log_date + 'T00:00:00'), 'dd/MM/yyyy', { locale: es })}
           </span>
@@ -156,42 +158,22 @@ export default function LogRow({
           )}
         </div>
 
-        {/* Comentarios (resumido) */}
-        {siteLog.comments && (
-          <div className="text-xs text-muted-foreground truncate">
-            {siteLog.comments.length > 50 
-              ? `${siteLog.comments.substring(0, 50)}...`
-              : siteLog.comments
-            }
-          </div>
-        )}
-
-        {/* Indicadores de adjuntos */}
-        {hasAttachments && (
-          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            {totalFiles > 0 && (
-              <span className="flex items-center gap-1">
-                <FileText className="h-3 w-3" />
-                {totalFiles}
-              </span>
-            )}
-            {totalEvents > 0 && (
-              <span className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                {totalEvents}
-              </span>
-            )}
-            {totalAttendees > 0 && (
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {totalAttendees}
-              </span>
-            )}
-            {totalEquipment > 0 && (
-              <span className="flex items-center gap-1">
-                <Package className="h-3 w-3" />
-                {totalEquipment}
-              </span>
+        {/* Mini-galería de thumbnails (hasta 8 imágenes) */}
+        {imageFiles.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {imageFiles.slice(0, 8).map((file, index) => (
+              <div key={file.id || index} className="w-6 h-6 rounded-sm overflow-hidden flex-shrink-0">
+                <img
+                  src={file.file_url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+            {imageFiles.length > 8 && (
+              <div className="w-6 h-6 bg-muted rounded-sm flex items-center justify-center text-[10px] text-muted-foreground font-medium">
+                +{imageFiles.length - 8}
+              </div>
             )}
           </div>
         )}
@@ -206,11 +188,9 @@ export default function LogRow({
     </>
   );
 
-  // Crear el card base usando DataRowCard
+  // Crear el card base usando DataRowCard (sin avatar ya que no hay usuario)
   const logCard = (
     <DataRowCard
-      avatarUrl={avatarUrl}
-      avatarFallback={avatarFallback}
       selected={selected}
       density={density}
       onClick={onClick ? () => onClick(siteLog) : undefined}
