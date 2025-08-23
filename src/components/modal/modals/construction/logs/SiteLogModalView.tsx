@@ -1,4 +1,5 @@
 import React from 'react'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
@@ -76,6 +77,13 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
   const siteLog = modalData?.viewingSiteLog
   const { openModal } = useGlobalModalStore()
   
+  // Filtrar solo imágenes para el lightbox
+  const imageUrls = siteLog?.files?.filter((file: any) => 
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+  ).map((file: any) => file.file_url) || []
+  
+  const lightbox = useImageLightbox(imageUrls)
+  
   if (!siteLog) {
     return null
   }
@@ -117,12 +125,25 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
 
   const viewPanel = (
     <div className="space-y-6">
-      {/* Fecha arriba */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+      {/* Fecha y creador */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4 text-accent" />
           {formatDate(siteLog.log_date)}
         </div>
+        
+        {/* Información del creador */}
+        {siteLog.creator && (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={siteLog.creator.avatar_url} alt={siteLog.creator.full_name} />
+              <AvatarFallback className="text-xs">{getInitials(siteLog.creator.full_name)}</AvatarFallback>
+            </Avatar>
+            <div className="text-sm text-muted-foreground">
+              {siteLog.creator.full_name}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Header con tipo de entrada y clima */}
@@ -146,19 +167,6 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
 
       <Separator />
 
-      {/* Información del creador */}
-      {siteLog.creator && (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={siteLog.creator.avatar_url} alt={siteLog.creator.full_name} />
-            <AvatarFallback>{getInitials(siteLog.creator.full_name)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="text-sm font-medium">{siteLog.creator.full_name}</div>
-            <div className="text-xs text-muted-foreground">Creador del registro</div>
-          </div>
-        </div>
-      )}
 
       {/* Comentarios */}
       {siteLog.comments && (
@@ -185,14 +193,19 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
               <Camera className="h-4 w-4 text-accent" />
               Archivos Multimedia ({imageFiles.length})
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {imageFiles.map((file: any, index: number) => (
                 <div key={file.id || index} className="aspect-square rounded-lg overflow-hidden border bg-muted/30">
                   <img
                     src={file.file_url}
                     alt={file.file_name || `Imagen ${index + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                    onClick={() => window.open(file.file_url, '_blank')}
+                    onClick={() => {
+                      const imageIndex = imageUrls.indexOf(file.file_url)
+                      if (imageIndex !== -1) {
+                        lightbox.openLightbox(imageIndex)
+                      }
+                    }}
                   />
                 </div>
               ))}
@@ -307,14 +320,23 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
   )
 
   return (
-    <FormModalLayout
-      columns={1}
-      viewPanel={viewPanel}
-      editPanel={null}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      onClose={onClose}
-      wide={true}
-    />
+    <>
+      <FormModalLayout
+        columns={1}
+        viewPanel={viewPanel}
+        editPanel={null}
+        headerContent={headerContent}
+        footerContent={footerContent}
+        onClose={onClose}
+        wide={true}
+      />
+      
+      <ImageLightbox
+        images={imageUrls}
+        currentIndex={lightbox.currentIndex}
+        isOpen={lightbox.isOpen}
+        onClose={lightbox.closeLightbox}
+      />
+    </>
   )
 }
