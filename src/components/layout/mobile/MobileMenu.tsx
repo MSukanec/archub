@@ -502,7 +502,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       >
                         <item.icon className="h-5 w-5" />
                         {item.label}
-                        <ChevronRight className="h-4 w-4 ml-auto" />
+                        {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
                       </button>
                     </CustomRestricted>
                   ) : (
@@ -517,7 +517,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     >
                       <item.icon className="h-5 w-5" />
                       {item.label}
-                      <ChevronRight className="h-4 w-4 ml-auto" />
+                      {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
                     </button>
                   )}
                 </div>
