@@ -24,6 +24,8 @@ import { supabase } from "@/lib/supabase";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { FileUploader } from "@/components/ui-custom/FileUploader";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
+import { useDropzone } from 'react-dropzone';
+import { uploadSiteLogFiles, type SiteLogFileInput } from "@/utils/uploadSiteLogFiles";
 
 // Schema basado en el modal original con valores exactos del enum
 const siteLogSchema = z.object({
@@ -109,8 +111,70 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [equipment, setEquipment] = useState<any[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
+  const [existingSiteLogFiles, setExistingSiteLogFiles] = useState<any[]>([]);
 
   const queryClient = useQueryClient();
+
+  // Query para obtener archivos existentes de la bitácora
+  const { data: siteLogFiles = [], isLoading: filesLoading } = useQuery({
+    queryKey: ['site-log-files', data?.id || data?.data?.id],
+    queryFn: async () => {
+      const siteLogId = data?.id || data?.data?.id;
+      if (!siteLogId || !supabase) return [];
+      
+      const { data: files, error } = await supabase
+        .from('project_media')
+        .select('*')
+        .eq('site_log_id', siteLogId);
+
+      if (error) {
+        console.error('Error fetching site log files:', error);
+        return [];
+      }
+      
+      return files || [];
+    },
+    enabled: !!(data?.id || data?.data?.id) && !!supabase
+  });
+
+  // Mutación para subir archivos de bitácora
+  const uploadFilesMutation = useMutation({
+    mutationFn: async ({ files, siteLogId }: { files: SiteLogFileInput[], siteLogId: string }) => {
+      if (!currentUser?.organization?.id || !currentUser?.preferences?.last_project_id) {
+        throw new Error('No hay proyecto u organización seleccionada');
+      }
+
+      const currentMember = members.find((m: any) => m.user_id === currentUser.user.id);
+      if (!currentMember) {
+        throw new Error('No se encontró el miembro de la organización para el usuario actual');
+      }
+
+      await uploadSiteLogFiles(
+        files,
+        siteLogId,
+        currentUser.preferences.last_project_id,
+        currentUser.organization.id,
+        currentMember.id
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['site-log-files'] });
+      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      setFilesToUpload([]);
+      toast({
+        title: "Archivos subidos",
+        description: "Los archivos se han subido correctamente a la bitácora."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudieron subir los archivos.",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Mutación para crear/actualizar bitácoras
   const siteLogMutation = useMutation({
@@ -205,8 +269,22 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
 
       return savedSiteLog;
     },
-    onSuccess: () => {
+    onSuccess: async (savedSiteLog) => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
+      
+      // Si hay archivos para subir, subirlos después de guardar la bitácora
+      if (filesToUpload.length > 0) {
+        try {
+          await uploadFilesMutation.mutateAsync({ 
+            files: filesToUpload, 
+            siteLogId: savedSiteLog.id 
+          });
+        } catch (error) {
+          console.error('Error uploading files:', error);
+          // No hacer throw aquí para no fallar todo el proceso
+        }
+      }
+      
       const siteLogId = data?.data?.id || data?.id;
       toast({
         title: siteLogId ? "Bitácora actualizada" : "Bitácora creada",
@@ -260,8 +338,9 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
       setAttendees(siteLogData.attendees || []);
       setEquipment(siteLogData.equipment || []);
       setUploadedFiles(siteLogData.files || []);
+      setExistingSiteLogFiles(siteLogFiles);
     }
-  }, [data, form]);
+  }, [data, form, siteLogFiles]);
 
   // Funciones para eventos
   const addEvent = () => {
@@ -492,15 +571,56 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             }}
           />
           
-          {/* Lista de archivos agregados */}
-          {uploadedFiles.length > 0 && (
+          {/* Lista de archivos para subir y existentes */}
+          {(filesToUpload.length > 0 || siteLogFiles.length > 0) && (
             <div className="space-y-2">
-              {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-sm">{file}</span>
-                  <Button variant="ghost" size="sm">
+              <p className="text-xs text-muted-foreground">
+                {filesToUpload.length > 0 && `${filesToUpload.length} archivo(s) para subir`}
+                {filesToUpload.length > 0 && siteLogFiles.length > 0 && " • "}
+                {siteLogFiles.length > 0 && `${siteLogFiles.length} archivo(s) existente(s)`}
+              </p>
+              
+              {/* Archivos para subir */}
+              {filesToUpload.map((fileInput, index) => (
+                <div key={`new-${index}`} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm">{fileInput.file.name}</span>
+                    <Badge variant="secondary" className="text-xs">Nuevo</Badge>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon-sm"
+                    onClick={() => removeFileToUpload(index)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                </div>
+              ))}
+              
+              {/* Archivos existentes */}
+              {siteLogFiles.map((file) => (
+                <div key={`existing-${file.id}`} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">{file.file_name}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => window.open(file.file_url, '_blank')}
+                    >
+                      Ver
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon-sm"
+                      onClick={() => removeExistingFile(file.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -778,16 +898,182 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
     </div>
   );
 
+  // Funciones para manejar archivos
+  const removeFileToUpload = (index: number) => {
+    setFilesToUpload(filesToUpload.filter((_, i) => i !== index));
+  };
+
+  const removeExistingFile = async (fileId: string) => {
+    try {
+      const fileToDelete = siteLogFiles.find(f => f.id === fileId);
+      if (!fileToDelete) return;
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('media')
+        .remove([fileToDelete.file_path]);
+
+      if (storageError) {
+        console.error('Error deleting from storage:', storageError);
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('project_media')
+        .delete()
+        .eq('id', fileId);
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['site-log-files'] });
+      queryClient.invalidateQueries({ queryKey: ['galleryFiles'] });
+      
+      toast({
+        title: "Archivo eliminado",
+        description: "El archivo se ha eliminado correctamente."
+      });
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el archivo.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles: File[]) => {
+      const newFiles: SiteLogFileInput[] = acceptedFiles.map(file => ({
+        file,
+        title: file.name,
+        description: ''
+      }));
+      setFilesToUpload([...filesToUpload, ...newFiles]);
+    },
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+      'video/*': ['.mp4', '.mov', '.avi', '.mkv']
+    },
+    maxSize: 50 * 1024 * 1024, // 50MB
+    multiple: true
+  });
+
   // Subform de Archivos
   const filesSubform = (
     <div className="space-y-6">
-      <div className="space-y-4">
+      {/* Drag & Drop Area */}
+      <div
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+          isDragActive
+            ? 'border-primary bg-primary/5'
+            : 'border-muted-foreground/25 hover:border-primary/50'
+        }`}
+      >
+        <input {...getInputProps()} />
+        <div className="space-y-2">
+          <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">
+              {isDragActive
+                ? 'Suelta los archivos aquí'
+                : 'Arrastra archivos aquí o haz clic para seleccionar'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Imágenes (PNG, JPG, GIF) o Videos (MP4, MOV, AVI, MKV). Máximo 50MB por archivo.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Archivos seleccionados para subir */}
+      {filesToUpload.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Archivos para subir ({filesToUpload.length})</h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setFilesToUpload([])}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Limpiar todo
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {filesToUpload.map((fileInput, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{fileInput.file.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(fileInput.file.size / (1024 * 1024)).toFixed(1)} MB • {fileInput.file.type}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => removeFileToUpload(index)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Archivos existentes */}
+      {siteLogFiles.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium">Archivos existentes ({siteLogFiles.length})</h4>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {siteLogFiles.map((file) => (
+              <div key={file.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{file.file_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(file.file_size / (1024 * 1024)).toFixed(1)} MB • {file.file_type}
+                    {file.description && ` • ${file.description}`}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(file.file_url, '_blank')}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Ver
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => removeExistingFile(file.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Estado vacío */}
+      {filesToUpload.length === 0 && siteLogFiles.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No hay archivos adjuntos</p>
-          <p className="text-xs">Sube fotos y videos del progreso</p>
+          <p className="text-xs">Arrastra archivos arriba para comenzar</p>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -880,8 +1166,10 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
               currentSubform === 'equipment' ? "Agregar Maquinaria" : "Confirmar"
             }
             onRightClick={() => {
-              // Agregar personal si hay datos válidos
-              if (currentSubform === 'personal' && attendees.length > 0) {
+              if (currentSubform === 'files') {
+                // Para archivos, simplemente regresar al panel principal
+                setPanel('edit');
+              } else if (currentSubform === 'personal' && attendees.length > 0) {
                 // Los datos ya están en attendees, solo regresamos al panel principal
                 setPanel('edit');
               } else {
