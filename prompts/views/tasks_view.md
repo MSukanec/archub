@@ -17,8 +17,11 @@ select
   t.is_system,
   t.organization_id,
   t.is_completed,
-  u.name as unit,        -- units.name
-  c.name as category     -- task_categories.name
+  u.name as unit,                 -- units.name
+  c.name as category,             -- task_categories.name
+  d.name as division,             -- task_divisions.name
+  d.name_en as division_en        -- task_divisions.name_en
 from public.tasks t
-left join public.units u           on u.id = t.unit_id
-left join public.task_categories c on c.id = t.category_id;
+left join public.units u             on u.id = t.unit_id
+left join public.task_categories c   on c.id = t.category_id
+left join public.task_divisions d    on d.id = t.task_division_id;

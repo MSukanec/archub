@@ -452,6 +452,14 @@ VISTA TASKS_VIEW:
   {
     "column_name": "category",
     "data_type": "text"
+  },
+  {
+    "column_name": "division",
+    "data_type": "text"
+  },
+  {
+    "column_name": "division_en",
+    "data_type": "text"
   }
 ]
 
