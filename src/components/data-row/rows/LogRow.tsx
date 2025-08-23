@@ -215,7 +215,6 @@ export default function LogRow({
       density={density}
       onClick={onClick ? () => onClick(siteLog) : undefined}
       className={className}
-      borderColor={siteLog.is_favorite ? 'warning' : undefined}
       data-testid={`log-row-${siteLog.id}`}
     >
       {cardContent}
