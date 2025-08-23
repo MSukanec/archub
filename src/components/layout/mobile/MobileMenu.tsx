@@ -77,7 +77,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Estado para determinar si estamos en menu principal o submenu
   // Detectar automáticamente la sección basada en la ruta actual
   const getInitialView = () => {
-    if (location.startsWith('/organization') || location === '/' || location === '/dashboard') return 'organizacion';
+    if (location === '/dashboard') return 'main'; // Dashboard independiente
+    if (location.startsWith('/organization') || location === '/') return 'organizacion';
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
@@ -287,12 +288,19 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   // Mobile menu principal - exactamente igual que desktop sidebar
   const mainMenuItems = [
+    {
+      id: 'dashboard',
+      icon: Home,
+      label: 'Dashboard',
+      defaultRoute: '/dashboard',
+      isActive: location === '/dashboard'
+    },
     { 
       id: 'organizacion', 
       icon: Building, 
       label: 'Organización', 
-      defaultRoute: '/organization/dashboard',
-      isActive: currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard' || location === '/tasks'
+      defaultRoute: '/organization',
+      isActive: currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board'))
     },
 
     { 
@@ -330,7 +338,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Submenus para cada sección principal (actualizado según SidebarSubmenu.tsx)
   const submenuContent = {
     organizacion: [
-      { icon: Home, label: 'Resumen', href: '/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
@@ -404,6 +411,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Función para manejar navegación desde menu principal a submenu
   const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
+    // Dashboard no tiene submenu, navegar directamente y cerrar
+    if (menuId === 'dashboard') {
+      navigate(defaultRoute);
+      handleCloseMenu();
+      return;
+    }
+    
     setCurrentView(menuId);
     setSidebarContext(menuId as any);
     // NO navegar automáticamente al dashboard, solo cambiar vista a submenu

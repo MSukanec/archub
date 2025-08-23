@@ -285,13 +285,18 @@ export function Sidebar() {
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/recursos')) return 'recursos';
     if (location.startsWith('/admin')) return 'administracion';
-
-    if (location === '/dashboard') return 'organizacion';
+    if (location === '/dashboard') return null; // Dashboard es independiente
     return null;
   };
 
   // Función para manejar clicks en botones principales - ahora tipo acordeón
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
+    // Dashboard no tiene submenu, navegar directamente
+    if (sectionId === 'dashboard') {
+      navigate(defaultRoute);
+      return;
+    }
+    
     // Toggle acordeón: si ya está expandido, colapsar; si no, expandir
     setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     // NO cambiar activeSidebarSection aquí - debe basarse en la ruta actual
@@ -300,7 +305,6 @@ export function Sidebar() {
   // Definir contenido de submenu para cada sección (copiado de SidebarSubmenu)
   const submenuContent = {
     'organizacion': [
-      { icon: Home, label: 'Resumen', href: '/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
@@ -341,12 +345,19 @@ export function Sidebar() {
 
   // Botones principales del sidebar - ahora con sistema de acordeón
   const mainSidebarItems = [
+    {
+      id: 'dashboard',
+      icon: Home,
+      label: 'Dashboard',
+      defaultRoute: '/dashboard',
+      isActive: location === '/dashboard'
+    },
     { 
       id: 'organizacion', 
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization',
-      isActive: (location.startsWith('/organization') && !location.startsWith('/organization/board')) || location === '/dashboard'
+      isActive: location.startsWith('/organization') && !location.startsWith('/organization/board')
     },
     { 
       id: 'diseno', 

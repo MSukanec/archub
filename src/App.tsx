@@ -51,7 +51,7 @@ import Gallery from "@/pages/resources/Gallery";
 import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
 
-import Dashboard from "@/pages/organization/dashboard/Dashboard";
+import Dashboard from "@/pages/dashboard/Dashboard";
 import Members from "@/pages/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
@@ -95,7 +95,7 @@ function Router() {
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
 
-        {/* Main Dashboard - redirects to Organization */}
+        {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard">
           <ProtectedRoute>
             <Dashboard />
@@ -117,7 +117,7 @@ function Router() {
         
         <Route path="/organization">
           <ProtectedRoute>
-            <Dashboard />
+            <Members />
           </ProtectedRoute>
         </Route>
 
@@ -138,7 +138,7 @@ function Router() {
 
         <Route path="/organization/:organizationId">
           <ProtectedRoute>
-            <Dashboard />
+            <Members />
           </ProtectedRoute>
         </Route>
 
