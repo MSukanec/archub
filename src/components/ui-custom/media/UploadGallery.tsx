@@ -207,21 +207,14 @@ export function UploadGallery({
 
   return (
     <div className="space-y-4">
-      {/* Header with title and upload button */}
-      {showTitle && (
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {title}
-          </label>
-          <div {...getRootProps()} className="cursor-pointer">
-            <input {...getInputProps()} />
-            <Button variant="default" size="sm" className="gap-2">
-              <Upload className="w-4 h-4" />
-              {uploadButtonText}
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Upload button - full width */}
+      <div {...getRootProps()} className="cursor-pointer">
+        <input {...getInputProps()} />
+        <Button variant="default" size="sm" className="w-full gap-2">
+          <Upload className="w-4 h-4" />
+          {uploadButtonText}
+        </Button>
+      </div>
 
       {/* Gallery */}
       {allFiles.length === 0 ? (
@@ -248,83 +241,43 @@ export function UploadGallery({
                 </div>
               )}
 
-              {/* Options overlay - top right corner */}
+              {/* Delete button overlay - top right corner */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Popover>
-                  <PopoverTrigger asChild>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
                     <Button
+                      variant="ghost"
                       size="sm"
-                      variant="default"
-                      title="Opciones"
-                      className="bg-black/60 hover:bg-black/80"
+                      title="Eliminar archivo"
+                      className="bg-black/60 hover:bg-red-600/80 text-white"
                     >
-                      <MoreHorizontal className="w-3 h-3" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48">
-                    <div className="space-y-1">
-                      {file.isExisting && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDownload(file)}
-                            className="w-full justify-start gap-2"
-                          >
-                            <Download className="w-4 h-4" />
-                            Descargar
-                          </Button>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyLink(file)}
-                            className="w-full justify-start gap-2"
-                          >
-                            <Copy className="w-4 h-4" />
-                            Copiar enlace
-                          </Button>
-                        </>
-                      )}
-
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full justify-start gap-2 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Eliminar
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Eliminar archivo</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              ¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => {
-                                if (file.isExisting) {
-                                  handleExistingFileDelete(file.id);
-                                } else {
-                                  removeFileToUpload(file.previewIndex!);
-                                }
-                              }}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Eliminar archivo</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        ¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          if (file.isExisting) {
+                            handleExistingFileDelete(file.id);
+                          } else {
+                            removeFileToUpload(file.previewIndex!);
+                          }
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               {/* Badge for new files */}
