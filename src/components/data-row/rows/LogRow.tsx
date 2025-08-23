@@ -188,9 +188,11 @@ export default function LogRow({
     </>
   );
 
-  // Crear el card base usando DataRowCard (sin avatar ya que no hay usuario)
+  // Crear el card base usando DataRowCard
   const logCard = (
     <DataRowCard
+      avatarUrl={avatarUrl}
+      avatarFallback={avatarFallback}
       selected={selected}
       density={density}
       onClick={onClick ? () => onClick(siteLog) : undefined}
