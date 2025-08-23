@@ -77,7 +77,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Estado para determinar si estamos en menu principal o submenu
   // Detectar automáticamente la sección basada en la ruta actual
   const getInitialView = () => {
-    if (location === '/dashboard') return 'main'; // Dashboard independiente
+    if (location === '/dashboard') return 'main'; // Resumen independiente
     if (location.startsWith('/organization') || location === '/') return 'organizacion';
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
@@ -291,7 +291,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     {
       id: 'dashboard',
       icon: Home,
-      label: 'Dashboard',
+      label: 'Resumen',
       defaultRoute: '/dashboard',
       isActive: location === '/dashboard'
     },
@@ -411,7 +411,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Función para manejar navegación desde menu principal a submenu
   const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
-    // Dashboard no tiene submenu, navegar directamente y cerrar
+    // Resumen no tiene submenu, navegar directamente y cerrar
     if (menuId === 'dashboard') {
       navigate(defaultRoute);
       handleCloseMenu();

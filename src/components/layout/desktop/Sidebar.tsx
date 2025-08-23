@@ -285,13 +285,13 @@ export function Sidebar() {
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/recursos')) return 'recursos';
     if (location.startsWith('/admin')) return 'administracion';
-    if (location === '/dashboard') return null; // Dashboard es independiente
+    if (location === '/dashboard') return null; // Resumen es independiente
     return null;
   };
 
   // Función para manejar clicks en botones principales - ahora tipo acordeón
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Dashboard no tiene submenu, navegar directamente
+    // Resumen no tiene submenu, navegar directamente
     if (sectionId === 'dashboard') {
       navigate(defaultRoute);
       return;
@@ -348,7 +348,7 @@ export function Sidebar() {
     {
       id: 'dashboard',
       icon: Home,
-      label: 'Dashboard',
+      label: 'Resumen',
       defaultRoute: '/dashboard',
       isActive: location === '/dashboard'
     },
