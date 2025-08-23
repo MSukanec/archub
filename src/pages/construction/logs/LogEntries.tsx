@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/ImageLightbox";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import SiteLogCard from "@/components/cards/SiteLogCard";
+import { LogRow } from "@/components/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 
@@ -225,21 +225,18 @@ export default function LogEntries({
           const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
           const isExpanded = expandedLogId === siteLog.id;
 
-          // Render mobile card or desktop collapsible
+          // Render mobile row or desktop collapsible
           if (isMobile) {
             return (
-              <SiteLogCard
+              <LogRow
                 key={siteLog.id}
                 siteLog={siteLog}
+                onClick={() => handleEditSiteLog(siteLog)}
                 onEdit={handleEditSiteLog}
                 onDelete={handleDeleteSiteLog}
                 onToggleFavorite={toggleFavorite}
-                onImageClick={(imageUrl, allImages) => {
-                  const imageIndex = imageUrls.indexOf(imageUrl);
-                  if (imageIndex !== -1) {
-                    lightbox.openLightbox(imageIndex);
-                  }
-                }}
+                enableSwipe={true}
+                density="normal"
               />
             );
           }
