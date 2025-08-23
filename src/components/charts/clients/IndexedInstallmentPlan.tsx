@@ -507,7 +507,7 @@ export default function IndexedInstallmentPlan({
                       {getClientDisplayName(commitments[mobileColumnIndex])}
                     </div>
                     {formatCommittedAmount(commitments[mobileColumnIndex]) && (
-                      <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
+                      <div className="text-xs font-medium text-foreground">
                         {formatCommittedAmount(commitments[mobileColumnIndex])}
                       </div>
                     )}
@@ -526,7 +526,7 @@ export default function IndexedInstallmentPlan({
                         {getClientDisplayName(commitment)}
                       </div>
                       {formatCommittedAmount(commitment) && (
-                        <div className="text-xs font-medium text-violet-600 dark:text-violet-400">
+                        <div className="text-xs font-medium text-foreground">
                           {formatCommittedAmount(commitment)}
                         </div>
                       )}
@@ -601,8 +601,8 @@ export default function IndexedInstallmentPlan({
                           <div className="space-y-1">
                             {/* Actualización - Violeta */}
                             <div className="flex justify-between items-center">
-                              <span className="text-violet-600 dark:text-violet-400 font-medium">Actualización:</span>
-                              <span className="text-violet-600 dark:text-violet-400 font-medium text-right">
+                              <span className="text-foreground font-medium">Actualización:</span>
+                              <span className="text-foreground font-medium text-right">
                                 {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].updatedAmount.toLocaleString()}
                               </span>
                             </div>
@@ -625,8 +625,8 @@ export default function IndexedInstallmentPlan({
                             
                             {/* Saldo - Azul */}
                             <div className="flex justify-between items-center">
-                              <span className="text-blue-600 dark:text-blue-400">Saldo:</span>
-                              <span className="text-blue-600 dark:text-blue-400 text-right">
+                              <span className="text-foreground">Saldo:</span>
+                              <span className="text-foreground text-right">
                                 {rowData[mobileColumnIndex].commitmentCurrency.symbol}{rowData[mobileColumnIndex].balance.toLocaleString()}
                               </span>
                             </div>
@@ -643,8 +643,8 @@ export default function IndexedInstallmentPlan({
                           <div className="space-y-1">
                             {/* Actualización - Violeta */}
                             <div className="flex justify-between items-center">
-                              <span className="text-violet-600 dark:text-violet-400 font-medium">Actualización:</span>
-                              <span className="text-violet-600 dark:text-violet-400 font-medium text-right">
+                              <span className="text-foreground font-medium">Actualización:</span>
+                              <span className="text-foreground font-medium text-right">
                                 {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
                               </span>
                             </div>
@@ -667,8 +667,8 @@ export default function IndexedInstallmentPlan({
                             
                             {/* Saldo - Azul */}
                             <div className="flex justify-between items-center">
-                              <span className="text-blue-600 dark:text-blue-400">Saldo:</span>
-                              <span className="text-blue-600 dark:text-blue-400 text-right">
+                              <span className="text-foreground">Saldo:</span>
+                              <span className="text-foreground text-right">
                                 {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
                               </span>
                             </div>
