@@ -10,6 +10,7 @@ import { Search, Filter, X, Home, Bell } from 'lucide-react'
 import { useLocation } from 'wouter'
 
 export function ActionBarMobile() {
+  const [, navigate] = useLocation()
   const { 
     actions, 
     showActionBar,
@@ -230,20 +231,18 @@ export function ActionBarMobile() {
       >
         {/* 5 slots when create action exists, 4 slots when it doesn't */}
         <div className={`flex items-center justify-between ${actions.create ? 'px-4' : 'px-8'}`}>
-          {/* Slot 1: Home */}
-          {actions.home && (
-            <button
-              onClick={actions.home.onClick}
-              className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
-            >
-              <Home 
-                className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
-                style={{ 
-                  color: 'var(--text-secondary)' 
-                }} 
-              />
-            </button>
-          )}
+          {/* Slot 1: Home - Always navigates to dashboard */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
+          >
+            <Home 
+              className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
+              style={{ 
+                color: 'var(--text-secondary)' 
+              }} 
+            />
+          </button>
 
           {/* Slot 2: Search */}
           {actions.search && (

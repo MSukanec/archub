@@ -66,14 +66,6 @@ export default function Contacts() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: {
-          id: 'home',
-          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
-          label: 'Inicio',
-          onClick: () => {
-            navigate('/dashboard');
-          },
-        },
         search: {
           id: 'search',
           icon: <Search className="h-5 w-5" />,

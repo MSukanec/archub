@@ -550,15 +550,6 @@ export default function Movements() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: {
-          id: 'home',
-          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
-          label: 'Inicio',
-          onClick: () => {
-            // Navigate to dashboard
-            navigate('/dashboard');
-          },
-        },
         search: {
           id: 'search',
           icon: <Search className="h-5 w-5" />,

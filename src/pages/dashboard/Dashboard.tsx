@@ -51,29 +51,12 @@ export default function Dashboard() {
     onTabChange: (tabId: string) => setActiveTab(tabId),
   };
 
-  // Configurar action bar móvil
+  // Dashboard no debe mostrar action bar
   useEffect(() => {
     if (isMobile) {
-      setActions({
-        home: {
-          id: 'home',
-          icon: <Home className="h-5 w-5" />,
-          label: 'Inicio',
-          onClick: () => {
-            navigate('/dashboard');
-          },
-        },
-      });
-      setShowActionBar(true);
+      setShowActionBar(false);
     }
-    
-    // Cleanup
-    return () => {
-      if (isMobile) {
-        setShowActionBar(false);
-      }
-    };
-  }, [isMobile, setActions, setShowActionBar, navigate]);
+  }, [isMobile, setShowActionBar]);
 
   if (isLoading) {
     return (
