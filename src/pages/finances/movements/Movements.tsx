@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -133,6 +134,8 @@ interface ConversionGroup {
 }
 
 export default function Movements() {
+  const [, navigate] = useLocation();
+  
   // Función para formatear moneda
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -597,7 +600,7 @@ export default function Movements() {
         clearActions();
       }
     };
-  }, [isMobile]); // Only depend on isMobile
+  }, [isMobile, navigate, setActions, setShowActionBar, clearActions, openModal]); // Include all dependencies
 
   // Separate effect for filter configuration to avoid loops
   useEffect(() => {
