@@ -243,41 +243,21 @@ export function UploadGallery({
 
               {/* Delete button overlay - top right corner */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      title="Eliminar archivo"
-                      className="bg-black/60 hover:bg-red-600/80 text-white"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Eliminar archivo</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        ¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          if (file.isExisting) {
-                            handleExistingFileDelete(file.id);
-                          } else {
-                            removeFileToUpload(file.previewIndex!);
-                          }
-                        }}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Eliminar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  title="Eliminar archivo"
+                  className="bg-black/60 hover:bg-red-600/80 text-white"
+                  onClick={() => {
+                    if (file.isExisting) {
+                      handleExistingFileDelete(file.id);
+                    } else {
+                      removeFileToUpload(file.previewIndex!);
+                    }
+                  }}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
               </div>
 
               {/* Badge for new files */}
