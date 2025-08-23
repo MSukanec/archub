@@ -83,7 +83,7 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
   // Handler para abrir el modal de edición
   const handleEdit = () => {
     onClose() // Cerrar el modal de vista primero
-    openModal('siteLog', { editingSiteLog: siteLog })
+    openModal('site-log', { data: siteLog, isEditing: true })
   }
 
   // Helper para formatear fecha

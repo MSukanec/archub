@@ -79,6 +79,11 @@ export default function LogEntries({
   const { setActions, setShowActionBar, clearActions, setFilterConfig, searchValue: mobileSearchValue, setSearchValue: setMobileSearchValue } = useActionBarMobile();
   const [, navigate] = useLocation();
 
+  // Función para abrir modal de vista (no edición)
+  const handleViewSiteLog = (siteLog: any) => {
+    openModal('site-log-view', { viewingSiteLog: siteLog });
+  };
+
   // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
@@ -231,7 +236,7 @@ export default function LogEntries({
               <LogRow
                 key={siteLog.id}
                 siteLog={siteLog}
-                onClick={() => handleEditSiteLog(siteLog)}
+                onClick={() => handleViewSiteLog(siteLog)}
                 onEdit={handleEditSiteLog}
                 onDelete={handleDeleteSiteLog}
                 onToggleFavorite={toggleFavorite}

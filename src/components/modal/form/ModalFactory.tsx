@@ -47,6 +47,7 @@ import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
 import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
 import { ChangelogFormModal } from '../modals/admin/ChangelogFormModal';
 import { SiteLogFormModal } from '../modals/construction/logs/SiteLogFormModal';
+import { SiteLogModalView } from '../modals/construction/logs/SiteLogModalView';
 import { AttendanceFormModal } from '../modals/construction/AttendanceFormModal';
 import { PersonnelFormModal } from '../modals/construction/PersonnelFormModal';
 import { ParameterVisibilityConfigModal } from '../modals/admin/ParameterVisibilityConfigModal';
@@ -174,6 +175,8 @@ export function ModalFactory() {
       return <ChangelogFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'site-log':
       return <SiteLogFormModal data={data || {}} />;
+    case 'site-log-view':
+      return <SiteLogModalView modalData={data || {}} onClose={closeModal} />;
     case 'attendance':
       return <AttendanceFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'personnel':
