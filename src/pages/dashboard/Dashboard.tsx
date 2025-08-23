@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Building } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Building, Home } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DashboardDashboard } from './DashboardDashboard';
@@ -8,12 +9,17 @@ import { DashboardActivity } from './DashboardActivity';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('Resumen');
+  const [, navigate] = useLocation();
   
   const { data: userData, isLoading } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const { setActions, setShowActionBar } = useActionBarMobile();
+  const isMobile = useMobile();
   
   // Usar la organización actual del usuario
   const organization = userData?.organization;
@@ -43,9 +49,31 @@ export default function Dashboard() {
     subtitle: `${organization?.is_system ? 'Organización del sistema' : 'Organización'} • Plan ${organization?.plan?.name || 'Free'}`,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
-
-
   };
+
+  // Configurar action bar móvil
+  useEffect(() => {
+    if (isMobile) {
+      setActions({
+        home: {
+          id: 'home',
+          icon: <Home className="h-5 w-5" />,
+          label: 'Inicio',
+          onClick: () => {
+            navigate('/dashboard');
+          },
+        },
+      });
+      setShowActionBar(true);
+    }
+    
+    // Cleanup
+    return () => {
+      if (isMobile) {
+        setShowActionBar(false);
+      }
+    };
+  }, [isMobile, setActions, setShowActionBar, navigate]);
 
   if (isLoading) {
     return (
