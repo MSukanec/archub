@@ -468,7 +468,10 @@ export default function IndexedInstallmentPlan({
           </div>
           
           {/* Scrollable right area header */}
-          <div className="flex-1 overflow-x-auto">
+          <div className={`flex-1 ${isMobile ? 'overflow-x-auto' : 'overflow-x-scroll'}`} style={!isMobile ? { 
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'var(--border) transparent'
+          } : {}}>
             <div className="flex" style={{ minWidth: 'max-content' }}>
               {commitments?.length ? (
                 isMobile ? (
@@ -565,7 +568,10 @@ export default function IndexedInstallmentPlan({
               </div>
               
               {/* Scrollable right area - unit data */}
-              <div className="flex-1 overflow-x-auto">
+              <div className={`flex-1 ${isMobile ? 'overflow-x-auto' : 'overflow-x-scroll'}`} style={!isMobile ? { 
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'var(--border) transparent'
+              } : {}}>
                 <div className="flex" style={{ minWidth: 'max-content' }}>
                   {rowData.length > 0 ? (
                     isMobile ? (
