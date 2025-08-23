@@ -70,11 +70,11 @@ const siteLogSchema = z.object({
 
 type SiteLogFormData = z.infer<typeof siteLogSchema>;
 
-interface SiteLogFormModalProps {
+interface SiteLogModalProps {
   data?: any;
 }
 
-export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
+export function SiteLogModal({ data }: SiteLogModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
@@ -651,7 +651,7 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             title="Personal"
             description="Control de asistencia y personal en obra"
             onClick={() => {
-              setCurrentSubform('personal');
+              setCurrentSubform('personnel');
               setPanel('subform');
             }}
           />
@@ -659,35 +659,24 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           {/* Lista de personal agregado */}
           {attendees.length > 0 && (
             <div className="space-y-2">
-              {attendees.map((attendee, index) => {
-                const contact = contacts.find(c => c.id === attendee.contact_id);
-                const contactName = contact ? `${contact.first_name} ${contact.last_name}`.trim() : 'Sin contacto';
-                const attendanceText = attendee.attendance_type === 'full' ? 'Jornada Completa' : 'Media Jornada';
-                
-                return (
-                  <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{contactName}</p>
-                      <p className="text-xs text-muted-foreground">{attendanceText}</p>
-                      {attendee.description && (
-                        <p className="text-xs text-muted-foreground">{attendee.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          const newAttendees = attendees.filter((_, i) => i !== index);
-                          setAttendees(newAttendees);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {attendees.map((attendee, index) => (
+                <div key={attendee.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">
+                      {contacts.find((c: any) => c.id === attendee.contact_id)?.first_name} {contacts.find((c: any) => c.id === attendee.contact_id)?.last_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {attendee.arrival_time} - {attendee.departure_time}
+                    </p>
                   </div>
-                );
-              })}
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm">Editar</Button>
+                    <Button variant="ghost" size="icon-sm" onClick={() => removeAttendee(attendee.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -697,22 +686,22 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
           <FormSubsectionButton
             icon={<Wrench />}
             title="Maquinaria"
-            description="Control de equipos y maquinaria utilizada"
+            description="Registro de equipos utilizados"
             onClick={() => {
               setCurrentSubform('equipment');
               setPanel('subform');
             }}
           />
           
-          {/* Lista de equipos agregados */}
+          {/* Lista de maquinaria agregada */}
           {equipment.length > 0 && (
             <div className="space-y-2">
               {equipment.map((item, index) => (
                 <div key={item.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{item.name}</p>
+                    <p className="text-sm font-medium">{item.name} (x{item.quantity})</p>
                     <p className="text-xs text-muted-foreground">
-                      Cantidad: {item.quantity} {item.condition && `- ${item.condition}`}
+                      {item.condition} {item.operator && `- Operador: ${item.operator}`}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -726,153 +715,236 @@ export function SiteLogFormModal({ data }: SiteLogFormModalProps) {
             </div>
           )}
         </div>
+
+        {/* Botón submit oculto */}
+        <button type="submit" style={{ display: 'none' }} />
       </form>
     </Form>
   );
 
-  // Subform de Personal
-  const personalSubform = (
+  const personnelSubform = (
     <PersonnelForm
       attendees={attendees}
       setAttendees={setAttendees}
       projectPersonnel={projectPersonnel}
+      contacts={contacts}
     />
   );
 
-  // Subform de Eventos
-  const eventsSubform = (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="text-center py-8 text-muted-foreground">
-          <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No hay eventos registrados</p>
-          <p className="text-xs">Agrega eventos importantes del día</p>
-        </div>
-      </div>
-    </div>
-  );
-
-
-  // Subform de Archivos
-  const filesSubform = (
-    <MediaForm
+  const mediaSubform = (
+    <MediaForm 
       filesToUpload={filesToUpload}
       setFilesToUpload={setFilesToUpload}
-      siteLogFiles={siteLogFiles}
+      existingFiles={siteLogFiles}
     />
   );
 
-  // Subform de Equipos
-  const equipmentSubform = (
+  // Configuración de eventos subform
+  const eventsSubform = (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="text-center py-8 text-muted-foreground">
-          <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No hay equipos registrados</p>
-          <p className="text-xs">Agrega maquinaria y equipos utilizados</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-medium">Eventos del Día</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Registra actividades importantes ocurridas durante la jornada
+          </p>
         </div>
+        <Button onClick={addEvent} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Evento
+        </Button>
       </div>
+
+      {events.length === 0 ? (
+        <EmptyState
+          icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
+          title="Sin eventos registrados"
+          description="Comienza agregando el primer evento del día"
+        />
+      ) : (
+        <div className="space-y-4">
+          {events.map((event) => (
+            <div key={event.id} className="p-4 border rounded-lg space-y-4">
+              <div className="flex justify-between items-start">
+                <h4 className="font-medium text-sm">Evento #{events.indexOf(event) + 1}</h4>
+                <Button 
+                  variant="ghost" 
+                  size="icon-sm" 
+                  onClick={() => removeEvent(event.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                <div>
+                  <label className="text-sm font-medium">Descripción</label>
+                  <Textarea
+                    placeholder="¿Qué ocurrió?"
+                    value={event.description}
+                    onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Hora</label>
+                    <Input
+                      type="time"
+                      value={event.time}
+                      onChange={(e) => updateEvent(event.id, 'time', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Responsable</label>
+                    <Input
+                      placeholder="¿Quién fue responsable?"
+                      value={event.responsible}
+                      onChange={(e) => updateEvent(event.id, 'responsible', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
-  // Determinar qué subform mostrar
-  const getSubform = () => {
-    switch (currentSubform) {
-      case 'personal':
-        return personalSubform;
-      case 'events':
-        return eventsSubform;
-      case 'files':
-        return filesSubform;
-      case 'equipment':
-        return equipmentSubform;
-      default:
-        return null;
-    }
+  // Configuración de maquinaria subform
+  const equipmentSubform = (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-medium">Maquinaria y Equipos</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Registra los equipos utilizados durante la jornada
+          </p>
+        </div>
+        <Button onClick={addEquipment} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Equipo
+        </Button>
+      </div>
+
+      {equipment.length === 0 ? (
+        <EmptyState
+          icon={<Wrench className="w-12 h-12 text-muted-foreground" />}
+          title="Sin equipos registrados"
+          description="Comienza agregando el primer equipo utilizado"
+        />
+      ) : (
+        <div className="space-y-4">
+          {equipment.map((item) => (
+            <div key={item.id} className="p-4 border rounded-lg space-y-4">
+              <div className="flex justify-between items-start">
+                <h4 className="font-medium text-sm">Equipo #{equipment.indexOf(item) + 1}</h4>
+                <Button 
+                  variant="ghost" 
+                  size="icon-sm" 
+                  onClick={() => removeEquipment(item.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Nombre del Equipo</label>
+                    <Input
+                      placeholder="Ej: Excavadora Caterpillar 320D"
+                      value={item.name}
+                      onChange={(e) => updateEquipmentItem(item.id, 'name', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Cantidad</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateEquipmentItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Estado/Condición</label>
+                    <Input
+                      placeholder="Ej: Operativo, En reparación"
+                      value={item.condition}
+                      onChange={(e) => updateEquipmentItem(item.id, 'condition', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Operador</label>
+                    <Input
+                      placeholder="Nombre del operador"
+                      value={item.operator}
+                      onChange={(e) => updateEquipmentItem(item.id, 'operator', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Observaciones</label>
+                  <Textarea
+                    placeholder="Notas adicionales sobre el equipo..."
+                    value={item.notes}
+                    onChange={(e) => updateEquipmentItem(item.id, 'notes', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const handleSubmit = () => {
+    form.handleSubmit(onSubmit)();
   };
 
+  const siteLogId = data?.data?.id || data?.id;
+  const isEditing = data?.isEditing || !!siteLogId;
+
   return (
-    <FormModalLayout
-      columns={1}
-      onClose={closeModal}
-      viewPanel={viewPanel}
-      editPanel={editPanel}
-      subformPanel={getSubform()}
-      isEditing={true}
-      headerContent={
-        currentPanel === 'subform' ? (
-          <FormModalHeader
-            title={
-              currentSubform === 'personal' ? "Personal" :
-              currentSubform === 'events' ? "Eventos" :
-              currentSubform === 'files' ? "Fotos y Videos" :
-              currentSubform === 'equipment' ? "Maquinaria" : "Bitácora"
-            }
-            description={
-              currentSubform === 'personal' ? "Gestiona el personal presente en obra" :
-              currentSubform === 'events' ? "Registra eventos importantes del día" :
-              currentSubform === 'files' ? "Sube archivos multimedia al registro" :
-              currentSubform === 'equipment' ? "Gestiona maquinaria y equipos utilizados" : "Bitácora de obra"
-            }
-            icon={
-              currentSubform === 'personal' ? Users :
-              currentSubform === 'events' ? Calendar :
-              currentSubform === 'files' ? Camera :
-              currentSubform === 'equipment' ? Wrench : FileText
-            }
-            leftActions={
-              <Button
-                variant="ghost"
-                onClick={() => setPanel('edit')}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Volver
-              </Button>
-            }
-          />
-        ) : (
-          <FormModalHeader
-            title={data ? "Editar Bitácora" : "Nueva Bitácora"}
-            description={data ? "Modifica la información de la bitácora" : "Crea una nueva bitácora de obra"}
-            icon={FileText}
-          />
-        )
-      }
-      footerContent={
-        currentPanel === 'subform' ? (
-          <FormModalFooter
-            leftLabel="Cancelar"
-            onLeftClick={closeModal}
-            rightLabel={
-              currentSubform === 'personal' ? "Confirmar Asistencia" :
-              currentSubform === 'events' ? "Agregar Evento" :
-              currentSubform === 'files' ? "Agregar Fotos y Videos" :
-              currentSubform === 'equipment' ? "Agregar Maquinaria" : "Confirmar"
-            }
-            onRightClick={() => {
-              if (currentSubform === 'files') {
-                // Para archivos, simplemente regresar al panel principal
-                setPanel('edit');
-              } else if (currentSubform === 'personal' && attendees.length > 0) {
-                // Los datos ya están en attendees, solo regresamos al panel principal
-                setPanel('edit');
-              } else {
-                setPanel('edit');
-              }
-            }}
-            showLoadingSpinner={false}
-          />
-        ) : (
-          <FormModalFooter
-            leftLabel="Cancelar"
-            onLeftClick={closeModal}
-            rightLabel={data ? "Guardar Cambios" : "Crear Bitácora"}
-            onRightClick={form.handleSubmit(onSubmit)}
-            showLoadingSpinner={isLoading}
-          />
-        )
-      }
-    />
+    <FormModalLayout>
+      <FormModalHeader
+        icon={<FileText />}
+        title={siteLogId ? "Editar Bitácora" : "Nueva Bitácora"}
+        description={siteLogId ? "Actualizar información de la bitácora de obra" : "Crear una nueva entrada en la bitácora de obra"}
+      />
+
+      {/* Contenido del modal según el panel activo */}
+      {currentPanel === 'view' && viewPanel}
+      {currentPanel === 'edit' && editPanel}
+      {currentPanel === 'subform' && currentSubform === 'personnel' && personnelSubform}
+      {currentPanel === 'subform' && currentSubform === 'files' && mediaSubform}
+      {currentPanel === 'subform' && currentSubform === 'events' && eventsSubform}
+      {currentPanel === 'subform' && currentSubform === 'equipment' && equipmentSubform}
+
+      <FormModalFooter
+        onCancel={closeModal}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        submitText={siteLogId ? "Actualizar" : "Crear"}
+      />
+    </FormModalLayout>
   );
 }
