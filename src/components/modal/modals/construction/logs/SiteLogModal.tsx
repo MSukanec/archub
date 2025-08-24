@@ -117,6 +117,20 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
 
   const queryClient = useQueryClient();
 
+  // Inicializar el panel correcto según si es creación o edición
+  useEffect(() => {
+    const siteLogId = data?.data?.id || data?.id;
+    const isCreating = !siteLogId;
+    
+    if (isCreating) {
+      // Si es creación, abrir en modo edición
+      setPanel('edit');
+    } else {
+      // Si es edición, abrir en modo visualización
+      setPanel('view');
+    }
+  }, [data, setPanel]);
+
   // Query para obtener archivos existentes de la bitácora
   const { data: siteLogFiles = [], isLoading: filesLoading } = useQuery({
     queryKey: ['site-log-files', data?.id || data?.data?.id],
