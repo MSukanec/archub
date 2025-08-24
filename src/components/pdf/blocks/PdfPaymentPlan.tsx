@@ -360,38 +360,58 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             {commitments.map((commitment, commitmentIndex) => (
               <View key={commitment.id} break={commitmentIndex > 0}>
                 
-                {/* Información de la Unidad Funcional - Header Optimizado */}
+                {/* Header de Unidad Funcional - Estilo Profesional */}
                 <View style={styles.section}>
-                  <Text style={[styles.subtitle, { marginBottom: 12, textAlign: 'center' }]}>
-                    Unidad Funcional: {commitment.unit || `Cliente ${commitmentIndex + 1}`}
-                  </Text>
+                  {/* Línea superior */}
+                  <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 20 }} />
                   
-                  {/* Layout de doble columna */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {/* Columna izquierda */}
-                    <View style={{ flex: 1, paddingRight: 8 }}>
-                      <View style={styles.row}>
-                        <Text style={styles.label}>Unidad:</Text>
-                        <Text style={styles.value}>{commitment.unit || `UF${commitmentIndex + 1}`}</Text>
-                      </View>
-                      <View style={styles.row}>
-                        <Text style={styles.label}>Cliente:</Text>
-                        <Text style={styles.value}>{getClientDisplayName(commitment)}</Text>
-                      </View>
+                  {/* Header principal */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 25 }}>
+                    {/* Lado izquierdo - Etiqueta */}
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#6b7280', letterSpacing: 1, textTransform: 'uppercase' }}>
+                        UNIDAD FUNCIONAL
+                      </Text>
                     </View>
                     
-                    {/* Columna derecha */}
-                    <View style={{ flex: 1, paddingLeft: 8 }}>
-                      <View style={styles.row}>
-                        <Text style={styles.label}>Monto de Obra Inicial:</Text>
-                        <Text style={styles.value}>
+                    {/* Lado derecho - Título principal */}
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1f2937', letterSpacing: 0.5 }}>
+                        {commitment.unit || `UF${commitmentIndex + 1}`}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  {/* Información detallada */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {/* Columna izquierda - Info del cliente */}
+                    <View style={{ flex: 1, paddingRight: 20 }}>
+                      <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1f2937', marginBottom: 8 }}>
+                        {getClientDisplayName(commitment)}
+                      </Text>
+                      <Text style={{ fontSize: 9, color: '#6b7280', lineHeight: 1.4 }}>
+                        Cliente de la unidad funcional
+                      </Text>
+                    </View>
+                    
+                    {/* Columna derecha - Info financiera */}
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                      <View style={{ marginBottom: 6 }}>
+                        <Text style={{ fontSize: 9, color: '#6b7280', textAlign: 'right' }}>
+                          Monto de Obra Inicial
+                        </Text>
+                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#1f2937', textAlign: 'right' }}>
                           {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
                         </Text>
                       </View>
                       {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
-                        <View style={styles.row}>
-                          <Text style={styles.label}>Cotización del dólar inicial:</Text>
-                          <Text style={styles.value}>{commitment.exchange_rate}</Text>
+                        <View>
+                          <Text style={{ fontSize: 9, color: '#6b7280', textAlign: 'right' }}>
+                            Cotización del dólar inicial
+                          </Text>
+                          <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#1f2937', textAlign: 'right' }}>
+                            ${commitment.exchange_rate}
+                          </Text>
                         </View>
                       )}
                     </View>
