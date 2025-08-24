@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { PdfBlock } from '@/components/pdf/types';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -41,7 +42,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
 
   // PDF general configuration
   const [pdfConfig, setPdfConfig] = useState({
-    pageSize: 'A4' as 'A4' | 'Letter',
+    pageSize: 'A4' as 'A4' | 'LETTER',
     orientation: 'portrait' as 'portrait' | 'landscape',
     margin: 20, // mm
   });
@@ -54,6 +55,12 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     tableContent: true,
     totals: true,
     footer: true,
+  });
+
+  // Footer configuration
+  const [footerConfig, setFooterConfig] = useState({
+    text: 'Generado automáticamente',
+    showDivider: true,
   });
 
   // Expanded section for accordion (only one at a time)
@@ -305,14 +312,14 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                   <Label className="text-xs font-medium">Tamaño de Página</Label>
                   <Select 
                     value={pdfConfig.pageSize} 
-                    onValueChange={(value: 'A4' | 'Letter') => setPdfConfig(prev => ({ ...prev, pageSize: value }))}
+                    onValueChange={(value: 'A4' | 'LETTER') => setPdfConfig(prev => ({ ...prev, pageSize: value }))}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
-                      <SelectItem value="Letter">Carta (216 × 279 mm)</SelectItem>
+                      <SelectItem value="LETTER">Carta (216 × 279 mm)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -407,16 +414,75 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           description="Resumen de costos y totales del presupuesto"
         />
         
-        <SectionItem
-          id="footer"
-          label="Pie de Página"
-          icon={FileSignature}
-          checked={sections.footer}
-          onToggle={() => toggleSection('footer')}
-          onExpand={() => toggleExpanded('footer')}
-          isExpanded={expandedSection === 'footer'}
-          description="Información adicional al final del documento"
-        />
+        {/* Footer Section - Custom with text controls */}
+        <div 
+          className="border border-border rounded-lg overflow-hidden bg-card"
+          data-section-id="footer"
+        >
+          {/* Section Header */}
+          <div 
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => toggleExpanded('footer')}
+          >
+            <div className="flex items-center gap-3">
+              {/* Drag Handle - for future use */}
+              <div className="text-muted-foreground cursor-grab">
+                <GripVertical className="h-4 w-4" />
+              </div>
+              
+              {/* Icon */}
+              <FileSignature className="h-4 w-4 text-accent" />
+              
+              {/* Label */}
+              <span className="text-sm font-medium">Pie de Página</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Switch */}
+              <Switch
+                checked={sections.footer}
+                onCheckedChange={() => toggleSection('footer')}
+                className="data-[state=checked]:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Expand Chevron */}
+              {expandedSection === 'footer' ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          {/* Expanded Content */}
+          {expandedSection === 'footer' && (
+            <div className="px-3 pb-3 pt-0 border-t border-border/50">
+              <div className="mt-3 space-y-4">
+                {/* Footer Text */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Texto del Pie de Página</Label>
+                  <Textarea
+                    value={footerConfig.text}
+                    onChange={(e) => setFooterConfig(prev => ({ ...prev, text: e.target.value }))}
+                    className="h-20 resize-none"
+                    placeholder="Texto que aparecerá en el pie de página..."
+                  />
+                </div>
+
+                {/* Divider Line */}
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Línea Divisoria</Label>
+                  <Switch
+                    checked={footerConfig.showDivider}
+                    onCheckedChange={(checked) => setFooterConfig(prev => ({ ...prev, showDivider: checked }))}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -562,7 +628,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         </Button>
         <div className="flex-1">
           <PDFDownloadLink
-            document={<PdfDocument blocks={blocks} />}
+            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} />}
             fileName={filename}
             className="w-full"
           >

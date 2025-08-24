@@ -7,28 +7,57 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
-    padding: 30,
   },
 });
 
-interface PdfDocumentProps {
-  blocks: PdfBlock[];
+interface PdfConfig {
+  pageSize: 'A4' | 'LETTER';
+  orientation: 'portrait' | 'landscape';
+  margin: number;
 }
 
-export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks }) => {
+interface FooterConfig {
+  text: string;
+  showDivider: boolean;
+}
+
+interface PdfDocumentProps {
+  blocks: PdfBlock[];
+  config?: PdfConfig;
+  footerConfig?: FooterConfig;
+}
+
+export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig }) => {
+  const pageConfig = config || { pageSize: 'A4', orientation: 'portrait', margin: 20 };
+  
+  // Apply margin as padding
+  const pageStyle = {
+    ...styles.page,
+    padding: pageConfig.margin,
+  };
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page 
+        size={pageConfig.pageSize} 
+        orientation={pageConfig.orientation}
+        style={pageStyle}
+      >
         {blocks.map((block, index) => {
           if (!block.enabled) return null;
           
           const BlockComponent = pdfBlocks[block.type as keyof typeof pdfBlocks];
           if (!BlockComponent) return null;
           
+          // Pass footerConfig to footer blocks
+          const blockData = block.type === 'footer' && footerConfig 
+            ? { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider }
+            : block.data;
+          
           return (
             <BlockComponent 
               key={index} 
-              data={block.data} 
+              data={blockData} 
               config={block.config} 
             />
           );
