@@ -196,3 +196,45 @@ export function useDeleteTaskDivision() {
     },
   });
 }
+
+export function useUpdateTaskDivisionsOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (divisions: { id: string; order: number }[]) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
+      // Update multiple records with their new order values
+      const updates = divisions.map(async (division) => {
+        const { error } = await supabase
+          .from('task_divisions')
+          .update({ order: division.order })
+          .eq('id', division.id);
+
+        if (error) {
+          console.error('Error updating division order:', error);
+          throw error;
+        }
+      });
+
+      // Wait for all updates to complete
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-divisions-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-divisions'] });
+      toast({
+        title: "Orden actualizado",
+        description: "El orden de las divisiones se ha actualizado exitosamente.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Update divisions order error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el orden de las divisiones. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+}

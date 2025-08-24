@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-import { HierarchicalCategoryTree } from '@/components/ui-custom/HierarchicalCategoryTree';
+import { HierarchicalCategoryTree } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
 
-import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
+import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 const AdminTaskDivisions = () => {
@@ -19,6 +19,7 @@ const AdminTaskDivisions = () => {
 
   const { data: divisions = [], isLoading, error, isError, refetch } = useTaskDivisionsAdmin();
   const { data: allDivisions = [] } = useAllTaskDivisions();
+  const updateDivisionsOrderMutation = useUpdateTaskDivisionsOrder();
 
   // Debug query state (only log errors)
   if (isError) {
@@ -89,6 +90,20 @@ const AdminTaskDivisions = () => {
 
   const handleCreateDivision = () => {
     openModal('task-division', { isEditing: true });
+  };
+
+  const handleReorderDivisions = async (reorderedDivisions: TaskDivisionAdmin[]) => {
+    try {
+      // Prepare the data for the API call
+      const divisionsWithOrder = reorderedDivisions.map((division, index) => ({
+        id: division.id,
+        order: index + 1
+      }));
+
+      await updateDivisionsOrderMutation.mutateAsync(divisionsWithOrder);
+    } catch (error) {
+      console.error('Error reordering divisions:', error);
+    }
   };
 
   // Filter divisions based on search term
@@ -163,6 +178,9 @@ const AdminTaskDivisions = () => {
                 // Note: task_divisions are flat, so this creates a new division instead of child
                 handleCreateDivision();
               }}
+              // Enable drag and drop for divisions
+              enableDragAndDrop={true}
+              onReorder={handleReorderDivisions}
             />
           )}
         </CardContent>

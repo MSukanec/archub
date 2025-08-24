@@ -1,9 +1,31 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Edit, Trash2, FileText, Plus, Layers } from 'lucide-react';
+import { ChevronRight, ChevronDown, Edit, Trash2, FileText, Plus, Layers, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+// Drag and Drop imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import {
+  CSS,
+} from '@dnd-kit/utilities';
+
 // Remove the import since TaskGroupAdmin doesn't exist
 // import { TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
 
@@ -15,6 +37,7 @@ interface CategoryTreeNode {
   taskGroups?: any[];
   template?: any;
   parent_id?: string | null;
+  order?: number;
 }
 
 interface HierarchicalCategoryTreeProps {
@@ -28,6 +51,10 @@ interface HierarchicalCategoryTreeProps {
   onEditTaskGroup?: (taskGroup: any, category: CategoryTreeNode) => void;
   onDeleteTaskGroup?: (taskGroupId: string) => void;
   onCreateChild?: (category: CategoryTreeNode) => void;
+  
+  // New drag and drop props
+  enableDragAndDrop?: boolean;
+  onReorder?: (reorderedItems: CategoryTreeNode[]) => void;
 
   level?: number;
 }
@@ -43,12 +70,68 @@ export function HierarchicalCategoryTree({
   onEditTaskGroup,
   onDeleteTaskGroup,
   onCreateChild,
+  
+  // Drag and drop props
+  enableDragAndDrop = false,
+  onReorder,
 
   level = 0
 }: HierarchicalCategoryTreeProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = categories.findIndex((item) => item.id === active.id);
+      const newIndex = categories.findIndex((item) => item.id === over?.id);
+      
+      const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+      
+      // Update order property for each item
+      const reorderedWithOrder = reorderedCategories.map((category, index) => ({
+        ...category,
+        order: index + 1
+      }));
+      
+      if (onReorder) {
+        onReorder(reorderedWithOrder);
+      }
+    }
+  };
+  
+  // Sortable Item component for drag and drop
+  const SortableItem = ({ category, currentLevel }: { category: CategoryTreeNode; currentLevel: number }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: category.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+      <div ref={setNodeRef} style={style} {...attributes}>
+        {renderCategoryContent(category, currentLevel, enableDragAndDrop ? listeners : undefined)}
+      </div>
+    );
+  };
+  
   const hasChildren = (category: CategoryTreeNode) => category.children && category.children.length > 0;
   
-  const renderCategory = (category: CategoryTreeNode, currentLevel: number) => {
+  const renderCategoryContent = (category: CategoryTreeNode, currentLevel: number, listeners?: any) => {
     const isExpanded = expandedCategories.has(category.id);
     const hasChildCategories = hasChildren(category);
     
@@ -257,6 +340,33 @@ export function HierarchicalCategoryTree({
       </div>
     );
   };
+  
+  const renderCategory = (category: CategoryTreeNode, currentLevel: number) => {
+    if (enableDragAndDrop && currentLevel === 0) {
+      // Only enable drag-drop for top-level items
+      return <SortableItem key={category.id} category={category} currentLevel={currentLevel} />;
+    } else {
+      // Regular rendering without drag-drop
+      return renderCategoryContent(category, currentLevel);
+    }
+  };
+
+  // Wrap in drag and drop context if enabled
+  if (enableDragAndDrop) {
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={categories.map(cat => cat.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-1">
+            {categories.map((category) => renderCategory(category, level))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    );
+  }
   
   return (
     <div className="space-y-1">
