@@ -326,38 +326,11 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
       {/* Tabla Detallada de Cuotas por Unidad */}
       {showDetailTable && heatmapData.length > 0 && commitments.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.subtitle}>Detalle de Cuotas por Unidad Funcional</Text>
-          
-          <View style={styles.table}>
-            {/* Header con unidades */}
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderCell, { width: 80 }]}>Cuota / Unidad</Text>
-              {commitments.map((commitment) => (
-                <Text key={commitment.id} style={[styles.tableHeaderCell, { width: 120 }]}>
-                  {commitment.unit || getClientDisplayName(commitment)}
-                </Text>
-              ))}
-            </View>
-            
-            {/* Subheader con nombres/montos */}
-            <View style={styles.tableRow}>
-              <Text style={[styles.tableCell, { width: 80 }]}></Text>
-              {commitments.map((commitment) => (
-                <View key={`header-${commitment.id}`} style={{ width: 120, padding: 2 }}>
-                  <Text style={[styles.tableCell, { fontSize: 8, textAlign: 'center' }]}>
-                    {getClientDisplayName(commitment)}
-                  </Text>
-                  <Text style={[styles.tableCell, { fontSize: 8, textAlign: 'center', fontWeight: 'bold' }]}>
-                    {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            
+        <View>
             {/* Generar páginas separadas - una por unidad funcional */}
             {commitments.map((commitment, commitmentIndex) => (
-              <View key={commitment.id} break={oneUnitPerPage && commitmentIndex > 0}>
+              <View key={commitment.id} break={oneUnitPerPage}>
+                
                 
                 {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
                 <View style={{ flexDirection: 'row', gap: 15 }}>
@@ -486,7 +459,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
               </View>
             ))}
-          </View>
         </View>
       )}
     </View>
