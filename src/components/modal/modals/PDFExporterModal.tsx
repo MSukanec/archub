@@ -46,8 +46,8 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     footer: true,
   });
 
-  // Expanded sections for accordion
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  // Expanded section for accordion (only one at a time)
+  const [expandedSection, setExpandedSection] = useState<string>('coverPage');
   
   const blocks = modalData?.blocks || [];
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -165,13 +165,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     }));
   };
 
-  // Toggle expanded section
+  // Toggle expanded section (only one at a time)
   const toggleExpanded = (section: string) => {
-    setExpandedSections(prev => 
-      prev.includes(section) 
-        ? prev.filter(s => s !== section)
-        : [...prev, section]
-    );
+    setExpandedSection(prev => prev === section ? '' : section);
   };
 
   // Section component - prepared for drag & drop
@@ -250,11 +246,11 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   // Sections configuration panel
   const sectionsPanel = (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b">
+      <div className="p-3 border-b bg-muted/30">
         <h3 className="font-medium text-sm text-muted-foreground">SECCIONES</h3>
       </div>
       
-      <div className="flex-1 p-4 space-y-3 overflow-auto">
+      <div className="flex-1 p-3 space-y-2 overflow-auto">
         <SectionItem
           id="coverPage"
           label="Portada"
@@ -262,7 +258,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.coverPage}
           onToggle={() => toggleSection('coverPage')}
           onExpand={() => toggleExpanded('coverPage')}
-          isExpanded={expandedSections.includes('coverPage')}
+          isExpanded={expandedSection === 'coverPage'}
           description="Página inicial del documento con información general del presupuesto"
         />
         
@@ -273,7 +269,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.header}
           onToggle={() => toggleSection('header')}
           onExpand={() => toggleExpanded('header')}
-          isExpanded={expandedSections.includes('header')}
+          isExpanded={expandedSection === 'header'}
           description="Información del proyecto y empresa en la parte superior"
         />
         
@@ -284,7 +280,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.tableHeader}
           onToggle={() => toggleSection('tableHeader')}
           onExpand={() => toggleExpanded('tableHeader')}
-          isExpanded={expandedSections.includes('tableHeader')}
+          isExpanded={expandedSection === 'tableHeader'}
           description="Encabezados de columnas para la tabla de tareas"
         />
         
@@ -295,7 +291,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.tableContent}
           onToggle={() => toggleSection('tableContent')}
           onExpand={() => toggleExpanded('tableContent')}
-          isExpanded={expandedSections.includes('tableContent')}
+          isExpanded={expandedSection === 'tableContent'}
           description="Filas con las tareas y sus detalles"
         />
         
@@ -306,7 +302,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.totals}
           onToggle={() => toggleSection('totals')}
           onExpand={() => toggleExpanded('totals')}
-          isExpanded={expandedSections.includes('totals')}
+          isExpanded={expandedSection === 'totals'}
           description="Resumen de costos y totales del presupuesto"
         />
         
@@ -317,25 +313,89 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           checked={sections.footer}
           onToggle={() => toggleSection('footer')}
           onExpand={() => toggleExpanded('footer')}
-          isExpanded={expandedSections.includes('footer')}
+          isExpanded={expandedSection === 'footer'}
           description="Información adicional al final del documento"
         />
       </div>
     </div>
   );
 
-  // PDF preview panel
-  const previewPanel = (
-    <div className="h-full flex flex-col bg-gray-100 dark:bg-gray-900">
+  // Action bar with controls
+  const actionBar = (
+    <div className="flex items-center justify-center gap-2 p-3 bg-muted/30 border-b">
+      {!state.loading && !state.error && (
+        <>
+          {/* Page navigation */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={prevPage}
+            disabled={state.page <= 1}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex items-center gap-1 px-2">
+            <span className="text-sm">{state.page}</span>
+            <span className="text-xs text-muted-foreground">/</span>
+            <span className="text-sm">{state.numPages}</span>
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={nextPage}
+            disabled={state.page >= state.numPages}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+
+          <div className="w-px h-4 bg-border mx-1" />
+
+          {/* Zoom controls */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomOut}
+            disabled={state.scale <= 0.5}
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          
+          <Badge 
+            variant="outline" 
+            className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
+            onClick={zoom100}
+            title="Zoom 100%"
+          >
+            {Math.round(state.scale * 100)}%
+          </Badge>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={zoomIn}
+            disabled={state.scale >= 3.0}
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
+  // PDF canvas only
+  const pdfCanvas = (
+    <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-900">
       {state.loading && (
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="h-full flex flex-col items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
           <p className="text-sm text-muted-foreground">Generando PDF...</p>
         </div>
       )}
 
       {state.error && (
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="h-full flex flex-col items-center justify-center">
           <FileText className="h-12 w-12 text-red-500 mb-4" />
           <p className="text-sm text-red-500 mb-4">{state.error}</p>
           <Button onClick={loadPdf} variant="outline" size="sm">
@@ -345,96 +405,37 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       )}
 
       {!state.loading && !state.error && (
-        <>
-          {/* PDF Toolbar */}
-          <div className="p-2 bg-background border-b">
-            <div className="flex items-center justify-center gap-2">
-              {/* Page navigation */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={prevPage}
-                disabled={state.page <= 1}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              
-              <div className="flex items-center gap-1 px-2">
-                <span className="text-sm">{state.page}</span>
-                <span className="text-xs text-muted-foreground">/</span>
-                <span className="text-sm">{state.numPages}</span>
-              </div>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={nextPage}
-                disabled={state.page >= state.numPages}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-
-              <div className="w-px h-4 bg-border mx-1" />
-
-              {/* Zoom controls */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={zoomOut}
-                disabled={state.scale <= 0.5}
-              >
-                <ZoomOut className="w-4 h-4" />
-              </Button>
-              
-              <Badge 
-                variant="outline" 
-                className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
-                onClick={zoom100}
-                title="Zoom 100%"
-              >
-                {Math.round(state.scale * 100)}%
-              </Badge>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={zoomIn}
-                disabled={state.scale >= 3.0}
-              >
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-            </div>
+        <div className="p-4 flex justify-center">
+          <div className="bg-white shadow-lg rounded border">
+            <canvas 
+              ref={canvasRef}
+              className="block"
+            />
           </div>
-
-          {/* PDF Canvas */}
-          <div className="flex-1 overflow-auto">
-            <div className="p-4 flex justify-center">
-              <div className="bg-white shadow-lg rounded border">
-                <canvas 
-                  ref={canvasRef}
-                  className="block"
-                />
-              </div>
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
 
   const editPanel = null;
 
-  // Two column layout
+  // New layout: Action bar + Two columns
   const viewPanel = (
-    <div className="flex h-full">
-      {/* Left column - Sections configuration */}
-      <div className="w-1/3 border-r bg-background">
-        {sectionsPanel}
-      </div>
+    <div className="h-full flex flex-col">
+      {/* Action bar at top */}
+      {actionBar}
       
-      {/* Right column - PDF preview */}
-      <div className="flex-1">
-        {previewPanel}
+      {/* Two columns below */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left column - Sections configuration */}
+        <div className="w-1/3 border-r">
+          {sectionsPanel}
+        </div>
+        
+        {/* Right column - PDF canvas only */}
+        <div className="flex-1">
+          {pdfCanvas}
+        </div>
       </div>
     </div>
   );
