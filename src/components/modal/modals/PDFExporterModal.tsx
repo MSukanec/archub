@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature, Settings } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
@@ -73,7 +73,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
 
-  // Generate PDF blob from blocks using react-pdf with current configurations
+  // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
     try {
       // Filter blocks based on current sections configuration
@@ -86,27 +86,27 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         if (block.type === 'footer') return sections.footer;
         return true;
       }).map(block => {
-        // Override footer data with current footerConfig
+        // Override footer data with debounced footerConfig
         if (block.type === 'footer') {
           return {
             ...block,
             data: {
-              text: footerConfig.text,
-              showDivider: footerConfig.showDivider
+              text: debouncedFooterConfig.text,
+              showDivider: debouncedFooterConfig.showDivider
             }
           };
         }
         return block;
       });
       
-      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={pdfConfig} footerConfig={footerConfig} />;
+      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} />;
       const asPdf = pdf(pdfDoc);
       return await asPdf.toBlob();
     } catch (error) {
       console.error('Error generating PDF:', error);
       throw error;
     }
-  }, [blocks, sections, pdfConfig, footerConfig]);
+  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -199,14 +199,42 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     loadPdf();
   }, [loadPdf]);
 
-  // Reload PDF when configurations change (with debounce)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadPdf();
-    }, 300); // Debounce to avoid too many regenerations
+  // Custom hook for debouncing text inputs
+  const useDebounce = (value: any, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
     
-    return () => clearTimeout(timer);
-  }, [pdfConfig, footerConfig, sections, loadPdf]);
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+    
+    return debouncedValue;
+  };
+
+  // Debounce only text inputs (footer text and margin input)
+  const debouncedFooterText = useDebounce(footerConfig.text, 500);
+  const debouncedMargin = useDebounce(pdfConfig.margin, 400);
+  
+  // Create debounced configs
+  const debouncedFooterConfig = useMemo(() => ({
+    ...footerConfig,
+    text: debouncedFooterText
+  }), [footerConfig.showDivider, debouncedFooterText]);
+  
+  const debouncedPdfConfig = useMemo(() => ({
+    ...pdfConfig,
+    margin: debouncedMargin
+  }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
+
+  // Reload PDF when debounced configurations change
+  useEffect(() => {
+    loadPdf();
+  }, [debouncedPdfConfig, debouncedFooterConfig, sections, loadPdf]);
 
   // Render page when page or scale changes
   useEffect(() => {
