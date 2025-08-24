@@ -359,15 +359,15 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             {commitments.map((commitment, commitmentIndex) => (
               <View key={commitment.id} break={oneUnitPerPage && commitmentIndex > 0}>
                 
-                {/* Línea superior que abarca todo el ancho */}
-                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
-                
                 {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
                 <View style={{ flexDirection: 'row', gap: 15 }}>
                   
                   {/* Columna izquierda - Header (1/3) */}
                   <View style={{ flex: 1, paddingRight: 10 }}>
-                    {/* Contenido sin marco superior */}
+                    {/* Línea superior */}
+                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                    
+                    {/* Contenido */}
                     <View style={{ paddingVertical: 0 }}>
                       
                       {/* Código de unidad grande alineado a la izquierda */}
@@ -395,10 +395,16 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                         )}
                       </View>
                     </View>
+                    
+                    {/* Línea inferior */}
+                    <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
                   </View>
 
                   {/* Columna derecha - Tabla (2/3) */}
                   <View style={{ flex: 2 }}>
+                    {/* Línea superior */}
+                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                    
                     <View style={{ ...styles.table, marginTop: 0 }}>
                     {/* Header */}
                     <View style={styles.tableHeader}>
