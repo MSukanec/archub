@@ -66,7 +66,7 @@ export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footer
             blockData = { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider };
           }
           
-          if ((block.type === 'tableHeader' || block.type === 'tableContent' || block.type === 'totals') && tableConfig) {
+          if ((block.type === 'budgetTable' || block.type === 'tableHeader' || block.type === 'tableContent' || block.type === 'totals') && tableConfig) {
             blockData = { ...block.data, ...tableConfig };
             blockConfig = { ...block.config, ...tableConfig };
           }

@@ -127,6 +127,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       const filteredBlocks = blocks.filter(block => {
         if (block.type === 'coverPage') return sections.coverPage;
         if (block.type === 'header') return sections.header;
+        if (block.type === 'budgetTable') return sections.constructionTasks;
         if (block.type === 'tableHeader') return sections.constructionTasks;
         if (block.type === 'tableContent') return sections.constructionTasks;
         if (block.type === 'totals') return sections.constructionTasks;
