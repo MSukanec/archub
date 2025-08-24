@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature } from 'lucide-react';
+import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature, Settings } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
@@ -8,6 +8,9 @@ import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { PdfBlock } from '@/components/pdf/types';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -36,6 +39,13 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     scale: 1.0,
   });
 
+  // PDF general configuration
+  const [pdfConfig, setPdfConfig] = useState({
+    pageSize: 'A4' as 'A4' | 'Letter',
+    orientation: 'portrait' as 'portrait' | 'landscape',
+    margin: 20, // mm
+  });
+
   // PDF sections configuration
   const [sections, setSections] = useState({
     coverPage: true,
@@ -47,7 +57,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   });
 
   // Expanded section for accordion (only one at a time)
-  const [expandedSection, setExpandedSection] = useState<string>('coverPage');
+  const [expandedSection, setExpandedSection] = useState<string>('general');
   
   const blocks = modalData?.blocks || [];
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -251,6 +261,97 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       </div>
       
       <div className="flex-1 p-3 space-y-2 overflow-auto">
+        {/* General Section - Always active, no switch */}
+        <div 
+          className="border border-border rounded-lg overflow-hidden bg-card"
+          data-section-id="general"
+        >
+          {/* Section Header */}
+          <div 
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => toggleExpanded('general')}
+          >
+            <div className="flex items-center gap-3">
+              {/* Drag Handle - for future use */}
+              <div className="text-muted-foreground cursor-grab">
+                <GripVertical className="h-4 w-4" />
+              </div>
+              
+              {/* Icon */}
+              <Settings className="h-4 w-4 text-accent" />
+              
+              {/* Label */}
+              <span className="text-sm font-medium">General</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* No switch for general section */}
+              
+              {/* Expand Chevron */}
+              {expandedSection === 'general' ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          {/* Expanded Content */}
+          {expandedSection === 'general' && (
+            <div className="px-3 pb-3 pt-0 border-t border-border/50">
+              <div className="mt-3 space-y-4">
+                {/* Page Size */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Tamaño de Página</Label>
+                  <Select 
+                    value={pdfConfig.pageSize} 
+                    onValueChange={(value: 'A4' | 'Letter') => setPdfConfig(prev => ({ ...prev, pageSize: value }))}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                      <SelectItem value="Letter">Carta (216 × 279 mm)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Orientation */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Orientación</Label>
+                  <Select 
+                    value={pdfConfig.orientation} 
+                    onValueChange={(value: 'portrait' | 'landscape') => setPdfConfig(prev => ({ ...prev, orientation: value }))}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="portrait">Vertical</SelectItem>
+                      <SelectItem value="landscape">Apaisada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Margins */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Márgenes (mm)</Label>
+                  <Input
+                    type="number"
+                    value={pdfConfig.margin}
+                    onChange={(e) => setPdfConfig(prev => ({ ...prev, margin: parseInt(e.target.value) || 20 }))}
+                    min="0"
+                    max="50"
+                    className="h-8"
+                    placeholder="20"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <SectionItem
           id="coverPage"
           label="Portada"
