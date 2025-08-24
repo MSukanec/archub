@@ -340,6 +340,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     organizacion: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
     ],
 

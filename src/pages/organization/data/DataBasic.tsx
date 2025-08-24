@@ -15,11 +15,11 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-interface DashboardBasicDataProps {
+interface DataBasicProps {
   organization: any;
 }
 
-export function DashboardBasicData({ organization }: DashboardBasicDataProps) {
+export function DataBasic({ organization }: DataBasicProps) {
   const { data: userData } = useCurrentUser();
 
   const { toast } = useToast();

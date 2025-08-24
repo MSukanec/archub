@@ -55,6 +55,7 @@ import Dashboard from "@/pages/dashboard/Dashboard";
 import Members from "@/pages/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
+import OrganizationData from "@/pages/organization/data/OrganizationData";
 
 import Onboarding from "@/pages/Onboarding";
 import SelectMode from "@/pages/SelectMode";
@@ -106,6 +107,12 @@ function Router() {
         <Route path="/organization/preferences">
           <ProtectedRoute>
             <Preferences />
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/organization/data">
+          <ProtectedRoute>
+            <OrganizationData />
           </ProtectedRoute>
         </Route>
 
