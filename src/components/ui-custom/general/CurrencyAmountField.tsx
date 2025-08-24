@@ -12,7 +12,7 @@ interface Currency {
   symbol: string
 }
 
-interface AmountInputProps {
+interface CurrencyAmountFieldProps {
   value?: number
   currency?: string
   currencies: Currency[]
@@ -23,7 +23,7 @@ interface AmountInputProps {
   disabled?: boolean
 }
 
-export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
+export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAmountFieldProps>(
   ({ 
     value, 
     currency, 
@@ -195,4 +195,4 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
   }
 )
 
-AmountInput.displayName = 'AmountInput'
+CurrencyAmountField.displayName = 'CurrencyAmountField'

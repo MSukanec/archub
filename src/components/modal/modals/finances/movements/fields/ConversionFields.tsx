@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AmountInput } from '@/components/ui-custom/general/AmountInput'
+import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField'
 
 import UserSelector from '@/components/ui-custom/UserSelector'
 
@@ -74,7 +74,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             <FormItem>
               <FormLabel>Moneda y Monto Origen *</FormLabel>
               <FormControl>
-                <AmountInput
+                <CurrencyAmountField
                   value={form.watch('amount_from') || undefined}
                   currency={form.watch('currency_id_from') || ''}
                   currencies={currencies?.map(orgCurrency => ({
@@ -135,7 +135,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             <FormItem>
               <FormLabel>Moneda y Monto Destino *</FormLabel>
               <FormControl>
-                <AmountInput
+                <CurrencyAmountField
                   value={form.watch('amount_to') || undefined}
                   currency={form.watch('currency_id_to') || ''}
                   currencies={currencies?.map(orgCurrency => ({

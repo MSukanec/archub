@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
-import { AmountInput } from '@/components/ui-custom/general/AmountInput'
+import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField'
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 
@@ -120,7 +120,7 @@ export function DefaultMovementFields({
         <FormItem>
           <FormLabel>Moneda y Monto *</FormLabel>
           <FormControl>
-            <AmountInput
+            <CurrencyAmountField
               value={form.watch('amount') || undefined}
               currency={form.watch('currency_id') || ''}
               currencies={currencies?.map(orgCurrency => ({

@@ -15,7 +15,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
-import { AmountInput } from '@/components/ui-custom/general/AmountInput'
+import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField'
 
 interface Contact {
   id: string
@@ -389,7 +389,7 @@ export default function ClientObligationModal({ modalData, onClose }: ClientObli
           <FormItem>
             <FormLabel className="text-xs font-medium">Moneda y Monto</FormLabel>
             <FormControl>
-              <AmountInput
+              <CurrencyAmountField
                 value={form.watch('amount') || undefined}
                 currency={form.watch('currency_id') || ''}
                 currencies={currencies?.map(orgCurrency => ({
