@@ -37,7 +37,7 @@ export default function AdminTaskRow({
         <div className="w-full">
           {/* DIV SUPERIOR 1: Rubro (Unidad) */}
           <div className="text-xs text-[var(--text-secondary)] font-bold">
-            {task.category || 'Sin categoría'}{task.unit && ` (${task.unit})`}
+            {task.division || 'Sin categoría'}{task.unit && ` (${task.unit})`}
           </div>
           
           {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
