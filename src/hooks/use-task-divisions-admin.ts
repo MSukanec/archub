@@ -75,12 +75,18 @@ export function useTaskDivisionsAdmin() {
         throw divisionsError;
       }
 
-      // Convert to format compatible with HierarchicalCategoryTree (as flat list)
-      const divisionsWithChildren: TaskDivisionAdmin[] = divisions.map(division => ({
-        ...division,
-        children: [] // Empty children array for compatibility
-      }));
+      // Build hierarchical structure from flat data using parent_id
+      const buildHierarchy = (items: any[], parentId: string | null = null): TaskDivisionAdmin[] => {
+        return items
+          .filter(item => item.parent_id === parentId)
+          .map(item => ({
+            ...item,
+            children: buildHierarchy(items, item.id)
+          }))
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+      };
 
+      const divisionsWithChildren = buildHierarchy(divisions);
       return divisionsWithChildren;
     },
   });

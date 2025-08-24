@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-import { HierarchicalCategoryTree } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
+import { HierarchicalCategoryTree, CategoryTreeNode } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
 
 import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -22,6 +22,7 @@ const AdminTaskDivisions = () => {
   const { data: allDivisions = [] } = useAllTaskDivisions();
   const updateDivisionsOrderMutation = useUpdateTaskDivisionsOrder();
   const updateTaskDivisionMutation = useUpdateTaskDivision();
+  const deleteTaskDivisionMutation = useDeleteTaskDivision();
 
   // Debug query state (only log errors)
   if (isError) {
@@ -76,6 +77,8 @@ const AdminTaskDivisions = () => {
       onConfirm: async () => {
         try {
           await deleteTaskDivisionMutation.mutateAsync(divisionId);
+          // Force immediate UI refresh
+          await refetch();
         } catch (error) {
           console.error('Error deleting division:', error);
           throw error;
@@ -98,7 +101,7 @@ const AdminTaskDivisions = () => {
     openModal('task-division', { isEditing: true });
   };
 
-  const handleReorderDivisions = async (reorderedDivisions: TaskDivisionAdmin[]) => {
+  const handleReorderDivisions = async (reorderedDivisions: CategoryTreeNode[]) => {
     try {
       // Prepare the data for the API call
       const divisionsWithOrder = reorderedDivisions.map((division, index) => ({
