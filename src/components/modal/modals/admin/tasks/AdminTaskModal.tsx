@@ -461,39 +461,47 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         taskId = actualTask.id
       } else {
-        // Create new task directly in tasks table
-        const newTask = {
-          code: generateTaskCode(),
-          custom_name: customName,
-          category_id: categoryId || null,
-          unit_id: unitId || null,
-          task_template_id: taskTemplateId || null,
-          task_division_id: taskDivisionId || null,
-          organization_id: null, // Always NULL as specified
-          is_system: true, // Always TRUE as specified
-          is_completed: isCompleted,
+        // Create new task using the proper hook
+        const taskPayload = {
           param_values: {}, // Empty object since we're not using parameters
-          param_order: [], // Empty array since we're not using parameters
-          name_rendered: null // NULL since we're not using parametric generation
+          param_order: [], // Empty array since we're not using parameters  
+          unit_id: unitId || null,
+          category_id: categoryId || null,
+          organization_id: null, // Always NULL as specified
+          custom_name: customName
         }
         
-        console.log('🔧 Creating task with data:', newTask)
+        console.log('🔧 Creating task with data:', taskPayload)
         console.log('🔧 Current isCompleted value:', isCompleted)
         console.log('🔧 CategoryId value:', categoryId)
         console.log('🔧 UnitId value:', unitId)
         
-        const { data, error } = await supabase
-          .from('tasks')
-          .insert([newTask])
-          .select()
-          .single()
+        const result = await createTaskMutation.mutateAsync(taskPayload)
         
-        if (error) {
-          console.error('Error creating task:', error)
-          throw error
+        if (!result || !result[0]) {
+          throw new Error('No se pudo crear la tarea')
         }
         
-        taskId = data.id
+        const createdTask = result[0]
+        taskId = createdTask.id
+        
+        // Update the task with additional fields that aren't handled by the RPC function
+        const additionalFields: any = {}
+        if (taskTemplateId) additionalFields.task_template_id = taskTemplateId
+        if (taskDivisionId) additionalFields.task_division_id = taskDivisionId
+        additionalFields.is_completed = isCompleted
+        
+        if (Object.keys(additionalFields).length > 0) {
+          const { error: updateError } = await supabase
+            .from('tasks')
+            .update(additionalFields)
+            .eq('id', taskId)
+          
+          if (updateError) {
+            console.error('Error updating additional task fields:', updateError)
+            throw updateError
+          }
+        }
       }
 
       // Save materials if any
