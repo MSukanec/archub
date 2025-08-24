@@ -23,18 +23,25 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
 
   const viewPanel = (
-    <div className="space-y-4">
-      <div className="border rounded-lg overflow-hidden" style={{ height: '60vh' }}>
-        <PDFViewer width="100%" height="100%">
-          <PdfDocument blocks={blocks} />
-        </PDFViewer>
+    <div className="space-y-6 py-8">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center">
+          <FileText className="h-8 w-8 text-red-600" />
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium">PDF Listo para Descargar</h3>
+          <p className="text-sm text-muted-foreground">
+            Tu presupuesto de tareas de construcción está listo. Haz clic en el botón para descargarlo.
+          </p>
+        </div>
       </div>
       
       <div className="flex justify-center">
         <PDFDownloadLink
           document={<PdfDocument blocks={blocks} />}
           fileName={filename}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-[var(--accent-foreground)] rounded-lg hover:bg-[var(--accent)]/90 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] rounded-lg hover:bg-[var(--accent)]/90 transition-colors font-medium"
         >
           {({ blob, url, loading, error }) => (
             <>
@@ -58,17 +65,10 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   );
 
   const footerContent = (
-    <div className="p-4 border-t border-[var(--card-border)] mt-auto">
-      <div className="flex justify-end">
-        <Button
-          variant="secondary"
-          onClick={onClose}
-          className="px-4"
-        >
-          Cerrar
-        </Button>
-      </div>
-    </div>
+    <FormModalFooter
+      leftLabel="Cerrar"
+      onLeftClick={onClose}
+    />
   );
 
   return (
