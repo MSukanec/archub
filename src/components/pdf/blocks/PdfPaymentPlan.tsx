@@ -101,16 +101,16 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#374151',
-    padding: 12,
-    borderBottom: '1px solid #374151',
+    backgroundColor: '#6b7280',
+    padding: 6,
+    borderBottom: '1px solid #6b7280',
   },
   tableHeaderCell: {
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: 'bold',
     flex: 1,
     color: '#ffffff',
-    textAlign: 'center'
+    textAlign: 'left'
   },
   tableRow: {
     flexDirection: 'row',
@@ -393,8 +393,8 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                     </View>
                     
                     {/* Lado derecho - Código de unidad GRANDE */}
-                    <View style={{ flex: 0, alignItems: 'flex-end' }}>
-                      <Text style={{ fontSize: 32, fontWeight: '900', color: '#1f2937', letterSpacing: 1 }}>
+                    <View style={{ flex: 0, alignItems: 'flex-end', maxWidth: 120 }}>
+                      <Text style={{ fontSize: 24, fontWeight: '900', color: '#1f2937', letterSpacing: 1 }}>
                         {commitment.unit || `UF${commitmentIndex + 1}`}
                       </Text>
                     </View>
@@ -402,7 +402,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 </View>
 
                 {/* Tabla de Cuotas para esta Unidad */}
-                <View style={{ marginTop: 10 }}>
+                <View style={{ marginTop: 5 }}>
                   
                   <View style={styles.table}>
                     {/* Header */}
