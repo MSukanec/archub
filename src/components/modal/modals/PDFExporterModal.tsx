@@ -233,21 +233,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
             </div>
           </div>
 
-          {/* Download Button */}
-          <div className="flex justify-center">
-            <PDFDownloadLink
-              document={<PdfDocument blocks={blocks} />}
-              fileName={filename}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] text-[var(--accent-foreground)] rounded-lg hover:bg-[var(--accent)]/90 transition-colors font-medium"
-            >
-              {({ blob, url, loading, error }) => (
-                <>
-                  <Download className="h-4 w-4" />
-                  {loading ? 'Generando PDF...' : 'Descargar PDF'}
-                </>
-              )}
-            </PDFDownloadLink>
-          </div>
         </>
       )}
     </div>
@@ -264,10 +249,37 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   );
 
   const footerContent = (
-    <FormModalFooter
-      leftLabel="Cerrar"
-      onLeftClick={onClose}
-    />
+    <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
+      <div className="flex gap-2 w-full">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onClose}
+          className="w-1/4"
+        >
+          Cerrar
+        </Button>
+        <div className="flex-1">
+          <PDFDownloadLink
+            document={<PdfDocument blocks={blocks} />}
+            fileName={filename}
+            className="w-full"
+          >
+            {({ blob, url, loading, error }) => (
+              <Button
+                type="button"
+                variant="default"
+                disabled={loading}
+                className="w-full"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {loading ? 'Generando PDF...' : 'Descargar PDF'}
+              </Button>
+            )}
+          </PDFDownloadLink>
+        </div>
+      </div>
+    </div>
   );
 
   return (
