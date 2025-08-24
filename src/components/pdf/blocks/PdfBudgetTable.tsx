@@ -85,6 +85,8 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
     showRowDividers: config?.showRowDividers !== false,
     groupBy: config?.groupBy || 'none'
   };
+  
+  console.log('🔧 PdfBudgetTable config:', { config, tableConfig });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {

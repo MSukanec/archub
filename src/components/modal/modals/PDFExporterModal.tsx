@@ -114,11 +114,15 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     margin: debouncedMargin
   }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
   
-  const debouncedTableConfig = useMemo(() => ({
-    ...tableConfig,
-    titleSize: debouncedTitleSize,
-    bodySize: debouncedBodySize
-  }), [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
+  const debouncedTableConfig = useMemo(() => {
+    const config = {
+      ...tableConfig,
+      titleSize: debouncedTitleSize,
+      bodySize: debouncedBodySize
+    };
+    console.log('🔧 Debounced Config Update:', { tableConfig, debouncedTitleSize, debouncedBodySize, final: config });
+    return config;
+  }, [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
 
   // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
@@ -147,6 +151,11 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         return block;
       });
       
+      console.log('🔧 PDF Generation Debug:', {
+        debouncedTableConfig,
+        filteredBlocks: filteredBlocks.map(b => ({ type: b.type, config: b.config }))
+      });
+      
       const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} tableConfig={debouncedTableConfig} />;
       const asPdf = pdf(pdfDoc);
       return await asPdf.toBlob();
@@ -154,7 +163,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       console.error('Error generating PDF:', error);
       throw error;
     }
-  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig]);
+  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -524,7 +533,11 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     min="8"
                     max="20"
                     value={tableConfig.titleSize}
-                    onChange={(e) => setTableConfig(prev => ({ ...prev, titleSize: parseInt(e.target.value) || 12 }))}
+                    onChange={(e) => {
+                      const newValue = parseInt(e.target.value) || 12;
+                      console.log('🔧 Title Size Change:', newValue);
+                      setTableConfig(prev => ({ ...prev, titleSize: newValue }));
+                    }}
                     className="h-8 text-xs"
                   />
                 </div>
