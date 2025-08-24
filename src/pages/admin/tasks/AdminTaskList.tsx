@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import AdminTaskRow from '@/components/data-row/rows/AdminTaskRow'
+import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask } from '@/hooks/use-generated-tasks'
@@ -31,6 +33,7 @@ const AdminTaskList = () => {
 
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const isMobile = useMobile()
 
   // Real data from useGeneratedTasks hook - now using task_parametric_view
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
@@ -354,6 +357,32 @@ const AdminTaskList = () => {
 
   // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
   const columns = baseColumns;
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {/* Mobile view with AdminTaskRow */}
+        <div className="space-y-2">
+          {processedTasks.map((task) => (
+            <AdminTaskRow
+              key={task.id}
+              task={task}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+        
+        {processedTasks.length === 0 && !isLoading && (
+          <div className="text-center py-8 text-muted-foreground">
+            <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron tareas</p>
+            <p className="text-xs">No hay tareas que coincidan con los filtros aplicados.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
