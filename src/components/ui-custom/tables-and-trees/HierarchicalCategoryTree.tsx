@@ -111,15 +111,16 @@ export function HierarchicalCategoryTree({
       // Determine drop position based on cursor position
       const rect = over.rect;
       if (rect) {
-        const y = event.activatorEvent ? (event.activatorEvent as MouseEvent).clientY : 0;
+        // Use the actual mouse position during drag, not activator event
+        const y = event.delta.y + (event.activatorEvent as MouseEvent)?.clientY || 0;
         const top = rect.top;
+        const bottom = rect.bottom;
         const height = rect.height;
-        const middle = top + height / 2;
-        const threshold = height * 0.25;
+        const threshold = height * 0.3; // Increase threshold for better detection
 
-        if (y < top + threshold) {
+        if (y <= top + threshold) {
           setDropPosition('before');
-        } else if (y > middle + threshold) {
+        } else if (y >= bottom - threshold) {
           setDropPosition('after');
         } else {
           setDropPosition('child');
@@ -132,6 +133,7 @@ export function HierarchicalCategoryTree({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    const currentDropPosition = dropPosition; // Store current value before clearing
 
     setActiveId(null);
     setOverId(null);
@@ -140,29 +142,38 @@ export function HierarchicalCategoryTree({
     if (!over || active.id === over.id) return;
 
     // Handle parent-child relationship change
-    if (dropPosition === 'child' && onParentChange) {
+    if (currentDropPosition === 'child' && onParentChange) {
+      console.log('Making', active.id, 'child of', over.id);
       onParentChange(active.id as string, over.id as string);
       return;
     }
 
     // Handle reordering
-    if ((dropPosition === 'before' || dropPosition === 'after') && onReorder) {
+    if ((currentDropPosition === 'before' || currentDropPosition === 'after') && onReorder) {
       const oldIndex = categories.findIndex((item) => item.id === active.id);
       let newIndex = categories.findIndex((item) => item.id === over.id);
       
-      if (dropPosition === 'after') {
+      console.log('Reordering:', { oldIndex, newIndex, dropPosition: currentDropPosition });
+      
+      // Fix the reordering logic
+      if (currentDropPosition === 'after') {
         newIndex = newIndex + 1;
       }
+      // For 'before', newIndex stays as is
       
-      const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
-      
-      // Update order property for each item
-      const reorderedWithOrder = reorderedCategories.map((category, index) => ({
-        ...category,
-        order: index + 1
-      }));
-      
-      onReorder(reorderedWithOrder);
+      // Only reorder if positions are different
+      if (oldIndex !== newIndex) {
+        const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+        
+        // Update order property for each item
+        const reorderedWithOrder = reorderedCategories.map((category, index) => ({
+          ...category,
+          order: index + 1
+        }));
+        
+        console.log('New order:', reorderedWithOrder.map(c => ({ id: c.id, name: c.name, order: c.order })));
+        onReorder(reorderedWithOrder);
+      }
     }
   };
   
