@@ -71,6 +71,7 @@ interface TableProps<T = any> {
     showExport?: boolean;
     onExport?: () => void;
     isExporting?: boolean;
+    customActions?: ReactNode;
   };
   // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
   headerActions?: {
@@ -366,6 +367,7 @@ export function Table<T = any>({
           showExport={topBar?.showExport}
           onExport={topBar?.onExport}
           isExporting={topBar?.isExporting}
+          customActions={topBar?.customActions}
         />
         
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}

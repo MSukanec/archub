@@ -52,15 +52,23 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   const headerContent = (
     <FormModalHeader 
       title="Exportar PDF"
+      description="Genera y descarga un PDF con el presupuesto de tareas de construcción"
       icon={FileText}
     />
   );
 
   const footerContent = (
-    <FormModalFooter
-      leftLabel="Cerrar"
-      onLeftClick={onClose}
-    />
+    <div className="p-4 border-t border-[var(--card-border)] mt-auto">
+      <div className="flex justify-end">
+        <Button
+          variant="secondary"
+          onClick={onClose}
+          className="px-4"
+        >
+          Cerrar
+        </Button>
+      </div>
+    </div>
   );
 
   return (

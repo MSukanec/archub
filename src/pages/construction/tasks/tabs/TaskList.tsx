@@ -296,34 +296,22 @@ export function TaskList({
           else if (tab === 'Por Tareas') setGroupingType('tasks')
           else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
           else setGroupingType('phases-rubros')
-        }
-      }}
-      headerActions={{
-        rightActions: (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportToExcel}
-              disabled={isExporting || finalTasks.length === 0}
-              className="h-8 px-3 text-xs"
-            >
-              {isExporting ? 'Exportando...' : 'Descargar Excel'}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportToPDF}
-              disabled={finalTasks.length === 0}
-              className="h-8 px-3 text-xs"
-            >
-              <FileText className="h-3 w-3 mr-1" />
-              Exportar PDF
-            </Button>
-          </div>
+        },
+        showExport: true,
+        onExport: handleExportToExcel,
+        isExporting: isExporting,
+        customActions: (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExportToPDF}
+            disabled={finalTasks.length === 0}
+            title="Exportar PDF"
+          >
+            <FileText className="h-4 w-4" />
+          </Button>
         )
       }}
-      showDoubleHeader={true}
       renderCard={(task: any) => (
         <TaskRow
           key={task.id}

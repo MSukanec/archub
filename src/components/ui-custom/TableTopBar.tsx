@@ -27,6 +27,7 @@ interface TableTopBarProps {
   showExport?: boolean;
   onExport?: () => void;
   isExporting?: boolean;
+  customActions?: ReactNode;
 }
 
 export function TableTopBar({
@@ -47,6 +48,7 @@ export function TableTopBar({
   showExport = false,
   onExport,
   isExporting = false,
+  customActions,
 }: TableTopBarProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(searchValue);
@@ -210,6 +212,9 @@ export function TableTopBar({
               <Download className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Acciones personalizadas */}
+          {customActions}
         </div>
       </div>
     </div>
