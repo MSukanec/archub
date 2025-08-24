@@ -33,6 +33,16 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     numPages: 0,
     scale: 1.0,
   });
+
+  // PDF sections configuration
+  const [sections, setSections] = useState({
+    coverPage: true,
+    header: true,
+    tableHeader: true,
+    tableContent: true,
+    totals: true,
+    footer: true,
+  });
   
   const blocks = modalData?.blocks || [];
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -142,17 +152,62 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     }
   }, [renderPage, state.pdfDoc, state.loading]);
 
-  const viewPanel = (
-    <div className="space-y-4">
+  // Toggle section
+  const toggleSection = (section: keyof typeof sections) => {
+    setSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Sections configuration panel
+  const sectionsPanel = (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b">
+        <h3 className="font-medium text-sm">SECCIONES</h3>
+      </div>
+      
+      <div className="flex-1 p-4 space-y-3">
+        {[
+          { key: 'coverPage', label: 'Portada', icon: '📋' },
+          { key: 'header', label: 'Encabezado', icon: '📄' },
+          { key: 'tableHeader', label: 'Cabecera de Tabla', icon: '📊' },
+          { key: 'tableContent', label: 'Contenido de Tabla', icon: '📝' },
+          { key: 'totals', label: 'Totales', icon: '💰' },
+          { key: 'footer', label: 'Pie de Página', icon: '📃' },
+        ].map(({ key, label, icon }) => (
+          <div key={key} className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-3">
+              <span className="text-sm">{icon}</span>
+              <span className="text-sm">{label}</span>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sections[key as keyof typeof sections]}
+                onChange={() => toggleSection(key as keyof typeof sections)}
+                className="sr-only peer"
+              />
+              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // PDF preview panel
+  const previewPanel = (
+    <div className="h-full flex flex-col bg-gray-100 dark:bg-gray-900">
       {state.loading && (
-        <div className="flex flex-col items-center justify-center py-8">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
           <p className="text-sm text-muted-foreground">Generando PDF...</p>
         </div>
       )}
 
       {state.error && (
-        <div className="flex flex-col items-center justify-center py-8">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <FileText className="h-12 w-12 text-red-500 mb-4" />
           <p className="text-sm text-red-500 mb-4">{state.error}</p>
           <Button onClick={loadPdf} variant="outline" size="sm">
@@ -164,66 +219,68 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       {!state.loading && !state.error && (
         <>
           {/* PDF Toolbar */}
-          <div className="flex items-center justify-center gap-2 p-2 bg-muted rounded-lg">
-            {/* Page navigation */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevPage}
-              disabled={state.page <= 1}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            
-            <div className="flex items-center gap-1 px-2">
-              <span className="text-sm">{state.page}</span>
-              <span className="text-xs text-muted-foreground">/</span>
-              <span className="text-sm">{state.numPages}</span>
+          <div className="p-2 bg-background border-b">
+            <div className="flex items-center justify-center gap-2">
+              {/* Page navigation */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={prevPage}
+                disabled={state.page <= 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <div className="flex items-center gap-1 px-2">
+                <span className="text-sm">{state.page}</span>
+                <span className="text-xs text-muted-foreground">/</span>
+                <span className="text-sm">{state.numPages}</span>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={nextPage}
+                disabled={state.page >= state.numPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+
+              <div className="w-px h-4 bg-border mx-1" />
+
+              {/* Zoom controls */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={zoomOut}
+                disabled={state.scale <= 0.5}
+              >
+                <ZoomOut className="w-4 h-4" />
+              </Button>
+              
+              <Badge 
+                variant="outline" 
+                className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
+                onClick={zoom100}
+                title="Zoom 100%"
+              >
+                {Math.round(state.scale * 100)}%
+              </Badge>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={zoomIn}
+                disabled={state.scale >= 3.0}
+              >
+                <ZoomIn className="w-4 h-4" />
+              </Button>
             </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextPage}
-              disabled={state.page >= state.numPages}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-
-            <div className="w-px h-4 bg-border mx-1" />
-
-            {/* Zoom controls */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomOut}
-              disabled={state.scale <= 0.5}
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            
-            <Badge 
-              variant="outline" 
-              className="px-2 cursor-pointer hover:bg-accent text-xs min-w-12 justify-center"
-              onClick={zoom100}
-              title="Zoom 100%"
-            >
-              {Math.round(state.scale * 100)}%
-            </Badge>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomIn}
-              disabled={state.scale >= 3.0}
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
           </div>
 
           {/* PDF Canvas */}
-          <div className="border rounded-lg bg-gray-100 dark:bg-gray-900 p-4 max-h-96 overflow-auto">
-            <div className="flex justify-center">
+          <div className="flex-1 overflow-auto">
+            <div className="p-4 flex justify-center">
               <div className="bg-white shadow-lg rounded border">
                 <canvas 
                   ref={canvasRef}
@@ -232,13 +289,27 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               </div>
             </div>
           </div>
-
         </>
       )}
     </div>
   );
 
   const editPanel = null;
+
+  // Two column layout
+  const viewPanel = (
+    <div className="flex h-full">
+      {/* Left column - Sections configuration */}
+      <div className="w-1/3 border-r bg-background">
+        {sectionsPanel}
+      </div>
+      
+      {/* Right column - PDF preview */}
+      <div className="flex-1">
+        {previewPanel}
+      </div>
+    </div>
+  );
 
   const headerContent = (
     <FormModalHeader 
@@ -292,6 +363,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       onClose={onClose}
       isEditing={false}
       fullscreen={true}
+      className="[&>*]:p-0" // Remove default padding to use full space
     />
   );
 }
