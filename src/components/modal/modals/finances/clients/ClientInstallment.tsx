@@ -7,7 +7,7 @@ import { FormModalHeader } from '../../../form/FormModalHeader'
 import { FormModalFooter } from '../../../form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import DatePicker from '@/components/ui-custom/DatePicker'
+import DatePicker from '@/components/ui-custom/general/DatePickerField'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
@@ -155,7 +155,7 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
               <FormItem>
                 <FormLabel>Fecha de Vencimiento</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <DatePickerField
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Selecciona la fecha"

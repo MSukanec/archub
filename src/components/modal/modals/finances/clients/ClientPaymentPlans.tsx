@@ -8,7 +8,7 @@ import { FormModalFooter } from '../../../form/FormModalFooter'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import DatePicker from '@/components/ui-custom/DatePicker'
+import DatePicker from '@/components/ui-custom/general/DatePickerField'
 import { Callout } from '@/components/ui-custom/general/Callout'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -355,7 +355,7 @@ export default function ClientPaymentPlans({ modalData, onClose }: ClientPayment
                 <FormItem>
                   <FormLabel>Fecha de Primera Cuota</FormLabel>
                   <FormControl>
-                    <DatePicker
+                    <DatePickerField
                       value={field.value}
                       onChange={field.onChange}
                       placeholder="Selecciona la fecha"

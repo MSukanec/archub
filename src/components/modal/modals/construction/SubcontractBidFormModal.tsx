@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
-import DatePicker from '@/components/ui-custom/DatePicker';
+import DatePicker from '@/components/ui-custom/general/DatePickerField';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, FileText, CheckSquare, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
@@ -225,7 +225,7 @@ export function SubcontractBidFormModal({
               <FormItem>
                 <FormLabel>Fecha de Recepción</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <DatePickerField
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Seleccionar fecha..."

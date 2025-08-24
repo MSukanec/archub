@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import DatePicker from '@/components/ui-custom/DatePicker'
+import DatePicker from '@/components/ui-custom/general/DatePickerField'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
@@ -314,7 +314,7 @@ export function AttendanceFormModal({ modalData, onClose }: AttendanceFormModalP
               <FormItem>
                 <FormLabel>Fecha</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <DatePickerField
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Seleccionar fecha"

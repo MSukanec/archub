@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import DatePicker from '@/components/ui-custom/DatePicker';
+import DatePicker from '@/components/ui-custom/general/DatePickerField';
 
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
@@ -130,7 +130,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           <Label htmlFor="date" className="text-xs font-medium">
             Fecha *
           </Label>
-          <DatePicker
+          <DatePickerField
             value={form.watch('date') ? new Date(form.watch('date')) : undefined}
             onChange={(date) => {
               if (date) {

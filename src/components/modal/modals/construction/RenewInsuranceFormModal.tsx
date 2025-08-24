@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import DatePicker from '@/components/ui-custom/DatePicker'
+import DatePicker from '@/components/ui-custom/general/DatePickerField'
 
 import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { Insurance } from '@/services/insurances'
@@ -161,7 +161,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             <FormItem>
               <FormLabel>Nueva Fecha de Vencimiento *</FormLabel>
               <FormControl>
-                <DatePicker
+                <DatePickerField
                   date={field.value}
                   onDateChange={field.onChange}
                   placeholder="Seleccionar nueva fecha..."

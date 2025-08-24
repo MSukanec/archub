@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-interface DatePickerProps {
+interface DatePickerFieldProps {
   value?: Date
   onChange: (date: Date | undefined) => void
   placeholder?: string
@@ -19,7 +19,7 @@ interface DatePickerProps {
   maxDate?: Date
 }
 
-export default function DatePicker({
+export default function DatePickerField({
   value,
   onChange,
   placeholder = "Seleccionar fecha",
@@ -29,7 +29,7 @@ export default function DatePicker({
   disablePast = false,
   minDate,
   maxDate
-}: DatePickerProps) {
+}: DatePickerFieldProps) {
   const [open, setOpen] = useState(false)
 
   const handleDateSelect = (date: Date | undefined) => {

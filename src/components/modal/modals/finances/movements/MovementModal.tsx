@@ -14,7 +14,7 @@ import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 
-import DatePicker from '@/components/ui-custom/DatePicker'
+import DatePicker from '@/components/ui-custom/general/DatePickerField'
 import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -1375,7 +1375,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePicker
+                <DatePickerField
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Seleccionar fecha..."
@@ -1465,7 +1465,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <FormItem>
                 <FormLabel>Fecha *</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <DatePickerField
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Seleccionar fecha..."
@@ -1600,7 +1600,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePicker
+                <DatePickerField
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Seleccionar fecha..."
