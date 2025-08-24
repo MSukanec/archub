@@ -7,6 +7,8 @@ export interface TaskDivisionAdmin {
   name: string;
   name_en?: string;
   description?: string;
+  code?: string;
+  parent_id?: string | null;
   organization_id: string | null;
   is_system: boolean;
   order?: number;
@@ -19,6 +21,8 @@ export interface CreateTaskDivisionData {
   name: string;
   name_en?: string;
   description?: string;
+  code?: string;
+  parent_id?: string | null;
   organization_id?: string | null;
   is_system?: boolean;
   order?: number;

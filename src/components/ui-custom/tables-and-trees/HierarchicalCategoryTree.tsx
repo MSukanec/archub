@@ -55,6 +55,9 @@ interface HierarchicalCategoryTreeProps {
   // New drag and drop props
   enableDragAndDrop?: boolean;
   onReorder?: (reorderedItems: CategoryTreeNode[]) => void;
+  
+  // Show order number prop
+  showOrderNumber?: boolean;
 
   level?: number;
 }
@@ -74,6 +77,9 @@ export function HierarchicalCategoryTree({
   // Drag and drop props
   enableDragAndDrop = false,
   onReorder,
+  
+  // Show order number prop
+  showOrderNumber = false,
 
   level = 0
 }: HierarchicalCategoryTreeProps) {
@@ -208,6 +214,12 @@ export function HierarchicalCategoryTree({
             
             {/* Category name and badges */}
             <div className="flex items-center space-x-2 flex-1">
+              {/* Order number badge */}
+              {showOrderNumber && category.order && (
+                <Badge variant="outline" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
+                  {category.order}
+                </Badge>
+              )}
               <span className="text-sm font-medium text-foreground">{category.name}</span>
               {category.code && (
                 <div className="flex items-center space-x-1">
@@ -289,7 +301,9 @@ export function HierarchicalCategoryTree({
               onEditTaskGroup={onEditTaskGroup}
               onDeleteTaskGroup={onDeleteTaskGroup}
               onCreateChild={onCreateChild}
-
+              enableDragAndDrop={enableDragAndDrop}
+              onReorder={onReorder}
+              showOrderNumber={showOrderNumber}
               level={currentLevel + 1}
             />
           </div>

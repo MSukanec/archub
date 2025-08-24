@@ -11,11 +11,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { useCreateTaskDivision, useUpdateTaskDivision, TaskDivisionAdmin } from "@/hooks/use-task-divisions-admin";
+import { useCreateTaskDivision, useUpdateTaskDivision, TaskDivisionAdmin, useAllTaskDivisions } from "@/hooks/use-task-divisions-admin";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const taskDivisionSchema = z.object({
+  parent_id: z.string().optional(),
+  code: z.string().optional(),
   name: z.string().min(1, 'El nombre es requerido'),
-  name_en: z.string().optional(),
   description: z.string().optional(),
 });
 
@@ -36,12 +38,14 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
   
   const createMutation = useCreateTaskDivision();
   const updateMutation = useUpdateTaskDivision();
+  const { data: allDivisions = [] } = useAllTaskDivisions(); // For parent selection
 
   const form = useForm<TaskDivisionFormData>({
     resolver: zodResolver(taskDivisionSchema),
     defaultValues: {
+      parent_id: editingDivision?.parent_id || '',
+      code: editingDivision?.code || '',
       name: editingDivision?.name || '',
-      name_en: editingDivision?.name_en || '',
       description: editingDivision?.description || '',
     },
   });
@@ -50,14 +54,16 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
   useEffect(() => {
     if (editingDivision) {
       form.reset({
+        parent_id: editingDivision.parent_id || '',
+        code: editingDivision.code || '',
         name: editingDivision.name,
-        name_en: editingDivision.name_en || '',
         description: editingDivision.description || '',
       });
     } else {
       form.reset({
+        parent_id: '',
+        code: '',
         name: '',
-        name_en: '',
         description: '',
       });
     }
@@ -68,8 +74,9 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
     
     try {
       const submitData = {
+        parent_id: data.parent_id || null,
+        code: data.code || null,
         name: data.name,
-        name_en: data.name_en || undefined,
         description: data.description || undefined,
         is_system: true, // Always system divisions
         organization_id: null, // Always null for system divisions
@@ -99,6 +106,53 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           
+          {/* Parent field */}
+          <FormField
+            control={form.control}
+            name="parent_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Padre (opcional)</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar división padre" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="">Sin padre</SelectItem>
+                    {allDivisions
+                      .filter(division => division.id !== editingDivision?.id) // Evitar bucles
+                      .map((division) => (
+                        <SelectItem key={division.id} value={division.id}>
+                          {division.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Code field */}
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Código (opcional)</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Ingresa el código de la división" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Name field */}
           <FormField
             control={form.control}
@@ -109,24 +163,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
                 <FormControl>
                   <Input 
                     placeholder="Ingresa el nombre de la división" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* English Name field */}
-          <FormField
-            control={form.control}
-            name="name_en"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre en inglés (opcional)</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ingresa el nombre en inglés" 
                     {...field} 
                   />
                 </FormControl>

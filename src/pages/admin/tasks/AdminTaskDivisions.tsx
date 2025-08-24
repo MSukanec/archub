@@ -187,6 +187,8 @@ const AdminTaskDivisions = () => {
               // Enable drag and drop for divisions
               enableDragAndDrop={true}
               onReorder={handleReorderDivisions}
+              // Show order numbers for divisions
+              showOrderNumber={true}
             />
           )}
         </CardContent>
