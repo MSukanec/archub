@@ -4,7 +4,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMobile } from '@/hooks/use-mobile'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Edit, Trash2, Calendar, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -84,7 +83,6 @@ export default function IndexedInstallmentPlan({
   const { toast } = useToast()
   const isMobile = useMobile()
   const [mobileColumnIndex, setMobileColumnIndex] = useState(0)
-  const [maxInstallmentFilter, setMaxInstallmentFilter] = useState<number | null>(null) // null = todas las cuotas
 
   // Delete payment plan mutation
   const deletePaymentPlanMutation = useMutation({
@@ -370,61 +368,34 @@ export default function IndexedInstallmentPlan({
           </div>
           {paymentPlan && (
             <div className="flex-shrink-0 flex gap-2">
-              {/* Filtro de cuotas para PDF */}
-              <div className="flex items-center gap-2">
-                <Select
-                  value={maxInstallmentFilter?.toString() || "all"}
-                  onValueChange={(value) => setMaxInstallmentFilter(value === "all" ? null : parseInt(value))}
-                >
-                  <SelectTrigger className="w-36">
-                    <SelectValue placeholder="Filtrar cuotas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas las Cuotas</SelectItem>
-                    {installments?.map((installment) => (
-                      <SelectItem key={installment.id} value={installment.number.toString()}>
-                        Cuota {installment.number.toString().padStart(2, '0')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  // Filtrar installments según la selección
-                  const filteredInstallments = maxInstallmentFilter 
-                    ? installments?.filter(inst => inst.number <= maxInstallmentFilter) || []
-                    : installments || []
-                  
-                  openModal('pdf-exporter', {
-                    blocks: [
-                      {
-                        type: 'header',
-                        enabled: true,
-                        data: { title: 'Plan de Pagos' },
-                        config: {}
+                onClick={() => openModal('pdf-exporter', {
+                  blocks: [
+                    {
+                      type: 'header',
+                      enabled: true,
+                      data: { title: 'Plan de Pagos' },
+                      config: {}
+                    },
+                    {
+                      type: 'paymentPlan',
+                      enabled: true,
+                      data: { 
+                        paymentPlan,
+                        installments,
+                        commitments,
+                        payments,
+                        clientsInfo,
+                        projectId,
+                        organizationId
                       },
-                      {
-                        type: 'paymentPlan',
-                        enabled: true,
-                        data: { 
-                          paymentPlan,
-                          installments: filteredInstallments,
-                          commitments,
-                          payments,
-                          clientsInfo,
-                          projectId,
-                          organizationId
-                        },
-                        config: {}
-                      }
-                    ],
-                    filename: `plan-de-pagos-${paymentPlan.payment_plans?.name || 'plan'}-${maxInstallmentFilter ? `cuota-${maxInstallmentFilter}` : 'completo'}-${new Date().toISOString().split('T')[0]}.pdf`
-                  })
-                }}
+                      config: {}
+                    }
+                  ],
+                  filename: `plan-de-pagos-${paymentPlan.payment_plans?.name || 'plan'}-${new Date().toISOString().split('T')[0]}.pdf`
+                })}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <FileText className="w-3 h-3" />

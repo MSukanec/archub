@@ -257,8 +257,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Plan de Pagos</Text>
-      
       {/* Información del Plan */}
       {showPlanInfo && (
         <View style={styles.section}>

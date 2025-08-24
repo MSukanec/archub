@@ -60,7 +60,19 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
 
   // Get blocks and filename from modal data
   const blocks = modalData?.blocks || [];
-  const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
+  const baseFilename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
+  
+  // Generate dynamic filename based on payment plan config
+  const generateDynamicFilename = () => {
+    if (paymentPlanConfig.maxInstallmentFilter) {
+      // Replace .pdf with filter info and .pdf
+      const nameWithoutExtension = baseFilename.replace(/\.pdf$/, '');
+      return `${nameWithoutExtension}-hasta-cuota-${paymentPlanConfig.maxInstallmentFilter}.pdf`;
+    }
+    return baseFilename;
+  };
+  
+  const filename = generateDynamicFilename();
 
   // Footer configuration - Initialize with text from blocks if available
   const [footerConfig, setFooterConfig] = useState(() => {
@@ -104,6 +116,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     showSchedule: true, // Cronograma de cuotas
     showDetailTable: true, // Tabla detallada por unidad
     showPlanInfo: true, // Información del plan
+    maxInstallmentFilter: null as number | null, // Filtro de cuotas: null = todas
   });
 
   // Expanded section for accordion (only one at a time)
@@ -217,10 +230,22 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           };
         }
         
-        // Override payment plan data with paymentPlanConfig
+        // Override payment plan data with paymentPlanConfig and filter installments
         if (block.type === 'paymentPlan') {
+          // Filter installments based on maxInstallmentFilter
+          let filteredInstallments = block.data?.installments || [];
+          if (paymentPlanConfig.maxInstallmentFilter) {
+            filteredInstallments = filteredInstallments.filter((inst: any) => 
+              inst.number <= paymentPlanConfig.maxInstallmentFilter!
+            );
+          }
+          
           return {
             ...block,
+            data: {
+              ...block.data,
+              installments: filteredInstallments
+            },
             config: paymentPlanConfig
           }
         }
@@ -236,7 +261,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       console.error('Error generating PDF:', error);
       throw error;
     }
-  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig]);
+  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig, paymentPlanConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -954,6 +979,37 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                   />
                 </div>
 
+                {/* Filtro de Cuotas */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Filtro de Cuotas</Label>
+                  <Select
+                    value={paymentPlanConfig.maxInstallmentFilter?.toString() || "all"}
+                    onValueChange={(value) => 
+                      setPaymentPlanConfig(prev => ({
+                        ...prev, 
+                        maxInstallmentFilter: value === "all" ? null : parseInt(value)
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Seleccionar cuotas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas las Cuotas</SelectItem>
+                      {(() => {
+                        // Get installments from blocks data
+                        const paymentBlock = blocks.find(block => block.type === 'paymentPlan');
+                        const installments = paymentBlock?.data?.installments || [];
+                        return installments.map((installment: any) => (
+                          <SelectItem key={installment.id} value={installment.number.toString()}>
+                            Hasta Cuota {installment.number.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded">
                   La tabla detallada incluye: Actualización, Valor de Cuota, Pagos y Saldos por unidad funcional
                 </div>
@@ -1176,7 +1232,50 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         </Button>
         <div className="flex-1">
           <PDFDownloadLink
-            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} tableConfig={tableConfig} headerConfig={headerConfig} />}
+            document={<PdfDocument blocks={blocks.filter(block => {
+              if (block.type === 'coverPage') return sections.coverPage;
+              if (block.type === 'header') return sections.header;
+              if (block.type === 'budgetTable') return sections.constructionTasks;
+              if (block.type === 'tableHeader') return sections.constructionTasks;
+              if (block.type === 'tableContent') return sections.constructionTasks;
+              if (block.type === 'totals') return sections.constructionTasks;
+              if (block.type === 'paymentPlan') return sections.paymentPlan;
+              if (block.type === 'footer') return sections.footer;
+              return true;
+            }).map(block => {
+              // Override footer data
+              if (block.type === 'footer') {
+                return {
+                  ...block,
+                  data: {
+                    text: debouncedFooterConfig.text,
+                    showDivider: debouncedFooterConfig.showDivider
+                  }
+                };
+              }
+              
+              // Override payment plan data with paymentPlanConfig and filter installments
+              if (block.type === 'paymentPlan') {
+                // Filter installments based on maxInstallmentFilter
+                let filteredInstallments = block.data?.installments || [];
+                if (paymentPlanConfig.maxInstallmentFilter) {
+                  filteredInstallments = filteredInstallments.filter((inst: any) => 
+                    inst.number <= paymentPlanConfig.maxInstallmentFilter!
+                  );
+                }
+                
+                return {
+                  ...block,
+                  data: {
+                    ...block.data,
+                    installments: filteredInstallments
+                  },
+                  config: paymentPlanConfig
+                }
+              }
+              
+              return block;
+            })} config={pdfConfig} footerConfig={debouncedFooterConfig} tableConfig={debouncedTableConfig} headerConfig={debouncedHeaderConfig} />}
             fileName={filename}
             className="w-full"
           >
