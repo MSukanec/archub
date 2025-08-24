@@ -29,14 +29,33 @@ interface TableConfig {
   groupBy: 'fase' | 'rubro' | 'fases-y-rubros';
 }
 
+interface HeaderConfig {
+  title?: string;
+  subtitle?: string;
+  organizationName?: string;
+  projectName?: string;
+  projectAddress?: string;
+  budgetDate?: string;
+  budgetNumber?: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  showLogo?: boolean;
+  logoUrl?: string;
+  logoSize?: number;
+  showDivider?: boolean;
+  layout?: 'row' | 'column';
+}
+
 interface PdfDocumentProps {
   blocks: PdfBlock[];
   config?: PdfConfig;
   footerConfig?: FooterConfig;
   tableConfig?: TableConfig;
+  headerConfig?: HeaderConfig;
 }
 
-export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig, tableConfig }) => {
+export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig, tableConfig, headerConfig }) => {
   const pageConfig = config || { pageSize: 'A4', orientation: 'portrait', margin: 20 };
   
   // Apply margin as padding
@@ -64,6 +83,11 @@ export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footer
           
           if (block.type === 'footer' && footerConfig) {
             blockData = { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider };
+          }
+          
+          if (block.type === 'header' && headerConfig) {
+            blockData = { ...block.data, ...headerConfig };
+            blockConfig = { ...block.config, ...headerConfig };
           }
           
           if ((block.type === 'budgetTable' || block.type === 'tableHeader' || block.type === 'tableContent' || block.type === 'totals') && tableConfig) {

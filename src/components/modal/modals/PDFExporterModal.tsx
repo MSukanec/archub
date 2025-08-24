@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { PdfBlock } from '@/components/pdf/types';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -30,6 +31,7 @@ interface PDFExporterModalProps {
 
 export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { data: userData } = useCurrentUser();
   const [state, setState] = useState({
     loading: true,
     error: null as string | null,
@@ -77,6 +79,25 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     groupBy: 'fases-y-rubros' as 'fase' | 'rubro' | 'fases-y-rubros', // grouping option
   });
 
+  // Header configuration with pre-populated data
+  const [headerConfig, setHeaderConfig] = useState({
+    title: 'Presupuesto de Tareas de Construcción',
+    subtitle: '',
+    organizationName: userData?.organization?.name || '',
+    projectName: '',
+    projectAddress: '',
+    budgetDate: new Date().toLocaleDateString('es-AR'),
+    budgetNumber: '',
+    contactPerson: userData?.user?.full_name || '',
+    phone: '',
+    email: userData?.user?.email || '',
+    showLogo: true,
+    logoUrl: userData?.organization?.logo_url || '',
+    logoSize: 60,
+    showDivider: true,
+    layout: 'row' as 'row' | 'column',
+  });
+
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
 
@@ -103,6 +124,18 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   const debouncedTitleSize = useDebounce(tableConfig.titleSize, 400);
   const debouncedBodySize = useDebounce(tableConfig.bodySize, 400);
   
+  // Debounce header text fields
+  const debouncedHeaderTitle = useDebounce(headerConfig.title, 500);
+  const debouncedHeaderSubtitle = useDebounce(headerConfig.subtitle, 500);
+  const debouncedHeaderOrgName = useDebounce(headerConfig.organizationName, 500);
+  const debouncedHeaderProjectName = useDebounce(headerConfig.projectName, 500);
+  const debouncedHeaderProjectAddress = useDebounce(headerConfig.projectAddress, 500);
+  const debouncedHeaderBudgetNumber = useDebounce(headerConfig.budgetNumber, 500);
+  const debouncedHeaderContactPerson = useDebounce(headerConfig.contactPerson, 500);
+  const debouncedHeaderPhone = useDebounce(headerConfig.phone, 500);
+  const debouncedHeaderEmail = useDebounce(headerConfig.email, 500);
+  const debouncedHeaderLogoSize = useDebounce(headerConfig.logoSize, 400);
+  
   // Create debounced configs
   const debouncedFooterConfig = useMemo(() => ({
     ...footerConfig,
@@ -114,15 +147,41 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     margin: debouncedMargin
   }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
   
-  const debouncedTableConfig = useMemo(() => {
-    const config = {
-      ...tableConfig,
-      titleSize: debouncedTitleSize,
-      bodySize: debouncedBodySize
-    };
-    console.log('🔧 Debounced Config Update:', { tableConfig, debouncedTitleSize, debouncedBodySize, final: config });
-    return config;
-  }, [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
+  const debouncedTableConfig = useMemo(() => ({
+    ...tableConfig,
+    titleSize: debouncedTitleSize,
+    bodySize: debouncedBodySize
+  }), [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
+
+  const debouncedHeaderConfig = useMemo(() => ({
+    ...headerConfig,
+    title: debouncedHeaderTitle,
+    subtitle: debouncedHeaderSubtitle,
+    organizationName: debouncedHeaderOrgName,
+    projectName: debouncedHeaderProjectName,
+    projectAddress: debouncedHeaderProjectAddress,
+    budgetNumber: debouncedHeaderBudgetNumber,
+    contactPerson: debouncedHeaderContactPerson,
+    phone: debouncedHeaderPhone,
+    email: debouncedHeaderEmail,
+    logoSize: debouncedHeaderLogoSize,
+  }), [
+    headerConfig.showLogo,
+    headerConfig.logoUrl,
+    headerConfig.showDivider,
+    headerConfig.layout,
+    headerConfig.budgetDate,
+    debouncedHeaderTitle,
+    debouncedHeaderSubtitle,
+    debouncedHeaderOrgName,
+    debouncedHeaderProjectName,
+    debouncedHeaderProjectAddress,
+    debouncedHeaderBudgetNumber,
+    debouncedHeaderContactPerson,
+    debouncedHeaderPhone,
+    debouncedHeaderEmail,
+    debouncedHeaderLogoSize,
+  ]);
 
   // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
@@ -151,19 +210,15 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         return block;
       });
       
-      console.log('🔧 PDF Generation Debug:', {
-        debouncedTableConfig,
-        filteredBlocks: filteredBlocks.map(b => ({ type: b.type, config: b.config }))
-      });
       
-      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} tableConfig={debouncedTableConfig} />;
+      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} tableConfig={debouncedTableConfig} headerConfig={debouncedHeaderConfig} />;
       const asPdf = pdf(pdfDoc);
       return await asPdf.toBlob();
     } catch (error) {
       console.error('Error generating PDF:', error);
       throw error;
     }
-  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig]);
+  }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -464,16 +519,214 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           description="Página inicial del documento con información general del presupuesto"
         />
         
-        <SectionItem
-          id="header"
-          label="Encabezado"
-          icon={Heading}
-          checked={sections.header}
-          onToggle={() => toggleSection('header')}
-          onExpand={() => toggleExpanded('header')}
-          isExpanded={expandedSection === 'header'}
-          description="Información del proyecto y empresa en la parte superior"
-        />
+        {/* Header Section - Custom with header controls */}
+        <div 
+          className="border border-border rounded-lg overflow-hidden bg-card"
+          data-section-id="header"
+        >
+          {/* Section Header */}
+          <div 
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => toggleExpanded('header')}
+          >
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={sections.header}
+                  onCheckedChange={() => toggleSection('header')}
+                  onClick={(e) => e.stopPropagation()}
+                  className="scale-75"
+                />
+                <Heading className="h-4 w-4 text-muted-foreground" />
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Encabezado</span>
+                <span className="text-xs text-muted-foreground">
+                  Información del proyecto y empresa en la parte superior
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                Configurable
+              </Badge>
+              
+              {/* Expand Chevron */}
+              {expandedSection === 'header' ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          {/* Expanded Content with Header Controls */}
+          {expandedSection === 'header' && (
+            <div className="px-3 pb-3 pt-0 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mt-2 mb-4">
+                Configura la información del encabezado, logo y datos del proyecto
+              </p>
+              
+              {/* Layout and Logo Settings */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <Label className="text-xs">Disposición</Label>
+                  <Select 
+                    value={headerConfig.layout} 
+                    onValueChange={(value: 'row' | 'column') => setHeaderConfig(prev => ({ ...prev, layout: value }))}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="row">Horizontal</SelectItem>
+                      <SelectItem value="column">Vertical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-xs">Tamaño Logo</Label>
+                  <Input
+                    type="number"
+                    value={headerConfig.logoSize}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, logoSize: parseInt(e.target.value) || 60 }))}
+                    min={20}
+                    max={120}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+              
+              {/* Logo and Divider Toggles */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={headerConfig.showLogo}
+                    onCheckedChange={(checked) => setHeaderConfig(prev => ({ ...prev, showLogo: checked }))}
+                    className="scale-75"
+                  />
+                  <Label className="text-xs">Mostrar Logo</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={headerConfig.showDivider}
+                    onCheckedChange={(checked) => setHeaderConfig(prev => ({ ...prev, showDivider: checked }))}
+                    className="scale-75"
+                  />
+                  <Label className="text-xs">Línea Separadora</Label>
+                </div>
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="space-y-3 mb-4">
+                <div>
+                  <Label className="text-xs font-medium">Título Principal</Label>
+                  <Input
+                    value={headerConfig.title}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, title: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Título del documento..."
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium">Subtítulo</Label>
+                  <Input
+                    value={headerConfig.subtitle}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, subtitle: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Subtítulo opcional..."
+                  />
+                </div>
+              </div>
+              
+              {/* Organization and Project Info */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <Label className="text-xs font-medium">Empresa</Label>
+                  <Input
+                    value={headerConfig.organizationName}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, organizationName: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Nombre de la empresa..."
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium">Proyecto</Label>
+                  <Input
+                    value={headerConfig.projectName}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, projectName: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Nombre del proyecto..."
+                  />
+                </div>
+              </div>
+              
+              {/* Address and Budget Info */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <Label className="text-xs font-medium">Dirección</Label>
+                  <Input
+                    value={headerConfig.projectAddress}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, projectAddress: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Dirección del proyecto..."
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-xs font-medium">Nº Presupuesto</Label>
+                  <Input
+                    value={headerConfig.budgetNumber}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, budgetNumber: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Número de presupuesto..."
+                  />
+                </div>
+              </div>
+              
+              {/* Contact Information */}
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs font-medium">Persona de Contacto</Label>
+                  <Input
+                    value={headerConfig.contactPerson}
+                    onChange={(e) => setHeaderConfig(prev => ({ ...prev, contactPerson: e.target.value }))}
+                    className="h-8 mt-1"
+                    placeholder="Nombre del contacto..."
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-medium">Teléfono</Label>
+                    <Input
+                      value={headerConfig.phone}
+                      onChange={(e) => setHeaderConfig(prev => ({ ...prev, phone: e.target.value }))}
+                      className="h-8 mt-1"
+                      placeholder="Teléfono..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs font-medium">Email</Label>
+                    <Input
+                      value={headerConfig.email}
+                      onChange={(e) => setHeaderConfig(prev => ({ ...prev, email: e.target.value }))}
+                      className="h-8 mt-1"
+                      placeholder="Email..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Construction Tasks Section - Custom with table controls */}
         <div 
@@ -533,11 +786,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     min="8"
                     max="20"
                     value={tableConfig.titleSize}
-                    onChange={(e) => {
-                      const newValue = parseInt(e.target.value) || 12;
-                      console.log('🔧 Title Size Change:', newValue);
-                      setTableConfig(prev => ({ ...prev, titleSize: newValue }));
-                    }}
+                    onChange={(e) => setTableConfig(prev => ({ ...prev, titleSize: parseInt(e.target.value) || 12 }))}
                     className="h-8 text-xs"
                   />
                 </div>
@@ -824,7 +1073,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         </Button>
         <div className="flex-1">
           <PDFDownloadLink
-            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} tableConfig={tableConfig} />}
+            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} tableConfig={tableConfig} headerConfig={headerConfig} />}
             fileName={filename}
             className="w-full"
           >
