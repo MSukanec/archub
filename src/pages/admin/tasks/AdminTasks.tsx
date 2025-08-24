@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';
+import AdminTaskDivisions from './AdminTaskDivisions';
 import AdminTaskParameters from './AdminTaskParameters';
 import AdminTaskTemplates from './AdminTaskTemplates';
 import AdminTaskFlow from './AdminTaskFlow';
@@ -18,6 +19,7 @@ const AdminTasks = () => {
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
     { id: 'flujo', label: 'Flujo', isActive: activeTab === 'flujo' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
+    { id: 'divisiones', label: 'Divisiones', isActive: activeTab === 'divisiones' },
     { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' },
     { id: 'acciones', label: 'Acciones', isActive: activeTab === 'acciones' }
   ];
@@ -35,6 +37,12 @@ const AdminTasks = () => {
           label: "Nueva Categoría",
           icon: Plus,
           onClick: () => openModal('task-category', { isEditing: true })
+        };
+      case 'divisiones':
+        return {
+          label: "Nueva División",
+          icon: Plus,
+          onClick: () => openModal('task-division', { isEditing: true })
         };
       case 'parametros':
         return {
@@ -71,6 +79,8 @@ const AdminTasks = () => {
         return <AdminTaskList />;
       case 'categorias':
         return <AdminTaskCategories />;
+      case 'divisiones':
+        return <AdminTaskDivisions />;
       case 'parametros':
         return <AdminTaskParameters />;
       case 'flujo':

@@ -497,5 +497,9 @@ TABLA TASK_DIVISIONS:
   {
     "column_name": "is_system",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "order",
+    "data_type": "integer"
   }
 ]

@@ -1,0 +1,198 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
+
+export interface TaskDivisionAdmin {
+  id: string;
+  name: string;
+  name_en?: string;
+  description?: string;
+  organization_id: string | null;
+  is_system: boolean;
+  order?: number;
+  created_at: string;
+  updated_at?: string;
+  children?: TaskDivisionAdmin[]; // Keep for compatibility with HierarchicalCategoryTree
+}
+
+export interface CreateTaskDivisionData {
+  name: string;
+  name_en?: string;
+  description?: string;
+  organization_id?: string | null;
+  is_system?: boolean;
+  order?: number;
+}
+
+export interface UpdateTaskDivisionData extends CreateTaskDivisionData {
+  id: string;
+}
+
+export function useAllTaskDivisions() {
+  return useQuery({
+    queryKey: ['all-task-divisions'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+
+      const { data: divisions, error } = await supabase
+        .from('task_divisions')
+        .select('*')
+        .order('order', { ascending: true, nullsFirst: false })
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching all divisions:', error);
+        throw error;
+      }
+
+      return divisions || [];
+    },
+  });
+}
+
+export function useTaskDivisionsAdmin() {
+  return useQuery({
+    queryKey: ['task-divisions-admin'],
+    retry: false,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
+      // Fetch divisions - simplified since they're not hierarchical
+      const { data: divisions, error: divisionsError } = await supabase
+        .from('task_divisions')
+        .select('*')
+        .order('order', { ascending: true, nullsFirst: false })
+        .order('name');
+
+      if (divisionsError) {
+        throw divisionsError;
+      }
+
+      // Convert to format compatible with HierarchicalCategoryTree (as flat list)
+      const divisionsWithChildren: TaskDivisionAdmin[] = divisions.map(division => ({
+        ...division,
+        children: [] // Empty children array for compatibility
+      }));
+
+      return divisionsWithChildren;
+    },
+  });
+}
+
+export function useCreateTaskDivision() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (divisionData: CreateTaskDivisionData) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
+      const { data, error } = await supabase
+        .from('task_divisions')
+        .insert([divisionData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating division:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-divisions-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-divisions'] });
+      toast({
+        title: "División creada",
+        description: "La división se ha creado exitosamente.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Create division error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la división. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateTaskDivision() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updateData }: UpdateTaskDivisionData) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
+      const { data, error } = await supabase
+        .from('task_divisions')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating division:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-divisions-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-divisions'] });
+      toast({
+        title: "División actualizada",
+        description: "La división se ha actualizado exitosamente.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Update division error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la división. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteTaskDivision() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!supabase) throw new Error('Supabase client not initialized');
+      
+      const { error } = await supabase
+        .from('task_divisions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting division:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-divisions-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-divisions'] });
+      toast({
+        title: "División eliminada",
+        description: "La división se ha eliminado exitosamente.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Delete division error:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la división. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+}
