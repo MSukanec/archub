@@ -345,7 +345,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             
             {/* Generar páginas separadas - una por unidad funcional */}
             {commitments.map((commitment, commitmentIndex) => (
-              <View key={commitment.id} style={{ pageBreakBefore: commitmentIndex > 0 ? 'always' : 'auto' }}>
+              <View key={commitment.id} break={commitmentIndex > 0}>
                 
                 {/* Información de la Unidad Funcional */}
                 <View style={styles.section}>
@@ -415,10 +415,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                           
                           {/* Detalles financieros */}
                           <View style={[styles.tableCell, { flex: 1.2 }]}>
-                            {/* Actualización - Violeta */}
+                            {/* Actualización - Negro */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
-                              <Text style={{ fontSize: 7, color: '#7c3aed' }}>Actualización:</Text>
-                              <Text style={{ fontSize: 7, color: '#7c3aed', fontWeight: 'bold' }}>
+                              <Text style={{ fontSize: 7, color: '#1f2937' }}>Actualización:</Text>
+                              <Text style={{ fontSize: 7, color: '#1f2937', fontWeight: 'bold' }}>
                                 {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
                               </Text>
                             </View>
@@ -439,10 +439,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                               </Text>
                             </View>
                             
-                            {/* Saldo - Azul */}
+                            {/* Saldo - Negro */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                              <Text style={{ fontSize: 7, color: '#2563eb' }}>Saldo:</Text>
-                              <Text style={{ fontSize: 7, color: '#2563eb' }}>
+                              <Text style={{ fontSize: 7, color: '#1f2937' }}>Saldo:</Text>
+                              <Text style={{ fontSize: 7, color: '#1f2937' }}>
                                 {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
                               </Text>
                             </View>
