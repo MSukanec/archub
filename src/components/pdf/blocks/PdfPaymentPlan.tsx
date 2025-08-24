@@ -101,25 +101,38 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
-    padding: 8,
-    borderBottom: '1px solid #d1d5db',
+    backgroundColor: '#374151',
+    padding: 12,
+    borderBottom: '1px solid #374151',
   },
   tableHeaderCell: {
     fontSize: 10,
     fontWeight: 'bold',
     flex: 1,
-    color: '#374151'
+    color: '#ffffff',
+    textAlign: 'center'
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 6,
+    padding: 8,
     borderBottom: '1px solid #e5e7eb',
+  },
+  tableRowEven: {
+    flexDirection: 'row',
+    padding: 8,
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#f9fafb'
+  },
+  tableRowOdd: {
+    flexDirection: 'row',
+    padding: 8,
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#ffffff'
   },
   tableCell: {
     fontSize: 9,
     flex: 1,
-    color: '#6b7280'
+    color: '#1f2937'
   },
   subtitle: {
     fontSize: 12,
@@ -404,8 +417,11 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                       const cellData = rowData[commitmentIndex] // Solo los datos de esta unidad
                       if (!installment || !cellData) return null
                       
+                      // Alternar colores de fila
+                      const rowStyle = rowIndex % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd
+                      
                       return (
-                        <View key={installment.id} style={styles.tableRow}>
+                        <View key={installment.id} style={rowStyle}>
                           {/* Información de la cuota */}
                           <View style={[styles.tableCell, { flex: 0.8 }]}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>
