@@ -316,20 +316,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Load form data when task and reference data is available
   React.useEffect(() => {
     if (isEditingMode && actualTask) {
-      // Load existing custom_name, task_template_id, category_id, and is_completed
+      // Load existing custom_name and is_completed
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
-      }
-      if (actualTask.task_template_id) {
-        setTaskTemplateId(actualTask.task_template_id)
-      }
-      
-      // Find category ID by name from TASKS_VIEW
-      if (actualTask.category && categories.length > 0) {
-        const foundCategory = categories.find(cat => cat.name === actualTask.category)
-        if (foundCategory) {
-          setCategoryId(foundCategory.id)
-        }
       }
       
       // Find unit ID by name from TASKS_VIEW
@@ -344,12 +333,18 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         setIsCompleted(actualTask.is_completed)
       }
       
-      // Load task_division_id if exists
+      // Load task_division_id if exists - CRITICAL FIX
       if (actualTask.task_division_id) {
         setTaskDivisionId(actualTask.task_division_id)
+      } else if (actualTask.division && taskDivisions.length > 0) {
+        // Fallback: try to find division by name from the view
+        const foundDivision = taskDivisions.find(div => div.name === actualTask.division)
+        if (foundDivision) {
+          setTaskDivisionId(foundDivision.id)
+        }
       }
     }
-  }, [isEditingMode, actualTask, categories, units])
+  }, [isEditingMode, actualTask, units, taskDivisions])
 
   // Initialize task materials when editing
   React.useEffect(() => {
@@ -437,9 +432,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         // Update existing task
         const updateData: any = {
           custom_name: customName,
-          category_id: categoryId || null,
+          category_id: null,
           unit_id: unitId || null,
-          task_template_id: taskTemplateId || null,
+          task_template_id: null,
           task_division_id: taskDivisionId || null,
           is_completed: isCompleted
         }
@@ -473,8 +468,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           param_order: [], // Empty array since we're not using parameters
           name_rendered: null, // NULL since we're not using parametric generation
           unit_id: unitId || null,
-          category_id: categoryId || null,
-          task_template_id: taskTemplateId || null,
+          category_id: null,
+          task_template_id: null,
           task_division_id: taskDivisionId || null,
           organization_id: null, // Always NULL as specified
           is_system: true, // Always TRUE as specified
@@ -568,45 +563,15 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           <h3 className="text-sm font-medium">Información de la Tarea</h3>
         </div>
         <div className="space-y-4 pl-6">
-          <div>
-            <Label htmlFor="task-template">Plantilla</Label>
-            <ComboBox
-              value={taskTemplateId}
-              onValueChange={setTaskTemplateId}
-              options={taskTemplates.map(template => ({
-                value: template.id,
-                label: template.name
-              }))}
-              placeholder="Seleccionar plantilla..."
-              searchPlaceholder="Buscar plantilla..."
-              emptyMessage="No se encontraron plantillas"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="task-division">División</Label>
-            <ComboBox
-              value={taskDivisionId}
-              onValueChange={setTaskDivisionId}
-              options={taskDivisions.map(division => ({
-                value: division.id,
-                label: division.name
-              }))}
-              placeholder="Seleccionar división..."
-              searchPlaceholder="Buscar división..."
-              emptyMessage="No se encontraron divisiones"
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="task-category">Rubro</Label>
+              <Label htmlFor="task-division">Rubro</Label>
               <ComboBox
-                value={categoryId}
-                onValueChange={setCategoryId}
-                options={(categories || []).map(category => ({
-                  value: category.id,
-                  label: category.name
+                value={taskDivisionId}
+                onValueChange={setTaskDivisionId}
+                options={taskDivisions.map(division => ({
+                  value: division.id,
+                  label: division.name
                 }))}
                 placeholder="Seleccionar rubro..."
                 searchPlaceholder="Buscar rubro..."
