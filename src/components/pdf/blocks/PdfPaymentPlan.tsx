@@ -347,30 +347,42 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             {commitments.map((commitment, commitmentIndex) => (
               <View key={commitment.id} break={commitmentIndex > 0}>
                 
-                {/* Información de la Unidad Funcional */}
+                {/* Información de la Unidad Funcional - Header Optimizado */}
                 <View style={styles.section}>
-                  <Text style={[styles.subtitle, { marginBottom: 8 }]}>
+                  <Text style={[styles.subtitle, { marginBottom: 12, textAlign: 'center' }]}>
                     Unidad Funcional: {commitment.unit || `Cliente ${commitmentIndex + 1}`}
                   </Text>
                   
-                  <View style={styles.row}>
-                    <Text style={styles.label}>Cliente:</Text>
-                    <Text style={styles.value}>{getClientDisplayName(commitment)}</Text>
-                  </View>
-                  
-                  <View style={styles.row}>
-                    <Text style={styles.label}>Total Comprometido:</Text>
-                    <Text style={styles.value}>
-                      {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
-                    </Text>
-                  </View>
-                  
-                  {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
-                    <View style={styles.row}>
-                      <Text style={styles.label}>Tipo de Cambio:</Text>
-                      <Text style={styles.value}>{commitment.exchange_rate}</Text>
+                  {/* Layout de doble columna */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {/* Columna izquierda */}
+                    <View style={{ flex: 1, paddingRight: 8 }}>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Unidad:</Text>
+                        <Text style={styles.value}>{commitment.unit || `UF${commitmentIndex + 1}`}</Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Cliente:</Text>
+                        <Text style={styles.value}>{getClientDisplayName(commitment)}</Text>
+                      </View>
                     </View>
-                  )}
+                    
+                    {/* Columna derecha */}
+                    <View style={{ flex: 1, paddingLeft: 8 }}>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Monto de Obra Inicial:</Text>
+                        <Text style={styles.value}>
+                          {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                        </Text>
+                      </View>
+                      {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
+                        <View style={styles.row}>
+                          <Text style={styles.label}>Cotización del dólar inicial:</Text>
+                          <Text style={styles.value}>{commitment.exchange_rate}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
                 </View>
 
                 {/* Tabla de Cuotas para esta Unidad */}
@@ -396,8 +408,8 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                         <View key={installment.id} style={styles.tableRow}>
                           {/* Información de la cuota */}
                           <View style={[styles.tableCell, { flex: 0.8 }]}>
-                            <Text style={{ fontSize: 9, fontWeight: 'bold' }}>
-                              {installment.number.toString().padStart(2, '0')}
+                            <Text style={{ fontSize: 8, fontWeight: 'bold' }}>
+                              Cuota Nº {installment.number.toString().padStart(2, '0')}
                             </Text>
                           </View>
                           
