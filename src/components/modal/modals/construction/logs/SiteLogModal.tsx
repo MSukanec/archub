@@ -339,9 +339,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       setAttendees(siteLogData.attendees || []);
       setEquipment(siteLogData.equipment || []);
       setUploadedFiles(siteLogData.files || []);
-      setExistingSiteLogFiles(siteLogFiles);
     }
-  }, [data, form, siteLogFiles]);
+  }, [data, form]);
 
   // Funciones para eventos
   const addEvent = () => {
@@ -651,7 +650,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             title="Personal"
             description="Control de asistencia y personal en obra"
             onClick={() => {
-              setCurrentSubform('personnel');
+              setCurrentSubform('personal');
               setPanel('subform');
             }}
           />
@@ -727,7 +726,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       attendees={attendees}
       setAttendees={setAttendees}
       projectPersonnel={projectPersonnel}
-      contacts={contacts}
     />
   );
 
@@ -735,7 +733,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     <MediaForm 
       filesToUpload={filesToUpload}
       setFilesToUpload={setFilesToUpload}
-      existingFiles={siteLogFiles}
+      siteLogFiles={siteLogFiles}
     />
   );
 
@@ -924,27 +922,34 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const isEditing = data?.isEditing || !!siteLogId;
 
   return (
-    <FormModalLayout>
-      <FormModalHeader
-        icon={<FileText />}
-        title={siteLogId ? "Editar Bitácora" : "Nueva Bitácora"}
-        description={siteLogId ? "Actualizar información de la bitácora de obra" : "Crear una nueva entrada en la bitácora de obra"}
-      />
-
-      {/* Contenido del modal según el panel activo */}
-      {currentPanel === 'view' && viewPanel}
-      {currentPanel === 'edit' && editPanel}
-      {currentPanel === 'subform' && currentSubform === 'personnel' && personnelSubform}
-      {currentPanel === 'subform' && currentSubform === 'files' && mediaSubform}
-      {currentPanel === 'subform' && currentSubform === 'events' && eventsSubform}
-      {currentPanel === 'subform' && currentSubform === 'equipment' && equipmentSubform}
-
-      <FormModalFooter
-        onCancel={closeModal}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        submitText={siteLogId ? "Actualizar" : "Crear"}
-      />
-    </FormModalLayout>
+    <FormModalLayout 
+      onClose={closeModal}
+      viewPanel={viewPanel}
+      editPanel={editPanel}
+      subformPanel={
+        currentSubform === 'personal' ? personnelSubform :
+        currentSubform === 'files' ? mediaSubform :
+        currentSubform === 'events' ? eventsSubform :
+        currentSubform === 'equipment' ? equipmentSubform :
+        null
+      }
+      headerContent={
+        <FormModalHeader
+          icon={FileText}
+          title={siteLogId ? "Editar Bitácora" : "Nueva Bitácora"}
+          description={siteLogId ? "Actualizar información de la bitácora de obra" : "Crear una nueva entrada en la bitácora de obra"}
+        />
+      }
+      footerContent={
+        <FormModalFooter
+          cancelText="Cancelar"
+          onLeftClick={closeModal}
+          onSubmit={handleSubmit}
+          showLoadingSpinner={isLoading}
+          submitText={siteLogId ? "Actualizar" : "Crear"}
+        />
+      }
+      isEditing={isEditing}
+    />
   );
 }
