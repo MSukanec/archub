@@ -58,21 +58,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     footer: true,
   });
 
-  // Get blocks and filename from modal data
+  // Get blocks from modal data
   const blocks = modalData?.blocks || [];
   const baseFilename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
-  
-  // Generate dynamic filename based on payment plan config
-  const generateDynamicFilename = () => {
-    if (paymentPlanConfig.maxInstallmentFilter) {
-      // Replace .pdf with filter info and .pdf
-      const nameWithoutExtension = baseFilename.replace(/\.pdf$/, '');
-      return `${nameWithoutExtension}-hasta-cuota-${paymentPlanConfig.maxInstallmentFilter}.pdf`;
-    }
-    return baseFilename;
-  };
-  
-  const filename = generateDynamicFilename();
 
   // Footer configuration - Initialize with text from blocks if available
   const [footerConfig, setFooterConfig] = useState(() => {
@@ -118,6 +106,16 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     showPlanInfo: true, // Información del plan
     maxInstallmentFilter: null as number | null, // Filtro de cuotas: null = todas
   });
+
+  // Generate dynamic filename based on payment plan config
+  const filename = useMemo(() => {
+    if (paymentPlanConfig.maxInstallmentFilter) {
+      // Replace .pdf with filter info and .pdf
+      const nameWithoutExtension = baseFilename.replace(/\.pdf$/, '');
+      return `${nameWithoutExtension}-hasta-cuota-${paymentPlanConfig.maxInstallmentFilter}.pdf`;
+    }
+    return baseFilename;
+  }, [baseFilename, paymentPlanConfig.maxInstallmentFilter]);
 
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
