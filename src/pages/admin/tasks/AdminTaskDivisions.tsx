@@ -85,7 +85,13 @@ const AdminTaskDivisions = () => {
   };
 
   const handleEditDivision = (divisionId: string) => {
-    openModal('task-division', { isEditing: true, divisionId });
+    // Find the division object to pass complete data to modal
+    const divisionToEdit = divisions.find(div => div.id === divisionId);
+    openModal('task-division', { 
+      isEditing: true, 
+      divisionId,
+      editingDivision: divisionToEdit 
+    });
   };
 
   const handleCreateDivision = () => {

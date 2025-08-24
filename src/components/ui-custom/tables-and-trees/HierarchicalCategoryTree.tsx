@@ -178,8 +178,19 @@ export function HierarchicalCategoryTree({
           style={{ marginLeft: `${indentation}px` }}
           onClick={() => hasChildCategories && onToggleExpanded(category.id)}
         >
-          {/* Left side: Chevron + Category info */}
+          {/* Left side: Drag handle + Chevron + Category info */}
           <div className="flex items-center space-x-2 flex-1">
+            {/* Drag handle - only show when drag and drop is enabled */}
+            {enableDragAndDrop && listeners && (
+              <div 
+                {...listeners} 
+                className="cursor-grab hover:cursor-grabbing p-1 hover:bg-accent/20 rounded mr-1"
+                title="Arrastrar para reordenar"
+              >
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+            
             {/* Chevron or placeholder */}
             {hasChildCategories ? (
               <div className="h-5 w-5 flex items-center justify-center">

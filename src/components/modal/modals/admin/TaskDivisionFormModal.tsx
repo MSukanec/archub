@@ -17,7 +17,6 @@ const taskDivisionSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   name_en: z.string().optional(),
   description: z.string().optional(),
-  order: z.number().optional(),
 });
 
 type TaskDivisionFormData = z.infer<typeof taskDivisionSchema>;
@@ -44,7 +43,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       name: editingDivision?.name || '',
       name_en: editingDivision?.name_en || '',
       description: editingDivision?.description || '',
-      order: editingDivision?.order || 0,
     },
   });
 
@@ -55,14 +53,12 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
         name: editingDivision.name,
         name_en: editingDivision.name_en || '',
         description: editingDivision.description || '',
-        order: editingDivision.order || 0,
       });
     } else {
       form.reset({
         name: '',
         name_en: '',
         description: '',
-        order: 0,
       });
     }
   }, [editingDivision, form]);
@@ -75,7 +71,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
         name: data.name,
         name_en: data.name_en || undefined,
         description: data.description || undefined,
-        order: data.order || 0,
         is_system: true, // Always system divisions
         organization_id: null, // Always null for system divisions
       };
@@ -159,26 +154,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
             )}
           />
 
-          {/* Order field */}
-          <FormField
-            control={form.control}
-            name="order"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Orden (opcional)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number"
-                    min="0"
-                    placeholder="Ingresa el orden de la división" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           
         </form>
       </Form>
