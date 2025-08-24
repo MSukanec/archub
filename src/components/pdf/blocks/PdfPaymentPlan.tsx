@@ -343,102 +343,118 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
               ))}
             </View>
             
-            {/* Filas de cuotas */}
-            {heatmapData.map((rowData, rowIndex) => {
-              const installment = installments[rowIndex]
-              if (!installment) return null
-              
-              return (
-                <View key={installment.id}>
-                  {/* Fila de encabezado de cuota */}
-                  <View style={styles.tableRow}>
-                    <View style={{ width: 80, padding: 4 }}>
-                      <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 10 }]}>
-                        Cuota {installment.number.toString().padStart(2, '0')}
-                      </Text>
-                      <Text style={[styles.tableCell, { fontSize: 8 }]}>
-                        {formatDate(installment.date)}
-                      </Text>
-                      <Text style={[styles.tableCell, { fontSize: 8 }]}>
-                        {installment.index_reference?.toFixed(2) || '0.00'}%
-                      </Text>
+            {/* Generar páginas separadas - una por unidad funcional */}
+            {commitments.map((commitment, commitmentIndex) => (
+              <View key={commitment.id} style={{ pageBreakBefore: commitmentIndex > 0 ? 'always' : 'auto' }}>
+                
+                {/* Información de la Unidad Funcional */}
+                <View style={styles.section}>
+                  <Text style={[styles.subtitle, { marginBottom: 8 }]}>
+                    Unidad Funcional: {commitment.unit || `Cliente ${commitmentIndex + 1}`}
+                  </Text>
+                  
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Cliente:</Text>
+                    <Text style={styles.value}>{getClientDisplayName(commitment)}</Text>
+                  </View>
+                  
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Total Comprometido:</Text>
+                    <Text style={styles.value}>
+                      {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                    </Text>
+                  </View>
+                  
+                  {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Tipo de Cambio:</Text>
+                      <Text style={styles.value}>{commitment.exchange_rate}</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Tabla de Cuotas para esta Unidad */}
+                <View style={styles.section}>
+                  <Text style={styles.subtitle}>Detalle de Cuotas</Text>
+                  
+                  <View style={styles.table}>
+                    {/* Header */}
+                    <View style={styles.tableHeader}>
+                      <Text style={[styles.tableHeaderCell, { flex: 0.8 }]}>Cuota</Text>
+                      <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Fecha</Text>
+                      <Text style={[styles.tableHeaderCell, { flex: 0.8 }]}>Índice</Text>
+                      <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Detalle</Text>
                     </View>
                     
-                    {/* Encabezados vacíos para las columnas de unidades */}
-                    {rowData.map((_, colIndex) => (
-                      <View key={`header-${rowIndex}-${colIndex}`} style={{ width: 120 }} />
-                    ))}
+                    {/* Filas de cuotas para esta unidad específica */}
+                    {heatmapData.map((rowData, rowIndex) => {
+                      const installment = installments[rowIndex]
+                      const cellData = rowData[commitmentIndex] // Solo los datos de esta unidad
+                      if (!installment || !cellData) return null
+                      
+                      return (
+                        <View key={installment.id} style={styles.tableRow}>
+                          {/* Información de la cuota */}
+                          <View style={[styles.tableCell, { flex: 0.8 }]}>
+                            <Text style={{ fontSize: 9, fontWeight: 'bold' }}>
+                              {installment.number.toString().padStart(2, '0')}
+                            </Text>
+                          </View>
+                          
+                          <View style={[styles.tableCell, { flex: 1.2 }]}>
+                            <Text style={{ fontSize: 8 }}>
+                              {formatDate(installment.date)}
+                            </Text>
+                          </View>
+                          
+                          <View style={[styles.tableCell, { flex: 0.8 }]}>
+                            <Text style={{ fontSize: 8 }}>
+                              {installment.index_reference?.toFixed(2) || '0.00'}%
+                            </Text>
+                          </View>
+                          
+                          {/* Detalles financieros */}
+                          <View style={[styles.tableCell, { flex: 1.2 }]}>
+                            {/* Actualización - Violeta */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                              <Text style={{ fontSize: 7, color: '#7c3aed' }}>Actualización:</Text>
+                              <Text style={{ fontSize: 7, color: '#7c3aed', fontWeight: 'bold' }}>
+                                {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
+                              </Text>
+                            </View>
+                            
+                            {/* Valor de Cuota - Rojo */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                              <Text style={{ fontSize: 7, color: '#dc2626' }}>Valor de Cuota:</Text>
+                              <Text style={{ fontSize: 7, color: '#dc2626' }}>
+                                {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
+                              </Text>
+                            </View>
+                            
+                            {/* Pago - Verde */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                              <Text style={{ fontSize: 7, color: '#16a34a' }}>Pago:</Text>
+                              <Text style={{ fontSize: 7, color: '#16a34a' }}>
+                                {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
+                              </Text>
+                            </View>
+                            
+                            {/* Saldo - Azul */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                              <Text style={{ fontSize: 7, color: '#2563eb' }}>Saldo:</Text>
+                              <Text style={{ fontSize: 7, color: '#2563eb' }}>
+                                {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      )
+                    })}
                   </View>
-
-                  {/* Fila de Actualización */}
-                  <View style={styles.tableRow}>
-                    <View style={{ width: 80, padding: 4 }}>
-                      <Text style={[styles.tableCell, { fontSize: 8, color: '#7c3aed', fontWeight: 'bold' }]}>
-                        Actualización
-                      </Text>
-                    </View>
-                    {rowData.map((cellData, colIndex) => (
-                      <View key={`actualizacion-${rowIndex}-${colIndex}`} style={{ width: 120, padding: 2, justifyContent: 'center' }}>
-                        <Text style={[styles.tableCell, { fontSize: 8, color: '#7c3aed', textAlign: 'center' }]}>
-                          {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Fila de Valor de Cuota */}
-                  <View style={styles.tableRow}>
-                    <View style={{ width: 80, padding: 4 }}>
-                      <Text style={[styles.tableCell, { fontSize: 8, color: '#dc2626', fontWeight: 'bold' }]}>
-                        Valor de Cuota
-                      </Text>
-                    </View>
-                    {rowData.map((cellData, colIndex) => (
-                      <View key={`valor-${rowIndex}-${colIndex}`} style={{ width: 120, padding: 2, justifyContent: 'center' }}>
-                        <Text style={[styles.tableCell, { fontSize: 8, color: '#dc2626', textAlign: 'center' }]}>
-                          {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Fila de Pago */}
-                  <View style={styles.tableRow}>
-                    <View style={{ width: 80, padding: 4 }}>
-                      <Text style={[styles.tableCell, { fontSize: 8, color: '#16a34a', fontWeight: 'bold' }]}>
-                        Pago
-                      </Text>
-                    </View>
-                    {rowData.map((cellData, colIndex) => (
-                      <View key={`pago-${rowIndex}-${colIndex}`} style={{ width: 120, padding: 2, justifyContent: 'center' }}>
-                        <Text style={[styles.tableCell, { fontSize: 8, color: '#16a34a', textAlign: 'center' }]}>
-                          {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Fila de Saldo */}
-                  <View style={styles.tableRow}>
-                    <View style={{ width: 80, padding: 4 }}>
-                      <Text style={[styles.tableCell, { fontSize: 8, color: '#2563eb', fontWeight: 'bold' }]}>
-                        Saldo
-                      </Text>
-                    </View>
-                    {rowData.map((cellData, colIndex) => (
-                      <View key={`saldo-${rowIndex}-${colIndex}`} style={{ width: 120, padding: 2, justifyContent: 'center' }}>
-                        <Text style={[styles.tableCell, { fontSize: 8, color: '#2563eb', textAlign: 'center' }]}>
-                          {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Separador visual entre cuotas */}
-                  <View style={{ height: 4 }} />
                 </View>
-              )
-            })}
+                
+              </View>
+            ))}
           </View>
         </View>
       )}
