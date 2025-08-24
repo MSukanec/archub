@@ -937,7 +937,6 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   };
 
   const siteLogId = data?.data?.id || data?.id;
-  const isEditing = data?.isEditing || !!siteLogId;
 
   // Configurar botones del footer según el panel actual
   const getFooterConfig = () => {
@@ -990,7 +989,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           submitText={footerConfig.submitText}
         />
       }
-      isEditing={isEditing}
+      isEditing={false}
     />
   );
 }
