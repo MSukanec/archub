@@ -360,57 +360,52 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             {commitments.map((commitment, commitmentIndex) => (
               <View key={commitment.id} break={commitmentIndex > 0}>
                 
-                {/* Header de Unidad Funcional - Optimizado */}
-                <View style={{ marginBottom: 20 }}>
-                  {/* Líneas superior e inferior */}
-                  <View style={{ borderTopWidth: 2, borderTopColor: '#374151', borderBottomWidth: 1, borderBottomColor: '#374151', paddingBottom: 15, marginBottom: 15 }} />
+                {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
+                <View style={{ flexDirection: 'row', gap: 15 }}>
                   
-                  {/* Header principal */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 }}>
-                    {/* Lado izquierdo - Título y detalles */}
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#6b7280', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
-                        DETALLE DE CUOTAS
-                      </Text>
-                      
-                      {/* Lista de información */}
-                      <View style={{ gap: 3 }}>
-                        <Text style={{ fontSize: 9, color: '#1f2937' }}>
-                          <Text style={{ fontWeight: 'bold' }}>Unidad Funcional:</Text> {commitment.unit || `UF${commitmentIndex + 1}`}
-                        </Text>
-                        <Text style={{ fontSize: 9, color: '#1f2937' }}>
-                          <Text style={{ fontWeight: 'bold' }}>Cliente:</Text> {getClientDisplayName(commitment)}
-                        </Text>
-                        <Text style={{ fontSize: 9, color: '#1f2937' }}>
-                          <Text style={{ fontWeight: 'bold' }}>Monto Inicial de Obra:</Text> {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
-                        </Text>
-                        {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
-                          <Text style={{ fontSize: 9, color: '#1f2937' }}>
-                            <Text style={{ fontWeight: 'bold' }}>Cotización de dólar inicial:</Text> ${commitment.exchange_rate}
-                          </Text>
-                        )}
-                      </View>
-                    </View>
+                  {/* Columna izquierda - Header (1/3) */}
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    {/* Línea superior */}
+                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                     
-                    {/* Lado derecho - Código de unidad GRANDE */}
-                    <View style={{ flex: 0, alignItems: 'flex-end', paddingLeft: 10 }}>
-                      <Text style={{ fontSize: 20, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5, textAlign: 'right' }}>
+                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#6b7280', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 15 }}>
+                      DETALLE DE CUOTAS
+                    </Text>
+                    
+                    {/* Código de unidad grande */}
+                    <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                      <Text style={{ fontSize: 28, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5 }}>
                         {commitment.unit || `UF${commitmentIndex + 1}`}
                       </Text>
                     </View>
+                    
+                    {/* Lista de información */}
+                    <View style={{ gap: 8 }}>
+                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Unidad Funcional:</Text>{'\n'}{commitment.unit || `UF${commitmentIndex + 1}`}
+                      </Text>
+                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Cliente:</Text>{'\n'}{getClientDisplayName(commitment)}
+                      </Text>
+                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Monto Inicial de Obra:</Text>{'\n'}{commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                      </Text>
+                      {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
+                        <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                          <Text style={{ fontWeight: 'bold' }}>Cotización de dólar inicial:</Text>{'\n'}${commitment.exchange_rate}
+                        </Text>
+                      )}
+                    </View>
                   </View>
-                </View>
 
-                {/* Tabla de Cuotas para esta Unidad */}
-                <View style={{ marginTop: 0 }}>
-                  
-                  <View style={styles.table}>
+                  {/* Columna derecha - Tabla (2/3) */}
+                  <View style={{ flex: 2 }}>
+                    <View style={styles.table}>
                     {/* Header */}
                     <View style={styles.tableHeader}>
-                      <Text style={[styles.tableHeaderCell, { flex: 0.8 }]}>Cuota</Text>
-                      <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Fecha</Text>
+                      <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Cuota</Text>
                       <Text style={[styles.tableHeaderCell, { flex: 0.8 }]}>Índice</Text>
-                      <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Detalle</Text>
+                      <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Detalle</Text>
                     </View>
                     
                     {/* Filas de cuotas para esta unidad específica */}
@@ -424,15 +419,12 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                       
                       return (
                         <View key={installment.id} style={rowStyle}>
-                          {/* Información de la cuota */}
-                          <View style={[styles.tableCell, { flex: 0.8 }]}>
+                          {/* Información de la cuota con fecha debajo */}
+                          <View style={[styles.tableCell, { flex: 1.2 }]}>
                             <Text style={{ fontSize: 8, fontWeight: 'bold' }}>
                               Cuota Nº {installment.number.toString().padStart(2, '0')}
                             </Text>
-                          </View>
-                          
-                          <View style={[styles.tableCell, { flex: 1.2 }]}>
-                            <Text style={{ fontSize: 8 }}>
+                            <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>
                               {formatDate(installment.date)}
                             </Text>
                           </View>
@@ -444,7 +436,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                           </View>
                           
                           {/* Detalles financieros */}
-                          <View style={[styles.tableCell, { flex: 1.2 }]}>
+                          <View style={[styles.tableCell, { flex: 1.5 }]}>
                             {/* Actualización - Negro */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
                               <Text style={{ fontSize: 7, color: '#1f2937' }}>Actualización:</Text>
@@ -480,9 +472,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                         </View>
                       )
                     })}
+                    </View>
                   </View>
+
                 </View>
-                
               </View>
             ))}
           </View>
