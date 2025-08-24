@@ -1,84 +1,71 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 
-interface InstallmentData {
+export interface ClientCommitment {
   id: string
-  project_id: string
-  organization_id: string
-  date: string
-  number: number
-  index_reference: number
-  created_at: string
+  client_id?: string
+  unit?: string
+  committed_amount?: number
+  currency_id?: string
+  exchange_rate?: number
+  currencies?: {
+    id: string
+    name: string
+    symbol: string
+  }
 }
 
-interface ClientCommitment {
+export interface PaymentPlan {
   id: string
-  project_id: string
-  client_id: string
-  unit: string
-  committed_amount: number | null
-  currency_id: string | null
-  exchange_rate: number | null
-  currencies?: { symbol: string }
+  name: string
+  description?: string
+  start_date: string
+  frequency: string
+  payment_day: number
 }
 
-interface HeatmapCellData {
+export interface HeatmapCellData {
   unitId: string
   installmentNumber: number
   updatedAmount: number
   installmentValue: number
   payment: number
   balance: number
-  isPaid: boolean
   commitmentCurrency: {
     symbol: string
+    id: string
     exchangeRate: number
   }
 }
 
-interface PaymentPlanData {
-  paymentPlan: {
-    id: string
-    installments_count: number
-    start_date: string
-    frequency: string
-    created_at: string
-    payment_plans?: {
-      id: string
-      name: string
-      description: string
-    }
-  }
-  installments: InstallmentData[]
-  commitments?: ClientCommitment[]
-  payments?: any[]
-  clientsInfo?: any[]
-  projectId: string
-  organizationId: string
-}
-
 interface PdfPaymentPlanProps {
-  data: PaymentPlanData
-  config: any
+  data: {
+    paymentPlan?: PaymentPlan
+    installments?: any[]
+    commitments?: ClientCommitment[]
+    payments?: any[]
+    clientsInfo?: any[]
+  }
+  config?: {
+    showPlanInfo?: boolean
+    showSchedule?: boolean
+    showDetailTable?: boolean
+    oneUnitPerPage?: boolean
+  }
 }
 
+// Styles for the PDF component
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    padding: 10
+  },
+  section: {
+    marginBottom: 20
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#2563eb'
-  },
-  section: {
     marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
     color: '#374151'
   },
   row: {
@@ -238,9 +225,9 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             installmentValue: installmentValue,
             payment: Math.round(totalPaidInCommitmentCurrency),
             balance: balance,
-            isPaid: totalPaidInCommitmentCurrency > 0,
             commitmentCurrency: {
               symbol: commitmentCurrency.symbol || '$',
+              id: commitment.currency_id || '',
               exchangeRate: commitment.exchange_rate || 1
             }
           })
@@ -258,43 +245,36 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
   return (
     <View style={styles.container}>
       {/* Información del Plan */}
-      {showPlanInfo && (
+      {showPlanInfo && paymentPlan && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información del Plan</Text>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Tipo:</Text>
-          <Text style={styles.value}>
-            {paymentPlan.payment_plans?.name || 'Plan personalizado'}
-          </Text>
-        </View>
-        
-        {paymentPlan.payment_plans?.description && (
+          <Text style={styles.title}>Información del Plan</Text>
           <View style={styles.row}>
-            <Text style={styles.label}>Descripción:</Text>
-            <Text style={styles.value}>{paymentPlan.payment_plans.description}</Text>
+            <Text style={styles.label}>Plan de Pago:</Text>
+            <Text style={styles.value}>{paymentPlan.name}</Text>
           </View>
-        )}
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Cuotas:</Text>
-          <Text style={styles.value}>{paymentPlan.installments_count}</Text>
+          {paymentPlan.description && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Descripción:</Text>
+              <Text style={styles.value}>{paymentPlan.description}</Text>
+            </View>
+          )}
+          <View style={styles.row}>
+            <Text style={styles.label}>Fecha de Inicio:</Text>
+            <Text style={styles.value}>{formatDate(paymentPlan.start_date)}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Frecuencia:</Text>
+            <Text style={styles.value}>{getFrequencyLabel(paymentPlan.frequency)}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Día de Pago:</Text>
+            <Text style={styles.value}>{paymentPlan.payment_day}</Text>
+          </View>
         </View>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Frecuencia:</Text>
-          <Text style={styles.value}>{getFrequencyLabel(paymentPlan.frequency)}</Text>
-        </View>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Fecha inicio:</Text>
-          <Text style={styles.value}>{formatDate(paymentPlan.start_date)}</Text>
-        </View>
-      </View>
       )}
 
-      {/* Tabla de Cuotas */}
-      {showSchedule && installments.length > 0 && (
+      {/* Cronograma de Cuotas */}
+      {showSchedule && installments?.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.subtitle}>Cronograma de Cuotas</Text>
           
@@ -326,20 +306,20 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
       {/* Tabla Detallada de Cuotas por Unidad */}
       {showDetailTable && heatmapData.length > 0 && commitments.length > 0 && (
-        <View>
+        <View style={styles.section}>
+          <View style={styles.table}>
             {/* Generar páginas separadas - una por unidad funcional */}
             {commitments.map((commitment, commitmentIndex) => (
               <View key={commitment.id} break={oneUnitPerPage}>
                 
+                {/* Línea superior que abarca todo el ancho */}
+                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                 
                 {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
                 <View style={{ flexDirection: 'row', gap: 15 }}>
                   
                   {/* Columna izquierda - Header (1/3) */}
                   <View style={{ flex: 1, paddingRight: 10 }}>
-                    {/* Línea superior */}
-                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
-                    
                     {/* Contenido */}
                     <View style={{ paddingVertical: 0 }}>
                       
@@ -368,16 +348,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                         )}
                       </View>
                     </View>
-                    
-                    {/* Línea inferior */}
-                    <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
                   </View>
 
                   {/* Columna derecha - Tabla (2/3) */}
                   <View style={{ flex: 2 }}>
-                    {/* Línea superior */}
-                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
-                    
                     <View style={{ ...styles.table, marginTop: 0 }}>
                     {/* Header */}
                     <View style={styles.tableHeader}>
@@ -459,6 +433,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
               </View>
             ))}
+          </View>
         </View>
       )}
     </View>
