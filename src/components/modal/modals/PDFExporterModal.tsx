@@ -105,6 +105,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     showDetailTable: true, // Tabla detallada por unidad
     showPlanInfo: true, // Información del plan
     maxInstallmentFilter: null as number | null, // Filtro de cuotas: null = todas
+    oneUnitPerPage: true, // Una unidad por página
   });
 
   // Generate dynamic filename based on payment plan config
@@ -1004,6 +1005,28 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                           </SelectItem>
                         ));
                       })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Distribución de Unidades */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Distribución de Unidades</Label>
+                  <Select
+                    value={paymentPlanConfig.oneUnitPerPage ? "separate" : "continuous"}
+                    onValueChange={(value) => 
+                      setPaymentPlanConfig(prev => ({
+                        ...prev, 
+                        oneUnitPerPage: value === "separate"
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="separate">Una unidad por página</SelectItem>
+                      <SelectItem value="continuous">Unidades continuas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

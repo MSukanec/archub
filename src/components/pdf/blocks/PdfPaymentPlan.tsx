@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
 
 export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
   const { paymentPlan, installments, commitments = [], payments = [], clientsInfo = [] } = data
-  const { showPlanInfo = true, showSchedule = true, showDetailTable = true } = config || {}
+  const { showPlanInfo = true, showSchedule = true, showDetailTable = true, oneUnitPerPage = true } = config || {}
   
 
   const formatDate = (dateString: string) => {
@@ -357,15 +357,18 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
             
             {/* Generar páginas separadas - una por unidad funcional */}
             {commitments.map((commitment, commitmentIndex) => (
-              <View key={commitment.id} break={commitmentIndex > 0}>
+              <View key={commitment.id} break={oneUnitPerPage && commitmentIndex > 0}>
+                
+                {/* Línea superior que abarca todo el ancho */}
+                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                 
                 {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
                 <View style={{ flexDirection: 'row', gap: 15 }}>
                   
                   {/* Columna izquierda - Header (1/3) */}
                   <View style={{ flex: 1, paddingRight: 10 }}>
-                    {/* Contenido con marco */}
-                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', paddingVertical: 15 }}>
+                    {/* Contenido sin marco superior */}
+                    <View style={{ paddingVertical: 0 }}>
                       
                       {/* Código de unidad grande alineado a la izquierda */}
                       <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
@@ -392,9 +395,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                         )}
                       </View>
                     </View>
-                    
-                    {/* Línea inferior justo después del contenido */}
-                    <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151' }} />
                   </View>
 
                   {/* Columna derecha - Tabla (2/3) */}
@@ -475,6 +475,9 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                   </View>
 
                 </View>
+                
+                {/* Línea inferior que abarca todo el ancho */}
+                <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
               </View>
             ))}
           </View>
