@@ -231,8 +231,8 @@ export function HierarchicalCategoryTree({
     const isExpanded = expandedCategories.has(category.id);
     const hasChildCategories = hasChildren(category);
     
-    // Calculate indentation based on level
-    const indentation = currentLevel * 24; // 24px per level for better hierarchy
+    // Calculate indentation based on level - increase indentation for child elements
+    const indentation = currentLevel * 32; // 32px per level for clear hierarchy
     
     // Calculate template completion based on task groups (NEW LOGIC)
     const getTemplateCompletion = (cat: CategoryTreeNode): { completed: number; total: number } => {
@@ -304,8 +304,8 @@ export function HierarchicalCategoryTree({
             
             {/* Category name and badges */}
             <div className="flex items-center space-x-2 flex-1">
-              {/* Order number badge */}
-              {showOrderNumber && category.order && (
+              {/* Order number badge - ONLY show for TOP LEVEL items (level 0) */}
+              {showOrderNumber && category.order && currentLevel === 0 && (
                 <Badge variant="outline" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
                   {category.order}
                 </Badge>
