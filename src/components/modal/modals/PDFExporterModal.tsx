@@ -519,58 +519,24 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           description="Página inicial del documento con información general del presupuesto"
         />
         
-        {/* Header Section - Custom with header controls */}
-        <div 
-          className="border border-border rounded-lg overflow-hidden bg-card"
-          data-section-id="header"
-        >
-          {/* Section Header */}
-          <div 
-            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => toggleExpanded('header')}
-          >
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={sections.header}
-                  onCheckedChange={() => toggleSection('header')}
-                  onClick={(e) => e.stopPropagation()}
-                  className="scale-75"
-                />
-                <Heading className="h-4 w-4 text-muted-foreground" />
-              </div>
-              
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">Encabezado</span>
-                <span className="text-xs text-muted-foreground">
-                  Información del proyecto y empresa en la parte superior
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                Configurable
-              </Badge>
-              
-              {/* Expand Chevron */}
-              {expandedSection === 'header' ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
-          </div>
-          
-          {/* Expanded Content with Header Controls */}
-          {expandedSection === 'header' && (
-            <div className="px-3 pb-3 pt-0 border-t border-border/50">
-              <p className="text-xs text-muted-foreground mt-2 mb-4">
+        <SectionItem
+          id="header"
+          label="Encabezado"
+          icon={Heading}
+          checked={sections.header}
+          onToggle={() => toggleSection('header')}
+          onExpand={() => toggleExpanded('header')}
+          isExpanded={expandedSection === 'header'}
+          description="Información del proyecto y empresa en la parte superior"
+          badge="Configurable"
+          expandedContent={
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">
                 Configura la información del encabezado, logo y datos del proyecto
               </p>
               
               {/* Layout and Logo Settings */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Disposición</Label>
                   <Select 
@@ -601,7 +567,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               </div>
               
               {/* Logo and Divider Toggles */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={headerConfig.showLogo}
@@ -622,7 +588,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               </div>
               
               {/* Title and Subtitle */}
-              <div className="space-y-3 mb-4">
+              <div className="space-y-3">
                 <div>
                   <Label className="text-xs font-medium">Título Principal</Label>
                   <Input
@@ -645,7 +611,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               </div>
               
               {/* Organization and Project Info */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-medium">Empresa</Label>
                   <Input
@@ -668,7 +634,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               </div>
               
               {/* Address and Budget Info */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-medium">Dirección</Label>
                   <Input
@@ -725,8 +691,8 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          }
+        />
         
         {/* Construction Tasks Section - Custom with table controls */}
         <div 
