@@ -6,4 +6,7 @@ export const pdfBlocks = {
   header: PdfHeader,
   footer: PdfFooter,
   budgetTable: PdfBudgetTable,
+  tableHeader: PdfBudgetTable,
+  tableContent: PdfBudgetTable,
+  totals: PdfBudgetTable,
 };

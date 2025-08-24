@@ -76,6 +76,15 @@ interface BudgetData {
 
 export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, config }) => {
   const tasks = data?.tasks || [];
+  
+  // Extract table configuration with defaults
+  const tableConfig = {
+    titleSize: config?.titleSize || 12,
+    bodySize: config?.bodySize || 10,
+    showTableBorder: config?.showTableBorder !== false,
+    showRowDividers: config?.showRowDividers !== false,
+    groupBy: config?.groupBy || 'none'
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -93,17 +102,43 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
     return quantity * unitCost;
   };
 
+  // Create dynamic styles based on configuration
+  const dynamicStyles = {
+    tableHeader: {
+      ...styles.tableHeader,
+      borderWidth: tableConfig.showTableBorder ? 1 : 0,
+      borderBottomWidth: tableConfig.showRowDividers ? 1 : 0,
+    },
+    tableRow: {
+      ...styles.tableRow,
+      borderLeftWidth: tableConfig.showTableBorder ? 1 : 0,
+      borderRightWidth: tableConfig.showTableBorder ? 1 : 0,
+      borderBottomWidth: tableConfig.showRowDividers ? 1 : 0,
+    },
+    headerText: {
+      ...styles.headerText,
+      fontSize: tableConfig.titleSize,
+    },
+    bodyText: {
+      fontSize: tableConfig.bodySize,
+    }
+  };
+  
+  // Determine which columns to show based on groupBy setting
+  const showPhase = tableConfig.groupBy !== 'fase' && tableConfig.groupBy !== 'fases-y-rubros';
+  const showRubro = tableConfig.groupBy !== 'rubro' && tableConfig.groupBy !== 'fases-y-rubros';
+
   return (
     <View style={styles.table}>
       {/* Header */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.tableCellPhase, styles.headerText]}>Fase</Text>
-        <Text style={[styles.tableCellRubro, styles.headerText]}>Rubro</Text>
-        <Text style={[styles.tableCellTask, styles.headerText]}>Tarea</Text>
-        <Text style={[styles.tableCellUnit, styles.headerText]}>Unidad</Text>
-        <Text style={[styles.tableCellQuantity, styles.headerText]}>Cantidad</Text>
-        <Text style={[styles.tableCellCost, styles.headerText]}>Costo Unitario</Text>
-        <Text style={[styles.tableCellSubtotal, styles.headerText]}>Subtotal</Text>
+      <View style={dynamicStyles.tableHeader}>
+        {showPhase && <Text style={[styles.tableCellPhase, dynamicStyles.headerText]}>Fase</Text>}
+        {showRubro && <Text style={[styles.tableCellRubro, dynamicStyles.headerText]}>Rubro</Text>}
+        <Text style={[styles.tableCellTask, dynamicStyles.headerText]}>Tarea</Text>
+        <Text style={[styles.tableCellUnit, dynamicStyles.headerText]}>Unidad</Text>
+        <Text style={[styles.tableCellQuantity, dynamicStyles.headerText]}>Cantidad</Text>
+        <Text style={[styles.tableCellCost, dynamicStyles.headerText]}>Costo Unitario</Text>
+        <Text style={[styles.tableCellSubtotal, dynamicStyles.headerText]}>Subtotal</Text>
       </View>
 
       {/* Rows */}
@@ -118,14 +153,14 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
         const subtotal = calculateTaskCost(task);
 
         return (
-          <View key={index} style={styles.tableRow}>
-            <Text style={styles.tableCellPhase}>{task.phase_name || 'Sin fase'}</Text>
-            <Text style={styles.tableCellRubro}>{task.category_name || 'Sin rubro'}</Text>
-            <Text style={styles.tableCellTask}>{taskName}</Text>
-            <Text style={styles.tableCellUnit}>{task.unit || '-'}</Text>
-            <Text style={styles.tableCellQuantity}>{quantity.toFixed(2)}</Text>
-            <Text style={styles.tableCellCost}>{formatCurrency(unitCost)}</Text>
-            <Text style={styles.tableCellSubtotal}>{formatCurrency(subtotal)}</Text>
+          <View key={index} style={dynamicStyles.tableRow}>
+            {showPhase && <Text style={[styles.tableCellPhase, dynamicStyles.bodyText]}>{task.phase_name || 'Sin fase'}</Text>}
+            {showRubro && <Text style={[styles.tableCellRubro, dynamicStyles.bodyText]}>{task.category_name || 'Sin rubro'}</Text>}
+            <Text style={[styles.tableCellTask, dynamicStyles.bodyText]}>{taskName}</Text>
+            <Text style={[styles.tableCellUnit, dynamicStyles.bodyText]}>{task.unit || '-'}</Text>
+            <Text style={[styles.tableCellQuantity, dynamicStyles.bodyText]}>{quantity.toFixed(2)}</Text>
+            <Text style={[styles.tableCellCost, dynamicStyles.bodyText]}>{formatCurrency(unitCost)}</Text>
+            <Text style={[styles.tableCellSubtotal, dynamicStyles.bodyText]}>{formatCurrency(subtotal)}</Text>
           </View>
         );
       })}
