@@ -4,7 +4,6 @@ import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DashboardDashboard } from './DashboardDashboard';
-import { DashboardBasicData } from './DashboardBasicData';
 import { DashboardActivity } from './DashboardActivity';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -29,11 +28,6 @@ export default function Dashboard() {
       id: 'Resumen',
       label: 'Resumen',
       isActive: activeTab === 'Resumen'
-    },
-    {
-      id: 'Datos Básicos',
-      label: 'Datos Básicos',
-      isActive: activeTab === 'Datos Básicos'
     },
 
     {
@@ -81,7 +75,6 @@ export default function Dashboard() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
-      {activeTab === 'Datos Básicos' && <DashboardBasicData organization={organization} />}
       {activeTab === 'Actividad' && <DashboardActivity />}
     </Layout>
   );
