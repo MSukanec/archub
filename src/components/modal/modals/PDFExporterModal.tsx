@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
@@ -7,6 +7,8 @@ import { PdfDocument } from '@/components/pdf/PdfDocument';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 import { PdfBlock } from '@/components/pdf/types';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -43,6 +45,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     totals: true,
     footer: true,
   });
+
+  // Expanded sections for accordion
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   
   const blocks = modalData?.blocks || [];
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -160,38 +165,161 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     }));
   };
 
+  // Toggle expanded section
+  const toggleExpanded = (section: string) => {
+    setExpandedSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
+  };
+
+  // Section component - prepared for drag & drop
+  interface SectionItemProps {
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    checked: boolean;
+    onToggle: () => void;
+    onExpand: () => void;
+    isExpanded: boolean;
+    description?: string;
+  }
+
+  const SectionItem: React.FC<SectionItemProps> = ({ 
+    id, 
+    label, 
+    icon: Icon, 
+    checked, 
+    onToggle, 
+    onExpand, 
+    isExpanded,
+    description 
+  }) => (
+    <div 
+      className="border border-border rounded-lg overflow-hidden bg-card"
+      data-section-id={id} // For future drag & drop
+    >
+      {/* Section Header */}
+      <div 
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+        onClick={onExpand}
+      >
+        <div className="flex items-center gap-3">
+          {/* Drag Handle - for future use */}
+          <div className="text-muted-foreground cursor-grab">
+            <GripVertical className="h-4 w-4" />
+          </div>
+          
+          {/* Icon */}
+          <Icon className="h-4 w-4 text-accent" />
+          
+          {/* Label */}
+          <span className="text-sm font-medium">{label}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {/* Switch */}
+          <Switch
+            checked={checked}
+            onCheckedChange={onToggle}
+            onClick={(e) => e.stopPropagation()}
+          />
+          
+          {/* Expand Chevron */}
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      </div>
+      
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="px-3 pb-3 pt-0 border-t border-border/50">
+          <p className="text-xs text-muted-foreground mt-2">
+            {description || `Configurar opciones para ${label.toLowerCase()}`}
+          </p>
+          {/* Future: Additional configuration options here */}
+        </div>
+      )}
+    </div>
+  );
+
   // Sections configuration panel
   const sectionsPanel = (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b">
-        <h3 className="font-medium text-sm">SECCIONES</h3>
+        <h3 className="font-medium text-sm text-muted-foreground">SECCIONES</h3>
       </div>
       
-      <div className="flex-1 p-4 space-y-3">
-        {[
-          { key: 'coverPage', label: 'Portada', icon: '📋' },
-          { key: 'header', label: 'Encabezado', icon: '📄' },
-          { key: 'tableHeader', label: 'Cabecera de Tabla', icon: '📊' },
-          { key: 'tableContent', label: 'Contenido de Tabla', icon: '📝' },
-          { key: 'totals', label: 'Totales', icon: '💰' },
-          { key: 'footer', label: 'Pie de Página', icon: '📃' },
-        ].map(({ key, label, icon }) => (
-          <div key={key} className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-3">
-              <span className="text-sm">{icon}</span>
-              <span className="text-sm">{label}</span>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={sections[key as keyof typeof sections]}
-                onChange={() => toggleSection(key as keyof typeof sections)}
-                className="sr-only peer"
-              />
-              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-        ))}
+      <div className="flex-1 p-4 space-y-3 overflow-auto">
+        <SectionItem
+          id="coverPage"
+          label="Portada"
+          icon={BookOpen}
+          checked={sections.coverPage}
+          onToggle={() => toggleSection('coverPage')}
+          onExpand={() => toggleExpanded('coverPage')}
+          isExpanded={expandedSections.includes('coverPage')}
+          description="Página inicial del documento con información general del presupuesto"
+        />
+        
+        <SectionItem
+          id="header"
+          label="Encabezado"
+          icon={Heading}
+          checked={sections.header}
+          onToggle={() => toggleSection('header')}
+          onExpand={() => toggleExpanded('header')}
+          isExpanded={expandedSections.includes('header')}
+          description="Información del proyecto y empresa en la parte superior"
+        />
+        
+        <SectionItem
+          id="tableHeader"
+          label="Cabecera de Tabla"
+          icon={Table}
+          checked={sections.tableHeader}
+          onToggle={() => toggleSection('tableHeader')}
+          onExpand={() => toggleExpanded('tableHeader')}
+          isExpanded={expandedSections.includes('tableHeader')}
+          description="Encabezados de columnas para la tabla de tareas"
+        />
+        
+        <SectionItem
+          id="tableContent"
+          label="Contenido de Tabla"
+          icon={FileBarChart}
+          checked={sections.tableContent}
+          onToggle={() => toggleSection('tableContent')}
+          onExpand={() => toggleExpanded('tableContent')}
+          isExpanded={expandedSections.includes('tableContent')}
+          description="Filas con las tareas y sus detalles"
+        />
+        
+        <SectionItem
+          id="totals"
+          label="Totales"
+          icon={Calculator}
+          checked={sections.totals}
+          onToggle={() => toggleSection('totals')}
+          onExpand={() => toggleExpanded('totals')}
+          isExpanded={expandedSections.includes('totals')}
+          description="Resumen de costos y totales del presupuesto"
+        />
+        
+        <SectionItem
+          id="footer"
+          label="Pie de Página"
+          icon={FileSignature}
+          checked={sections.footer}
+          onToggle={() => toggleSection('footer')}
+          onExpand={() => toggleExpanded('footer')}
+          isExpanded={expandedSections.includes('footer')}
+          description="Información adicional al final del documento"
+        />
       </div>
     </div>
   );
