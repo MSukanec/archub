@@ -57,6 +57,10 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     footer: true,
   });
 
+  // Get blocks and filename from modal data
+  const blocks = modalData?.blocks || [];
+  const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
+
   // Footer configuration - Initialize with text from blocks if available
   const [footerConfig, setFooterConfig] = useState(() => {
     const footerBlock = blocks.find(block => block.type === 'footer');
@@ -68,9 +72,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
 
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
-  
-  const blocks = modalData?.blocks || [];
-  const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
 
   // Generate PDF blob from blocks using react-pdf with current configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
