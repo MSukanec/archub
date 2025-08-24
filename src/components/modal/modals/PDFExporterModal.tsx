@@ -99,6 +99,13 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     layout: 'row' as 'row' | 'column',
   });
 
+  // Payment plan configuration
+  const [paymentPlanConfig, setPaymentPlanConfig] = useState({
+    showSchedule: true, // Cronograma de cuotas
+    showDetailTable: true, // Tabla detallada por unidad
+    showPlanInfo: true, // Información del plan
+  });
+
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
 
@@ -209,6 +216,15 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
             }
           };
         }
+        
+        // Override payment plan data with paymentPlanConfig
+        if (block.type === 'paymentPlan') {
+          return {
+            ...block,
+            config: paymentPlanConfig
+          }
+        }
+        
         return block;
       });
       
@@ -906,10 +922,40 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                 Tabla detallada del plan de pagos con cronograma de cuotas e información del plan
               </p>
               
-              {/* Payment Plan Configuration Controls can be added here in the future */}
-              <div className="space-y-3">
+              {/* Payment Plan Configuration Controls */}
+              <div className="space-y-4 mt-3">
+                {/* Plan Information */}
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Información del Plan</Label>
+                  <Switch
+                    checked={paymentPlanConfig.showPlanInfo}
+                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showPlanInfo: checked }))}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+
+                {/* Schedule Table */}
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Cronograma de Cuotas</Label>
+                  <Switch
+                    checked={paymentPlanConfig.showSchedule}
+                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showSchedule: checked }))}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+
+                {/* Detailed Table */}
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Tabla Detallada por Unidad</Label>
+                  <Switch
+                    checked={paymentPlanConfig.showDetailTable}
+                    onCheckedChange={(checked) => setPaymentPlanConfig(prev => ({ ...prev, showDetailTable: checked }))}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+
                 <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded">
-                  Plan de pagos configurado automáticamente según los datos del proyecto
+                  La tabla detallada incluye: Actualización, Valor de Cuota, Pagos y Saldos por unidad funcional
                 </div>
               </div>
             </div>

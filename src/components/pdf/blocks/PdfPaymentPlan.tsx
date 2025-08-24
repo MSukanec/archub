@@ -132,6 +132,16 @@ const styles = StyleSheet.create({
 
 export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
   const { paymentPlan, installments, commitments = [], payments = [], clientsInfo = [] } = data
+  const { showPlanInfo = true, showSchedule = true, showDetailTable = true } = config || {}
+  
+  // Debug logging
+  console.log('PdfPaymentPlan received data:', {
+    installments: installments?.length || 0,
+    commitments: commitments?.length || 0,
+    payments: payments?.length || 0,
+    clientsInfo: clientsInfo?.length || 0,
+    config
+  })
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -244,8 +254,9 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
       <Text style={styles.title}>Plan de Pagos</Text>
       
       {/* Información del Plan */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Información del Plan</Text>
+      {showPlanInfo && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Información del Plan</Text>
         
         <View style={styles.row}>
           <Text style={styles.label}>Tipo:</Text>
@@ -276,9 +287,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
           <Text style={styles.value}>{formatDate(paymentPlan.start_date)}</Text>
         </View>
       </View>
+      )}
 
       {/* Tabla de Cuotas */}
-      {installments.length > 0 && (
+      {showSchedule && installments.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.subtitle}>Cronograma de Cuotas</Text>
           
@@ -309,7 +321,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
       )}
 
       {/* Tabla Detallada de Cuotas por Unidad */}
-      {heatmapData.length > 0 && commitments.length > 0 && (
+      {showDetailTable && heatmapData.length > 0 && commitments.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.subtitle}>Detalle de Cuotas por Unidad Funcional</Text>
           
