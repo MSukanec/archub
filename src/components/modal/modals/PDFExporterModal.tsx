@@ -291,6 +291,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       footerContent={footerContent}
       onClose={onClose}
       isEditing={false}
+      fullscreen={true}
     />
   );
 }

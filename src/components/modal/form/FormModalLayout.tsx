@@ -22,6 +22,8 @@ interface FormModalLayoutProps {
   onSubmit?: () => void;
   // Prop para controlar el ancho del modal (similar al Layout)
   wide?: boolean;
+  // Prop para hacer el modal pantalla completa
+  fullscreen?: boolean;
 }
 
 export function FormModalLayout({
@@ -37,6 +39,7 @@ export function FormModalLayout({
   isEditing = false,
   onSubmit,
   wide = false,
+  fullscreen = false,
 }: FormModalLayoutProps) {
   const { currentPanel, setPanel } = useModalPanelStore();
 
@@ -109,10 +112,12 @@ export function FormModalLayout({
         className={cn(
           "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
           "w-full h-full rounded-none", // Mobile: full viewport
-          // Desktop width control based on wide prop
-          wide 
-            ? "md:w-[1200px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: fixed 1200px
-            : "md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // DEFAULT: fixed 600px
+          // Fullscreen mode takes precedence
+          fullscreen 
+            ? "md:w-full md:h-full md:rounded-none md:m-0" // FULLSCREEN: 100% viewport
+            : wide 
+              ? "md:w-[1200px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: fixed 1200px
+              : "md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // DEFAULT: fixed 600px
           "flex flex-col overflow-auto",
           className,
         )}
