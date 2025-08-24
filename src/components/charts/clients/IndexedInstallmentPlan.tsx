@@ -385,6 +385,9 @@ export default function IndexedInstallmentPlan({
                       data: { 
                         paymentPlan,
                         installments,
+                        commitments,
+                        payments,
+                        clientsInfo,
                         projectId,
                         organizationId
                       },

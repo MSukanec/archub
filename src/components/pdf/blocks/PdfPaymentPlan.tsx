@@ -1,6 +1,41 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 
+interface InstallmentData {
+  id: string
+  project_id: string
+  organization_id: string
+  date: string
+  number: number
+  index_reference: number
+  created_at: string
+}
+
+interface ClientCommitment {
+  id: string
+  project_id: string
+  client_id: string
+  unit: string
+  committed_amount: number | null
+  currency_id: string | null
+  exchange_rate: number | null
+  currencies?: { symbol: string }
+}
+
+interface HeatmapCellData {
+  unitId: string
+  installmentNumber: number
+  updatedAmount: number
+  installmentValue: number
+  payment: number
+  balance: number
+  isPaid: boolean
+  commitmentCurrency: {
+    symbol: string
+    exchangeRate: number
+  }
+}
+
 interface PaymentPlanData {
   paymentPlan: {
     id: string
@@ -14,7 +49,10 @@ interface PaymentPlanData {
       description: string
     }
   }
-  installments: any[]
+  installments: InstallmentData[]
+  commitments?: ClientCommitment[]
+  payments?: any[]
+  clientsInfo?: any[]
   projectId: string
   organizationId: string
 }
@@ -93,7 +131,7 @@ const styles = StyleSheet.create({
 })
 
 export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
-  const { paymentPlan, installments } = data
+  const { paymentPlan, installments, commitments = [], payments = [], clientsInfo = [] } = data
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -114,6 +152,92 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
       default: return frequency
     }
   }
+
+  const getClientDisplayName = (commitment: ClientCommitment) => {
+    const clientInfo = clientsInfo?.find((client: any) => client.id === commitment.client_id)
+    if (!clientInfo) return 'Cliente'
+    
+    if (clientInfo.company_name) {
+      return clientInfo.company_name
+    }
+    return `${clientInfo.first_name || ''} ${clientInfo.last_name || ''}`.trim()
+  }
+
+  // Calculate heatmap data using the same logic as the component
+  const generateHeatmapData = (): HeatmapCellData[][] => {
+    const heatmapData: HeatmapCellData[][] = []
+    const previousBalancesByUnit: { [unitId: string]: number } = {}
+    
+    installments.forEach((installment) => {
+      const rowData: HeatmapCellData[] = []
+      
+      if (commitments?.length) {
+        commitments.forEach((commitment) => {
+          // Find payments for this specific client and installment number
+          const installmentPayments = payments?.filter((payment: any) => 
+            (commitment.unit ? payment.unit === commitment.unit : payment.client_id === commitment.client_id) &&
+            payment.installment_number === installment.number
+          ) || []
+          
+          // Convert payments to commitment currency
+          const totalPaidInCommitmentCurrency = installmentPayments.reduce((sum: number, payment: any) => {
+            let convertedAmount = payment.amount || 0
+            
+            if (payment.currency_id !== commitment.currency_id && payment.exchange_rate) {
+              convertedAmount = convertedAmount * (payment.exchange_rate || 1)
+            }
+            
+            return sum + convertedAmount
+          }, 0)
+          
+          // Get commitment currency info
+          const commitmentCurrency = commitment.currencies || { symbol: '$' }
+          
+          // Calculate updated amount (violeta)
+          let updatedAmount: number
+          
+          if (installment.number === 1) {
+            updatedAmount = Math.round(commitment.committed_amount || 0)
+          } else {
+            const previousBalance = previousBalancesByUnit[commitment.id] || 0
+            const percentageIncrease = installment.index_reference || 0
+            updatedAmount = Math.round(previousBalance * (1 + percentageIncrease / 100))
+          }
+          
+          // Calculate installment value = MONTO VIOLETA / CUOTAS RESTANTES
+          const totalInstallments = installments?.length || 1
+          const remainingInstallments = totalInstallments - installment.number + 1
+          const installmentValue = Math.round(updatedAmount / remainingInstallments)
+          
+          // Calculate balance = MONTO ACTUALIZADO (violeta) - PAGO (verde)
+          const balance = updatedAmount - Math.round(totalPaidInCommitmentCurrency)
+          
+          // Store balance for next installment
+          previousBalancesByUnit[commitment.id] = balance
+          
+          rowData.push({
+            unitId: commitment.id,
+            installmentNumber: installment.number,
+            updatedAmount: updatedAmount,
+            installmentValue: installmentValue,
+            payment: Math.round(totalPaidInCommitmentCurrency),
+            balance: balance,
+            isPaid: totalPaidInCommitmentCurrency > 0,
+            commitmentCurrency: {
+              symbol: commitmentCurrency.symbol || '$',
+              exchangeRate: commitment.exchange_rate || 1
+            }
+          })
+        })
+      }
+      
+      heatmapData.push(rowData)
+    })
+
+    return heatmapData
+  }
+
+  const heatmapData = generateHeatmapData()
 
   return (
     <View style={styles.container}>
@@ -180,6 +304,102 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 </Text>
               </View>
             ))}
+          </View>
+        </View>
+      )}
+
+      {/* Tabla Detallada de Cuotas por Unidad */}
+      {heatmapData.length > 0 && commitments.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.subtitle}>Detalle de Cuotas por Unidad Funcional</Text>
+          
+          <View style={styles.table}>
+            {/* Header con unidades */}
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderCell, { width: 80 }]}>Cuota / Unidad</Text>
+              {commitments.map((commitment) => (
+                <Text key={commitment.id} style={[styles.tableHeaderCell, { width: 120 }]}>
+                  {commitment.unit || getClientDisplayName(commitment)}
+                </Text>
+              ))}
+            </View>
+            
+            {/* Subheader con nombres/montos */}
+            <View style={styles.tableRow}>
+              <Text style={[styles.tableCell, { width: 80 }]}></Text>
+              {commitments.map((commitment) => (
+                <View key={`header-${commitment.id}`} style={{ width: 120, padding: 2 }}>
+                  <Text style={[styles.tableCell, { fontSize: 8, textAlign: 'center' }]}>
+                    {getClientDisplayName(commitment)}
+                  </Text>
+                  <Text style={[styles.tableCell, { fontSize: 8, textAlign: 'center', fontWeight: 'bold' }]}>
+                    {commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            
+            {/* Filas de cuotas */}
+            {heatmapData.map((rowData, rowIndex) => {
+              const installment = installments[rowIndex]
+              if (!installment) return null
+              
+              return (
+                <View key={installment.id}>
+                  {/* Fila principal con información de cuota */}
+                  <View style={styles.tableRow}>
+                    <View style={{ width: 80, padding: 4 }}>
+                      <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 10 }]}>
+                        Cuota {installment.number.toString().padStart(2, '0')}
+                      </Text>
+                      <Text style={[styles.tableCell, { fontSize: 8 }]}>
+                        {formatDate(installment.date)}
+                      </Text>
+                      <Text style={[styles.tableCell, { fontSize: 8 }]}>
+                        {installment.index_reference?.toFixed(2) || '0.00'}%
+                      </Text>
+                    </View>
+                    
+                    {/* Columnas para cada unidad */}
+                    {rowData.map((cellData, colIndex) => (
+                      <View key={`${rowIndex}-${colIndex}`} style={{ width: 120, padding: 2 }}>
+                        {/* Actualización - Violeta */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#7c3aed' }]}>Actualización:</Text>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#7c3aed', fontWeight: 'bold' }]}>
+                            {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Valor de Cuota - Rojo */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#dc2626' }]}>Valor de Cuota:</Text>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#dc2626' }]}>
+                            {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Pago - Verde */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#16a34a' }]}>Pago:</Text>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#16a34a' }]}>
+                            {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Saldo - Azul */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#2563eb' }]}>Saldo:</Text>
+                          <Text style={[styles.tableCell, { fontSize: 7, color: '#2563eb' }]}>
+                            {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )
+            })}
           </View>
         </View>
       )}
