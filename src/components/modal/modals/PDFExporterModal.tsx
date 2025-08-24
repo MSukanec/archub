@@ -73,6 +73,38 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
 
+  // Custom hook for debouncing text inputs
+  const useDebounce = (value: any, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+    
+    return debouncedValue;
+  };
+
+  // Debounce only text inputs (footer text and margin input)
+  const debouncedFooterText = useDebounce(footerConfig.text, 500);
+  const debouncedMargin = useDebounce(pdfConfig.margin, 400);
+  
+  // Create debounced configs
+  const debouncedFooterConfig = useMemo(() => ({
+    ...footerConfig,
+    text: debouncedFooterText
+  }), [footerConfig.showDivider, debouncedFooterText]);
+  
+  const debouncedPdfConfig = useMemo(() => ({
+    ...pdfConfig,
+    margin: debouncedMargin
+  }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
+
   // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
     try {
@@ -198,38 +230,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   useEffect(() => {
     loadPdf();
   }, [loadPdf]);
-
-  // Custom hook for debouncing text inputs
-  const useDebounce = (value: any, delay: number) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    
-    useEffect(() => {
-      const handler = setTimeout(() => {
-        setDebouncedValue(value);
-      }, delay);
-      
-      return () => {
-        clearTimeout(handler);
-      };
-    }, [value, delay]);
-    
-    return debouncedValue;
-  };
-
-  // Debounce only text inputs (footer text and margin input)
-  const debouncedFooterText = useDebounce(footerConfig.text, 500);
-  const debouncedMargin = useDebounce(pdfConfig.margin, 400);
-  
-  // Create debounced configs
-  const debouncedFooterConfig = useMemo(() => ({
-    ...footerConfig,
-    text: debouncedFooterText
-  }), [footerConfig.showDivider, debouncedFooterText]);
-  
-  const debouncedPdfConfig = useMemo(() => ({
-    ...pdfConfig,
-    margin: debouncedMargin
-  }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
 
   // Reload PDF when debounced configurations change
   useEffect(() => {
