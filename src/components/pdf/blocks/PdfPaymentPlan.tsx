@@ -134,14 +134,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
   const { paymentPlan, installments, commitments = [], payments = [], clientsInfo = [] } = data
   const { showPlanInfo = true, showSchedule = true, showDetailTable = true } = config || {}
   
-  // Debug logging
-  console.log('PdfPaymentPlan received data:', {
-    installments: installments?.length || 0,
-    commitments: commitments?.length || 0,
-    payments: payments?.length || 0,
-    clientsInfo: clientsInfo?.length || 0,
-    config
-  })
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
