@@ -19,7 +19,7 @@ const AdminTasks = () => {
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
     { id: 'flujo', label: 'Flujo', isActive: activeTab === 'flujo' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
-    { id: 'divisiones', label: 'Divisiones', isActive: activeTab === 'divisiones' },
+    { id: 'divisiones', label: 'Rubros', isActive: activeTab === 'divisiones' },
     { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' },
     { id: 'acciones', label: 'Acciones', isActive: activeTab === 'acciones' }
   ];
@@ -40,7 +40,7 @@ const AdminTasks = () => {
         };
       case 'divisiones':
         return {
-          label: "Nueva División",
+          label: "Nuevo Rubro",
           icon: Plus,
           onClick: () => openModal('task-division', { isEditing: true })
         };
