@@ -68,6 +68,15 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     };
   });
 
+  // Construction tasks table configuration
+  const [tableConfig, setTableConfig] = useState({
+    titleSize: 12, // int4 for header text size
+    bodySize: 10,  // int4 for body text size
+    showTableBorder: true, // bool for complete table border
+    showRowDividers: true, // bool for lines between items
+    groupBy: 'fases-y-rubros' as 'fase' | 'rubro' | 'fases-y-rubros', // grouping option
+  });
+
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
 
@@ -88,9 +97,11 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     return debouncedValue;
   };
 
-  // Debounce only text inputs (footer text and margin input)
+  // Debounce text inputs and number inputs
   const debouncedFooterText = useDebounce(footerConfig.text, 500);
   const debouncedMargin = useDebounce(pdfConfig.margin, 400);
+  const debouncedTitleSize = useDebounce(tableConfig.titleSize, 400);
+  const debouncedBodySize = useDebounce(tableConfig.bodySize, 400);
   
   // Create debounced configs
   const debouncedFooterConfig = useMemo(() => ({
@@ -102,6 +113,12 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     ...pdfConfig,
     margin: debouncedMargin
   }), [pdfConfig.pageSize, pdfConfig.orientation, debouncedMargin]);
+  
+  const debouncedTableConfig = useMemo(() => ({
+    ...tableConfig,
+    titleSize: debouncedTitleSize,
+    bodySize: debouncedBodySize
+  }), [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
 
   // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
@@ -129,7 +146,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         return block;
       });
       
-      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} />;
+      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={debouncedPdfConfig} footerConfig={debouncedFooterConfig} tableConfig={debouncedTableConfig} />;
       const asPdf = pdf(pdfDoc);
       return await asPdf.toBlob();
     } catch (error) {
@@ -232,7 +249,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   // Reload PDF when debounced configurations change
   useEffect(() => {
     loadPdf();
-  }, [debouncedPdfConfig, debouncedFooterConfig, sections, loadPdf]);
+  }, [debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, sections, loadPdf]);
 
   // Render page when page or scale changes
   useEffect(() => {
@@ -448,16 +465,136 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           description="Información del proyecto y empresa en la parte superior"
         />
         
-        <SectionItem
-          id="constructionTasks"
-          label="Tareas de Construcción"
-          icon={Table}
-          checked={sections.constructionTasks}
-          onToggle={() => toggleSection('constructionTasks')}
-          onExpand={() => toggleExpanded('constructionTasks')}
-          isExpanded={expandedSection === 'constructionTasks'}
-          description="Tabla completa con todas las tareas, costos y totales del presupuesto"
-        />
+        {/* Construction Tasks Section - Custom with table controls */}
+        <div 
+          className="border border-border rounded-lg overflow-hidden bg-card"
+          data-section-id="constructionTasks"
+        >
+          {/* Section Header */}
+          <div 
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => toggleExpanded('constructionTasks')}
+          >
+            <div className="flex items-center gap-3">
+              {/* Drag Handle - for future use */}
+              <div className="text-muted-foreground cursor-grab">
+                <GripVertical className="h-4 w-4" />
+              </div>
+              
+              {/* Icon */}
+              <Table className="h-4 w-4 text-accent" />
+              
+              {/* Label */}
+              <span className="text-sm font-medium">Tareas de Construcción</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Switch */}
+              <Switch
+                checked={sections.constructionTasks}
+                onCheckedChange={() => toggleSection('constructionTasks')}
+                className="data-[state=checked]:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Expand Chevron */}
+              {expandedSection === 'constructionTasks' ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          {/* Expanded Content with Table Controls */}
+          {expandedSection === 'constructionTasks' && (
+            <div className="px-3 pb-3 pt-0 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mt-2 mb-4">
+                Tabla completa con todas las tareas, costos y totales del presupuesto
+              </p>
+              
+              {/* Text Sizes - Inline */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <Label htmlFor="titleSize" className="text-xs">Tamaño Título</Label>
+                  <Input
+                    id="titleSize"
+                    type="number"
+                    min="8"
+                    max="20"
+                    value={tableConfig.titleSize}
+                    onChange={(e) => setTableConfig(prev => ({ ...prev, titleSize: parseInt(e.target.value) || 12 }))}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bodySize" className="text-xs">Tamaño Cuerpo</Label>
+                  <Input
+                    id="bodySize"
+                    type="number"
+                    min="6"
+                    max="16"
+                    value={tableConfig.bodySize}
+                    onChange={(e) => setTableConfig(prev => ({ ...prev, bodySize: parseInt(e.target.value) || 10 }))}
+                    className="h-8 text-xs"
+                  />
+                </div>
+              </div>
+              
+              {/* Table Borders - Inline */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <Label htmlFor="tableBorder" className="text-xs">Borde Tabla</Label>
+                  <Select 
+                    value={tableConfig.showTableBorder ? "si" : "no"} 
+                    onValueChange={(value) => setTableConfig(prev => ({ ...prev, showTableBorder: value === "si" }))}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="si">Con borde</SelectItem>
+                      <SelectItem value="no">Sin borde</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="rowDividers" className="text-xs">Líneas Divisorias</Label>
+                  <Select 
+                    value={tableConfig.showRowDividers ? "si" : "no"} 
+                    onValueChange={(value) => setTableConfig(prev => ({ ...prev, showRowDividers: value === "si" }))}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="si">Con líneas</SelectItem>
+                      <SelectItem value="no">Sin líneas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Grouping Option */}
+              <div>
+                <Label htmlFor="groupBy" className="text-xs">Agrupar por</Label>
+                <Select 
+                  value={tableConfig.groupBy} 
+                  onValueChange={(value: 'fase' | 'rubro' | 'fases-y-rubros') => setTableConfig(prev => ({ ...prev, groupBy: value }))}
+                >
+                  <SelectTrigger className="h-8 text-xs mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fase">Fase (oculta primera columna)</SelectItem>
+                    <SelectItem value="rubro">Rubro (oculta rubro)</SelectItem>
+                    <SelectItem value="fases-y-rubros">Fases y Rubros (oculta ambas)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Footer Section - Custom with text controls */}
         <div 
@@ -673,7 +810,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         </Button>
         <div className="flex-1">
           <PDFDownloadLink
-            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} />}
+            document={<PdfDocument blocks={blocks} config={pdfConfig} footerConfig={footerConfig} tableConfig={tableConfig} />}
             fileName={filename}
             className="w-full"
           >

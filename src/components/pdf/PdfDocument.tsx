@@ -21,13 +21,22 @@ interface FooterConfig {
   showDivider: boolean;
 }
 
+interface TableConfig {
+  titleSize: number;
+  bodySize: number;
+  showTableBorder: boolean;
+  showRowDividers: boolean;
+  groupBy: 'fase' | 'rubro' | 'fases-y-rubros';
+}
+
 interface PdfDocumentProps {
   blocks: PdfBlock[];
   config?: PdfConfig;
   footerConfig?: FooterConfig;
+  tableConfig?: TableConfig;
 }
 
-export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig }) => {
+export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig, tableConfig }) => {
   const pageConfig = config || { pageSize: 'A4', orientation: 'portrait', margin: 20 };
   
   // Apply margin as padding
@@ -49,16 +58,24 @@ export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footer
           const BlockComponent = pdfBlocks[block.type as keyof typeof pdfBlocks];
           if (!BlockComponent) return null;
           
-          // Pass footerConfig to footer blocks
-          const blockData = block.type === 'footer' && footerConfig 
-            ? { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider }
-            : block.data;
+          // Pass footerConfig to footer blocks and tableConfig to table blocks
+          let blockData = block.data;
+          let blockConfig = block.config;
+          
+          if (block.type === 'footer' && footerConfig) {
+            blockData = { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider };
+          }
+          
+          if ((block.type === 'tableHeader' || block.type === 'tableContent' || block.type === 'totals') && tableConfig) {
+            blockData = { ...block.data, ...tableConfig };
+            blockConfig = { ...block.config, ...tableConfig };
+          }
           
           return (
             <BlockComponent 
               key={index} 
               data={blockData} 
-              config={block.config} 
+              config={blockConfig} 
             />
           );
         })}
