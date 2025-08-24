@@ -367,8 +367,7 @@ const AdminTaskList = () => {
             <AdminTaskRow
               key={task.id}
               task={task}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onClick={() => handleEdit(task)}
             />
           ))}
         </div>
