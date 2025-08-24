@@ -501,5 +501,9 @@ TABLA TASK_DIVISIONS:
   {
     "column_name": "order",
     "data_type": "integer"
+  },
+  {
+    "column_name": "code",
+    "data_type": "text"
   }
 ]
