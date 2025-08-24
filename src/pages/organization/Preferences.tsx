@@ -280,9 +280,8 @@ export default function Preferences() {
                     label: `${currency.name} (${currency.symbol})`
                   }))}
                   value={secondaryCurrencies}
-                  onChange={handleSecondaryCurrenciesChange}
+                  onValueChange={handleSecondaryCurrenciesChange}
                   placeholder="Selecciona una moneda secundaria"
-                  addButtonText="Agregar Moneda Secundaria"
                 />
               </div>
 
@@ -310,9 +309,8 @@ export default function Preferences() {
                     label: wallet.name
                   }))}
                   value={secondaryWallets}
-                  onChange={handleSecondaryWalletsChange}
+                  onValueChange={handleSecondaryWalletsChange}
                   placeholder="Selecciona una billetera secundaria"
-                  addButtonText="Agregar Billetera Secundaria"
                 />
               </div>
             </div>
