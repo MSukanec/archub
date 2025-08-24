@@ -932,8 +932,35 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
     form.handleSubmit(onSubmit)();
   };
 
+  const handleEditClick = () => {
+    setPanel('edit');
+  };
+
   const siteLogId = data?.data?.id || data?.id;
   const isEditing = data?.isEditing || !!siteLogId;
+
+  // Configurar botones del footer según el panel actual
+  const getFooterConfig = () => {
+    if (currentPanel === 'view') {
+      return {
+        cancelText: "Cerrar",
+        onLeftClick: closeModal,
+        submitText: "Editar",
+        onSubmit: handleEditClick,
+        showLoadingSpinner: false
+      };
+    } else {
+      return {
+        cancelText: "Cancelar",
+        onLeftClick: closeModal,
+        submitText: siteLogId ? "Actualizar" : "Crear",
+        onSubmit: handleSubmit,
+        showLoadingSpinner: isLoading
+      };
+    }
+  };
+
+  const footerConfig = getFooterConfig();
 
   return (
     <FormModalLayout 
@@ -956,11 +983,11 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       }
       footerContent={
         <FormModalFooter
-          cancelText="Cancelar"
-          onLeftClick={closeModal}
-          onSubmit={handleSubmit}
-          showLoadingSpinner={isLoading}
-          submitText={siteLogId ? "Actualizar" : "Crear"}
+          cancelText={footerConfig.cancelText}
+          onLeftClick={footerConfig.onLeftClick}
+          onSubmit={footerConfig.onSubmit}
+          showLoadingSpinner={footerConfig.showLoadingSpinner}
+          submitText={footerConfig.submitText}
         />
       }
       isEditing={isEditing}
