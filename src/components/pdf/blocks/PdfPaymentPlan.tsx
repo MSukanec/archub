@@ -365,32 +365,38 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 <View style={{ flexDirection: 'row', gap: 15 }}>
                   
                   {/* Columna izquierda - Header (1/3) */}
-                  <View style={{ flex: 1, paddingRight: 10, borderTopWidth: 2, borderTopColor: '#374151', borderBottomWidth: 2, borderBottomColor: '#374151', paddingVertical: 15 }}>
-                    
-                    {/* Código de unidad grande alineado a la izquierda */}
-                    <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                      <Text style={{ fontSize: 28, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5 }}>
-                        {commitment.unit || `UF${commitmentIndex + 1}`}
-                      </Text>
-                    </View>
-                    
-                    {/* Lista de información */}
-                    <View style={{ gap: 8 }}>
-                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
-                        <Text style={{ fontWeight: 'bold' }}>Unidad Funcional:</Text>{'\n'}{commitment.unit || `UF${commitmentIndex + 1}`}
-                      </Text>
-                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
-                        <Text style={{ fontWeight: 'bold' }}>Cliente:</Text>{'\n'}{getClientDisplayName(commitment)}
-                      </Text>
-                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
-                        <Text style={{ fontWeight: 'bold' }}>Monto Inicial de Obra:</Text>{'\n'}{commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
-                      </Text>
-                      {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
-                        <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
-                          <Text style={{ fontWeight: 'bold' }}>Cotización de dólar inicial:</Text>{'\n'}${commitment.exchange_rate}
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    {/* Contenido con marco */}
+                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', paddingVertical: 15 }}>
+                      
+                      {/* Código de unidad grande alineado a la izquierda */}
+                      <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
+                        <Text style={{ fontSize: 28, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5 }}>
+                          {commitment.unit || `UF${commitmentIndex + 1}`}
                         </Text>
-                      )}
+                      </View>
+                      
+                      {/* Lista de información */}
+                      <View style={{ gap: 8 }}>
+                        <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                          <Text style={{ fontWeight: 'bold' }}>Unidad Funcional:</Text>{'\n'}{commitment.unit || `UF${commitmentIndex + 1}`}
+                        </Text>
+                        <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                          <Text style={{ fontWeight: 'bold' }}>Cliente:</Text>{'\n'}{getClientDisplayName(commitment)}
+                        </Text>
+                        <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                          <Text style={{ fontWeight: 'bold' }}>Monto Inicial de Obra:</Text>{'\n'}{commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                        </Text>
+                        {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
+                          <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                            <Text style={{ fontWeight: 'bold' }}>Cotización de dólar inicial:</Text>{'\n'}${commitment.exchange_rate}
+                          </Text>
+                        )}
+                      </View>
                     </View>
+                    
+                    {/* Línea inferior justo después del contenido */}
+                    <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151' }} />
                   </View>
 
                   {/* Columna derecha - Tabla (2/3) */}
