@@ -106,17 +106,19 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
   const dynamicStyles = {
     tableHeader: {
       ...styles.tableHeader,
-      borderWidth: tableConfig.showTableBorder ? 1 : 0,
-      borderBottomWidth: tableConfig.showRowDividers ? 1 : 0,
+      borderWidth: tableConfig.showTableBorder ? 1 : undefined,
+      borderBottomWidth: tableConfig.showRowDividers ? 1 : undefined,
+      borderColor: tableConfig.showTableBorder ? '#000' : undefined,
     },
     tableRow: {
       ...styles.tableRow,
-      borderLeftWidth: tableConfig.showTableBorder ? 1 : 0,
-      borderRightWidth: tableConfig.showTableBorder ? 1 : 0,
-      borderBottomWidth: tableConfig.showRowDividers ? 1 : 0,
+      borderLeftWidth: tableConfig.showTableBorder ? 1 : undefined,
+      borderRightWidth: tableConfig.showTableBorder ? 1 : undefined,
+      borderBottomWidth: tableConfig.showRowDividers ? 1 : undefined,
+      borderColor: tableConfig.showTableBorder || tableConfig.showRowDividers ? '#000' : undefined,
     },
     headerText: {
-      ...styles.headerText,
+      fontWeight: 'bold',
       fontSize: tableConfig.titleSize,
     },
     bodyText: {
