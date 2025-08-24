@@ -11,7 +11,7 @@ import { Calculator, Plus, Trash2, Building2, Edit, FileText, Settings } from 'l
 import { useNavigationStore } from '@/stores/navigationStore'
 // Using Table component for budget tasks display
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 import { useBudgets, useDeleteBudget } from '@/hooks/use-budgets'

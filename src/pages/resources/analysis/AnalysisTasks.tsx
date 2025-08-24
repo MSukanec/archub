@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { TableIcon, Edit, Trash2, Search, Filter, Plus, Home, Bell } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'

@@ -6,7 +6,7 @@ import { Calendar, Trash2, BarChart3, CheckSquare } from 'lucide-react'
 import { Plus } from 'lucide-react'
 
 import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 
 import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'

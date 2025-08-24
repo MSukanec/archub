@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Edit, FileText, Calculator, Plus, Package, DollarSign, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table } from '@/components/ui-custom/Table';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

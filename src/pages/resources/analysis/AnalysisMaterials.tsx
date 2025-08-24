@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'

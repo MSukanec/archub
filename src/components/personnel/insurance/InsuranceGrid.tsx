@@ -1,7 +1,7 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { InsuranceActions } from './InsuranceActions'
 import { AttachmentBadge } from '@/components/attachments/AttachmentBadge'
 import { InsuranceStatusRow } from '@/services/insurances'

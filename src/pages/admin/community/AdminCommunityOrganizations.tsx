@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table } from '@/components/ui-custom/Table';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';

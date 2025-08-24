@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Users, Plus, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
-import { Table } from "@/components/ui-custom/Table";
+import { Table } from "@/components/ui-custom/tables-and-trees/Table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-import { Table } from "@/components/ui-custom/Table";
+import { Table } from "@/components/ui-custom/tables-and-trees/Table";
 import { EmptyState } from "@/components/ui-custom/EmptyState";
 
 import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";

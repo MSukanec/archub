@@ -4,7 +4,7 @@ import { Settings, Edit, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-import { Table } from '@/components/ui-custom/Table';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/EmptyState';
 import { ActionBar } from '@/components/layout/desktop/ActionBar';
 

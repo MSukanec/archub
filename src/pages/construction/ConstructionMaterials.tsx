@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Table } from '@/components/ui-custom/Table'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 
 import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
