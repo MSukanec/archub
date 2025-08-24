@@ -466,19 +466,19 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           return `CU-${Date.now()}`
         }
 
-        // Create task without unit_id and category_id first
         const newTask = {
           code: generateTaskCode(),
           custom_name: customName,
           param_values: {}, // Empty object since we're not using parameters
           param_order: [], // Empty array since we're not using parameters
           name_rendered: null, // NULL since we're not using parametric generation
+          unit_id: unitId || null,
+          category_id: categoryId || null,
           task_template_id: taskTemplateId || null,
           task_division_id: taskDivisionId || null,
           organization_id: null, // Always NULL as specified
           is_system: true, // Always TRUE as specified
           is_completed: isCompleted
-          // NOTE: Deliberately excluding unit_id and category_id from initial insert
         }
         
         console.log('🔧 Creating task with data:', newTask)
@@ -501,51 +501,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         taskId = data.id
         console.log('✅ Task created successfully with ID:', taskId)
-        
-        // Update unit_id and category_id in a separate operation if they exist
-        if (unitId || categoryId) {
-          console.log('🔄 Updating unit_id and category_id separately...')
-          const updateData: any = {}
-          if (unitId) updateData.unit_id = unitId
-          if (categoryId) updateData.category_id = categoryId
-          
-          console.log('🔄 Update payload:', updateData)
-          console.log('🔄 Updating task ID:', taskId)
-          
-          const { data: updateResult, error: updateError } = await supabase
-            .from('tasks')
-            .update(updateData)
-            .eq('id', taskId)
-            .select('unit_id, category_id')
-            .single()
-          
-          if (updateError) {
-            console.error('❌ Error updating unit_id/category_id:', updateError)
-          } else {
-            console.log('✅ Update operation completed')
-            console.log('✅ Returned data after update:', updateResult)
-            
-            // Let's double check what was actually saved
-            const { data: verifyData, error: verifyError } = await supabase
-              .from('tasks')
-              .select('unit_id, category_id')
-              .eq('id', taskId)
-              .single()
-            
-            if (verifyError) {
-              console.error('❌ Error verifying update:', verifyError)
-            } else {
-              console.log('🔍 Verification check - actual values in DB:', verifyData)
-              if (verifyData.unit_id !== unitId || verifyData.category_id !== categoryId) {
-                console.error('❌ MISMATCH! Expected vs Actual:')
-                console.error('   Expected unit_id:', unitId, 'Actual unit_id:', verifyData.unit_id)
-                console.error('   Expected category_id:', categoryId, 'Actual category_id:', verifyData.category_id)
-              } else {
-                console.log('✅ Fields were successfully saved!')
-              }
-            }
-          }
-        }
       }
 
       // Save materials if any
