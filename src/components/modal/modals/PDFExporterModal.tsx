@@ -51,9 +51,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   const [sections, setSections] = useState({
     coverPage: true,
     header: true,
-    tableHeader: true,
-    tableContent: true,
-    totals: true,
+    constructionTasks: true,
     footer: true,
   });
 
@@ -112,9 +110,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       const filteredBlocks = blocks.filter(block => {
         if (block.type === 'coverPage') return sections.coverPage;
         if (block.type === 'header') return sections.header;
-        if (block.type === 'tableHeader') return sections.tableHeader;
-        if (block.type === 'tableContent') return sections.tableContent;
-        if (block.type === 'totals') return sections.totals;
+        if (block.type === 'tableHeader') return sections.constructionTasks;
+        if (block.type === 'tableContent') return sections.constructionTasks;
+        if (block.type === 'totals') return sections.constructionTasks;
         if (block.type === 'footer') return sections.footer;
         return true;
       }).map(block => {
@@ -451,36 +449,14 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         />
         
         <SectionItem
-          id="tableHeader"
-          label="Cabecera de Tabla"
+          id="constructionTasks"
+          label="Tareas de Construcción"
           icon={Table}
-          checked={sections.tableHeader}
-          onToggle={() => toggleSection('tableHeader')}
-          onExpand={() => toggleExpanded('tableHeader')}
-          isExpanded={expandedSection === 'tableHeader'}
-          description="Encabezados de columnas para la tabla de tareas"
-        />
-        
-        <SectionItem
-          id="tableContent"
-          label="Contenido de Tabla"
-          icon={FileBarChart}
-          checked={sections.tableContent}
-          onToggle={() => toggleSection('tableContent')}
-          onExpand={() => toggleExpanded('tableContent')}
-          isExpanded={expandedSection === 'tableContent'}
-          description="Filas con las tareas y sus detalles"
-        />
-        
-        <SectionItem
-          id="totals"
-          label="Totales"
-          icon={Calculator}
-          checked={sections.totals}
-          onToggle={() => toggleSection('totals')}
-          onExpand={() => toggleExpanded('totals')}
-          isExpanded={expandedSection === 'totals'}
-          description="Resumen de costos y totales del presupuesto"
+          checked={sections.constructionTasks}
+          onToggle={() => toggleSection('constructionTasks')}
+          onExpand={() => toggleExpanded('constructionTasks')}
+          isExpanded={expandedSection === 'constructionTasks'}
+          description="Tabla completa con todas las tareas, costos y totales del presupuesto"
         />
         
         {/* Footer Section - Custom with text controls */}
