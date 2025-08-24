@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#6b7280',
+    backgroundColor: 'hsl(0, 0%, 30%)',
     padding: 6,
-    borderBottom: '1px solid #6b7280',
+    borderBottom: '1px solid hsl(0, 0%, 30%)',
   },
   tableHeaderCell: {
     fontSize: 8,
@@ -362,8 +362,8 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 
                 {/* Header de Unidad Funcional - Optimizado */}
                 <View style={{ marginBottom: 20 }}>
-                  {/* Línea superior */}
-                  <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                  {/* Líneas superior e inferior */}
+                  <View style={{ borderTopWidth: 2, borderTopColor: '#374151', borderBottomWidth: 1, borderBottomColor: '#374151', paddingBottom: 15, marginBottom: 15 }} />
                   
                   {/* Header principal */}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 }}>
@@ -393,8 +393,8 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                     </View>
                     
                     {/* Lado derecho - Código de unidad GRANDE */}
-                    <View style={{ flex: 0, alignItems: 'flex-end', maxWidth: 120 }}>
-                      <Text style={{ fontSize: 24, fontWeight: '900', color: '#1f2937', letterSpacing: 1 }}>
+                    <View style={{ flex: 0, alignItems: 'flex-end', paddingLeft: 10 }}>
+                      <Text style={{ fontSize: 20, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5, textAlign: 'right' }}>
                         {commitment.unit || `UF${commitmentIndex + 1}`}
                       </Text>
                     </View>
@@ -402,7 +402,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 </View>
 
                 {/* Tabla de Cuotas para esta Unidad */}
-                <View style={{ marginTop: 5 }}>
+                <View style={{ marginTop: 0 }}>
                   
                   <View style={styles.table}>
                     {/* Header */}
