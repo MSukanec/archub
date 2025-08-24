@@ -543,11 +543,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Configurable Badge */}
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                Configurable
-              </Badge>
-              
               {/* Switch */}
               <Switch
                 checked={sections.header}
