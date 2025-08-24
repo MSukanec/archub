@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 
 import { HierarchicalCategoryTree } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
 
-import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
+import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { toast } from '@/hooks/use-toast';
 
 const AdminTaskDivisions = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,7 @@ const AdminTaskDivisions = () => {
   const { data: divisions = [], isLoading, error, isError, refetch } = useTaskDivisionsAdmin();
   const { data: allDivisions = [] } = useAllTaskDivisions();
   const updateDivisionsOrderMutation = useUpdateTaskDivisionsOrder();
+  const updateTaskDivisionMutation = useUpdateTaskDivision();
 
   // Debug query state (only log errors)
   if (isError) {
@@ -49,8 +51,6 @@ const AdminTaskDivisions = () => {
       }
     }
   }, [divisions, expandedCategories.size]);
-
-  const deleteTaskDivisionMutation = useDeleteTaskDivision();
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
@@ -109,6 +109,33 @@ const AdminTaskDivisions = () => {
       await updateDivisionsOrderMutation.mutateAsync(divisionsWithOrder);
     } catch (error) {
       console.error('Error reordering divisions:', error);
+    }
+  };
+
+  const handleParentChange = async (childId: string, newParentId: string | null) => {
+    try {
+      await updateTaskDivisionMutation.mutateAsync({
+        id: childId,
+        parent_id: newParentId,
+        // Keep existing data - we only want to update parent_id
+        name: divisions.find(d => d.id === childId)?.name || '',
+        description: divisions.find(d => d.id === childId)?.description,
+        code: divisions.find(d => d.id === childId)?.code,
+        is_system: true,
+        organization_id: null,
+      });
+      
+      toast({
+        title: newParentId ? "Elemento convertido en hijo" : "Elemento movido al nivel principal",
+        description: "La relación padre-hijo se ha actualizado correctamente.",
+      });
+    } catch (error) {
+      console.error('Error changing parent:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la relación padre-hijo.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -187,6 +214,7 @@ const AdminTaskDivisions = () => {
               // Enable drag and drop for divisions
               enableDragAndDrop={true}
               onReorder={handleReorderDivisions}
+              onParentChange={handleParentChange}
               // Show order numbers for divisions
               showOrderNumber={true}
             />

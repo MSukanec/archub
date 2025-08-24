@@ -14,6 +14,9 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -55,6 +58,7 @@ interface HierarchicalCategoryTreeProps {
   // New drag and drop props
   enableDragAndDrop?: boolean;
   onReorder?: (reorderedItems: CategoryTreeNode[]) => void;
+  onParentChange?: (childId: string, newParentId: string | null) => void;
   
   // Show order number prop
   showOrderNumber?: boolean;
@@ -77,12 +81,17 @@ export function HierarchicalCategoryTree({
   // Drag and drop props
   enableDragAndDrop = false,
   onReorder,
+  onParentChange,
   
   // Show order number prop
   showOrderNumber = false,
 
   level = 0
 }: HierarchicalCategoryTreeProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | 'child' | null>(null);
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -90,12 +99,60 @@ export function HierarchicalCategoryTree({
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    setOverId(over?.id as string || null);
+
+    if (over && active.id !== over.id) {
+      // Determine drop position based on cursor position
+      const rect = over.rect;
+      if (rect) {
+        const y = event.activatorEvent ? (event.activatorEvent as MouseEvent).clientY : 0;
+        const top = rect.top;
+        const height = rect.height;
+        const middle = top + height / 2;
+        const threshold = height * 0.25;
+
+        if (y < top + threshold) {
+          setDropPosition('before');
+        } else if (y > middle + threshold) {
+          setDropPosition('after');
+        } else {
+          setDropPosition('child');
+        }
+      }
+    } else {
+      setDropPosition(null);
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    setActiveId(null);
+    setOverId(null);
+    setDropPosition(null);
+
+    if (!over || active.id === over.id) return;
+
+    // Handle parent-child relationship change
+    if (dropPosition === 'child' && onParentChange) {
+      onParentChange(active.id as string, over.id as string);
+      return;
+    }
+
+    // Handle reordering
+    if ((dropPosition === 'before' || dropPosition === 'after') && onReorder) {
       const oldIndex = categories.findIndex((item) => item.id === active.id);
-      const newIndex = categories.findIndex((item) => item.id === over?.id);
+      let newIndex = categories.findIndex((item) => item.id === over.id);
+      
+      if (dropPosition === 'after') {
+        newIndex = newIndex + 1;
+      }
       
       const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
       
@@ -105,9 +162,7 @@ export function HierarchicalCategoryTree({
         order: index + 1
       }));
       
-      if (onReorder) {
-        onReorder(reorderedWithOrder);
-      }
+      onReorder(reorderedWithOrder);
     }
   };
   
@@ -128,9 +183,33 @@ export function HierarchicalCategoryTree({
       opacity: isDragging ? 0.5 : 1,
     };
 
+    const isDropTarget = overId === category.id && activeId !== category.id;
+
     return (
-      <div ref={setNodeRef} style={style} {...attributes}>
-        {renderCategoryContent(category, currentLevel, enableDragAndDrop ? listeners : undefined)}
+      <div className="relative">
+        {/* Drop indicators */}
+        {isDropTarget && (
+          <>
+            {/* Before drop zone */}
+            {dropPosition === 'before' && (
+              <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
+            )}
+            
+            {/* Child drop zone */}
+            {dropPosition === 'child' && (
+              <div className="absolute inset-0 border-2 border-dashed border-primary bg-primary/5 rounded-md z-10" />
+            )}
+            
+            {/* After drop zone */}
+            {dropPosition === 'after' && (
+              <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
+            )}
+          </>
+        )}
+        
+        <div ref={setNodeRef} style={style} {...attributes}>
+          {renderCategoryContent(category, currentLevel, enableDragAndDrop ? listeners : undefined)}
+        </div>
       </div>
     );
   };
@@ -303,6 +382,7 @@ export function HierarchicalCategoryTree({
               onCreateChild={onCreateChild}
               enableDragAndDrop={enableDragAndDrop}
               onReorder={onReorder}
+              onParentChange={onParentChange}
               showOrderNumber={showOrderNumber}
               level={currentLevel + 1}
             />
@@ -382,6 +462,8 @@ export function HierarchicalCategoryTree({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={categories.map(cat => cat.id)} strategy={verticalListSortingStrategy}>
