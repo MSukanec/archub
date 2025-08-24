@@ -101,15 +101,16 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: 'hsl(0, 0%, 30%)',
+    backgroundColor: '#ffffff',
     padding: 6,
-    borderBottom: '1px solid hsl(0, 0%, 30%)',
+    borderTop: '2px solid #374151',
+    borderBottom: '2px solid #374151',
   },
   tableHeaderCell: {
     fontSize: 8,
     fontWeight: 'bold',
     flex: 1,
-    color: '#ffffff',
+    color: '#000000',
     textAlign: 'left'
   },
   tableRow: {
@@ -364,16 +365,10 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                 <View style={{ flexDirection: 'row', gap: 15 }}>
                   
                   {/* Columna izquierda - Header (1/3) */}
-                  <View style={{ flex: 1, paddingRight: 10 }}>
-                    {/* Línea superior */}
-                    <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                  <View style={{ flex: 1, paddingRight: 10, borderTopWidth: 2, borderTopColor: '#374151', borderBottomWidth: 2, borderBottomColor: '#374151', paddingVertical: 15 }}>
                     
-                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#6b7280', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 15 }}>
-                      DETALLE DE CUOTAS
-                    </Text>
-                    
-                    {/* Código de unidad grande */}
-                    <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                    {/* Código de unidad grande alineado a la izquierda */}
+                    <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
                       <Text style={{ fontSize: 28, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5 }}>
                         {commitment.unit || `UF${commitmentIndex + 1}`}
                       </Text>
@@ -400,7 +395,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
                   {/* Columna derecha - Tabla (2/3) */}
                   <View style={{ flex: 2 }}>
-                    <View style={styles.table}>
+                    <View style={{ ...styles.table, marginTop: 0 }}>
                     {/* Header */}
                     <View style={styles.tableHeader}>
                       <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Cuota</Text>
