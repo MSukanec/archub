@@ -57,10 +57,13 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     footer: true,
   });
 
-  // Footer configuration
-  const [footerConfig, setFooterConfig] = useState({
-    text: 'Generado automáticamente',
-    showDivider: true,
+  // Footer configuration - Initialize with text from blocks if available
+  const [footerConfig, setFooterConfig] = useState(() => {
+    const footerBlock = blocks.find(block => block.type === 'footer');
+    return {
+      text: footerBlock?.data?.text || 'Generado automáticamente',
+      showDivider: true,
+    };
   });
 
   // Expanded section for accordion (only one at a time)
@@ -69,12 +72,40 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   const blocks = modalData?.blocks || [];
   const filename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
 
-  // Generate PDF blob from blocks using react-pdf
+  // Generate PDF blob from blocks using react-pdf with current configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
-    const pdfDoc = <PdfDocument blocks={blocks} />;
-    const asPdf = pdf(pdfDoc);
-    return await asPdf.toBlob();
-  }, [blocks]);
+    try {
+      // Filter blocks based on current sections configuration
+      const filteredBlocks = blocks.filter(block => {
+        if (block.type === 'coverPage') return sections.coverPage;
+        if (block.type === 'header') return sections.header;
+        if (block.type === 'tableHeader') return sections.tableHeader;
+        if (block.type === 'tableContent') return sections.tableContent;
+        if (block.type === 'totals') return sections.totals;
+        if (block.type === 'footer') return sections.footer;
+        return true;
+      }).map(block => {
+        // Override footer data with current footerConfig
+        if (block.type === 'footer') {
+          return {
+            ...block,
+            data: {
+              text: footerConfig.text,
+              showDivider: footerConfig.showDivider
+            }
+          };
+        }
+        return block;
+      });
+      
+      const pdfDoc = <PdfDocument blocks={filteredBlocks} config={pdfConfig} footerConfig={footerConfig} />;
+      const asPdf = pdf(pdfDoc);
+      return await asPdf.toBlob();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      throw error;
+    }
+  }, [blocks, sections, pdfConfig, footerConfig]);
 
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
@@ -166,6 +197,15 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
   useEffect(() => {
     loadPdf();
   }, [loadPdf]);
+
+  // Reload PDF when configurations change (with debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadPdf();
+    }, 300); // Debounce to avoid too many regenerations
+    
+    return () => clearTimeout(timer);
+  }, [pdfConfig, footerConfig, sections, loadPdf]);
 
   // Render page when page or scale changes
   useEffect(() => {
