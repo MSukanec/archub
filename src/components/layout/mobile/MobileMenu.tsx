@@ -300,7 +300,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       icon: Building, 
       label: 'Organización', 
       defaultRoute: '/organization',
-      isActive: currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board'))
+      isActive: location !== '/dashboard' && (currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board')))
     },
 
     { 
