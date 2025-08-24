@@ -367,7 +367,7 @@ export default function IndexedInstallmentPlan({
             </p>
           </div>
           {paymentPlan && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex gap-2">
               <Button
                 variant="ghost"
                 size="sm"
