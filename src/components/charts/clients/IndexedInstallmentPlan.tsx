@@ -4,7 +4,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMobile } from '@/hooks/use-mobile'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Edit, Trash2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Loader2, Edit, Trash2, Calendar, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -368,6 +368,36 @@ export default function IndexedInstallmentPlan({
           </div>
           {paymentPlan && (
             <div className="flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openModal('pdf-exporter', {
+                  blocks: [
+                    {
+                      type: 'header',
+                      enabled: true,
+                      data: { title: 'Plan de Pagos' },
+                      config: {}
+                    },
+                    {
+                      type: 'paymentPlan',
+                      enabled: true,
+                      data: { 
+                        paymentPlan,
+                        installments,
+                        projectId,
+                        organizationId
+                      },
+                      config: {}
+                    }
+                  ],
+                  filename: `plan-de-pagos-${paymentPlan.payment_plans?.name || 'plan'}-${new Date().toISOString().split('T')[0]}.pdf`
+                })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <FileText className="w-3 h-3" />
+              </Button>
+              
               <Button
                 variant="ghost"
                 size="sm"

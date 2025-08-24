@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature, Settings } from 'lucide-react';
+import { FileText, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, GripVertical, BookOpen, Heading, Table, FileBarChart, Calculator, FileSignature, Settings, Calendar } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout';
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader';
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter';
@@ -54,6 +54,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     coverPage: true,
     header: true,
     constructionTasks: true,
+    paymentPlan: true,
     footer: true,
   });
 
@@ -194,6 +195,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
         if (block.type === 'tableHeader') return sections.constructionTasks;
         if (block.type === 'tableContent') return sections.constructionTasks;
         if (block.type === 'totals') return sections.constructionTasks;
+        if (block.type === 'paymentPlan') return sections.paymentPlan;
         if (block.type === 'footer') return sections.footer;
         return true;
       }).map(block => {
@@ -851,6 +853,64 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     <SelectItem value="fases-y-rubros">Fases y Rubros (oculta ambas)</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Plan de Pago Section */}
+        <div 
+          className="border border-border rounded-lg overflow-hidden bg-card"
+          data-section-id="paymentPlan"
+        >
+          {/* Section Header */}
+          <div 
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => toggleExpanded('paymentPlan')}
+          >
+            <div className="flex items-center gap-3">
+              {/* Drag Handle - for future use */}
+              <div className="text-muted-foreground cursor-grab">
+                <GripVertical className="h-4 w-4" />
+              </div>
+              
+              {/* Icon */}
+              <Calendar className="h-4 w-4 text-accent" />
+              
+              {/* Label */}
+              <span className="text-sm font-medium">Plan de Pagos</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Switch */}
+              <Switch
+                checked={sections.paymentPlan}
+                onCheckedChange={() => toggleSection('paymentPlan')}
+                className="data-[state=checked]:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Expand Chevron */}
+              {expandedSection === 'paymentPlan' ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          {/* Expanded Content */}
+          {expandedSection === 'paymentPlan' && (
+            <div className="px-3 pb-3 pt-0 border-t border-border/50">
+              <p className="text-xs text-muted-foreground mt-2 mb-4">
+                Tabla detallada del plan de pagos con cronograma de cuotas e información del plan
+              </p>
+              
+              {/* Payment Plan Configuration Controls can be added here in the future */}
+              <div className="space-y-3">
+                <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded">
+                  Plan de pagos configurado automáticamente según los datos del proyecto
+                </div>
               </div>
             </div>
           )}
