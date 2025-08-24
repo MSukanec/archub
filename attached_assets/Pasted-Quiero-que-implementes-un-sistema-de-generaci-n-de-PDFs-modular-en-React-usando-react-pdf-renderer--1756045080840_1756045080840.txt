@@ -1,0 +1,94 @@
+Quiero que implementes un sistema de generación de PDFs modular en React usando @react-pdf/renderer.
+El objetivo es poder exportar PDFs desde mi app con bloques configurables, reordenables y opcionalmente activables/desactivables.
+
+Requerimientos:
+
+Estructura de carpetas
+
+src/components/pdf/
+  ├─ blocks/
+  │   ├─ PdfHeader.tsx
+  │   ├─ PdfFooter.tsx
+  │   ├─ PdfSignatures.tsx
+  │   ├─ PdfBudgetTable.tsx
+  │   └─ ...
+  ├─ PdfDocument.tsx
+  ├─ pdfService.ts
+  └─ types.ts
+
+
+Tipos base (types.ts)
+
+PdfBlockProps<T>: recibe data y config.
+
+PdfBlock: { type: string; enabled: boolean; data?: any; config?: Record<string, any>; }.
+
+Bloques (blocks/)
+
+Cada bloque es un React.FC<PdfBlockProps> que usa componentes de @react-pdf/renderer (View, Text, Image).
+
+Ejemplo: PdfHeader que recibe { title } y renderiza un título grande con borde inferior.
+
+Crear al menos 3 bloques iniciales: PdfHeader, PdfFooter, PdfBudgetTable.
+
+Servicio de bloques (pdfService.ts)
+
+Exportar un objeto pdfBlocks que mapea type → componente:
+
+export const pdfBlocks = {
+  header: PdfHeader,
+  footer: PdfFooter,
+  budgetTable: PdfBudgetTable,
+};
+
+
+Documento principal (PdfDocument.tsx)
+
+Recibe una prop blocks: PdfBlock[].
+
+Recorre el array y renderiza solo los que tienen enabled: true.
+
+Ejemplo:
+
+<Document>
+  <Page size="A4">
+    {blocks.map((block, i) => {
+      if (!block.enabled) return null;
+      const BlockComponent = pdfBlocks[block.type];
+      return <BlockComponent key={i} data={block.data} config={block.config} />;
+    })}
+  </Page>
+</Document>
+
+
+Modal de exportación (PdfExportModal.tsx)
+
+Crear un modal con un <PDFViewer> (de @react-pdf/renderer) para mostrar el preview en pantalla.
+
+Incluir un <PDFDownloadLink> para descargar el archivo.
+
+El modal recibe blocks y lo pasa a PdfDocument.
+
+Botón de exportar
+
+Crear un botón Exportar PDF.
+
+Al hacer clic → abre el modal.
+
+Pasar un blocks de ejemplo:
+
+const pdfConfig = [
+  { type: "header", enabled: true, data: { title: "Presupuesto Obra A" } },
+  { type: "budgetTable", enabled: true, data: budgetData },
+  { type: "footer", enabled: true, data: { text: "Generado con Archub" } },
+];
+
+Resultado esperado
+
+Al hacer clic en Exportar PDF, se abre un modal.
+
+En el modal aparece un preview del PDF.
+
+El usuario puede descargar el archivo con el mismo contenido.
+
+La estructura queda modular, lista para agregar más bloques en el futuro.

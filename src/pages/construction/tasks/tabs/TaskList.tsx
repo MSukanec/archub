@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
-import { CheckSquare, Edit, Trash2, Plus, Eye } from 'lucide-react'
+import { CheckSquare, Edit, Trash2, Plus, Eye, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui-custom/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -13,6 +13,7 @@ import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 import TaskRow from '@/components/data-row/rows/TaskRow'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface TaskListProps {
   tasks: any[]
@@ -29,6 +30,7 @@ export function TaskList({
 }: TaskListProps) {
   const [groupingType, setGroupingType] = useState('rubros-phases')
   const [isExporting, setIsExporting] = useState(false)
+  const { openModal } = useGlobalModalStore()
 
   // Filtrar tareas según búsqueda y agregar groupKey
   const filteredTasks = useMemo(() => {
@@ -91,6 +93,34 @@ export function TaskList({
     } finally {
       setIsExporting(false)
     }
+  }
+
+  // Handle PDF export
+  const handleExportToPDF = () => {
+    if (finalTasks.length === 0) return
+
+    const pdfConfig = [
+      { 
+        type: "header", 
+        enabled: true, 
+        data: { title: "Presupuesto de Tareas de Construcción" } 
+      },
+      { 
+        type: "budgetTable", 
+        enabled: true, 
+        data: { tasks: finalTasks } 
+      },
+      { 
+        type: "footer", 
+        enabled: true, 
+        data: { text: "Generado con Archub" } 
+      },
+    ]
+
+    openModal('pdf-exporter', {
+      blocks: pdfConfig,
+      filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.pdf`
+    })
   }
 
   // Definir columnas base para la tabla
@@ -266,11 +296,34 @@ export function TaskList({
           else if (tab === 'Por Tareas') setGroupingType('tasks')
           else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
           else setGroupingType('phases-rubros')
-        },
-        showExport: true,
-        onExport: handleExportToExcel,
-        isExporting: isExporting
+        }
       }}
+      headerActions={{
+        rightActions: (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportToExcel}
+              disabled={isExporting || finalTasks.length === 0}
+              className="h-8 px-3 text-xs"
+            >
+              {isExporting ? 'Exportando...' : 'Descargar Excel'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportToPDF}
+              disabled={finalTasks.length === 0}
+              className="h-8 px-3 text-xs"
+            >
+              <FileText className="h-3 w-3 mr-1" />
+              Exportar PDF
+            </Button>
+          </div>
+        )
+      }}
+      showDoubleHeader={true}
       renderCard={(task: any) => (
         <TaskRow
           key={task.id}

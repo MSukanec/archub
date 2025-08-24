@@ -59,6 +59,7 @@ import { SubcontractTaskFormModal } from '../modals/construction/SubcontractTask
 import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 import { PartnerModal } from '../modals/organizations/members/PartnerModal';
+import { PDFExporterModal } from '../modals/PDFExporterModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -202,6 +203,8 @@ export function ModalFactory() {
       return <ClientPaymentPlans modalData={data || undefined} onClose={closeModal} />;
     case 'client-installment':
       return <ClientInstallment modalData={data || undefined} onClose={closeModal} />;
+    case 'pdf-exporter':
+      return <PDFExporterModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }
