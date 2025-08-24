@@ -472,8 +472,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           param_values: {}, // Empty object since we're not using parameters
           param_order: [], // Empty array since we're not using parameters
           name_rendered: null, // NULL since we're not using parametric generation
-          unit_id: unitId || null,
-          category_id: categoryId || null,
+          unit_id: unitId, // Direct assignment without || null
+          category_id: categoryId, // Direct assignment without || null
           task_template_id: taskTemplateId || null,
           task_division_id: taskDivisionId || null,
           organization_id: null, // Always NULL as specified
@@ -501,6 +501,25 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         
         taskId = data.id
         console.log('✅ Task created successfully with ID:', taskId)
+        
+        // Update unit_id and category_id in a separate operation if they exist
+        if (unitId || categoryId) {
+          console.log('🔄 Updating unit_id and category_id separately...')
+          const updateData: any = {}
+          if (unitId) updateData.unit_id = unitId
+          if (categoryId) updateData.category_id = categoryId
+          
+          const { error: updateError } = await supabase
+            .from('tasks')
+            .update(updateData)
+            .eq('id', taskId)
+          
+          if (updateError) {
+            console.error('Error updating unit_id/category_id:', updateError)
+          } else {
+            console.log('✅ Successfully updated unit_id and category_id')
+          }
+        }
       }
 
       // Save materials if any
