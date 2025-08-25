@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase de Construction:
 
-TABLA PRODUCTS:
+VISTA CONSTRUCTION_TASKS_VIEW:
 
 [
   {
@@ -8,51 +8,63 @@ TABLA PRODUCTS:
     "data_type": "uuid"
   },
   {
-    "column_name": "material_id",
+    "column_name": "organization_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "brand_id",
+    "column_name": "project_id",
     "data_type": "uuid"
   },
   {
-    "column_name": "name",
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "custom_name",
     "data_type": "text"
   },
   {
-    "column_name": "description",
+    "column_name": "unit",
     "data_type": "text"
   },
   {
-    "column_name": "image_url",
+    "column_name": "category_name",
     "data_type": "text"
   },
   {
-    "column_name": "specs",
-    "data_type": "jsonb"
+    "column_name": "division_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "quantity",
+    "data_type": "real"
+  },
+  {
+    "column_name": "start_date",
+    "data_type": "date"
+  },
+  {
+    "column_name": "end_date",
+    "data_type": "date"
+  },
+  {
+    "column_name": "duration_in_days",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "progress_percent",
+    "data_type": "integer"
   },
   {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "unit_id",
-    "data_type": "uuid"
-  },
-  {
-    "column_name": "default_price",
-    "data_type": "numeric"
-  },
-  {
-    "column_name": "default_provider",
-    "data_type": "text"
-  },
-  {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
   },
   {
-    "column_name": "url",
+    "column_name": "phase_name",
     "data_type": "text"
   }
 ]
