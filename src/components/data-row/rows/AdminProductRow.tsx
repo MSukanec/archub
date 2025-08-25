@@ -94,27 +94,27 @@ export default function AdminProductRow({
   className 
 }: AdminProductRowProps) {
   
-  // Contenido interno del card usando el nuevo sistema
+  // Contenido interno del card usando el nuevo sistema - una sola columna
   const cardContent = (
     <>
-      {/* Columna de contenido (principal) */}
+      {/* Una sola columna con toda la información */}
       <div className="flex-1 min-w-0">
-        {/* Primera fila - Material */}
-        <div className="font-semibold text-sm truncate">
-          {product.material?.name || 'Sin material'}
-        </div>
-
-        {/* Segunda fila - Marca - Modelo */}
-        <div className="text-xs text-muted-foreground truncate">
-          {product.brand?.name ? `${product.brand.name} - ${product.name}` : product.name}
-        </div>
-
-        {/* Tercera fila - Categoría */}
+        {/* Primera fila - Categoría */}
         <div className="text-xs text-muted-foreground truncate">
           {product.categoryHierarchy || 'Sin categoría'}
         </div>
 
-        {/* Cuarta fila - Unidad de Venta - Precio */}
+        {/* Segunda fila - Material */}
+        <div className="font-semibold text-sm truncate">
+          {product.material?.name || 'Sin material'}
+        </div>
+
+        {/* Tercera fila - Marca - Modelo */}
+        <div className="font-semibold text-sm truncate">
+          {product.brand?.name ? `${product.brand.name} - ${product.name}` : product.name}
+        </div>
+
+        {/* Cuarta fila - Unidad - Precio */}
         <div className="text-xs text-muted-foreground truncate">
           {(() => {
             const unitName = product.unit_presentation?.name || 'Sin unidad';
@@ -124,14 +124,17 @@ export default function AdminProductRow({
             return `${unitName} - ${price}`;
           })()}
         </div>
+
+        {/* Quinta fila - Link */}
+        {product.url && (
+          <div className="text-xs text-muted-foreground truncate mt-1">
+            <LinkButton url={product.url} />
+          </div>
+        )}
       </div>
 
-      {/* Trailing Section - Solo Link */}
-      <div className="flex items-center">
-        <LinkButton url={product.url} />
-        {/* Espacio mínimo para chevron si existe */}
-        {onClick && <div className="w-2" />}
-      </div>
+      {/* Espacio mínimo para chevron si existe */}
+      {onClick && <div className="w-2" />}
     </>
   );
 
