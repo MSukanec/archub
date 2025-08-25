@@ -82,7 +82,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
 
   // Header configuration with pre-populated data
   const [headerConfig, setHeaderConfig] = useState({
-    title: 'Presupuesto de Tareas de Construcción',
+    title: 'Plan de Pagos',
     subtitle: '',
     organizationName: userData?.organization?.name || '',
     projectName: '',

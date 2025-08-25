@@ -257,41 +257,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
   return (
     <View style={styles.container}>
-      {/* Información del Plan */}
-      {showPlanInfo && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información del Plan</Text>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Tipo:</Text>
-          <Text style={styles.value}>
-            {paymentPlan.payment_plans?.name || 'Plan personalizado'}
-          </Text>
-        </View>
-        
-        {paymentPlan.payment_plans?.description && (
-          <View style={styles.row}>
-            <Text style={styles.label}>Descripción:</Text>
-            <Text style={styles.value}>{paymentPlan.payment_plans.description}</Text>
-          </View>
-        )}
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Cuotas:</Text>
-          <Text style={styles.value}>{paymentPlan.installments_count}</Text>
-        </View>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Frecuencia:</Text>
-          <Text style={styles.value}>{getFrequencyLabel(paymentPlan.frequency)}</Text>
-        </View>
-        
-        <View style={styles.row}>
-          <Text style={styles.label}>Fecha inicio:</Text>
-          <Text style={styles.value}>{formatDate(paymentPlan.start_date)}</Text>
-        </View>
-      </View>
-      )}
 
       {/* Tabla de Cuotas */}
       {showSchedule && installments.length > 0 && (
@@ -327,7 +292,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
       {/* Unidades Funcionales Individuales - Sin tabla intermedia */}
       {showDetailTable && heatmapData.length > 0 && commitments.length > 0 && (
         commitments.map((commitment, commitmentIndex) => (
-          <View key={commitment.id} style={styles.section} break={oneUnitPerPage && commitmentIndex > 0}>
+          <View key={commitment.id} style={styles.section} break={oneUnitPerPage}>
             
             {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
             <View style={{ flexDirection: 'row', gap: 15 }}>

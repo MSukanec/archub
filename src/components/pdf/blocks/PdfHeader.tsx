@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 8,
@@ -108,7 +108,7 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
         )}
         
         {/* Título centrado */}
-        <Text style={[styles.title, { textAlign: 'center', fontSize: 22 }]}>
+        <Text style={[styles.title, { textAlign: 'center', fontSize: 16 }]}>
           {headerConfig.title}
         </Text>
         
@@ -121,12 +121,6 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
         {/* Información en dos columnas */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <View style={{ flex: 1, marginRight: 20 }}>
-            {headerConfig.organizationName && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Empresa:</Text>
-                <Text style={styles.infoValue}>{headerConfig.organizationName}</Text>
-              </View>
-            )}
             {headerConfig.projectName && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Proyecto:</Text>
@@ -190,12 +184,6 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
           {/* Información del proyecto */}
           <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1, marginRight: 15 }}>
-              {headerConfig.organizationName && (
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Empresa:</Text>
-                  <Text style={styles.infoValue}>{headerConfig.organizationName}</Text>
-                </View>
-              )}
               {headerConfig.projectName && (
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Proyecto:</Text>
