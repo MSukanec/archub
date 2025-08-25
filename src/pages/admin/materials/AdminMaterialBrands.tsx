@@ -4,12 +4,12 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useBrands, Brand, useDeleteBrand } from '@/hooks/use-brands'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminBrandRow from '@/components/data-row/rows/AdminBrandRow'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 
@@ -131,22 +131,25 @@ const AdminMaterialBrands = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            data={sortedBrands}
-            columns={columns}
-            isLoading={isLoading}
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                <Tag className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No se encontraron marcas</p>
-                <p className="text-xs">No hay marcas que coincidan con los filtros aplicados.</p>
-              </div>
-            }
+      <Table
+        data={sortedBrands}
+        columns={columns}
+        isLoading={isLoading}
+        renderCard={(brand) => (
+          <AdminBrandRow
+            brand={brand}
+            onClick={() => handleEdit(brand)}
+            density="normal"
           />
-        </CardContent>
-      </Card>
+        )}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <Tag className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron marcas</p>
+            <p className="text-xs">No hay marcas que coincidan con los filtros aplicados.</p>
+          </div>
+        }
+      />
     </div>
   )
 }
