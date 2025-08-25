@@ -80,6 +80,20 @@ export default function ProductList() {
   // Base columns definition
   const baseColumns = [
     {
+      key: 'category',
+      label: 'Categoría',
+      width: '16%',
+      render: (product: Product) => (
+        <span className="text-sm font-medium">
+          {(() => {
+            const hierarchy = product.categoryHierarchy || 'Sin categoría';
+            // Extraer solo la primera categoría (antes del primer " > ")
+            return hierarchy.split(' > ')[0];
+          })()}
+        </span>
+      )
+    },
+    {
       key: 'material',
       label: 'Material',
       width: '16%',
@@ -92,7 +106,7 @@ export default function ProductList() {
     {
       key: 'brand',
       label: 'Marca',
-      width: '15%',
+      width: '13%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.brand?.name || 'Sin marca'}
@@ -102,7 +116,7 @@ export default function ProductList() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '20%',
+      width: '15%',
       render: (product: Product) => (
         <span className="text-sm font-medium">{product.name}</span>
       )
@@ -110,7 +124,7 @@ export default function ProductList() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '14%',
+      width: '12%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit_presentation?.name || 'N/A'}
@@ -120,7 +134,7 @@ export default function ProductList() {
     {
       key: 'url',
       label: 'Link',
-      width: '10%',
+      width: '8%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -142,7 +156,7 @@ export default function ProductList() {
     {
       key: 'image',
       label: 'Imagen',
-      width: '10%',
+      width: '8%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -180,7 +194,7 @@ export default function ProductList() {
     {
       key: 'default_price',
       label: 'Precio',
-      width: '15%',
+      width: '12%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <span className="text-sm font-mono">
@@ -195,7 +209,7 @@ export default function ProductList() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '16%',
+      width: '10%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <Button
@@ -205,22 +219,6 @@ export default function ProductList() {
             className="h-7 w-7 p-0"
           >
             <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicate(product)}
-            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
-          >
-            <Copy className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(product)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
