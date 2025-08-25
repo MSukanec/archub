@@ -1,9 +1,7 @@
 import React from 'react';
 import DataRowCard from '../DataRowCard';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Crown, Zap } from 'lucide-react';
-import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 // Interface para la organización (usando la estructura real de la app)
 interface Organization {
@@ -20,6 +18,8 @@ interface Organization {
     features?: any;
     price?: number;
   };
+  members_count?: number;
+  projects_count?: number;
 }
 
 interface OrganizationRowProps {
@@ -62,53 +62,15 @@ const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
   );
 };
 
-// Componente customizado para el trailing con avatares superpuestos
-const OrganizationTrailing = ({ organizationId }: { organizationId: string }) => {
-  const { data: members = [] } = useOrganizationMembers(organizationId);
-  
-  if (members.length === 0) {
-    return (
-      <div className="text-xs text-muted-foreground">
-        Sin miembros
-      </div>
-    );
-  }
-  
+// Componente para mostrar métricas de la organización
+const OrganizationMetrics = ({ membersCount, projectsCount }: { membersCount?: number; projectsCount?: number }) => {
   return (
-    <div className="flex items-center">
-      {/* Mostrar hasta 3 avatares superpuestos más grandes */}
-      <div className="flex -space-x-2">
-        {/* Mostrar contador "+X" al INICIO si hay más de 3 miembros */}
-        {members.length > 3 && (
-          <div 
-            className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center relative"
-            style={{ zIndex: 13 }}
-          >
-            <span className="text-xs font-medium text-muted-foreground">
-              +{members.length - 3}
-            </span>
-          </div>
-        )}
-        {/* Mostrar los primeros 3 avatares */}
-        {members.slice(0, 3).map((member, index) => (
-          <Avatar 
-            key={member.id} 
-            className="w-8 h-8 border-2 border-background relative"
-            style={{ zIndex: 10 - index }}
-          >
-            {member.avatar_url ? (
-              <AvatarImage 
-                src={member.avatar_url} 
-                alt={member.full_name || member.email} 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <AvatarFallback className="text-xs font-medium">
-                {(member.full_name || member.email || 'U').substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-        ))}
+    <div className="text-right space-y-1">
+      <div className="text-xs text-muted-foreground">
+        {membersCount || 0} {(membersCount || 0) === 1 ? 'miembro' : 'miembros'}
+      </div>
+      <div className="text-xs text-muted-foreground">
+        {projectsCount || 0} {(projectsCount || 0) === 1 ? 'proyecto' : 'proyectos'}
       </div>
     </div>
   );
@@ -138,9 +100,12 @@ export default function OrganizationRow({
         </div>
       </div>
 
-      {/* Trailing Section - Avatares */}
+      {/* Trailing Section - Métricas */}
       <div className="flex items-center">
-        <OrganizationTrailing organizationId={organization.id} />
+        <OrganizationMetrics 
+          membersCount={organization.members_count} 
+          projectsCount={organization.projects_count} 
+        />
         {/* Espacio mínimo para chevron si existe */}
         {onClick && <div className="w-2" />}
       </div>

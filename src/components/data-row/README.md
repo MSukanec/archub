@@ -107,10 +107,10 @@ type Line = {
 ### Paso 1: Crear archivo wrapper
 Ubicación: `src/components/data-row/rows/[Entidad]Row.tsx`
 
-### Paso 2: Implementar transformación de datos
+### Paso 2: Implementar usando children pattern
 ```typescript
 // Ejemplo: MovementRow.tsx
-import DataRowCard, { DataRowCardProps } from '../DataRowCard';
+import DataRowCard from '../DataRowCard';
 import { Movement } from '@/types';
 
 interface MovementRowProps {
@@ -121,30 +121,54 @@ interface MovementRowProps {
 }
 
 export default function MovementRow({ movement, onClick, selected, density }: MovementRowProps) {
-  // Transformar datos del movimiento a props de DataRowCard
-  const dataRowProps: DataRowCardProps = {
-    title: movement.description,
-    subtitle: movement.category?.name,
-    lines: [
-      { 
-        text: formatAmount(movement.amount), 
-        tone: movement.amount > 0 ? 'success' : 'danger',
-        mono: true,
-        hintRight: movement.currency?.symbol 
-      },
-      { 
-        text: movement.wallet?.name || 'Sin billetera',
-        tone: 'muted' 
-      }
-    ],
-    avatarFallback: movement.category?.name?.[0] || 'M',
-    showChevron: !!onClick,
-    onClick,
-    selected,
-    density
-  };
+  // Contenido interno del card usando children
+  const cardContent = (
+    <>
+      {/* Columna de contenido (principal) */}
+      <div className="flex-1 min-w-0">
+        {/* Title */}
+        <div className="font-semibold text-sm truncate">
+          {movement.description}
+        </div>
+        
+        {/* Subtitle */}
+        <div className="text-xs text-muted-foreground truncate">
+          {movement.category?.name}
+        </div>
+        
+        {/* Additional info line */}
+        <div className="text-xs text-muted-foreground">
+          {movement.wallet?.name || 'Sin billetera'}
+        </div>
+      </div>
 
-  return <DataRowCard {...dataRowProps} />;
+      {/* Trailing Section */}
+      <div className="flex items-center">
+        <div className="text-right">
+          <div className={cn(
+            "text-sm font-medium",
+            movement.amount > 0 ? "text-green-600" : "text-red-600"
+          )}>
+            {formatAmount(movement.amount)}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {movement.currency?.symbol}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <DataRowCard
+      avatarFallback={movement.category?.name?.[0] || 'M'}
+      selected={selected}
+      density={density}
+      onClick={onClick}
+    >
+      {cardContent}
+    </DataRowCard>
+  );
 }
 ```
 

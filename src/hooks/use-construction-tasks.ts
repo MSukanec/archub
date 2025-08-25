@@ -97,11 +97,11 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
     queryFn: async (): Promise<ConstructionTask[]> => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🚀 Fetching construction tasks for project:', projectId, 'in organization:', organizationId);
+      console.log('Fetching construction tasks for project:', projectId, 'in organization:', organizationId);
       
       // Validar que tenemos los parámetros necesarios
       if (!projectId || !organizationId) {
-        console.log('❌ Missing projectId or organizationId, returning empty array');
+        console.log('Missing projectId or organizationId, returning empty array');
         return [];
       }
       
@@ -113,10 +113,8 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
 
-      console.log('🔍 Raw construction_tasks_view data:', constructionTasks?.slice(0, 2));
-
       if (constructionError) {
-        console.error('❌ Error fetching construction tasks:', constructionError);
+        console.error('Error fetching construction tasks:', constructionError);
         throw constructionError;
       }
       

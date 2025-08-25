@@ -13,6 +13,7 @@ import { Edit, Trash2, Building, Crown } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useToast } from '@/hooks/use-toast';
+import OrganizationRow from '@/components/data-row/rows/OrganizationRow';
 
 interface Organization {
   id: string;
@@ -351,6 +352,13 @@ const AdminCommunityOrganizations = () => {
             columns={tableColumns}
             data={filteredOrganizations}
             isLoading={isLoading}
+            renderCard={(organization) => (
+              <OrganizationRow
+                organization={organization}
+                onClick={() => handleEdit(organization)}
+                density="normal"
+              />
+            )}
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
