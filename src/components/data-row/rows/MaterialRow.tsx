@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 // Interface para el material (usando la estructura real de la app)
 interface Material {
   id: string;
-  name: string;
+  name: string; // MODELO
+  material_name?: string; // MATERIAL
   brand?: string;
   category?: string;
   unit?: string;
@@ -50,9 +51,9 @@ export default function MaterialRow({
           {material.category || 'Sin categoría'}
         </div>
 
-        {/* Segunda fila - Material (bold) */}
-        <div className="font-bold text-sm truncate">
-          {material.name}
+        {/* Segunda fila - Material */}
+        <div className="font-semibold text-xs truncate">
+          {material.material_name || 'Sin material'}
         </div>
 
         {/* Tercera fila - Marca - Modelo */}

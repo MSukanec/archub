@@ -247,7 +247,8 @@ export default function AnalysisMaterials() {
               <MaterialRow
                 material={{
                   id: product.id,
-                  name: product.material?.name || product.name,
+                  name: product.name, // MODELO
+                  material_name: product.material?.name, // MATERIAL
                   brand: product.brand?.name,
                   category: (() => {
                     const hierarchy = product.categoryHierarchy || 'Sin categoría';
