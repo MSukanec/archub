@@ -216,6 +216,10 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
 
           progress_percent: phaseRelation?.progress_percent || 0,
           
+          // Campos de división - obtenidos directamente de construction_tasks_view
+          division_name: item.division_name || null,
+          category_name: item.category_name || null,
+          
           // Compatibilidad con sistema existente
           id: item.id, // ID de construction_tasks para compatibilidad
           organization_id: item.organization_id,
@@ -230,6 +234,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
             display_name: taskData?.name_rendered || taskData?.code || 'Sin nombre',
             rubro_name: taskData?.category_name || null,
             category_name: taskData?.category_name || null,
+            division_name: item.division_name || null,
             unit_id: taskData?.unit_id,
             unit_name: taskData?.unit_name || null,
             unit_symbol: taskData?.unit_name || null,
