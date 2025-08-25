@@ -101,7 +101,12 @@ export default function AdminProductRow({
       <div className="flex-1 min-w-0">
         {/* Primera fila - Categoría */}
         <div className="text-xs text-muted-foreground truncate">
-          {product.categoryHierarchy || 'Sin categoría'}
+          {(() => {
+            const hierarchy = product.categoryHierarchy || 'Sin categoría';
+            // Extraer solo la primera categoría (antes del primer " > ")
+            const firstCategory = hierarchy.split(' > ')[0];
+            return firstCategory;
+          })()}
         </div>
 
         {/* Segunda fila - Material */}
