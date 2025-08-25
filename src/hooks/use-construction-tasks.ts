@@ -105,9 +105,9 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         return [];
       }
       
-      // Obtener las tareas de construcción básicas primero
+      // Obtener las tareas de construcción desde la vista que incluye division_name
       const { data: constructionTasks, error: constructionError } = await supabase
-        .from('construction_tasks')
+        .from('construction_tasks_view')
         .select('*')
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
