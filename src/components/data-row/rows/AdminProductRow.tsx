@@ -110,7 +110,7 @@ export default function AdminProductRow({
         </div>
 
         {/* Segunda fila - Material */}
-        <div className="font-semibold text-sm truncate">
+        <div className="font-semibold text-xs truncate">
           {product.material?.name || 'Sin material'}
         </div>
 
