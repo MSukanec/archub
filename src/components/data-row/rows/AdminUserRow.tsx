@@ -1,7 +1,7 @@
 import React from 'react';
 import DataRowCard from '../DataRowCard';
 import { cn } from '@/lib/utils';
-import { Building, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -43,32 +43,14 @@ const getUserInitials = (user: User): string => {
   return user.email.slice(0, 2).toUpperCase();
 };
 
-// Componente para mostrar métricas del usuario
-const UserMetrics = ({ organizationsCount, lastActivity }: { organizationsCount: number; lastActivity: string }) => {
+// Componente para mostrar fecha de creación del usuario
+const UserCreationDate = ({ createdAt }: { createdAt: string }) => {
   return (
-    <div className="text-right space-y-1">
-      <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
-        <Building className="w-3 h-3" />
-        <span>{organizationsCount} {organizationsCount === 1 ? 'org' : 'orgs'}</span>
-      </div>
+    <div className="text-right">
       <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
         <Calendar className="w-3 h-3" />
-        <span>{format(new Date(lastActivity), 'dd/MM/yy', { locale: es })}</span>
+        <span>{format(new Date(createdAt), 'dd/MM/yy', { locale: es })}</span>
       </div>
-    </div>
-  );
-};
-
-// Badge de estado activo/inactivo
-const StatusBadge = ({ isActive }: { isActive: boolean }) => {
-  return (
-    <div className={cn(
-      'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-      isActive 
-        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-    )}>
-      {isActive ? 'Activo' : 'Inactivo'}
     </div>
   );
 };
@@ -86,28 +68,20 @@ export default function AdminUserRow({
     <>
       {/* Columna de contenido (principal) */}
       <div className="flex-1 min-w-0">
-        {/* Title - Nombre completo o email */}
+        {/* Primera fila - Nombre completo */}
         <div className="font-semibold text-sm truncate">
           {user.full_name || 'Sin nombre'}
         </div>
 
-        {/* Subtitle - Email */}
+        {/* Segunda fila - Email */}
         <div className="text-xs text-muted-foreground truncate">
           {user.email}
         </div>
-
-        {/* Status Badge */}
-        <div className="mt-1">
-          <StatusBadge isActive={user.is_active} />
-        </div>
       </div>
 
-      {/* Trailing Section - Métricas */}
+      {/* Trailing Section - Fecha de creación */}
       <div className="flex items-center">
-        <UserMetrics 
-          organizationsCount={user.organizations_count} 
-          lastActivity={user.last_activity_at} 
-        />
+        <UserCreationDate createdAt={user.created_at} />
         {/* Espacio mínimo para chevron si existe */}
         {onClick && <div className="w-2" />}
       </div>
