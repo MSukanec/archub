@@ -4,10 +4,10 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import ProductList from './ProductList';
 
 const Products = () => {
-  const [activeTab, setActiveTab] = useState('productos');
+  const [activeTab, setActiveTab] = useState('listado');
 
   const tabs = [
-    { id: 'productos', label: 'Productos', isActive: activeTab === 'productos' }
+    { id: 'listado', label: 'Listado', isActive: activeTab === 'listado' }
   ];
 
   const headerProps = {
@@ -22,7 +22,7 @@ const Products = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'productos':
+      case 'listado':
         return <ProductList />;
       default:
         return <ProductList />;

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import MaterialRow from '@/components/data-row/rows/MaterialRow'
@@ -15,6 +15,7 @@ import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLig
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const [groupingType, setGroupingType] = useState('material')  // Por defecto agrupar por material
   
   const { data: products = [], isLoading: productsLoading } = useProducts()
   const deleteProductMutation = useDeleteProduct()
@@ -23,8 +24,25 @@ export default function ProductList() {
   const { data: userData } = useCurrentUser()
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
-  // Filter products by type (no search filtering since it's analysis view)
-  const filteredProducts = products
+  // Filter products and add groupKey for grouping
+  const filteredProducts = useMemo(() => {
+    return products.map(product => {
+      let groupKey = '';
+      
+      switch (groupingType) {
+        case 'material':
+          groupKey = product.material?.name || 'Sin material';
+          break;
+        default:
+          groupKey = '';
+      }
+      
+      return {
+        ...product,
+        groupKey
+      };
+    });
+  }, [products, groupingType]);
 
   // Data type selector options
   const dataTypeOptions = [
@@ -59,8 +77,8 @@ export default function ProductList() {
     })
   }
 
-  // Products table columns configuration
-  const productsColumns = [
+  // Base columns definition
+  const baseColumns = [
     {
       key: 'material',
       label: 'Material',
@@ -74,7 +92,7 @@ export default function ProductList() {
     {
       key: 'brand',
       label: 'Marca',
-      width: '13%',
+      width: '15%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.brand?.name || 'Sin marca'}
@@ -84,7 +102,7 @@ export default function ProductList() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '18%',
+      width: '20%',
       render: (product: Product) => (
         <span className="text-sm font-medium">{product.name}</span>
       )
@@ -92,7 +110,7 @@ export default function ProductList() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '12%',
+      width: '14%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit_presentation?.name || 'N/A'}
@@ -102,7 +120,7 @@ export default function ProductList() {
     {
       key: 'url',
       label: 'Link',
-      width: '8%',
+      width: '10%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -124,7 +142,7 @@ export default function ProductList() {
     {
       key: 'image',
       label: 'Imagen',
-      width: '8%',
+      width: '10%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -162,7 +180,7 @@ export default function ProductList() {
     {
       key: 'default_price',
       label: 'Precio',
-      width: '12%',
+      width: '15%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <span className="text-sm font-mono">
@@ -175,25 +193,9 @@ export default function ProductList() {
       )
     },
     {
-      key: 'is_system',
-      label: 'Tipo',
-      width: '8%',
-      render: (product: Product) => (
-        <Badge 
-          variant={product.is_system ? "default" : "secondary"}
-          className={`text-xs ${product.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
-            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
-          }`}
-        >
-          {product.is_system ? 'Sistema' : 'Organización'}
-        </Badge>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '16%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <Button
@@ -224,6 +226,20 @@ export default function ProductList() {
       )
     }
   ]
+  
+  // Select columns based on grouping type
+  const productsColumns = useMemo(() => {
+    // For no grouping, use all base columns
+    if (groupingType === 'none') {
+      return baseColumns;
+    }
+    
+    // Filter columns for grouping - hide the grouped column
+    return baseColumns.filter(column => {
+      if (groupingType === 'material' && column.key === 'material') return false;
+      return true;
+    });
+  }, [groupingType]);
 
   return (
     <div className="space-y-6">
@@ -243,6 +259,15 @@ export default function ProductList() {
           <Table
             data={filteredProducts}
             columns={productsColumns}
+            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            topBar={{
+              tabs: ['No Agrupar', 'Agrupar por Material'],
+              activeTab: groupingType === 'none' ? 'No Agrupar' : 'Agrupar por Material',
+              onTabChange: (tab: string) => {
+                if (tab === 'No Agrupar') setGroupingType('none')
+                else if (tab === 'Agrupar por Material') setGroupingType('material')
+              }
+            }}
             renderCard={(product) => (
               <MaterialRow
                 material={{
@@ -265,6 +290,15 @@ export default function ProductList() {
                 density="normal"
               />
             )}
+            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+              return (
+                <>
+                  <div className="col-span-full text-sm font-medium">
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+                  </div>
+                </>
+              );
+            }}
             emptyState={
               <EmptyState
                 icon={<Package />}
