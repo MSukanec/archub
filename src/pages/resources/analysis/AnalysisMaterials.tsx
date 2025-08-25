@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
+import MaterialRow from '@/components/data-row/rows/MaterialRow'
 import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -242,6 +243,31 @@ export default function AnalysisMaterials() {
           <Table
             data={filteredProducts}
             columns={productsColumns}
+            renderCard={(product) => (
+              <MaterialRow
+                material={{
+                  id: product.id,
+                  name: product.material?.name || product.name,
+                  unit_id: product.unit_id || '',
+                  category_id: product.material?.category_id || '',
+                  is_completed: true,
+                  is_system: product.is_system || false,
+                  created_at: product.created_at,
+                  provider: product.default_provider,
+                  type: product.is_system ? 'SISTEMA' : 'USUARIO', // Badge de TIPO
+                  unit: { name: product.unit_presentation?.name || 'Sin unidad' },
+                  category: { name: product.categoryHierarchy || 'Sin categoría' },
+                  organization_material_prices: product.default_price ? [{
+                    id: '1',
+                    unit_price: product.default_price,
+                    currency_id: '1',
+                    currency: { symbol: '$', name: 'Peso' }
+                  }] : []
+                }}
+                onClick={() => handleEdit(product)}
+                density="normal"
+              />
+            )}
             emptyState={
               <EmptyState
                 icon={<Package />}
