@@ -113,6 +113,8 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
 
+      console.log('🔍 Raw construction_tasks_view data:', constructionTasks?.slice(0, 2));
+
       if (constructionError) {
         console.error('Error fetching construction tasks:', constructionError);
         throw constructionError;
