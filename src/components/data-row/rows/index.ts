@@ -13,8 +13,8 @@ export type { ClientObligation } from './ClientObligationRow';
 export { default as SubcontractRow } from './SubcontractRow';
 export type { Subcontract } from './SubcontractRow';
 
-export { default as OrganizationRow } from './OrganizationRow';
-export type { Organization } from './OrganizationRow';
+export { default as AdminOrganizationRow } from './AdminOrganizationRow';
+export type { Organization } from './AdminOrganizationRow';
 
 export { default as AnalysisTaskRow } from './AnalysisTaskRow';
 

@@ -17,7 +17,7 @@ interface Organization {
     name: string;
     features?: any;
     price?: number;
-  };
+  } | null;
   members_count?: number;
   projects_count?: number;
 }

@@ -12,6 +12,7 @@ import { Edit, Trash2, Building, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminUserRow from '@/components/data-row/rows/AdminUserRow'
 
 interface User {
   id: string
@@ -239,6 +240,13 @@ const AdminCommunityUsers = () => {
             data={users}
             columns={columns}
             isLoading={isLoading}
+            renderCard={(user) => (
+              <AdminUserRow
+                user={user}
+                onClick={() => handleEdit(user)}
+                density="normal"
+              />
+            )}
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />

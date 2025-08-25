@@ -18,7 +18,7 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
-import { OrganizationRow } from '@/components/data-row/rows'
+import { AdminOrganizationRow } from '@/components/data-row/rows'
 import { useMobile } from '@/hooks/use-mobile'
 
 // Componente para una sola tarjeta de organización
@@ -202,7 +202,7 @@ export function OrganizationList() {
       <div className={isMobile ? "space-y-2" : "space-y-2"}>
         {organizations.map((organization) => (
           isMobile ? (
-            <OrganizationRow
+            <AdminOrganizationRow
               key={organization.id}
               organization={organization}
               onClick={() => handleSelect(organization.id)}
