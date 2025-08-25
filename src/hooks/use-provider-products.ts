@@ -125,11 +125,17 @@ export function useToggleProviderProduct() {
         description: "La selección del producto se ha guardado correctamente.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error toggling provider product:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      });
       toast({
         title: "Error",
-        description: "No se pudo actualizar la selección del producto.",
+        description: error?.message || "No se pudo actualizar la selección del producto.",
         variant: "destructive"
       });
     },
