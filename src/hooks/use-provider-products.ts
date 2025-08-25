@@ -58,42 +58,64 @@ export function useToggleProviderProduct() {
         throw new Error('No organization or supabase client');
       }
 
-      // Primero verificar si ya existe
-      const { data: existing } = await supabase
-        .from('provider_products')
-        .select('id, is_active')
-        .eq('organization_id', organizationId)
-        .eq('product_id', productId)
-        .single();
+      console.log('Toggling product:', { organizationId, productId, isActive });
 
-      if (existing) {
-        // Actualizar existente
-        const { data, error } = await supabase
+      try {
+        // Primero verificar si ya existe
+        const { data: existing, error: selectError } = await supabase
           .from('provider_products')
-          .update({ 
-            is_active: isActive, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('id', existing.id)
-          .select()
+          .select('id, is_active')
+          .eq('organization_id', organizationId)
+          .eq('product_id', productId)
           .single();
 
-        if (error) throw error;
-        return data;
-      } else {
-        // Crear nuevo
-        const { data, error } = await supabase
-          .from('provider_products')
-          .insert({
-            organization_id: organizationId,
-            product_id: productId,
-            is_active: isActive
-          })
-          .select()
-          .single();
+        if (selectError && selectError.code !== 'PGRST116') {
+          console.error('Error checking existing provider product:', selectError);
+          throw selectError;
+        }
 
-        if (error) throw error;
-        return data;
+        if (existing) {
+          // Actualizar existente
+          console.log('Updating existing provider product:', existing.id);
+          const { data, error } = await supabase
+            .from('provider_products')
+            .update({ 
+              is_active: isActive, 
+              updated_at: new Date().toISOString() 
+            })
+            .eq('id', existing.id)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error updating provider product:', error);
+            throw error;
+          }
+          console.log('Updated provider product:', data);
+          return data;
+        } else {
+          // Crear nuevo
+          console.log('Creating new provider product');
+          const { data, error } = await supabase
+            .from('provider_products')
+            .insert({
+              organization_id: organizationId,
+              product_id: productId,
+              is_active: isActive
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error creating provider product:', error);
+            throw error;
+          }
+          console.log('Created provider product:', data);
+          return data;
+        }
+      } catch (error) {
+        console.error('Error in provider product mutation:', error);
+        throw error;
       }
     },
     onSuccess: () => {
