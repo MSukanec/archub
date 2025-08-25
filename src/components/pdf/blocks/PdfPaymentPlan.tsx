@@ -324,6 +324,139 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
         </View>
       )}
 
+      {/* Unidades Funcionales Individuales - Sin tabla intermedia */}
+      {showDetailTable && heatmapData.length > 0 && commitments.length > 0 && (
+        commitments.map((commitment, commitmentIndex) => (
+          <View key={commitment.id} style={styles.section} break={oneUnitPerPage && commitmentIndex > 0}>
+            
+            {/* Layout de dos columnas: Header (1/3) + Tabla (2/3) */}
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              
+              {/* Columna izquierda - Header (1/3) */}
+              <View style={{ flex: 1, paddingRight: 10 }}>
+                {/* Línea superior */}
+                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                
+                {/* Contenido */}
+                <View style={{ paddingVertical: 0 }}>
+                  
+                  {/* Código de unidad grande alineado a la izquierda */}
+                  <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
+                    <Text style={{ fontSize: 28, fontWeight: '900', color: '#1f2937', letterSpacing: 0.5 }}>
+                      {commitment.unit || `UF${commitmentIndex + 1}`}
+                    </Text>
+                  </View>
+                  
+                  {/* Lista de información */}
+                  <View style={{ gap: 8 }}>
+                    <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                      <Text style={{ fontWeight: 'bold' }}>Unidad Funcional:</Text>{'\n'}{commitment.unit || `UF${commitmentIndex + 1}`}
+                    </Text>
+                    <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                      <Text style={{ fontWeight: 'bold' }}>Cliente:</Text>{'\n'}{getClientDisplayName(commitment)}
+                    </Text>
+                    <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                      <Text style={{ fontWeight: 'bold' }}>Monto Inicial de Obra:</Text>{'\n'}{commitment.currencies?.symbol || '$'}{(commitment.committed_amount || 0).toLocaleString()}
+                    </Text>
+                    {commitment.exchange_rate && commitment.exchange_rate !== 1 && (
+                      <Text style={{ fontSize: 9, color: '#1f2937', lineHeight: 1.3 }}>
+                        <Text style={{ fontWeight: 'bold' }}>Cotización de dólar inicial:</Text>{'\n'}${commitment.exchange_rate}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+                
+                {/* Línea inferior */}
+                <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
+              </View>
+
+              {/* Columna derecha - Tabla (2/3) */}
+              <View style={{ flex: 2 }}>
+                {/* Línea superior */}
+                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
+                
+                <View style={{ ...styles.table, marginTop: 0 }}>
+                {/* Header */}
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Cuota</Text>
+                  <Text style={[styles.tableHeaderCell, { flex: 0.8 }]}>Índice</Text>
+                  <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Detalle</Text>
+                </View>
+                
+                {/* Filas de cuotas para esta unidad específica */}
+                {heatmapData.map((rowData, rowIndex) => {
+                  const installment = installments[rowIndex]
+                  const cellData = rowData[commitmentIndex] // Solo los datos de esta unidad
+                  if (!installment || !cellData) return null
+                  
+                  // Alternar colores de fila
+                  const rowStyle = rowIndex % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd
+                  
+                  return (
+                    <View key={installment.id} style={rowStyle}>
+                      {/* Información de la cuota con fecha debajo */}
+                      <View style={[styles.tableCell, { flex: 1.2 }]}>
+                        <Text style={{ fontSize: 8, fontWeight: 'bold' }}>
+                          Cuota Nº {installment.number.toString().padStart(2, '0')}
+                        </Text>
+                        <Text style={{ fontSize: 7, color: '#6b7280', marginTop: 2 }}>
+                          {formatDate(installment.date)}
+                        </Text>
+                      </View>
+                      
+                      <View style={[styles.tableCell, { flex: 0.8 }]}>
+                        <Text style={{ fontSize: 8 }}>
+                          {installment.index_reference?.toFixed(2) || '0.00'}%
+                        </Text>
+                      </View>
+                      
+                      {/* Detalles financieros */}
+                      <View style={[styles.tableCell, { flex: 1.5 }]}>
+                        {/* Actualización - Negro */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={{ fontSize: 7, color: '#1f2937' }}>Actualización:</Text>
+                          <Text style={{ fontSize: 7, color: '#1f2937', fontWeight: 'bold' }}>
+                            {cellData.commitmentCurrency.symbol}{cellData.updatedAmount.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Valor de Cuota - Rojo */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={{ fontSize: 7, color: '#dc2626' }}>Valor de Cuota:</Text>
+                          <Text style={{ fontSize: 7, color: '#dc2626' }}>
+                            {cellData.commitmentCurrency.symbol}{cellData.installmentValue.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Pago - Verde */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 1 }}>
+                          <Text style={{ fontSize: 7, color: '#16a34a' }}>Pago:</Text>
+                          <Text style={{ fontSize: 7, color: '#16a34a' }}>
+                            {cellData.commitmentCurrency.symbol}{cellData.payment.toLocaleString()}
+                          </Text>
+                        </View>
+                        
+                        {/* Saldo - Negro */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          <Text style={{ fontSize: 7, color: '#1f2937' }}>Saldo:</Text>
+                          <Text style={{ fontSize: 7, color: '#1f2937' }}>
+                            {cellData.commitmentCurrency.symbol}{cellData.balance.toLocaleString()}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  )
+                })}
+                </View>
+              </View>
+
+            </View>
+            
+            {/* Línea inferior que abarca todo el ancho */}
+            <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
+          </View>
+        ))
+      )}
     </View>
   )
 }
