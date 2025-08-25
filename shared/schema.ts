@@ -498,6 +498,23 @@ export const insertSubcontractBidSchema = createInsertSchema(subcontract_bids).o
   updated_at: true,
 });
 
+// Provider Products table
+export const provider_products = pgTable("provider_products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  product_id: uuid("product_id").notNull(),
+  provider_code: text("provider_code"),
+  is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const insertProviderProductSchema = createInsertSchema(provider_products).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 // Types for subcontracts
 export type Subcontract = typeof subcontracts.$inferSelect;
 export type InsertSubcontract = z.infer<typeof insertSubcontractSchema>;
@@ -505,3 +522,5 @@ export type SubcontractTask = typeof subcontract_tasks.$inferSelect;
 export type InsertSubcontractTask = z.infer<typeof insertSubcontractTaskSchema>;
 export type SubcontractBid = typeof subcontract_bids.$inferSelect;
 export type InsertSubcontractBid = z.infer<typeof insertSubcontractBidSchema>;
+export type ProviderProduct = typeof provider_products.$inferSelect;
+export type InsertProviderProduct = z.infer<typeof insertProviderProductSchema>;
