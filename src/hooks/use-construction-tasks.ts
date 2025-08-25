@@ -192,6 +192,14 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         const taskData = taskDetailsMap.get(item.task_id);
         const phaseRelation = phaseRelationsMap.get(item.id);
         
+        // Debug: revisar si division_name está llegando
+        console.log('🔍 Item data:', {
+          id: item.id,
+          task_division_id: item.task_division_id,
+          division_name: item.division_name,
+          category_name: item.category_name
+        });
+        
         // Extraer información de fase si existe
         const projectPhase = phaseRelation?.construction_project_phases;
         const phase = projectPhase?.construction_phases;
