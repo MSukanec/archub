@@ -10,6 +10,7 @@ import { Edit, Trash2, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminChangelogRow from '@/components/data-row/rows/AdminChangelogRow'
 
 interface ChangelogEntry {
   id: string;
@@ -205,6 +206,13 @@ const AdminCommunityChangelog = () => {
             data={changelogEntries}
             columns={columns}
             isLoading={isLoading}
+            renderCard={(entry) => (
+              <AdminChangelogRow
+                entry={entry}
+                onClick={() => handleEdit(entry)}
+                density="normal"
+              />
+            )}
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
