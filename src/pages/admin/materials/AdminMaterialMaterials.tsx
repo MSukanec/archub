@@ -5,8 +5,8 @@ import { toast } from '@/hooks/use-toast'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminMaterialRow from '@/components/data-row/rows/AdminMaterialRow'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -259,48 +259,53 @@ const AdminMaterialMateriales = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            data={processedMaterials}
-            columns={columns}
-            isLoading={isLoading}
-            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-            topBar={{
-              tabs: ['Sin Agrupar', 'Por Categorías'],
-              activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
-              onTabChange: (tab: string) => {
-                if (tab === 'Sin Agrupar') setGroupingType('none')
-                else if (tab === 'Por Categorías') setGroupingType('categories')
-              },
-              showSearch: true,
-              searchValue: searchValue,
-              onSearchChange: setSearchValue,
-              showFilter: true,
-              isFilterActive: categoryFilter !== 'all',
-              renderFilterContent: () => (
-                <div className="space-y-3 p-2 min-w-[200px]">
-                  <div>
-                    <Label className="text-xs font-medium mb-1 block">Categoría</Label>
-                    <Select value={categoryFilter} onValueChange={(value: string) => setCategoryFilter(value)}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Todas las categorías" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas las categorías</SelectItem>
-                        {categories.map((category: any) => (
-                          <SelectItem key={category.id} value={category.name.toLowerCase()}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              ),
-              showClearFilters: categoryFilter !== 'all' || groupingType !== 'categories',
-              onClearFilters: clearFilters,
-            }}
+      <Table
+        data={processedMaterials}
+        columns={columns}
+        isLoading={isLoading}
+        groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+        renderCard={(material) => (
+          <AdminMaterialRow
+            material={material}
+            onClick={() => handleEdit(material)}
+            density="normal"
+          />
+        )}
+        topBar={{
+          tabs: ['Sin Agrupar', 'Por Categorías'],
+          activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+          onTabChange: (tab: string) => {
+            if (tab === 'Sin Agrupar') setGroupingType('none')
+            else if (tab === 'Por Categorías') setGroupingType('categories')
+          },
+          showSearch: true,
+          searchValue: searchValue,
+          onSearchChange: setSearchValue,
+          showFilter: true,
+          isFilterActive: categoryFilter !== 'all',
+          renderFilterContent: () => (
+            <div className="space-y-3 p-2 min-w-[200px]">
+              <div>
+                <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                <Select value={categoryFilter} onValueChange={(value: string) => setCategoryFilter(value)}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas las categorías" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las categorías</SelectItem>
+                    {categories.map((category: any) => (
+                      <SelectItem key={category.id} value={category.name.toLowerCase()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ),
+          showClearFilters: categoryFilter !== 'all' || groupingType !== 'categories',
+          onClearFilters: clearFilters,
+        }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">
                 {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
@@ -314,8 +319,6 @@ const AdminMaterialMateriales = () => {
               </div>
             }
           />
-        </CardContent>
-      </Card>
     </div>
   )
 }
