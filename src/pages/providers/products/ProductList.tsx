@@ -11,6 +11,8 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useProviderProducts, useToggleProviderProduct } from '@/hooks/use-provider-products'
 
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")
@@ -18,11 +20,31 @@ export default function ProductList() {
   const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
   
   const { data: products = [], isLoading: productsLoading } = useProducts()
+  const { data: providerProducts = [] } = useProviderProducts()
+  const toggleProviderProduct = useToggleProviderProduct()
   const deleteProductMutation = useDeleteProduct()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
+
+  // Función para verificar si un producto está seleccionado
+  const isProductSelected = (productId: string) => {
+    const providerProduct = providerProducts.find(pp => pp.product_id === productId)
+    return providerProduct?.is_active || false
+  }
+
+  // Función para manejar el toggle del checkbox
+  const handleToggleProduct = async (productId: string, currentState: boolean) => {
+    try {
+      await toggleProviderProduct.mutateAsync({
+        productId,
+        isActive: !currentState
+      })
+    } catch (error) {
+      console.error('Error toggling product:', error)
+    }
+  }
 
   // Filter products and add groupKey for grouping
   const filteredProducts = useMemo(() => {
@@ -42,12 +64,15 @@ export default function ProductList() {
           groupKey = '';
       }
       
+      const isSelected = isProductSelected(product.id)
+      
       return {
         ...product,
-        groupKey
+        groupKey,
+        isSelected
       };
     });
-  }, [products, groupingType]);
+  }, [products, groupingType, providerProducts]);
 
   // Data type selector options
   const dataTypeOptions = [
@@ -85,9 +110,24 @@ export default function ProductList() {
   // Base columns definition
   const baseColumns = [
     {
+      key: 'selected',
+      label: 'Disponible',
+      width: '8%',
+      render: (product: Product & { isSelected?: boolean }) => {
+        const isSelected = product.isSelected || false
+        return (
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => handleToggleProduct(product.id, isSelected)}
+            disabled={toggleProviderProduct.isPending}
+          />
+        )
+      }
+    },
+    {
       key: 'category',
       label: 'Categoría',
-      width: '16%',
+      width: '15%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {(() => {
@@ -101,7 +141,7 @@ export default function ProductList() {
     {
       key: 'material',
       label: 'Material',
-      width: '16%',
+      width: '15%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.material?.name || 'Sin material'}
@@ -111,7 +151,7 @@ export default function ProductList() {
     {
       key: 'brand',
       label: 'Marca',
-      width: '13%',
+      width: '12%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.brand?.name || 'Sin marca'}
@@ -121,7 +161,7 @@ export default function ProductList() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '15%',
+      width: '14%',
       render: (product: Product) => (
         <span className="text-sm font-medium">{product.name}</span>
       )
@@ -129,7 +169,7 @@ export default function ProductList() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '12%',
+      width: '11%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit_presentation?.name || 'N/A'}
@@ -139,7 +179,7 @@ export default function ProductList() {
     {
       key: 'url',
       label: 'Link',
-      width: '8%',
+      width: '7%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -161,7 +201,7 @@ export default function ProductList() {
     {
       key: 'image',
       label: 'Imagen',
-      width: '8%',
+      width: '7%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -199,7 +239,7 @@ export default function ProductList() {
     {
       key: 'default_price',
       label: 'Precio',
-      width: '12%',
+      width: '11%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <span className="text-sm font-mono">
@@ -264,6 +304,7 @@ export default function ProductList() {
             data={filteredProducts}
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            rowClassName={(product) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
             topBar={{
               tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
               activeTab: groupingType === 'none' ? 'No Agrupar' : 
@@ -275,8 +316,9 @@ export default function ProductList() {
               }
             }}
             renderCard={(product) => (
-              <MaterialRow
-                material={{
+              <div className={!product.isSelected ? 'opacity-40' : 'opacity-100'}>
+                <MaterialRow
+                  material={{
                   id: product.id,
                   name: product.name, // MODELO
                   material_name: product.material?.name, // MATERIAL
@@ -295,6 +337,7 @@ export default function ProductList() {
                 onClick={() => handleEdit(product)}
                 density="normal"
               />
+              </div>
             )}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
               return (
