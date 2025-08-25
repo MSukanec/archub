@@ -54,9 +54,9 @@ export default function MaterialRow({
           {material.name}
         </div>
 
-        {/* Tercera fila - Brand-Model (bold) */}
+        {/* Tercera fila - Marca - Modelo */}
         <div className="font-bold text-sm truncate">
-          {material.brand || 'Sin marca'}
+          {material.brand ? `${material.brand} - ${material.name}` : material.name}
         </div>
 
         {/* Cuarta fila - Unit-Price */}
