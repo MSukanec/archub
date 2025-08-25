@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useToggleProviderProduct, useProviderProducts } from '@/hooks/use-provider-products';
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
@@ -25,8 +28,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
+  provider_code: z.string().optional(),
   currency: z.string().min(1, "La moneda es obligatoria"),
-  price: z.coerce.number().min(0, "El precio debe ser mayor o igual a 0"),
+  price: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,26 +59,45 @@ interface ProviderProductModalProps {
 export function ProviderProductModal({ modalData, onClose }: ProviderProductModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const product = modalData?.product;
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { data: providerProducts = [] } = useProviderProducts();
+  const toggleProviderProduct = useToggleProviderProduct();
+
+  // Obtener el provider product actual para este producto
+  const currentProviderProduct = providerProducts.find(pp => pp.product_id === product?.id);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currency: "CLP",
+      provider_code: currentProviderProduct?.provider_code || '',
+      currency: defaultCurrency?.symbol || "CLP",
       price: product?.default_price || 0,
     },
   });
 
+  // Actualizar valores cuando cambie la moneda por defecto o el provider product
+  useEffect(() => {
+    if (defaultCurrency) {
+      form.setValue('currency', defaultCurrency.symbol);
+    }
+    if (currentProviderProduct?.provider_code) {
+      form.setValue('provider_code', currentProviderProduct.provider_code);
+    }
+  }, [defaultCurrency, currentProviderProduct, form]);
+
   const handleSubmit = async (data: FormData) => {
+    if (!product?.id) return;
+    
     setIsLoading(true);
     try {
-      // TODO: Implementar conexión con Supabase
-      console.log("Datos a guardar:", {
-        productId: product?.id,
-        ...data
+      // Actualizar el provider_code usando el hook existente
+      await toggleProviderProduct.mutateAsync({
+        productId: product.id,
+        isActive: true, // Asegurar que esté activo
+        providerCode: data.provider_code
       });
-      
-      // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
       onClose();
     } catch (error) {
@@ -142,6 +165,24 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       {/* Formulario */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* Campo de Código */}
+          <FormField
+            control={form.control}
+            name="provider_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Código</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Código interno del proveedor (opcional)"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}

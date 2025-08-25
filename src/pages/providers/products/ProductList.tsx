@@ -65,11 +65,13 @@ export default function ProductList() {
       }
       
       const isSelected = isProductSelected(product.id)
+      const providerProduct = providerProducts.find(pp => pp.product_id === product.id)
       
       return {
         ...product,
         groupKey,
-        isSelected
+        isSelected,
+        providerCode: providerProduct?.provider_code
       };
     });
   }, [products, groupingType, providerProducts]);
@@ -112,7 +114,7 @@ export default function ProductList() {
     {
       key: 'selected',
       label: 'Disponible',
-      width: '8%',
+      width: '7%',
       render: (product: Product & { isSelected?: boolean }) => {
         const isSelected = product.isSelected || false
         return (
@@ -125,9 +127,19 @@ export default function ProductList() {
       }
     },
     {
+      key: 'provider_code',
+      label: 'Código',
+      width: '8%',
+      render: (product: Product & { providerCode?: string }) => (
+        <span className="text-sm font-mono text-muted-foreground">
+          {product.providerCode || '-'}
+        </span>
+      )
+    },
+    {
       key: 'category',
       label: 'Categoría',
-      width: '15%',
+      width: '14%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {(() => {
@@ -141,7 +153,7 @@ export default function ProductList() {
     {
       key: 'material',
       label: 'Material',
-      width: '15%',
+      width: '14%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.material?.name || 'Sin material'}

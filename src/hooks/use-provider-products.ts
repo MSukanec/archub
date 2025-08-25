@@ -53,7 +53,7 @@ export function useToggleProviderProduct() {
   const organizationId = userData?.organization?.id;
 
   return useMutation({
-    mutationFn: async ({ productId, isActive }: { productId: string; isActive: boolean }) => {
+    mutationFn: async ({ productId, isActive, providerCode }: { productId: string; isActive: boolean; providerCode?: string }) => {
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
       }
@@ -73,12 +73,18 @@ export function useToggleProviderProduct() {
 
         if (existing) {
           // Actualizar existente
+          const updateData: any = { 
+            is_active: isActive, 
+            updated_at: new Date().toISOString() 
+          };
+          
+          if (providerCode !== undefined) {
+            updateData.provider_code = providerCode;
+          }
+
           const { data, error } = await supabase
             .from('provider_products')
-            .update({ 
-              is_active: isActive, 
-              updated_at: new Date().toISOString() 
-            })
+            .update(updateData)
             .eq('id', existing.id)
             .select()
             .single();
@@ -87,13 +93,19 @@ export function useToggleProviderProduct() {
           return data;
         } else {
           // Crear nuevo
+          const insertData: any = {
+            organization_id: organizationId,
+            product_id: productId,
+            is_active: isActive
+          };
+          
+          if (providerCode !== undefined) {
+            insertData.provider_code = providerCode;
+          }
+
           const { data, error } = await supabase
             .from('provider_products')
-            .insert({
-              organization_id: organizationId,
-              product_id: productId,
-              is_active: isActive
-            })
+            .insert(insertData)
             .select()
             .single();
 
