@@ -22,8 +22,8 @@ export interface NewProviderProductData {
 
 // Hook para obtener los productos del proveedor (organización actual)
 export function useProviderProducts() {
-  const { currentUser } = useCurrentUser();
-  const organizationId = currentUser?.activeOrganization?.id;
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
 
   return useQuery({
     queryKey: ['provider-products', organizationId],
@@ -49,8 +49,8 @@ export function useProviderProducts() {
 // Hook para crear o actualizar un producto de proveedor
 export function useToggleProviderProduct() {
   const queryClient = useQueryClient();
-  const { currentUser } = useCurrentUser();
-  const organizationId = currentUser?.activeOrganization?.id;
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
 
   return useMutation({
     mutationFn: async ({ productId, isActive }: { productId: string; isActive: boolean }) => {
