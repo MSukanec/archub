@@ -58,8 +58,6 @@ export function useToggleProviderProduct() {
         throw new Error('No organization or supabase client');
       }
 
-      console.log('Toggling product:', { organizationId, productId, isActive });
-
       try {
         // Primero verificar si ya existe
         const { data: existing, error: selectError } = await supabase
@@ -70,13 +68,11 @@ export function useToggleProviderProduct() {
           .single();
 
         if (selectError && selectError.code !== 'PGRST116') {
-          console.error('Error checking existing provider product:', selectError);
           throw selectError;
         }
 
         if (existing) {
           // Actualizar existente
-          console.log('Updating existing provider product:', existing.id);
           const { data, error } = await supabase
             .from('provider_products')
             .update({ 
@@ -87,15 +83,10 @@ export function useToggleProviderProduct() {
             .select()
             .single();
 
-          if (error) {
-            console.error('Error updating provider product:', error);
-            throw error;
-          }
-          console.log('Updated provider product:', data);
+          if (error) throw error;
           return data;
         } else {
           // Crear nuevo
-          console.log('Creating new provider product');
           const { data, error } = await supabase
             .from('provider_products')
             .insert({
@@ -106,15 +97,10 @@ export function useToggleProviderProduct() {
             .select()
             .single();
 
-          if (error) {
-            console.error('Error creating provider product:', error);
-            throw error;
-          }
-          console.log('Created provider product:', data);
+          if (error) throw error;
           return data;
         }
       } catch (error) {
-        console.error('Error in provider product mutation:', error);
         throw error;
       }
     },
@@ -126,13 +112,6 @@ export function useToggleProviderProduct() {
       });
     },
     onError: (error: any) => {
-      console.error('Error toggling provider product:', error);
-      console.error('Error details:', {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint
-      });
       toast({
         title: "Error",
         description: error?.message || "No se pudo actualizar la selección del producto.",

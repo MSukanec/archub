@@ -304,7 +304,7 @@ export default function ProductList() {
             data={filteredProducts}
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-            rowClassName={(product) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
+            getRowClassName={(product) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
             topBar={{
               tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
               activeTab: groupingType === 'none' ? 'No Agrupar' : 
@@ -316,28 +316,27 @@ export default function ProductList() {
               }
             }}
             renderCard={(product) => (
-              <div className={!product.isSelected ? 'opacity-40' : 'opacity-100'}>
-                <MaterialRow
-                  material={{
-                  id: product.id,
-                  name: product.name, // MODELO
-                  material_name: product.material?.name, // MATERIAL
-                  brand: product.brand?.name,
-                  category: (() => {
-                    const hierarchy = product.categoryHierarchy || 'Sin categoría';
-                    // Extraer solo la primera categoría (antes del primer " > ")
-                    return hierarchy.split(' > ')[0];
-                  })(),
-                  unit: product.unit_presentation?.name,
-                  price: product.default_price,
-                  image_url: product.image_url,
-                  is_system: product.is_system || false,
-                  created_at: product.created_at
-                }}
-                onClick={() => handleEdit(product)}
-                density="normal"
+              <MaterialRow
+                material={{
+                id: product.id,
+                name: product.name, // MODELO
+                material_name: product.material?.name, // MATERIAL
+                brand: product.brand?.name,
+                category: (() => {
+                  const hierarchy = product.categoryHierarchy || 'Sin categoría';
+                  // Extraer solo la primera categoría (antes del primer " > ")
+                  return hierarchy.split(' > ')[0];
+                })(),
+                unit: product.unit_presentation?.name,
+                price: product.default_price,
+                image_url: product.image_url,
+                is_system: product.is_system || false,
+                created_at: product.created_at
+              }}
+              onClick={() => handleEdit(product)}
+              density="normal"
+              className={!product.isSelected ? 'opacity-40' : 'opacity-100'}
               />
-              </div>
             )}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
               return (
