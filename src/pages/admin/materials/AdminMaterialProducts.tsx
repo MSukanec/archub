@@ -4,13 +4,13 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import AdminProductRow from '@/components/data-row/rows/AdminProductRow'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
@@ -301,22 +301,25 @@ const AdminMaterialProducts = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            data={sortedProducts}
-            columns={columns}
-            isLoading={isLoading}
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No se encontraron productos</p>
-                <p className="text-xs">No hay productos que coincidan con los filtros aplicados.</p>
-              </div>
-            }
+      <Table
+        data={sortedProducts}
+        columns={columns}
+        isLoading={isLoading}
+        renderCard={(product) => (
+          <AdminProductRow
+            product={product}
+            onClick={() => handleEdit(product)}
+            density="normal"
           />
-        </CardContent>
-      </Card>
+        )}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <Package className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron productos</p>
+            <p className="text-xs">No hay productos que coincidan con los filtros aplicados.</p>
+          </div>
+        }
+      />
 
       <ImageLightbox
         images={lightboxImages}
