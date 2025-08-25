@@ -69,6 +69,9 @@ import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 
+// Provider Pages  
+import Products from "@/pages/providers/products/Products";
+
 
 
 
@@ -350,6 +353,12 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
+        {/* Provider Routes */}
+        <Route path="/proveedor/productos">
+          <ProtectedRoute>
+            <Products />
+          </ProtectedRoute>
+        </Route>
 
 
 

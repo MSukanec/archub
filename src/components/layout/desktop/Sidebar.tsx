@@ -284,6 +284,7 @@ export function Sidebar() {
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/recursos')) return 'recursos';
+    if (location.startsWith('/proveedor')) return 'proveedor';
     if (location.startsWith('/admin')) return 'administracion';
     if (location === '/dashboard') return null; // Resumen es independiente
     return null;
@@ -335,6 +336,9 @@ export function Sidebar() {
       { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
       { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
       { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
+    ],
+    'proveedor': [
+      { icon: Package, label: 'Productos', href: '/proveedor/productos' },
     ],
     'administracion': [
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
@@ -388,6 +392,13 @@ export function Sidebar() {
       label: 'Recursos', 
       defaultRoute: '/recursos/documentacion',
       isActive: location.startsWith('/recursos')
+    },
+    { 
+      id: 'proveedor', 
+      icon: Package, 
+      label: 'Proveedor', 
+      defaultRoute: '/proveedor/productos',
+      isActive: location.startsWith('/proveedor')
     },
     ...(isAdmin ? [{ 
       id: 'administracion', 
