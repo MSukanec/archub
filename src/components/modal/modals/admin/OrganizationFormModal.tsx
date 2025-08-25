@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -44,6 +45,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
+  const { data: currentUser } = useCurrentUser();
 
   // Fetch plans for select
   const { data: plans = [] } = useQuery({
@@ -118,7 +120,8 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
             name: data.name,
             is_active: data.is_active,
             plan_id: data.plan_id,
-            is_system: false
+            is_system: false,
+            created_by: currentUser?.user?.id
           });
         
         if (error) throw error;
