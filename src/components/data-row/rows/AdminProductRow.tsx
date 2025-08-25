@@ -62,8 +62,8 @@ const getProductInitials = (product: Product): string => {
   return material.slice(0, 2).toUpperCase();
 };
 
-// Componente para mostrar precio y botón de enlace
-const PriceAndLink = ({ price, url }: { price?: number; url?: string }) => {
+// Componente para mostrar solo el botón de enlace
+const LinkButton = ({ url }: { url?: string }) => {
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (url) {
@@ -71,29 +71,18 @@ const PriceAndLink = ({ price, url }: { price?: number; url?: string }) => {
     }
   };
 
+  if (!url) return null;
+
   return (
-    <div className="text-right space-y-1">
-      {/* Precio */}
-      <div className="text-xs font-medium">
-        {price !== null && price !== undefined ? 
-          `S/. ${price.toFixed(2)}` : 
-          'Sin precio'
-        }
-      </div>
-      
-      {/* Botón LINK */}
-      {url && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLinkClick}
-          className="h-6 px-2 text-xs"
-        >
-          <ExternalLink className="w-3 h-3 mr-1" />
-          LINK
-        </Button>
-      )}
-    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleLinkClick}
+      className="h-6 px-2 text-xs"
+    >
+      <ExternalLink className="w-3 h-3 mr-1" />
+      LINK
+    </Button>
   );
 };
 
@@ -124,14 +113,22 @@ export default function AdminProductRow({
         <div className="text-xs text-muted-foreground truncate">
           {product.categoryHierarchy || 'Sin categoría'}
         </div>
+
+        {/* Cuarta fila - Unidad de Venta - Precio */}
+        <div className="text-xs text-muted-foreground truncate">
+          {(() => {
+            const unitName = product.unit_presentation?.name || 'Sin unidad';
+            const price = product.default_price !== null && product.default_price !== undefined 
+              ? `$${product.default_price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` 
+              : 'Sin precio';
+            return `${unitName} - ${price}`;
+          })()}
+        </div>
       </div>
 
-      {/* Trailing Section - Precio y Link */}
+      {/* Trailing Section - Solo Link */}
       <div className="flex items-center">
-        <PriceAndLink 
-          price={product.default_price} 
-          url={product.url} 
-        />
+        <LinkButton url={product.url} />
         {/* Espacio mínimo para chevron si existe */}
         {onClick && <div className="w-2" />}
       </div>
