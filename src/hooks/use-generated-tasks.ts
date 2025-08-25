@@ -14,6 +14,7 @@ export interface GeneratedTask {
   is_completed?: boolean;
   unit: string;
   category: string;
+  division?: string; // División/rubro de la tarea
   created_at: string;
   updated_at: string;
 }
