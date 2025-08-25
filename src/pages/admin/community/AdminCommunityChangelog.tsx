@@ -213,6 +213,7 @@ const AdminCommunityChangelog = () => {
                 density="normal"
               />
             )}
+            cardSpacing="space-y-0"
             emptyState={
               <div className="text-center py-8 text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
