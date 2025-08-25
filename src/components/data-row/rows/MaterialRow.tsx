@@ -10,6 +10,7 @@ interface Material {
   category?: string;
   unit?: string;
   price?: number;
+  image_url?: string;
   is_system: boolean;
   created_at: string;
 }
@@ -84,9 +85,10 @@ export default function MaterialRow({
     </>
   );
 
-  // Usar el nuevo DataRowCard con avatar de iniciales (IDÉNTICO a AdminProductRow)
+  // Usar el nuevo DataRowCard con avatar (IDÉNTICO a AdminProductRow)
   return (
     <DataRowCard
+      avatarUrl={material.image_url}
       avatarFallback={getMaterialInitials(material)}
       selected={selected}
       density={density}

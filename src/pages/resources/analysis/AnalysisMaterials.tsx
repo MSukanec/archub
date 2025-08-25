@@ -256,6 +256,7 @@ export default function AnalysisMaterials() {
                   })(),
                   unit: product.unit_presentation?.name,
                   price: product.default_price,
+                  image_url: product.image_url,
                   is_system: product.is_system || false,
                   created_at: product.created_at
                 }}
