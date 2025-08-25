@@ -15,7 +15,7 @@ import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLig
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
-  const [groupingType, setGroupingType] = useState('material')  // Por defecto agrupar por material
+  const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
   
   const { data: products = [], isLoading: productsLoading } = useProducts()
   const deleteProductMutation = useDeleteProduct()
@@ -32,6 +32,11 @@ export default function ProductList() {
       switch (groupingType) {
         case 'material':
           groupKey = product.material?.name || 'Sin material';
+          break;
+        case 'category':
+          const hierarchy = product.categoryHierarchy || 'Sin categoría';
+          // Extraer solo la primera categoría (antes del primer " > ")
+          groupKey = hierarchy.split(' > ')[0];
           break;
         default:
           groupKey = '';
@@ -235,6 +240,7 @@ export default function ProductList() {
     // Filter columns for grouping - hide the grouped column
     return baseColumns.filter(column => {
       if (groupingType === 'material' && column.key === 'material') return false;
+      if (groupingType === 'category' && column.key === 'category') return false;
       return true;
     });
   }, [groupingType]);
@@ -259,10 +265,12 @@ export default function ProductList() {
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
-              tabs: ['No Agrupar', 'Agrupar por Material'],
-              activeTab: groupingType === 'none' ? 'No Agrupar' : 'Agrupar por Material',
+              tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
+              activeTab: groupingType === 'none' ? 'No Agrupar' : 
+                        groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
               onTabChange: (tab: string) => {
                 if (tab === 'No Agrupar') setGroupingType('none')
+                else if (tab === 'Agrupar por Categoría') setGroupingType('category')
                 else if (tab === 'Agrupar por Material') setGroupingType('material')
               }
             }}
