@@ -61,6 +61,7 @@ import { InsuranceFormModal } from '../modals/construction/InsuranceFormModal';
 import { RenewInsuranceFormModal } from '../modals/construction/RenewInsuranceFormModal';
 import { PartnerModal } from '../modals/organizations/members/PartnerModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
+import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -208,6 +209,8 @@ export function ModalFactory() {
       return <ClientInstallment modalData={data || undefined} onClose={closeModal} />;
     case 'pdf-exporter':
       return <PDFExporterModal modalData={data || undefined} onClose={closeModal} />;
+    case 'provider-product':
+      return <ProviderProductModal modalData={data || undefined} onClose={closeModal} />;
     default:
       return null;
   }

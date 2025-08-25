@@ -55,7 +55,7 @@ export default function ProductList() {
   ]
 
   const handleEdit = (product: Product) => {
-    openModal('product-form', { editingProduct: product })
+    openModal('provider-product', { product: product })
   }
 
   const handleDuplicate = (product: Product) => {
