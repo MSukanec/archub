@@ -94,34 +94,49 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
     onClose();
   };
 
-  const updateOrganizationMutation = useMutation({
+  const organizationMutation = useMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { error } = await supabase
-        .from('organizations')
-        .update({
-          name: data.name,
-          is_active: data.is_active,
-          plan_id: data.plan_id
-        })
-        .eq('id', organization!.id);
-      
-      if (error) throw error;
+      if (organization) {
+        // Actualizar organización existente
+        const { error } = await supabase
+          .from('organizations')
+          .update({
+            name: data.name,
+            is_active: data.is_active,
+            plan_id: data.plan_id
+          })
+          .eq('id', organization.id);
+        
+        if (error) throw error;
+      } else {
+        // Crear nueva organización
+        const { error } = await supabase
+          .from('organizations')
+          .insert({
+            name: data.name,
+            is_active: data.is_active,
+            plan_id: data.plan_id,
+            is_system: false
+          });
+        
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       toast({
-        title: 'Organización actualizada',
-        description: 'Los cambios se guardaron correctamente.'
+        title: organization ? 'Organización actualizada' : 'Organización creada',
+        description: organization ? 'Los cambios se guardaron correctamente.' : 'La organización se creó correctamente.'
       });
       handleClose();
     },
     onError: (error) => {
-      console.error('Error updating organization:', error);
+      console.error('Error with organization:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo actualizar la organización. Inténtalo de nuevo.',
+        description: organization ? 'No se pudo actualizar la organización. Inténtalo de nuevo.' : 'No se pudo crear la organización. Inténtalo de nuevo.',
         variant: 'destructive'
       });
     }
@@ -130,7 +145,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
   const onSubmit = async (data: OrganizationFormData) => {
     setIsLoading(true);
     try {
-      await updateOrganizationMutation.mutateAsync(data);
+      await organizationMutation.mutateAsync(data);
     } finally {
       setIsLoading(false);
     }
@@ -219,7 +234,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
 
   const headerContent = (
     <FormModalHeader 
-      title={organization ? 'Editar Organización' : 'Ver Organización'}
+      title={organization ? 'Editar Organización' : 'Nueva Organización'}
       icon={Building}
     />
   );
@@ -228,7 +243,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel="Guardar Cambios"
+      rightLabel={organization ? 'Guardar Cambios' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
     />
   );
