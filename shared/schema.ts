@@ -271,7 +271,7 @@ export const task_parameter_positions = pgTable("task_parameter_positions", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
-// Tasks table (renamed from task_parametric)
+// Tasks table
 export const tasks = pgTable("tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
   code: text("code"),

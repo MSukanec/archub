@@ -77,7 +77,7 @@ export function ConstructionSingleTaskModal({
 
   // Hook para cargar TODAS las tareas de la librería parametrica
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['task-parametric-library'],
+    queryKey: ['task-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       

@@ -35,7 +35,7 @@ const AdminTaskList = () => {
   const { data: userData } = useCurrentUser()
   const isMobile = useMobile()
 
-  // Real data from useGeneratedTasks hook - now using task_parametric_view
+  // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
   const { data: parameters = [] } = useTaskParametersAdmin()
@@ -48,7 +48,7 @@ const AdminTaskList = () => {
       const matchesSearch = !searchValue || 
         (task.custom_name || task.name_rendered)?.toLowerCase().includes(searchValue.toLowerCase()) ||
         task.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        task.division?.toLowerCase().includes(searchValue.toLowerCase())
+        task.category?.toLowerCase().includes(searchValue.toLowerCase())
       
       return matchesSearch
     })
@@ -65,7 +65,7 @@ const AdminTaskList = () => {
     if (groupingType === 'rubros') {
       return filteredGeneratedTasks.map(task => ({
         ...task,
-        groupKey: task.division || 'Sin rubro'
+        groupKey: task.category || 'Sin rubro'
       }));
     }
     
@@ -240,9 +240,9 @@ const AdminTaskList = () => {
       width: '12%',
       render: (task: GeneratedTask) => (
         <div>
-          {task.division ? (
+          {task.category ? (
             <Badge variant="outline" className="text-xs">
-              {task.division}
+              {task.category}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin rubro</span>

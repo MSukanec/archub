@@ -125,7 +125,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
 
       // Debug logs removed
 
-      // Obtener los IDs de las tareas para buscar en task_parametric_view
+      // Obtener los IDs de las tareas
       const taskIds = constructionTasks.map(ct => ct.task_id);
       const constructionTaskIds = constructionTasks.map(ct => ct.id);
       
@@ -187,7 +187,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         });
       }
 
-      // Mapear datos de construction_tasks con task_parametric_view al formato esperado
+      // Mapear datos de construction_tasks al formato esperado
       const mappedTasks: ConstructionTask[] = constructionTasks.map((item: any) => {
         const taskData = taskDetailsMap.get(item.task_id);
         const phaseRelation = phaseRelationsMap.get(item.id);
@@ -202,7 +202,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           // Campos principales de construction_tasks
           task_instance_id: item.id, // ID de construction_tasks
           project_id: item.project_id,
-          task_id: item.task_id, // FK a task_parametric
+          task_id: item.task_id, // FK a tasks
           task_code: taskData?.code || '',
           param_values: taskData?.param_values || {},
           start_date: item.start_date,

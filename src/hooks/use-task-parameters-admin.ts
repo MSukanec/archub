@@ -183,9 +183,9 @@ export function useUpdateTaskParameter() {
       // Recalcular name_rendered de todas las tareas cuando se actualiza un expression_template
       console.log('🔄 Recalculando name_rendered de todas las tareas...');
       
-      // Obtener todas las tareas paramétricas
+      // Obtener todas las tareas
       const { data: tasks, error: tasksError } = await supabase
-        .from('task_parametric')
+        .from('tasks')
         .select('id, param_values');
         
       if (tasksError) {
@@ -195,7 +195,7 @@ export function useUpdateTaskParameter() {
         // Esto activa los triggers de base de datos que regeneran el name_rendered
         for (const task of tasks) {
           await supabase
-            .from('task_parametric')
+            .from('tasks')
             .update({ param_values: task.param_values })
             .eq('id', task.id);
         }
@@ -211,7 +211,7 @@ export function useUpdateTaskParameter() {
       queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task-parametric-view'] });
+      queryClient.invalidateQueries({ queryKey: ['task-view'] });
       
       toast({
         title: 'Parámetro actualizado',

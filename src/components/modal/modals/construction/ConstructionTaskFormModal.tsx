@@ -134,7 +134,7 @@ export function ConstructionTaskFormModal({
 
   // Hook para cargar TODAS las tareas de la librería parametrica (sin filtrar por proyecto)
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['task-parametric-library'],
+    queryKey: ['task-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -478,7 +478,7 @@ export function ConstructionTaskFormModal({
       }
 
       // Invalidar caché para que la tabla se actualice automáticamente
-      await queryClient.invalidateQueries({ queryKey: ['task-parametric-library'] });
+      await queryClient.invalidateQueries({ queryKey: ['task-library'] });
       
       // Limpiar formulario y volver al panel principal
       setTaskNameText('');

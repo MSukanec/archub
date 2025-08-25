@@ -22,21 +22,21 @@ export function useDebugTasks(organizationId: string) {
       console.log("task_generated data:", taskGenerated);
       console.log("task_generated error:", taskGeneratedError);
 
-      // Verificar task_parametric_view
-      const { data: taskParametricView, error: taskParametricViewError } = await supabase
+      // Verificar task_view
+      const { data: taskView, error: taskViewError } = await supabase
         .from("task_view")
         .select("*")
         .eq("organization_id", organizationId)
         .limit(5);
 
-      console.log("task_parametric_view data:", taskParametricView);
-      console.log("task_parametric_view error:", taskParametricViewError);
+      console.log("task_view data:", taskView);
+      console.log("task_view error:", taskViewError);
 
       return {
         taskGenerated,
-        taskParametricView,
+        taskView,
         taskGeneratedError,
-        taskParametricViewError
+        taskViewError
       };
     },
     enabled: !!supabase && !!organizationId
