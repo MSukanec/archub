@@ -14,7 +14,6 @@ interface Material {
   provider?: string;
   organization_id?: string;
   is_system: boolean;
-  type?: string; // Campo adicional para el badge de TIPO
   created_at: string;
   unit?: { name: string };
   category?: { name: string };
@@ -56,28 +55,8 @@ const getMaterialPrice = (material: Material): string => {
   return 'Sin precio';
 };
 
-// Helper para obtener el variant del badge del tipo
-const getTypeBadgeVariant = (type: string) => {
-  const typeValue = type?.toLowerCase() || '';
-  if (typeValue.includes('sistema') || typeValue.includes('system')) return 'default';
-  if (typeValue.includes('usuario') || typeValue.includes('user')) return 'secondary';
-  return 'outline';
-};
-
-// Helper para obtener la clase CSS del badge del tipo
-const getTypeBadgeClassName = (type: string) => {
-  const typeValue = type?.toLowerCase() || '';
-  if (typeValue.includes('sistema') || typeValue.includes('system')) {
-    return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-  }
-  if (typeValue.includes('usuario') || typeValue.includes('user')) {
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-  }
-  return '';
-};
-
-// Componente para mostrar precio, estado y tipo
-const PriceStatusAndType = ({ material }: { material: Material }) => {
+// Componente para mostrar precio y estado (IDÉNTICO a AdminMaterialRow)
+const PriceAndStatus = ({ material }: { material: Material }) => {
   const price = getMaterialPrice(material);
   const isCompleted = material.is_completed;
 
@@ -102,17 +81,19 @@ const PriceStatusAndType = ({ material }: { material: Material }) => {
         </Badge>
       </div>
 
-      {/* Badge de TIPO */}
-      {material.type && (
-        <div className="flex justify-end">
-          <Badge 
-            variant={getTypeBadgeVariant(material.type)}
-            className={`text-xs ${getTypeBadgeClassName(material.type)}`}
-          >
-            {material.type}
-          </Badge>
-        </div>
-      )}
+      {/* ÚNICA DIFERENCIA: Badge de TIPO (SISTEMA/USUARIO) */}
+      <div className="flex justify-end">
+        <Badge 
+          variant={material.is_system ? "default" : "secondary"} 
+          className={`text-xs ${
+            material.is_system 
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+              : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+          }`}
+        >
+          {material.is_system ? 'SISTEMA' : 'USUARIO'}
+        </Badge>
+      </div>
     </div>
   );
 };
@@ -125,7 +106,7 @@ export default function MaterialRow({
   className 
 }: MaterialRowProps) {
   
-  // Contenido interno del card usando el nuevo sistema
+  // Contenido interno del card usando el nuevo sistema (IDÉNTICO a AdminMaterialRow)
   const cardContent = (
     <>
       {/* Columna de contenido (principal) */}
@@ -146,16 +127,16 @@ export default function MaterialRow({
         </div>
       </div>
 
-      {/* Trailing Section - Precio, Estado y Tipo */}
+      {/* Trailing Section - Precio y Estado (con badge adicional de TIPO) */}
       <div className="flex items-center">
-        <PriceStatusAndType material={material} />
+        <PriceAndStatus material={material} />
         {/* Espacio mínimo para chevron si existe */}
         {onClick && <div className="w-2" />}
       </div>
     </>
   );
 
-  // Usar el nuevo DataRowCard con avatar de iniciales
+  // Usar el nuevo DataRowCard con avatar de iniciales (IDÉNTICO a AdminMaterialRow)
   return (
     <DataRowCard
       avatarFallback={getMaterialInitials(material)}

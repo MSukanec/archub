@@ -254,7 +254,6 @@ export default function AnalysisMaterials() {
                   is_system: product.is_system || false,
                   created_at: product.created_at,
                   provider: product.default_provider,
-                  type: product.is_system ? 'SISTEMA' : 'USUARIO', // Badge de TIPO
                   unit: { name: product.unit_presentation?.name || 'Sin unidad' },
                   category: { name: product.categoryHierarchy || 'Sin categoría' },
                   organization_material_prices: product.default_price ? [{
