@@ -299,7 +299,7 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
               
               {/* Columna izquierda - Header (1/3) */}
               <View style={{ flex: 1, paddingRight: 10 }}>
-                {/* Línea superior */}
+                {/* Línea superior - 1. Encima de la UF */}
                 <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                 
                 {/* Contenido */}
@@ -331,13 +331,13 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
                   </View>
                 </View>
                 
-                {/* Línea inferior */}
+                {/* Línea inferior - 2. Abajo de la UF */}
                 <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
               </View>
 
               {/* Columna derecha - Tabla (2/3) */}
               <View style={{ flex: 2 }}>
-                {/* Línea superior */}
+                {/* Línea superior - 3. Arriba del encabezado de cuotas */}
                 <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                 
                 <View style={{ ...styles.table, marginTop: 0 }}>
@@ -416,9 +416,6 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
               </View>
 
             </View>
-            
-            {/* Línea inferior que abarca todo el ancho */}
-            <View style={{ borderBottomWidth: 2, borderBottomColor: '#374151', marginTop: 15 }} />
           </View>
         ))
       )}
