@@ -337,10 +337,8 @@ export function PdfPaymentPlan({ data, config }: PdfPaymentPlanProps) {
 
               {/* Columna derecha - Tabla (2/3) */}
               <View style={{ flex: 2 }}>
-                {/* Línea superior - 3. Arriba del encabezado de cuotas */}
-                <View style={{ borderTopWidth: 2, borderTopColor: '#374151', marginBottom: 15 }} />
                 
-                <View style={{ ...styles.table, marginTop: 0 }}>
+                <View style={{ ...styles.table, marginTop: 15 }}>
                 {/* Header */}
                 <View style={styles.tableHeader}>
                   <Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>Cuota</Text>
