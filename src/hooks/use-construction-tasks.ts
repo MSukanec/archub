@@ -192,14 +192,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         const taskData = taskDetailsMap.get(item.task_id);
         const phaseRelation = phaseRelationsMap.get(item.id);
         
-        // Debug temporal: verificar datos de división
-        console.log('🔍 Construction task data:', {
-          id: item.id,
-          task_division_id: item.task_division_id,
-          division_name: item.division_name,
-          category_name: item.category_name,
-          raw_item: item
-        });
         
         
         // Extraer información de fase si existe
