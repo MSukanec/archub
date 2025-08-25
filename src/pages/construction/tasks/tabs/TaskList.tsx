@@ -42,7 +42,7 @@ export function TaskList({
           groupKey = task.phase_name || 'Sin fase';
           break;
         case 'rubros':
-          groupKey = task.category_name || 'Sin rubro';
+          groupKey = task.division_name || 'Sin rubro';
           break;
         case 'tasks':
           const customName = task.custom_name || task.task?.display_name;
@@ -54,10 +54,10 @@ export function TaskList({
           }
           break;
         case 'rubros-phases':
-          groupKey = `${task.category_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
+          groupKey = `${task.division_name || 'Sin rubro'} - ${task.phase_name || 'Sin fase'}`;
           break;
         case 'phases-rubros':
-          groupKey = `${task.phase_name || 'Sin fase'} - ${task.category_name || 'Sin rubro'}`;
+          groupKey = `${task.phase_name || 'Sin fase'} - ${task.division_name || 'Sin rubro'}`;
           break;
         default:
           groupKey = '';
@@ -132,9 +132,9 @@ export function TaskList({
       width: '15%'
     },
     {
-      key: 'category_name',
+      key: 'division_name',
       label: 'Rubro',
-      render: (task: any) => task.category_name || 'Sin rubro',
+      render: (task: any) => task.division_name || 'Sin rubro',
       width: '10%'
     },
     {
@@ -257,10 +257,10 @@ export function TaskList({
     
     // Filtrar columnas base para otros tipos de agrupación
     return baseColumns.filter(column => {
-      if (groupingType === 'rubros' && column.key === 'category_name') return false;
+      if (groupingType === 'rubros' && column.key === 'division_name') return false;
       if (groupingType === 'phases' && column.key === 'phase') return false;
-      if (groupingType === 'rubros-phases' && (column.key === 'category_name' || column.key === 'phase')) return false;
-      if (groupingType === 'phases-rubros' && (column.key === 'category_name' || column.key === 'phase')) return false;
+      if (groupingType === 'rubros-phases' && (column.key === 'division_name' || column.key === 'phase')) return false;
+      if (groupingType === 'phases-rubros' && (column.key === 'division_name' || column.key === 'phase')) return false;
       return true;
     });
   }, [groupingType]);
@@ -322,7 +322,7 @@ export function TaskList({
         if (groupingType === 'tasks') {
           const totalQuantity = groupRows.reduce((sum, row) => sum + (row.quantity || 0), 0);
           const unitSymbol = groupRows[0]?.task?.unit_symbol || '';
-          const rubroName = groupRows[0]?.task?.rubro_name || '';
+          const rubroName = groupRows[0]?.task?.division_name || '';
           
           return (
             <>
