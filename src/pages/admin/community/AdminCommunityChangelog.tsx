@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, FileText } from 'lucide-react'
 import { format } from 'date-fns'
@@ -200,30 +199,26 @@ const AdminCommunityChangelog = () => {
   return (
     <div className="space-y-6">
       {/* Changelog Entries Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            data={changelogEntries}
-            columns={columns}
-            isLoading={isLoading}
-            renderCard={(entry) => (
-              <AdminChangelogRow
-                entry={entry}
-                onClick={() => handleEdit(entry)}
-                density="normal"
-              />
-            )}
-            cardSpacing="space-y-0"
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No se encontraron changelogs</p>
-                <p className="text-xs">No hay changelogs que coincidan con los filtros aplicados.</p>
-              </div>
-            }
+      <Table
+        data={changelogEntries}
+        columns={columns}
+        isLoading={isLoading}
+        renderCard={(entry) => (
+          <AdminChangelogRow
+            entry={entry}
+            onClick={() => handleEdit(entry)}
+            density="normal"
           />
-        </CardContent>
-      </Card>
+        )}
+        cardSpacing="space-y-0"
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron changelogs</p>
+            <p className="text-xs">No hay changelogs que coincidan con los filtros aplicados.</p>
+          </div>
+        }
+      />
     </div>
   )
 }

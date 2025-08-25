@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -346,29 +345,25 @@ const AdminCommunityOrganizations = () => {
   return (
     <div className="space-y-6">
       {/* Organizations Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            columns={tableColumns}
-            data={filteredOrganizations}
-            isLoading={isLoading}
-            renderCard={(organization) => (
-              <AdminOrganizationRow
-                organization={organization}
-                onClick={() => handleEdit(organization)}
-                density="normal"
-              />
-            )}
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No se encontraron organizaciones</p>
-                <p className="text-xs">No hay organizaciones que coincidan con los filtros aplicados.</p>
-              </div>
-            }
+      <Table
+        columns={tableColumns}
+        data={filteredOrganizations}
+        isLoading={isLoading}
+        renderCard={(organization) => (
+          <AdminOrganizationRow
+            organization={organization}
+            onClick={() => handleEdit(organization)}
+            density="normal"
           />
-        </CardContent>
-      </Card>
+        )}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron organizaciones</p>
+            <p className="text-xs">No hay organizaciones que coincidan con los filtros aplicados.</p>
+          </div>
+        }
+      />
     </div>
   );
 };

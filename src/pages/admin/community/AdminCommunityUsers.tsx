@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Building, Users } from 'lucide-react'
 import { format } from 'date-fns'
@@ -234,29 +233,25 @@ const AdminCommunityUsers = () => {
   return (
     <div className="space-y-6">
       {/* Users Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table
-            data={users}
-            columns={columns}
-            isLoading={isLoading}
-            renderCard={(user) => (
-              <AdminUserRow
-                user={user}
-                onClick={() => handleEdit(user)}
-                density="normal"
-              />
-            )}
-            emptyState={
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p className="text-sm">No se encontraron usuarios</p>
-                <p className="text-xs">No hay usuarios que coincidan con los filtros aplicados.</p>
-              </div>
-            }
+      <Table
+        data={users}
+        columns={columns}
+        isLoading={isLoading}
+        renderCard={(user) => (
+          <AdminUserRow
+            user={user}
+            onClick={() => handleEdit(user)}
+            density="normal"
           />
-        </CardContent>
-      </Card>
+        )}
+        emptyState={
+          <div className="text-center py-8 text-muted-foreground">
+            <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p className="text-sm">No se encontraron usuarios</p>
+            <p className="text-xs">No hay usuarios que coincidan con los filtros aplicados.</p>
+          </div>
+        }
+      />
 
       <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
         <AlertDialogContent>
