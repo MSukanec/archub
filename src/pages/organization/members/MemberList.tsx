@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { MemberCard } from "@/components/cards/MemberCard";
+import MemberRow from "@/components/data-row/rows/MemberRow";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
@@ -200,13 +200,15 @@ export function MemberList({ organization }: MemberListProps) {
           {isMobile ? (
             <div className="space-y-3">
               {members.map((member) => (
-                <MemberCard 
+                <MemberRow
                   key={member.id} 
                   member={{
                     ...member,
                     users: Array.isArray(member.users) ? member.users[0] : member.users,
                     roles: Array.isArray(member.roles) ? member.roles[0] : member.roles
                   }}
+                  onClick={() => openModal('member', { editingMember: member })}
+                  density="normal"
                 />
               ))}
               {members.length === 0 && (
