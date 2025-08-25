@@ -248,20 +248,16 @@ export default function AnalysisMaterials() {
                 material={{
                   id: product.id,
                   name: product.material?.name || product.name,
-                  unit_id: product.unit_id || '',
-                  category_id: product.material?.category_id || '',
-                  is_completed: true,
+                  brand: product.brand?.name,
+                  category: (() => {
+                    const hierarchy = product.categoryHierarchy || 'Sin categoría';
+                    // Extraer solo la primera categoría (antes del primer " > ")
+                    return hierarchy.split(' > ')[0];
+                  })(),
+                  unit: product.unit_presentation?.name,
+                  price: product.default_price,
                   is_system: product.is_system || false,
-                  created_at: product.created_at,
-                  provider: product.default_provider,
-                  unit: { name: product.unit_presentation?.name || 'Sin unidad' },
-                  category: { name: product.categoryHierarchy || 'Sin categoría' },
-                  organization_material_prices: product.default_price ? [{
-                    id: '1',
-                    unit_price: product.default_price,
-                    currency_id: '1',
-                    currency: { symbol: '$', name: 'Peso' }
-                  }] : []
+                  created_at: product.created_at
                 }}
                 onClick={() => handleEdit(product)}
                 density="normal"
