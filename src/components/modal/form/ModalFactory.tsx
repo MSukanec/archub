@@ -42,6 +42,7 @@ import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptio
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
 import { AdminTaskModal } from '../modals/admin/tasks/AdminTaskModal';
+import { TaskModal } from '../modals/analysis/TaskModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
 import { ProfileOrganizationFormModal } from '../modals/profile/ProfileOrganizationFormModal';
@@ -168,6 +169,8 @@ export function ModalFactory() {
 
     case 'parametric-task':
       return <AdminTaskModal modalData={data || undefined} onClose={closeModal} />;
+    case 'task':
+      return <TaskModal modalData={data || undefined} onClose={closeModal} />;
 
 
     case 'admin-user':

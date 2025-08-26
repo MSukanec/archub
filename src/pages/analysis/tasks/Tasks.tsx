@@ -25,7 +25,7 @@ export default function Tasks() {
   ]
 
   const handleNewTask = () => {
-    openModal('parametric-task', {})
+    openModal('task', {})
   }
 
   // Header configuration

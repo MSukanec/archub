@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell } from 'lucide-react'
+import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell, Grid3X3, List } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -37,17 +37,17 @@ export default function TaskList() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: { id: 'home', label: 'Inicio', onClick: () => {} },
-        search: { id: 'search', label: 'Buscar', onClick: () => {} },
+        home: { id: 'home', label: 'Inicio', icon: <Home className="h-6 w-6" />, onClick: () => {} },
+        search: { id: 'search', label: 'Buscar', icon: <Search className="h-6 w-6" />, onClick: () => {} },
         create: {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
           label: 'Nueva Tarea',
-          onClick: () => openModal('parametric-task'),
+          onClick: () => openModal('task'),
           variant: 'primary'
         },
-        filter: { id: 'filter', label: 'Filtros', onClick: () => {} },
-        notifications: { id: 'notifications', label: 'Notificaciones', onClick: () => {} },
+        filter: { id: 'filter', label: 'Filtros', icon: <Filter className="h-6 w-6" />, onClick: () => {} },
+        notifications: { id: 'notifications', label: 'Notificaciones', icon: <Bell className="h-6 w-6" />, onClick: () => {} },
       })
       setShowActionBar(true)
     }
@@ -211,7 +211,7 @@ export default function TaskList() {
   }, [groupingType]);
 
   const handleEdit = (task: any) => {
-    openModal('parametric-task', { taskId: task.id })
+    openModal('task', { taskId: task.id })
   }
 
   const handleDuplicate = (task: any) => {
@@ -223,7 +223,7 @@ export default function TaskList() {
       created_at: undefined, // Remove created_at
       updated_at: undefined  // Remove updated_at
     }
-    openModal('parametric-task', { task: duplicateTask, isDuplicating: true })
+    openModal('task', { task: duplicateTask, isDuplicating: true })
   }
 
   const handleDelete = (task: any) => {
