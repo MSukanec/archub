@@ -74,7 +74,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     defaultValues: {
       provider_code: currentProviderProduct?.provider_code || '',
       currency: currentPrice?.currencies?.symbol || defaultCurrency?.symbol || "CLP",
-      price: currentPrice?.price || product?.default_price || 0,
+      price: currentPrice?.price || 0,
     },
   });
 

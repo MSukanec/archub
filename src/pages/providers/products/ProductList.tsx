@@ -257,9 +257,9 @@ export default function ProductList() {
       label: 'Precio',
       width: '12%',
       render: (product: Product & { providerPrice?: number; providerCurrency?: string; isSelected?: boolean }) => {
-        const isSelected = product.isSelected || false
-        const displayPrice = isSelected && product.providerPrice ? product.providerPrice : product.default_price
-        const displayCurrency = isSelected && product.providerCurrency ? product.providerCurrency : '$'
+        // Solo mostrar el precio específico del proveedor, nunca el precio global
+        const displayPrice = product.providerPrice
+        const displayCurrency = product.providerCurrency || '$'
         
         return (
           <div className="flex items-center gap-1">
