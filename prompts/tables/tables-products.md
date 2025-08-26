@@ -189,5 +189,9 @@ VISTA PRODUCTS_VIEW:
   {
     "column_name": "is_system",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "category_hierarchy",
+    "data_type": "text"
   }
 ]

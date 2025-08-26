@@ -127,13 +127,13 @@ const AdminMaterialProducts = () => {
       )
     },
     {
-      key: 'categoryHierarchy',
+      key: 'category_hierarchy',
       label: 'Categoría',
       width: '20%',
       render: (product: Product) => (
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground font-mono leading-tight">
-            {product.categoryHierarchy || 'Sin categoría'}
+            {product.category_hierarchy || 'Sin categoría'}
           </span>
         </div>
       )
@@ -164,9 +164,7 @@ const AdminMaterialProducts = () => {
         <div className="flex flex-col">
           <span className="font-medium text-sm">{product.name}</span>
           <span className="text-xs text-muted-foreground">
-            {product.unit_presentation ? 
-              `${product.unit_presentation.name} (${product.unit_presentation.equivalence} ${product.unit_presentation.unit?.name})` : 
-              'Sin unidad'
+            {product.unit || 'Sin unidad'
             }
           </span>
         </div>

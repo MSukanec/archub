@@ -104,7 +104,7 @@ export default function AdminProductRow({
         {/* Primera fila - Categoría */}
         <div className="text-xs text-muted-foreground truncate">
           {(() => {
-            const hierarchy = product.categoryHierarchy || 'Sin categoría';
+            const hierarchy = product.category_hierarchy || 'Sin categoría';
             // Extraer solo la primera categoría (antes del primer " > ")
             const firstCategory = hierarchy.split(' > ')[0];
             return firstCategory;
