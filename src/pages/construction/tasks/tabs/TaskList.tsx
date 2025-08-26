@@ -15,6 +15,7 @@ import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 import TaskRow from '@/components/data-row/rows/TaskRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { cn } from '@/lib/utils'
 
 interface TaskListProps {
   tasks: any[]
