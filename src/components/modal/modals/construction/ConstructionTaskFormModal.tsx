@@ -9,7 +9,7 @@ import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 import { useModalPanelStore } from "@/components/modal/form/modalPanelStore";
 
-import { ComboBox } from "@/components/ui-custom/ComboBoxWriteField";
+import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings, Search, CheckSquare, Square, Filter, X, Plus, Zap, ArrowLeft, Layers, Wrench } from "lucide-react";

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { X, Plus } from 'lucide-react'
 import { usePartners, Partner } from '@/hooks/use-partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 
 export interface PartnerWithdrawalRow {
   partner_id: string

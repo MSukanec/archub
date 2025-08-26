@@ -13,7 +13,7 @@ import FormModalBody from '../../../form/FormModalBody';
 import { useModalPanelStore } from '../../../form/modalPanelStore';
 import { useGlobalModalStore } from '../../../form/useGlobalModalStore';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { HandHeart } from 'lucide-react';
 
 const partnerSchema = z.object({

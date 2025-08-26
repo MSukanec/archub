@@ -4,7 +4,7 @@ import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Plus } from 'lucide-react';
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Label } from '@/components/ui/label';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
