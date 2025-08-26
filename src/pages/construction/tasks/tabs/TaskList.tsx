@@ -355,46 +355,22 @@ export function TaskList({
         showSearch: true,
         searchValue: searchValue,
         onSearchChange: setSearchValue,
+        showGrouping: true,
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none',
+        showExport: true,
+        onExport: handleExportToExcel,
+        isExporting: isExporting,
         customActions: (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={finalTasks.length === 0}
-                title="Exportar"
-              >
-                Exportar
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-4" align="end">
-              <div className="space-y-2">
-                <div className="text-sm font-medium mb-3">Exportar como:</div>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleExportToExcel}
-                  disabled={isExporting || finalTasks.length === 0}
-                  className="w-full justify-start"
-                >
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />
-                  Excel (.xlsx)
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleExportToPDF}
-                  disabled={finalTasks.length === 0}
-                  className="w-full justify-start"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  PDF
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExportToPDF}
+            disabled={finalTasks.length === 0}
+            title="Exportar PDF"
+          >
+            <FileText className="h-4 w-4" />
+          </Button>
         )
       }}
       renderCard={(task: any) => (
