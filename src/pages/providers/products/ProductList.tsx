@@ -56,10 +56,10 @@ export default function ProductList() {
       
       switch (groupingType) {
         case 'material':
-          groupKey = product.material?.name || 'Sin material';
+          groupKey = product.material || 'Sin material';
           break;
         case 'category':
-          const hierarchy = product.categoryHierarchy || 'Sin categoría';
+          const hierarchy = product.category_hierarchy || 'Sin categoría';
           // Extraer solo la primera categoría (antes del primer " > ")
           groupKey = hierarchy.split(' > ')[0];
           break;
@@ -151,7 +151,7 @@ export default function ProductList() {
       render: (product: Product) => (
         <span className="text-xs font-medium">
           {(() => {
-            const hierarchy = product.categoryHierarchy || 'Sin categoría';
+            const hierarchy = product.category_hierarchy || 'Sin categoría';
             // Extraer solo la primera categoría (antes del primer " > ")
             return hierarchy.split(' > ')[0];
           })()}
@@ -164,7 +164,7 @@ export default function ProductList() {
       width: '14%',
       render: (product: Product) => (
         <span className="text-xs font-medium">
-          {product.material?.name || 'Sin material'}
+          {product.material || 'Sin material'}
         </span>
       )
     },
@@ -174,7 +174,7 @@ export default function ProductList() {
       width: '10%',
       render: (product: Product) => (
         <span className="text-xs font-medium">
-          {product.brand?.name || 'Sin marca'}
+          {product.brand || 'Sin marca'}
         </span>
       )
     },
@@ -192,7 +192,7 @@ export default function ProductList() {
       width: '9%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
-          {product.unit_presentation?.name || 'N/A'}
+          {product.unit || 'N/A'}
         </Badge>
       )
     },
@@ -350,14 +350,14 @@ export default function ProductList() {
                 material={{
                 id: product.id,
                 name: product.name, // MODELO
-                material_name: product.material?.name, // MATERIAL
-                brand: product.brand?.name,
+                material_name: product.material, // MATERIAL
+                brand: product.brand,
                 category: (() => {
-                  const hierarchy = product.categoryHierarchy || 'Sin categoría';
+                  const hierarchy = product.category_hierarchy || 'Sin categoría';
                   // Extraer solo la primera categoría (antes del primer " > ")
                   return hierarchy.split(' > ')[0];
                 })(),
-                unit: product.unit_presentation?.name,
+                unit: product.unit,
                 price: product.default_price,
                 image_url: product.image_url,
                 is_system: product.is_system || false,
