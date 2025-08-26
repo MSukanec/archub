@@ -29,7 +29,7 @@ export default function Materials() {
 
   // Header configuration
   const headerProps = {
-    title: "Análisis de Materiales",
+    title: "Materiales",
     icon: Package,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {

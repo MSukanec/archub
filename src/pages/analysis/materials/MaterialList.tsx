@@ -117,17 +117,22 @@ export default function MaterialList() {
     {
       key: 'material',
       label: 'Material',
-      width: '16%',
+      width: '20%',
       render: (product: Product) => (
-        <span className="text-sm font-medium">
-          {product.material || 'Sin material'}
-        </span>
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold">
+            {product.material || 'Sin material'}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {product.name}
+          </span>
+        </div>
       )
     },
     {
       key: 'brand',
       label: 'Marca',
-      width: '13%',
+      width: '15%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {product.brand || 'Sin marca'}
@@ -135,17 +140,9 @@ export default function MaterialList() {
       )
     },
     {
-      key: 'name',
-      label: 'Modelo',
-      width: '18%',
-      render: (product: Product) => (
-        <span className="text-sm font-medium">{product.name}</span>
-      )
-    },
-    {
       key: 'unit',
       label: 'Unidad',
-      width: '12%',
+      width: '10%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit || 'N/A'}
@@ -155,7 +152,7 @@ export default function MaterialList() {
     {
       key: 'url',
       label: 'Link',
-      width: '8%',
+      width: '7%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -177,7 +174,7 @@ export default function MaterialList() {
     {
       key: 'image',
       label: 'Imagen',
-      width: '8%',
+      width: '7%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -215,7 +212,7 @@ export default function MaterialList() {
     {
       key: 'avg_price',
       label: 'Precio Promedio',
-      width: '15%',
+      width: '16%',
       render: (product: Product) => (
         <div className="flex flex-col gap-1">
           <span className="text-sm font-mono">
@@ -235,7 +232,7 @@ export default function MaterialList() {
     {
       key: 'is_system',
       label: 'Tipo',
-      width: '8%',
+      width: '9%',
       render: (product: Product) => (
         <Badge 
           variant={product.is_system ? "default" : "secondary"}
@@ -251,7 +248,7 @@ export default function MaterialList() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '11%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <Button
