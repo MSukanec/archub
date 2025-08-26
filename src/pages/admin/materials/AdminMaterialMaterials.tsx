@@ -51,25 +51,29 @@ const AdminMaterialMateriales = () => {
 
   // Function to find the top-level category (without parent_id) for a given category
   const findTopLevelCategory = (categoryId: string): string => {
-    const findTopLevel = (cats: any[], targetId: string): any => {
-      for (const cat of cats) {
-        if (cat.id === targetId) {
-          // If this category has no parent_id, it's top-level
-          return cat
-        }
+    // First, find all categories in a flat list with their hierarchy info
+    const flattenAllCategories = (cats: any[], parentName?: string): Array<{id: string, name: string, topLevelName: string}> => {
+      const result: Array<{id: string, name: string, topLevelName: string}> = []
+      
+      cats.forEach(cat => {
+        const topLevel = parentName || cat.name // If no parent, this IS the top level
+        result.push({
+          id: cat.id,
+          name: cat.name,
+          topLevelName: topLevel
+        })
+        
         if (cat.children && cat.children.length > 0) {
-          const found = findTopLevel(cat.children, targetId)
-          if (found) {
-            // Return the current category (parent) since we found the target in its children
-            return cat
-          }
+          result.push(...flattenAllCategories(cat.children, topLevel))
         }
-      }
-      return null
+      })
+      
+      return result
     }
     
-    const topLevelCat = findTopLevel(categories, categoryId)
-    return topLevelCat?.name || 'Sin categoría'
+    const flatCategories = flattenAllCategories(categories)
+    const foundCategory = flatCategories.find(cat => cat.id === categoryId)
+    return foundCategory?.topLevelName || 'Sin categoría'
   }
 
   // Apply client-side filtering
@@ -321,26 +325,31 @@ const AdminMaterialMateriales = () => {
             </>
           ),
           onClearFilters: clearFilters,
-          rightActions: (
-            <div className="flex items-center gap-2">
-              <Button
-                variant={groupingType === 'none' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setGroupingType('none')}
-                className="text-xs h-8"
-              >
-                Sin Agrupar
-              </Button>
-              <Button
-                variant={groupingType === 'categories' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setGroupingType('categories')}
-                className="text-xs h-8"
-              >
-                Por Categorías
-              </Button>
-            </div>
-          )
+          showGrouping: true,
+          renderGroupingContent: () => (
+            <>
+              <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+              <div className="space-y-1">
+                <Button
+                  variant={groupingType === 'none' ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setGroupingType('none')}
+                  className="w-full justify-start text-xs font-normal h-8"
+                >
+                  Sin Agrupar
+                </Button>
+                <Button
+                  variant={groupingType === 'categories' ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setGroupingType('categories')}
+                  className="w-full justify-start text-xs font-normal h-8"
+                >
+                  Por Categorías
+                </Button>
+              </div>
+            </>
+          ),
+          isGroupingActive: groupingType !== 'none'
         }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">
