@@ -55,7 +55,7 @@ interface ParameterSelection {
   optionLabel: string;
 }
 
-interface ConstructionTaskFormModalProps {
+interface TaskMultiModalProps {
   modalData: {
     projectId: string;
     organizationId: string;
@@ -66,10 +66,10 @@ interface ConstructionTaskFormModalProps {
   onClose: () => void;
 }
 
-export function ConstructionTaskFormModal({ 
+export function TaskMultiModal({ 
   modalData, 
   onClose 
-}: ConstructionTaskFormModalProps) {
+}: TaskMultiModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTasks, setSelectedTasks] = useState<SelectedTask[]>([]);
