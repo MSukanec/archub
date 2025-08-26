@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
@@ -22,6 +22,7 @@ const AdminMaterialProducts = () => {
   const [sortBy, setSortBy] = useState('name')
   const [filterByMaterial, setFilterByMaterial] = useState('')
   const [filterByBrand, setFilterByBrand] = useState('')
+  const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
   
   const { openModal } = useGlobalModalStore()
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
@@ -50,31 +51,67 @@ const AdminMaterialProducts = () => {
       return acc
     }, [])
 
-  // Apply client-side filtering
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = searchValue === '' || 
-      product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      product.material?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      product.brand?.toLowerCase().includes(searchValue.toLowerCase())
-    
-    const matchesMaterial = filterByMaterial === '' || product.material_id === filterByMaterial
-    const matchesBrand = filterByBrand === '' || product.brand_id === filterByBrand
-    
-    return matchesSearch && matchesMaterial && matchesBrand
-  })
+  // Filter products and add groupKey for grouping
+  const filteredProducts = useMemo(() => {
+    const filtered = products.filter(product => {
+      const matchesSearch = searchValue === '' || 
+        product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        product.material?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        product.brand?.toLowerCase().includes(searchValue.toLowerCase())
+      
+      const matchesMaterial = filterByMaterial === '' || product.material_id === filterByMaterial
+      const matchesBrand = filterByBrand === '' || product.brand_id === filterByBrand
+      
+      return matchesSearch && matchesMaterial && matchesBrand
+    })
 
-  // Apply client-side sorting
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'name') {
-      return a.name.localeCompare(b.name)
-    } else if (sortBy === 'material') {
-      return (a.material || '').localeCompare(b.material || '')
-    } else if (sortBy === 'brand') {
-      return (a.brand || '').localeCompare(b.brand || '')
-    } else {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    }
-  })
+    const productsWithGroupKey = filtered.map(product => {
+      let groupKey = '';
+      
+      switch (groupingType) {
+        case 'material':
+          groupKey = product.material || 'Sin material';
+          break;
+        case 'category':
+          const hierarchy = product.category_hierarchy || 'Sin categoría';
+          // Extraer solo la primera categoría (antes del primer " > ")
+          groupKey = hierarchy.split(' > ')[0];
+          break;
+        default:
+          groupKey = '';
+      }
+      
+      return {
+        ...product,
+        groupKey
+      };
+    });
+
+    // Ordenar según el tipo de agrupación
+    return productsWithGroupKey.sort((a, b) => {
+      switch (groupingType) {
+        case 'material':
+          const materialA = a.material || 'Sin material';
+          const materialB = b.material || 'Sin material';
+          return materialA.localeCompare(materialB);
+        case 'category':
+          const categoryA = a.groupKey;
+          const categoryB = b.groupKey;
+          return categoryA.localeCompare(categoryB);
+        default:
+          // Para 'none', ordenar por el sortBy seleccionado
+          if (sortBy === 'name') {
+            return a.name.localeCompare(b.name)
+          } else if (sortBy === 'material') {
+            return (a.material || '').localeCompare(b.material || '')
+          } else if (sortBy === 'brand') {
+            return (a.brand || '').localeCompare(b.brand || '')
+          } else {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          }
+      }
+    });
+  }, [products, searchValue, filterByMaterial, filterByBrand, sortBy, groupingType])
 
   const handleEdit = (product: Product) => {
     openModal('product-form', { editingProduct: product })
@@ -115,7 +152,7 @@ const AdminMaterialProducts = () => {
     setFilterByBrand('')
   }
 
-  const columns = [
+  const baseColumns = [
     {
       key: 'created_at',
       label: 'Fecha',
@@ -296,13 +333,39 @@ const AdminMaterialProducts = () => {
       )
     }
   ]
+  
+  // Select columns based on grouping type
+  const columns = useMemo(() => {
+    // For no grouping, use all base columns
+    if (groupingType === 'none') {
+      return baseColumns;
+    }
+    
+    // Filter columns for grouping - hide the grouped column
+    return baseColumns.filter(column => {
+      if (groupingType === 'material' && column.key === 'material') return false;
+      if (groupingType === 'category' && column.key === 'category_hierarchy') return false;
+      return true;
+    });
+  }, [groupingType]);
 
   return (
     <div className="space-y-6">
       <Table
-        data={sortedProducts}
+        data={filteredProducts}
         columns={columns}
         isLoading={isLoading}
+        groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+        topBar={{
+          tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
+          activeTab: groupingType === 'none' ? 'No Agrupar' : 
+                    groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
+          onTabChange: (tab: string) => {
+            if (tab === 'No Agrupar') setGroupingType('none')
+            else if (tab === 'Agrupar por Categoría') setGroupingType('category')
+            else if (tab === 'Agrupar por Material') setGroupingType('material')
+          }
+        }}
         renderCard={(product) => (
           <AdminProductRow
             product={product}
@@ -310,6 +373,15 @@ const AdminMaterialProducts = () => {
             density="normal"
           />
         )}
+        renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+          return (
+            <>
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+              </div>
+            </>
+          );
+        }}
         emptyState={
           <div className="text-center py-8 text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-4 opacity-20" />
