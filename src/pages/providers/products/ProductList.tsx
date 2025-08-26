@@ -39,7 +39,10 @@ export default function ProductList() {
     try {
       await toggleProviderProduct.mutateAsync({
         productId,
-        isActive: !currentState
+        isActive: !currentState,
+        providerCode: undefined, // No cambiar el código al hacer toggle
+        currencyId: undefined,   // No cambiar la moneda al hacer toggle
+        price: undefined         // No cambiar el precio al hacer toggle
       })
     } catch (error) {
       console.error('Error toggling product:', error)
