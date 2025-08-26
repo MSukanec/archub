@@ -25,8 +25,8 @@ const AdminMaterials = () => {
     },
     onSuccess: () => {
       // Invalidar todas las queries de productos para actualizar las tablas
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/provider-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['provider-products'] });
       
       toast({
         title: "Precios actualizados",
