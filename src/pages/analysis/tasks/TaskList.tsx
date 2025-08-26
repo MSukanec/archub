@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { TableIcon, Edit, Trash2, Search, Filter, Plus, Home, Bell } from 'lucide-react'
+import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
@@ -107,7 +107,7 @@ export default function TaskList() {
     {
       key: 'category',
       label: 'Rubro',
-      width: '20%',
+      width: '18%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
           {task.category || 'Sin rubro'}
@@ -117,7 +117,7 @@ export default function TaskList() {
     {
       key: 'name_rendered',
       label: 'Tarea',
-      width: '60%',
+      width: '52%',
       render: (task: any) => (
         <span className="text-sm font-medium">{task.name_rendered}</span>
       )
@@ -125,7 +125,7 @@ export default function TaskList() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '10%',
+      width: '9%',
       render: (task: any) => (
         <Badge variant="secondary" className="text-xs">
           {task.unit || 'N/A'}
@@ -133,42 +133,66 @@ export default function TaskList() {
       )
     },
     {
-      key: 'actions',
-      label: 'Acciones',
+      key: 'is_system',
+      label: 'Tipo',
       width: '10%',
       render: (task: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => openModal('parametric-task', { taskId: task.id })}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          {/* Solo mostrar botón eliminar si NO es del sistema y pertenece a la organización */}
-          {!task.is_system && task.organization_id === userData?.organization?.id && (
+        <Badge 
+          variant={task.is_system ? "default" : "secondary"}
+          className={`text-xs ${task.is_system 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+          }`}
+        >
+          {task.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '11%',
+      render: (task: any) => {
+        // Solo mostrar acciones para tareas que pertenecen a la organización (no del sistema)
+        const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
+        
+        if (!canEdit) {
+          return (
+            <div className="flex items-center justify-center h-7">
+              <span className="text-xs text-muted-foreground">-</span>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                showDeleteConfirmation({
-                  title: "Eliminar tarea",
-                  description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
-                  itemName: task.name_rendered || 'esta tarea',
-                  onConfirm: () => {
-                    // TODO: Implementar eliminación de tarea
-                    console.log('Eliminar tarea:', task.id)
-                  }
-                })
-              }}
-              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              onClick={() => handleEdit(task)}
+              className="h-7 w-7 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDuplicate(task)}
+              className="h-7 w-7 p-0"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(task)}
+              className="h-7 w-7 p-0"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
-          )}
-        </div>
-      )
+          </div>
+        );
+      }
     }
   ]
 
@@ -185,6 +209,34 @@ export default function TaskList() {
       return true;
     });
   }, [groupingType]);
+
+  const handleEdit = (task: any) => {
+    openModal('parametric-task', { taskId: task.id })
+  }
+
+  const handleDuplicate = (task: any) => {
+    // Create a duplicate object with "Copia" added to the name
+    const duplicateTask = {
+      ...task,
+      id: undefined, // Remove ID so it creates a new task
+      name_rendered: `${task.name_rendered} - Copia`,
+      created_at: undefined, // Remove created_at
+      updated_at: undefined  // Remove updated_at
+    }
+    openModal('parametric-task', { task: duplicateTask, isDuplicating: true })
+  }
+
+  const handleDelete = (task: any) => {
+    showDeleteConfirmation({
+      title: "Eliminar tarea",
+      description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
+      itemName: task.name_rendered || 'esta tarea',
+      onConfirm: () => {
+        // TODO: Implementar eliminación de tarea
+        console.log('Eliminar tarea:', task.id)
+      }
+    })
+  }
 
   // Render grouping popover content
   const renderGroupingContent = () => {
