@@ -1375,7 +1375,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePickerField
+                <DatePicker
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Seleccionar fecha..."
@@ -1465,7 +1465,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <FormItem>
                 <FormLabel>Fecha *</FormLabel>
                 <FormControl>
-                  <DatePickerField
+                  <DatePicker
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Seleccionar fecha..."
@@ -1600,7 +1600,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormItem>
               <FormLabel>Fecha *</FormLabel>
               <FormControl>
-                <DatePickerField
+                <DatePicker
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Seleccionar fecha..."
