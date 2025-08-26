@@ -126,3 +126,36 @@ TABLA PROVIDER_PRODUCTS:
     "data_type": "timestamp with time zone"
   }
 ]
+
+VISTA PRODUCTS_VIEW:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "material",
+    "data_type": "text"
+  },
+  {
+    "column_name": "brand",
+    "data_type": "text"
+  },
+  {
+    "column_name": "url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "image_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
+  }
+]

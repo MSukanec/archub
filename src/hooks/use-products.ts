@@ -29,43 +29,22 @@ async function buildCategoryHierarchy(categoryId: string): Promise<string> {
 
 export interface Product {
   id: string;
-  material_id: string;
-  brand_id?: string;
-  unit_id?: string;
-  name: string;
-  description?: string;
-  image_url?: string;
+  material?: string;  // Ahora viene como string desde la vista
+  brand?: string;     // Ahora viene como string desde la vista
+  unit?: string;      // Ahora viene como string desde la vista
   url?: string;
+  image_url?: string;
+  is_system?: boolean;
+  // Campos que necesitamos agregar a la vista
+  name?: string;
+  description?: string;
   default_price?: number;
   default_provider?: string;
-  is_system?: boolean;
-  created_at: string;
-  // Campos calculados
-  categoryHierarchy?: string;
-  // Relaciones
-  material?: {
-    id: string;
-    name: string;
-    category_id: string;
-    category?: {
-      id: string;
-      name: string;
-      parent_id: string | null;
-    };
-  };
-  brand?: {
-    id: string;
-    name: string;
-  };
-  unit_presentation?: {
-    id: string;
-    name: string;
-    equivalence: number;
-    unit?: {
-      id: string;
-      name: string;
-    };
-  };
+  created_at?: string;
+  material_id?: string;  // Para mantener compatibilidad
+  brand_id?: string;     // Para mantener compatibilidad
+  unit_id?: string;      // Para mantener compatibilidad
+  categoryHierarchy?: string; // Lo calculamos si es necesario
 }
 
 export interface NewProductData {
@@ -91,41 +70,16 @@ export function useProducts() {
       }
 
       const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          material:materials(
-            id, name, category_id,
-            category:material_categories!materials_category_id_fkey(id, name, parent_id)
-          ),
-          brand:brands(id, name),
-          unit_presentation:unit_presentations!unit_id(
-            id, name, equivalence,
-            unit:units(id, name)
-          )
-        `)
-        .order('name')
+        .from('products_view')
+        .select('*')
+        .order('id')
 
       if (error) {
         console.error('Error fetching products:', error)
         throw error
       }
 
-      // Build category hierarchy for each product
-      const productsWithHierarchy = await Promise.all(
-        (data || []).map(async (product: any) => {
-          const categoryHierarchy = product.material?.category_id 
-            ? await buildCategoryHierarchy(product.material.category_id)
-            : 'Sin categoría';
-          
-          return {
-            ...product,
-            categoryHierarchy
-          };
-        })
-      );
-
-      return productsWithHierarchy
+      return data || []
     },
     enabled: !!supabase
   })
