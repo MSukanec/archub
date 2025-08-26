@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { cn } from '@/lib/utils'
 
 import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box, RefreshCw } from 'lucide-react'
 
@@ -152,222 +153,156 @@ const AdminMaterialProducts = () => {
     setFilterByBrand('')
   }
 
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'category', label: 'Por categorías' },
+      { value: 'material', label: 'Por material' }
+    ];
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value)}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   const baseColumns = [
     {
-      key: 'created_at',
-      label: 'Fecha',
-      width: '5%',
+      key: 'name',
+      label: 'Producto',
+      width: 'minmax(0, 1fr)',
+      render: (product: Product) => (
+        <div className="font-medium text-xs">
+          {product.name}
+        </div>
+      )
+    },
+    ...(groupingType !== 'category' ? [{
+      key: 'category_hierarchy',
+      label: 'Categoría',
+      width: '12%',
+      render: (product: Product) => (
+        <div>
+          {product.category_hierarchy ? (
+            <Badge variant="outline" className="text-xs">
+              {product.category_hierarchy.split(' > ')[0]}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin categoría</span>
+          )}
+        </div>
+      )
+    }] : []),
+    ...(groupingType !== 'material' ? [{
+      key: 'material',
+      label: 'Material',
+      width: '12%',
+      render: (product: Product) => (
+        <div>
+          {product.material ? (
+            <Badge variant="secondary" className="text-xs">
+              {product.material}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin material</span>
+          )}
+        </div>
+      )
+    }] : []),
+    {
+      key: 'brand',
+      label: 'Marca',
+      width: '10%',
       render: (product: Product) => (
         <span className="text-xs text-muted-foreground">
-          {format(new Date(product.created_at), 'dd/MM/yy', { locale: es })}
+          {product.brand || '–'}
         </span>
       )
     },
     {
-      key: 'category_hierarchy',
-      label: 'Categoría',
-      width: '20%',
+      key: 'unit_id',
+      label: 'Unidad',
+      width: '8%',
       render: (product: Product) => (
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground font-mono leading-tight">
-            {product.category_hierarchy || 'Sin categoría'}
-          </span>
-        </div>
-      )
-    },
-    {
-      key: 'material',
-      label: 'Material',
-      render: (product: Product) => (
-        <Badge variant="secondary" className="text-xs">
-          {product.material || 'Sin material'}
-        </Badge>
-      )
-    },
-    {
-      key: 'brand',
-      label: 'Marca',
-      render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <Tag className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm">{product.brand || 'Sin marca'}</span>
-        </div>
-      )
-    },
-    {
-      key: 'name',
-      label: 'Modelo',
-      render: (product: Product) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-sm">{product.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {product.unit || 'Sin unidad'
-            }
-          </span>
+        <div>
+          {product.unit ? (
+            <Badge variant="secondary" className="text-xs">
+              {product.unit}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin unidad</span>
+          )}
         </div>
       )
     },
     {
       key: 'default_price',
-      label: 'Precio por Defecto',
-      render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-mono">
-            {product.default_price !== null && product.default_price !== undefined ? 
-              `S/. ${product.default_price.toFixed(2)}` : 
-              '-'
-            }
-          </span>
-        </div>
-      )
-    },
-    {
-      key: 'default_provider',
-      label: 'Proveedor por Defecto',
-      render: (product: Product) => (
-        <span className="text-sm text-muted-foreground truncate max-w-[150px]">
-          {product.default_provider || '-'}
-        </span>
-      )
-    },
-    {
-      key: 'description',
-      label: 'Descripción',
-      render: (product: Product) => (
-        <span className="text-sm text-muted-foreground truncate max-w-[200px]">
-          {product.description || '-'}
-        </span>
-      )
-    },
-    {
-      key: 'url',
-      label: 'URL',
+      label: 'Precio',
       width: '8%',
       render: (product: Product) => (
-        <div className="flex items-center">
-          {product.url ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open(product.url, '_blank')}
-              className="h-7 px-2 text-blue-600 hover:text-blue-700"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              URL
-            </Button>
-          ) : (
-            <span className="text-xs text-muted-foreground">-</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'image',
-      label: 'Imagen',
-      width: '8%',
-      render: (product: Product) => (
-        <div className="flex items-center">
-          {product.image_url ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setLightboxImages([product.image_url!])
-                openLightbox(0)
-              }}
-              className="h-7 w-7 p-0"
-            >
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="h-6 w-6 object-cover rounded"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = '<Image className="h-3 w-3 text-muted-foreground" />';
-                  }
-                }}
-              />
-            </Button>
-          ) : (
-            <div className="flex items-center justify-center h-7 w-7">
-              <Image className="h-3 w-3 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'avg_price',
-      label: 'Precio Promedio',
-      width: '15%',
-      render: (product: Product) => (
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-mono">
-            {product.avg_price !== null && product.avg_price !== undefined ? 
-              `ARS ${product.avg_price.toFixed(2)}` : 
-              '-'
-            }
-          </span>
-          {product.providers_count && product.providers_count > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {product.providers_count} proveedor{product.providers_count > 1 ? 'es' : ''}
-            </span>
-          )}
-        </div>
+        <span className="text-xs font-medium">
+          {product.default_price !== null && product.default_price !== undefined ? `$${product.default_price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
+        </span>
       )
     },
     {
       key: 'actions',
       label: 'Acciones',
-      width: '10%',
+      width: '120px',
       render: (product: Product) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(product)}
-            className="h-7 w-7 p-0"
+            className="h-8 w-8 p-0"
+            title="Editar producto"
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDuplicate(product)}
-            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+            className="h-8 w-8 p-0"
+            title="Duplicar producto"
           >
-            <Copy className="h-3 w-3" />
+            <Copy className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(product)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+            className="h-8 w-8 p-0"
+            title="Eliminar producto"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         </div>
       )
     }
   ]
   
-  // Select columns based on grouping type
-  const columns = useMemo(() => {
-    // For no grouping, use all base columns
-    if (groupingType === 'none') {
-      return baseColumns;
-    }
-    
-    // Filter columns for grouping - hide the grouped column
-    return baseColumns.filter(column => {
-      if (groupingType === 'material' && column.key === 'material') return false;
-      if (groupingType === 'category' && column.key === 'category_hierarchy') return false;
-      return true;
-    });
-  }, [groupingType]);
+  // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
+  const columns = baseColumns;
 
   return (
     <div className="space-y-6">
@@ -377,14 +312,52 @@ const AdminMaterialProducts = () => {
         isLoading={isLoading}
         groupBy={groupingType === 'none' ? undefined : 'groupKey'}
         topBar={{
-          tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
-          activeTab: groupingType === 'none' ? 'No Agrupar' : 
-                    groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
-          onTabChange: (tab: string) => {
-            if (tab === 'No Agrupar') setGroupingType('none')
-            else if (tab === 'Agrupar por Categoría') setGroupingType('category')
-            else if (tab === 'Agrupar por Material') setGroupingType('material')
-          }
+          showSearch: true,
+          searchValue: searchValue,
+          onSearchChange: setSearchValue,
+          showFilter: true,
+          isFilterActive: filterByMaterial !== '' || filterByBrand !== '',
+          renderFilterContent: () => (
+            <>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs font-medium mb-2 block">Material</Label>
+                  <Select value={filterByMaterial} onValueChange={setFilterByMaterial}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todos los materiales" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todos los materiales</SelectItem>
+                      {uniqueMaterials.map((material: any) => (
+                        <SelectItem key={material.id} value={material.id}>
+                          {material.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-medium mb-2 block">Marca</Label>
+                  <Select value={filterByBrand} onValueChange={setFilterByBrand}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todas las marcas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las marcas</SelectItem>
+                      {uniqueBrands.map((brand: any) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
+          ),
+          onClearFilters: clearFilters,
+          renderGroupingContent: renderGroupingContent,
+          isGroupingActive: groupingType !== 'none'
         }}
         renderCard={(product) => (
           <AdminProductRow
@@ -393,15 +366,11 @@ const AdminMaterialProducts = () => {
             density="normal"
           />
         )}
-        renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
-          return (
-            <>
-              <div className="col-span-full text-sm font-medium">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
-              </div>
-            </>
-          );
-        }}
+        renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+          <div className="col-span-full text-sm font-medium">
+            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+          </div>
+        )}
         emptyState={
           <div className="text-center py-8 text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-4 opacity-20" />
