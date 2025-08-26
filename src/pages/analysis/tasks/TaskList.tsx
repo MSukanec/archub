@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiRequest } from '@/lib/queryClient'
+import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { AnalysisTaskRow } from '@/components/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
@@ -16,7 +18,32 @@ import { cn } from '@/lib/utils'
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
-  const { showDeleteConfirmation } = useDeleteConfirmation()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  
+  // Mutation para eliminar tarea
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      const response = await apiRequest(`/api/construction-tasks/${taskId}`, {
+        method: 'DELETE'
+      })
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/construction-tasks'] })
+      toast({
+        title: 'Tarea eliminada',
+        description: 'La tarea se eliminó correctamente.'
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error al eliminar',
+        description: error.message || 'No se pudo eliminar la tarea.',
+        variant: 'destructive'
+      })
+    }
+  })
   const { data: userData } = useCurrentUser()
   
   
@@ -238,15 +265,17 @@ export default function TaskList() {
   }
 
   const handleDelete = (task: any) => {
-    showDeleteConfirmation({
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
       title: "Eliminar tarea",
       description: `¿Estás seguro de que quieres eliminar "${task.custom_name || 'esta tarea'}"?`,
       itemName: task.custom_name || 'esta tarea',
-      dangerous: true,
+      itemType: 'tarea',
+      destructiveActionText: 'Eliminar Tarea',
       onConfirm: () => {
-        // TODO: Implementar eliminación de tarea
-        console.log('Eliminar tarea:', task.id)
-      }
+        deleteTaskMutation.mutate(task.id)
+      },
+      isLoading: deleteTaskMutation.isPending
     })
   }
 
