@@ -116,7 +116,7 @@ export default function MaterialList() {
   ]
 
   const handleEdit = (product: Product) => {
-    openModal('product-form', { editingProduct: product })
+    openModal('custom-product', { editingProduct: product, isEditing: true })
   }
 
   const handleDuplicate = (product: Product) => {
@@ -128,7 +128,7 @@ export default function MaterialList() {
       created_at: undefined, // Remove created_at
       updated_at: undefined  // Remove updated_at
     }
-    openModal('product-form', { editingProduct: duplicateProduct, isDuplicating: true })
+    openModal('custom-product', { editingProduct: duplicateProduct, isDuplicating: true })
   }
 
   const handleDelete = (product: Product) => {

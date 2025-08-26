@@ -31,7 +31,6 @@ import ClientInstallment from '../modals/finances/clients/ClientInstallment';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';
-import { ProductFormModal } from '../modals/admin/ProductFormModal';
 import { UnitPresentationFormModal } from '../modals/admin/UnitPresentationFormModal';
 import { DependencyConnectionModal } from '../modals/construction/DependencyConnectionModal';
 import { BudgetTaskFormModal } from '../modals/construction/BudgetTaskFormModal';
@@ -129,7 +128,7 @@ export function ModalFactory() {
       return <BrandFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'product-form':
-      return <ProductFormModal modalData={data || {}} onClose={closeModal} />;
+      return <ProductModal modalData={data || {}} onClose={closeModal} />;
     
     case 'unit-presentation-form':
       return <UnitPresentationFormModal modalData={data || {}} onClose={closeModal} />;

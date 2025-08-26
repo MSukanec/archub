@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 
-import { useCreateProduct, NewProductData } from '@/hooks/use-products'
+import { useCreateProduct, useUpdateProduct, NewProductData } from '@/hooks/use-products'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
 import { useMaterials } from '@/hooks/use-materials'
 import { useUnits } from '@/hooks/use-units'
@@ -40,7 +40,11 @@ const productSchema = z.object({
 
 
 interface ProductModalProps {
-  modalData: {}
+  modalData: {
+    editingProduct?: any
+    isEditing?: boolean
+    isDuplicating?: boolean
+  }
   onClose: () => void
 }
 
@@ -48,8 +52,11 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState<string>('')
   
+  const { editingProduct, isEditing = false, isDuplicating = false } = modalData || {}
+  
   // Hooks
   const createMutation = useCreateProduct()
+  const updateMutation = useUpdateProduct()
   const createBrandMutation = useCreateBrand()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
@@ -61,10 +68,26 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const { data: unitPresentations = [] } = useUnitPresentations()
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
 
-  // Force edit mode when modal opens
+  // Force edit mode when modal opens or load existing data
   useEffect(() => {
     setPanel('edit')
-  }, [])
+    
+    // Si estamos editando o duplicando, cargar los datos del producto
+    if (editingProduct && (isEditing || isDuplicating)) {
+      form.reset({
+        material_id: editingProduct.material_id || '',
+        brand_id: editingProduct.brand_id || '',
+        name: isDuplicating ? `${editingProduct.name} - Copia` : (editingProduct.name || ''),
+        description: editingProduct.description || '',
+        unit_presentation_id: editingProduct.unit_id || '',
+        default_price: editingProduct.default_price || undefined,
+        currency_id: '',
+        default_provider: editingProduct.default_provider || '',
+        url: editingProduct.url || '',
+        image_url: editingProduct.image_url || '',
+      })
+    }
+  }, [editingProduct, isEditing, isDuplicating, form])
 
   // Set default currency
   useEffect(() => {
@@ -110,7 +133,13 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
         is_system: false,
       }
 
-      await createMutation.mutateAsync(productData)
+      if (editingProduct && isEditing && !isDuplicating) {
+        // Actualizar producto existente
+        await updateMutation.mutateAsync({ id: editingProduct.id, data: productData })
+      } else {
+        // Crear nuevo producto (incluye duplicación)
+        await createMutation.mutateAsync(productData)
+      }
       onClose()
     } catch (error) {
       console.error('Error creating product:', error)
@@ -356,7 +385,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
 
   const headerContent = (
     <FormModalHeader 
-      title="Nuevo Producto Personalizado"
+      title={editingProduct && isEditing && !isDuplicating ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto Personalizado"}
       icon={Package}
     />
   )
@@ -365,7 +394,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Crear Producto"
+      rightLabel={editingProduct && isEditing && !isDuplicating ? "Actualizar Producto" : isDuplicating ? "Duplicar Producto" : "Crear Producto"}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isLoading}
     />
