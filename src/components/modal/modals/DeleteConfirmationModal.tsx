@@ -72,7 +72,7 @@ export default function DeleteConfirmationModal({
       
       const updateProgress = () => {
         const elapsed = Date.now() - pressStartTime.current
-        const newProgress = Math.min(elapsed / 4000, 1) // 4 segundos = 100%
+        const newProgress = Math.min(elapsed / 3000, 1) // 3 segundos = 100%
         
         setProgress(newProgress)
         
@@ -231,7 +231,7 @@ export default function DeleteConfirmationModal({
               </p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Para confirmar, mantené presionado el botón "Eliminar" por 4 segundos
+              Para confirmar, mantené presionado el botón "Eliminar" por 3 segundos
             </p>
           </div>
         </div>
