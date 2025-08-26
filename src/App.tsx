@@ -72,6 +72,12 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 // Provider Pages  
 import Products from "@/pages/providers/products/Products";
 
+// Analysis Pages
+import AnalysisTasks from "@/pages/analysis/Tasks";
+import AnalysisLabor from "@/pages/analysis/Labor";
+import AnalysisMaterials from "@/pages/analysis/Materials";
+import AnalysisIndirects from "@/pages/analysis/Indirects";
+
 
 
 
@@ -255,10 +261,26 @@ function Router() {
         </Route>
         
         {/* Analysis Routes */}
-        <Route path="/analysis/tasks" component={() => import('@/pages/analysis/Tasks')} />
-        <Route path="/analysis/labor" component={() => import('@/pages/analysis/Labor')} />
-        <Route path="/analysis/materials" component={() => import('@/pages/analysis/Materials')} />
-        <Route path="/analysis/indirects" component={() => import('@/pages/analysis/Indirects')} />
+        <Route path="/analysis/tasks">
+          <ProtectedRoute>
+            <AnalysisTasks />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/analysis/labor">
+          <ProtectedRoute>
+            <AnalysisLabor />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/analysis/materials">
+          <ProtectedRoute>
+            <AnalysisMaterials />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/analysis/indirects">
+          <ProtectedRoute>
+            <AnalysisIndirects />
+          </ProtectedRoute>
+        </Route>
 
 
         {/* Finances Routes */}
