@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 const formSchema = z.object({
   provider_code: z.string().optional(),
   currency_id: z.string().min(1, "La moneda es obligatoria"),
-  amount: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0"),
+  amount: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0").optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -74,7 +74,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     defaultValues: {
       provider_code: currentProviderProduct?.provider_code || '',
       currency_id: currentPrice?.currency_id || defaultCurrency?.id || '',
-      amount: currentPrice?.price || 0,
+      amount: currentPrice?.price || undefined,
     },
   });
 
@@ -82,9 +82,10 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   useEffect(() => {
     if (currentPrice) {
       form.setValue('currency_id', currentPrice.currency_id || '');
-      form.setValue('amount', currentPrice.price || 0);
+      form.setValue('amount', currentPrice.price || undefined);
     } else if (defaultCurrency) {
       form.setValue('currency_id', defaultCurrency.id);
+      form.setValue('amount', undefined);
     }
     if (currentProviderProduct?.provider_code) {
       form.setValue('provider_code', currentProviderProduct.provider_code);
@@ -105,7 +106,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
         isActive: true, // Asegurar que esté activo
         providerCode: data.provider_code,
         currency: selectedCurrency?.symbol,
-        price: data.amount
+        price: data.amount || 0
       });
       
       onClose();
@@ -200,7 +201,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
                 value={form.watch('amount')}
                 currency={form.watch('currency_id')}
                 currencies={currencies}
-                onValueChange={(value) => form.setValue('amount', value || 0)}
+                onValueChange={(value) => form.setValue('amount', value)}
                 onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
                 placeholder="0.00"
               />
