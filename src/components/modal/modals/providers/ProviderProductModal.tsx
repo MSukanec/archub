@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 const formSchema = z.object({
   provider_code: z.string().optional(),
   currency_id: z.string().min(1, "La moneda es obligatoria"),
-  amount: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0").optional(),
+  amount: z.number().min(0, "El precio debe ser mayor or igual a 0").optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -99,6 +99,10 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     try {
       // Encontrar el símbolo de la moneda para el hook
       const selectedCurrency = currencies.find(c => c.id === data.currency_id);
+      
+      console.log('Form data:', data);
+      console.log('Selected currency:', selectedCurrency);
+      console.log('Currencies available:', currencies);
       
       // Actualizar el provider_code, moneda y precio usando el hook existente
       await toggleProviderProduct.mutateAsync({

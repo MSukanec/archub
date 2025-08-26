@@ -72,6 +72,8 @@ export function useToggleProviderProduct() {
       currency?: string;
       price?: number;
     }) => {
+      console.log('useToggleProviderProduct received:', { productId, isActive, providerCode, currency, price });
+      
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
       }
