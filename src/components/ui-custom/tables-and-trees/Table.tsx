@@ -179,8 +179,8 @@ export function Table<T = any>({
   const defaultFilterContent = () => {
     return (
       <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground">Filtros disponibles:</div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-sm font-medium text-foreground mb-3">Filtros disponibles</div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
           Funcionalidad de filtros personalizada no configurada para esta tabla.
         </div>
       </div>
@@ -191,8 +191,8 @@ export function Table<T = any>({
   const defaultGroupingContent = () => {
     return (
       <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground">Agrupación:</div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-sm font-medium text-foreground mb-3">Agrupar por</div>
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
           Opciones de agrupación no configuradas para esta tabla.
         </div>
       </div>
@@ -340,8 +340,10 @@ export function Table<T = any>({
                     <span className="text-xs">Filtros</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-56" align="end">
-                  {(topBar?.renderFilterContent ?? defaultFilterContent)()}
+                <PopoverContent className="w-64 p-4" align="end">
+                  <div className="space-y-4">
+                    {(topBar?.renderFilterContent ?? defaultFilterContent)()}
+                  </div>
                 </PopoverContent>
               </Popover>
             )}
@@ -362,8 +364,10 @@ export function Table<T = any>({
                     <span className="text-xs">Agrupar</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-56" align="end">
-                  {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
+                <PopoverContent className="w-64 p-4" align="end">
+                  <div className="space-y-4">
+                    {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
+                  </div>
                 </PopoverContent>
               </Popover>
             )}

@@ -403,9 +403,9 @@ const AdminTaskList = () => {
               onSearchChange: setSearchValue,
               isFilterActive: typeFilter !== 'all',
               renderFilterContent: () => (
-                <div className="space-y-3 p-2 min-w-[200px]">
+                <>
                   <div>
-                    <Label className="text-xs font-medium mb-1 block">Tipo</Label>
+                    <Label className="text-xs font-medium mb-2 block">Tipo</Label>
                     <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Todas las tareas" />
@@ -417,7 +417,7 @@ const AdminTaskList = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </>
               ),
               onClearFilters: clearFilters,
             }}

@@ -212,9 +212,9 @@ export default function ConstructionMaterials() {
                 showFilter: true,
                 isFilterActive: selectedPhase !== '' || selectedCategory !== '',
                 renderFilterContent: () => (
-                  <div className="space-y-3 p-2 min-w-[200px]">
+                  <>
                     <div>
-                      <Label className="text-xs font-medium mb-1 block">Fase</Label>
+                      <Label className="text-xs font-medium mb-2 block">Fase</Label>
                       <Select value={selectedPhase} onValueChange={setSelectedPhase}>
                         <SelectTrigger className="h-8 text-xs">
                           <SelectValue placeholder="Todas las fases" />
@@ -230,7 +230,7 @@ export default function ConstructionMaterials() {
                       </Select>
                     </div>
                     <div>
-                      <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                      <Label className="text-xs font-medium mb-2 block">Categoría</Label>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                         <SelectTrigger className="h-8 text-xs">
                           <SelectValue placeholder="Todas las categorías" />
@@ -245,7 +245,7 @@ export default function ConstructionMaterials() {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                  </>
                 ),
                 showClearFilters: true,
                 onClearFilters: () => {
