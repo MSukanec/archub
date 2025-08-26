@@ -369,34 +369,47 @@ export default function MaterialList() {
       key: 'actions',
       label: 'Acciones',
       width: '11%',
-      render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(product)}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicate(product)}
-            className="h-7 w-7 p-0"
-          >
-            <Copy className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(product)}
-            className="h-7 w-7 p-0"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      )
+      render: (product: Product) => {
+        // Solo mostrar acciones para materiales que pertenecen a la organización (no del sistema)
+        const canEdit = !product.is_system;
+        
+        if (!canEdit) {
+          return (
+            <div className="flex items-center justify-center h-7">
+              <span className="text-xs text-muted-foreground">-</span>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEdit(product)}
+              className="h-7 w-7 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDuplicate(product)}
+              className="h-7 w-7 p-0"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(product)}
+              className="h-7 w-7 p-0"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        );
+      }
     }
   ]
   
