@@ -76,7 +76,6 @@ interface TableProps<T = any> {
     showSort?: boolean;
     renderSortContent?: () => ReactNode;
     isSortActive?: boolean;
-    showGrouping?: boolean;
     renderGroupingContent?: () => ReactNode;
     isGroupingActive?: boolean;
     showClearFilters?: boolean;
@@ -193,11 +192,27 @@ export function Table<T = any>({
   
   // Renderizado de contenido de agrupación por defecto
   const defaultGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'Sin agrupar' }
+    ];
+
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
-        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
-          Opciones de agrupación no configuradas para esta tabla.
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant="secondary"
+              size="sm"
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                "button-secondary-pressed hover:bg-secondary"
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
         </div>
       </>
     );
@@ -216,11 +231,10 @@ export function Table<T = any>({
     const showSearch = topBar?.showSearch ?? true;
     const showFilter = topBar?.showFilter ?? true;
     const showSort = topBar?.showSort ?? false;
-    const showGrouping = topBar?.showGrouping ?? true;
     const showClearFilters = topBar?.showClearFilters ?? true;
     const showExport = topBar?.showExport ?? false;
     
-    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showGrouping || showClearFilters || showExport || topBar?.leftModeButtons?.options.length;
+    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || showExport || topBar?.leftModeButtons?.options.length || true; // Siempre true porque el botón de agrupación siempre está presente
     
     if (!hasContent) return null;
 
@@ -362,29 +376,25 @@ export function Table<T = any>({
               </Popover>
             )}
 
-            {/* Botón de agrupación */}
-            {showGrouping && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "gap-2",
-                      topBar?.isGroupingActive ? "button-secondary-pressed" : ""
-                    )}
-                  >
-                    <Group className="h-4 w-4" />
-                    <span className="text-xs">Agrupar</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-4" align="end">
-                  <div className="space-y-4">
-                    {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+            {/* Botón de agrupación - SIEMPRE visible */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "gap-2",
+                    topBar?.isGroupingActive ? "button-secondary-pressed" : ""
+                  )}
+                >
+                  <Group className="h-4 w-4" />
+                  <span className="text-xs">Agrupar</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4" align="end">
+                {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
+              </PopoverContent>
+            </Popover>
 
 
             {/* Botón de exportar */}
