@@ -303,6 +303,47 @@ export function TaskList({
     setGroupingType('rubros-phases')
   }
 
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'Sin Agrupar' },
+      { value: 'phases', label: 'Por Fases' },
+      { value: 'rubros', label: 'Por Rubros' },
+      { value: 'tasks', label: 'Por Tareas' },
+      { value: 'rubros-phases', label: 'Por Fases y Rubros' },
+      { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
+    ]
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value)}
+              className="w-full justify-start text-xs font-normal h-8"
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+        <div className="mt-3 pt-2 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="w-full justify-start text-xs font-normal h-8 text-muted-foreground"
+          >
+            Limpiar filtros
+          </Button>
+        </div>
+      </>
+    )
+  }
+
   return (
     <Table
       columns={columns}
@@ -310,24 +351,12 @@ export function TaskList({
       isLoading={isLoading}
       mode="construction"
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-      filterButton={{
-        options: [
-          { value: 'none', label: 'Sin Agrupar' },
-          { value: 'phases', label: 'Por Fases' },
-          { value: 'rubros', label: 'Por Rubros' },
-          { value: 'tasks', label: 'Por Tareas' },
-          { value: 'rubros-phases', label: 'Por Fases y Rubros' },
-          { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
-        ],
-        value: groupingType,
-        onValueChange: setGroupingType,
-        placeholder: 'Agrupar por...',
-        clearFilters
-      }}
       topBar={{
         showSearch: true,
         searchValue: searchValue,
         onSearchChange: setSearchValue,
+        renderGroupingContent: renderGroupingContent,
+        isGroupingActive: groupingType !== 'none',
         customActions: (
           <Popover>
             <PopoverTrigger asChild>
