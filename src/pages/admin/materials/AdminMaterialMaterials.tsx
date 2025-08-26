@@ -49,6 +49,29 @@ const AdminMaterialMateriales = () => {
     return path ? path.join(' / ') : 'Sin categoría'
   }
 
+  // Function to find the top-level category (without parent_id) for a given category
+  const findTopLevelCategory = (categoryId: string): string => {
+    const findTopLevel = (cats: any[], targetId: string): any => {
+      for (const cat of cats) {
+        if (cat.id === targetId) {
+          // If this category has no parent_id, it's top-level
+          return cat
+        }
+        if (cat.children && cat.children.length > 0) {
+          const found = findTopLevel(cat.children, targetId)
+          if (found) {
+            // Return the current category (parent) since we found the target in its children
+            return cat
+          }
+        }
+      }
+      return null
+    }
+    
+    const topLevelCat = findTopLevel(categories, categoryId)
+    return topLevelCat?.name || 'Sin categoría'
+  }
+
   // Apply client-side filtering
   const filteredMaterials = materials.filter(material => {
     const matchesSearch = searchValue === '' || material.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -76,7 +99,7 @@ const AdminMaterialMateriales = () => {
     if (groupingType === 'categories') {
       return sortedMaterials.map(material => ({
         ...material,
-        groupKey: material.category?.name || 'Sin categoría'
+        groupKey: material.category?.id ? findTopLevelCategory(material.category.id) : 'Sin categoría'
       }));
     }
     
@@ -272,12 +295,6 @@ const AdminMaterialMateriales = () => {
           />
         )}
         topBar={{
-          tabs: ['Sin Agrupar', 'Por Categorías'],
-          activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
-          onTabChange: (tab: string) => {
-            if (tab === 'Sin Agrupar') setGroupingType('none')
-            else if (tab === 'Por Categorías') setGroupingType('categories')
-          },
           showSearch: true,
           searchValue: searchValue,
           onSearchChange: setSearchValue,
@@ -304,6 +321,26 @@ const AdminMaterialMateriales = () => {
             </>
           ),
           onClearFilters: clearFilters,
+          rightActions: (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={groupingType === 'none' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setGroupingType('none')}
+                className="text-xs h-8"
+              >
+                Sin Agrupar
+              </Button>
+              <Button
+                variant={groupingType === 'categories' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setGroupingType('categories')}
+                className="text-xs h-8"
+              >
+                Por Categorías
+              </Button>
+            </div>
+          )
         }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">
