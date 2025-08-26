@@ -1,5 +1,5 @@
 import React, { useState, useImperativeHandle, forwardRef } from 'react'
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, X } from 'lucide-react'

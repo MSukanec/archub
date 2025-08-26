@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import DatePicker from '@/components/ui-custom/general/DatePickerField';
+import DatePicker from '@/components/ui-custom/fields/DatePickerField';
 
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),

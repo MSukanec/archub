@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField'
 
 import { useCreateUnitPresentation, useUpdateUnitPresentation, UnitPresentation, NewUnitPresentationData } from '@/hooks/use-unit-presentations'
 import { useUnits } from '@/hooks/use-units'

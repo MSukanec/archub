@@ -10,7 +10,7 @@ import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { ComboBox } from "@/components/ui-custom/ComboBoxWrite"
+import { ComboBox } from "@/components/ui-custom/ComboBoxWriteField"
 import { Button } from "@/components/ui/button"
 
 interface ReplacementOption {

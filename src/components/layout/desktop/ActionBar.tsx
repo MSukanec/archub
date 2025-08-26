@@ -1,7 +1,7 @@
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField';
 
 interface ActionBarProps {
   selectedValue?: string;

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import DatePicker from '@/components/ui-custom/general/DatePickerField'
+import DatePicker from '@/components/ui-custom/fields/DatePickerField'
 
 import { useRenewInsurance, useUploadCertificate } from '@/hooks/useInsurances'
 import { Insurance } from '@/services/insurances'

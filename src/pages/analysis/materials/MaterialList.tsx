@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import MaterialRow from '@/components/data-row/rows/MaterialRow'
@@ -183,56 +183,47 @@ export default function MaterialList() {
 
   // Filter content component
   const renderFilterContent = () => (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 w-80">
       <div className="space-y-2">
         <label className="text-sm font-medium">Categoría</label>
-        <Select value={filterByCategory} onValueChange={setFilterByCategory}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Todas las categorías" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las categorías</SelectItem>
-            {categoryOptions.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ComboBoxWriteField
+          value={filterByCategory}
+          onValueChange={setFilterByCategory}
+          options={[
+            { value: "all", label: "Todas las categorías" },
+            ...categoryOptions.map(category => ({ value: category, label: category }))
+          ]}
+          placeholder="Todas las categorías"
+          className="w-full"
+        />
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Material</label>
-        <Select value={filterByMaterial} onValueChange={setFilterByMaterial}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Todos los materiales" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los materiales</SelectItem>
-            {materialOptions.map((material) => (
-              <SelectItem key={material} value={material}>
-                {material}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ComboBoxWriteField
+          value={filterByMaterial}
+          onValueChange={setFilterByMaterial}
+          options={[
+            { value: "all", label: "Todos los materiales" },
+            ...materialOptions.map(material => ({ value: material, label: material }))
+          ]}
+          placeholder="Todos los materiales"
+          className="w-full"
+        />
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Marca</label>
-        <Select value={filterByBrand} onValueChange={setFilterByBrand}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Todas las marcas" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las marcas</SelectItem>
-            {brandOptions.map((brand) => (
-              <SelectItem key={brand} value={brand}>
-                {brand}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ComboBoxWriteField
+          value={filterByBrand}
+          onValueChange={setFilterByBrand}
+          options={[
+            { value: "all", label: "Todas las marcas" },
+            ...brandOptions.map(brand => ({ value: brand, label: brand }))
+          ]}
+          placeholder="Todas las marcas"
+          className="w-full"
+        />
       </div>
     </div>
   );

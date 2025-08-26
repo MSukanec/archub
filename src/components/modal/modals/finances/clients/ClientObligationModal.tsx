@@ -15,7 +15,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
-import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField'
+import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 
 interface Contact {
   id: string

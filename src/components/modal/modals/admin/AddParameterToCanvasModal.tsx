@@ -4,7 +4,7 @@ import { FormModalHeader } from '../../form/FormModalHeader';
 import { FormModalFooter } from '../../form/FormModalFooter';
 import { useGlobalModalStore } from '../../form/useGlobalModalStore';
 import { Plus } from 'lucide-react';
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField';
 import { Label } from '@/components/ui/label';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -105,7 +105,7 @@ export function AddParameterToCanvasModal() {
 
   const viewPanel = null;
 
-  // Convertir parámetros a formato ComboBoxWrite
+  // Convertir parámetros a formato ComboBoxWriteField
   const comboBoxOptions = availableParameters.map(param => ({
     value: param.id,
     label: param.slug

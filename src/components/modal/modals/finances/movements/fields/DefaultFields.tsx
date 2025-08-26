@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
-import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField'
+import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 

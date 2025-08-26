@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTaskTemplate } from '@/hooks/use-task-templates'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
-import { ComboBox } from '@/components/ui-custom/ComboBoxWrite'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteFieldField'
 import { Label } from '@/components/ui/label'
 
 interface ParameterSelection {
