@@ -18,7 +18,6 @@ export default function MaterialList() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
   const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
-  const [searchValue, setSearchValue] = useState("")
   const [filterByCategory, setFilterByCategory] = useState("all")
   const [filterByMaterial, setFilterByMaterial] = useState("all")
   const [filterByBrand, setFilterByBrand] = useState("all")
@@ -30,22 +29,9 @@ export default function MaterialList() {
   const { data: userData } = useCurrentUser()
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
-  // Filter products and add groupKey for grouping
+  // Filter products (sin búsqueda, solo filtros) and add groupKey for grouping
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
-      // Filtro de búsqueda
-      if (searchValue) {
-        const searchLower = searchValue.toLowerCase();
-        const matchesName = product.name.toLowerCase().includes(searchLower);
-        const matchesMaterial = product.material?.toLowerCase().includes(searchLower);
-        const matchesBrand = product.brand?.toLowerCase().includes(searchLower);
-        const matchesCategory = product.category_hierarchy?.toLowerCase().includes(searchLower);
-        
-        if (!matchesName && !matchesMaterial && !matchesBrand && !matchesCategory) {
-          return false;
-        }
-      }
-
       // Filtro por categoría
       if (filterByCategory !== "all") {
         const hierarchy = product.category_hierarchy || 'Sin categoría';
@@ -109,7 +95,7 @@ export default function MaterialList() {
           return a.name.localeCompare(b.name);
       }
     });
-  }, [products, groupingType, searchValue, filterByCategory, filterByMaterial, filterByBrand]);
+  }, [products, groupingType, filterByCategory, filterByMaterial, filterByBrand]);
 
   // Data type selector options
   const dataTypeOptions = [
@@ -173,14 +159,13 @@ export default function MaterialList() {
 
   // Clear filters function
   const handleClearFilters = () => {
-    setSearchValue("");
     setFilterByCategory("all");
     setFilterByMaterial("all");
     setFilterByBrand("all");
   };
 
   // Check if any filters are active
-  const isFilterActive = searchValue !== "" || filterByCategory !== "all" || filterByMaterial !== "all" || filterByBrand !== "all";
+  const isFilterActive = filterByCategory !== "all" || filterByMaterial !== "all" || filterByBrand !== "all";
 
   // Filter content component
   const renderFilterContent = () => (
@@ -468,7 +453,7 @@ export default function MaterialList() {
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)]" />
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <EmptyState
             icon={<Package />}
             title="No hay productos registrados"
@@ -480,8 +465,6 @@ export default function MaterialList() {
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
-              searchValue: searchValue,
-              onSearchChange: setSearchValue,
               renderFilterContent: renderFilterContent,
               isFilterActive: isFilterActive,
               renderGroupingContent: renderGroupingContent,
