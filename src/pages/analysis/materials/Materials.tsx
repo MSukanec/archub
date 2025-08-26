@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Package, Plus } from 'lucide-react'
-import MaterialList from './materials/MaterialList'
+import MaterialList from './MaterialList'
 
 export default function Materials() {
   const { setSidebarContext } = useNavigationStore()

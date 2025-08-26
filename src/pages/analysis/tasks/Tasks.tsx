@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { TableIcon, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import TaskList from './tasks/TaskList'
+import TaskList from './TaskList'
 
 export default function Tasks() {
   const { setSidebarContext } = useNavigationStore()

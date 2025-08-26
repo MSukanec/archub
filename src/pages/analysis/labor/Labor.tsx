@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Users, Plus } from 'lucide-react'
-import LaborList from './labor/LaborList'
+import LaborList from './LaborList'
 
 export default function Labor() {
   const { setSidebarContext } = useNavigationStore()

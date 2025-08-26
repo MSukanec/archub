@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { DollarSign, Plus } from 'lucide-react'
-import IndirectList from './indirects/IndirectList'
+import IndirectList from './IndirectList'
 
 export default function Indirects() {
   const { setSidebarContext } = useNavigationStore()
