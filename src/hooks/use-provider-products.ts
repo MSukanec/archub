@@ -133,56 +133,74 @@ export function useToggleProviderProduct() {
           providerProduct = data;
         }
 
-        // Si se proporciona moneda y precio, manejar product_prices
-        if (currency && price !== undefined && providerProduct) {
-          // Obtener currency_id basado en el símbolo
-          const { data: currencyData, error: currencyError } = await supabase
-            .from('currencies')
+        // SIEMPRE manejar product_prices cuando se activa un producto
+        if (providerProduct && isActive) {
+          // Verificar si ya existe un precio para este provider_product
+          const { data: existingPrice, error: priceSelectError } = await supabase
+            .from('product_prices')
             .select('id')
-            .eq('symbol', currency)
+            .eq('provider_product_id', providerProduct.id)
             .single();
 
-          if (currencyError) {
-            console.warn('Currency not found:', currency);
-          } else {
-            // Verificar si ya existe un precio para este provider_product
-            const { data: existingPrice, error: priceSelectError } = await supabase
-              .from('product_prices')
-              .select('id')
-              .eq('provider_product_id', providerProduct.id)
-              .single();
+          if (priceSelectError && priceSelectError.code !== 'PGRST116') {
+            console.warn('Error checking existing price:', priceSelectError);
+          }
 
-            if (priceSelectError && priceSelectError.code !== 'PGRST116') {
-              console.warn('Error checking existing price:', priceSelectError);
+          if (existingPrice) {
+            // Si existe y se proporcionan currency/price, actualizar
+            if (currency && price !== undefined) {
+              // Obtener currency_id basado en el símbolo
+              const { data: currencyData, error: currencyError } = await supabase
+                .from('currencies')
+                .select('id')
+                .eq('symbol', currency)
+                .single();
+
+              if (currencyError) {
+                console.warn('Currency not found:', currency);
+              } else {
+                const { error: priceUpdateError } = await supabase
+                  .from('product_prices')
+                  .update({
+                    currency_id: currencyData.id,
+                    price: price,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', existingPrice.id);
+
+                if (priceUpdateError) {
+                  console.warn('Error updating price:', priceUpdateError);
+                }
+              }
+            }
+          } else {
+            // No existe, crear nueva entrada
+            let insertData: any = {
+              provider_product_id: providerProduct.id,
+              currency_id: null,
+              price: null
+            };
+
+            // Si se proporcionan currency/price, usarlos
+            if (currency && price !== undefined) {
+              const { data: currencyData, error: currencyError } = await supabase
+                .from('currencies')
+                .select('id')
+                .eq('symbol', currency)
+                .single();
+
+              if (!currencyError && currencyData) {
+                insertData.currency_id = currencyData.id;
+                insertData.price = price;
+              }
             }
 
-            if (existingPrice) {
-              // Actualizar precio existente
-              const { error: priceUpdateError } = await supabase
-                .from('product_prices')
-                .update({
-                  currency_id: currencyData.id,
-                  price: price,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', existingPrice.id);
+            const { error: priceInsertError } = await supabase
+              .from('product_prices')
+              .insert(insertData);
 
-              if (priceUpdateError) {
-                console.warn('Error updating price:', priceUpdateError);
-              }
-            } else {
-              // Crear nuevo precio
-              const { error: priceInsertError } = await supabase
-                .from('product_prices')
-                .insert({
-                  provider_product_id: providerProduct.id,
-                  currency_id: currencyData.id,
-                  price: price
-                });
-
-              if (priceInsertError) {
-                console.warn('Error creating price:', priceInsertError);
-              }
+            if (priceInsertError) {
+              console.warn('Error creating price:', priceInsertError);
             }
           }
         }
