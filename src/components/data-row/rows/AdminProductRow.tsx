@@ -122,17 +122,20 @@ export default function AdminProductRow({
 
         {/* Segunda fila - Material */}
         <div className="font-semibold text-xs truncate">
+          {console.log('🔍 Renderizando material:', product.material)}
           {product.material || 'Sin material'}
         </div>
 
         {/* Tercera fila - Marca - Modelo */}
         <div className="font-semibold text-sm truncate">
+          {console.log('🔍 Renderizando brand:', product.brand)}
           {product.brand ? `${product.brand} - ${product.name}` : product.name}
         </div>
 
         {/* Cuarta fila - Unidad - Precio */}
         <div className="text-xs text-muted-foreground truncate">
           {(() => {
+            console.log('🔍 Renderizando unit:', product.unit)
             const unitName = product.unit || 'Sin unidad';
             const price = product.default_price !== null && product.default_price !== undefined 
               ? `$${product.default_price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` 
