@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import MaterialRow from '@/components/data-row/rows/MaterialRow'
@@ -15,6 +15,7 @@ import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLig
 export default function AnalysisMaterials() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
   
   const { data: products = [], isLoading: productsLoading } = useProducts()
   const deleteProductMutation = useDeleteProduct()
@@ -23,8 +24,30 @@ export default function AnalysisMaterials() {
   const { data: userData } = useCurrentUser()
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
 
-  // Filter products by type (no search filtering since it's analysis view)
-  const filteredProducts = products
+  // Filter products and add groupKey for grouping
+  const filteredProducts = useMemo(() => {
+    return products.map(product => {
+      let groupKey = '';
+      
+      switch (groupingType) {
+        case 'material':
+          groupKey = product.material || 'Sin material';
+          break;
+        case 'category':
+          const hierarchy = product.category_hierarchy || 'Sin categoría';
+          // Extraer solo la primera categoría (antes del primer " > ")
+          groupKey = hierarchy.split(' > ')[0];
+          break;
+        default:
+          groupKey = '';
+      }
+      
+      return {
+        ...product,
+        groupKey
+      };
+    });
+  }, [products, groupingType]);
 
   // Data type selector options
   const dataTypeOptions = [
@@ -59,8 +82,22 @@ export default function AnalysisMaterials() {
     })
   }
 
-  // Products table columns configuration
-  const productsColumns = [
+  // Base columns definition
+  const baseColumns = [
+    {
+      key: 'category',
+      label: 'Categoría',
+      width: '16%',
+      render: (product: Product) => (
+        <span className="text-sm font-medium">
+          {(() => {
+            const hierarchy = product.category_hierarchy || 'Sin categoría';
+            // Extraer solo la primera categoría (antes del primer " > ")
+            return hierarchy.split(' > ')[0];
+          })()}
+        </span>
+      )
+    },
     {
       key: 'material',
       label: 'Material',
@@ -224,6 +261,21 @@ export default function AnalysisMaterials() {
       )
     }
   ]
+  
+  // Select columns based on grouping type
+  const productsColumns = useMemo(() => {
+    // For no grouping, use all base columns
+    if (groupingType === 'none') {
+      return baseColumns;
+    }
+    
+    // Filter columns for grouping - hide the grouped column
+    return baseColumns.filter(column => {
+      if (groupingType === 'material' && column.key === 'material') return false;
+      if (groupingType === 'category' && column.key === 'category') return false;
+      return true;
+    });
+  }, [groupingType]);
 
   return (
     <div className="space-y-6">
@@ -243,6 +295,17 @@ export default function AnalysisMaterials() {
           <Table
             data={filteredProducts}
             columns={productsColumns}
+            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            topBar={{
+              tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
+              activeTab: groupingType === 'none' ? 'No Agrupar' : 
+                        groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
+              onTabChange: (tab: string) => {
+                if (tab === 'No Agrupar') setGroupingType('none')
+                else if (tab === 'Agrupar por Categoría') setGroupingType('category')
+                else if (tab === 'Agrupar por Material') setGroupingType('material')
+              }
+            }}
             renderCard={(product) => (
               <MaterialRow
                 material={{
@@ -265,6 +328,15 @@ export default function AnalysisMaterials() {
                 density="normal"
               />
             )}
+            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+              return (
+                <>
+                  <div className="col-span-full text-sm font-medium">
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+                  </div>
+                </>
+              );
+            }}
             emptyState={
               <EmptyState
                 icon={<Package />}
