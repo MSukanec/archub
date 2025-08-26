@@ -32,7 +32,7 @@ const productSchema = z.object({
   default_provider: z.string().optional(),
 })
 
-interface ProductFormModalProps {
+interface AdminProductModalProps {
   modalData: {
     editingProduct?: Product | null
     isDuplicating?: boolean
@@ -40,7 +40,7 @@ interface ProductFormModalProps {
   onClose: () => void
 }
 
-export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) {
+export function AdminProductModal({ modalData, onClose }: AdminProductModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingProduct, isDuplicating = false } = modalData
@@ -59,7 +59,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
-  }, [])
+  }, [setPanel])
 
   // Form setup
   const form = useForm<z.infer<typeof productSchema>>({
@@ -79,7 +79,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
 
   // Load editing data (including duplication)
   useEffect(() => {
-    console.log('ProductFormModal useEffect triggered:', {
+    console.log('AdminProductModal useEffect triggered:', {
       isEditing,
       isDuplicating,
       hasEditingProduct: !!editingProduct,
@@ -172,7 +172,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
                     value: material.id,
                     label: material.name
                   }))}
-                  placeholder="Selecciona un material"
+                  placeholder="Seleccionar material..."
                   searchPlaceholder="Buscar material..."
                   emptyMessage="No se encontraron materiales"
                 />
@@ -191,7 +191,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
               <FormLabel>Marca</FormLabel>
               <FormControl>
                 <ComboBox
-                  value={field.value}
+                  value={field.value || ''}
                   onValueChange={field.onChange}
                   options={[
                     { value: '', label: 'Sin marca' },
@@ -200,7 +200,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
                       label: brand.name
                     }))
                   ]}
-                  placeholder="Selecciona una marca (opcional)"
+                  placeholder="Seleccionar marca..."
                   searchPlaceholder="Buscar marca..."
                   emptyMessage="No se encontraron marcas"
                 />
@@ -210,100 +210,16 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           )}
         />
 
-        {/* Unit Presentation */}
-        <FormField
-          control={form.control}
-          name="unit_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad *</FormLabel>
-              <FormControl>
-                <ComboBox
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  options={unitPresentations.map(unitPresentation => ({
-                    value: unitPresentation.id,
-                    label: `${unitPresentation.name} (${unitPresentation.equivalence} ${unitPresentation.unit?.name})`
-                  }))}
-                  placeholder="Selecciona una unidad de presentación"
-                  searchPlaceholder="Buscar unidad..."
-                  emptyMessage="No se encontraron unidades"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Product Name */}
+        {/* Product Model/Name */}
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre / Modelo del Producto *</FormLabel>
+              <FormLabel>Modelo *</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ej: Cemento Portland Tipo I, Ladrillo King Kong..."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* URL */}
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL del Producto</FormLabel>
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="https://ejemplo.com/producto"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Default Price */}
-        <FormField
-          control={form.control}
-          name="default_price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Precio por Defecto</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Default Provider */}
-        <FormField
-          control={form.control}
-          name="default_provider"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proveedor por Defecto</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Nombre del proveedor..."
+                  placeholder="Ej: Premium 2024, Serie A, etc."
                   {...field}
                 />
               </FormControl>
@@ -321,9 +237,53 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
               <FormLabel>Descripción</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Descripción detallada del producto, especificaciones técnicas..."
+                  placeholder="Descripción detallada del producto..."
                   className="resize-none"
                   rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Unit Presentation - Full Width */}
+        <FormField
+          control={form.control}
+          name="unit_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad de Venta *</FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={unitPresentations.map(unitPresentation => ({
+                    value: unitPresentation.id,
+                    label: `${unitPresentation.name} (${unitPresentation.equivalence} ${unitPresentation.unit?.name})`
+                  }))}
+                  placeholder="Seleccionar unidad..."
+                  searchPlaceholder="Buscar unidad..."
+                  emptyMessage="No se encontraron unidades"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Link */}
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="https://ejemplo.com/producto"
                   {...field}
                 />
               </FormControl>
@@ -338,7 +298,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de Imagen</FormLabel>
+              <FormLabel>Imagen</FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://ejemplo.com/imagen.jpg"
@@ -349,13 +309,60 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
             </FormItem>
           )}
         />
+
+        {/* Provider and Price in two columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Default Provider */}
+          <FormField
+            control={form.control}
+            name="default_provider"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proveedor (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Nombre del proveedor principal"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Default Price */}
+          <FormField
+            control={form.control}
+            name="default_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Precio</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      className="pl-6"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    />
+                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </form>
     </Form>
   )
 
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto"}
+      title={isEditing ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto Personalizado"}
       icon={Package}
     />
   )
@@ -364,7 +371,7 @@ export function ProductFormModal({ modalData, onClose }: ProductFormModalProps) 
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? "Actualizar" : isDuplicating ? "Duplicar" : "Crear"}
+      rightLabel={isEditing ? "Actualizar Producto" : isDuplicating ? "Duplicar Producto" : "Crear Producto"}
       onRightClick={form.handleSubmit(onSubmit)}
       submitDisabled={isLoading}
       showLoadingSpinner={isLoading}

@@ -63,6 +63,7 @@ import { PartnerModal } from '../modals/organizations/members/PartnerModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
+import { AdminProductModal } from '../modals/admin/materials/AdminProductModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -129,7 +130,7 @@ export function ModalFactory() {
       return <BrandFormModal modalData={data || {}} onClose={closeModal} />;
     
     case 'product-form':
-      return <ProductModal modalData={data || {}} onClose={closeModal} />;
+      return <AdminProductModal modalData={data || {}} onClose={closeModal} />;
     
     case 'unit-presentation-form':
       return <UnitPresentationFormModal modalData={data || {}} onClose={closeModal} />;
