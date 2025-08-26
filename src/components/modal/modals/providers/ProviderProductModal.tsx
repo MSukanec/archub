@@ -119,56 +119,32 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
 
   const editPanel = (
     <div className="space-y-6">
-      {/* Descripción del Producto */}
+      {/* Información del Producto */}
       {product && (
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Package className="h-4 w-4 text-[var(--accent)]" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Información del Producto
-            </span>
+            </label>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2 text-sm">
             <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Material</span>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {product.material?.name || 'No especificado'}
-              </p>
+              <span className="font-medium">Categoría:</span> {product.categoryHierarchy?.split(' > ')[0] || 'Sin categoría'}
             </div>
-            
             <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Marca</span>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {product.brand?.name || 'No especificada'}
-              </p>
+              <span className="font-medium">Material:</span> {product.material?.name || 'No especificado'}
             </div>
-            
             <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Modelo</span>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {product.name}
-              </p>
+              <span className="font-medium">Marca:</span> {product.brand?.name || 'No especificada'}
             </div>
-            
             <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Unidad</span>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {product.unit_presentation?.name || 'No especificada'}
-              </p>
+              <span className="font-medium">Modelo:</span> {product.name}
+            </div>
+            <div>
+              <span className="font-medium">Unidad:</span> {product.unit_presentation?.name || 'No especificada'}
             </div>
           </div>
-          
-          {product.categoryHierarchy && (
-            <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Categoría</span>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className="text-xs">
-                  {product.categoryHierarchy.split(' > ')[0]}
-                </Badge>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
