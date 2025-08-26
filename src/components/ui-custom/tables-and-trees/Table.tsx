@@ -5,11 +5,21 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Search,
+  Filter,
+  X,
+  Download,
+  Group
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { TableTopBar } from "./TableTopBar";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -121,6 +131,11 @@ export function Table<T = any>({
   const [internalSearchValue, setInternalSearchValue] = useState("");
   const [internalFilters, setInternalFilters] = useState<any>({});
   
+  // Estados para el TopBar integrado
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  
   const itemsPerPage = 100;
   const showPagination = data.length > itemsPerPage;
   
@@ -179,6 +194,210 @@ export function Table<T = any>({
         <div className="text-sm font-medium text-foreground">Agrupación:</div>
         <div className="text-xs text-muted-foreground">
           Opciones de agrupación no configuradas para esta tabla.
+        </div>
+      </div>
+    );
+  };
+
+  // Handler interno para búsqueda del TopBar
+  const handleTopBarSearchChange = (value: string) => {
+    setSearchInputValue(value);
+    const onChangeHandler = topBar?.onSearchChange ?? handleSearchChange;
+    onChangeHandler?.(value);
+  };
+
+  // Función para renderizar el TopBar integrado
+  const renderTopBar = () => {
+    const tabs = topBar?.tabs || [];
+    const showSearch = topBar?.showSearch ?? true;
+    const showFilter = topBar?.showFilter ?? true;
+    const showSort = topBar?.showSort ?? false;
+    const showGrouping = topBar?.showGrouping ?? true;
+    const showClearFilters = topBar?.showClearFilters ?? true;
+    const showExport = topBar?.showExport ?? false;
+    
+    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showGrouping || showClearFilters || showExport;
+    
+    if (!hasContent) return null;
+
+    return (
+      <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Lado izquierdo - Tabs (solo texto) */}
+          <div className="flex items-center gap-1">
+            {tabs.map((tab) => (
+              <Button
+                key={tab}
+                variant={topBar?.activeTab === tab ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => topBar?.onTabChange?.(tab)}
+                className={cn(
+                  "h-8 px-3 text-xs font-normal",
+                  topBar?.activeTab === tab ? "button-secondary-pressed hover:bg-secondary" : ""
+                )}
+              >
+                {tab}
+              </Button>
+            ))}
+          </div>
+
+          {/* Lado derecho - Búsqueda, Orden, Filtros */}
+          <div className="flex items-center gap-1">
+            {/* Buscador expandible */}
+            {showSearch && (
+              <div 
+                className="relative flex items-center"
+                onMouseLeave={() => {
+                  if (isSearchExpanded && !searchFocused) {
+                    setIsSearchExpanded(false);
+                    setSearchFocused(false);
+                  }
+                }}
+              >
+                <div className={cn(
+                  "absolute right-0 transition-all duration-300 overflow-hidden",
+                  isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"
+                )}>
+                  <div className={cn(
+                    "relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all",
+                    isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"
+                  )}>
+                    <Input
+                      placeholder="Buscar..."
+                      value={searchInputValue}
+                      onChange={(e) => handleTopBarSearchChange(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => {
+                        setSearchFocused(false);
+                        setTimeout(() => {
+                          if (!searchFocused) {
+                            setIsSearchExpanded(false);
+                          }
+                        }, 150);
+                      }}
+                      className={cn(
+                        "flex-1 h-full text-xs border-0 bg-transparent font-normal",
+                        "placeholder:text-[var(--muted-foreground)]",
+                        "focus:ring-0 focus:outline-none",
+                        isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"
+                      )}
+                      autoFocus={isSearchExpanded}
+                    />
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 hover:bg-transparent"
+                      onClick={() => {
+                        setIsSearchExpanded(!isSearchExpanded);
+                        if (!isSearchExpanded) {
+                          setTimeout(() => setSearchFocused(true), 100);
+                        }
+                      }}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botón de ordenamiento */}
+            {showSort && topBar?.renderSortContent && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "gap-2",
+                      topBar?.isSortActive ? "button-secondary-pressed" : ""
+                    )}
+                  >
+                    <ArrowUpDown className="h-4 w-4" />
+                    <span className="text-xs">Ordenar</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56" align="end">
+                  {topBar.renderSortContent()}
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {/* Botón de filtros */}
+            {showFilter && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "gap-2",
+                      isFilterActive ? "button-secondary-pressed" : ""
+                    )}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="text-xs">Filtros</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56" align="end">
+                  {(topBar?.renderFilterContent ?? defaultFilterContent)()}
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {/* Botón de agrupación */}
+            {showGrouping && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "gap-2",
+                      topBar?.isGroupingActive ? "button-secondary-pressed" : ""
+                    )}
+                  >
+                    <Group className="h-4 w-4" />
+                    <span className="text-xs">Agrupar</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56" align="end">
+                  {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
+                </PopoverContent>
+              </Popover>
+            )}
+
+            {/* Botón de limpiar filtros */}
+            {showClearFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={topBar?.onClearFilters ?? handleClearFilters}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                <span className="text-xs">Limpiar</span>
+              </Button>
+            )}
+
+            {/* Botón de exportar */}
+            {showExport && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={topBar?.onExport}
+                disabled={topBar?.isExporting ?? false}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                <span className="text-xs">Exportar</span>
+              </Button>
+            )}
+
+            {/* Acciones personalizadas */}
+            {topBar?.customActions}
+          </div>
         </div>
       </div>
     );
@@ -415,30 +634,8 @@ export function Table<T = any>({
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
-        {/* Nueva barra superior flexible */}
-        <TableTopBar
-          tabs={topBar?.tabs}
-          activeTab={topBar?.activeTab}
-          onTabChange={topBar?.onTabChange}
-          showSearch={topBar?.showSearch ?? true}
-          onSearchChange={topBar?.onSearchChange ?? handleSearchChange}
-          searchValue={searchValue}
-          showFilter={topBar?.showFilter ?? true}
-          renderFilterContent={topBar?.renderFilterContent ?? defaultFilterContent}
-          isFilterActive={isFilterActive}
-          showSort={topBar?.showSort ?? false}
-          renderSortContent={topBar?.renderSortContent}
-          isSortActive={topBar?.isSortActive ?? false}
-          showGrouping={topBar?.showGrouping ?? true}
-          renderGroupingContent={topBar?.renderGroupingContent ?? defaultGroupingContent}
-          isGroupingActive={topBar?.isGroupingActive ?? false}
-          showClearFilters={topBar?.showClearFilters ?? true}
-          onClearFilters={topBar?.onClearFilters ?? handleClearFilters}
-          showExport={topBar?.showExport ?? false}
-          onExport={topBar?.onExport}
-          isExporting={topBar?.isExporting ?? false}
-          customActions={topBar?.customActions}
-        />
+        {/* Nueva barra superior integrada */}
+        {renderTopBar()}
         
         {/* Header Actions Row LEGACY - Fila superior con botones (solo si showDoubleHeader está activo) */}
         {headerActions && showDoubleHeader && (
