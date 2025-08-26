@@ -67,7 +67,7 @@ export default function AnalysisMaterials() {
       width: '16%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
-          {product.material?.name || 'Sin material'}
+          {product.material || 'Sin material'}
         </span>
       )
     },
@@ -77,7 +77,7 @@ export default function AnalysisMaterials() {
       width: '13%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
-          {product.brand?.name || 'Sin marca'}
+          {product.brand || 'Sin marca'}
         </span>
       )
     },
@@ -95,7 +95,7 @@ export default function AnalysisMaterials() {
       width: '12%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
-          {product.unit_presentation?.name || 'N/A'}
+          {product.unit || 'N/A'}
         </Badge>
       )
     },
@@ -248,14 +248,14 @@ export default function AnalysisMaterials() {
                 material={{
                   id: product.id,
                   name: product.name, // MODELO
-                  material_name: product.material?.name, // MATERIAL
-                  brand: product.brand?.name,
+                  material_name: product.material, // MATERIAL
+                  brand: product.brand,
                   category: (() => {
-                    const hierarchy = product.categoryHierarchy || 'Sin categoría';
+                    const hierarchy = product.category_hierarchy || 'Sin categoría';
                     // Extraer solo la primera categoría (antes del primer " > ")
                     return hierarchy.split(' > ')[0];
                   })(),
-                  unit: product.unit_presentation?.name,
+                  unit: product.unit,
                   price: product.default_price,
                   image_url: product.image_url,
                   is_system: product.is_system || false,
