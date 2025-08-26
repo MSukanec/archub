@@ -460,6 +460,21 @@ export function TaskSingleModal({
     />
   );
 
+  // Función wrapper para el submit que puede ser llamada por ENTER
+  const handleSubmitWrapper = () => {
+    // Validar que hay una tarea seleccionada antes de enviar
+    if (!selectedTaskId) {
+      form.setError('task_id', { 
+        type: 'manual', 
+        message: 'Debe seleccionar una tarea' 
+      });
+      return;
+    }
+    
+    // Llamar al submit del formulario
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <FormModalLayout
       columns={1}
@@ -469,6 +484,7 @@ export function TaskSingleModal({
       footerContent={footerContent}
       isEditing={true}
       onClose={onClose}
+      onSubmit={handleSubmitWrapper}
     />
   );
 }

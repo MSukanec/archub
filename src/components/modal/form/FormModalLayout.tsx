@@ -64,16 +64,31 @@ export function FormModalLayout({
 
   // Manejar ENTER para submit global
   useEffect(() => {
+    if (!onSubmit) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Solo procesar ENTER si hay función de submit y no estamos en un textarea
-      if (event.key === 'Enter' && onSubmit && 
-          (event.target as HTMLElement)?.tagName !== 'TEXTAREA') {
+      // Solo hacer submit con ENTER si:
+      // 1. Se presiona ENTER
+      // 2. No hay modificadores (Ctrl, Shift, Alt)
+      // 3. El elemento activo no es un textarea (permite salto de línea)
+      // 4. El elemento activo no es un select abierto
+      if (
+        event.key === 'Enter' && 
+        !event.ctrlKey && 
+        !event.shiftKey && 
+        !event.altKey &&
+        !(event.target as HTMLElement)?.tagName?.toLowerCase().includes('textarea') &&
+        !(event.target as HTMLElement)?.getAttribute('role') === 'combobox'
+      ) {
         event.preventDefault();
         onSubmit();
       }
     };
 
+    // Agregar el listener al documento
     document.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
