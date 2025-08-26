@@ -9,6 +9,7 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
@@ -28,6 +29,7 @@ const productSchema = z.object({
   material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
   name: z.string().min(1, 'El nombre del modelo es requerido'),
+  description: z.string().optional(),
   unit_presentation_id: z.string().min(1, 'La unidad de venta es requerida'),
   default_price: z.coerce.number().optional(),
   currency_id: z.string().optional(),
@@ -79,6 +81,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       material_id: '',
       brand_id: '',
       name: '',
+      description: '',
       unit_presentation_id: '',
       default_price: undefined,
       currency_id: '',
@@ -96,11 +99,12 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
         brand_id: data.brand_id || undefined,
         unit_id: data.unit_presentation_id || undefined,
         name: data.name,
-        description: undefined,
+        description: data.description || undefined,
         image_url: data.image_url || undefined,
         url: data.url || undefined,
         default_price: data.default_price || undefined,
         default_provider: undefined,
+        organization_id: userData?.organization?.id,
       }
 
       await createMutation.mutateAsync(productData)
@@ -202,6 +206,25 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                 <FormControl>
                   <Input
                     placeholder="Ej: Premium 2024, Serie A, etc."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Descripción */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Descripción detallada del producto..."
+                    className="min-h-[80px]"
                     {...field}
                   />
                 </FormControl>
