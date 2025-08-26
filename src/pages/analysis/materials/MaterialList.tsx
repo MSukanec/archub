@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import MaterialRow from '@/components/data-row/rows/MaterialRow'
@@ -16,6 +17,10 @@ export default function MaterialList() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
   const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
+  const [searchValue, setSearchValue] = useState("")
+  const [filterByCategory, setFilterByCategory] = useState("all")
+  const [filterByMaterial, setFilterByMaterial] = useState("all")
+  const [filterByBrand, setFilterByBrand] = useState("all")
   
   const { data: products = [], isLoading: productsLoading } = useProducts()
   const deleteProductMutation = useDeleteProduct()
@@ -26,7 +31,47 @@ export default function MaterialList() {
 
   // Filter products and add groupKey for grouping
   const filteredProducts = useMemo(() => {
-    const productsWithGroupKey = products.map(product => {
+    let filtered = products.filter(product => {
+      // Filtro de búsqueda
+      if (searchValue) {
+        const searchLower = searchValue.toLowerCase();
+        const matchesName = product.name.toLowerCase().includes(searchLower);
+        const matchesMaterial = product.material?.toLowerCase().includes(searchLower);
+        const matchesBrand = product.brand?.toLowerCase().includes(searchLower);
+        const matchesCategory = product.category_hierarchy?.toLowerCase().includes(searchLower);
+        
+        if (!matchesName && !matchesMaterial && !matchesBrand && !matchesCategory) {
+          return false;
+        }
+      }
+
+      // Filtro por categoría
+      if (filterByCategory !== "all") {
+        const hierarchy = product.category_hierarchy || 'Sin categoría';
+        const category = hierarchy.split(' > ')[0];
+        if (category !== filterByCategory) {
+          return false;
+        }
+      }
+
+      // Filtro por material
+      if (filterByMaterial !== "all") {
+        if ((product.material || 'Sin material') !== filterByMaterial) {
+          return false;
+        }
+      }
+
+      // Filtro por marca
+      if (filterByBrand !== "all") {
+        if ((product.brand || 'Sin marca') !== filterByBrand) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    const productsWithGroupKey = filtered.map(product => {
       let groupKey = '';
       
       switch (groupingType) {
@@ -63,7 +108,7 @@ export default function MaterialList() {
           return a.name.localeCompare(b.name);
       }
     });
-  }, [products, groupingType]);
+  }, [products, groupingType, searchValue, filterByCategory, filterByMaterial, filterByBrand]);
 
   // Data type selector options
   const dataTypeOptions = [
@@ -97,6 +142,100 @@ export default function MaterialList() {
       isLoading: deleteProductMutation.isPending
     })
   }
+
+  // Get unique options for filters
+  const categoryOptions = useMemo(() => {
+    const categories = new Set<string>();
+    products.forEach(product => {
+      const hierarchy = product.category_hierarchy || 'Sin categoría';
+      const category = hierarchy.split(' > ')[0];
+      categories.add(category);
+    });
+    return Array.from(categories).sort();
+  }, [products]);
+
+  const materialOptions = useMemo(() => {
+    const materials = new Set<string>();
+    products.forEach(product => {
+      materials.add(product.material || 'Sin material');
+    });
+    return Array.from(materials).sort();
+  }, [products]);
+
+  const brandOptions = useMemo(() => {
+    const brands = new Set<string>();
+    products.forEach(product => {
+      brands.add(product.brand || 'Sin marca');
+    });
+    return Array.from(brands).sort();
+  }, [products]);
+
+  // Clear filters function
+  const handleClearFilters = () => {
+    setSearchValue("");
+    setFilterByCategory("all");
+    setFilterByMaterial("all");
+    setFilterByBrand("all");
+  };
+
+  // Check if any filters are active
+  const isFilterActive = searchValue !== "" || filterByCategory !== "all" || filterByMaterial !== "all" || filterByBrand !== "all";
+
+  // Filter content component
+  const renderFilterContent = () => (
+    <div className="space-y-4 p-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Categoría</label>
+        <Select value={filterByCategory} onValueChange={setFilterByCategory}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categoryOptions.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Material</label>
+        <Select value={filterByMaterial} onValueChange={setFilterByMaterial}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Todos los materiales" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los materiales</SelectItem>
+            {materialOptions.map((material) => (
+              <SelectItem key={material} value={material}>
+                {material}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Marca</label>
+        <Select value={filterByBrand} onValueChange={setFilterByBrand}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Todas las marcas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las marcas</SelectItem>
+            {brandOptions.map((brand) => (
+              <SelectItem key={brand} value={brand}>
+                {brand}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
 
   // Base columns definition
   const baseColumns = [
@@ -312,7 +451,15 @@ export default function MaterialList() {
                 if (tab === 'No Agrupar') setGroupingType('none')
                 else if (tab === 'Agrupar por Categoría') setGroupingType('category')
                 else if (tab === 'Agrupar por Material') setGroupingType('material')
-              }
+              },
+              showSearch: true,
+              searchValue: searchValue,
+              onSearchChange: setSearchValue,
+              showFilter: true,
+              renderFilterContent: renderFilterContent,
+              isFilterActive: isFilterActive,
+              showClearFilters: isFilterActive,
+              onClearFilters: handleClearFilters
             }}
             renderCard={(product) => (
               <MaterialRow
