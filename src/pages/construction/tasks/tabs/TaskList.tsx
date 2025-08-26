@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
-import { CheckSquare, Edit, Trash2, Plus, Eye, FileText } from 'lucide-react'
+import { CheckSquare, Edit, Trash2, Plus, Eye, FileText, FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
@@ -309,9 +310,6 @@ export function TaskList({
       isLoading={isLoading}
       mode="construction"
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      searchPlaceholder="Buscar por tarea, rubro o fase..."
       filterButton={{
         options: [
           { value: 'none', label: 'Sin Agrupar' },
@@ -327,19 +325,47 @@ export function TaskList({
         clearFilters
       }}
       topBar={{
-        showExport: true,
-        onExport: handleExportToExcel,
-        isExporting: isExporting,
+        showSearch: true,
+        searchValue: searchValue,
+        onSearchChange: setSearchValue,
         customActions: (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleExportToPDF}
-            disabled={finalTasks.length === 0}
-            title="Exportar PDF"
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={finalTasks.length === 0}
+                title="Exportar"
+              >
+                Exportar
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-4" align="end">
+              <div className="space-y-2">
+                <div className="text-sm font-medium mb-3">Exportar como:</div>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleExportToExcel}
+                  disabled={isExporting || finalTasks.length === 0}
+                  className="w-full justify-start"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Excel (.xlsx)
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleExportToPDF}
+                  disabled={finalTasks.length === 0}
+                  className="w-full justify-start"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  PDF
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         )
       }}
       renderCard={(task: any) => (
