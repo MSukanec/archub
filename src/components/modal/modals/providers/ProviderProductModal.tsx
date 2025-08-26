@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   provider_code: z.string().optional(),
-  currency_id: z.string().min(1, "La moneda es obligatoria"),
+  currency_id: z.string().optional(),
   amount: z.number().min(0, "El precio debe ser mayor or igual a 0").optional(),
 });
 
@@ -74,7 +74,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     resolver: zodResolver(formSchema),
     defaultValues: {
       provider_code: '',
-      currency_id: '',
+      currency_id: defaultCurrency?.id || '',
       amount: undefined,
     },
   });
@@ -95,8 +95,9 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       form.setValue('currency_id', currentPrice.currency_id || '');
       form.setValue('amount', currentPrice.price || undefined);
     } else {
-      // Si no hay precio, usar moneda por defecto  
+      // Si no hay precio, usar moneda por defecto (UUID de currencies, no de organization_currencies)
       if (defaultCurrency?.id) {
+        console.log('Setting currency_id to:', defaultCurrency.id);
         form.setValue('currency_id', defaultCurrency.id);
         // Forzar trigger para que se actualice el CurrencyAmountField
         form.trigger('currency_id');
