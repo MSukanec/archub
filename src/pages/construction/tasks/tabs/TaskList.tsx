@@ -33,6 +33,7 @@ export function TaskList({
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [groupingType, setGroupingType] = useState('rubros-phases')
+  const [filterType, setFilterType] = useState('all')
   const [isExporting, setIsExporting] = useState(false)
   const { openModal } = useGlobalModalStore()
 
@@ -53,6 +54,20 @@ export function TaskList({
           divisionName.toLowerCase().includes(searchTerm) ||
           phaseName.toLowerCase().includes(searchTerm)
         );
+      });
+    }
+
+    // Aplicar filtros por tipo
+    if (filterType !== 'all') {
+      filtered = filtered.filter(task => {
+        switch (filterType) {
+          case 'phase':
+            return task.phase_name && task.phase_name.trim() !== '';
+          case 'rubro':
+            return task.division_name && task.division_name.trim() !== '';
+          default:
+            return true;
+        }
       });
     }
     
@@ -90,7 +105,7 @@ export function TaskList({
         groupKey
       };
     });
-  }, [tasks, searchValue, groupingType]);
+  }, [tasks, searchValue, groupingType, filterType]);
 
   // Para agrupación por tarea, simplemente usar filteredTasks con groupKey
   const finalTasks = useMemo(() => {
@@ -304,6 +319,37 @@ export function TaskList({
     setGroupingType('rubros-phases')
   }
 
+  // Render filter popover content
+  const renderFilterContent = () => {
+    const filterOptions = [
+      { value: 'all', label: 'Todas las tareas' },
+      { value: 'phase', label: 'Solo con fase' },
+      { value: 'rubro', label: 'Solo con rubro' }
+    ];
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Filtrar por</div>
+        <div className="space-y-1">
+          {filterOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={filterType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setFilterType(option.value)}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                filterType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
@@ -349,6 +395,8 @@ export function TaskList({
         showSearch: true,
         searchValue: searchValue,
         onSearchChange: setSearchValue,
+        renderFilterContent: renderFilterContent,
+        isFilterActive: filterType !== 'all',
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none',
         onExport: handleExportToExcel,
