@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { cn } from '@/lib/utils'
 
 import { Plus, Edit, Trash2, Package, Crown, Copy, Wrench } from 'lucide-react'
 
@@ -159,6 +160,36 @@ const AdminMaterialMateriales = () => {
     setCategoryFilter('all')
     setGroupingType('categories')
   }
+
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'categories', label: 'Por categorías' }
+    ];
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value as 'none' | 'categories')}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </>
+    );
+  };
 
   // Table columns configuration - hide 'Categoría' column when grouped by categories
   const baseColumns = [
@@ -325,30 +356,7 @@ const AdminMaterialMateriales = () => {
             </>
           ),
           onClearFilters: clearFilters,
-          showGrouping: true,
-          renderGroupingContent: () => (
-            <>
-              <div className="text-xs font-medium mb-2 block">Agrupar por</div>
-              <div className="space-y-1">
-                <Button
-                  variant={groupingType === 'none' ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setGroupingType('none')}
-                  className="w-full justify-start text-xs font-normal h-8"
-                >
-                  Sin Agrupar
-                </Button>
-                <Button
-                  variant={groupingType === 'categories' ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setGroupingType('categories')}
-                  className="w-full justify-start text-xs font-normal h-8"
-                >
-                  Por Categorías
-                </Button>
-              </div>
-            </>
-          ),
+          renderGroupingContent: renderGroupingContent,
           isGroupingActive: groupingType !== 'none'
         }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
