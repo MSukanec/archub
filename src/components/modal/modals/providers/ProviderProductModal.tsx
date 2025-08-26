@@ -151,39 +151,41 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       {/* Formulario */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          {/* Campo de Código */}
-          <FormField
-            control={form.control}
-            name="provider_code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Código</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Código interno del proveedor (opcional)"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            {/* Campo de Código */}
+            <FormField
+              control={form.control}
+              name="provider_code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Código interno del proveedor (opcional)"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Campo de Precio con Moneda */}
-          <FormItem>
-            <FormLabel>Precio</FormLabel>
-            <FormControl>
-              <CurrencyAmountField
-                value={form.watch('amount')}
-                currency={form.watch('currency_id')}
-                currencies={currencies}
-                onValueChange={(value) => form.setValue('amount', value)}
-                onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
-                placeholder="0.00"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+            {/* Campo de Precio con Moneda */}
+            <FormItem>
+              <FormLabel>Precio</FormLabel>
+              <FormControl>
+                <CurrencyAmountField
+                  value={form.watch('amount')}
+                  currency={form.watch('currency_id')}
+                  currencies={currencies}
+                  onValueChange={(value) => form.setValue('amount', value)}
+                  onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
+                  placeholder="0.00"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </div>
         </form>
       </Form>
     </div>
