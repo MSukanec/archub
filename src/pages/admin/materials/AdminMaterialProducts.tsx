@@ -187,11 +187,27 @@ const AdminMaterialProducts = () => {
   const baseColumns = [
     {
       key: 'name',
-      label: 'Producto',
+      label: 'Marca - Modelo',
       width: 'minmax(0, 1fr)',
       render: (product: Product) => (
         <div className="font-medium text-xs">
-          {product.name}
+          {product.brand ? `${product.brand} - ${product.name}` : product.name}
+        </div>
+      )
+    },
+    {
+      key: 'material',
+      label: 'Material',
+      width: '12%',
+      render: (product: Product) => (
+        <div>
+          {product.material ? (
+            <Badge variant="secondary" className="text-xs">
+              {product.material}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">Sin material</span>
+          )}
         </div>
       )
     },
@@ -211,32 +227,6 @@ const AdminMaterialProducts = () => {
         </div>
       )
     }] : []),
-    ...(groupingType !== 'material' ? [{
-      key: 'material',
-      label: 'Material',
-      width: '12%',
-      render: (product: Product) => (
-        <div>
-          {product.material ? (
-            <Badge variant="secondary" className="text-xs">
-              {product.material}
-            </Badge>
-          ) : (
-            <span className="text-muted-foreground text-xs">Sin material</span>
-          )}
-        </div>
-      )
-    }] : []),
-    {
-      key: 'brand',
-      label: 'Marca',
-      width: '10%',
-      render: (product: Product) => (
-        <span className="text-xs text-muted-foreground">
-          {product.brand || '–'}
-        </span>
-      )
-    },
     {
       key: 'unit_id',
       label: 'Unidad',
