@@ -121,10 +121,10 @@ export default function MaterialList() {
       render: (product: Product) => (
         <div className="flex flex-col">
           <span className="text-sm font-semibold">
-            {product.material || 'Sin material'}
+            {product.brand ? `${product.brand} - ${product.name}` : product.name}
           </span>
           <span className="text-xs text-muted-foreground">
-            {product.name}
+            {product.material || 'Sin material'}
           </span>
         </div>
       )
