@@ -38,7 +38,6 @@ export function useProviderProducts() {
             id,
             currency_id,
             price,
-            valid_from,
             currencies (
               id,
               name,
@@ -178,8 +177,7 @@ export function useToggleProviderProduct() {
                 .insert({
                   provider_product_id: providerProduct.id,
                   currency_id: currencyData.id,
-                  price: price,
-                  valid_from: new Date().toISOString().split('T')[0] // Solo fecha
+                  price: price
                 });
 
               if (priceInsertError) {
@@ -195,7 +193,11 @@ export function useToggleProviderProduct() {
       }
     },
     onSuccess: () => {
+      // Invalidar múltiples queries para asegurar actualización completa
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Forzar re-render inmediato
+      queryClient.refetchQueries({ queryKey: ['provider-products'] });
       toast({
         title: "Producto actualizado",
         description: "La selección del producto se ha guardado correctamente.",
