@@ -143,7 +143,7 @@ const AdminMaterialProducts = () => {
       label: 'Material',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
-          {product.material?.name || 'Sin material'}
+          {product.material || 'Sin material'}
         </Badge>
       )
     },
@@ -153,7 +153,7 @@ const AdminMaterialProducts = () => {
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <Tag className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm">{product.brand?.name || 'Sin marca'}</span>
+          <span className="text-sm">{product.brand || 'Sin marca'}</span>
         </div>
       )
     },
