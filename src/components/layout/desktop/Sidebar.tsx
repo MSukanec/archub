@@ -55,7 +55,8 @@ import {
   BarChart3,
   HandCoins,
   TrendingUp,
-  ListTodo
+  ListTodo,
+  TableIcon
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -284,6 +285,7 @@ export function Sidebar() {
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/recursos')) return 'recursos';
+    if (location.startsWith('/analysis')) return 'analisis';
     if (location.startsWith('/proveedor')) return 'proveedor';
     if (location.startsWith('/admin')) return 'administracion';
     if (location === '/dashboard') return null; // Resumen es independiente
@@ -335,7 +337,12 @@ export function Sidebar() {
       { icon: Images, label: 'Galería', href: '/recursos/galeria' },
       { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
       { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
-      { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
+    ],
+    'analisis': [
+      { icon: TableIcon, label: 'Tareas', href: '/analysis/tasks' },
+      { icon: Users, label: 'Mano de Obra', href: '/analysis/labor' },
+      { icon: Package, label: 'Materiales', href: '/analysis/materials' },
+      { icon: DollarSign, label: 'Indirectos', href: '/analysis/indirects' },
     ],
     'proveedor': [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' },
@@ -392,6 +399,13 @@ export function Sidebar() {
       label: 'Recursos', 
       defaultRoute: '/recursos/documentacion',
       isActive: location.startsWith('/recursos')
+    },
+    { 
+      id: 'analisis', 
+      icon: BarChart3, 
+      label: 'Análisis', 
+      defaultRoute: '/analysis/tasks',
+      isActive: location.startsWith('/analysis')
     },
     { 
       id: 'proveedor', 

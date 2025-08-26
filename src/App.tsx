@@ -253,6 +253,12 @@ function Router() {
             <Analysis />
           </ProtectedRoute>
         </Route>
+        
+        {/* Analysis Routes */}
+        <Route path="/analysis/tasks" component={() => import('@/pages/analysis/Tasks')} />
+        <Route path="/analysis/labor" component={() => import('@/pages/analysis/Labor')} />
+        <Route path="/analysis/materials" component={() => import('@/pages/analysis/Materials')} />
+        <Route path="/analysis/indirects" component={() => import('@/pages/analysis/Indirects')} />
 
 
         {/* Finances Routes */}

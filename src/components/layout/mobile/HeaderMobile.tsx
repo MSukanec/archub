@@ -1,5 +1,5 @@
 import React from "react";
-import { Building, Brush, HardHat, DollarSign, BookOpen, User, Crown, Menu, UserCircle, Settings } from "lucide-react";
+import { Building, Brush, HardHat, DollarSign, BookOpen, User, Crown, Menu, UserCircle, Settings, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { MobileMenu } from "./MobileMenu";
@@ -38,6 +38,7 @@ export function HeaderMobile({
     if (location.startsWith("/construction")) return "Construcción";
     if (location.startsWith("/finances")) return "Finanzas";
     if (location.startsWith("/recursos")) return "Recursos";
+    if (location.startsWith("/analysis")) return "Análisis";
     if (location.startsWith("/profile")) return "Perfil";
     if (location.startsWith("/settings")) return "Configuración";
     if (location.startsWith("/admin")) return "Administración";
@@ -51,6 +52,7 @@ export function HeaderMobile({
     if (location.startsWith("/construction")) return <HardHat className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/finances")) return <DollarSign className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/recursos")) return <BookOpen className="w-5 h-5 text-[var(--accent)]" />;
+    if (location.startsWith("/analysis")) return <BarChart3 className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/profile")) return <User className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/admin")) return <Crown className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/settings")) return <Settings className="w-5 h-5 text-[var(--accent)]" />;
