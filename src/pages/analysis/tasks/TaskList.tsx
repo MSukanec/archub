@@ -11,6 +11,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { AnalysisTaskRow } from '@/components/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -185,6 +186,36 @@ export default function TaskList() {
     });
   }, [groupingType]);
 
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'rubros', label: 'Agrupar por rubros' }
+    ];
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value as 'none' | 'rubros')}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   if (tasksLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -215,29 +246,7 @@ export default function TaskList() {
         />
       )}
       topBar={{
-        renderGroupingContent: () => (
-          <>
-            <div className="text-xs font-medium mb-2 block">Agrupar por</div>
-            <div className="space-y-1">
-              <Button
-                variant={groupingType === 'none' ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setGroupingType('none')}
-                className="w-full justify-start text-xs font-normal h-8"
-              >
-                Sin agrupar
-              </Button>
-              <Button
-                variant={groupingType === 'rubros' ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setGroupingType('rubros')}
-                className="w-full justify-start text-xs font-normal h-8"
-              >
-                Por rubros
-              </Button>
-            </div>
-          </>
-        ),
+        renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none'
       }}
       renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
