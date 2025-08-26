@@ -119,7 +119,7 @@ export default function TaskList() {
       label: 'Tarea',
       width: '52%',
       render: (task: any) => (
-        <span className="text-sm font-medium">{task.name_rendered || task.custom_name || 'Sin nombre'}</span>
+        <span className="text-sm font-medium">{task.custom_name || 'Sin nombre'}</span>
       )
     },
     {
@@ -186,7 +186,7 @@ export default function TaskList() {
               variant="ghost"
               size="sm"
               onClick={() => handleDelete(task)}
-              className="h-7 w-7 p-0"
+              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -219,7 +219,7 @@ export default function TaskList() {
     const duplicateTask = {
       ...task,
       id: undefined, // Remove ID so it creates a new task
-      name_rendered: `${task.name_rendered} - Copia`,
+      custom_name: `${task.custom_name} - Copia`,
       created_at: undefined, // Remove created_at
       updated_at: undefined  // Remove updated_at
     }
@@ -229,8 +229,9 @@ export default function TaskList() {
   const handleDelete = (task: any) => {
     showDeleteConfirmation({
       title: "Eliminar tarea",
-      description: `¿Estás seguro de que quieres eliminar "${task.name_rendered || 'esta tarea'}"?`,
-      itemName: task.name_rendered || 'esta tarea',
+      description: `¿Estás seguro de que quieres eliminar "${task.custom_name || 'esta tarea'}"?`,
+      itemName: task.custom_name || 'esta tarea',
+      dangerous: true,
       onConfirm: () => {
         // TODO: Implementar eliminación de tarea
         console.log('Eliminar tarea:', task.id)
