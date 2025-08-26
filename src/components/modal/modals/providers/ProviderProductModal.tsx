@@ -106,21 +106,42 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   }, [defaultCurrency, currentProviderProduct, currentPrice, form, organizationCurrencies.length]);
 
   const handleSubmit = async (data: FormData) => {
+    console.log('=== SUBMIT ===');
+    console.log('Form data:', data);
+    console.log('Default currency:', defaultCurrency);
+    console.log('All form values:', form.getValues());
+    
     if (!product?.id) return;
+    
+    // Si no hay currency_id, usar la moneda por defecto
+    if (!data.currency_id && defaultCurrency?.id) {
+      data.currency_id = defaultCurrency.id;
+      console.log('Using default currency:', defaultCurrency.id);
+    }
+    
+    if (!data.currency_id) {
+      console.error('No se pudo determinar la moneda');
+      return;
+    }
     
     setIsLoading(true);
     try {
       // Encontrar el símbolo de la moneda para el hook
       const selectedCurrency = currencies.find(c => c.id === data.currency_id);
+      console.log('Selected currency:', selectedCurrency);
       
-      // Actualizar el provider_code, moneda y precio usando el hook existente
-      await toggleProviderProduct.mutateAsync({
+      const requestData = {
         productId: product.id,
         isActive: true,
         providerCode: data.provider_code,
         currency: selectedCurrency?.symbol,
         price: data.amount || 0
-      });
+      };
+      
+      console.log('Sending request:', requestData);
+      
+      // Actualizar el provider_code, moneda y precio usando el hook existente
+      await toggleProviderProduct.mutateAsync(requestData);
       
       onClose();
     } catch (error) {
@@ -222,7 +243,10 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar"
-      onRightClick={form.handleSubmit(handleSubmit)}
+      onRightClick={() => {
+        console.log('Button clicked - form values:', form.getValues());
+        form.handleSubmit(handleSubmit)();
+      }}
       showLoadingSpinner={isLoading}
     />
   );
