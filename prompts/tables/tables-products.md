@@ -195,3 +195,20 @@ VISTA PRODUCTS_VIEW:
     "data_type": "text"
   }
 ]
+
+MATERIALIZED VIEW PRODUCT_AVG_PRICES:
+
+[
+  {
+    "column_name": "product_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "avg_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "providers_count",
+    "data_type": "bigint"
+  }
+]

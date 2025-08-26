@@ -46,6 +46,10 @@ export interface Product {
   is_system: boolean;
   // Campo calculado (si lo necesitamos)
   categoryHierarchy?: string;
+  category_hierarchy: string;
+  // Campos de precio promedio
+  avg_price?: number;     // Precio promedio del día
+  providers_count?: number; // Cantidad de proveedores
 }
 
 export interface NewProductData {
@@ -70,7 +74,7 @@ export function useProducts() {
         return []
       }
 
-      const { data, error } = await supabase
+      const { data: products, error } = await supabase
         .from('products_view')
         .select('*')
         .order('name')
@@ -80,9 +84,28 @@ export function useProducts() {
         throw error
       }
 
-      // Los datos se obtienen correctamente
+      // Obtener los precios promedio de la vista materializada
+      const { data: avgPrices, error: avgError } = await supabase
+        .from('product_avg_prices')
+        .select('product_id, avg_price, providers_count')
 
-      return data || []
+      if (avgError) {
+        console.error('Error fetching average prices:', avgError)
+        // Si hay error con precios promedio, continuar solo con productos
+        return products || []
+      }
+
+      // Combinar datos de productos con precios promedio
+      const productsWithAvgPrices = products?.map(product => {
+        const avgPriceData = avgPrices?.find(ap => ap.product_id === product.id)
+        return {
+          ...product,
+          avg_price: avgPriceData?.avg_price || null,
+          providers_count: avgPriceData?.providers_count || 0
+        }
+      }) || []
+
+      return productsWithAvgPrices
     },
     enabled: !!supabase
   })

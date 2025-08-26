@@ -197,17 +197,22 @@ export default function AnalysisMaterials() {
       )
     },
     {
-      key: 'default_price',
-      label: 'Precio',
-      width: '12%',
+      key: 'avg_price',
+      label: 'Precio Promedio',
+      width: '15%',
       render: (product: Product) => (
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col gap-1">
           <span className="text-sm font-mono">
-            {product.default_price !== null && product.default_price !== undefined ? 
-              `ARS ${product.default_price.toFixed(2)}` : 
+            {product.avg_price !== null && product.avg_price !== undefined ? 
+              `ARS ${product.avg_price.toFixed(2)}` : 
               '-'
             }
           </span>
+          {product.providers_count && product.providers_count > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {product.providers_count} proveedor{product.providers_count > 1 ? 'es' : ''}
+            </span>
+          )}
         </div>
       )
     },
@@ -319,7 +324,7 @@ export default function AnalysisMaterials() {
                     return hierarchy.split(' > ')[0];
                   })(),
                   unit: product.unit,
-                  price: product.default_price,
+                  price: product.avg_price || product.default_price,
                   image_url: product.image_url,
                   is_system: product.is_system || false,
                   created_at: product.created_at
