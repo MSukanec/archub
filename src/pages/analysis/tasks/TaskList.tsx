@@ -6,9 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/lib/supabase'
+import { useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { AnalysisTaskRow } from '@/components/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
@@ -18,37 +16,7 @@ import { cn } from '@/lib/utils'
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
-  
-  // Mutation para eliminar tarea
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const { error } = await supabase
-        .from('construction_tasks')
-        .delete()
-        .eq('id', taskId)
-      
-      if (error) {
-        console.error('Error deleting task:', error)
-        throw error
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['construction-tasks'] })
-      toast({
-        title: 'Tarea eliminada',
-        description: 'La tarea se eliminó correctamente.'
-      })
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al eliminar',
-        description: error.message || 'No se pudo eliminar la tarea.',
-        variant: 'destructive'
-      })
-    }
-  })
+  const deleteTaskMutation = useDeleteGeneratedTask()
   const { data: userData } = useCurrentUser()
   
   
