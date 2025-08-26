@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Package, Plus } from 'lucide-react'
 import MaterialList from './MaterialList'
 
 export default function Materials() {
   const { setSidebarContext } = useNavigationStore()
+  const { openModal } = useGlobalModalStore()
   const [activeTab, setActiveTab] = useState("lista")
 
   // Set sidebar context on mount
@@ -23,8 +25,7 @@ export default function Materials() {
   ]
 
   const handleNewMaterial = () => {
-    // TODO: Implementar modal para producto personalizado
-    console.log('Crear nuevo producto personalizado')
+    openModal('custom-product')
   }
 
   // Header configuration
