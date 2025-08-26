@@ -66,6 +66,9 @@ interface TableProps<T = any> {
     showSort?: boolean;
     renderSortContent?: () => ReactNode;
     isSortActive?: boolean;
+    showGrouping?: boolean;
+    renderGroupingContent?: () => ReactNode;
+    isGroupingActive?: boolean;
     showClearFilters?: boolean;
     onClearFilters?: () => void;
     showExport?: boolean;
@@ -362,6 +365,9 @@ export function Table<T = any>({
           showSort={topBar?.showSort}
           renderSortContent={topBar?.renderSortContent}
           isSortActive={topBar?.isSortActive}
+          showGrouping={topBar?.showGrouping}
+          renderGroupingContent={topBar?.renderGroupingContent}
+          isGroupingActive={topBar?.isGroupingActive}
           showClearFilters={topBar?.showClearFilters}
           onClearFilters={topBar?.onClearFilters}
           showExport={topBar?.showExport}

@@ -154,7 +154,7 @@ export function TableTopBar({
             </div>
           )}
 
-          {/* Botón de ordenamiento (solo icono) */}
+          {/* Botón de ordenamiento (ícono + texto) */}
           {showSort && renderSortContent && (
             <Popover>
               <PopoverTrigger asChild>
@@ -162,10 +162,12 @@ export function TableTopBar({
                   variant="ghost"
                   size="sm"
                   className={cn(
+                    "gap-2",
                     isSortActive ? "button-secondary-pressed" : ""
                   )}
                 >
                   <ArrowUpDown className="h-4 w-4" />
+                  <span className="text-xs">Ordenar</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-56" align="end">
@@ -174,7 +176,7 @@ export function TableTopBar({
             </Popover>
           )}
 
-          {/* Botón de filtros (solo icono) */}
+          {/* Botón de filtros (ícono + texto) */}
           {showFilter && renderFilterContent && (
             <Popover>
               <PopoverTrigger asChild>
@@ -182,10 +184,12 @@ export function TableTopBar({
                   variant="ghost"
                   size="sm"
                   className={cn(
+                    "gap-2",
                     isFilterActive ? "button-secondary-pressed" : ""
                   )}
                 >
                   <Filter className="h-4 w-4" />
+                  <span className="text-xs">Filtros</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-56" align="end">
@@ -194,7 +198,7 @@ export function TableTopBar({
             </Popover>
           )}
 
-          {/* Botón de agrupación (solo icono) */}
+          {/* Botón de agrupación (ícono + texto) */}
           {showGrouping && renderGroupingContent && (
             <Popover>
               <PopoverTrigger asChild>
@@ -202,11 +206,12 @@ export function TableTopBar({
                   variant="ghost"
                   size="sm"
                   className={cn(
+                    "gap-2",
                     isGroupingActive ? "button-secondary-pressed" : ""
                   )}
-                  title="Agrupar"
                 >
                   <Group className="h-4 w-4" />
+                  <span className="text-xs">Agrupar</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-56" align="end">
@@ -215,28 +220,30 @@ export function TableTopBar({
             </Popover>
           )}
 
-          {/* Botón de limpiar filtros (solo icono) */}
+          {/* Botón de limpiar filtros (ícono + texto) */}
           {showClearFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onClearFilters}
-              title="Limpiar filtros"
+              className="gap-2"
             >
               <X className="h-4 w-4" />
+              <span className="text-xs">Limpiar</span>
             </Button>
           )}
 
-          {/* Botón de exportar a Excel (solo icono) */}
+          {/* Botón de exportar a Excel (ícono + texto) */}
           {showExport && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onExport}
               disabled={isExporting}
-              title="Exportar a Excel"
+              className="gap-2"
             >
               <Download className="h-4 w-4" />
+              <span className="text-xs">Exportar</span>
             </Button>
           )}
 
