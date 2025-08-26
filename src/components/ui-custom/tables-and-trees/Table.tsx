@@ -85,6 +85,12 @@ interface TableProps<T = any> {
     onExport?: () => void;
     isExporting?: boolean;
     customActions?: ReactNode;
+    // 🆕 BOTONES DE MODO A LA IZQUIERDA
+    leftModeButtons?: {
+      options: { key: string; label: string }[];
+      activeMode?: string;
+      onModeChange?: (mode: string) => void;
+    };
   };
   // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
   headerActions?: {
@@ -214,29 +220,56 @@ export function Table<T = any>({
     const showClearFilters = topBar?.showClearFilters ?? true;
     const showExport = topBar?.showExport ?? false;
     
-    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showGrouping || showClearFilters || showExport;
+    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showGrouping || showClearFilters || showExport || topBar?.leftModeButtons?.options.length;
     
     if (!hasContent) return null;
 
     return (
       <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Lado izquierdo - Tabs (solo texto) */}
-          <div className="flex items-center gap-1">
-            {tabs.map((tab) => (
-              <Button
-                key={tab}
-                variant={topBar?.activeTab === tab ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => topBar?.onTabChange?.(tab)}
-                className={cn(
-                  "h-8 px-3 text-xs font-normal",
-                  topBar?.activeTab === tab ? "button-secondary-pressed hover:bg-secondary" : ""
-                )}
-              >
-                {tab}
-              </Button>
-            ))}
+          {/* Lado izquierdo - Botones de modo y Tabs */}
+          <div className="flex items-center gap-3">
+            {/* Botones de modo */}
+            {topBar?.leftModeButtons && (
+              <div className="flex items-center gap-1">
+                {topBar.leftModeButtons.options.map((option) => (
+                  <Button
+                    key={option.key}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => topBar.leftModeButtons?.onModeChange?.(option.key)}
+                    className={cn(
+                      "text-xs h-8 px-3",
+                      topBar.leftModeButtons?.activeMode === option.key
+                        ? "button-secondary-pressed hover:bg-secondary"
+                        : ""
+                    )}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+            
+            {/* Tabs */}
+            {tabs.length > 0 && (
+              <div className="flex items-center gap-1">
+                {tabs.map((tab) => (
+                  <Button
+                    key={tab}
+                    variant={topBar?.activeTab === tab ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => topBar?.onTabChange?.(tab)}
+                    className={cn(
+                      "h-8 px-3 text-xs font-normal",
+                      topBar?.activeTab === tab ? "button-secondary-pressed hover:bg-secondary" : ""
+                    )}
+                  >
+                    {tab}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Lado derecho - Búsqueda, Orden, Filtros */}

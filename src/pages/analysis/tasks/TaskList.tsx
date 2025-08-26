@@ -31,6 +31,9 @@ export default function TaskList() {
   
   // Estado para agrupación - por defecto "Por Rubros"
   const [groupingType, setGroupingType] = useState('rubros')
+  
+  // Estado para modo de vista - por defecto "Todas"
+  const [viewMode, setViewMode] = useState('all')
 
 
   // Configure mobile action bar - only set what's needed
@@ -80,9 +83,14 @@ export default function TaskList() {
     }
   }, [isMobile, groupingType])
 
-  // Filtrar tareas y agregar groupKey (sin búsqueda, solo agrupación)
+  // Filtrar tareas por modo de vista y agregar groupKey
   const filteredTasks = useMemo(() => {
-    let filtered = tasks
+    let filtered = tasks;
+    
+    // Filtrar por modo de vista
+    if (viewMode === 'organization') {
+      filtered = filtered.filter(task => !task.is_system && task.organization_id === userData?.organization?.id);
+    }
     
     return filtered.map(task => {
       let groupKey = '';
@@ -100,7 +108,7 @@ export default function TaskList() {
         groupKey
       };
     });
-  }, [tasks, groupingType]);
+  }, [tasks, groupingType, viewMode, userData?.organization?.id]);
 
   // Columnas base para la tabla
   const baseColumns = [
@@ -196,19 +204,22 @@ export default function TaskList() {
     }
   ]
 
-  // Seleccionar columnas según el tipo de agrupación
+  // Seleccionar columnas según el tipo de agrupación y modo de vista
   const columns = useMemo(() => {
-    // Para sin agrupar, usar todas las columnas base
-    if (groupingType === 'none') {
-      return baseColumns;
-    }
+    let filteredColumns = baseColumns;
     
     // Para agrupación por rubros, filtrar la columna de rubro
-    return baseColumns.filter(column => {
-      if (groupingType === 'rubros' && column.key === 'category') return false;
-      return true;
-    });
-  }, [groupingType]);
+    if (groupingType === 'rubros') {
+      filteredColumns = filteredColumns.filter(column => column.key !== 'category');
+    }
+    
+    // Para modo "Solo de la Organización", ocultar la columna TIPO
+    if (viewMode === 'organization') {
+      filteredColumns = filteredColumns.filter(column => column.key !== 'is_system');
+    }
+    
+    return filteredColumns;
+  }, [groupingType, viewMode]);
 
   const handleEdit = (task: any) => {
     openModal('task', { taskId: task.id })
@@ -299,6 +310,14 @@ export default function TaskList() {
         />
       )}
       topBar={{
+        leftModeButtons: {
+          options: [
+            { key: 'all', label: 'Todas' },
+            { key: 'organization', label: 'Solo de la Organización' }
+          ],
+          activeMode: viewMode,
+          onModeChange: setViewMode
+        },
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none'
       }}
