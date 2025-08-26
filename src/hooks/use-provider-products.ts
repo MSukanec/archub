@@ -151,12 +151,16 @@ export function useToggleProviderProduct() {
           if (existingPrice) {
             // Si existe y se proporcionan currency/price, actualizar
             if (currency && price !== undefined) {
+              console.log('Looking for currency symbol in UPDATE:', currency);
+              
               // Obtener currency_id basado en el símbolo
               const { data: currencyData, error: currencyError } = await supabase
                 .from('currencies')
-                .select('id')
+                .select('id, symbol, code')
                 .eq('symbol', currency)
                 .single();
+
+              console.log('Currency UPDATE search result:', { currencyData, currencyError });
 
               if (currencyError) {
                 console.warn('Currency not found:', currency);
@@ -185,15 +189,22 @@ export function useToggleProviderProduct() {
 
             // Si se proporcionan currency/price, usarlos
             if (currency && price !== undefined) {
+              console.log('Looking for currency symbol in INSERT:', currency);
+              
               const { data: currencyData, error: currencyError } = await supabase
                 .from('currencies')
-                .select('id')
+                .select('id, symbol, code')
                 .eq('symbol', currency)
                 .single();
+
+              console.log('Currency search result:', { currencyData, currencyError });
 
               if (!currencyError && currencyData) {
                 insertData.currency_id = currencyData.id;
                 insertData.price = price;
+                console.log('Final insertData:', insertData);
+              } else {
+                console.warn('Failed to find currency, inserting with NULL values');
               }
             }
 
