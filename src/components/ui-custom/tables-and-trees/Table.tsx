@@ -600,8 +600,10 @@ export function Table<T = any>({
     );
   }
 
-  // Si no hay datos, mostramos la estructura básica con el TableTopBar pero sin datos
-  const hasData = data.length > 0;
+  // Diferenciamos entre "sin datos originales" y "sin resultados de búsqueda"
+  const hasOriginalData = data.length > 0;
+  const hasFilteredData = filteredData.length > 0;
+  const hasActiveSearch = searchValue.length > 0;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -671,10 +673,20 @@ export function Table<T = any>({
 
         {/* Table Rows con agrupamiento */}
         <div>
-          {!hasData ? (
-            // Mostrar empty state cuando no hay datos
+          {!hasOriginalData ? (
+            // Mostrar empty state cuando no hay datos originales
             <div className="p-8 text-center">
               {emptyState}
+            </div>
+          ) : !hasFilteredData && hasActiveSearch ? (
+            // Mostrar mensaje específico cuando hay búsqueda activa pero sin resultados
+            <div className="p-8 text-center">
+              <div className="text-sm text-muted-foreground">
+                No se encontraron resultados para "{searchValue}"
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Intenta con términos diferentes o limpia la búsqueda
+              </div>
             </div>
           ) : groupBy ? (
             // Renderizado con agrupamiento
@@ -740,7 +752,7 @@ export function Table<T = any>({
                 ))}
               </Fragment>
             ))
-          ) : hasData ? (
+          ) : hasFilteredData ? (
             // Renderizado sin agrupamiento (comportamiento original)
             paginatedData.map((item, index) => (
               <div
@@ -781,7 +793,7 @@ export function Table<T = any>({
           ) : null}
           
           {/* 🆕 FILA DE TOTALES */}
-          {renderFooterRow && hasData && (
+          {renderFooterRow && hasFilteredData && (
             <div className={cn(
               "grid gap-4 px-4 py-3",
               mode === "budget" && "bg-[var(--table-header-bg)] text-[var(--table-header-fg)]",
@@ -799,9 +811,18 @@ export function Table<T = any>({
 
       {/* Mobile Card View */}
       <div className="lg:hidden">
-        {!hasData ? (
+        {!hasOriginalData ? (
           <div className="p-8 text-center">
             {emptyState}
+          </div>
+        ) : !hasFilteredData && hasActiveSearch ? (
+          <div className="p-8 text-center">
+            <div className="text-sm text-muted-foreground">
+              No se encontraron resultados para "{searchValue}"
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Intenta con términos diferentes o limpia la búsqueda
+            </div>
           </div>
         ) : paginatedData.map((item, index) =>
           renderCard ? (
