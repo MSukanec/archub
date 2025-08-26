@@ -268,18 +268,23 @@ export default function ProductList() {
       key: 'actions',
       label: '',
       width: '6%',
-      render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(product)}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-        </div>
-      )
+      render: (product: Product & { isSelected?: boolean }) => {
+        const isSelected = product.isSelected || false
+        return (
+          <div className="flex items-center gap-1">
+            {isSelected && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEdit(product)}
+                className="h-7 w-7 p-0"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        )
+      }
     }
   ]
   
