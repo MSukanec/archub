@@ -119,7 +119,7 @@ export default function TaskList() {
       label: 'Tarea',
       width: '52%',
       render: (task: any) => (
-        <span className="text-sm font-medium">{task.name_rendered}</span>
+        <span className="text-sm font-medium">{task.name_rendered || task.custom_name || 'Sin nombre'}</span>
       )
     },
     {
