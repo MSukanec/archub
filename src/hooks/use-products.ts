@@ -70,16 +70,64 @@ export function useProducts() {
         return []
       }
 
-      const { data, error } = await supabase
+      // Intentar primero con la vista
+      let { data, error } = await supabase
         .from('products_view')
         .select('*')
         .order('id')
+
+      // Si la vista no existe, usar la consulta anterior como fallback
+      if (error && error.code === 'PGRST116') {
+        console.warn('products_view no existe, usando consulta con joins como fallback')
+        
+        const fallbackQuery = await supabase
+          .from('products')
+          .select(`
+            *,
+            material:materials(
+              id, name, category_id,
+              category:material_categories!materials_category_id_fkey(id, name, parent_id)
+            ),
+            brand:brands(id, name),
+            unit_presentation:unit_presentations!unit_id(
+              id, name, equivalence,
+              unit:units(id, name)
+            )
+          `)
+          .order('name')
+
+        if (fallbackQuery.error) {
+          console.error('Error fetching products (fallback):', fallbackQuery.error)
+          throw fallbackQuery.error
+        }
+
+        // Build category hierarchy for each product
+        const productsWithHierarchy = await Promise.all(
+          (fallbackQuery.data || []).map(async (product: any) => {
+            const categoryHierarchy = product.material?.category_id 
+              ? await buildCategoryHierarchy(product.material.category_id)
+              : 'Sin categoría';
+            
+            return {
+              ...product,
+              categoryHierarchy,
+              // Mapear a la estructura de la vista
+              material: product.material?.name || 'Sin material',
+              brand: product.brand?.name || 'Sin marca',
+              unit: product.unit_presentation?.name || 'Sin unidad'
+            };
+          })
+        );
+
+        return productsWithHierarchy
+      }
 
       if (error) {
         console.error('Error fetching products:', error)
         throw error
       }
 
+      console.log('Datos desde products_view:', data)
       return data || []
     },
     enabled: !!supabase
