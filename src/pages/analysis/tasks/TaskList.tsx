@@ -97,7 +97,7 @@ export default function TaskList() {
       
       switch (groupingType) {
         case 'rubros':
-          groupKey = task.category || 'Sin rubro';
+          groupKey = task.division || 'Sin rubro';
           break;
         default:
           groupKey = '';
@@ -118,7 +118,7 @@ export default function TaskList() {
       width: '18%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
-          {task.category || 'Sin rubro'}
+          {task.division || 'Sin rubro'}
         </Badge>
       )
     },
