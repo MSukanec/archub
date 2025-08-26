@@ -28,13 +28,33 @@ export function TaskList({
   onEditTask, 
   onDeleteTask 
 }: TaskListProps) {
+  const [searchValue, setSearchValue] = useState('')
+  const [sortBy, setSortBy] = useState('created_at')
   const [groupingType, setGroupingType] = useState('rubros-phases')
   const [isExporting, setIsExporting] = useState(false)
   const { openModal } = useGlobalModalStore()
 
-  // Filtrar tareas según búsqueda y agregar groupKey
+  // Filtrar tareas según búsqueda
   const filteredTasks = useMemo(() => {
-    return tasks.map(task => {
+    let filtered = tasks;
+    
+    // Aplicar filtro de búsqueda si existe
+    if (searchValue.trim()) {
+      const searchTerm = searchValue.toLowerCase();
+      filtered = filtered.filter(task => {
+        const displayName = task.custom_name || task.task?.display_name || '';
+        const divisionName = task.division_name || '';
+        const phaseName = task.phase_name || '';
+        
+        return (
+          displayName.toLowerCase().includes(searchTerm) ||
+          divisionName.toLowerCase().includes(searchTerm) ||
+          phaseName.toLowerCase().includes(searchTerm)
+        );
+      });
+    }
+    
+    return filtered.map(task => {
       let groupKey = '';
       
       switch (groupingType) {
@@ -68,7 +88,7 @@ export function TaskList({
         groupKey
       };
     });
-  }, [tasks, groupingType]);
+  }, [tasks, searchValue, groupingType]);
 
   // Para agrupación por tarea, simplemente usar filteredTasks con groupKey
   const finalTasks = useMemo(() => {
@@ -275,6 +295,13 @@ export function TaskList({
     )
   }
 
+  // Función para limpiar filtros
+  const clearFilters = () => {
+    setSearchValue('')
+    setSortBy('created_at')
+    setGroupingType('rubros-phases')
+  }
+
   return (
     <Table
       columns={columns}
@@ -282,21 +309,24 @@ export function TaskList({
       isLoading={isLoading}
       mode="construction"
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+      searchPlaceholder="Buscar por tarea, rubro o fase..."
+      filterButton={{
+        options: [
+          { value: 'none', label: 'Sin Agrupar' },
+          { value: 'phases', label: 'Por Fases' },
+          { value: 'rubros', label: 'Por Rubros' },
+          { value: 'tasks', label: 'Por Tareas' },
+          { value: 'rubros-phases', label: 'Por Fases y Rubros' },
+          { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
+        ],
+        value: groupingType,
+        onValueChange: setGroupingType,
+        placeholder: 'Agrupar por...',
+        clearFilters
+      }}
       topBar={{
-        tabs: ['Sin Agrupar', 'Por Fases', 'Por Rubros', 'Por Tareas', 'Por Fases y Rubros', 'Por Rubros y Tareas'],
-        activeTab: groupingType === 'none' ? 'Sin Agrupar' : 
-                  groupingType === 'phases' ? 'Por Fases' :
-                  groupingType === 'rubros' ? 'Por Rubros' :
-                  groupingType === 'tasks' ? 'Por Tareas' :
-                  groupingType === 'rubros-phases' ? 'Por Fases y Rubros' : 'Por Rubros y Tareas',
-        onTabChange: (tab: string) => {
-          if (tab === 'Sin Agrupar') setGroupingType('none')
-          else if (tab === 'Por Fases') setGroupingType('phases')
-          else if (tab === 'Por Rubros') setGroupingType('rubros')
-          else if (tab === 'Por Tareas') setGroupingType('tasks')
-          else if (tab === 'Por Fases y Rubros') setGroupingType('rubros-phases')
-          else setGroupingType('phases-rubros')
-        },
         showExport: true,
         onExport: handleExportToExcel,
         isExporting: isExporting,
