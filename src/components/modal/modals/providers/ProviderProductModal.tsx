@@ -97,8 +97,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     } else {
       // Si no hay precio, usar moneda por defecto (UUID de currencies, no de organization_currencies)
       if (defaultCurrency?.id) {
-        console.log('Setting currency_id to:', defaultCurrency.id);
-        form.setValue('currency_id', defaultCurrency.id);
+          form.setValue('currency_id', defaultCurrency.id);
         // Forzar trigger para que se actualice el CurrencyAmountField
         form.trigger('currency_id');
       }
@@ -107,17 +106,11 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   }, [defaultCurrency, currentProviderProduct, currentPrice, form, organizationCurrencies.length]);
 
   const handleSubmit = async (data: FormData) => {
-    console.log('=== SUBMIT ===');
-    console.log('Form data:', data);
-    console.log('Default currency:', defaultCurrency);
-    console.log('All form values:', form.getValues());
-    
     if (!product?.id) return;
     
     // Si no hay currency_id, usar la moneda por defecto
     if (!data.currency_id && defaultCurrency?.id) {
       data.currency_id = defaultCurrency.id;
-      console.log('Using default currency:', defaultCurrency.id);
     }
     
     if (!data.currency_id) {
@@ -127,19 +120,15 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     
     setIsLoading(true);
     try {
-      // Encontrar el símbolo de la moneda para el hook
-      const selectedCurrency = currencies.find(c => c.id === data.currency_id);
-      console.log('Selected currency:', selectedCurrency);
-      
       const requestData = {
         productId: product.id,
         isActive: true,
         providerCode: data.provider_code,
-        currency: selectedCurrency?.symbol,
+        currencyId: data.currency_id, // ENVIAR EL UUID DIRECTAMENTE
         price: data.amount || 0
       };
       
-      console.log('Sending request:', requestData);
+      console.log('Guardando producto con:', requestData);
       
       // Actualizar el provider_code, moneda y precio usando el hook existente
       await toggleProviderProduct.mutateAsync(requestData);
@@ -185,7 +174,13 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
 
       {/* Formulario */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit(handleSubmit)(e);
+          }} 
+          className="space-y-4"
+        >
           <div className="grid grid-cols-2 gap-4">
             {/* Campo de Código */}
             <FormField
@@ -244,10 +239,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar"
-      onRightClick={() => {
-        console.log('Button clicked - form values:', form.getValues());
-        form.handleSubmit(handleSubmit)();
-      }}
+      onRightClick={form.handleSubmit(handleSubmit)}
       showLoadingSpinner={isLoading}
     />
   );

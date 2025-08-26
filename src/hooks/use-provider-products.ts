@@ -65,14 +65,14 @@ export function useToggleProviderProduct() {
   const organizationId = userData?.organization?.id;
 
   return useMutation({
-    mutationFn: async ({ productId, isActive, providerCode, currency, price }: { 
+    mutationFn: async ({ productId, isActive, providerCode, currencyId, price }: { 
       productId: string; 
       isActive: boolean; 
       providerCode?: string;
-      currency?: string;
+      currencyId?: string;
       price?: number;
     }) => {
-      console.log('useToggleProviderProduct received:', { productId, isActive, providerCode, currency, price });
+      console.log('useToggleProviderProduct received:', { productId, isActive, providerCode, currencyId, price });
       
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
@@ -149,34 +149,23 @@ export function useToggleProviderProduct() {
           }
 
           if (existingPrice) {
-            // Si existe y se proporcionan currency/price, actualizar
-            if (currency && price !== undefined) {
-              console.log('Looking for currency symbol in UPDATE:', currency);
+            // Si existe y se proporcionan currencyId/price, actualizar
+            if (currencyId && price !== undefined) {
+              console.log('Updating price with currencyId:', currencyId);
               
-              // Obtener currency_id basado en el símbolo
-              const { data: currencyData, error: currencyError } = await supabase
-                .from('currencies')
-                .select('id, symbol, code')
-                .eq('symbol', currency)
-                .single();
+              const { error: priceUpdateError } = await supabase
+                .from('product_prices')
+                .update({
+                  currency_id: currencyId,
+                  price: price,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', existingPrice.id);
 
-              console.log('Currency UPDATE search result:', { currencyData, currencyError });
-
-              if (currencyError) {
-                console.warn('Currency not found:', currency);
+              if (priceUpdateError) {
+                console.warn('Error updating price:', priceUpdateError);
               } else {
-                const { error: priceUpdateError } = await supabase
-                  .from('product_prices')
-                  .update({
-                    currency_id: currencyData.id,
-                    price: price,
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('id', existingPrice.id);
-
-                if (priceUpdateError) {
-                  console.warn('Error updating price:', priceUpdateError);
-                }
+                console.log('Price updated successfully');
               }
             }
           } else {
@@ -187,25 +176,12 @@ export function useToggleProviderProduct() {
               price: null
             };
 
-            // Si se proporcionan currency/price, usarlos
-            if (currency && price !== undefined) {
-              console.log('Looking for currency symbol in INSERT:', currency);
-              
-              const { data: currencyData, error: currencyError } = await supabase
-                .from('currencies')
-                .select('id, symbol, code')
-                .eq('symbol', currency)
-                .single();
-
-              console.log('Currency search result:', { currencyData, currencyError });
-
-              if (!currencyError && currencyData) {
-                insertData.currency_id = currencyData.id;
-                insertData.price = price;
-                console.log('Final insertData:', insertData);
-              } else {
-                console.warn('Failed to find currency, inserting with NULL values');
-              }
+            // Si se proporcionan currencyId/price, usarlos
+            if (currencyId && price !== undefined) {
+              console.log('Inserting price with currencyId:', currencyId);
+              insertData.currency_id = currencyId;
+              insertData.price = price;
+              console.log('Final insertData:', insertData);
             }
 
             const { error: priceInsertError } = await supabase
