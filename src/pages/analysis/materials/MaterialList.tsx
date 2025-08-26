@@ -150,7 +150,7 @@ export default function MaterialList() {
               variant="ghost"
               size="sm"
               onClick={() => window.open(product.url, '_blank')}
-              className="h-7 px-2 text-blue-600 hover:text-blue-700"
+              className="h-7 px-2"
             >
               <ExternalLink className="h-3 w-3 mr-1" />
               Link
@@ -253,7 +253,7 @@ export default function MaterialList() {
             variant="ghost"
             size="sm"
             onClick={() => handleDuplicate(product)}
-            className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+            className="h-7 w-7 p-0"
           >
             <Copy className="h-3 w-3" />
           </Button>
@@ -261,7 +261,7 @@ export default function MaterialList() {
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(product)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+            className="h-7 w-7 p-0"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
