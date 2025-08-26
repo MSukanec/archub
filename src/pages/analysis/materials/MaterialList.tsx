@@ -183,9 +183,9 @@ export default function MaterialList() {
 
   // Filter content component
   const renderFilterContent = () => (
-    <div className="space-y-4 p-4 w-80">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Categoría</label>
+    <>
+      <div>
+        <label className="text-xs font-medium mb-2 block">Categoría</label>
         <ComboBoxWriteField
           value={filterByCategory}
           onValueChange={setFilterByCategory}
@@ -198,8 +198,8 @@ export default function MaterialList() {
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Material</label>
+      <div>
+        <label className="text-xs font-medium mb-2 block">Material</label>
         <ComboBoxWriteField
           value={filterByMaterial}
           onValueChange={setFilterByMaterial}
@@ -212,8 +212,8 @@ export default function MaterialList() {
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Marca</label>
+      <div>
+        <label className="text-xs font-medium mb-2 block">Marca</label>
         <ComboBoxWriteField
           value={filterByBrand}
           onValueChange={setFilterByBrand}
@@ -225,7 +225,7 @@ export default function MaterialList() {
           className="w-full"
         />
       </div>
-    </div>
+    </>
   );
 
   // Base columns definition
