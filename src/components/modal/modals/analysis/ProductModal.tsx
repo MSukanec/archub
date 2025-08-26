@@ -33,6 +33,7 @@ const productSchema = z.object({
   unit_presentation_id: z.string().min(1, 'La unidad de venta es requerida'),
   default_price: z.coerce.number().optional(),
   currency_id: z.string().optional(),
+  default_provider: z.string().optional(),
   url: z.string().optional(),
   image_url: z.string().optional(),
 })
@@ -85,6 +86,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       unit_presentation_id: '',
       default_price: undefined,
       currency_id: '',
+      default_provider: '',
       url: '',
       image_url: '',
     },
@@ -103,8 +105,9 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
         image_url: data.image_url || undefined,
         url: data.url || undefined,
         default_price: data.default_price || undefined,
-        default_provider: undefined,
+        default_provider: data.default_provider || undefined,
         organization_id: userData?.organization?.id,
+        is_system: false,
       }
 
       await createMutation.mutateAsync(productData)
@@ -287,6 +290,24 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
             />
 
           </div>
+
+          {/* Proveedor - Ancho completo */}
+          <FormField
+            control={form.control}
+            name="default_provider"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proveedor (Opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Nombre del proveedor principal"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Link e Imagen - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

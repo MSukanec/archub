@@ -62,6 +62,8 @@ export interface NewProductData {
   url?: string;
   default_price?: number;
   default_provider?: string;
+  organization_id?: string;
+  is_system?: boolean;
 }
 
 export function useProducts() {
