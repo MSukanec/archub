@@ -28,23 +28,24 @@ async function buildCategoryHierarchy(categoryId: string): Promise<string> {
 }
 
 export interface Product {
+  // Campos directos de la vista products_view
   id: string;
-  material?: string;  // Ahora viene como string desde la vista
-  brand?: string;     // Ahora viene como string desde la vista
-  unit?: string;      // Ahora viene como string desde la vista
+  name: string;
+  description?: string;
   url?: string;
   image_url?: string;
-  is_system?: boolean;
-  // Campos que necesitamos agregar a la vista
-  name?: string;
-  description?: string;
-  default_price?: number;
+  created_at: string;
+  material_id: string;
+  unit_id: string;
+  brand_id?: string;
   default_provider?: string;
-  created_at?: string;
-  material_id?: string;  // Para mantener compatibilidad
-  brand_id?: string;     // Para mantener compatibilidad
-  unit_id?: string;      // Para mantener compatibilidad
-  categoryHierarchy?: string; // Lo calculamos si es necesario
+  default_price?: number;
+  material: string;       // Nombre del material (desde join)
+  brand?: string;         // Nombre de la marca (desde join)
+  unit: string;           // Nombre de la unidad (desde join)
+  is_system: boolean;
+  // Campo calculado (si lo necesitamos)
+  categoryHierarchy?: string;
 }
 
 export interface NewProductData {

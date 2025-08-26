@@ -135,11 +135,11 @@ VISTA PRODUCTS_VIEW:
     "data_type": "uuid"
   },
   {
-    "column_name": "material",
+    "column_name": "name",
     "data_type": "text"
   },
   {
-    "column_name": "brand",
+    "column_name": "description",
     "data_type": "text"
   },
   {
@@ -148,6 +148,38 @@ VISTA PRODUCTS_VIEW:
   },
   {
     "column_name": "image_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "material_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "brand_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "default_provider",
+    "data_type": "text"
+  },
+  {
+    "column_name": "default_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "material",
+    "data_type": "text"
+  },
+  {
+    "column_name": "brand",
     "data_type": "text"
   },
   {
