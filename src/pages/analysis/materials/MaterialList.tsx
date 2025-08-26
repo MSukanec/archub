@@ -103,7 +103,7 @@ export default function MaterialList() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '16%',
+      width: '18%',
       render: (product: Product) => (
         <span className="text-sm font-medium">
           {(() => {
@@ -117,7 +117,7 @@ export default function MaterialList() {
     {
       key: 'material',
       label: 'Material',
-      width: '20%',
+      width: '25%',
       render: (product: Product) => (
         <div className="flex flex-col">
           <span className="text-sm font-semibold">
@@ -130,19 +130,9 @@ export default function MaterialList() {
       )
     },
     {
-      key: 'brand',
-      label: 'Marca',
-      width: '15%',
-      render: (product: Product) => (
-        <span className="text-sm font-medium">
-          {product.brand || 'Sin marca'}
-        </span>
-      )
-    },
-    {
       key: 'unit',
       label: 'Unidad',
-      width: '10%',
+      width: '12%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit || 'N/A'}
