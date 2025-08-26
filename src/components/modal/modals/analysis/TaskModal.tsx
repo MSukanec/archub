@@ -20,7 +20,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 
 import { Zap, Plus, Trash2, FileText, Settings, Package, Edit2 } from 'lucide-react'
 
@@ -330,9 +329,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         }
       }
       
-      if (actualTask.is_completed !== undefined) {
-        setIsCompleted(actualTask.is_completed)
-      }
+      // Always keep is_completed as false for analysis tasks
       
       // Load task_division_id if exists - CRITICAL FIX
       if (actualTask.task_division_id) {
@@ -437,7 +434,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           unit_id: unitId || null,
           task_template_id: null,
           task_division_id: taskDivisionId || null,
-          is_completed: isCompleted
+          is_completed: false // Always false for analysis tasks
         }
         
         console.log('🔧 Updating task with data:', updateData)
@@ -474,7 +471,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           task_division_id: taskDivisionId || null,
           organization_id: userData.organization.id, // SET TO ORGANIZATION ID for analysis tasks
           is_system: false, // SET TO FALSE for analysis tasks
-          is_completed: isCompleted
+          is_completed: false // Always false for analysis tasks
         }
         
         console.log('🔧 Creating task with data:', newTask)
@@ -604,19 +601,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               onChange={(e) => setCustomName(e.target.value)}
               placeholder="Nombre personalizado para la tarea..."
               rows={3}
-            />
-          </div>
-          
-          {/* Task Completion Status - moved here before materials */}
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="is-completed">Tarea Completada</Label>
-              <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
-            </div>
-            <Switch
-              id="is-completed"
-              checked={isCompleted}
-              onCheckedChange={setIsCompleted}
             />
           </div>
         </div>
