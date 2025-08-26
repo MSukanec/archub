@@ -117,7 +117,7 @@ export default function ProductList() {
     {
       key: 'selected',
       label: '',
-      width: '4%',
+      width: '3%',
       render: (product: Product & { isSelected?: boolean }) => {
         const isSelected = product.isSelected || false
         return (
@@ -134,7 +134,7 @@ export default function ProductList() {
     {
       key: 'provider_code',
       label: 'Código',
-      width: '10%',
+      width: '8%',
       render: (product: Product & { providerCode?: string }) => (
         <span className="text-xs font-mono text-muted-foreground">
           {product.providerCode || '-'}
@@ -144,7 +144,7 @@ export default function ProductList() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '16%',
+      width: '14%',
       render: (product: Product) => (
         <span className="text-xs font-medium">
           {(() => {
@@ -158,7 +158,7 @@ export default function ProductList() {
     {
       key: 'material',
       label: 'Material',
-      width: '16%',
+      width: '14%',
       render: (product: Product) => (
         <span className="text-xs font-medium">
           {product.material?.name || 'Sin material'}
@@ -168,7 +168,7 @@ export default function ProductList() {
     {
       key: 'brand',
       label: 'Marca',
-      width: '12%',
+      width: '10%',
       render: (product: Product) => (
         <span className="text-xs font-medium">
           {product.brand?.name || 'Sin marca'}
@@ -178,7 +178,7 @@ export default function ProductList() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '18%',
+      width: '20%',
       render: (product: Product) => (
         <span className="text-xs font-medium">{product.name}</span>
       )
@@ -186,7 +186,7 @@ export default function ProductList() {
     {
       key: 'unit',
       label: 'Unidad',
-      width: '11%',
+      width: '9%',
       render: (product: Product) => (
         <Badge variant="secondary" className="text-xs">
           {product.unit_presentation?.name || 'N/A'}
@@ -196,7 +196,7 @@ export default function ProductList() {
     {
       key: 'url',
       label: 'Link',
-      width: '6%',
+      width: '3%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -217,7 +217,7 @@ export default function ProductList() {
     {
       key: 'image',
       label: 'Img',
-      width: '5%',
+      width: '3%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -255,7 +255,7 @@ export default function ProductList() {
     {
       key: 'price',
       label: 'Precio',
-      width: '12%',
+      width: '10%',
       render: (product: Product & { providerPrice?: number; providerCurrency?: string; isSelected?: boolean }) => {
         // Solo mostrar el precio específico del proveedor, nunca el precio global
         const displayPrice = product.providerPrice
@@ -276,7 +276,7 @@ export default function ProductList() {
     {
       key: 'actions',
       label: '',
-      width: '6%',
+      width: '8%',
       render: (product: Product & { isSelected?: boolean }) => {
         const isSelected = product.isSelected || false
         return (
