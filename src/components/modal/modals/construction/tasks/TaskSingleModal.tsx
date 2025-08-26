@@ -25,7 +25,7 @@ const singleTaskSchema = z.object({
 
 type SingleTaskFormData = z.infer<typeof singleTaskSchema>;
 
-interface ConstructionSingleTaskModalProps {
+interface TaskSingleModalProps {
   modalData: {
     projectId: string;
     organizationId: string;
@@ -36,10 +36,10 @@ interface ConstructionSingleTaskModalProps {
   onClose: () => void;
 }
 
-export function ConstructionSingleTaskModal({ 
+export function TaskSingleModal({ 
   modalData, 
   onClose 
-}: ConstructionSingleTaskModalProps) {
+}: TaskSingleModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState<string>('todos');
@@ -75,23 +75,21 @@ export function ConstructionSingleTaskModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Hook para cargar TODAS las tareas de la librería parametrica
+  // Hook para cargar TODAS las tareas de la librería parametrica usando la vista actualizada
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['task-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: allTasks, error } = await supabase
-        .from('task_view')
+        .from('construction_tasks_view')
         .select('*')
-        .order('name_rendered', { ascending: true });
+        .order('custom_name', { ascending: true });
       
       if (error) {
         console.error('❌ Error cargando librería de tareas:', error);
         throw error;
       }
-      
-
       
       return allTasks || [];
     },
@@ -126,13 +124,13 @@ export function ConstructionSingleTaskModal({
     }
   }, [isEditing, modalData.editingTask, form]);
 
-  // Obtener categorías únicas para el filtro
+  // Obtener divisiones únicas para el filtro (usando division de la vista)
   const uniqueRubros = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
     
     const rubros = tasks
-      .filter(task => task.element_category_name)
-      .map(task => task.element_category_name)
+      .filter(task => task.division)
+      .map(task => task.division)
       .filter((rubro, index, self) => self.indexOf(rubro) === index)
       .sort();
     
@@ -145,19 +143,19 @@ export function ConstructionSingleTaskModal({
     
     let filtered = tasks;
     
-    // Filtro por búsqueda de texto
+    // Filtro por búsqueda de texto (usando custom_name)
     if (searchQuery.trim()) {
       const searchLower = searchQuery.toLowerCase();
       filtered = filtered.filter(task => 
-        task.name_rendered?.toLowerCase().includes(searchLower) ||
+        task.custom_name?.toLowerCase().includes(searchLower) ||
         task.code?.toLowerCase().includes(searchLower) ||
-        task.element_category_name?.toLowerCase().includes(searchLower)
+        task.division?.toLowerCase().includes(searchLower)
       );
     }
     
-    // Filtro por rubro
+    // Filtro por rubro (usando division)
     if (rubroFilter && rubroFilter.trim() && rubroFilter !== 'todos') {
-      filtered = filtered.filter(task => task.element_category_name === rubroFilter);
+      filtered = filtered.filter(task => task.division === rubroFilter);
     }
     
     return filtered;
@@ -169,10 +167,10 @@ export function ConstructionSingleTaskModal({
     form.setValue('task_id', taskId);
     
     // Encontrar la tarea seleccionada para obtener su unidad
-    const selectedTask = tasks.find(task => task.id === taskId);
-    if (selectedTask?.unit_name) {
+    const selectedTask = tasks.find(task => task.task_id === taskId);
+    if (selectedTask?.unit) {
       // Actualizar el placeholder del campo cantidad para mostrar la unidad
-      setSelectedTaskUnit(selectedTask.unit_name);
+      setSelectedTaskUnit(selectedTask.unit);
     }
   };
 
@@ -224,14 +222,14 @@ export function ConstructionSingleTaskModal({
       <div>
         <h4 className="font-medium">Tarea</h4>
         <p className="text-muted-foreground mt-1">
-          {modalData.editingTask.task?.display_name || modalData.editingTask.task_code || 'Sin tarea'}
+          {modalData.editingTask.custom_name || modalData.editingTask.task_code || 'Sin tarea'}
         </p>
       </div>
       
       <div>
         <h4 className="font-medium">Código</h4>
         <p className="text-muted-foreground mt-1">
-          {modalData.editingTask.task_code || 'Sin código'}
+          {modalData.editingTask.code || 'Sin código'}
         </p>
       </div>
 
@@ -342,28 +340,28 @@ export function ConstructionSingleTaskModal({
             ) : (
               filteredTasks.map((task) => (
                 <div 
-                  key={task.id}
-                  onClick={() => handleTaskSelect(task.id)}
+                  key={task.task_id}
+                  onClick={() => handleTaskSelect(task.task_id)}
                   className={`px-4 py-3 cursor-pointer transition-colors duration-150 grid grid-cols-[1fr,auto] gap-4 items-start ${
-                    selectedTaskId === task.id 
+                    selectedTaskId === task.task_id 
                       ? 'bg-accent/10 border-l-2 border-l-accent' 
                       : 'hover:bg-muted/30'
                   }`}
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-tight text-foreground">
-                      {task.name_rendered || task.code || 'Sin nombre'}
+                      {task.custom_name || task.code || 'Sin nombre'}
                     </p>
-                    {task.element_category_name && (
+                    {task.division && (
                       <p className="text-xs text-muted-foreground">
-                        {task.element_category_name}
+                        {task.division}
                       </p>
                     )}
                   </div>
                   <div className="flex-shrink-0 pt-0.5">
-                    {task.unit_name && (
+                    {task.unit && (
                       <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded">
-                        {task.unit_name}
+                        {task.unit}
                       </span>
                     )}
                   </div>
