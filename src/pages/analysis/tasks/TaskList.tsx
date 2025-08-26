@@ -18,29 +18,19 @@ export default function TaskList() {
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
   
-  // Search state
-  const [searchValue, setSearchValue] = useState("")
   
   // Mobile action bar
   const { 
     setActions, 
     setShowActionBar, 
     clearActions, 
-    setFilterConfig,
-    searchValue: mobileSearchValue,
-    setSearchValue: setMobileSearchValue
+    setFilterConfig
   } = useActionBarMobile()
   const isMobile = useMobile()
   
   // Estado para agrupación - por defecto "Por Rubros"
   const [groupingType, setGroupingType] = useState('rubros')
 
-  // Sync search values between mobile and desktop
-  useEffect(() => {
-    if (isMobile && mobileSearchValue !== searchValue) {
-      setSearchValue(mobileSearchValue)
-    }
-  }, [mobileSearchValue, isMobile])
 
   // Configure mobile action bar - only set what's needed
   useEffect(() => {
@@ -89,20 +79,9 @@ export default function TaskList() {
     }
   }, [isMobile, groupingType])
 
-  // Filtrar tareas y agregar groupKey con búsqueda
+  // Filtrar tareas y agregar groupKey (sin búsqueda, solo agrupación)
   const filteredTasks = useMemo(() => {
     let filtered = tasks
-    
-    // Aplicar filtro de búsqueda
-    if (searchValue.trim()) {
-      const searchTerm = searchValue.toLowerCase()
-      filtered = filtered.filter(task => 
-        task.unit_name?.toLowerCase().includes(searchTerm) ||
-        task.element_category_name?.toLowerCase().includes(searchTerm) ||
-        task.labor_cost?.toString().includes(searchTerm) ||
-        task.material_cost?.toString().includes(searchTerm)
-      )
-    }
     
     return filtered.map(task => {
       let groupKey = '';
@@ -120,7 +99,7 @@ export default function TaskList() {
         groupKey
       };
     });
-  }, [tasks, groupingType, searchValue]);
+  }, [tasks, groupingType]);
 
   // Columnas base para la tabla
   const baseColumns = [
@@ -206,6 +185,14 @@ export default function TaskList() {
     });
   }, [groupingType]);
 
+  if (tasksLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--accent)]" />
+      </div>
+    )
+  }
+
   if (tasks.length === 0) {
     return (
       <EmptyState
@@ -220,7 +207,6 @@ export default function TaskList() {
     <Table
       columns={columns}
       data={filteredTasks}
-      isLoading={tasksLoading}
       groupBy={groupingType === 'none' ? undefined : 'groupKey'}
       renderCard={(task: any) => (
         <AnalysisTaskRow
@@ -229,12 +215,30 @@ export default function TaskList() {
         />
       )}
       topBar={{
-        tabs: ['Sin Agrupar', 'Por Rubros'],
-        activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',
-        onTabChange: (tab: string) => {
-          if (tab === 'Sin Agrupar') setGroupingType('none')
-          else if (tab === 'Por Rubros') setGroupingType('rubros')
-        }
+        renderGroupingContent: () => (
+          <>
+            <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+            <div className="space-y-1">
+              <Button
+                variant={groupingType === 'none' ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setGroupingType('none')}
+                className="w-full justify-start text-xs font-normal h-8"
+              >
+                Sin agrupar
+              </Button>
+              <Button
+                variant={groupingType === 'rubros' ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setGroupingType('rubros')}
+                className="w-full justify-start text-xs font-normal h-8"
+              >
+                Por rubros
+              </Button>
+            </div>
+          </>
+        ),
+        isGroupingActive: groupingType !== 'none'
       }}
       renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
         <>
