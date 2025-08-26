@@ -700,25 +700,33 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     </div>
   );
 
+  // Header content
+  const headerContent = (
+    <FormModalHeader 
+      title={isEditingMode ? "Editar Tarea" : "Nueva Tarea Personalizada"}
+      description={isEditingMode ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
+      icon={Zap}
+    />
+  );
+
+  // Footer content
+  const footerContent = (
+    <FormModalFooter
+      leftLabel="Cancelar"
+      onLeftClick={onClose}
+      rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
+      onRightClick={handleSubmit}
+      showLoadingSpinner={isLoading}
+    />
+  );
+
   return (
     <FormModalLayout
-      headerContent={
-        <FormModalHeader 
-          title={isEditingMode ? "Editar Tarea Personalizada" : (isDuplicating ? "Duplicar Tarea Personalizada" : "Crear Tarea Personalizada")}
-          icon={FileText}
-        />
-      }
-      footerContent={
-        <FormModalFooter 
-          leftLabel="Cancelar"
-          onLeftClick={onClose}
-          rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
-          onRightClick={handleSubmit}
-          showLoadingSpinner={isLoading}
-        />
-      }
-      editPanel={editPanel}
+      columns={1}
       viewPanel={viewPanel}
+      editPanel={editPanel}
+      headerContent={headerContent}
+      footerContent={footerContent}
       onClose={onClose}
       isEditing={true} // Siempre abrir en modo edición
     />
