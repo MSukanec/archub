@@ -306,13 +306,13 @@ export function TaskList({
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'Sin Agrupar' },
-      { value: 'phases', label: 'Por Fases' },
-      { value: 'rubros', label: 'Por Rubros' },
-      { value: 'tasks', label: 'Por Tareas' },
-      { value: 'rubros-phases', label: 'Por Fases y Rubros' },
-      { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
-    ]
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'phases', label: 'Agrupar por fases' },
+      { value: 'rubros', label: 'Agrupar por rubros' },
+      { value: 'tasks', label: 'Agrupar por tareas' },
+      { value: 'rubros-phases', label: 'Agrupar por fases y rubros' },
+      { value: 'phases-rubros', label: 'Agrupar por rubros y tareas' }
+    ];
 
     return (
       <>
@@ -324,25 +324,18 @@ export function TaskList({
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setGroupingType(option.value)}
-              className="w-full justify-start text-xs font-normal h-8"
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
             >
               {option.label}
             </Button>
           ))}
         </div>
-        <div className="mt-3 pt-2 border-t">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="w-full justify-start text-xs font-normal h-8 text-muted-foreground"
-          >
-            Limpiar filtros
-          </Button>
-        </div>
       </>
-    )
-  }
+    );
+  };
 
   return (
     <Table
@@ -355,7 +348,6 @@ export function TaskList({
         showSearch: true,
         searchValue: searchValue,
         onSearchChange: setSearchValue,
-        showGrouping: true,
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none',
         showExport: true,
