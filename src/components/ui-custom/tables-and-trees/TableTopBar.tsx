@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from "react";
-import { Search, Filter, ArrowUpDown, X, Download } from "lucide-react";
+import { Search, Filter, ArrowUpDown, X, Download, Group } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +22,9 @@ interface TableTopBarProps {
   showSort?: boolean;
   renderSortContent?: () => ReactNode;
   isSortActive?: boolean;
+  showGrouping?: boolean;
+  renderGroupingContent?: () => ReactNode;
+  isGroupingActive?: boolean;
   showClearFilters?: boolean;
   onClearFilters?: () => void;
   showExport?: boolean;
@@ -43,6 +46,9 @@ export function TableTopBar({
   showSort = false,
   renderSortContent,
   isSortActive = false,
+  showGrouping = false,
+  renderGroupingContent,
+  isGroupingActive = false,
   showClearFilters = false,
   onClearFilters,
   showExport = false,
@@ -55,7 +61,7 @@ export function TableTopBar({
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // No renderizar nada si no hay configuración
-  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || showExport;
+  const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showGrouping || showClearFilters || showExport;
 
   if (!hasContent) return null;
 
@@ -184,6 +190,27 @@ export function TableTopBar({
               </PopoverTrigger>
               <PopoverContent className="w-56" align="end">
                 {renderFilterContent()}
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {/* Botón de agrupación (solo icono) */}
+          {showGrouping && renderGroupingContent && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    isGroupingActive ? "button-secondary-pressed" : ""
+                  )}
+                  title="Agrupar"
+                >
+                  <Group className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                {renderGroupingContent()}
               </PopoverContent>
             </Popover>
           )}

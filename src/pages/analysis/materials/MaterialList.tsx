@@ -413,6 +413,34 @@ export default function MaterialList() {
     }
   ]
   
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'No Agrupar' },
+      { value: 'category', label: 'Agrupar por Categoría' },
+      { value: 'material', label: 'Agrupar por Material' }
+    ];
+
+    return (
+      <div className="space-y-2">
+        <div className="text-sm font-medium text-foreground mb-3">Agrupar por:</div>
+        {groupingOptions.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
+            className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
+              groupingType === option.value
+                ? 'bg-secondary text-secondary-foreground'
+                : 'hover:bg-muted'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   // Select columns based on grouping type
   const productsColumns = useMemo(() => {
     // For no grouping, use all base columns
@@ -448,20 +476,15 @@ export default function MaterialList() {
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
-              tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
-              activeTab: groupingType === 'none' ? 'No Agrupar' : 
-                        groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
-              onTabChange: (tab: string) => {
-                if (tab === 'No Agrupar') setGroupingType('none')
-                else if (tab === 'Agrupar por Categoría') setGroupingType('category')
-                else if (tab === 'Agrupar por Material') setGroupingType('material')
-              },
               showSearch: true,
               searchValue: searchValue,
               onSearchChange: setSearchValue,
               showFilter: true,
               renderFilterContent: renderFilterContent,
               isFilterActive: isFilterActive,
+              showGrouping: true,
+              renderGroupingContent: renderGroupingContent,
+              isGroupingActive: groupingType !== 'none',
               showClearFilters: isFilterActive,
               onClearFilters: handleClearFilters
             }}
