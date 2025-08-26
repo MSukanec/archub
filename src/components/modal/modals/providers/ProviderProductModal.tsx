@@ -93,25 +93,38 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   }, [defaultCurrency, currentProviderProduct, currentPrice, form]);
 
   const handleSubmit = async (data: FormData) => {
-    if (!product?.id) return;
+    console.log('=== SUBMIT BUTTON CLICKED ===');
+    console.log('Product ID:', product?.id);
+    console.log('Form is valid:', form.formState.isValid);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Form data from handleSubmit:', data);
+    
+    if (!product?.id) {
+      console.log('No product ID, returning early');
+      return;
+    }
     
     setIsLoading(true);
     try {
       // Encontrar el símbolo de la moneda para el hook
       const selectedCurrency = currencies.find(c => c.id === data.currency_id);
       
-      console.log('Form data:', data);
       console.log('Selected currency:', selectedCurrency);
       console.log('Currencies available:', currencies);
       
-      // Actualizar el provider_code, moneda y precio usando el hook existente
-      await toggleProviderProduct.mutateAsync({
+      const requestData = {
         productId: product.id,
         isActive: true, // Asegurar que esté activo
         providerCode: data.provider_code,
         currency: selectedCurrency?.symbol,
         price: data.amount || 0
-      });
+      };
+      
+      console.log('Request data to send:', requestData);
+      
+      // Actualizar el provider_code, moneda y precio usando el hook existente
+      const result = await toggleProviderProduct.mutateAsync(requestData);
+      console.log('Mutation result:', result);
       
       onClose();
     } catch (error) {
@@ -207,7 +220,12 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar"
-      onRightClick={form.handleSubmit(handleSubmit)}
+      onRightClick={() => {
+        console.log('=== FOOTER BUTTON CLICKED ===');
+        console.log('Form values:', form.getValues());
+        console.log('Form state:', form.formState);
+        form.handleSubmit(handleSubmit)();
+      }}
       showLoadingSpinner={isLoading}
     />
   );
