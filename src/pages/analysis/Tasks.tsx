@@ -1,34 +1,52 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { TableIcon, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import TaskList from './TaskList'
+import TaskList from './tasks/TaskList'
 
 export default function Tasks() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
+  const [activeTab, setActiveTab] = useState("lista")
 
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('organization')
   }, [setSidebarContext])
 
+  // Header tabs configuration
+  const headerTabs = [
+    {
+      id: "lista",
+      label: "Lista", 
+      isActive: activeTab === "lista"
+    }
+  ]
+
+  const handleNewTask = () => {
+    openModal('parametric-task', {})
+  }
+
   // Header configuration
   const headerProps = {
     title: "Análisis de Tareas",
     icon: TableIcon,
+    tabs: headerTabs,
+    onTabChange: (tabId: string) => {
+      setActiveTab(tabId)
+    },
     actionButton: {
       label: "Crear Tarea Personalizada",
       icon: Plus,
-      onClick: () => openModal('parametric-task', {}),
+      onClick: handleNewTask,
       variant: "default" as const
     }
   }
 
   return (
     <Layout headerProps={headerProps} wide>
-      <TaskList />
+      {activeTab === "lista" && <TaskList />}
     </Layout>
   )
 }

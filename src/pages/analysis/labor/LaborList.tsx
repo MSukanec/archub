@@ -1,0 +1,28 @@
+import { Users, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+
+interface LaborListProps {
+  onNewLabor: () => void
+}
+
+export default function LaborList({ onNewLabor }: LaborListProps) {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <CustomRestricted reason="coming_soon">
+        <EmptyState
+          icon={<Users className="w-8 h-8 text-muted-foreground" />}
+          title="No hay análisis de mano de obra"
+          description="Comienza agregando tu primer análisis de mano de obra para el proyecto"
+          action={
+            <Button onClick={onNewLabor}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Análisis de Mano de Obra
+            </Button>
+          }
+        />
+      </CustomRestricted>
+    </div>
+  )
+}
