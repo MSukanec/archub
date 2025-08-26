@@ -94,6 +94,17 @@ export default function AdminProductRow({
   className 
 }: AdminProductRowProps) {
   
+  // DEBUG: Ver qué datos llegan al componente
+  console.log('🔍 AdminProductRow recibe:', {
+    name: product.name,
+    material: product.material,
+    brand: product.brand,
+    unit: product.unit,
+    material_id: product.material_id,
+    brand_id: product.brand_id,
+    unit_id: product.unit_id
+  })
+  
   // Contenido interno del card usando el nuevo sistema - una sola columna
   const cardContent = (
     <>
