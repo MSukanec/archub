@@ -243,14 +243,21 @@ export function Table<T = any>({
           <div className="flex items-center gap-1">
             {/* Buscador */}
             {showSearch && (
-              <div className="relative flex items-center w-48">
+              <div 
+                className={cn(
+                  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "h-9 px-3",
+                  "gap-2 w-48 justify-start"
+                )}
+              >
                 <Input
                   placeholder="Buscar..."
                   value={searchInputValue}
                   onChange={(e) => handleTopBarSearchChange(e.target.value)}
-                  className="h-8 text-xs pr-8 border-[var(--card-border)] bg-[var(--card-bg)] placeholder:text-[var(--muted-foreground)]"
+                  className="flex-1 h-full text-xs border-0 bg-transparent placeholder:text-[var(--muted-foreground)] focus:ring-0 focus:outline-none p-0"
                 />
-                <Search className="absolute right-2 h-4 w-4 text-[var(--muted-foreground)] pointer-events-none" />
+                <Search className="h-4 w-4 text-[var(--muted-foreground)] shrink-0" />
               </div>
             )}
 
