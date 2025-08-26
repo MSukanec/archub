@@ -247,21 +247,22 @@ export function Table<T = any>({
                 className={cn(
                   "inline-flex items-center justify-start whitespace-nowrap rounded-lg text-xs",
                   "bg-transparent text-[var(--button-ghost-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] border border-[var(--menues-border)]",
-                  "h-9 px-2 py-2 gap-1.5 w-48"
+                  "h-8 px-2 py-2 gap-1.5 w-96",
+                  "focus-within:ring-0 focus-within:outline-none"
                 )}
               >
                 <Input
                   placeholder="Buscar..."
                   value={searchInputValue}
                   onChange={(e) => handleTopBarSearchChange(e.target.value)}
-                  className="flex-1 h-full text-xs border-0 bg-transparent placeholder:text-[var(--muted-foreground)] focus:ring-0 focus:outline-none p-0"
+                  className="flex-1 h-full text-xs border-0 bg-transparent placeholder:text-[var(--muted-foreground)] focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none p-0"
                 />
                 {searchInputValue && (
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleTopBarSearchChange("")}
-                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    className="h-4 w-4 p-0 hover:bg-transparent focus:ring-0 focus:outline-none focus-visible:ring-0"
                   >
                     <X className="h-3 w-3" />
                   </Button>
