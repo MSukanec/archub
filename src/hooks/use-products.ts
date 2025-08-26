@@ -80,18 +80,7 @@ export function useProducts() {
         throw error
       }
 
-      console.log('🔍 DATOS CRUDOS DE PRODUCTS_VIEW:', data)
-      if (data && data.length > 0) {
-        console.log('🔍 PRIMER PRODUCTO:', data[0])
-        console.log('🔍 CAMPOS MATERIAL/BRAND/UNIT:', {
-          material: data[0].material,
-          brand: data[0].brand,
-          unit: data[0].unit,
-          material_id: data[0].material_id,
-          brand_id: data[0].brand_id,
-          unit_id: data[0].unit_id
-        })
-      }
+      // Los datos se obtienen correctamente
 
       return data || []
     },
