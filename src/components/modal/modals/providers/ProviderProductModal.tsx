@@ -177,6 +177,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
         <form 
           onSubmit={(e) => {
             e.preventDefault();
+            console.log('Form onSubmit triggered');
             form.handleSubmit(handleSubmit)(e);
           }} 
           className="space-y-4"
@@ -193,6 +194,12 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
                     <Input
                       placeholder="Código interno del proveedor (opcional)"
                       {...field}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          form.handleSubmit(handleSubmit)();
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

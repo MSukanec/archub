@@ -135,8 +135,8 @@ export function useToggleProviderProduct() {
           providerProduct = data;
         }
 
-        // SIEMPRE manejar product_prices cuando se activa un producto
-        if (providerProduct && isActive) {
+        // SIEMPRE manejar product_prices cuando se activa un producto Y se proporcionan precio/moneda
+        if (providerProduct && isActive && (currencyId || price !== undefined)) {
           // Verificar si ya existe un precio para este provider_product
           const { data: existingPrice, error: priceSelectError } = await supabase
             .from('product_prices')

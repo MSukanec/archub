@@ -37,13 +37,13 @@ export default function ProductList() {
   // Función para manejar el toggle del checkbox
   const handleToggleProduct = async (productId: string, currentState: boolean) => {
     try {
-      await toggleProviderProduct.mutateAsync({
+      // Solo enviar los campos necesarios para el toggle
+      const payload: any = {
         productId,
-        isActive: !currentState,
-        providerCode: undefined, // No cambiar el código al hacer toggle
-        currencyId: undefined,   // No cambiar la moneda al hacer toggle
-        price: undefined         // No cambiar el precio al hacer toggle
-      })
+        isActive: !currentState
+      }
+      
+      await toggleProviderProduct.mutateAsync(payload)
     } catch (error) {
       console.error('Error toggling product:', error)
     }
