@@ -176,7 +176,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           {/* Material */}
           <FormField
             control={form.control}
