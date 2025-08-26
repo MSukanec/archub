@@ -1631,7 +1631,6 @@ export default function Movements() {
             </div>
           ),
           showSort: false,
-          showClearFilters: true,
           onClearFilters: () => {
             setSearchValue("");
             setFilterByType("all");

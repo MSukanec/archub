@@ -247,7 +247,6 @@ export default function ConstructionMaterials() {
                     </div>
                   </>
                 ),
-                showClearFilters: true,
                 onClearFilters: () => {
                   setSelectedPhase("")
                   setSelectedCategory("")

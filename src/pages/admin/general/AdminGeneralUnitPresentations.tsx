@@ -224,7 +224,6 @@ const AdminGeneralUnitPresentations = () => {
               </div>
             </div>
           ),
-          showClearFilters: filterByUnit !== '' || sortBy !== 'name',
           onClearFilters: clearFilters
         }}
         emptyState={

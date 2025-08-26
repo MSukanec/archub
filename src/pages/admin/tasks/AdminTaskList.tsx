@@ -419,7 +419,7 @@ const AdminTaskList = () => {
                   </div>
                 </>
               ),
-              onClearFilters: clearFilters,
+              onClearFilters: clearFilters
             }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">

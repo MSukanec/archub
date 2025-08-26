@@ -342,6 +342,18 @@ export function Table<T = any>({
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-4" align="end">
                   <div className="space-y-4">
+                    {/* Botón limpiar filtros dentro del popover si hay filtros activos */}
+                    {isFilterActive && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={topBar?.onClearFilters ?? handleClearFilters}
+                        className="w-full gap-2"
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="text-xs">Limpiar Filtros</span>
+                      </Button>
+                    )}
                     {(topBar?.renderFilterContent ?? defaultFilterContent)()}
                   </div>
                 </PopoverContent>
@@ -372,18 +384,6 @@ export function Table<T = any>({
               </Popover>
             )}
 
-            {/* Botón de limpiar filtros */}
-            {showClearFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={topBar?.onClearFilters ?? handleClearFilters}
-                className="gap-2"
-              >
-                <X className="h-4 w-4" />
-                <span className="text-xs">Limpiar</span>
-              </Button>
-            )}
 
             {/* Botón de exportar */}
             {showExport && (

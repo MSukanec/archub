@@ -284,9 +284,9 @@ const AdminMaterialMateriales = () => {
           showFilter: true,
           isFilterActive: categoryFilter !== 'all',
           renderFilterContent: () => (
-            <div className="space-y-3 p-2 min-w-[200px]">
+            <>
               <div>
-                <Label className="text-xs font-medium mb-1 block">Categoría</Label>
+                <Label className="text-xs font-medium mb-2 block">Categoría</Label>
                 <Select value={categoryFilter} onValueChange={(value: string) => setCategoryFilter(value)}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las categorías" />
@@ -301,9 +301,8 @@ const AdminMaterialMateriales = () => {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            </>
           ),
-          showClearFilters: categoryFilter !== 'all' || groupingType !== 'categories',
           onClearFilters: clearFilters,
         }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
