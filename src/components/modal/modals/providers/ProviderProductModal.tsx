@@ -64,6 +64,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   
   // Formatear monedas para CurrencyAmountField
   const currencies = organizationCurrencies.map(oc => oc.currency);
+  
 
   // Obtener el provider product actual para este producto
   const currentProviderProduct = providerProducts.find(pp => pp.product_id === product?.id);
@@ -72,59 +73,54 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      provider_code: currentProviderProduct?.provider_code || '',
-      currency_id: currentPrice?.currency_id || defaultCurrency?.id || '',
-      amount: currentPrice?.price || undefined,
+      provider_code: '',
+      currency_id: '',
+      amount: undefined,
     },
   });
 
   // Actualizar valores cuando cambie la moneda por defecto o el provider product
   useEffect(() => {
+    // Solo proceder si tenemos las monedas cargadas
+    if (organizationCurrencies.length === 0) return;
+    
+    // Establecer valores iniciales
+    if (currentProviderProduct?.provider_code) {
+      form.setValue('provider_code', currentProviderProduct.provider_code);
+    } else {
+      form.setValue('provider_code', '');
+    }
+    
     if (currentPrice) {
       form.setValue('currency_id', currentPrice.currency_id || '');
       form.setValue('amount', currentPrice.price || undefined);
-    } else if (defaultCurrency) {
-      form.setValue('currency_id', defaultCurrency.id);
+    } else {
+      // Si no hay precio, usar moneda por defecto  
+      if (defaultCurrency?.id) {
+        form.setValue('currency_id', defaultCurrency.id);
+        // Forzar trigger para que se actualice el CurrencyAmountField
+        form.trigger('currency_id');
+      }
       form.setValue('amount', undefined);
     }
-    if (currentProviderProduct?.provider_code) {
-      form.setValue('provider_code', currentProviderProduct.provider_code);
-    }
-  }, [defaultCurrency, currentProviderProduct, currentPrice, form]);
+  }, [defaultCurrency, currentProviderProduct, currentPrice, form, organizationCurrencies.length]);
 
   const handleSubmit = async (data: FormData) => {
-    console.log('=== SUBMIT BUTTON CLICKED ===');
-    console.log('Product ID:', product?.id);
-    console.log('Form is valid:', form.formState.isValid);
-    console.log('Form errors:', form.formState.errors);
-    console.log('Form data from handleSubmit:', data);
-    
-    if (!product?.id) {
-      console.log('No product ID, returning early');
-      return;
-    }
+    if (!product?.id) return;
     
     setIsLoading(true);
     try {
       // Encontrar el símbolo de la moneda para el hook
       const selectedCurrency = currencies.find(c => c.id === data.currency_id);
       
-      console.log('Selected currency:', selectedCurrency);
-      console.log('Currencies available:', currencies);
-      
-      const requestData = {
+      // Actualizar el provider_code, moneda y precio usando el hook existente
+      await toggleProviderProduct.mutateAsync({
         productId: product.id,
-        isActive: true, // Asegurar que esté activo
+        isActive: true,
         providerCode: data.provider_code,
         currency: selectedCurrency?.symbol,
         price: data.amount || 0
-      };
-      
-      console.log('Request data to send:', requestData);
-      
-      // Actualizar el provider_code, moneda y precio usando el hook existente
-      const result = await toggleProviderProduct.mutateAsync(requestData);
-      console.log('Mutation result:', result);
+      });
       
       onClose();
     } catch (error) {
@@ -188,20 +184,26 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
             />
 
             {/* Campo de Precio con Moneda */}
-            <FormItem>
-              <FormLabel>Precio</FormLabel>
-              <FormControl>
-                <CurrencyAmountField
-                  value={form.watch('amount')}
-                  currency={form.watch('currency_id')}
-                  currencies={currencies}
-                  onValueChange={(value) => form.setValue('amount', value)}
-                  onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
-                  placeholder="0.00"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Precio</FormLabel>
+                  <FormControl>
+                    <CurrencyAmountField
+                      value={form.watch('amount')}
+                      currency={form.watch('currency_id')}
+                      currencies={currencies}
+                      onValueChange={(value) => form.setValue('amount', value)}
+                      onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
+                      placeholder="0.00"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </form>
       </Form>
@@ -220,12 +222,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel="Guardar"
-      onRightClick={() => {
-        console.log('=== FOOTER BUTTON CLICKED ===');
-        console.log('Form values:', form.getValues());
-        console.log('Form state:', form.formState);
-        form.handleSubmit(handleSubmit)();
-      }}
+      onRightClick={form.handleSubmit(handleSubmit)}
       showLoadingSpinner={isLoading}
     />
   );
