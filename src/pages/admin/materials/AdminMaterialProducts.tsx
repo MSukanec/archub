@@ -187,46 +187,19 @@ const AdminMaterialProducts = () => {
   const baseColumns = [
     {
       key: 'name',
-      label: 'Marca - Modelo',
+      label: 'Material',
       width: 'minmax(0, 1fr)',
       render: (product: Product) => (
-        <div className="font-medium text-xs">
-          {product.brand ? `${product.brand} - ${product.name}` : product.name}
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold">
+            {product.brand ? `${product.brand} - ${product.name}` : product.name}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {product.material || 'Sin material'}
+          </span>
         </div>
       )
     },
-    {
-      key: 'material',
-      label: 'Material',
-      width: '12%',
-      render: (product: Product) => (
-        <div>
-          {product.material ? (
-            <Badge variant="secondary" className="text-xs">
-              {product.material}
-            </Badge>
-          ) : (
-            <span className="text-muted-foreground text-xs">Sin material</span>
-          )}
-        </div>
-      )
-    },
-    ...(groupingType !== 'category' ? [{
-      key: 'category_hierarchy',
-      label: 'Categoría',
-      width: '12%',
-      render: (product: Product) => (
-        <div>
-          {product.category_hierarchy ? (
-            <Badge variant="outline" className="text-xs">
-              {product.category_hierarchy.split(' > ')[0]}
-            </Badge>
-          ) : (
-            <span className="text-muted-foreground text-xs">Sin categoría</span>
-          )}
-        </div>
-      )
-    }] : []),
     {
       key: 'unit_id',
       label: 'Unidad',
@@ -241,16 +214,6 @@ const AdminMaterialProducts = () => {
             <span className="text-muted-foreground text-xs">Sin unidad</span>
           )}
         </div>
-      )
-    },
-    {
-      key: 'default_price',
-      label: 'Precio',
-      width: '8%',
-      render: (product: Product) => (
-        <span className="text-xs font-medium">
-          {product.default_price !== null && product.default_price !== undefined ? `$${product.default_price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-        </span>
       )
     },
     {
