@@ -132,9 +132,7 @@ export function Table<T = any>({
   const [internalFilters, setInternalFilters] = useState<any>({});
   
   // Estados para el TopBar integrado
-  const [searchFocused, setSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   
   const itemsPerPage = 100;
   const showPagination = data.length > itemsPerPage;
@@ -243,62 +241,16 @@ export function Table<T = any>({
 
           {/* Lado derecho - Búsqueda, Orden, Filtros */}
           <div className="flex items-center gap-1">
-            {/* Buscador expandible */}
+            {/* Buscador */}
             {showSearch && (
-              <div 
-                className="relative flex items-center"
-                onMouseLeave={() => {
-                  if (isSearchExpanded && !searchFocused) {
-                    setIsSearchExpanded(false);
-                    setSearchFocused(false);
-                  }
-                }}
-              >
-                <div className={cn(
-                  "absolute right-0 transition-all duration-300 overflow-hidden",
-                  isSearchExpanded ? "w-48 opacity-100" : "w-8 opacity-100"
-                )}>
-                  <div className={cn(
-                    "relative flex items-center h-8 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] transition-all",
-                    isSearchExpanded ? "bg-[var(--card-bg)]" : "bg-transparent border-transparent"
-                  )}>
-                    <Input
-                      placeholder="Buscar..."
-                      value={searchInputValue}
-                      onChange={(e) => handleTopBarSearchChange(e.target.value)}
-                      onFocus={() => setSearchFocused(true)}
-                      onBlur={() => {
-                        setSearchFocused(false);
-                        setTimeout(() => {
-                          if (!searchFocused) {
-                            setIsSearchExpanded(false);
-                          }
-                        }, 150);
-                      }}
-                      className={cn(
-                        "flex-1 h-full text-xs border-0 bg-transparent font-normal",
-                        "placeholder:text-[var(--muted-foreground)]",
-                        "focus:ring-0 focus:outline-none",
-                        isSearchExpanded ? "pl-3 pr-10" : "pl-0 pr-0 opacity-0"
-                      )}
-                      autoFocus={isSearchExpanded}
-                    />
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 hover:bg-transparent"
-                      onClick={() => {
-                        setIsSearchExpanded(!isSearchExpanded);
-                        if (!isSearchExpanded) {
-                          setTimeout(() => setSearchFocused(true), 100);
-                        }
-                      }}
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+              <div className="relative flex items-center w-48">
+                <Input
+                  placeholder="Buscar..."
+                  value={searchInputValue}
+                  onChange={(e) => handleTopBarSearchChange(e.target.value)}
+                  className="h-8 text-xs pr-8 border-[var(--card-border)] bg-[var(--card-bg)] placeholder:text-[var(--muted-foreground)]"
+                />
+                <Search className="absolute right-2 h-4 w-4 text-[var(--muted-foreground)] pointer-events-none" />
               </div>
             )}
 
