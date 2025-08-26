@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 
-import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box, RefreshCw } from 'lucide-react'
 
 const AdminMaterialProducts = () => {
   const [searchValue, setSearchValue] = useState('')
