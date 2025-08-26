@@ -75,15 +75,27 @@ export function TaskSingleModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Hook para cargar TODAS las tareas de la librería parametrica usando la vista actualizada
+  // Hook para cargar TODAS las tareas de la librería parametrica (tareas base, no instancias de proyecto)
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['task-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      // Usar la tabla base de tareas, no la vista de construcción que incluye instancias de proyecto
       const { data: allTasks, error } = await supabase
-        .from('construction_tasks_view')
-        .select('*')
+        .from('tasks')
+        .select(`
+          id,
+          custom_name,
+          code,
+          division,
+          unit,
+          category,
+          created_at,
+          updated_at,
+          is_system,
+          organization_id
+        `)
         .order('custom_name', { ascending: true });
       
       if (error) {
@@ -91,6 +103,7 @@ export function TaskSingleModal({
         throw error;
       }
       
+      console.log('📋 Loaded tasks from library:', allTasks?.length, 'tasks');
       return allTasks || [];
     },
     enabled: !!supabase
@@ -129,11 +142,12 @@ export function TaskSingleModal({
     if (!tasks || tasks.length === 0) return [];
     
     const rubros = tasks
-      .filter(task => task.division)
+      .filter(task => task.division && task.division.trim())
       .map(task => task.division)
       .filter((rubro, index, self) => self.indexOf(rubro) === index)
       .sort();
     
+    console.log('🏗️ Unique rubros found:', rubros);
     return rubros;
   }, [tasks]);
 
@@ -167,7 +181,7 @@ export function TaskSingleModal({
     form.setValue('task_id', taskId);
     
     // Encontrar la tarea seleccionada para obtener su unidad
-    const selectedTask = tasks.find(task => task.task_id === taskId);
+    const selectedTask = tasks.find(task => task.id === taskId);
     if (selectedTask?.unit) {
       // Actualizar el placeholder del campo cantidad para mostrar la unidad
       setSelectedTaskUnit(selectedTask.unit);
@@ -340,10 +354,10 @@ export function TaskSingleModal({
             ) : (
               filteredTasks.map((task) => (
                 <div 
-                  key={task.task_id}
-                  onClick={() => handleTaskSelect(task.task_id)}
+                  key={task.id}
+                  onClick={() => handleTaskSelect(task.id)}
                   className={`px-4 py-3 cursor-pointer transition-colors duration-150 grid grid-cols-[1fr,auto] gap-4 items-start ${
-                    selectedTaskId === task.task_id 
+                    selectedTaskId === task.id 
                       ? 'bg-accent/10 border-l-2 border-l-accent' 
                       : 'hover:bg-muted/30'
                   }`}
