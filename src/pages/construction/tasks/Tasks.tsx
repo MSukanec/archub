@@ -54,6 +54,7 @@ export default function Tasks() {
     updated_at: task.updated_at,
     phase_name: task.phase_name,
     category_name: task.category_name, // Pasar directamente desde la vista
+    division_name: task.division_name, // ¡ESTE CAMPO FALTABA! 
     custom_name: task.custom_name, // Pasar directamente desde la vista
     unit: task.unit, // Pasar directamente desde la vista
     task: {
@@ -62,7 +63,7 @@ export default function Tasks() {
       display_name: task.custom_name,
       category_name: task.category_name,
       unit_name: task.unit,
-      rubro_name: null, // No disponible en la vista
+      rubro_name: task.division_name, // Ahora sí disponible en la vista
     }
   }))
 
