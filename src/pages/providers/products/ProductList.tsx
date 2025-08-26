@@ -331,7 +331,7 @@ export default function ProductList() {
             data={filteredProducts}
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-            getRowClassName={(product) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
+            getRowClassName={(product: any) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
             topBar={{
               tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
               activeTab: groupingType === 'none' ? 'No Agrupar' : 
@@ -342,7 +342,7 @@ export default function ProductList() {
                 else if (tab === 'Agrupar por Material') setGroupingType('material')
               }
             }}
-            renderCard={(product) => (
+            renderCard={(product: any) => (
               <MaterialRow
                 material={{
                 id: product.id,
