@@ -15,7 +15,7 @@ import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 
 import DatePicker from '@/components/ui-custom/fields/DatePickerField'
-import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
+import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'

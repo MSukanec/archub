@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { CascadingSelect } from '@/components/ui-custom/CascadingSelect'
+import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories'

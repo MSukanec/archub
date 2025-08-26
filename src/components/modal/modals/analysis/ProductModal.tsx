@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
+import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 
 import { useCreateProduct, NewProductData } from '@/hooks/use-products'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
@@ -36,23 +37,15 @@ const productSchema = z.object({
   image_url: z.string().optional(),
 })
 
-// Helper function to flatten material categories for ComboBox
-function flattenCategories(categories: any[]): Array<{ value: string; label: string }> {
-  const result: Array<{ value: string; label: string }> = []
-  
-  function traverse(cats: any[], prefix = '') {
-    cats.forEach(cat => {
-      const label = prefix ? `${prefix} > ${cat.name}` : cat.name
-      result.push({ value: cat.id, label })
-      
-      if (cat.children && cat.children.length > 0) {
-        traverse(cat.children, label)
-      }
-    })
-  }
-  
-  traverse(categories)
-  return result
+// Helper function to convert material categories for CascadingSelect
+function convertToCascadingOptions(categories: any[]): any[] {
+  return categories.map(category => ({
+    value: category.id,
+    label: category.name,
+    children: category.children && category.children.length > 0 
+      ? convertToCascadingOptions(category.children) 
+      : undefined
+  }))
 }
 
 interface ProductModalProps {
@@ -133,7 +126,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   }
 
   // Prepare data for ComboBoxes
-  const categoryOptions = flattenCategories(materialCategories)
+  const categoryOptions = convertToCascadingOptions(materialCategories)
   const brandOptions = brands.map(brand => ({ value: brand.id, label: brand.name }))
   const unitOptions = units.map(unit => ({ value: unit.id, label: unit.name }))
   const unitPresentationOptions = unitPresentations.map(up => ({ 
@@ -159,7 +152,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
 
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-6">
           {/* Categoría */}
           <FormField
@@ -169,13 +162,11 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               <FormItem>
                 <FormLabel>Categoría *</FormLabel>
                 <FormControl>
-                  <ComboBox
-                    value={field.value}
-                    onValueChange={field.onChange}
+                  <CascadingSelect
+                    value={field.value ? [field.value] : []}
+                    onValueChange={(values) => field.onChange(values[values.length - 1] || '')}
                     options={categoryOptions}
                     placeholder="Seleccionar categoría..."
-                    searchPlaceholder="Buscar categoría..."
-                    emptyMessage="No se encontraron categorías."
                   />
                 </FormControl>
                 <FormMessage />
@@ -226,57 +217,60 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
             )}
           />
 
-          {/* Unidad de Cómputo */}
-          <FormField
-            control={form.control}
-            name="unit_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad de Cómputo *</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar unidad..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {unitOptions.map((unit) => (
-                        <SelectItem key={unit.value} value={unit.value}>
-                          {unit.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Unidades - Inline en Desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Unidad de Cómputo */}
+            <FormField
+              control={form.control}
+              name="unit_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unidad de Cómputo *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar unidad..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unitOptions.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Unidad de Venta/Presentación */}
-          <FormField
-            control={form.control}
-            name="unit_presentation_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad de Venta/Presentación</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar presentación..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {unitPresentationOptions.map((presentation) => (
-                        <SelectItem key={presentation.value} value={presentation.value}>
-                          {presentation.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Unidad de Venta/Presentación */}
+            <FormField
+              control={form.control}
+              name="unit_presentation_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unidad de Venta/Presentación</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar presentación..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unitPresentationOptions.map((presentation) => (
+                          <SelectItem key={presentation.value} value={presentation.value}>
+                            {presentation.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Precio */}
           <FormField
@@ -303,43 +297,46 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
             )}
           />
 
-          {/* Link */}
-          <FormField
-            control={form.control}
-            name="url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Link</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://ejemplo.com/producto"
-                    type="url"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Link e Imagen - Inline en Desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Link */}
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://ejemplo.com/producto"
+                      type="url"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Imagen */}
-          <FormField
-            control={form.control}
-            name="image_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Imagen</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                    type="url"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Imagen */}
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Imagen</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://ejemplo.com/imagen.jpg"
+                      type="url"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
       </form>
     </Form>
