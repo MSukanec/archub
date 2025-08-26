@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
-import { CheckSquare, Edit, Trash2, Plus, Eye, FileText, FileSpreadsheet } from 'lucide-react'
+import { CheckSquare, Edit, Trash2, Plus, Eye, FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -351,20 +351,9 @@ export function TaskList({
         onSearchChange: setSearchValue,
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none',
-        showExport: true,
         onExport: handleExportToExcel,
-        isExporting: isExporting,
-        customActions: (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleExportToPDF}
-            disabled={finalTasks.length === 0}
-            title="Exportar PDF"
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
-        )
+        onExportPDF: handleExportToPDF,
+        isExporting: isExporting
       }}
       renderCard={(task: any) => (
         <TaskRow

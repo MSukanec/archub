@@ -9,7 +9,8 @@ import {
   Filter,
   X,
   Download,
-  Group
+  Group,
+  FileText
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,9 @@ interface TableProps<T = any> {
     onClearFilters?: () => void;
     showExport?: boolean;
     onExport?: () => void;
+    onExportPDF?: () => void;
     isExporting?: boolean;
+    renderExportContent?: () => ReactNode;
     customActions?: ReactNode;
     // 🆕 BOTONES DE MODO A LA IZQUIERDA
     leftModeButtons?: {
@@ -218,6 +221,48 @@ export function Table<T = any>({
     );
   };
 
+  // Renderizado de contenido de exportación por defecto
+  const defaultExportContent = () => {
+    const exportOptions = [
+      { 
+        key: 'excel', 
+        label: 'Exportar a Excel', 
+        icon: Download,
+        onClick: topBar?.onExport
+      },
+      { 
+        key: 'pdf', 
+        label: 'Exportar a PDF', 
+        icon: FileText,
+        onClick: topBar?.onExportPDF
+      }
+    ];
+
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">Exportar como</div>
+        <div className="space-y-1">
+          {exportOptions.map((option) => {
+            const IconComponent = option.icon;
+            return (
+              <Button
+                key={option.key}
+                variant="ghost"
+                size="sm"
+                onClick={option.onClick}
+                disabled={topBar?.isExporting ?? false}
+                className="w-full justify-start text-xs font-normal h-8 gap-2"
+              >
+                <IconComponent className="h-3 w-3" />
+                {option.label}
+              </Button>
+            );
+          })}
+        </div>
+      </>
+    );
+  };
+
   // Handler interno para búsqueda del TopBar
   const handleTopBarSearchChange = (value: string) => {
     setSearchInputValue(value);
@@ -232,9 +277,8 @@ export function Table<T = any>({
     const showFilter = topBar?.showFilter ?? true;
     const showSort = topBar?.showSort ?? false;
     const showClearFilters = topBar?.showClearFilters ?? true;
-    const showExport = topBar?.showExport ?? false;
     
-    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || showExport || topBar?.leftModeButtons?.options.length || true; // Siempre true porque el botón de agrupación siempre está presente
+    const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || topBar?.leftModeButtons?.options.length || true; // Siempre true porque los botones de agrupación y exportación siempre están presentes
     
     if (!hasContent) return null;
 
@@ -397,19 +441,22 @@ export function Table<T = any>({
             </Popover>
 
 
-            {/* Botón de exportar */}
-            {showExport && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={topBar?.onExport}
-                disabled={topBar?.isExporting ?? false}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                <span className="text-xs">Exportar</span>
-              </Button>
-            )}
+            {/* Botón de exportar - SIEMPRE visible */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="text-xs">Exportar</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4" align="end">
+                {(topBar?.renderExportContent ?? defaultExportContent)()}
+              </PopoverContent>
+            </Popover>
 
             {/* Acciones personalizadas */}
             {topBar?.customActions}
