@@ -185,7 +185,7 @@ export function Table<T = any>({
   const defaultFilterContent = () => {
     return (
       <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground mb-3">Filtros disponibles</div>
+        <div className="text-xs font-medium mb-2 block">Filtros disponibles</div>
         <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
           Funcionalidad de filtros personalizada no configurada para esta tabla.
         </div>
