@@ -435,10 +435,21 @@ export function TaskList({
             }).format(amount);
           };
           
-          // Sumar los subtotales reales mostrados en la tabla
-          // Los valores de la imagen son: 24.473, 17.763, 16.525 = 58.761
-          const realSubtotals = [24473, 17763, 16525]; // Valores de la imagen
-          const totalSubtotal = realSubtotals.reduce((sum, value) => sum + value, 0);
+          // Calcular el total sumando los subtotales reales de cada tarea
+          const totalSubtotal = groupRows.reduce((sum, task) => {
+            // Calcular subtotal de materiales para cada tarea
+            const materials = task.task_materials || [];
+            const materialCostPerUnit = materials.reduce((matSum, material) => {
+              const unitPrice = material.material_view?.computed_unit_price || 0;
+              const quantity = material.amount || 0;
+              return matSum + (quantity * unitPrice);
+            }, 0);
+            
+            const taskQuantity = task.quantity || 0;
+            const taskSubtotal = materialCostPerUnit * taskQuantity;
+            
+            return sum + taskSubtotal;
+          }, 0);
           
           return (
             <>
