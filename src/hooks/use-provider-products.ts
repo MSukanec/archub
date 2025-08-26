@@ -134,32 +134,17 @@ export function useToggleProviderProduct() {
           providerProduct = data;
         }
 
-        // Siempre manejar product_prices cuando se activa un producto
-        if (isActive && providerProduct) {
-          // Si no se proporcionan currency y price, usar valores por defecto
-          let finalCurrency = currency;
-          let finalPrice = price;
-          
-          if (!finalCurrency || finalPrice === undefined) {
-            // Obtener moneda por defecto de la organización
-            const { data: orgPrefs } = await supabase
-              .from('organization_preferences')
-              .select(`default_currency:currencies(symbol)`)
-              .eq('organization_id', organizationId)
-              .single();
-            
-            finalCurrency = orgPrefs?.default_currency?.symbol || 'CLP';
-            finalPrice = finalPrice !== undefined ? finalPrice : 0;
-          }
+        // Si se proporciona moneda y precio, manejar product_prices
+        if (currency && price !== undefined && providerProduct) {
           // Obtener currency_id basado en el símbolo
           const { data: currencyData, error: currencyError } = await supabase
             .from('currencies')
             .select('id')
-            .eq('symbol', finalCurrency)
+            .eq('symbol', currency)
             .single();
 
           if (currencyError) {
-            console.warn('Currency not found:', finalCurrency);
+            console.warn('Currency not found:', currency);
           } else {
             // Verificar si ya existe un precio para este provider_product
             const { data: existingPrice, error: priceSelectError } = await supabase
@@ -178,7 +163,7 @@ export function useToggleProviderProduct() {
                 .from('product_prices')
                 .update({
                   currency_id: currencyData.id,
-                  price: finalPrice,
+                  price: price,
                   updated_at: new Date().toISOString()
                 })
                 .eq('id', existingPrice.id);
@@ -193,7 +178,7 @@ export function useToggleProviderProduct() {
                 .insert({
                   provider_product_id: providerProduct.id,
                   currency_id: currencyData.id,
-                  price: finalPrice,
+                  price: price,
                   valid_from: new Date().toISOString().split('T')[0] // Solo fecha
                 });
 
