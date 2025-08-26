@@ -23,7 +23,7 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
 import { useToast } from '@/hooks/use-toast'
-import UserSelector from '@/components/ui-custom/UserSelector'
+import UserSelectorField from '@/components/ui-custom/fields/UserSelectorField'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
@@ -1116,7 +1116,7 @@ export default function MovementImportStepModal({ modalData, onClose }: Movement
     <div className="space-y-6">
       <div className="space-y-3">
         <Label>Creador de los movimientos</Label>
-        <UserSelector
+        <UserSelectorField
           users={users}
           value={selectedCreator}
           onChange={setSelectedCreator}

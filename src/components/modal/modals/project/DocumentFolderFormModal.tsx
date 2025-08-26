@@ -14,7 +14,7 @@ import { useModalPanelStore } from '../../form/modalPanelStore';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { FolderPlus, FolderOpen } from 'lucide-react';
-import UserSelector from '@/components/ui-custom/UserSelector';
+import UserSelectorField from '@/components/ui-custom/fields/UserSelectorField';
 
 const documentFolderSchema = z.object({
   name: z.string().min(1, 'El nombre de la carpeta es obligatorio'),

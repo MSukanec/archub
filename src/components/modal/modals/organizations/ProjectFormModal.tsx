@@ -19,7 +19,7 @@ import { useProjectTypes } from "@/hooks/use-project-types";
 import { useProjectModalities } from "@/hooks/use-project-modalities";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import UserSelector from "@/components/ui-custom/UserSelector";
+import UserSelectorField from "@/components/ui-custom/fields/UserSelectorField";
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
@@ -329,7 +329,7 @@ export function ProjectFormModal({ modalData, onClose }: ProjectFormModalProps) 
                 <FormItem>
                   <FormLabel>Creador *</FormLabel>
                   <FormControl>
-                    <UserSelector
+                    <UserSelectorField
                       users={organizationMembers?.map(member => ({
                         id: member.id,
                         full_name: member.full_name,

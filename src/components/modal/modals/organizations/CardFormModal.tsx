@@ -12,7 +12,7 @@ import { useGlobalModalStore } from "../../form/useGlobalModalStore";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import UserSelector from "@/components/ui-custom/UserSelector";
+import UserSelectorField from "@/components/ui-custom/fields/UserSelectorField";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
@@ -153,7 +153,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             <FormItem>
               <FormLabel>Asignado a (opcional)</FormLabel>
               <FormControl>
-                <UserSelector
+                <UserSelectorField
                   users={users}
                   value={field.value || ''}
                   onChange={field.onChange}

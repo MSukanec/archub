@@ -8,7 +8,7 @@ interface User {
   avatar_url?: string;
 }
 
-interface UserSelectorProps {
+interface UserSelectorFieldProps {
   users: User[];
   value: string;
   onChange: (value: string) => void;
@@ -16,13 +16,13 @@ interface UserSelectorProps {
   className?: string;
 }
 
-export default function UserSelector({
+export default function UserSelectorField({
   users,
   value,
   onChange,
   placeholder = "Seleccionar usuario",
   className = ""
-}: UserSelectorProps) {
+}: UserSelectorFieldProps) {
   // Ordenar usuarios alfabéticamente por nombre
   const sortedUsers = React.useMemo(() => {
     return [...users].sort((a, b) => {
