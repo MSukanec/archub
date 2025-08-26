@@ -190,12 +190,12 @@ export function Table<T = any>({
   // Renderizado de contenido de agrupación por defecto
   const defaultGroupingContent = () => {
     return (
-      <div className="space-y-3">
-        <div className="text-sm font-medium text-foreground mb-3">Agrupar por</div>
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
         <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
           Opciones de agrupación no configuradas para esta tabla.
         </div>
-      </div>
+      </>
     );
   };
 

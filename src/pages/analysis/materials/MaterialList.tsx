@@ -12,6 +12,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { cn } from '@/lib/utils'
 
 export default function MaterialList() {
   const [dataType, setDataType] = useState("todos")
@@ -422,22 +423,25 @@ export default function MaterialList() {
     ];
 
     return (
-      <div className="space-y-2">
-        <div className="text-sm font-medium text-foreground mb-3">Agrupar por:</div>
-        {groupingOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
-            className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
-              groupingType === option.value
-                ? 'bg-secondary text-secondary-foreground'
-                : 'hover:bg-muted'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </>
     );
   };
 
