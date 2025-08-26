@@ -13,6 +13,7 @@ import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCo
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
+import GroupSubtotal from '@/components/construction/GroupSubtotal'
 import TaskRow from '@/components/data-row/rows/TaskRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { cn } from '@/lib/utils'
@@ -425,7 +426,7 @@ export function TaskList({
             </>
           );
         } else if (groupingType === 'rubros-phases') {
-          // Para "Por Fases y Rubros" - calcular suma real de subtotales
+          // Para "Por Fases y Rubros" - mostrar subtotal usando un componente especial
           const formatCurrency = (amount: number) => {
             return new Intl.NumberFormat('es-AR', {
               style: 'currency',
@@ -435,22 +436,6 @@ export function TaskList({
             }).format(amount);
           };
           
-          // Calcular el total sumando los subtotales reales de cada tarea
-          const totalSubtotal = groupRows.reduce((sum, task) => {
-            // Calcular subtotal de materiales para cada tarea
-            const materials = task.task_materials || [];
-            const materialCostPerUnit = materials.reduce((matSum, material) => {
-              const unitPrice = material.material_view?.computed_unit_price || 0;
-              const quantity = material.amount || 0;
-              return matSum + (quantity * unitPrice);
-            }, 0);
-            
-            const taskQuantity = task.quantity || 0;
-            const taskSubtotal = materialCostPerUnit * taskQuantity;
-            
-            return sum + taskSubtotal;
-          }, 0);
-          
           return (
             <>
               <div className="truncate text-sm font-medium">
@@ -459,7 +444,9 @@ export function TaskList({
               <div></div>
               <div></div>
               <div></div>
-              <div className="text-left font-medium">{formatCurrency(totalSubtotal)}</div>
+              <div className="text-left font-medium">
+                <GroupSubtotal tasks={groupRows} />
+              </div>
               <div></div>
             </>
           );
