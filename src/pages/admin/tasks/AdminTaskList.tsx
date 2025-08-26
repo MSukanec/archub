@@ -399,10 +399,8 @@ const AdminTaskList = () => {
                 if (tab === 'Sin Agrupar') setGroupingType('none')
                 else if (tab === 'Por Rubros') setGroupingType('rubros')
               },
-              showSearch: true,
               searchValue: searchValue,
               onSearchChange: setSearchValue,
-              showFilter: true,
               isFilterActive: typeFilter !== 'all',
               renderFilterContent: () => (
                 <div className="space-y-3 p-2 min-w-[200px]">
@@ -421,7 +419,6 @@ const AdminTaskList = () => {
                   </div>
                 </div>
               ),
-              showClearFilters: typeFilter !== 'all' || groupingType !== 'none',
               onClearFilters: clearFilters,
             }}
             renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (

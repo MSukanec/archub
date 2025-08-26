@@ -476,16 +476,12 @@ export default function MaterialList() {
             columns={productsColumns}
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             topBar={{
-              showSearch: true,
               searchValue: searchValue,
               onSearchChange: setSearchValue,
-              showFilter: true,
               renderFilterContent: renderFilterContent,
               isFilterActive: isFilterActive,
-              showGrouping: true,
               renderGroupingContent: renderGroupingContent,
               isGroupingActive: groupingType !== 'none',
-              showClearFilters: isFilterActive,
               onClearFilters: handleClearFilters
             }}
             renderCard={(product) => (

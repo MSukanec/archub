@@ -110,6 +110,7 @@ export function Table<T = any>({
   headerActions,
   showDoubleHeader = false,
 }: TableProps<T>) {
+  // Estados internos para funcionalidad estándar
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
   );
@@ -117,8 +118,71 @@ export function Table<T = any>({
     defaultSort?.direction || null,
   );
   const [currentPage, setCurrentPage] = useState(1);
+  const [internalSearchValue, setInternalSearchValue] = useState("");
+  const [internalFilters, setInternalFilters] = useState<any>({});
+  
   const itemsPerPage = 100;
   const showPagination = data.length > itemsPerPage;
+  
+  // Usar valores internos si no se pasan por topBar
+  const searchValue = topBar?.searchValue ?? internalSearchValue;
+  const isFilterActive = topBar?.isFilterActive ?? Object.keys(internalFilters).length > 0;
+  
+  // Handlers por defecto
+  const handleSearchChange = (value: string) => {
+    if (topBar?.onSearchChange) {
+      topBar.onSearchChange(value);
+    } else {
+      setInternalSearchValue(value);
+    }
+  };
+  
+  const handleClearFilters = () => {
+    if (topBar?.onClearFilters) {
+      topBar.onClearFilters();
+    } else {
+      setInternalSearchValue("");
+      setInternalFilters({});
+    }
+  };
+  
+  // Filtrado básico de datos por búsqueda
+  const filteredData = useMemo(() => {
+    if (!searchValue) return data;
+    
+    return data.filter((item) => {
+      // Buscar en todas las columnas de texto
+      return columns.some(column => {
+        const value = item[column.key as keyof T];
+        if (value == null) return false;
+        return String(value).toLowerCase().includes(searchValue.toLowerCase());
+      });
+    });
+  }, [data, searchValue, columns]);
+  
+  // Renderizado de contenido de filtros por defecto
+  const defaultFilterContent = () => {
+    return (
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-foreground">Filtros disponibles:</div>
+        <div className="text-xs text-muted-foreground">
+          Funcionalidad de filtros personalizada no configurada para esta tabla.
+        </div>
+      </div>
+    );
+  };
+  
+  // Renderizado de contenido de agrupación por defecto
+  const defaultGroupingContent = () => {
+    return (
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-foreground">Agrupación:</div>
+        <div className="text-xs text-muted-foreground">
+          Opciones de agrupación no configuradas para esta tabla.
+        </div>
+      </div>
+    );
+  };
 
   // Helper function to handle sort logic
   const handleSort = (
@@ -144,7 +208,7 @@ export function Table<T = any>({
   // 🆕 AGRUPAMIENTO DE DATOS
   const groupedData = useMemo(() => {
     const sortedData = (() => {
-      if (!sortKey || !sortDirection) return data;
+      if (!sortKey || !sortDirection) return filteredData;
 
       return [...data].sort((a, b) => {
         const column = columns.find((col) => col.key === sortKey);
@@ -356,23 +420,23 @@ export function Table<T = any>({
           tabs={topBar?.tabs}
           activeTab={topBar?.activeTab}
           onTabChange={topBar?.onTabChange}
-          showSearch={topBar?.showSearch}
-          onSearchChange={topBar?.onSearchChange}
-          searchValue={topBar?.searchValue}
-          showFilter={topBar?.showFilter}
-          renderFilterContent={topBar?.renderFilterContent}
-          isFilterActive={topBar?.isFilterActive}
-          showSort={topBar?.showSort}
+          showSearch={topBar?.showSearch ?? true}
+          onSearchChange={topBar?.onSearchChange ?? handleSearchChange}
+          searchValue={searchValue}
+          showFilter={topBar?.showFilter ?? true}
+          renderFilterContent={topBar?.renderFilterContent ?? defaultFilterContent}
+          isFilterActive={isFilterActive}
+          showSort={topBar?.showSort ?? false}
           renderSortContent={topBar?.renderSortContent}
-          isSortActive={topBar?.isSortActive}
-          showGrouping={topBar?.showGrouping}
-          renderGroupingContent={topBar?.renderGroupingContent}
-          isGroupingActive={topBar?.isGroupingActive}
-          showClearFilters={topBar?.showClearFilters}
-          onClearFilters={topBar?.onClearFilters}
-          showExport={topBar?.showExport}
+          isSortActive={topBar?.isSortActive ?? false}
+          showGrouping={topBar?.showGrouping ?? true}
+          renderGroupingContent={topBar?.renderGroupingContent ?? defaultGroupingContent}
+          isGroupingActive={topBar?.isGroupingActive ?? false}
+          showClearFilters={topBar?.showClearFilters ?? true}
+          onClearFilters={topBar?.onClearFilters ?? handleClearFilters}
+          showExport={topBar?.showExport ?? false}
           onExport={topBar?.onExport}
-          isExporting={topBar?.isExporting}
+          isExporting={topBar?.isExporting ?? false}
           customActions={topBar?.customActions}
         />
         
