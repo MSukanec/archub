@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useToggleProviderProduct, useProviderProducts } from '@/hooks/use-provider-products';
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
@@ -18,19 +18,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CurrencyAmountField } from '@/components/ui-custom/general/CurrencyAmountField';
 import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   provider_code: z.string().optional(),
-  currency: z.string().min(1, "La moneda es obligatoria"),
-  price: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0"),
+  currency_id: z.string().min(1, "La moneda es obligatoria"),
+  amount: z.coerce.number().min(0, "El precio debe ser mayor or igual a 0"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -61,9 +55,15 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   const product = modalData?.product;
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
-  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
   const { data: providerProducts = [] } = useProviderProducts();
   const toggleProviderProduct = useToggleProviderProduct();
+  
+  // Obtener moneda por defecto de la organización
+  const defaultCurrency = organizationCurrencies.find(oc => oc.is_default)?.currency;
+  
+  // Formatear monedas para CurrencyAmountField
+  const currencies = organizationCurrencies.map(oc => oc.currency);
 
   // Obtener el provider product actual para este producto
   const currentProviderProduct = providerProducts.find(pp => pp.product_id === product?.id);
@@ -73,18 +73,18 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     resolver: zodResolver(formSchema),
     defaultValues: {
       provider_code: currentProviderProduct?.provider_code || '',
-      currency: currentPrice?.currencies?.symbol || defaultCurrency?.symbol || "CLP",
-      price: currentPrice?.price || 0,
+      currency_id: currentPrice?.currency_id || defaultCurrency?.id || '',
+      amount: currentPrice?.price || 0,
     },
   });
 
   // Actualizar valores cuando cambie la moneda por defecto o el provider product
   useEffect(() => {
     if (currentPrice) {
-      form.setValue('currency', currentPrice.currencies?.symbol || 'CLP');
-      form.setValue('price', currentPrice.price || 0);
+      form.setValue('currency_id', currentPrice.currency_id || '');
+      form.setValue('amount', currentPrice.price || 0);
     } else if (defaultCurrency) {
-      form.setValue('currency', defaultCurrency.symbol);
+      form.setValue('currency_id', defaultCurrency.id);
     }
     if (currentProviderProduct?.provider_code) {
       form.setValue('provider_code', currentProviderProduct.provider_code);
@@ -96,13 +96,16 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
     
     setIsLoading(true);
     try {
+      // Encontrar el símbolo de la moneda para el hook
+      const selectedCurrency = currencies.find(c => c.id === data.currency_id);
+      
       // Actualizar el provider_code, moneda y precio usando el hook existente
       await toggleProviderProduct.mutateAsync({
         productId: product.id,
         isActive: true, // Asegurar que esté activo
         providerCode: data.provider_code,
-        currency: data.currency,
-        price: data.price
+        currency: selectedCurrency?.symbol,
+        price: data.amount
       });
       
       onClose();
@@ -189,51 +192,21 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
             )}
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moneda</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar moneda" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="CLP">CLP (Peso Chileno)</SelectItem>
-                      <SelectItem value="USD">USD (Dólar)</SelectItem>
-                      <SelectItem value="EUR">EUR (Euro)</SelectItem>
-                      <SelectItem value="UF">UF (Unidad de Fomento)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Precio</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          {/* Campo de Precio con Moneda */}
+          <FormItem>
+            <FormLabel>Precio</FormLabel>
+            <FormControl>
+              <CurrencyAmountField
+                value={form.watch('amount')}
+                currency={form.watch('currency_id')}
+                currencies={currencies}
+                onValueChange={(value) => form.setValue('amount', value || 0)}
+                onCurrencyChange={(currencyId) => form.setValue('currency_id', currencyId)}
+                placeholder="0.00"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         </form>
       </Form>
     </div>
