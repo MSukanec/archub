@@ -353,7 +353,7 @@ export function TaskSingleModal({
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-tight text-foreground">
-                      {task.custom_name || task.code || 'Sin nombre'}
+                      {task.custom_name || '(Sin Nombre)'}
                     </p>
                     {task.division && (
                       <p className="text-xs text-muted-foreground">
