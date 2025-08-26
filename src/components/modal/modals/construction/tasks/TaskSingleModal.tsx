@@ -75,27 +75,16 @@ export function TaskSingleModal({
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
 
-  // Hook para cargar TODAS las tareas de la librería parametrica (tareas base, no instancias de proyecto)
+  // Hook para cargar TODAS las tareas de la librería parametrica usando TASKS_VIEW
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['task-library'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      // Usar la tabla base de tareas, no la vista de construcción que incluye instancias de proyecto
+      // Usar TASKS_VIEW que incluye los campos division y unit ya resueltos
       const { data: allTasks, error } = await supabase
-        .from('tasks')
-        .select(`
-          id,
-          custom_name,
-          code,
-          division,
-          unit,
-          category,
-          created_at,
-          updated_at,
-          is_system,
-          organization_id
-        `)
+        .from('tasks_view')
+        .select('*')
         .order('custom_name', { ascending: true });
       
       if (error) {
@@ -103,7 +92,7 @@ export function TaskSingleModal({
         throw error;
       }
       
-      console.log('📋 Loaded tasks from library:', allTasks?.length, 'tasks');
+      console.log('📋 Loaded tasks from TASKS_VIEW:', allTasks?.length, 'tasks');
       return allTasks || [];
     },
     enabled: !!supabase
