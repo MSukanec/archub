@@ -68,6 +68,23 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const { data: unitPresentations = [] } = useUnitPresentations()
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
 
+  // Form setup
+  const form = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      material_id: '',
+      brand_id: '',
+      name: '',
+      description: '',
+      unit_presentation_id: '',
+      default_price: undefined,
+      currency_id: '',
+      default_provider: '',
+      url: '',
+      image_url: '',
+    },
+  })
+
   // Force edit mode when modal opens or load existing data
   useEffect(() => {
     setPanel('edit')
@@ -97,23 +114,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       form.setValue('currency_id', defaultCurrency.currency.id)
     }
   }, [organizationCurrencies])
-
-  // Form setup
-  const form = useForm<z.infer<typeof productSchema>>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      material_id: '',
-      brand_id: '',
-      name: '',
-      description: '',
-      unit_presentation_id: '',
-      default_price: undefined,
-      currency_id: '',
-      default_provider: '',
-      url: '',
-      image_url: '',
-    },
-  })
 
   const onSubmit = async (data: z.infer<typeof productSchema>) => {
     setIsLoading(true)
