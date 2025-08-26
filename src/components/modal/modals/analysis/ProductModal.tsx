@@ -18,6 +18,7 @@ import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectFi
 import { useCreateProduct, NewProductData } from '@/hooks/use-products'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
+import { useCreateMaterial } from '@/hooks/use-materials'
 import { useUnits } from '@/hooks/use-units'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -26,11 +27,11 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Package } from 'lucide-react'
 
 const productSchema = z.object({
-  material_id: z.string().min(1, 'El material es requerido'),
+  category_path: z.array(z.string()).min(1, 'La categoría es requerida'),
+  material_name: z.string().min(1, 'El nombre del material es requerido'),
   brand_id: z.string().optional(),
   name: z.string().min(1, 'El nombre del modelo es requerido'),
-  unit_id: z.string().min(1, 'La unidad de cómputo es requerida'),
-  unit_presentation_id: z.string().optional(),
+  unit_presentation_id: z.string().min(1, 'La unidad de cómputo es requerida'),
   default_price: z.coerce.number().optional(),
   currency_id: z.string().optional(),
   url: z.string().optional(),
@@ -60,6 +61,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   // Hooks
   const createMutation = useCreateProduct()
   const createBrandMutation = useCreateBrand()
+  const createMaterialMutation = useCreateMaterial()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
   
@@ -88,10 +90,10 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      material_id: '',
+      category_path: [],
+      material_name: '',
       brand_id: '',
       name: '',
-      unit_id: '',
       unit_presentation_id: '',
       default_price: undefined,
       currency_id: '',
@@ -104,10 +106,21 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
     setIsLoading(true)
     
     try {
+      // Primero crear el material con la categoría seleccionada
+      const categoryId = data.category_path[data.category_path.length - 1] // Última categoría seleccionada
+      const materialData = {
+        name: data.material_name,
+        category_id: categoryId,
+        unit_id: data.unit_presentation_id
+      }
+      
+      const newMaterial = await createMaterialMutation.mutateAsync(materialData)
+      
+      // Luego crear el producto usando el material creado
       const productData: NewProductData = {
-        material_id: data.material_id,
+        material_id: newMaterial.id,
         brand_id: data.brand_id || undefined,
-        unit_id: data.unit_id || undefined,
+        unit_id: data.unit_presentation_id || undefined,
         name: data.name,
         description: undefined,
         image_url: data.image_url || undefined,
@@ -157,16 +170,34 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
           {/* Categoría */}
           <FormField
             control={form.control}
-            name="material_id"
+            name="category_path"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoría *</FormLabel>
                 <FormControl>
                   <CascadingSelect
-                    value={field.value ? [field.value] : []}
-                    onValueChange={(values) => field.onChange(values[values.length - 1] || '')}
+                    value={field.value || []}
+                    onValueChange={field.onChange}
                     options={categoryOptions}
                     placeholder="Seleccionar categoría..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Nombre del Material */}
+          <FormField
+            control={form.control}
+            name="material_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Material *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ej: Cemento, Ladrillo, etc."
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -219,10 +250,10 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
 
           {/* Unidades - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Unidad de Cómputo */}
+            {/* Unidad de Cómputo/Presentación */}
             <FormField
               control={form.control}
-              name="unit_id"
+              name="unit_presentation_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Unidad de Cómputo *</FormLabel>
@@ -230,32 +261,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar unidad..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {unitOptions.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Unidad de Venta/Presentación */}
-            <FormField
-              control={form.control}
-              name="unit_presentation_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unidad de Venta/Presentación</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar presentación..." />
                       </SelectTrigger>
                       <SelectContent>
                         {unitPresentationOptions.map((presentation) => (
@@ -270,6 +275,9 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                 </FormItem>
               )}
             />
+
+            {/* Segundo campo vacío para mantener layout de 2 columnas */}
+            <div></div>
           </div>
 
           {/* Precio */}
