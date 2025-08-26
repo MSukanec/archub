@@ -13,12 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
-import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 
 import { useCreateProduct, NewProductData } from '@/hooks/use-products'
-import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
-import { useCreateMaterial } from '@/hooks/use-materials'
+import { useMaterials } from '@/hooks/use-materials'
 import { useUnits } from '@/hooks/use-units'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -27,27 +25,16 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Package } from 'lucide-react'
 
 const productSchema = z.object({
-  category_path: z.array(z.string()).min(1, 'La categoría es requerida'),
-  material_name: z.string().min(1, 'El nombre del material es requerido'),
+  material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
   name: z.string().min(1, 'El nombre del modelo es requerido'),
-  unit_presentation_id: z.string().min(1, 'La unidad de cómputo es requerida'),
+  unit_presentation_id: z.string().min(1, 'La unidad de venta es requerida'),
   default_price: z.coerce.number().optional(),
   currency_id: z.string().optional(),
   url: z.string().optional(),
   image_url: z.string().optional(),
 })
 
-// Helper function to convert material categories for CascadingSelect
-function convertToCascadingOptions(categories: any[]): any[] {
-  return categories.map(category => ({
-    value: category.id,
-    label: category.name,
-    children: category.children && category.children.length > 0 
-      ? convertToCascadingOptions(category.children) 
-      : undefined
-  }))
-}
 
 interface ProductModalProps {
   modalData: {}
@@ -61,12 +48,11 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   // Hooks
   const createMutation = useCreateProduct()
   const createBrandMutation = useCreateBrand()
-  const createMaterialMutation = useCreateMaterial()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
   
   // Data hooks
-  const { data: materialCategories = [] } = useMaterialCategories()
+  const { data: materials = [] } = useMaterials()
   const { data: brands = [] } = useBrands()
   const { data: units = [] } = useUnits()
   const { data: unitPresentations = [] } = useUnitPresentations()
@@ -90,8 +76,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      category_path: [],
-      material_name: '',
+      material_id: '',
       brand_id: '',
       name: '',
       unit_presentation_id: '',
@@ -106,19 +91,8 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
     setIsLoading(true)
     
     try {
-      // Primero crear el material con la categoría seleccionada
-      const categoryId = data.category_path[data.category_path.length - 1] // Última categoría seleccionada
-      const materialData = {
-        name: data.material_name,
-        category_id: categoryId,
-        unit_id: data.unit_presentation_id
-      }
-      
-      const newMaterial = await createMaterialMutation.mutateAsync(materialData)
-      
-      // Luego crear el producto usando el material creado
       const productData: NewProductData = {
-        material_id: newMaterial.id,
+        material_id: data.material_id,
         brand_id: data.brand_id || undefined,
         unit_id: data.unit_presentation_id || undefined,
         name: data.name,
@@ -139,7 +113,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   }
 
   // Prepare data for ComboBoxes
-  const categoryOptions = convertToCascadingOptions(materialCategories)
+  const materialOptions = materials.map(material => ({ value: material.id, label: material.name }))
   const brandOptions = brands.map(brand => ({ value: brand.id, label: brand.name }))
   const unitOptions = units.map(unit => ({ value: unit.id, label: unit.name }))
   const unitPresentationOptions = unitPresentations.map(up => ({ 
@@ -167,38 +141,26 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-6">
-          {/* Categoría */}
+          {/* Material */}
           <FormField
             control={form.control}
-            name="category_path"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoría *</FormLabel>
-                <FormControl>
-                  <CascadingSelect
-                    value={field.value || []}
-                    onValueChange={field.onChange}
-                    options={categoryOptions}
-                    placeholder="Seleccionar categoría..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Nombre del Material */}
-          <FormField
-            control={form.control}
-            name="material_name"
+            name="material_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Material *</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Ej: Cemento, Ladrillo, etc."
-                    {...field}
-                  />
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar material..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {materialOptions.map((material) => (
+                        <SelectItem key={material.value} value={material.value}>
+                          {material.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -248,15 +210,40 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
             )}
           />
 
-          {/* Unidades - Inline en Desktop */}
+          {/* Precio y Unidad - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Unidad de Cómputo/Presentación */}
+            {/* Precio */}
+            <FormField
+              control={form.control}
+              name="default_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Precio</FormLabel>
+                  <FormControl>
+                    <CurrencyAmountField
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      currency={selectedCurrency}
+                      currencies={currencyOptions}
+                      onCurrencyChange={(currencyId) => {
+                        setSelectedCurrency(currencyId)
+                        form.setValue('currency_id', currencyId)
+                      }}
+                      placeholder="0.00"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Unidad de Venta */}
             <FormField
               control={form.control}
               name="unit_presentation_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unidad de Cómputo *</FormLabel>
+                  <FormLabel>Unidad de Venta *</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
@@ -276,34 +263,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               )}
             />
 
-            {/* Segundo campo vacío para mantener layout de 2 columnas */}
-            <div></div>
           </div>
-
-          {/* Precio */}
-          <FormField
-            control={form.control}
-            name="default_price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Precio</FormLabel>
-                <FormControl>
-                  <CurrencyAmountField
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    currency={selectedCurrency}
-                    onCurrencyChange={(currencyId) => {
-                      setSelectedCurrency(currencyId)
-                      form.setValue('currency_id', currencyId)
-                    }}
-                    currencies={currencyOptions}
-                    placeholder="0.00"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           {/* Link e Imagen - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
