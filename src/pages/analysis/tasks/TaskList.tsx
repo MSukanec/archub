@@ -89,7 +89,7 @@ export default function TaskList() {
       
       switch (groupingType) {
         case 'rubros':
-          groupKey = task.element_category_name || 'Sin rubro';
+          groupKey = task.category || 'Sin rubro';
           break;
         default:
           groupKey = '';
@@ -105,12 +105,12 @@ export default function TaskList() {
   // Columnas base para la tabla
   const baseColumns = [
     {
-      key: 'element_category_name',
+      key: 'category',
       label: 'Rubro',
       width: '20%',
       render: (task: any) => (
         <Badge variant="outline" className="text-xs">
-          {task.element_category_name || 'Sin rubro'}
+          {task.category || 'Sin rubro'}
         </Badge>
       )
     },
@@ -123,12 +123,12 @@ export default function TaskList() {
       )
     },
     {
-      key: 'unit_name',
+      key: 'unit',
       label: 'Unidad',
       width: '10%',
       render: (task: any) => (
         <Badge variant="secondary" className="text-xs">
-          {task.unit_name || 'N/A'}
+          {task.unit || 'N/A'}
         </Badge>
       )
     },
@@ -181,7 +181,7 @@ export default function TaskList() {
     
     // Para agrupación por rubros, filtrar la columna de rubro
     return baseColumns.filter(column => {
-      if (groupingType === 'rubros' && column.key === 'element_category_name') return false;
+      if (groupingType === 'rubros' && column.key === 'category') return false;
       return true;
     });
   }, [groupingType]);
