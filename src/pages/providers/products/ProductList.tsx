@@ -51,7 +51,7 @@ export default function ProductList() {
 
   // Filter products and add groupKey for grouping
   const filteredProducts = useMemo(() => {
-    return products.map(product => {
+    const productsWithGroupKey = products.map(product => {
       let groupKey = '';
       
       switch (groupingType) {
@@ -79,6 +79,22 @@ export default function ProductList() {
         providerPrice: currentPrice?.price,
         providerCurrency: currentPrice?.currencies?.symbol
       };
+    });
+
+    // Ordenar según el tipo de agrupación
+    return productsWithGroupKey.sort((a, b) => {
+      switch (groupingType) {
+        case 'material':
+          const materialA = a.material || 'Sin material';
+          const materialB = b.material || 'Sin material';
+          return materialA.localeCompare(materialB);
+        case 'category':
+          const categoryA = a.groupKey;
+          const categoryB = b.groupKey;
+          return categoryA.localeCompare(categoryB);
+        default:
+          return a.name.localeCompare(b.name);
+      }
     });
   }, [products, groupingType, providerProducts]);
 
