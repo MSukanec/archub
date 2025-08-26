@@ -217,6 +217,26 @@ const AdminMaterialProducts = () => {
       )
     },
     {
+      key: 'avg_price',
+      label: 'Precio Promedio',
+      width: '15%',
+      render: (product: Product) => (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium">
+            {product.avg_price !== null && product.avg_price !== undefined ? 
+              `ARS ${product.avg_price.toFixed(2)}` : 
+              '–'
+            }
+          </span>
+          {product.providers_count && product.providers_count > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {product.providers_count} proveedor{product.providers_count > 1 ? 'es' : ''}
+            </span>
+          )}
+        </div>
+      )
+    },
+    {
       key: 'actions',
       label: 'Acciones',
       width: '120px',
