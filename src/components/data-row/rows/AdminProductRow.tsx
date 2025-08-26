@@ -53,8 +53,8 @@ interface AdminProductRowProps {
 
 // Helper para obtener las iniciales del producto
 const getProductInitials = (product: Product): string => {
-  const material = product.material?.name || 'P';
-  const brand = product.brand?.name || '';
+  const material = product.material || 'P';
+  const brand = product.brand || '';
   
   if (brand) {
     return `${material.slice(0, 1)}${brand.slice(0, 1)}`.toUpperCase();
@@ -111,18 +111,18 @@ export default function AdminProductRow({
 
         {/* Segunda fila - Material */}
         <div className="font-semibold text-xs truncate">
-          {product.material?.name || 'Sin material'}
+          {product.material || 'Sin material'}
         </div>
 
         {/* Tercera fila - Marca - Modelo */}
         <div className="font-semibold text-sm truncate">
-          {product.brand?.name ? `${product.brand.name} - ${product.name}` : product.name}
+          {product.brand ? `${product.brand} - ${product.name}` : product.name}
         </div>
 
         {/* Cuarta fila - Unidad - Precio */}
         <div className="text-xs text-muted-foreground truncate">
           {(() => {
-            const unitName = product.unit_presentation?.name || 'Sin unidad';
+            const unitName = product.unit || 'Sin unidad';
             const price = product.default_price !== null && product.default_price !== undefined 
               ? `$${product.default_price.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` 
               : 'Sin precio';

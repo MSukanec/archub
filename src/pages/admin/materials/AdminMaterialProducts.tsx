@@ -35,8 +35,8 @@ const AdminMaterialProducts = () => {
   const uniqueMaterials = products
     .filter(p => p.material)
     .reduce((acc: any[], product) => {
-      if (!acc.find(m => m.id === product.material?.id)) {
-        acc.push(product.material)
+      if (!acc.find(m => m.name === product.material)) {
+        acc.push({ id: product.material_id, name: product.material })
       }
       return acc
     }, [])
@@ -44,8 +44,8 @@ const AdminMaterialProducts = () => {
   const uniqueBrands = products
     .filter(p => p.brand)
     .reduce((acc: any[], product) => {
-      if (!acc.find(b => b.id === product.brand?.id)) {
-        acc.push(product.brand)
+      if (!acc.find(b => b.name === product.brand)) {
+        acc.push({ id: product.brand_id, name: product.brand })
       }
       return acc
     }, [])
@@ -54,8 +54,8 @@ const AdminMaterialProducts = () => {
   const filteredProducts = products.filter(product => {
     const matchesSearch = searchValue === '' || 
       product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      product.material?.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      product.brand?.name?.toLowerCase().includes(searchValue.toLowerCase())
+      product.material?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      product.brand?.toLowerCase().includes(searchValue.toLowerCase())
     
     const matchesMaterial = filterByMaterial === '' || product.material_id === filterByMaterial
     const matchesBrand = filterByBrand === '' || product.brand_id === filterByBrand
@@ -68,9 +68,9 @@ const AdminMaterialProducts = () => {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name)
     } else if (sortBy === 'material') {
-      return (a.material?.name || '').localeCompare(b.material?.name || '')
+      return (a.material || '').localeCompare(b.material || '')
     } else if (sortBy === 'brand') {
-      return (a.brand?.name || '').localeCompare(b.brand?.name || '')
+      return (a.brand || '').localeCompare(b.brand || '')
     } else {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
