@@ -113,25 +113,27 @@ export default function ProductList() {
   const baseColumns = [
     {
       key: 'selected',
-      label: 'Disponible',
-      width: '7%',
+      label: '',
+      width: '4%',
       render: (product: Product & { isSelected?: boolean }) => {
         const isSelected = product.isSelected || false
         return (
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => handleToggleProduct(product.id, isSelected)}
-            disabled={toggleProviderProduct.isPending}
-          />
+          <div className="flex justify-center">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => handleToggleProduct(product.id, isSelected)}
+              disabled={toggleProviderProduct.isPending}
+            />
+          </div>
         )
       }
     },
     {
       key: 'provider_code',
       label: 'Código',
-      width: '8%',
+      width: '10%',
       render: (product: Product & { providerCode?: string }) => (
-        <span className="text-sm font-mono text-muted-foreground">
+        <span className="text-xs font-mono text-muted-foreground">
           {product.providerCode || '-'}
         </span>
       )
@@ -139,9 +141,9 @@ export default function ProductList() {
     {
       key: 'category',
       label: 'Categoría',
-      width: '14%',
+      width: '16%',
       render: (product: Product) => (
-        <span className="text-sm font-medium">
+        <span className="text-xs font-medium">
           {(() => {
             const hierarchy = product.categoryHierarchy || 'Sin categoría';
             // Extraer solo la primera categoría (antes del primer " > ")
@@ -153,9 +155,9 @@ export default function ProductList() {
     {
       key: 'material',
       label: 'Material',
-      width: '14%',
+      width: '16%',
       render: (product: Product) => (
-        <span className="text-sm font-medium">
+        <span className="text-xs font-medium">
           {product.material?.name || 'Sin material'}
         </span>
       )
@@ -165,7 +167,7 @@ export default function ProductList() {
       label: 'Marca',
       width: '12%',
       render: (product: Product) => (
-        <span className="text-sm font-medium">
+        <span className="text-xs font-medium">
           {product.brand?.name || 'Sin marca'}
         </span>
       )
@@ -173,9 +175,9 @@ export default function ProductList() {
     {
       key: 'name',
       label: 'Modelo',
-      width: '14%',
+      width: '18%',
       render: (product: Product) => (
-        <span className="text-sm font-medium">{product.name}</span>
+        <span className="text-xs font-medium">{product.name}</span>
       )
     },
     {
@@ -191,7 +193,7 @@ export default function ProductList() {
     {
       key: 'url',
       label: 'Link',
-      width: '7%',
+      width: '6%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.url ? (
@@ -199,10 +201,9 @@ export default function ProductList() {
               variant="ghost"
               size="sm"
               onClick={() => window.open(product.url, '_blank')}
-              className="h-7 px-2 text-blue-600 hover:text-blue-700"
+              className="h-7 px-1 text-xs text-blue-600 hover:text-blue-700"
             >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Link
+              <ExternalLink className="h-3 w-3" />
             </Button>
           ) : (
             <span className="text-xs text-muted-foreground">-</span>
@@ -212,8 +213,8 @@ export default function ProductList() {
     },
     {
       key: 'image',
-      label: 'Imagen',
-      width: '7%',
+      label: 'Img',
+      width: '5%',
       render: (product: Product) => (
         <div className="flex items-center">
           {product.image_url ? (
@@ -251,12 +252,12 @@ export default function ProductList() {
     {
       key: 'default_price',
       label: 'Precio',
-      width: '11%',
+      width: '12%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
-          <span className="text-sm font-mono">
+          <span className="text-xs font-mono">
             {product.default_price !== null && product.default_price !== undefined ? 
-              `ARS ${product.default_price.toFixed(2)}` : 
+              `$${product.default_price.toFixed(0)}` : 
               '-'
             }
           </span>
@@ -265,8 +266,8 @@ export default function ProductList() {
     },
     {
       key: 'actions',
-      label: 'Acciones',
-      width: '10%',
+      label: '',
+      width: '6%',
       render: (product: Product) => (
         <div className="flex items-center gap-1">
           <Button
