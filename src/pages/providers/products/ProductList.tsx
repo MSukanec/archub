@@ -66,12 +66,15 @@ export default function ProductList() {
       
       const isSelected = isProductSelected(product.id)
       const providerProduct = providerProducts.find(pp => pp.product_id === product.id)
+      const currentPrice = providerProduct?.product_prices?.[0]
       
       return {
         ...product,
         groupKey,
         isSelected,
-        providerCode: providerProduct?.provider_code
+        providerCode: providerProduct?.provider_code,
+        providerPrice: currentPrice?.price,
+        providerCurrency: currentPrice?.currencies?.symbol
       };
     });
   }, [products, groupingType, providerProducts]);
@@ -250,19 +253,25 @@ export default function ProductList() {
       )
     },
     {
-      key: 'default_price',
+      key: 'price',
       label: 'Precio',
       width: '12%',
-      render: (product: Product) => (
-        <div className="flex items-center gap-1">
-          <span className="text-xs font-mono">
-            {product.default_price !== null && product.default_price !== undefined ? 
-              `$${product.default_price.toFixed(0)}` : 
-              '-'
-            }
-          </span>
-        </div>
-      )
+      render: (product: Product & { providerPrice?: number; providerCurrency?: string; isSelected?: boolean }) => {
+        const isSelected = product.isSelected || false
+        const displayPrice = isSelected && product.providerPrice ? product.providerPrice : product.default_price
+        const displayCurrency = isSelected && product.providerCurrency ? product.providerCurrency : '$'
+        
+        return (
+          <div className="flex items-center gap-1">
+            <span className="text-xs font-mono">
+              {displayPrice !== null && displayPrice !== undefined ? 
+                `${displayCurrency}${displayPrice.toFixed(0)}` : 
+                '-'
+              }
+            </span>
+          </div>
+        )
+      }
     },
     {
       key: 'actions',

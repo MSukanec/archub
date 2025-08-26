@@ -27,12 +27,25 @@ export function useProviderProducts() {
 
   return useQuery({
     queryKey: ['provider-products', organizationId],
-    queryFn: async (): Promise<ProviderProduct[]> => {
+    queryFn: async () => {
       if (!organizationId || !supabase) return [];
 
       const { data, error } = await supabase
         .from('provider_products')
-        .select('*')
+        .select(`
+          *,
+          product_prices (
+            id,
+            currency_id,
+            price,
+            valid_from,
+            currencies (
+              id,
+              name,
+              symbol
+            )
+          )
+        `)
         .eq('organization_id', organizationId);
 
       if (error) {
@@ -53,13 +66,19 @@ export function useToggleProviderProduct() {
   const organizationId = userData?.organization?.id;
 
   return useMutation({
-    mutationFn: async ({ productId, isActive, providerCode }: { productId: string; isActive: boolean; providerCode?: string }) => {
+    mutationFn: async ({ productId, isActive, providerCode, currency, price }: { 
+      productId: string; 
+      isActive: boolean; 
+      providerCode?: string;
+      currency?: string;
+      price?: number;
+    }) => {
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
       }
 
       try {
-        // Primero verificar si ya existe
+        // Primero verificar si ya existe el provider_product
         const { data: existing, error: selectError } = await supabase
           .from('provider_products')
           .select('id, is_active')
@@ -70,6 +89,8 @@ export function useToggleProviderProduct() {
         if (selectError && selectError.code !== 'PGRST116') {
           throw selectError;
         }
+
+        let providerProduct;
 
         if (existing) {
           // Actualizar existente
@@ -90,7 +111,7 @@ export function useToggleProviderProduct() {
             .single();
 
           if (error) throw error;
-          return data;
+          providerProduct = data;
         } else {
           // Crear nuevo
           const insertData: any = {
@@ -110,8 +131,65 @@ export function useToggleProviderProduct() {
             .single();
 
           if (error) throw error;
-          return data;
+          providerProduct = data;
         }
+
+        // Si se proporciona moneda y precio, manejar product_prices
+        if (currency && price !== undefined && providerProduct) {
+          // Obtener currency_id basado en el símbolo
+          const { data: currencyData, error: currencyError } = await supabase
+            .from('currencies')
+            .select('id')
+            .eq('symbol', currency)
+            .single();
+
+          if (currencyError) {
+            console.warn('Currency not found:', currency);
+          } else {
+            // Verificar si ya existe un precio para este provider_product
+            const { data: existingPrice, error: priceSelectError } = await supabase
+              .from('product_prices')
+              .select('id')
+              .eq('provider_product_id', providerProduct.id)
+              .single();
+
+            if (priceSelectError && priceSelectError.code !== 'PGRST116') {
+              console.warn('Error checking existing price:', priceSelectError);
+            }
+
+            if (existingPrice) {
+              // Actualizar precio existente
+              const { error: priceUpdateError } = await supabase
+                .from('product_prices')
+                .update({
+                  currency_id: currencyData.id,
+                  price: price,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', existingPrice.id);
+
+              if (priceUpdateError) {
+                console.warn('Error updating price:', priceUpdateError);
+              }
+            } else {
+              // Crear nuevo precio
+              const { error: priceInsertError } = await supabase
+                .from('product_prices')
+                .insert({
+                  provider_product_id: providerProduct.id,
+                  currency_id: currencyData.id,
+                  price: price,
+                  valid_from: new Date().toISOString().split('T')[0] // Solo fecha
+                });
+
+              if (priceInsertError) {
+                console.warn('Error creating price:', priceInsertError);
+              }
+            }
+          }
+        }
+
+        return providerProduct;
       } catch (error) {
         throw error;
       }

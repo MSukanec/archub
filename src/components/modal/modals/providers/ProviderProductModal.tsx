@@ -67,36 +67,42 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
 
   // Obtener el provider product actual para este producto
   const currentProviderProduct = providerProducts.find(pp => pp.product_id === product?.id);
+  const currentPrice = currentProviderProduct?.product_prices?.[0];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       provider_code: currentProviderProduct?.provider_code || '',
-      currency: defaultCurrency?.symbol || "CLP",
-      price: product?.default_price || 0,
+      currency: currentPrice?.currencies?.symbol || defaultCurrency?.symbol || "CLP",
+      price: currentPrice?.price || product?.default_price || 0,
     },
   });
 
   // Actualizar valores cuando cambie la moneda por defecto o el provider product
   useEffect(() => {
-    if (defaultCurrency) {
+    if (currentPrice) {
+      form.setValue('currency', currentPrice.currencies?.symbol || 'CLP');
+      form.setValue('price', currentPrice.price || 0);
+    } else if (defaultCurrency) {
       form.setValue('currency', defaultCurrency.symbol);
     }
     if (currentProviderProduct?.provider_code) {
       form.setValue('provider_code', currentProviderProduct.provider_code);
     }
-  }, [defaultCurrency, currentProviderProduct, form]);
+  }, [defaultCurrency, currentProviderProduct, currentPrice, form]);
 
   const handleSubmit = async (data: FormData) => {
     if (!product?.id) return;
     
     setIsLoading(true);
     try {
-      // Actualizar el provider_code usando el hook existente
+      // Actualizar el provider_code, moneda y precio usando el hook existente
       await toggleProviderProduct.mutateAsync({
         productId: product.id,
         isActive: true, // Asegurar que esté activo
-        providerCode: data.provider_code
+        providerCode: data.provider_code,
+        currency: data.currency,
+        price: data.price
       });
       
       onClose();
