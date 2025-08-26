@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import AdminMaterialProducts from './AdminMaterialProducts';
@@ -15,6 +15,7 @@ const AdminMaterials = () => {
   const [activeTab, setActiveTab] = useState('productos');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Mutation para refrescar precios promedio
   const refreshPricesMutation = useMutation({
@@ -23,6 +24,10 @@ const AdminMaterials = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidar todas las queries de productos para actualizar las tablas
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/provider-products'] });
+      
       toast({
         title: "Precios actualizados",
         description: "Los precios promedio han sido actualizados correctamente.",
@@ -57,7 +62,7 @@ const AdminMaterials = () => {
             label: "Refrescar",
             icon: RefreshCw,
             onClick: () => refreshPricesMutation.mutate(),
-            variant: "secondary",
+            variant: "ghost",
             isLoading: refreshPricesMutation.isPending
           }
         };
