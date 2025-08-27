@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Palette } from 'lucide-react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { FeatureIntroduction } from '@/components/ui-custom/FeatureIntroduction'
 
 import { useNavigationStore } from '@/stores/navigationStore'
 
@@ -14,14 +13,6 @@ export default function DesignDashboard() {
     setSidebarContext('design')
   }, [setSidebarContext])
 
-  // ActionBar features
-  const features = [
-    {
-      icon: <Palette className="h-4 w-4" />,
-      title: "Dashboard Integral",
-      description: "Panel de control con métricas principales del estado de diseño del proyecto."
-    }
-  ]
 
   const headerProps = {
     title: "Resumen de Diseño",
@@ -32,13 +23,6 @@ export default function DesignDashboard() {
     <Layout wide headerProps={headerProps}>
       <div>
 
-        {/* Feature Introduction - Mobile only */}
-        <FeatureIntroduction
-          title="Resumen de Diseño"
-          icon={<Palette className="h-6 w-6" />}
-          features={features}
-          className="md:hidden"
-        />
 
         {/* Coming Soon Section */}
         <motion.div
