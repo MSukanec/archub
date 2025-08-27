@@ -130,6 +130,36 @@ export default function ProductList() {
     })
   }
 
+  // Render grouping popover content
+  const renderGroupingContent = () => {
+    const groupingOptions = [
+      { value: 'none', label: 'No Agrupar' },
+      { value: 'category', label: 'Agrupar por Categoría' },
+      { value: 'material', label: 'Agrupar por Material' }
+    ];
+
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Opciones de agrupación</p>
+        <div className="space-y-1">
+          {groupingOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setGroupingType(option.value as any)}
+              className={`w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent transition-colors ${
+                groupingType === option.value 
+                  ? 'bg-accent text-accent-foreground font-medium' 
+                  : 'text-muted-foreground'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // Base columns definition
   const baseColumns = [
     {
@@ -351,14 +381,8 @@ export default function ProductList() {
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             getRowClassName={(product: any) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
             topBar={{
-              tabs: ['No Agrupar', 'Agrupar por Categoría', 'Agrupar por Material'],
-              activeTab: groupingType === 'none' ? 'No Agrupar' : 
-                        groupingType === 'category' ? 'Agrupar por Categoría' : 'Agrupar por Material',
-              onTabChange: (tab: string) => {
-                if (tab === 'No Agrupar') setGroupingType('none')
-                else if (tab === 'Agrupar por Categoría') setGroupingType('category')
-                else if (tab === 'Agrupar por Material') setGroupingType('material')
-              }
+              renderGroupingContent: renderGroupingContent,
+              isGroupingActive: groupingType !== 'none'
             }}
             renderCard={(product: any) => (
               <MaterialRow
