@@ -9,7 +9,7 @@ import { FormModalHeader } from "../../form/FormModalHeader";
 import { FormModalFooter } from "../../form/FormModalFooter";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { CustomCombobox } from "@/components/ui-custom/CustomCombobox";
+import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
 
 import { useCreateTaskCategory, useUpdateTaskCategory, TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 import { useAllTaskCategories } from "@/hooks/use-task-categories-admin";
@@ -105,15 +105,13 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
               <FormItem className="flex flex-col">
                 <FormLabel>Categoría Padre</FormLabel>
                 <FormControl>
-                  <CustomCombobox
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={allCategories || []}
+                  <ComboBox
+                    value={field.value || ""}
+                    onValueChange={(value) => field.onChange(value || null)}
+                    options={(allCategories || []).map(category => ({ value: category.id, label: category.name }))}
                     placeholder="Seleccionar categoría padre (opcional)"
                     searchPlaceholder="Buscar categoría..."
                     emptyMessage="No se encontraron categorías."
-                    allowClear={true}
-                    clearLabel="Sin padre (Categoría de nivel superior)"
                   />
                 </FormControl>
                 <FormMessage />

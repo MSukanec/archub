@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Type } from "lucide-react";
-import { CustomCombobox } from "@/components/ui-custom/CustomCombobox";
+import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
 import { useActions } from "@/hooks/use-actions";
 
 export interface TaskTemplateParameter {
@@ -371,15 +371,13 @@ export function TemplateNameBuilder({
         <label className="text-xs font-medium text-muted-foreground">
           Acción de la Plantilla
         </label>
-        <CustomCombobox
-          value={selectedAction}
-          onValueChange={handleActionChange}
-          options={actions}
+        <ComboBox
+          value={selectedAction || ""}
+          onValueChange={(value) => handleActionChange(value || null)}
+          options={actions.map(action => ({ value: action.id, label: action.name }))}
           placeholder="Seleccionar acción..."
           searchPlaceholder="Buscar acción..."
           emptyMessage="No se encontraron acciones."
-          allowClear={true}
-          clearLabel="Sin acción"
         />
       </div>
 
