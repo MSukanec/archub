@@ -5,7 +5,7 @@ import { AvatarUploader } from '@/components/ui-custom/AvatarUploader';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { PhoneInput } from '@/components/ui-custom/PhoneInput';
+import { PhoneField } from '@/components/ui-custom/fields/PhoneField';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 
@@ -362,7 +362,7 @@ export function DataBasic({ organization }: DataBasicProps) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
-                <PhoneInput 
+                <PhoneField 
                   value={phone}
                   onChange={setPhone}
                   placeholder="Número de teléfono"

@@ -33,7 +33,7 @@ const countries = [
   { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺' },
 ];
 
-interface PhoneInputProps {
+interface PhoneFieldProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -41,7 +41,7 @@ interface PhoneInputProps {
   className?: string;
 }
 
-export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
+export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
   ({ value, onChange, placeholder = 'Número de teléfono', disabled, className }, ref) => {
     const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default: Argentina
     const [open, setOpen] = useState(false);
@@ -130,4 +130,4 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
   }
 );
 
-PhoneInput.displayName = 'PhoneInput';
+PhoneField.displayName = 'PhoneField';

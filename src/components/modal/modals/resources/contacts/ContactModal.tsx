@@ -27,7 +27,7 @@ import { useSearchUsers } from "@/hooks/use-search-users";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { PhoneInput } from "@/components/ui-custom/PhoneInput";
+import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
 
 
 const createContactSchema = z.object({
@@ -502,7 +502,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
                 <FormItem>
                   <FormLabel>Teléfono</FormLabel>
                   <FormControl>
-                    <PhoneInput
+                    <PhoneField
                       value={field.value || ""}
                       onChange={field.onChange}
                       placeholder="Número de teléfono"
