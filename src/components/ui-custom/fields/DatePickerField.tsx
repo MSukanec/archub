@@ -52,8 +52,8 @@ export default function DatePickerField({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            // Exact SelectTrigger styles with mobile optimization
-            "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer min-h-[44px] md:min-h-auto",
+            // Exact SelectTrigger styles matching SELECT and INPUT components
+            "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 md:px-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer",
             // Placeholder text styling
             !value && "text-[var(--input-placeholder)]",
             disabled && "cursor-not-allowed opacity-60",
