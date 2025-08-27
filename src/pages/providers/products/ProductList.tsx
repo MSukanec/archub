@@ -130,35 +130,6 @@ export default function ProductList() {
     })
   }
 
-  // Render grouping popover content
-  const renderGroupingContent = () => {
-    const groupingOptions = [
-      { value: 'none', label: 'No Agrupar' },
-      { value: 'category', label: 'Agrupar por Categoría' },
-      { value: 'material', label: 'Agrupar por Material' }
-    ];
-
-    return (
-      <>
-        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
-        <div className="space-y-1">
-          {groupingOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant={groupingType === option.value ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
-              className={`w-full justify-start text-xs font-normal h-8 ${
-                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
-              }`}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </>
-    );
-  };
 
   // Base columns definition
   const baseColumns = [
@@ -381,7 +352,14 @@ export default function ProductList() {
             groupBy={groupingType === 'none' ? undefined : 'groupKey'}
             getRowClassName={(product: any) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
             topBar={{
-              renderGroupingContent: renderGroupingContent,
+              // 🆕 NUEVA FORMA SIMPLIFICADA - Solo props, sin función personalizada
+              groupingOptions: [
+                { value: 'none', label: 'No Agrupar' },
+                { value: 'category', label: 'Agrupar por Categoría' },
+                { value: 'material', label: 'Agrupar por Material' }
+              ],
+              currentGrouping: groupingType,
+              onGroupingChange: (value: string) => setGroupingType(value as 'none' | 'category' | 'material'),
               isGroupingActive: groupingType !== 'none'
             }}
             renderCard={(product: any) => (

@@ -79,6 +79,10 @@ interface TableProps<T = any> {
     isSortActive?: boolean;
     renderGroupingContent?: () => ReactNode;
     isGroupingActive?: boolean;
+    // 🆕 NUEVA FORMA SIMPLIFICADA DE AGRUPACIÓN (opcional)
+    groupingOptions?: { value: string; label: string }[];
+    currentGrouping?: string;
+    onGroupingChange?: (value: string) => void;
     showClearFilters?: boolean;
     onClearFilters?: () => void;
     showExport?: boolean;
@@ -181,6 +185,53 @@ export function Table<T = any>({
     });
   }, [data, searchValue, columns]);
   
+  /**
+   * 🎨 HELPER PARA CREAR BOTONES DE POPOVER ESTÁNDAR
+   * Usa este helper para crear botones consistentes en todos los popovers
+   * Maneja automáticamente el estilo activo/inactivo
+   */
+  const createPopoverButton = (
+    option: { value: string; label: string }, 
+    currentValue: string, 
+    onClick: (value: string) => void
+  ) => {
+    const isActive = currentValue === option.value;
+    return (
+      <Button
+        key={option.value}
+        variant={isActive ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => onClick(option.value)}
+        className={cn(
+          "w-full justify-start text-xs font-normal h-8",
+          isActive ? "button-secondary-pressed hover:bg-secondary" : ""
+        )}
+      >
+        {option.label}
+      </Button>
+    );
+  };
+
+  /**
+   * 🔧 HELPER PARA CREAR POPOVERS ESTÁNDAR
+   * Crea la estructura estándar de un popover con título y botones
+   */
+  const createStandardPopover = (
+    title: string,
+    options: { value: string; label: string }[],
+    currentValue: string,
+    onChange: (value: string) => void
+  ) => {
+    return (
+      <>
+        <div className="text-xs font-medium mb-2 block">{title}</div>
+        <div className="space-y-1">
+          {options.map((option) => createPopoverButton(option, currentValue, onChange))}
+        </div>
+      </>
+    );
+  };
+
   // Renderizado de contenido de filtros por defecto
   const defaultFilterContent = () => {
     return (
@@ -193,32 +244,21 @@ export function Table<T = any>({
     );
   };
   
-  // Renderizado de contenido de agrupación por defecto
+  /**
+   * 🔄 CONTENIDO DE AGRUPACIÓN POR DEFECTO
+   * Si no se proporciona renderGroupingContent, se usa este contenido por defecto
+   * Puedes extender topBar con groupingOptions para personalizar las opciones
+   */
   const defaultGroupingContent = () => {
-    const groupingOptions = [
+    // Si se proporcionan opciones personalizadas, úsalas; si no, usa la opción por defecto
+    const groupingOptions = topBar?.groupingOptions || [
       { value: 'none', label: 'Sin agrupar' }
     ];
+    
+    const currentValue = topBar?.currentGrouping || 'none';
+    const onChange = topBar?.onGroupingChange || (() => {});
 
-    return (
-      <>
-        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
-        <div className="space-y-1">
-          {groupingOptions.map((option) => (
-            <Button
-              key={option.value}
-              variant="secondary"
-              size="sm"
-              className={cn(
-                "w-full justify-start text-xs font-normal h-8",
-                "button-secondary-pressed hover:bg-secondary"
-              )}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </>
-    );
+    return createStandardPopover("Agrupar por", groupingOptions, currentValue, onChange);
   };
 
   // Renderizado de contenido de exportación por defecto
