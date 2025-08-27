@@ -108,19 +108,26 @@ export function HierarchicalTree({
     setOverId(over?.id as string || null);
 
     if (over && active.id !== over.id) {
-      // Determine drop position based on cursor position
+      // Determine drop position based on cursor position relative to the target element
       const rect = over.rect;
       if (rect) {
-        // Use the actual mouse position during drag, not activator event
-        const y = event.delta.y + (event.activatorEvent as MouseEvent)?.clientY || 0;
-        const top = rect.top;
-        const bottom = rect.bottom;
-        const height = rect.height;
-        const threshold = height * 0.3; // Increase threshold for better detection
+        // Get the current mouse position from the event
+        const pointerEvent = event.activatorEvent as PointerEvent;
+        const currentY = pointerEvent?.clientY + event.delta.y;
+        
+        const elementTop = rect.top;
+        const elementBottom = rect.bottom;
+        const elementHeight = rect.height;
+        
+        // Use smaller thresholds for more precise positioning
+        const threshold = elementHeight * 0.25;
 
-        if (y <= top + threshold) {
+        // Calculate relative position within the element
+        const relativeY = currentY - elementTop;
+        
+        if (relativeY <= threshold) {
           setDropPosition('before');
-        } else if (y >= bottom - threshold) {
+        } else if (relativeY >= elementHeight - threshold) {
           setDropPosition('after');
         } else {
           setDropPosition('child');
@@ -155,11 +162,29 @@ export function HierarchicalTree({
       
       console.log('Reordering:', { oldIndex, newIndex, dropPosition: currentDropPosition });
       
-      // Fix the reordering logic
+      // Adjust newIndex based on drop position
       if (currentDropPosition === 'after') {
-        newIndex = newIndex + 1;
+        // If dropping after, we want to insert after the target element
+        // But arrayMove expects the final position, so if we're moving down
+        // we need to account for the element being removed first
+        if (oldIndex < newIndex) {
+          // Moving down: the target stays in place after removal
+          newIndex = newIndex;
+        } else {
+          // Moving up: we want to be right after target
+          newIndex = newIndex + 1;
+        }
+      } else if (currentDropPosition === 'before') {
+        // If dropping before, we want to insert before the target element
+        if (oldIndex < newIndex) {
+          // Moving down: we want to be right before target, but since
+          // the dragged element will be removed first, target moves left
+          newIndex = newIndex - 1;
+        } else {
+          // Moving up: we want to be right before target
+          newIndex = newIndex;
+        }
       }
-      // For 'before', newIndex stays as is
       
       // Only reorder if positions are different
       if (oldIndex !== newIndex) {
