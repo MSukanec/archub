@@ -5,7 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-import { HierarchicalCategoryTree, CategoryTreeNode } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
+import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+
+interface CategoryTreeNode {
+  id: string;
+  name: string;
+  code?: string;
+  children?: CategoryTreeNode[];
+  taskGroups?: any[];
+  template?: any;
+  parent_id?: string | null;
+  order?: number;
+}
 
 import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -198,7 +209,7 @@ const AdminTaskDivisions = () => {
               </p>
             </div>
           ) : (
-            <HierarchicalCategoryTree
+            <HierarchicalTree
               categories={filteredDivisions}
               expandedCategories={expandedCategories}
               onToggleExpanded={toggleCategoryExpansion}

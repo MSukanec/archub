@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-import { HierarchicalCategoryTree } from '@/components/ui-custom/tables-and-trees/HierarchicalCategoryTree';
+import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -145,7 +145,7 @@ const AdminTaskCategories = () => {
               </p>
             </div>
           ) : (
-            <HierarchicalCategoryTree
+            <HierarchicalTree
               categories={filteredCategories}
               expandedCategories={expandedCategories}
               onToggleExpanded={toggleCategoryExpansion}

@@ -43,7 +43,7 @@ interface CategoryTreeNode {
   order?: number;
 }
 
-interface HierarchicalCategoryTreeProps {
+interface HierarchicalTreeProps {
   categories: CategoryTreeNode[];
   expandedCategories: Set<string>;
   onToggleExpanded: (categoryId: string) => void;
@@ -66,7 +66,7 @@ interface HierarchicalCategoryTreeProps {
   level?: number;
 }
 
-export function HierarchicalCategoryTree({
+export function HierarchicalTree({
   categories,
   expandedCategories,
   onToggleExpanded,
@@ -87,7 +87,7 @@ export function HierarchicalCategoryTree({
   showOrderNumber = false,
 
   level = 0
-}: HierarchicalCategoryTreeProps) {
+}: HierarchicalTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [dropPosition, setDropPosition] = useState<'before' | 'after' | 'child' | null>(null);
@@ -380,7 +380,7 @@ export function HierarchicalCategoryTree({
         {/* Children */}
         {hasChildCategories && isExpanded && (
           <div className="mt-1">
-            <HierarchicalCategoryTree
+            <HierarchicalTree
               categories={category.children!}
               expandedCategories={expandedCategories}
               onToggleExpanded={onToggleExpanded}

@@ -14,7 +14,7 @@ export interface TaskDivisionAdmin {
   order?: number;
   created_at: string;
   updated_at?: string;
-  children?: TaskDivisionAdmin[]; // Keep for compatibility with HierarchicalCategoryTree
+  children?: TaskDivisionAdmin[]; // Keep for compatibility with HierarchicalTree
 }
 
 export interface CreateTaskDivisionData {
