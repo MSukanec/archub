@@ -108,7 +108,6 @@ export function HierarchicalTree({
     setOverId(over?.id as string || null);
 
     if (over && active.id !== over.id) {
-      // Simplify detection - use the current mouse position
       const rect = over.rect;
       if (rect && event.activatorEvent) {
         // Get current mouse position
@@ -117,16 +116,31 @@ export function HierarchicalTree({
         const elementBottom = rect.bottom;
         const elementHeight = rect.height;
         
-        // Use simple thirds approach
-        const topThird = elementTop + (elementHeight / 3);
-        const bottomThird = elementBottom - (elementHeight / 3);
+        // Check if this is the first item in the list
+        const targetIndex = categories.findIndex((item) => item.id === over.id);
+        const isFirstItem = targetIndex === 0;
         
-        if (mouseY < topThird) {
-          setDropPosition('before');
-        } else if (mouseY > bottomThird) {
-          setDropPosition('after');
+        if (isFirstItem) {
+          // For the first item, use a larger "before" zone (half the element)
+          const middlePoint = elementTop + (elementHeight / 2);
+          
+          if (mouseY < middlePoint) {
+            setDropPosition('before');
+          } else {
+            setDropPosition('after');
+          }
         } else {
-          setDropPosition('child');
+          // For other items, use thirds approach
+          const topThird = elementTop + (elementHeight / 3);
+          const bottomThird = elementBottom - (elementHeight / 3);
+          
+          if (mouseY < topThird) {
+            setDropPosition('before');
+          } else if (mouseY > bottomThird) {
+            setDropPosition('after');
+          } else {
+            setDropPosition('child');
+          }
         }
       }
     } else {
