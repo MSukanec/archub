@@ -139,24 +139,25 @@ export default function ProductList() {
     ];
 
     return (
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Opciones de agrupación</p>
+      <>
+        <div className="text-xs font-medium mb-2 block">Agrupar por</div>
         <div className="space-y-1">
           {groupingOptions.map((option) => (
-            <button
+            <Button
               key={option.value}
-              onClick={() => setGroupingType(option.value as any)}
-              className={`w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent transition-colors ${
-                groupingType === option.value 
-                  ? 'bg-accent text-accent-foreground font-medium' 
-                  : 'text-muted-foreground'
-              }`}
+              variant={groupingType === option.value ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
+              className={cn(
+                "w-full justify-start text-xs font-normal h-8",
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              )}
             >
               {option.label}
-            </button>
+            </Button>
           ))}
         </div>
-      </div>
+      </>
     );
   };
 
