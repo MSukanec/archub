@@ -59,7 +59,7 @@ export function useMaterials() {
         .select(`
           *,
           unit:units(name),
-          category:material_categories!materials_category_id_fkey(name),
+          category:material_categories(name),
           default_unit_presentation:unit_presentations(name),
           organization_material_prices(
             id,
@@ -75,6 +75,12 @@ export function useMaterials() {
         console.error('Error fetching materials:', error)
         throw error
       }
+
+      console.log('🔧 Raw materials data sample:', data?.slice(0, 3)?.map(m => ({ 
+        name: m.name, 
+        category_id: m.category_id, 
+        category: m.category 
+      })))
 
       // Filtrar precios solo de la organización actual
       const materialsWithFilteredPrices = data?.map(material => ({
