@@ -36,6 +36,8 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
   const { editingDivision, isEditing = false, divisionId } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  console.log('🔧 TaskDivisionFormModal props:', { modalData, editingDivision, isEditing, divisionId });
+  
   const createMutation = useCreateTaskDivision();
   const updateMutation = useUpdateTaskDivision();
   const { data: allDivisions = [] } = useAllTaskDivisions(); // For parent selection
@@ -74,12 +76,12 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
     
     try {
       const submitData = {
-        parent_id: data.parent_id || null,
-        code: data.code || null,
+        parent_id: data.parent_id || undefined,
+        code: data.code || undefined,
         name: data.name,
         description: data.description || undefined,
         is_system: true, // Always system divisions
-        organization_id: null, // Always null for system divisions
+        organization_id: undefined, // Always undefined for system divisions
       };
 
       if (editingDivision) {

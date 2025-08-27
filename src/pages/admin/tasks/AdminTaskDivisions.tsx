@@ -98,18 +98,17 @@ const AdminTaskDivisions = () => {
     });
   };
 
-  const handleEditDivision = (divisionId: string) => {
-    // Find the division object to pass complete data to modal
-    const divisionToEdit = divisions.find(div => div.id === divisionId);
+  const handleEditDivision = (division: CategoryTreeNode) => {
+    console.log('🔧 Editing division:', { division, divisionsLength: divisions.length });
     openModal('task-division', { 
       isEditing: true, 
-      divisionId,
-      editingDivision: divisionToEdit 
+      divisionId: division.id,
+      editingDivision: division 
     });
   };
 
   const handleCreateDivision = () => {
-    openModal('task-division', { isEditing: true });
+    openModal('task-division', { isEditing: false });
   };
 
   const handleReorderDivisions = async (reorderedDivisions: CategoryTreeNode[]) => {
@@ -213,7 +212,7 @@ const AdminTaskDivisions = () => {
               categories={filteredDivisions}
               expandedCategories={expandedCategories}
               onToggleExpanded={toggleCategoryExpansion}
-              onEdit={(division) => handleEditDivision(division.id)}
+              onEdit={(division) => handleEditDivision(division)}
               onDelete={(divisionId) => {
                 // Find division name for confirmation
                 const divisionName = filteredDivisions.find(div => div.id === divisionId)?.name || 'División';
