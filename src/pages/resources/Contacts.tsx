@@ -482,9 +482,6 @@ export default function Contacts() {
           setActiveTab(tabId);
         },
         // Botones de acción del header
-        showHeaderSearch: true,
-        headerSearchValue: searchValue,
-        onHeaderSearchChange: setSearchValue,
         showFilters: true,
 
         onHeaderClearFilters: () => {
