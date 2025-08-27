@@ -12,7 +12,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProviderProducts, useToggleProviderProduct } from '@/hooks/use-provider-products'
-import { cn } from '@/lib/utils'
 
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")
@@ -149,10 +148,7 @@ export default function ProductList() {
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
-              className={cn(
-                "w-full justify-start text-xs font-normal h-8",
-                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
-              )}
+              className="w-full justify-start text-xs font-normal h-8"
             >
               {option.label}
             </Button>
