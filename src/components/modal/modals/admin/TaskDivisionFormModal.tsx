@@ -75,14 +75,19 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
     setIsSubmitting(true);
     
     try {
+      // Handle parent_id properly - convert empty string to null
+      const parentId = data.parent_id && data.parent_id !== '' ? data.parent_id : null;
+      
       const submitData = {
-        parent_id: data.parent_id || undefined,
+        parent_id: parentId,
         code: data.code || undefined,
         name: data.name,
         description: data.description || undefined,
         is_system: true, // Always system divisions
         organization_id: undefined, // Always undefined for system divisions
       };
+      
+      console.log('🔧 Submit data:', { originalData: data, submitData });
 
       if (editingDivision) {
         await updateMutation.mutateAsync({ 
@@ -115,14 +120,20 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Padre (opcional)</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select 
+                  onValueChange={(value) => {
+                    // Convert "no-parent" to empty string and let form handle it
+                    field.onChange(value === "no-parent" ? "" : value);
+                  }} 
+                  value={field.value || "no-parent"}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar división padre" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Sin padre</SelectItem>
+                    <SelectItem value="no-parent">Sin padre</SelectItem>
                     {allDivisions
                       .filter(division => division.id !== editingDivision?.id) // Evitar bucles
                       .map((division) => (
