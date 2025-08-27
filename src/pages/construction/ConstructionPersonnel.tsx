@@ -4,7 +4,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useNavigationStore } from '@/stores/navigationStore'
-import CustomGradebook from '@/components/ui-custom/CustomGradebook'
+import AttendanceGradebook from '@/components/charts/graphics/AttendanceGradebook'
 import { EmptyState } from '@/components/ui-custom/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { Users, Plus, UserCheck } from 'lucide-react'
@@ -95,7 +95,7 @@ function transformAttendanceData(attendanceData: any[]) {
 
   const workers = Array.from(workersMap.values())
 
-  // Create attendance records array for CustomGradebook
+  // Create attendance records array for AttendanceGradebook
   const attendance: any[] = []
 
   attendanceData.forEach(attendanceRecord => {
@@ -485,7 +485,7 @@ export default function ConstructionPersonnel() {
         {activeTab === 'attendance' && (
           <>
             {workers.length > 0 ? (
-              <CustomGradebook 
+              <AttendanceGradebook 
                 workers={workers}
                 attendance={attendance}
                 onEditAttendance={handleEditAttendance}

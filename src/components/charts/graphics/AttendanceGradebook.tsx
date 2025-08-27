@@ -22,7 +22,7 @@ interface AttendanceRecord {
   status: 'full' | 'half'
 }
 
-interface CustomGradebookProps {
+interface AttendanceGradebookProps {
   workers?: Worker[]
   attendance?: AttendanceRecord[]
   onExportAttendance?: () => void
@@ -30,7 +30,7 @@ interface CustomGradebookProps {
   onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void // New prop for editing attendance
 }
 
-const CustomGradebook: React.FC<CustomGradebookProps> = ({
+const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   workers = [],
   attendance = [],
   onExportAttendance,
@@ -498,4 +498,4 @@ const CustomGradebook: React.FC<CustomGradebookProps> = ({
   )
 }
 
-export default CustomGradebook
+export default AttendanceGradebook
