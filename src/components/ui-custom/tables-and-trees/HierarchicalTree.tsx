@@ -108,26 +108,22 @@ export function HierarchicalTree({
     setOverId(over?.id as string || null);
 
     if (over && active.id !== over.id) {
-      // Determine drop position based on cursor position relative to the target element
+      // Simplify detection - use the current mouse position
       const rect = over.rect;
-      if (rect) {
-        // Get the current mouse position from the event
-        const pointerEvent = event.activatorEvent as PointerEvent;
-        const currentY = pointerEvent?.clientY + event.delta.y;
-        
+      if (rect && event.activatorEvent) {
+        // Get current mouse position
+        const mouseY = (event.activatorEvent as PointerEvent).clientY + event.delta.y;
         const elementTop = rect.top;
         const elementBottom = rect.bottom;
         const elementHeight = rect.height;
         
-        // Use smaller thresholds for more precise positioning
-        const threshold = elementHeight * 0.25;
-
-        // Calculate relative position within the element
-        const relativeY = currentY - elementTop;
+        // Use simple thirds approach
+        const topThird = elementTop + (elementHeight / 3);
+        const bottomThird = elementBottom - (elementHeight / 3);
         
-        if (relativeY <= threshold) {
+        if (mouseY < topThird) {
           setDropPosition('before');
-        } else if (relativeY >= elementHeight - threshold) {
+        } else if (mouseY > bottomThird) {
           setDropPosition('after');
         } else {
           setDropPosition('child');
@@ -155,40 +151,49 @@ export function HierarchicalTree({
       return;
     }
 
-    // Handle reordering
+    // Handle reordering - SIMPLIFIED LOGIC
     if ((currentDropPosition === 'before' || currentDropPosition === 'after') && onReorder) {
       const oldIndex = categories.findIndex((item) => item.id === active.id);
-      let newIndex = categories.findIndex((item) => item.id === over.id);
+      const targetIndex = categories.findIndex((item) => item.id === over.id);
       
-      console.log('Reordering:', { oldIndex, newIndex, dropPosition: currentDropPosition });
+      let newIndex = targetIndex;
       
-      // Adjust newIndex based on drop position
+      // Simple logic: before = target position, after = target position + 1
       if (currentDropPosition === 'after') {
-        // If dropping after, we want to insert after the target element
-        // But arrayMove expects the final position, so if we're moving down
-        // we need to account for the element being removed first
-        if (oldIndex < newIndex) {
-          // Moving down: the target stays in place after removal
-          newIndex = newIndex;
-        } else {
-          // Moving up: we want to be right after target
-          newIndex = newIndex + 1;
-        }
-      } else if (currentDropPosition === 'before') {
-        // If dropping before, we want to insert before the target element
-        if (oldIndex < newIndex) {
-          // Moving down: we want to be right before target, but since
-          // the dragged element will be removed first, target moves left
-          newIndex = newIndex - 1;
-        } else {
-          // Moving up: we want to be right before target
-          newIndex = newIndex;
-        }
+        newIndex = targetIndex + 1;
       }
+      // For 'before', newIndex = targetIndex (insert at target position)
       
-      // Only reorder if positions are different
-      if (oldIndex !== newIndex) {
-        const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+      // Clamp to valid range
+      newIndex = Math.max(0, Math.min(newIndex, categories.length));
+      
+      console.log('Reordering:', { 
+        oldIndex, 
+        targetIndex, 
+        newIndex, 
+        dropPosition: currentDropPosition,
+        draggedItem: categories[oldIndex]?.name,
+        targetItem: categories[targetIndex]?.name 
+      });
+      
+      // Only reorder if positions are actually different
+      if (oldIndex !== newIndex && oldIndex >= 0 && targetIndex >= 0) {
+        // Create a new array without the dragged item
+        const itemsWithoutDragged = categories.filter((_, index) => index !== oldIndex);
+        
+        // Calculate the insertion position in the new array
+        let insertIndex = newIndex;
+        if (oldIndex < newIndex) {
+          insertIndex = newIndex - 1; // Adjust because we removed an item before the target
+        }
+        
+        // Insert the dragged item at the new position
+        const draggedItem = categories[oldIndex];
+        const reorderedCategories = [
+          ...itemsWithoutDragged.slice(0, insertIndex),
+          draggedItem,
+          ...itemsWithoutDragged.slice(insertIndex)
+        ];
         
         // Update order property for each item
         const reorderedWithOrder = reorderedCategories.map((category, index) => ({
