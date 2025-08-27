@@ -148,7 +148,9 @@ export default function ProductList() {
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material')}
-              className="w-full justify-start text-xs font-normal h-8"
+              className={`w-full justify-start text-xs font-normal h-8 ${
+                groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
+              }`}
             >
               {option.label}
             </Button>
