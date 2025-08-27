@@ -118,13 +118,35 @@ export function HierarchicalTree({
         
         // Check if this is the first item in the list
         const targetIndex = categories.findIndex((item) => item.id === over.id);
+        const draggedIndex = categories.findIndex((item) => item.id === active.id);
         const isFirstItem = targetIndex === 0;
+        const isDraggingFromBelow = draggedIndex > targetIndex;
         
         if (isFirstItem) {
-          // For the first item, use a larger "before" zone (half the element)
-          const middlePoint = elementTop + (elementHeight / 2);
+          // For the first item, use special logic
+          let shouldBeBefore = false;
           
-          if (mouseY < middlePoint) {
+          if (isDraggingFromBelow) {
+            // If dragging from below to first item, be more generous with "before" detection
+            const generousBeforeThreshold = elementTop + (elementHeight * 0.9);
+            shouldBeBefore = mouseY < generousBeforeThreshold;
+          } else {
+            // Normal detection for other cases
+            const beforeThreshold = elementTop + (elementHeight * 0.8);
+            shouldBeBefore = mouseY < beforeThreshold;
+          }
+          
+          console.log('🔧 First item detection:', {
+            mouseY,
+            elementTop,
+            elementHeight,
+            targetIndex,
+            draggedIndex,
+            isDraggingFromBelow,
+            shouldBeBefore
+          });
+          
+          if (shouldBeBefore) {
             setDropPosition('before');
           } else {
             setDropPosition('after');
@@ -192,22 +214,12 @@ export function HierarchicalTree({
       
       // Only reorder if positions are actually different
       if (oldIndex !== newIndex && oldIndex >= 0 && targetIndex >= 0) {
-        // Create a new array without the dragged item
-        const itemsWithoutDragged = categories.filter((_, index) => index !== oldIndex);
-        
-        // Calculate the insertion position in the new array
-        let insertIndex = newIndex;
-        if (oldIndex < newIndex) {
-          insertIndex = newIndex - 1; // Adjust because we removed an item before the target
-        }
-        
-        // Insert the dragged item at the new position
         const draggedItem = categories[oldIndex];
-        const reorderedCategories = [
-          ...itemsWithoutDragged.slice(0, insertIndex),
-          draggedItem,
-          ...itemsWithoutDragged.slice(insertIndex)
-        ];
+        
+        // Simple approach: remove item and insert at new position
+        const reorderedCategories = [...categories];
+        reorderedCategories.splice(oldIndex, 1); // Remove from old position
+        reorderedCategories.splice(newIndex > oldIndex ? newIndex - 1 : newIndex, 0, draggedItem); // Insert at new position
         
         // Update order property for each item
         const reorderedWithOrder = reorderedCategories.map((category, index) => ({
