@@ -72,10 +72,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
-import AnalysisTasks from "@/pages/analysis/tasks/Tasks";
-import AnalysisLabor from "@/pages/analysis/labor/Labor";
-import AnalysisMaterials from "@/pages/analysis/materials/Materials";
-import AnalysisIndirects from "@/pages/analysis/indirects/Indirects";
+import AnalysisTasks from "@/pages/professional/analysis/tasks/Tasks";
+import AnalysisLabor from "@/pages/professional/analysis/labor/Labor";
+import AnalysisMaterials from "@/pages/professional/analysis/materials/Materials";
+import AnalysisIndirects from "@/pages/professional/analysis/indirects/Indirects";
 
 
 
