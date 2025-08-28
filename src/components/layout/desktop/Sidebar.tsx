@@ -520,7 +520,7 @@ export function Sidebar() {
           </div>
 
           {/* Divisor */}
-          <div className="h-px bg-[var(--sidebar-icon)] opacity-20 mb-2"></div>
+          <div className="h-px bg-[var(--sidebar-icon)] mb-2"></div>
           
           {/* Settings buttons */}
           <div className="flex flex-col gap-[2px] mb-[2px]">
