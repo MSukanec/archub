@@ -64,6 +64,7 @@ import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
 import { AdminProductModal } from '../modals/admin/materials/AdminProductModal';
+import { IndirectCostsModal } from '../modals/analysis/IndirectCostsModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -217,6 +218,8 @@ export function ModalFactory() {
       return <ProviderProductModal modalData={data || undefined} onClose={closeModal} />;
     case 'custom-product':
       return <ProductModal modalData={data || {}} onClose={closeModal} />;
+    case 'indirect-cost':
+      return <IndirectCostsModal modalData={data || {}} onClose={closeModal} />;
     default:
       return null;
   }
