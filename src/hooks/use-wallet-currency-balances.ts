@@ -57,6 +57,18 @@ export function useWalletCurrencyBalances(organizationId?: string, projectId?: s
         const amount = movement.amount || 0;
         const typeName = movement.movement_data.type?.name?.toLowerCase() || '';
 
+        // DEBUG: Log movimientos de efectivo ARS para investigar discrepancia
+        if (walletName === 'Efectivo' && currencyCode === 'ARS') {
+          console.log('🔍 DEBUG Efectivo ARS:', {
+            date: movement.movement_date,
+            description: movement.description,
+            amount: amount,
+            typeName: typeName,
+            conversion_group_id: movement.conversion_group_id,
+            is_conversion: movement.is_conversion
+          });
+        }
+
         // Count movements per currency
         currencyMovementCounts.set(currencyCode, (currencyMovementCounts.get(currencyCode) || 0) + 1);
 
