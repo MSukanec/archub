@@ -158,13 +158,14 @@ export default function SelectMode() {
       // Set the bypass flag to prevent future onboarding redirects
       console.log('SelectMode: Completed onboarding, preventing future redirects');
       localStorage.setItem('onboarding_bypass', 'true');
+      localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
       
       // Reset completion flag to allow normal flow
       setCompletingOnboarding(false);
       
       // Navigate immediately with React Router
       setSidebarContext('organization');
-      navigate('/organization/dashboard');
+      navigate('/dashboard');
       
       console.log('SelectMode: Navigation completed with fresh user data');
     },

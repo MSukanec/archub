@@ -86,13 +86,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
       
       // Check bypass flag
       const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
+      const bypassUserId = localStorage.getItem('onboarding_bypass_user_id');
       
       // Handle bypass logic
       if (onboardingBypass) {
-        // Clear bypass for users who haven't completed onboarding (fresh users)
-        if (!onboardingCompleted) {
-          console.log('AuthGuard: Clearing bypass for incomplete onboarding');
+        // Clear bypass if it's from a different user or if user hasn't completed onboarding
+        if (!onboardingCompleted || bypassUserId !== userData.user?.id) {
+          console.log('AuthGuard: Clearing bypass for incomplete onboarding or different user');
           localStorage.removeItem('onboarding_bypass');
+          localStorage.removeItem('onboarding_bypass_user_id');
         } else {
           // Bypass active for completed users - skip all onboarding checks
           console.log('AuthGuard: Bypass active, skipping onboarding checks');
