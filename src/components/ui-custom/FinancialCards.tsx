@@ -1,7 +1,7 @@
 import { DollarSign } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMobile } from '@/hooks/use-mobile'
-import { MobileCurrencyCard } from '@/components/cards/MobileCurrencyCard'
+import { MobileCurrencyCard } from '@/components/ui/cards/MobileCurrencyCard'
 
 interface CurrencyBalance {
   currency: string

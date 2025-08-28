@@ -35,7 +35,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
-import ContactCardDesktop from '@/components/cards/contacts/ContactCardDesktop'
+import ContactCardDesktop from '@/components/ui/cards/contacts/ContactCardDesktop'
 import { ContactAvatarUploader } from '@/components/contacts/ContactAvatarUploader'
 import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
 

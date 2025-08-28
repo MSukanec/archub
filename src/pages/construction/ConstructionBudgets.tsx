@@ -20,7 +20,7 @@ import { useBudgetTasks } from '@/hooks/use-budget-tasks'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 // Removed direct Supabase import - now using server endpoints
-import { BudgetTaskCard } from '@/components/cards/BudgetTaskCard'
+import { BudgetTaskCard } from '@/components/ui/cards/BudgetTaskCard'
 import { useUnits } from '@/hooks/use-units'
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
 

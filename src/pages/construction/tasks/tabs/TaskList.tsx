@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
-import ConstructionTaskCard from '@/components/cards/ConstructionTaskCard'
+import ConstructionTaskCard from '@/components/ui/cards/ConstructionTaskCard'
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal'
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost'

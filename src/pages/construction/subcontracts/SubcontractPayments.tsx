@@ -6,7 +6,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import InstallmentDetailCard from '@/components/cards/InstallmentDetailCard'
+import InstallmentDetailCard from '@/components/ui/cards/InstallmentDetailCard'
 import { Receipt, Plus, Wallet } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
