@@ -1,5 +1,5 @@
 import React from 'react'
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'

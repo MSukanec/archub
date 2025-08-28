@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProviderProducts, useToggleProviderProduct } from '@/hooks/use-provider-products'
 

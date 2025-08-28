@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { cn } from '@/lib/utils'
 
 export default function MaterialList() {

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox'
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
 import { cn } from '@/lib/utils'
 
 import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box, RefreshCw } from 'lucide-react'

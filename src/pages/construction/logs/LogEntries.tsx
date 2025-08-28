@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/ImageLightbox";
+import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
 import { LogRow } from "@/components/data-row/rows";
