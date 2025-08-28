@@ -351,14 +351,14 @@ export function Sidebar() {
       },
       {
         id: 'proyecto',
-        icon: HardHat,
+        icon: FolderOpen,
         label: 'Proyecto',
         defaultRoute: '/construction/dashboard',
         isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
       },
       {
         id: 'biblioteca',
-        icon: FolderOpen,
+        icon: BookOpen,
         label: 'Biblioteca',
         defaultRoute: '/library/documentation',
         isActive: location.startsWith('/library')
