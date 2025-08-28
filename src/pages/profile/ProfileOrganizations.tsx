@@ -17,7 +17,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { ActiveOrganizationMembersCard } from '@/components/ui-custom/ActiveOrganizationMembersCard'
+import { OrganizationMemberAvatars } from '@/components/ui-custom/general/OrganizationMemberAvatars'
 import { AdminOrganizationRow } from '@/components/data-row/rows'
 import { useMobile } from '@/hooks/use-mobile'
 

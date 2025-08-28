@@ -10,11 +10,11 @@ interface Member {
   };
 }
 
-interface ActiveOrganizationMembersCardProps {
+interface OrganizationMemberAvatarsProps {
   members: Member[];
 }
 
-export function ActiveOrganizationMembersCard({ members }: ActiveOrganizationMembersCardProps) {
+export function OrganizationMemberAvatars({ members }: OrganizationMemberAvatarsProps) {
   if (!members || members.length === 0) return null;
   
   const displayMembers = members.slice(0, 4);
