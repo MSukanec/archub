@@ -98,7 +98,7 @@ interface UserData {
 }
 
 export function useCurrentUser(forceRefresh?: boolean) {
-  const { user: authUser, loading: authLoading } = useAuthStore()
+  const { user: authUser, loading: authLoading, logout } = useAuthStore()
 
   return useQuery<UserData>({
     queryKey: ['current-user'],
@@ -142,6 +142,14 @@ export function useCurrentUser(forceRefresh?: boolean) {
         },
       })
 
+      // Handle user not found (deleted from database)
+      if (response.status === 404) {
+        console.log('🚨 User deleted from database but session still active - logging out automatically')
+        // Force logout since user no longer exists in database
+        await logout()
+        throw new Error('User not found in database - session invalidated')
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -156,8 +164,8 @@ export function useCurrentUser(forceRefresh?: boolean) {
     },
     enabled: !!authUser && !authLoading,
     retry: (failureCount, error) => {
-      // Don't retry if user is logging out or not authenticated
-      if (authLoading || !authUser || error.message.includes('logging out')) {
+      // Don't retry if user is logging out, not authenticated, or was deleted
+      if (authLoading || !authUser || error.message.includes('logging out') || error.message.includes('session invalidated')) {
         return false
       }
       return failureCount < 2
