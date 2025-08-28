@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
-import Plan from "@/components/ui-custom/Plan";
+import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 
 import { 
   Home,
@@ -273,7 +273,7 @@ export function SidebarSubmenu() {
                 return (
                   <div key={index} className="mb-[1px]">
                     <div className="p-1">
-                      <Plan isExpanded={isSecondarySidebarExpanded} />
+                      <PlanBadge isExpanded={isSecondarySidebarExpanded} />
                     </div>
                   </div>
                 );

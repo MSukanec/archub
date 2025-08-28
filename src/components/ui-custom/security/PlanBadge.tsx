@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Star, Crown, Zap } from "lucide-react";
 
-interface PlanProps {
+interface PlanBadgeProps {
   isExpanded: boolean;
 }
 
-export default function Plan({ isExpanded }: PlanProps) {
+export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
   const { data: userData } = useCurrentUser();
 
   return (
