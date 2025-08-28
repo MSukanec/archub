@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/components/layout/mobile/ActionBarMobileContext";
-import { AuthGuard } from "@/components/ui-custom/AuthGuard";
+import { AuthGuard } from "@/components/ui-custom/security/AuthGuard";
 import { AdminProtectedRoute } from "@/components/ui-custom/AdminProtectedRoute";
 
 // Public Pages
