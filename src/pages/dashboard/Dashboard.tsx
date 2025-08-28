@@ -4,7 +4,6 @@ import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DashboardDashboard } from './DashboardDashboard';
-import { OrganizationActivity } from '../professional/organization/Activity';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -28,12 +27,6 @@ export default function Dashboard() {
       id: 'Resumen',
       label: 'Resumen',
       isActive: activeTab === 'Resumen'
-    },
-
-    {
-      id: 'Actividad',
-      label: 'Actividad',
-      isActive: activeTab === 'Actividad'
     }
   ];
 
@@ -75,7 +68,6 @@ export default function Dashboard() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Resumen' && <DashboardDashboard organization={organization} />}
-      {activeTab === 'Actividad' && <OrganizationActivity />}
     </Layout>
   );
 }
