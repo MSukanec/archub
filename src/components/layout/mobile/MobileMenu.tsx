@@ -43,6 +43,7 @@ import {
   Tag,
   TrendingUp,
   ListTodo,
+  Library,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -311,7 +312,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       },
       {
         id: 'biblioteca',
-        icon: BookOpen,
+        icon: Library,
         label: 'Biblioteca',
         defaultRoute: '/library/documentation',
         isActive: location.startsWith('/library')

@@ -56,7 +56,8 @@ import {
   HandCoins,
   TrendingUp,
   ListTodo,
-  TableIcon
+  TableIcon,
+  Library
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -358,7 +359,7 @@ export function Sidebar() {
       },
       {
         id: 'biblioteca',
-        icon: BookOpen,
+        icon: Library,
         label: 'Biblioteca',
         defaultRoute: '/library/documentation',
         isActive: location.startsWith('/library')
