@@ -58,7 +58,7 @@ import OrganizationData from "@/pages/professional/organization/data/Organizatio
 
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
-import { OrganizationActivity } from "@/pages/professional/organization/Activity";
+import Activity from "@/pages/professional/organization/Activity";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/community/AdminCommunity";
@@ -110,7 +110,7 @@ function Router() {
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/preferences" component={Preferences} />
-        <Route path="/organization/activity" component={OrganizationActivity} />
+        <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/data" component={OrganizationData} />
 
         <Route path="/organization/members" component={Members} />
