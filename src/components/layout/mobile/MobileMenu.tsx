@@ -77,12 +77,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   // Estado para determinar si estamos en menu principal o submenu
   // Detectar automáticamente la sección basada en la ruta actual
   const getInitialView = () => {
-    if (location === '/dashboard') return 'main'; // Resumen independiente
-    if (location.startsWith('/organization') || location === '/') return 'organizacion';
-    if (location.startsWith('/design')) return 'diseno';
-    if (location.startsWith('/construction')) return 'construccion';
-    if (location.startsWith('/finances')) return 'finanzas';
-    if (location.startsWith('/recursos')) return 'recursos';
+    if (location === '/dashboard') return 'main';
+    if (location.startsWith('/organization')) return 'organization';
+    if (location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')) return 'project';
+    if (location.startsWith('/proveedor')) return 'provider';
     if (location.startsWith('/admin')) return 'admin';
     return 'main';
   };
@@ -286,124 +284,89 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     setExpandedAccordion(prev => prev === key ? null : key);
   };
 
-  // Mobile menu principal - exactamente igual que desktop sidebar
-  const mainMenuItems = [
-    {
-      id: 'dashboard',
-      icon: Home,
-      label: 'Resumen',
-      defaultRoute: '/dashboard',
-      isActive: location === '/dashboard'
-    },
-    { 
-      id: 'organizacion', 
-      icon: Building, 
-      label: 'Organización', 
-      defaultRoute: '/organization',
-      isActive: location !== '/dashboard' && (currentSidebarContext === 'organization' || (location.startsWith('/organization') && !location.startsWith('/organization/board')))
-    },
-
-    { 
-      id: 'diseno', 
-      icon: Brush, 
-      label: 'Diseño', 
-      defaultRoute: '/design/dashboard',
-      isActive: currentSidebarContext === 'design' || location.startsWith('/design'),
-      restricted: true
-    },
-    { 
-      id: 'construccion', 
-      icon: HardHat, 
-      label: 'Construcción', 
-      defaultRoute: '/construction/dashboard',
-      isActive: currentSidebarContext === 'construction' || location.startsWith('/construction')
-    },
-    { 
-      id: 'finanzas', 
-      icon: DollarSign, 
-      label: 'Finanzas', 
-      defaultRoute: '/finances/dashboard',
-      isActive: currentSidebarContext === 'finances' || location.startsWith('/finances')
-    },
-
-    { 
-      id: 'recursos', 
-      icon: BookOpen, 
-      label: 'Recursos', 
-      defaultRoute: '/recursos/documentacion',
-      isActive: currentSidebarContext === 'recursos' || location.startsWith('/recursos')
-    }
-  ];
-
-  // Submenus para cada sección principal (actualizado según SidebarSubmenu.tsx)
-  const submenuContent = {
-    organizacion: [
+  // Definir contenido para cada nivel del sidebar móvil
+  const mobileMenuContent = {
+    main: [
+      {
+        id: 'dashboard',
+        icon: Home,
+        label: 'Dashboard',
+        defaultRoute: '/dashboard',
+        isActive: location === '/dashboard'
+      },
+      {
+        id: 'organizacion',
+        icon: Building,
+        label: 'Organización',
+        defaultRoute: '/organization',
+        isActive: location.startsWith('/organization')
+      },
+      {
+        id: 'proyecto',
+        icon: HardHat,
+        label: 'Proyecto',
+        defaultRoute: '/construction/dashboard',
+        isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
+      },
+      {
+        id: 'proveedor',
+        icon: Package,
+        label: 'Proveedor',
+        defaultRoute: '/proveedor/productos',
+        isActive: location.startsWith('/proveedor')
+      },
+      ...(isAdmin ? [{
+        id: 'administracion',
+        icon: Crown,
+        label: 'Administración',
+        defaultRoute: '/admin/dashboard',
+        isActive: location.startsWith('/admin')
+      }] : [])
+    ],
+    organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
-      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
-
-    diseno: [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
+    project: [
+      {
+        icon: Brush,
+        label: 'Diseño',
+        href: '/design/dashboard',
+        restricted: true
+      },
+      {
+        icon: HardHat,
+        label: 'Construcción',
+        href: '/construction/dashboard'
+      },
+      {
+        icon: DollarSign,
+        label: 'Finanzas',
+        href: '/finances/dashboard'
+      }
     ],
-
-    construccion: [
-      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
-      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
+    provider: [
+      { icon: Package, label: 'Productos', href: '/proveedor/productos' }
     ],
-    
-    finanzas: [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: Users, label: 'Clientes', href: '/finances/clients' },
-      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis' },
-      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements' },
-    ],
-
-    recursos: [
-      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
-      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
-      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
-      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
-      { icon: BarChart3, label: 'Análisis de Costos', href: '/recursos/cost-analysis' },
-    ],
-
     admin: [
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
-      { icon: Settings, label: 'General', href: '/admin/general' },
+      { icon: Settings, label: 'General', href: '/admin/general' }
     ]
   };
 
-  // Agregar botón de administración después del menu principal (solo para admins)
-  if (isAdmin) {
-    mainMenuItems.push({
-      id: 'admin',
-      icon: Crown,
-      label: 'Administración',
-      defaultRoute: '/admin/dashboard',
-      isActive: currentSidebarContext === 'admin' || location.startsWith('/admin')
-    });
-  }
 
   // Función para obtener el título de la vista actual
   const getCurrentViewTitle = () => {
     if (currentView === 'main') return 'Menú Principal';
     
     const titleMap = {
-      'organizacion': 'Organización', 
-      'proyecto': 'Proyecto',
-      'construccion': 'Construcción',
-      'finanzas': 'Finanzas',
-      'diseno': 'Diseño',
-      'recursos': 'Recursos',
+      'organization': 'Organización',
+      'project': 'Proyecto', 
+      'provider': 'Proveedor',
       'admin': 'Administración'
     };
     
@@ -412,17 +375,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Función para manejar navegación desde menu principal a submenu
   const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
-    // Resumen no tiene submenu, navegar directamente y cerrar
+    // Dashboard no tiene submenu, navegar directamente y cerrar
     if (menuId === 'dashboard') {
       navigate(defaultRoute);
       handleCloseMenu();
       return;
     }
     
+    // Cambiar al nivel correspondiente
     setCurrentView(menuId);
-    setSidebarContext(menuId as any);
-    // NO navegar automáticamente al dashboard, solo cambiar vista a submenu
-    // navigate(defaultRoute);
   };
   
   // Función para volver al menu principal
@@ -491,10 +452,31 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             )}
           </div>
           {currentView === 'main' ? (
-            // Menu principal - solo botones principales
+            // Menu principal
             <nav className="space-y-2">
-              {mainMenuItems.map((item) => (
+              {mobileMenuContent.main.map((item) => (
                 <div key={item.id}>
+                  <button
+                    onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                      item.isActive 
+                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                    {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
+                  </button>
+                </div>
+              ))}
+            </nav>
+          ) : (
+            // Submenu - mostrar opciones de la sección seleccionada
+            <nav className="space-y-2">
+              {mobileMenuContent[currentView as keyof typeof mobileMenuContent]?.map((item, index) => (
+                <div key={index}>
                   {('restricted' in item && item.restricted) ? (
                     <PlanRestricted reason="coming_soon" functionName={item.label}>
                       <button
@@ -503,57 +485,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       >
                         <item.icon className="h-5 w-5" />
                         {item.label}
-                        {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
-                      </button>
-                    </PlanRestricted>
-                  ) : (
-                    <button
-                      onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                        item.isActive 
-                          ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
-                      {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </nav>
-          ) : (
-            // Submenu - mostrar opciones de la sección seleccionada
-            <nav className="space-y-2">
-              {submenuContent[currentView as keyof typeof submenuContent]?.map((item, index) => (
-                <div key={index}>
-                  {/* Section Headers */}
-                  {('type' in item && item.type === 'section') ? (
-                    <div className="px-2 py-2 text-xs font-semibold text-[var(--menues-fg)] opacity-60 uppercase tracking-wider">
-                      {item.label}
-                    </div>
-                  ) : ('type' in item && item.type === 'plan') ? (
-                    // Plan component placeholder - just show as disabled for now
-                    <button
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
-                      disabled
-                    >
-                      {item.icon && <item.icon className="h-5 w-5" />}
-                      {item.label}
-                    </button>
-                  ) : ('restricted' in item && item.restricted) ? (
-                    <PlanRestricted reason="coming_soon" functionName={item.label}>
-                      <button
-                        className={cn(
-                          "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal",
-                          ('indent' in item && !!item.indent) && "ml-6"
-                        )}
-                        disabled
-                      >
-                        {item.icon && <item.icon className="h-5 w-5" />}
-                        {item.label}
                       </button>
                     </PlanRestricted>
                   ) : (
@@ -561,20 +492,19 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (item.href) {
+                        if ('href' in item) {
                           navigate(item.href);
                           handleCloseMenu();
                         }
                       }}
                       className={cn(
                         "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                        location === item.href 
+                        ('href' in item && location === item.href)
                           ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]",
-                        ('indent' in item && !!item.indent) && "ml-6"
+                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
                       )}
                     >
-                      {item.icon && <item.icon className="h-5 w-5" />}
+                      <item.icon className="h-5 w-5" />
                       {item.label}
                     </button>
                   )}

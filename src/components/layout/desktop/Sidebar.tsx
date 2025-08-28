@@ -83,7 +83,7 @@ export function Sidebar() {
       setDocked(userData.preferences.sidebar_docked);
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
-  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
   // Theme state
@@ -291,136 +291,112 @@ export function Sidebar() {
     return null;
   };
 
-  // Función para manejar clicks en botones principales - ahora tipo acordeón
+  // Función para manejar clicks en botones principales - ahora cambia nivel del sidebar
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Resumen no tiene submenu, navegar directamente
+    // Dashboard no tiene submenu, navegar directamente
     if (sectionId === 'dashboard') {
       navigate(defaultRoute);
       return;
     }
     
-    // Toggle acordeón: si ya está expandido, colapsar; si no, expandir
-    setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
-    // NO cambiar activeSidebarSection aquí - debe basarse en la ruta actual
+    // Cambiar al nivel correspondiente del sidebar
+    switch (sectionId) {
+      case 'organizacion':
+        setSidebarLevel('organization');
+        break;
+      case 'proyecto':
+        setSidebarLevel('project');
+        break;
+      case 'proveedor':
+        setSidebarLevel('provider');
+        break;
+      case 'administracion':
+        setSidebarLevel('admin');
+        break;
+      default:
+        // Para otros casos, navegar directamente
+        navigate(defaultRoute);
+    }
   };
 
-  // Definir contenido de submenu para cada sección (copiado de SidebarSubmenu)
-  const submenuContent = {
-    'organizacion': [
+  // Definir contenido para cada nivel del sidebar
+  const sidebarContent = {
+    main: [
+      {
+        id: 'dashboard',
+        icon: Home,
+        label: 'Dashboard',
+        defaultRoute: '/dashboard',
+        isActive: location === '/dashboard'
+      },
+      {
+        id: 'organizacion',
+        icon: Building,
+        label: 'Organización',
+        defaultRoute: '/organization',
+        isActive: location.startsWith('/organization')
+      },
+      {
+        id: 'proyecto',
+        icon: HardHat,
+        label: 'Proyecto',
+        defaultRoute: '/construction/dashboard',
+        isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
+      },
+      {
+        id: 'proveedor',
+        icon: Package,
+        label: 'Proveedor',
+        defaultRoute: '/proveedor/productos',
+        isActive: location.startsWith('/proveedor')
+      },
+      ...(isAdmin ? [{
+        id: 'administracion',
+        icon: Crown,
+        label: 'Administración',
+        defaultRoute: '/admin/dashboard',
+        isActive: location.startsWith('/admin')
+      }] : [])
+    ],
+    organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
-      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
+      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
-    'diseno': [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
+    project: [
+      {
+        icon: Brush,
+        label: 'Diseño',
+        href: '/design/dashboard',
+        generalModeRestricted: true
+      },
+      {
+        icon: HardHat,
+        label: 'Construcción',
+        href: '/construction/dashboard'
+      },
+      {
+        icon: DollarSign,
+        label: 'Finanzas',
+        href: '/finances/dashboard'
+      }
     ],
-    'construccion': [
-      { icon: Home, label: 'Resumen', href: '/construction/dashboard', requiresProject: true },
-      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks', requiresProject: true },
-      { icon: Users, label: 'Personal', href: '/construction/personnel', requiresProject: true },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts', requiresProject: true },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets', requiresProject: true },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials', requiresProject: true },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs', requiresProject: true },
+    provider: [
+      { icon: Package, label: 'Productos', href: '/proveedor/productos' }
     ],
-    'finanzas': [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
-      { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
-      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
-      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
-    ],
-    'recursos': [
-      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
-      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
-      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
-      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' },
-    ],
-    'analisis': [
-      { icon: TableIcon, label: 'Tareas', href: '/analysis/tasks' },
-      { icon: Users, label: 'Mano de Obra', href: '/analysis/labor' },
-      { icon: Package, label: 'Materiales', href: '/analysis/materials' },
-      { icon: DollarSign, label: 'Indirectos', href: '/analysis/indirects' },
-    ],
-    'proveedor': [
-      { icon: Package, label: 'Productos', href: '/proveedor/productos' },
-    ],
-    'administracion': [
+    admin: [
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
-      { icon: Settings, label: 'General', href: '/admin/general' },
-    ],
+      { icon: Settings, label: 'General', href: '/admin/general' }
+    ]
   };
 
-  // Botones principales del sidebar - ahora con sistema de acordeón
-  const mainSidebarItems = [
-    {
-      id: 'dashboard',
-      icon: Home,
-      label: 'Resumen',
-      defaultRoute: '/dashboard',
-      isActive: location === '/dashboard'
-    },
-    { 
-      id: 'organizacion', 
-      icon: Building, 
-      label: 'Organización', 
-      defaultRoute: '/organization',
-      isActive: location.startsWith('/organization') && !location.startsWith('/organization/board')
-    },
-    { 
-      id: 'diseno', 
-      icon: Brush, 
-      label: 'Diseño', 
-      defaultRoute: '/design/dashboard',
-      isActive: location.startsWith('/design'),
-      generalModeRestricted: true
-    },
-    { 
-      id: 'construccion', 
-      icon: HardHat, 
-      label: 'Construcción', 
-      defaultRoute: '/construction/dashboard',
-      isActive: location.startsWith('/construction')
-    },
-    { 
-      id: 'finanzas', 
-      icon: DollarSign, 
-      label: 'Finanzas', 
-      defaultRoute: '/finances/dashboard',
-      isActive: location.startsWith('/finances')
-    },
-    { 
-      id: 'recursos', 
-      icon: BookOpen, 
-      label: 'Recursos', 
-      defaultRoute: '/recursos/documentacion',
-      isActive: location.startsWith('/recursos')
-    },
-    { 
-      id: 'analisis', 
-      icon: BarChart3, 
-      label: 'Análisis', 
-      defaultRoute: '/analysis/tasks',
-      isActive: location.startsWith('/analysis')
-    },
-    { 
-      id: 'proveedor', 
-      icon: Package, 
-      label: 'Proveedor', 
-      defaultRoute: '/proveedor/productos',
-      isActive: location.startsWith('/proveedor')
-    },
-    ...(isAdmin ? [{ 
-      id: 'administracion', 
-      icon: Crown, 
-      label: 'Administración', 
-      defaultRoute: '/admin/dashboard',
-      isActive: location.startsWith('/admin')
-    }] : []),
-  ];
+  // Función para obtener el contenido actual del sidebar según el nivel
+  const getCurrentSidebarItems = () => {
+    return sidebarContent[sidebarLevel] || sidebarContent.main;
+  };
 
 
 
@@ -433,18 +409,8 @@ export function Sidebar() {
       style={{
         overflow: 'hidden'
       }}
-      onMouseEnter={() => {
-        setHovered(true);
-        // Cuando se hace hover, expandir la sección activa basada en la ubicación actual
-        const activeSection = getActiveSectionFromLocation();
-        if (activeSection && submenuContent[activeSection as keyof typeof submenuContent]) {
-          setExpandedAccordion(activeSection);
-        }
-      }}
-      onMouseLeave={() => {
-        setHovered(false);
-        // Al salir del hover, mantener el estado de acordeón como estaba
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Logo Section */}
       <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
@@ -461,50 +427,56 @@ export function Sidebar() {
       <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Context Title - Removed since sidebar doesn't expand */}
-            {mainSidebarItems.map((item, index) => (
-              <div key={`${item.label}-${index}`} className="mb-[2px]">
-                {/* Main Button with potential restriction */}
-                {item.generalModeRestricted ? (
-                  <PlanRestricted reason="general_mode" functionName={item.label}>
-                    <SidebarButton
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={item.isActive}
-                      isExpanded={isExpanded}
-                      onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-                      variant="main"
-                    />
-                  </PlanRestricted>
-                ) : (
-                  <SidebarButton
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={item.isActive}
-                    isExpanded={isExpanded}
-                    onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
-                    variant="main"
-                  />
-                )}
-                
-                {/* Mostrar subelementos si está expandido y el sidebar está expandido */}
-                {isExpanded && expandedAccordion === item.id && submenuContent[item.id as keyof typeof submenuContent] && (
-                  <div className="ml-4 mt-[2px] space-y-[1px]">
-                    {submenuContent[item.id as keyof typeof submenuContent].map((subItem, subIndex) => (
-                      <SidebarButton
-                        key={subIndex}
-                        icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                        label={subItem.label}
-                        href={subItem.href}
-                        isActive={location === subItem.href}
-                        isExpanded={isExpanded}
-                        variant="secondary"
-                      />
-                    ))}
-                  </div>
-                )}
+            {/* Botón Volver (solo en niveles secundarios) */}
+            {sidebarLevel !== 'main' && (
+              <div className="mb-4">
+                <SidebarButton
+                  icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+                  label="Volver"
+                  isActive={false}
+                  isExpanded={isExpanded}
+                  onClick={goToMainLevel}
+                  variant="main"
+                />
               </div>
-            ))}
+            )}
+            
+            {/* Renderizar contenido según el nivel actual */}
+            {getCurrentSidebarItems().map((item, index) => {
+              const itemKey = 'id' in item ? item.id : item.label;
+              const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
+              const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
+              
+              const buttonElement = (
+                <SidebarButton
+                  icon={<item.icon className="w-[18px] h-[18px]" />}
+                  label={item.label}
+                  isActive={isActive || false}
+                  isExpanded={isExpanded}
+                  onClick={() => {
+                    if ('defaultRoute' in item && 'id' in item) {
+                      handleMainSectionClick(item.id, item.defaultRoute);
+                    } else if ('href' in item) {
+                      navigate(item.href);
+                    }
+                  }}
+                  href={'href' in item ? item.href : undefined}
+                  variant="main"
+                />
+              );
+
+              return (
+                <div key={`${itemKey}-${index}`} className="mb-[2px]">
+                  {hasRestriction ? (
+                    <PlanRestricted reason="general_mode" functionName={item.label}>
+                      {buttonElement}
+                    </PlanRestricted>
+                  ) : (
+                    buttonElement
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
