@@ -83,7 +83,7 @@ export function Sidebar() {
       setDocked(userData.preferences.sidebar_docked);
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
-  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel, goToPreviousLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
   // Theme state
@@ -313,6 +313,15 @@ export function Sidebar() {
       case 'administracion':
         setSidebarLevel('admin');
         break;
+      case 'construccion':
+        setSidebarLevel('construction');
+        break;
+      case 'finanzas':
+        setSidebarLevel('finances');
+        break;
+      case 'diseno':
+        setSidebarLevel('design');
+        break;
       default:
         // Para otros casos, navegar directamente
         navigate(defaultRoute);
@@ -366,21 +375,43 @@ export function Sidebar() {
     ],
     project: [
       {
+        id: 'diseno',
         icon: Brush,
         label: 'Diseño',
-        href: '/design/dashboard',
+        defaultRoute: '/design/dashboard',
         generalModeRestricted: true
       },
       {
+        id: 'construccion',
         icon: HardHat,
         label: 'Construcción',
-        href: '/construction/dashboard'
+        defaultRoute: '/construction/dashboard'
       },
       {
+        id: 'finanzas',
         icon: DollarSign,
         label: 'Finanzas',
-        href: '/finances/dashboard'
+        defaultRoute: '/finances/dashboard'
       }
+    ],
+    construction: [
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+      { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+    ],
+    finances: [
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+      { icon: Users, label: 'Clientes', href: '/finances/clients' },
+      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
+      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
+    ],
+    design: [
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
@@ -419,6 +450,9 @@ export function Sidebar() {
             {sidebarLevel === 'main' ? 'ARCHUB' : 
              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
              sidebarLevel === 'project' ? 'PROYECTO' :
+             sidebarLevel === 'construction' ? 'CONSTRUCCIÓN' :
+             sidebarLevel === 'finances' ? 'FINANZAS' :
+             sidebarLevel === 'design' ? 'DISEÑO' :
              sidebarLevel === 'provider' ? 'PROVEEDOR' :
              sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
           </div>
@@ -428,6 +462,9 @@ export function Sidebar() {
               {sidebarLevel === 'main' ? 'A' :
                sidebarLevel === 'organization' ? 'O' :
                sidebarLevel === 'project' ? 'P' :
+               sidebarLevel === 'construction' ? 'C' :
+               sidebarLevel === 'finances' ? 'F' :
+               sidebarLevel === 'design' ? 'D' :
                sidebarLevel === 'provider' ? 'PR' :
                sidebarLevel === 'admin' ? 'AD' : 'A'}
             </div>
@@ -448,7 +485,7 @@ export function Sidebar() {
                     label="Volver"
                     isActive={false}
                     isExpanded={isExpanded}
-                    onClick={goToMainLevel}
+                    onClick={goToPreviousLevel}
                     variant="main"
                   />
                 </div>
