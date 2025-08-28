@@ -64,6 +64,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
+import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectContext } from "@/stores/projectContext";
 
 export function Sidebar() {
@@ -513,6 +514,10 @@ export function Sidebar() {
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
 
+          {/* Plan Badge */}
+          <div className="mb-2">
+            <PlanBadge isExpanded={isExpanded} />
+          </div>
 
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
