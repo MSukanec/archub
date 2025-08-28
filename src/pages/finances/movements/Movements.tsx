@@ -39,7 +39,7 @@ import { Label } from "@/components/ui/label";
 import { Table } from "@/components/ui-custom/tables-and-trees/Table";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
-import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 
 import { TransferGroup } from "@/components/data-row";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/data-row";
@@ -1443,7 +1443,7 @@ export default function Movements() {
         <Trash2 className="h-4 w-4" />
       </Button>
     ] : []),
-    <CustomRestricted 
+    <PlanRestricted 
       key="import-movements"
       functionName="Importación de Excel"
       reason="general_mode"
@@ -1455,7 +1455,7 @@ export default function Movements() {
         <Upload className="mr-2 h-4 w-4" />
         Importar
       </Button>
-    </CustomRestricted>
+    </PlanRestricted>
   ];
 
   // Detectar si hay filtros activos

@@ -5,7 +5,7 @@ import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
-import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 import Plan from "@/components/ui-custom/Plan";
 
@@ -283,7 +283,7 @@ export function SidebarSubmenu() {
               if (item.restricted) {
                 return (
                   <div key={index} className="mb-[1px]">
-                    <CustomRestricted reason={typeof item.restricted === 'string' ? item.restricted : 'coming_soon'}>
+                    <PlanRestricted reason={typeof item.restricted === 'string' ? item.restricted : 'coming_soon'}>
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href="#"
@@ -293,7 +293,7 @@ export function SidebarSubmenu() {
                         isExpanded={isSecondarySidebarExpanded}
                         variant="secondary"
                       />
-                    </CustomRestricted>
+                    </PlanRestricted>
                   </div>
                 );
               }
@@ -302,7 +302,7 @@ export function SidebarSubmenu() {
               if (item.generalModeRestricted) {
                 return (
                   <div key={index} className="mb-[1px]">
-                    <CustomRestricted reason="general_mode" functionName={item.label}>
+                    <PlanRestricted reason="general_mode" functionName={item.label}>
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href={item.href}
@@ -316,7 +316,7 @@ export function SidebarSubmenu() {
                         isExpanded={isSecondarySidebarExpanded}
                         variant="secondary"
                       />
-                    </CustomRestricted>
+                    </PlanRestricted>
                   </div>
                 );
               }

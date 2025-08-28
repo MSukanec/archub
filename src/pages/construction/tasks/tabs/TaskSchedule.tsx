@@ -20,7 +20,7 @@ import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 
-import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {
@@ -203,7 +203,7 @@ export function TaskSchedule() {
 
       {activeTab === 'list' && (
         <div className="space-y-6">
-          <CustomRestricted reason="coming_soon">
+          <PlanRestricted reason="coming_soon">
             <div className="flex flex-col items-center justify-center py-16">
               <CheckSquare className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Listado de Tareas</h3>
@@ -212,13 +212,13 @@ export function TaskSchedule() {
                 del proyecto en formato de tabla con filtros avanzados.
               </p>
             </div>
-          </CustomRestricted>
+          </PlanRestricted>
         </div>
       )}
 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          <CustomRestricted reason="coming_soon">
+          <PlanRestricted reason="coming_soon">
             <div className="flex flex-col items-center justify-center py-16">
               <BarChart3 className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Análisis Visual</h3>
@@ -227,7 +227,7 @@ export function TaskSchedule() {
                 burndown charts y análisis de rutas críticas del cronograma.
               </p>
             </div>
-          </CustomRestricted>
+          </PlanRestricted>
         </div>
       )}
     </div>

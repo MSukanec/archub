@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
-import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -266,7 +266,7 @@ export default function ConstructionMaterials() {
 
       {activeTab === 'purchase-orders' && (
         <div className="space-y-6">
-          <CustomRestricted reason="coming_soon">
+          <PlanRestricted reason="coming_soon">
             <div className="flex flex-col items-center justify-center py-16">
               <ShoppingCart className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Órdenes de Compra</h3>
@@ -275,7 +275,7 @@ export default function ConstructionMaterials() {
                 proveedores y hacer seguimiento de tus pedidos de materiales.
               </p>
             </div>
-          </CustomRestricted>
+          </PlanRestricted>
         </div>
       )}
     </Layout>

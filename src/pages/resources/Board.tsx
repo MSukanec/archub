@@ -14,7 +14,7 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted';
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 
@@ -223,7 +223,7 @@ function BoardContent() {
           title="No hay tableros creados"
           description="Crea tu primer tablero para comenzar a organizar tareas con el sistema Kanban"
           action={
-            <CustomRestricted 
+            <PlanRestricted 
               feature="max_kanban_boards" 
               current={boards.length}
             >
@@ -231,7 +231,7 @@ function BoardContent() {
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Tablero
               </Button>
-            </CustomRestricted>
+            </PlanRestricted>
           }
         />
       </Layout>

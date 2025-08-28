@@ -34,7 +34,7 @@ import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
-import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import ContactCardDesktop from '@/components/cards/contacts/ContactCardDesktop'
 import { ContactAvatarUploader } from '@/components/contacts/ContactAvatarUploader'
 import { ContactAttachmentsPanel } from '@/components/contacts/ContactAttachmentsPanel'
@@ -450,13 +450,13 @@ export default function Contacts() {
             }
           />
         ) : (
-          <CustomRestricted reason="coming_soon">
+          <PlanRestricted reason="coming_soon">
             <div className="text-center py-12">
               <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
               <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
             </div>
-          </CustomRestricted>
+          </PlanRestricted>
         )}
       </Layout>
     )
@@ -555,13 +555,13 @@ export default function Contacts() {
 
             {/* Contenido para la tab de Empresas - Restringida */}
             {activeTab === "empresas" && (
-              <CustomRestricted reason="coming_soon">
+              <PlanRestricted reason="coming_soon">
                 <div className="text-center py-12">
                   <Building className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Gestión de Empresas</h3>
                   <p className="text-muted-foreground">Próximamente podrás gestionar empresas y organizaciones externas</p>
                 </div>
-              </CustomRestricted>
+              </PlanRestricted>
             )}
           </div>
         </div>

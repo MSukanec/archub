@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
 import { useUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
@@ -258,7 +258,7 @@ export function Header({
 
         {/* Right: Project Selector - SIEMPRE VISIBLE */}
         <div className="flex items-center">
-          <CustomRestricted feature="project_management">
+          <PlanRestricted feature="project_management">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -322,7 +322,7 @@ export function Header({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          </CustomRestricted>
+          </PlanRestricted>
         </div>
       </div>
 
@@ -359,12 +359,12 @@ export function Header({
                   </button>
                 );
 
-                // Si la tab está restringida, envolverla con CustomRestricted
+                // Si la tab está restringida, envolverla con PlanRestricted
                 if (tab.isRestricted && tab.restrictionReason) {
                   return (
-                    <CustomRestricted key={tab.id} reason={tab.restrictionReason}>
+                    <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
                       {tabContent}
-                    </CustomRestricted>
+                    </PlanRestricted>
                   );
                 }
 

@@ -10,7 +10,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { Building, Package, Hammer, Eye, CheckCircle, Loader2 } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 
@@ -280,9 +280,9 @@ export default function SelectMode() {
 
                 if (!isAvailable) {
                   return (
-                    <CustomRestricted key={mode.type} reason="coming_soon">
+                    <PlanRestricted key={mode.type} reason="coming_soon">
                       {cardContent}
-                    </CustomRestricted>
+                    </PlanRestricted>
                   );
                 }
 

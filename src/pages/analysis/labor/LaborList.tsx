@@ -1,7 +1,7 @@
 import { Users, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 
 interface LaborListProps {
   onNewLabor: () => void
@@ -10,7 +10,7 @@ interface LaborListProps {
 export default function LaborList({ onNewLabor }: LaborListProps) {
   return (
     <div className="h-full flex items-center justify-center">
-      <CustomRestricted reason="coming_soon">
+      <PlanRestricted reason="coming_soon">
         <EmptyState
           icon={<Users className="w-8 h-8 text-muted-foreground" />}
           title="No hay análisis de mano de obra"
@@ -22,7 +22,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
             </Button>
           }
         />
-      </CustomRestricted>
+      </PlanRestricted>
     </div>
   )
 }

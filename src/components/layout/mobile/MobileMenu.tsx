@@ -55,7 +55,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/hooks/use-projects";
-import CustomRestricted from "@/components/ui-custom/security/CustomRestricted";
+import CustomRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 
 interface MobileMenuProps {
@@ -496,7 +496,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               {mainMenuItems.map((item) => (
                 <div key={item.id}>
                   {('restricted' in item && item.restricted) ? (
-                    <CustomRestricted reason="coming_soon" functionName={item.label}>
+                    <PlanRestricted reason="coming_soon" functionName={item.label}>
                       <button
                         className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
                         disabled
@@ -505,7 +505,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         {item.label}
                         {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
                       </button>
-                    </CustomRestricted>
+                    </PlanRestricted>
                   ) : (
                     <button
                       onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
@@ -544,7 +544,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       {item.label}
                     </button>
                   ) : ('restricted' in item && item.restricted) ? (
-                    <CustomRestricted reason="coming_soon" functionName={item.label}>
+                    <PlanRestricted reason="coming_soon" functionName={item.label}>
                       <button
                         className={cn(
                           "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal",
@@ -555,7 +555,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         {item.icon && <item.icon className="h-5 w-5" />}
                         {item.label}
                       </button>
-                    </CustomRestricted>
+                    </PlanRestricted>
                   ) : (
                     <button
                       onClick={(e) => {

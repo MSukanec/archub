@@ -63,7 +63,7 @@ import { Input } from "@/components/ui/input";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
-import CustomRestricted from "@/components/ui-custom/security/CustomRestricted";
+import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import Plan from "@/components/ui-custom/Plan";
 import { useProjectContext } from "@/stores/projectContext";
 
@@ -467,7 +467,7 @@ export function Sidebar() {
               <div key={`${item.label}-${index}`} className="mb-[2px]">
                 {/* Main Button with potential restriction */}
                 {item.generalModeRestricted ? (
-                  <CustomRestricted reason="general_mode" functionName={item.label}>
+                  <PlanRestricted reason="general_mode" functionName={item.label}>
                     <SidebarButton
                       icon={<item.icon className="w-[18px] h-[18px]" />}
                       label={item.label}
@@ -476,7 +476,7 @@ export function Sidebar() {
                       onClick={() => handleMainSectionClick(item.id, item.defaultRoute)}
                       variant="main"
                     />
-                  </CustomRestricted>
+                  </PlanRestricted>
                 ) : (
                   <SidebarButton
                     icon={<item.icon className="w-[18px] h-[18px]" />}

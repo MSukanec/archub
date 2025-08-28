@@ -13,7 +13,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectContext } from "@/stores/projectContext";
 
-interface CustomRestrictedProps {
+interface PlanRestrictedProps {
   feature?: string;
   current?: number;
   reason?: "coming_soon" | "general_mode" | string;
@@ -21,13 +21,13 @@ interface CustomRestrictedProps {
   children: React.ReactNode;
 }
 
-export function CustomRestricted({
+export function PlanRestricted({
   feature,
   current,
   reason,
   functionName,
   children,
-}: CustomRestrictedProps) {
+}: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
   const [, navigate] = useLocation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -340,4 +340,4 @@ export function CustomRestricted({
   );
 }
 
-export default CustomRestricted;
+export default PlanRestricted;
