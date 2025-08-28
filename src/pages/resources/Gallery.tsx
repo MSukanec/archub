@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { Gallery as GalleryComponent } from '@/components/ui-custom/Gallery';
+import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -10,17 +10,20 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Images, Plus } from 'lucide-react';
 
-// Gallery file interface
+// Gallery file interface - compatible with Gallery component
 interface GalleryFile {
   id: string;
   file_url: string;
-  file_type: string;
   file_name: string;
+  file_type: string;
+  file_size?: number;
   created_at: string;
-  description?: string;
-  project_id?: string;
+  project_id: string;
   project_name?: string;
-  visibility: 'organization' | 'project';
+  description?: string;
+  visibility: string;
+  created_by: string;
+  site_log_id?: string | null;
 }
 
 export default function Gallery() {
@@ -75,9 +78,13 @@ export default function Gallery() {
           file_url,
           file_type,
           file_name,
+          file_size,
           created_at,
           description,
           project_id,
+          visibility,
+          created_by,
+          site_log_id,
           projects!inner(name)
         `)
         .eq('organization_id', userData.organization.id)
@@ -93,9 +100,13 @@ export default function Gallery() {
             file_url,
             file_type,
             file_name,
+            file_size,
             created_at,
             description,
             project_id,
+            visibility,
+            created_by,
+            site_log_id,
             projects!inner(name)
           `)
           .eq('project_id', currentProject.id)
@@ -117,7 +128,9 @@ export default function Gallery() {
         // Combine and format files
         const allFiles = [...orgFiles, ...projectFiles].map(file => ({
           ...file,
-          project_name: file.projects?.name || 'Sin proyecto'
+          project_name: file.projects?.[0]?.name || 'Sin proyecto',
+          created_by: file.created_by || 'Desconocido',
+          site_log_id: file.site_log_id || null
         }));
 
         // Sort by creation date (newest first)
