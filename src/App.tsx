@@ -6,8 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/components/layout/mobile/ActionBarMobileContext";
-import { AuthRedirect } from "@/components/ui-custom/AuthRedirect";
-import { ProtectedRoute } from "@/components/ui-custom/ProtectedRoute";
+import { AuthGuard } from "@/components/ui-custom/AuthGuard";
 import { AdminProtectedRoute } from "@/components/ui-custom/AdminProtectedRoute";
 
 // Public Pages
@@ -93,7 +92,7 @@ import { ProjectContextInitializer } from "@/components/navigation/ProjectContex
 
 function Router() {
   return (
-    <AuthRedirect>
+    <AuthGuard>
       <Switch>
         {/* Public Routes */}
         <Route path="/" component={Landing} />
@@ -106,243 +105,89 @@ function Router() {
         <Route path="/select-mode" component={SelectMode} />
 
         {/* Main Dashboard - Independent dashboard */}
-        <Route path="/dashboard">
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/dashboard" component={Dashboard} />
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
-        <Route path="/organization/preferences">
-          <ProtectedRoute>
-            <Preferences />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization/preferences" component={Preferences} />
 
-        <Route path="/organization/data">
-          <ProtectedRoute>
-            <OrganizationData />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization/data" component={OrganizationData} />
 
-        <Route path="/organization/members">
-          <ProtectedRoute>
-            <Members />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization/members" component={Members} />
         
-        <Route path="/organization">
-          <ProtectedRoute>
-            <Members />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization" component={Members} />
 
 
-        <Route path="/organization/projects">
-          <ProtectedRoute>
-            <Projects />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization/projects" component={Projects} />
 
 
 
-        <Route path="/recursos/board">
-          <ProtectedRoute>
-            <Board />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/recursos/board" component={Board} />
 
-        <Route path="/organization/:organizationId">
-          <ProtectedRoute>
-            <Members />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/organization/:organizationId" component={Members} />
 
         {/* Projects Routes */}
-        <Route path="/projects">
-          <ProtectedRoute>
-            <Projects />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/projects" component={Projects} />
 
 
-        <Route path="/finances/clients">
-          <ProtectedRoute>
-            <Clients />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/finances/clients" component={Clients} />
         
 
 
         {/* Resources Routes */}
-        <Route path="/recursos/documentacion">
-          <ProtectedRoute>
-            <Documentation />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/recursos/galeria">
-          <ProtectedRoute>
-            <Gallery />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/recursos/contactos">
-          <ProtectedRoute>
-            <Contacts />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/recursos/documentacion" component={Documentation} />
+        <Route path="/recursos/galeria" component={Gallery} />
+        <Route path="/recursos/contactos" component={Contacts} />
 
         {/* Design Routes */}
-        <Route path="/design/dashboard">
-          <ProtectedRoute>
-            <DesignDashboard />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/design/dashboard" component={DesignDashboard} />
 
 
 
 
         {/* Construction Routes */}
-        <Route path="/construction/dashboard">
-          <ProtectedRoute>
-            <ConstructionDashboard />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/tasks">
-          <ProtectedRoute>
-            <ConstructionTasks />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/construction/dashboard" component={ConstructionDashboard} />
+        <Route path="/construction/tasks" component={ConstructionTasks} />
 
 
-        <Route path="/construction/subcontracts">
-          <ProtectedRoute>
-            <ConstructionSubcontracts />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/subcontracts/:id">
-          <ProtectedRoute>
-            <SubcontractView />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/logs">
-          <ProtectedRoute>
-            <Logs />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/personnel">
-          <ProtectedRoute>
-            <ConstructionPersonnel />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/budgets">
-          <ProtectedRoute>
-            <ConstructionBudgets />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/construction/materials">
-          <ProtectedRoute>
-            <ConstructionMaterials />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/recursos/cost-analysis">
-          <ProtectedRoute>
-            <Analysis />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/resources/analysis">
-          <ProtectedRoute>
-            <Analysis />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/resources/analysis/:tab?">
-          <ProtectedRoute>
-            <Analysis />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />
+        <Route path="/construction/subcontracts/:id" component={SubcontractView} />
+        <Route path="/construction/logs" component={Logs} />
+        <Route path="/construction/personnel" component={ConstructionPersonnel} />
+        <Route path="/construction/budgets" component={ConstructionBudgets} />
+        <Route path="/construction/materials" component={ConstructionMaterials} />
+        <Route path="/recursos/cost-analysis" component={Analysis} />
+        <Route path="/resources/analysis" component={Analysis} />
+        <Route path="/resources/analysis/:tab?" component={Analysis} />
         
         {/* Analysis Routes */}
-        <Route path="/analysis/tasks">
-          <ProtectedRoute>
-            <AnalysisTasks />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/analysis/labor">
-          <ProtectedRoute>
-            <AnalysisLabor />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/analysis/materials">
-          <ProtectedRoute>
-            <AnalysisMaterials />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/analysis/indirects">
-          <ProtectedRoute>
-            <AnalysisIndirects />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/analysis/tasks" component={AnalysisTasks} />
+        <Route path="/analysis/labor" component={AnalysisLabor} />
+        <Route path="/analysis/materials" component={AnalysisMaterials} />
+        <Route path="/analysis/indirects" component={AnalysisIndirects} />
 
 
         {/* Finances Routes */}
-        <Route path="/finances">
-          <ProtectedRoute>
-            <FinancesDashboard />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/finances/dashboard">
-          <ProtectedRoute>
-            <FinancesDashboard />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/finances/movements">
-          <ProtectedRoute>
-            <Movements />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/finances/analysis">
-          <ProtectedRoute>
-            <FinancesAnalysis />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/finances" component={FinancesDashboard} />
+        <Route path="/finances/dashboard" component={FinancesDashboard} />
+        <Route path="/finances/movements" component={Movements} />
+        <Route path="/finances/analysis" component={FinancesAnalysis} />
 
-        <Route path="/finances/capital-movements">
-          <ProtectedRoute>
-            <FinancesCapitalMovements />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/finances/clients">
-          <ProtectedRoute>
-            <Clients />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/finances/capital-movements" component={FinancesCapitalMovements} />
+        <Route path="/finances/clients" component={Clients} />
 
 
         {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
-        <Route path="/profile/organizations">
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/profile/preferences">
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/profile">
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/profile/organizations" component={Profile} />
+        <Route path="/profile/preferences" component={Profile} />
+        <Route path="/profile" component={Profile} />
 
 
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminCommunity />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminCommunity />
+          </AdminProtectedRoute>
         </Route>
 
 
@@ -358,35 +203,25 @@ function Router() {
 
 
         <Route path="/admin/materials">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminMaterials />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminMaterials />
+          </AdminProtectedRoute>
         </Route>
 
         <Route path="/admin/tasks">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminTasks />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminTasks />
+          </AdminProtectedRoute>
         </Route>
 
         <Route path="/admin/general">
-          <ProtectedRoute>
-            <AdminProtectedRoute>
-              <AdminGeneral />
-            </AdminProtectedRoute>
-          </ProtectedRoute>
+          <AdminProtectedRoute>
+            <AdminGeneral />
+          </AdminProtectedRoute>
         </Route>
 
         {/* Provider Routes */}
-        <Route path="/proveedor/productos">
-          <ProtectedRoute>
-            <Products />
-          </ProtectedRoute>
-        </Route>
+        <Route path="/proveedor/productos" component={Products} />
 
 
 
@@ -395,7 +230,7 @@ function Router() {
         {/* 404 Route - Must be last */}
         <Route path="*" component={NotFound} />
       </Switch>
-    </AuthRedirect>
+    </AuthGuard>
   );
 }
 
