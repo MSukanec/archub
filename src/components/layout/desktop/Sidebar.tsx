@@ -441,15 +441,17 @@ export function Sidebar() {
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Botón Volver (solo en niveles secundarios) */}
             {sidebarLevel !== 'main' && (
-              <div className="mb-4">
-                <SidebarButton
-                  icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-                  label="Volver"
-                  isActive={false}
-                  isExpanded={isExpanded}
-                  onClick={goToMainLevel}
-                  variant="main"
-                />
+              <div>
+                <div className="mb-[2px]">
+                  <SidebarButton
+                    icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+                    label="Volver"
+                    isActive={false}
+                    isExpanded={isExpanded}
+                    onClick={goToMainLevel}
+                    variant="main"
+                  />
+                </div>
                 {/* Línea divisoria después del botón Volver */}
                 <div className="h-px bg-white/20 my-2"></div>
               </div>
