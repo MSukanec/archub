@@ -446,6 +446,7 @@ export function Sidebar() {
               const itemKey = 'id' in item ? item.id : item.label;
               const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
               const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
+              const isDashboard = 'id' in item && item.id === 'dashboard';
               
               const buttonElement = (
                 <SidebarButton
@@ -466,13 +467,20 @@ export function Sidebar() {
               );
 
               return (
-                <div key={`${itemKey}-${index}`} className="mb-[2px]">
-                  {hasRestriction ? (
-                    <PlanRestricted reason="general_mode" functionName={item.label}>
-                      {buttonElement}
-                    </PlanRestricted>
-                  ) : (
-                    buttonElement
+                <div key={`${itemKey}-${index}`}>
+                  <div className="mb-[2px]">
+                    {hasRestriction ? (
+                      <PlanRestricted reason="general_mode" functionName={item.label}>
+                        {buttonElement}
+                      </PlanRestricted>
+                    ) : (
+                      buttonElement
+                    )}
+                  </div>
+                  
+                  {/* Línea divisoria después de Dashboard */}
+                  {isDashboard && sidebarLevel === 'main' && (
+                    <div className="h-px bg-white/20 my-2"></div>
                   )}
                 </div>
               );
