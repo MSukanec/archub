@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 
-interface ComboBoxMultiSelectProps {
+interface ComboBoxMultiSelectFieldProps {
   options: Array<{
     value: string;
     label: string;
@@ -28,7 +28,7 @@ interface ComboBoxMultiSelectProps {
   className?: string;
 }
 
-export function ComboBoxMultiSelect({
+export function ComboBoxMultiSelectField({
   options,
   value,
   onChange,
@@ -36,7 +36,7 @@ export function ComboBoxMultiSelect({
   searchPlaceholder = "Buscar opciones...",
   emptyText = "No se encontraron opciones",
   className,
-}: ComboBoxMultiSelectProps) {
+}: ComboBoxMultiSelectFieldProps) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (optionValue: string) => {

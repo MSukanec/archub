@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Copy, Edit, Trash2, Settings, Plus } from 'lucide-react';
-import { ComboBoxMultiSelect } from '@/components/ui-custom/ComboBoxMultiSelect';
+import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -128,7 +128,7 @@ function ParameterNode({ data, id }: NodeProps<ParameterNodeData>) {
               </Button>
             </div>
           </div>
-          <ComboBoxMultiSelect
+          <ComboBoxMultiSelectField
             options={comboBoxOptions}
             value={visibleOptions}
             onChange={onVisibleOptionsChange}

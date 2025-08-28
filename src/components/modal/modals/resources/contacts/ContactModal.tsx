@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-import { ComboBoxMultiSelect } from "@/components/ui-custom/ComboBoxMultiSelect";
+import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes } from "@/hooks/use-contact-types";
@@ -522,7 +522,7 @@ export function ContactFormModal({ modalData, onClose }: ContactFormModalProps) 
               <FormItem>
                 <FormLabel>Tipos de contacto</FormLabel>
                 <FormControl>
-                  <ComboBoxMultiSelect
+                  <ComboBoxMultiSelectField
                     options={contactTypes?.map(type => ({
                       value: type.id,
                       label: type.name
