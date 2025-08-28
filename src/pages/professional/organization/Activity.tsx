@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export function DashboardActivity() {
+export function OrganizationActivity() {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
 
