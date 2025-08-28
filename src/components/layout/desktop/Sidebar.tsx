@@ -307,6 +307,9 @@ export function Sidebar() {
       case 'proyecto':
         setSidebarLevel('project');
         break;
+      case 'recursos':
+        setSidebarLevel('recursos');
+        break;
       case 'proveedor':
         setSidebarLevel('provider');
         break;
@@ -353,6 +356,13 @@ export function Sidebar() {
         label: 'Proyecto',
         defaultRoute: '/construction/dashboard',
         isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
+      },
+      {
+        id: 'recursos',
+        icon: BookOpen,
+        label: 'Recursos',
+        defaultRoute: '/recursos/documentacion',
+        isActive: location.startsWith('/recursos')
       },
       {
         id: 'proveedor',
@@ -415,6 +425,12 @@ export function Sidebar() {
         ]
       }
     ],
+    recursos: [
+      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
+      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
+      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
+      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' }
+    ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
     ],
@@ -429,6 +445,32 @@ export function Sidebar() {
   // Función para obtener el contenido actual del sidebar según el nivel
   const getCurrentSidebarItems = () => {
     return sidebarContent[sidebarLevel] || sidebarContent.main;
+  };
+
+  // Función para obtener el título del header
+  const getHeaderTitle = () => {
+    switch(sidebarLevel) {
+      case 'main': return 'ARCHUB';
+      case 'organization': return 'ORGANIZACIÓN';
+      case 'project': return 'PROYECTO';
+      case 'recursos': return 'RECURSOS';
+      case 'provider': return 'PROVEEDOR';
+      case 'admin': return 'ADMINISTRACIÓN';
+      default: return 'ARCHUB';
+    }
+  };
+
+  // Función para obtener la inicial del header
+  const getHeaderInitial = () => {
+    switch(sidebarLevel) {
+      case 'main': return 'A';
+      case 'organization': return 'O';
+      case 'project': return 'P';
+      case 'recursos': return 'R';
+      case 'provider': return 'PR';
+      case 'admin': return 'AD';
+      default: return 'A';
+    }
   };
 
 
@@ -464,8 +506,9 @@ export function Sidebar() {
             {sidebarLevel === 'main' ? 'ARCHUB' : 
              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
              sidebarLevel === 'project' ? 'PROYECTO' :
+             sidebarLevel === 'recursos' ? 'RECURSOS' :
              sidebarLevel === 'provider' ? 'PROVEEDOR' :
-             sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
+             sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'
           </div>
         ) : (
           <div className="w-full flex items-center justify-center">
@@ -473,8 +516,9 @@ export function Sidebar() {
               {sidebarLevel === 'main' ? 'A' :
                sidebarLevel === 'organization' ? 'O' :
                sidebarLevel === 'project' ? 'P' :
+               sidebarLevel === 'recursos' ? 'R' :
                sidebarLevel === 'provider' ? 'PR' :
-               sidebarLevel === 'admin' ? 'AD' : 'A'}
+               sidebarLevel === 'admin' ? 'AD' : 'A'
             </div>
           </div>
         )}
