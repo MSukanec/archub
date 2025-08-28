@@ -80,7 +80,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (location === '/dashboard') return 'main';
     if (location.startsWith('/organization')) return 'organization';
     if (location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')) return 'project';
-    if (location.startsWith('/recursos')) return 'recursos';
     if (location.startsWith('/proveedor')) return 'provider';
     if (location.startsWith('/admin')) return 'admin';
     return 'main';
@@ -310,13 +309,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
       },
       {
-        id: 'recursos',
-        icon: BookOpen,
-        label: 'Recursos',
-        defaultRoute: '/recursos/documentacion',
-        isActive: location.startsWith('/recursos')
-      },
-      {
         id: 'proveedor',
         icon: Package,
         label: 'Proveedor',
@@ -377,12 +369,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         ]
       }
     ],
-    recursos: [
-      { icon: FileText, label: 'Documentación', href: '/recursos/documentacion' },
-      { icon: Images, label: 'Galería', href: '/recursos/galeria' },
-      { icon: Contact, label: 'Contactos', href: '/recursos/contactos' },
-      { icon: CheckSquare, label: 'Tablero', href: '/recursos/board' }
-    ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
     ],
@@ -401,8 +387,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     
     const titleMap = {
       'organization': 'Organización',
-      'project': 'Proyecto',
-      'recursos': 'Recursos',
+      'project': 'Proyecto', 
       'provider': 'Proveedor',
       'admin': 'Administración'
     };
