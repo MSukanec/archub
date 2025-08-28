@@ -55,7 +55,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Set up auth state change listener
       supabase.auth.onAuthStateChange((event, session) => {
-        set({ user: session?.user ?? null, loading: false });
+        console.log('🔧 AuthStore: Auth state changed:', event, !!session?.user);
+        
+        // Don't override logout state
+        const currentState = get();
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          set({ user: null, loading: false });
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Only set user if we're not in the middle of logout
+          if (!currentState.loading || currentState.user) {
+            set({ user: session.user, loading: false });
+          }
+        }
       });
     } catch (err) {
       set({ user: null, loading: false, initialized: true });
@@ -154,19 +165,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, user: null });
     
     try {
-      await supabase.auth.signOut();
+      // Use sign out with scope 'local' to clear all sessions
+      await supabase.auth.signOut({ scope: 'local' });
       console.log('🔧 AuthStore: Logout completed successfully');
       
       // Clear all React Query cache to prevent stale queries
       queryClient.clear();
       console.log('🔧 AuthStore: Cleared React Query cache');
       
+      // Clear any stored session data
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
     } finally {
       // Ensure state is properly cleared
-      set({ user: null, loading: false });
+      set({ user: null, loading: false, initialized: true });
       console.log('🔧 AuthStore: Logout process finished');
+      
+      // Force redirect to home page after logout
+      window.location.href = '/';
     }
   },
 

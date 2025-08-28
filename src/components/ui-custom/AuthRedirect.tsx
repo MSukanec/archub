@@ -72,8 +72,8 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
     }
   }, [user, userData, initialized, loading, userDataLoading, location, navigate]);
 
-  // Show loading while checking auth state
-  if (!initialized || loading) {
+  // Show loading while checking auth state (but not during logout)
+  if (!initialized || (loading && user)) {
     console.log('AuthRedirect: Showing loading spinner', { initialized, loading });
     return (
       <div className="flex items-center justify-center min-h-screen">
