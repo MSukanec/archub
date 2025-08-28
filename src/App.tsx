@@ -25,30 +25,30 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 
-import FinancesDashboard from "@/pages/finances/FinancesDashboard";
-import Movements from "@/pages/finances/movements/Movements";
-import FinancesAnalysis from "@/pages/finances/FinancesAnalysis";
-import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements";
-import { Clients } from "@/pages/finances/clients/Clients";
+import FinancesDashboard from "@/pages/professional/project/finances/FinancesDashboard";
+import Movements from "@/pages/professional/project/finances/movements/Movements";
+import FinancesAnalysis from "@/pages/professional/project/finances/FinancesAnalysis";
+import FinancesCapitalMovements from "@/pages/professional/project/finances/FinancesCapitalMovements";
+import { Clients } from "@/pages/professional/project/finances/clients/Clients";
 
 
 import Preferences from "@/pages/professional/organization/Preferences";
-import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
-import Logs from "@/pages/construction/logs/Logs";
-import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
-import ConstructionBudgets from "@/pages/construction/ConstructionBudgets";
-import ConstructionMaterials from "@/pages/construction/ConstructionMaterials";
-import Analysis from "@/pages/resources/analysis/Analysis";
-import ConstructionTasks from "@/pages/construction/tasks/Tasks";
+import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
+import Logs from "@/pages/professional/project/construction/logs/Logs";
+import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
+import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
+import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
+import Analysis from "@/pages/professional/project/resources/analysis/Analysis";
+import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
 
 
-import ConstructionSubcontracts from "@/pages/construction/subcontracts/Subcontracts";
-import SubcontractView from "@/pages/construction/subcontracts/SubcontractView";
-import DesignDashboard from "@/pages/design/DesignDashboard";
-import Documentation from "@/pages/resources/Documentation";
-import Gallery from "@/pages/resources/Gallery";
-import Contacts from "@/pages/resources/Contacts";
-import Board from "@/pages/resources/Board";
+import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
+import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
+import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
+import Documentation from "@/pages/professional/project/resources/Documentation";
+import Gallery from "@/pages/professional/project/resources/Gallery";
+import Contacts from "@/pages/professional/project/resources/Contacts";
+import Board from "@/pages/professional/project/resources/Board";
 
 import Dashboard from "@/pages/dashboard/Dashboard";
 import Members from "@/pages/professional/organization/members/Members";
