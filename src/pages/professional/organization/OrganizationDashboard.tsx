@@ -1,22 +1,64 @@
+import { useEffect } from "react";
 import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban } from "lucide-react";
+import { useLocation } from 'wouter';
+
+import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomButton } from "@/components/ui-custom/CustomButton";
+
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useLocation } from "wouter";
 
-interface DashboardDashboardProps {
-  organization: any;
-}
-
-export function DashboardDashboard({ organization }: DashboardDashboardProps) {
-  const { data: userData } = useCurrentUser();
+export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
+  
+  const { data: userData, isLoading } = useCurrentUser();
+  const { setShowActionBar } = useActionBarMobile();
+  const isMobile = useMobile();
+  
+  // Usar la organización actual del usuario
+  const organization = userData?.organization;
   const currentTime = new Date();
 
+  const headerProps = {
+    icon: Building,
+    title: organization?.name || 'Organización',
+    subtitle: `${organization?.is_system ? 'Organización del sistema' : 'Organización'} • Plan ${organization?.plan?.name || 'Free'}`,
+  };
+
+  // Dashboard no debe mostrar action bar
+  useEffect(() => {
+    if (isMobile) {
+      setShowActionBar(false);
+    }
+  }, [isMobile, setShowActionBar]);
+
+  if (isLoading) {
+    return (
+      <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Cargando organización...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!organization) {
+    return (
+      <Layout headerProps={headerProps} wide={true}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Organización no encontrada</div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <Layout headerProps={headerProps} wide={true}>
+      <div className="space-y-6">
         {/* Welcome Card - Full Width */}
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent"></div>
@@ -136,5 +178,6 @@ export function DashboardDashboard({ organization }: DashboardDashboardProps) {
           </Card>
         </div>
       </div>
+    </Layout>
   );
 }

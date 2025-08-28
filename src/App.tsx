@@ -50,7 +50,7 @@ import Gallery from "@/pages/professional/project/resources/Gallery";
 import Contacts from "@/pages/professional/project/resources/Contacts";
 import Board from "@/pages/professional/project/resources/Board";
 
-import Dashboard from "@/pages/dashboard/Dashboard";
+import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
@@ -106,7 +106,7 @@ function Router() {
         <Route path="/select-mode" component={SelectMode} />
 
         {/* Main Dashboard - Independent dashboard */}
-        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard" component={OrganizationDashboard} />
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/preferences" component={Preferences} />
