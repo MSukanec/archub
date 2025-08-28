@@ -83,7 +83,7 @@ export function Sidebar() {
       setDocked(userData.preferences.sidebar_docked);
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
-  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel, goToPreviousLevel } = useNavigationStore();
+  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
   // Theme state
@@ -291,7 +291,7 @@ export function Sidebar() {
     return null;
   };
 
-  // Función para manejar clicks en botones principales - ahora cambia nivel del sidebar
+  // Función para manejar clicks en botones principales
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
     // Dashboard no tiene submenu, navegar directamente
     if (sectionId === 'dashboard') {
@@ -313,18 +313,20 @@ export function Sidebar() {
       case 'administracion':
         setSidebarLevel('admin');
         break;
-      case 'construccion':
-        setSidebarLevel('construction');
-        break;
-      case 'finanzas':
-        setSidebarLevel('finances');
-        break;
-      case 'diseno':
-        setSidebarLevel('design');
-        break;
       default:
         // Para otros casos, navegar directamente
         navigate(defaultRoute);
+    }
+  };
+
+  // Función para manejar acordeón en subniveles
+  const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
+    // Si es una sección con submenu, toggle acordeón
+    if (['construccion', 'finanzas', 'diseno'].includes(sectionId)) {
+      setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
+    } else {
+      // Si no tiene submenu, navegar directamente
+      navigate(defaultRoute);
     }
   };
 
@@ -379,39 +381,39 @@ export function Sidebar() {
         icon: Brush,
         label: 'Diseño',
         defaultRoute: '/design/dashboard',
-        generalModeRestricted: true
+        generalModeRestricted: true,
+        submenu: [
+          { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
+        ]
       },
       {
         id: 'construccion',
         icon: HardHat,
         label: 'Construcción',
-        defaultRoute: '/construction/dashboard'
+        defaultRoute: '/construction/dashboard',
+        submenu: [
+          { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+          { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+          { icon: Users, label: 'Personal', href: '/construction/personnel' },
+          { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+          { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+          { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+        ]
       },
       {
         id: 'finanzas',
         icon: DollarSign,
         label: 'Finanzas',
-        defaultRoute: '/finances/dashboard'
+        defaultRoute: '/finances/dashboard',
+        submenu: [
+          { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+          { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+          { icon: Users, label: 'Clientes', href: '/finances/clients' },
+          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
+          { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
+        ]
       }
-    ],
-    construction: [
-      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
-      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
-    ],
-    finances: [
-      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-      { icon: Users, label: 'Clientes', href: '/finances/clients' },
-      { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
-      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
-    ],
-    design: [
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
@@ -440,7 +442,19 @@ export function Sidebar() {
       style={{
         overflow: 'hidden'
       }}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true);
+        // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
+        if (sidebarLevel === 'project') {
+          if (location.startsWith('/construction')) {
+            setExpandedAccordion('construccion');
+          } else if (location.startsWith('/finances')) {
+            setExpandedAccordion('finanzas');
+          } else if (location.startsWith('/design')) {
+            setExpandedAccordion('diseno');
+          }
+        }
+      }}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Header Section - Dinámico según el nivel */}
@@ -450,9 +464,6 @@ export function Sidebar() {
             {sidebarLevel === 'main' ? 'ARCHUB' : 
              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
              sidebarLevel === 'project' ? 'PROYECTO' :
-             sidebarLevel === 'construction' ? 'CONSTRUCCIÓN' :
-             sidebarLevel === 'finances' ? 'FINANZAS' :
-             sidebarLevel === 'design' ? 'DISEÑO' :
              sidebarLevel === 'provider' ? 'PROVEEDOR' :
              sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
           </div>
@@ -462,9 +473,6 @@ export function Sidebar() {
               {sidebarLevel === 'main' ? 'A' :
                sidebarLevel === 'organization' ? 'O' :
                sidebarLevel === 'project' ? 'P' :
-               sidebarLevel === 'construction' ? 'C' :
-               sidebarLevel === 'finances' ? 'F' :
-               sidebarLevel === 'design' ? 'D' :
                sidebarLevel === 'provider' ? 'PR' :
                sidebarLevel === 'admin' ? 'AD' : 'A'}
             </div>
@@ -485,7 +493,7 @@ export function Sidebar() {
                     label="Volver"
                     isActive={false}
                     isExpanded={isExpanded}
-                    onClick={goToPreviousLevel}
+                    onClick={goToMainLevel}
                     variant="main"
                   />
                 </div>
@@ -500,6 +508,7 @@ export function Sidebar() {
               const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
               const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
               const isDashboard = 'id' in item && item.id === 'dashboard';
+              const hasSubmenu = 'submenu' in item && item.submenu;
               
               const buttonElement = (
                 <SidebarButton
@@ -509,7 +518,11 @@ export function Sidebar() {
                   isExpanded={isExpanded}
                   onClick={() => {
                     if ('defaultRoute' in item && 'id' in item) {
-                      handleMainSectionClick(item.id, item.defaultRoute);
+                      if (hasSubmenu) {
+                        handleSubSectionClick(item.id, item.defaultRoute);
+                      } else {
+                        handleMainSectionClick(item.id, item.defaultRoute);
+                      }
                     } else if ('href' in item) {
                       navigate(item.href);
                     }
@@ -530,6 +543,37 @@ export function Sidebar() {
                       buttonElement
                     )}
                   </div>
+                  
+                  {/* Mostrar submenu si está expandido */}
+                  {hasSubmenu && isExpanded && expandedAccordion === ('id' in item ? item.id : null) && (
+                    <div className="ml-4 mt-[2px] space-y-[1px]">
+                      {item.submenu.map((subItem, subIndex) => (
+                        <div key={subIndex}>
+                          {('generalModeRestricted' in subItem && subItem.generalModeRestricted) ? (
+                            <PlanRestricted reason="general_mode" functionName={subItem.label}>
+                              <SidebarButton
+                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                                label={subItem.label}
+                                href={subItem.href}
+                                isActive={location === subItem.href}
+                                isExpanded={isExpanded}
+                                variant="secondary"
+                              />
+                            </PlanRestricted>
+                          ) : (
+                            <SidebarButton
+                              icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                              label={subItem.label}
+                              href={subItem.href}
+                              isActive={location === subItem.href}
+                              isExpanded={isExpanded}
+                              variant="secondary"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   
                   {/* Línea divisoria después de Dashboard */}
                   {isDashboard && sidebarLevel === 'main' && (

@@ -331,20 +331,42 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     ],
     project: [
       {
+        id: 'diseno',
         icon: Brush,
         label: 'Diseño',
-        href: '/design/dashboard',
-        restricted: true
+        defaultRoute: '/design/dashboard',
+        restricted: true,
+        submenu: [
+          { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
+        ]
       },
       {
+        id: 'construccion',
         icon: HardHat,
         label: 'Construcción',
-        href: '/construction/dashboard'
+        defaultRoute: '/construction/dashboard',
+        submenu: [
+          { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+          { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+          { icon: Users, label: 'Personal', href: '/construction/personnel' },
+          { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+          { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+          { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+        ]
       },
       {
+        id: 'finanzas',
         icon: DollarSign,
         label: 'Finanzas',
-        href: '/finances/dashboard'
+        defaultRoute: '/finances/dashboard',
+        submenu: [
+          { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+          { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+          { icon: Users, label: 'Clientes', href: '/finances/clients' },
+          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
+          { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
+        ]
       }
     ],
     provider: [
@@ -475,41 +497,99 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           ) : (
             // Submenu - mostrar opciones de la sección seleccionada
             <nav className="space-y-2">
-              {mobileMenuContent[currentView as keyof typeof mobileMenuContent]?.map((item, index) => (
-                <div key={index}>
-                  {('restricted' in item && item.restricted) ? (
-                    <PlanRestricted reason="coming_soon" functionName={item.label}>
-                      <button
-                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
-                        disabled
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.label}
-                      </button>
-                    </PlanRestricted>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if ('href' in item) {
-                          navigate(item.href);
-                          handleCloseMenu();
-                        }
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                        ('href' in item && location === item.href)
-                          ? "bg-[hsl(76,100%,40%)] text-white" 
-                          : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
-                    </button>
-                  )}
-                </div>
-              )) || (
+              {mobileMenuContent[currentView as keyof typeof mobileMenuContent]?.map((item, index) => {
+                const hasSubmenu = 'submenu' in item && item.submenu;
+                const isExpanded = expandedAccordion === ('id' in item ? item.id : null);
+                
+                return (
+                  <div key={index}>
+                    {('restricted' in item && item.restricted) ? (
+                      <PlanRestricted reason="coming_soon" functionName={item.label}>
+                        <button
+                          className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                          disabled
+                        >
+                          <item.icon className="h-5 w-5" />
+                          {item.label}
+                          {hasSubmenu && <ChevronRight className="h-4 w-4 ml-auto" />}
+                        </button>
+                      </PlanRestricted>
+                    ) : (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (hasSubmenu && 'id' in item) {
+                              toggleAccordion(item.id);
+                            } else if ('href' in item) {
+                              navigate(item.href);
+                              handleCloseMenu();
+                            } else if ('defaultRoute' in item) {
+                              navigate(item.defaultRoute);
+                              handleCloseMenu();
+                            }
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                            (('href' in item && location === item.href) || ('defaultRoute' in item && location.startsWith(item.defaultRoute.split('/').slice(0, 2).join('/'))))
+                              ? "bg-[hsl(76,100%,40%)] text-white" 
+                              : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          {item.label}
+                          {hasSubmenu && (
+                            <ChevronRight className={cn(
+                              "h-4 w-4 ml-auto transition-transform duration-200",
+                              isExpanded && "rotate-90"
+                            )} />
+                          )}
+                        </button>
+                        
+                        {/* Submenu expandido */}
+                        {hasSubmenu && isExpanded && (
+                          <div className="ml-6 mt-2 space-y-1">
+                            {item.submenu.map((subItem, subIndex) => (
+                              <div key={subIndex}>
+                                {('restricted' in subItem && subItem.restricted) ? (
+                                  <PlanRestricted reason="coming_soon" functionName={subItem.label}>
+                                    <button
+                                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
+                                      disabled
+                                    >
+                                      <subItem.icon className="h-4 w-4" />
+                                      {subItem.label}
+                                    </button>
+                                  </PlanRestricted>
+                                ) : (
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      navigate(subItem.href);
+                                      handleCloseMenu();
+                                    }}
+                                    className={cn(
+                                      "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg transition-all duration-150",
+                                      location === subItem.href
+                                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                                    )}
+                                  >
+                                    <subItem.icon className="h-4 w-4" />
+                                    {subItem.label}
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              }) || (
                 <div className="text-center py-4 text-[var(--menues-fg)] opacity-60">
                   No hay opciones disponibles
                 </div>
