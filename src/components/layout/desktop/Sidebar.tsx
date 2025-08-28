@@ -355,6 +355,13 @@ export function Sidebar() {
         isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
       },
       {
+        id: 'biblioteca',
+        icon: FolderOpen,
+        label: 'Biblioteca',
+        defaultRoute: '/library/documentation',
+        isActive: location.startsWith('/library')
+      },
+      {
         id: 'proveedor',
         icon: Package,
         label: 'Proveedor',
@@ -413,6 +420,24 @@ export function Sidebar() {
           { icon: Users, label: 'Clientes', href: '/finances/clients' },
           { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
+        ]
+      }
+    ],
+    library: [
+      { icon: FileText, label: 'Documentación', href: '/library/documentation' },
+      { icon: Contact, label: 'Contactos', href: '/library/contacts' },
+      { icon: Images, label: 'Galería', href: '/library/gallery' },
+      { icon: Layout, label: 'Tablero', href: '/library/board' },
+      { 
+        id: 'analysis',
+        icon: BarChart3, 
+        label: 'Análisis', 
+        defaultRoute: '/library/analysis',
+        submenu: [
+          { icon: CheckSquare, label: 'Tareas', href: '/library/analysis/tasks' },
+          { icon: Package2, label: 'Materiales', href: '/library/analysis/materials' },
+          { icon: Users, label: 'Mano de obra', href: '/library/analysis/labor' },
+          { icon: TrendingUp, label: 'Gastos generales', href: '/library/analysis/overheads' }
         ]
       }
     ],

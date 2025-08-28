@@ -38,17 +38,17 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import Analysis from "@/pages/professional/project/resources/analysis/Analysis";
+import Analysis from "@/pages/professional/organization/Library/analysis/Analysis";
 import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
 
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
-import Documentation from "@/pages/professional/project/resources/Documentation";
-import Gallery from "@/pages/professional/project/resources/Gallery";
-import Contacts from "@/pages/professional/project/resources/Contacts";
-import Board from "@/pages/professional/project/resources/Board";
+import Documentation from "@/pages/professional/organization/Library/Documentation";
+import Gallery from "@/pages/professional/organization/Library/Gallery";
+import Contacts from "@/pages/professional/organization/Library/Contacts";
+import Board from "@/pages/professional/organization/Library/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
@@ -73,10 +73,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
-import AnalysisTasks from "@/pages/professional/analysis/tasks/Tasks";
-import AnalysisLabor from "@/pages/professional/analysis/labor/Labor";
-import AnalysisMaterials from "@/pages/professional/analysis/materials/Materials";
-import AnalysisIndirects from "@/pages/professional/analysis/indirects/Indirects";
+import AnalysisTasks from "@/pages/professional/organization/Library/analysis/AnalysisTasks";
+import AnalysisLabor from "@/pages/professional/organization/Library/analysis/AnalysisLabor";
+import AnalysisMaterials from "@/pages/professional/organization/Library/analysis/AnalysisMaterials";
+import AnalysisOverheads from "@/pages/professional/organization/Library/analysis/AnalysisOverheads";
 
 
 
@@ -122,7 +122,7 @@ function Router() {
 
 
 
-        <Route path="/recursos/board" component={Board} />
+        <Route path="/library/board" component={Board} />
 
         <Route path="/organization/:organizationId" component={Members} />
 
@@ -135,9 +135,9 @@ function Router() {
 
 
         {/* Resources Routes */}
-        <Route path="/recursos/documentacion" component={Documentation} />
-        <Route path="/recursos/galeria" component={Gallery} />
-        <Route path="/recursos/contactos" component={Contacts} />
+        <Route path="/library/documentation" component={Documentation} />
+        <Route path="/library/gallery" component={Gallery} />
+        <Route path="/library/contacts" component={Contacts} />
 
         {/* Design Routes */}
         <Route path="/design/dashboard" component={DesignDashboard} />
@@ -156,7 +156,11 @@ function Router() {
         <Route path="/construction/personnel" component={ConstructionPersonnel} />
         <Route path="/construction/budgets" component={ConstructionBudgets} />
         <Route path="/construction/materials" component={ConstructionMaterials} />
-        <Route path="/recursos/cost-analysis" component={Analysis} />
+        <Route path="/library/analysis" component={Analysis} />
+        <Route path="/library/analysis/tasks" component={AnalysisTasks} />
+        <Route path="/library/analysis/materials" component={AnalysisMaterials} />
+        <Route path="/library/analysis/labor" component={AnalysisLabor} />
+        <Route path="/library/analysis/overheads" component={AnalysisOverheads} />
         <Route path="/resources/analysis" component={Analysis} />
         <Route path="/resources/analysis/:tab?" component={Analysis} />
         
@@ -164,7 +168,7 @@ function Router() {
         <Route path="/analysis/tasks" component={AnalysisTasks} />
         <Route path="/analysis/labor" component={AnalysisLabor} />
         <Route path="/analysis/materials" component={AnalysisMaterials} />
-        <Route path="/analysis/indirects" component={AnalysisIndirects} />
+        <Route path="/analysis/indirects" component={AnalysisOverheads} />
 
 
         {/* Finances Routes */}

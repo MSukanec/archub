@@ -80,6 +80,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (location === '/dashboard') return 'main';
     if (location.startsWith('/organization')) return 'organization';
     if (location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')) return 'project';
+    if (location.startsWith('/library')) return 'library';
     if (location.startsWith('/proveedor')) return 'provider';
     if (location.startsWith('/admin')) return 'admin';
     return 'main';
@@ -309,6 +310,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
       },
       {
+        id: 'biblioteca',
+        icon: FolderOpen,
+        label: 'Biblioteca',
+        defaultRoute: '/library/documentation',
+        isActive: location.startsWith('/library')
+      },
+      {
         id: 'proveedor',
         icon: Package,
         label: 'Proveedor',
@@ -370,6 +378,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         ]
       }
     ],
+    library: [
+      { icon: FileText, label: 'Documentación', href: '/library/documentation' },
+      { icon: Contact, label: 'Contactos', href: '/library/contacts' },
+      { icon: Images, label: 'Galería', href: '/library/gallery' },
+      { icon: Layout, label: 'Tablero', href: '/library/board' },
+      { 
+        id: 'analysis',
+        icon: BarChart3, 
+        label: 'Análisis', 
+        defaultRoute: '/library/analysis',
+        submenu: [
+          { icon: CheckSquare, label: 'Tareas', href: '/library/analysis/tasks' },
+          { icon: Package2, label: 'Materiales', href: '/library/analysis/materials' },
+          { icon: Users, label: 'Mano de obra', href: '/library/analysis/labor' },
+          { icon: TrendingUp, label: 'Gastos generales', href: '/library/analysis/overheads' }
+        ]
+      }
+    ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
     ],
@@ -388,7 +414,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     
     const titleMap = {
       'organization': 'Organización',
-      'project': 'Proyecto', 
+      'project': 'Proyecto',
+      'library': 'Biblioteca', 
       'provider': 'Proveedor',
       'admin': 'Administración'
     };
