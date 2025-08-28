@@ -8,6 +8,7 @@ interface AuthState {
   loading: boolean;
   initialized: boolean;
   completingOnboarding: boolean;
+  authSubscription?: any;
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
@@ -21,6 +22,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: true,
   initialized: false,
   completingOnboarding: false,
+  authSubscription: undefined,
 
   initialize: async () => {
     const state = get();
@@ -54,20 +56,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       // Set up auth state change listener
-      supabase.auth.onAuthStateChange((event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         console.log('🔧 AuthStore: Auth state changed:', event, !!session?.user);
         
-        // Don't override logout state
-        const currentState = get();
         if (event === 'SIGNED_OUT' || !session?.user) {
           set({ user: null, loading: false });
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Only set user if we're not in the middle of logout
-          if (!currentState.loading || currentState.user) {
-            set({ user: session.user, loading: false });
-          }
+          set({ user: session.user, loading: false });
         }
       });
+      
+      // Store subscription for cleanup
+      set({ authSubscription: subscription } as any);
     } catch (err) {
       set({ user: null, loading: false, initialized: true });
     }
@@ -161,31 +161,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     console.log('🔧 AuthStore: Starting logout process');
     
-    // Set loading state and clear user immediately
-    set({ loading: true, user: null });
-    
     try {
-      // Use sign out with scope 'local' to clear all sessions
-      await supabase.auth.signOut({ scope: 'local' });
-      console.log('🔧 AuthStore: Logout completed successfully');
+      // Get current state and unsubscribe from auth changes
+      const state = get();
+      if (state.authSubscription) {
+        state.authSubscription.unsubscribe();
+      }
       
-      // Clear all React Query cache to prevent stale queries
+      // Clear user state immediately
+      set({ user: null, loading: false, initialized: true });
+      
+      // Clear all React Query cache first
       queryClient.clear();
       console.log('🔧 AuthStore: Cleared React Query cache');
       
-      // Clear any stored session data
-      localStorage.removeItem('supabase.auth.token');
+      // Clear all storage
+      localStorage.clear();
       sessionStorage.clear();
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log('🔧 AuthStore: Logout completed successfully');
+      
+      // Force hard page reload to clear all state
+      window.location.replace('/');
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
-    } finally {
-      // Ensure state is properly cleared
+      // Even if logout fails, force redirect
       set({ user: null, loading: false, initialized: true });
-      console.log('🔧 AuthStore: Logout process finished');
-      
-      // Force redirect to home page after logout
-      window.location.href = '/';
+      window.location.replace('/');
     }
   },
 
