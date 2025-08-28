@@ -15,17 +15,20 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 
+export interface ComboBoxMultiSelectFieldOption {
+  value: string;
+  label: string;
+}
+
 interface ComboBoxMultiSelectFieldProps {
-  options: Array<{
-    value: string;
-    label: string;
-  }>;
+  options: ComboBoxMultiSelectFieldOption[];
   value: string[];
   onChange: (value: string[]) => void;
   placeholder?: string;
   searchPlaceholder?: string;
   emptyText?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export function ComboBoxMultiSelectField({
@@ -36,6 +39,7 @@ export function ComboBoxMultiSelectField({
   searchPlaceholder = "Buscar opciones...",
   emptyText = "No se encontraron opciones",
   className,
+  disabled = false,
 }: ComboBoxMultiSelectFieldProps) {
   const [open, setOpen] = useState(false);
 
@@ -65,12 +69,13 @@ export function ComboBoxMultiSelectField({
   return (
     <div className={cn("space-y-2", className)}>
       {/* Trigger que se ve como un Input/Select normal */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open && !disabled} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
             role="combobox"
             aria-expanded={open}
+            disabled={disabled}
             className="flex w-full items-center justify-between text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 md:px-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1"
           >
             <span className={cn(

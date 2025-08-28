@@ -5,7 +5,7 @@ import { Coins } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ComboBoxMultiRows } from '@/components/ui-custom/ComboBoxMultiRows';
+import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -274,13 +274,13 @@ export default function Preferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-                <ComboBoxMultiRows
+                <ComboBoxMultiSelectField
                   options={availableSecondaryCurrencies.map(currency => ({
                     value: currency.id,
                     label: `${currency.name} (${currency.symbol})`
                   }))}
                   value={secondaryCurrencies}
-                  onValueChange={handleSecondaryCurrenciesChange}
+                  onChange={handleSecondaryCurrenciesChange}
                   placeholder="Selecciona una moneda secundaria"
                 />
               </div>
@@ -303,13 +303,13 @@ export default function Preferences() {
 
               <div className="space-y-2">
                 <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-                <ComboBoxMultiRows
+                <ComboBoxMultiSelectField
                   options={availableSecondaryWallets.map(wallet => ({
                     value: wallet.id,
                     label: wallet.name
                   }))}
                   value={secondaryWallets}
-                  onValueChange={handleSecondaryWalletsChange}
+                  onChange={handleSecondaryWalletsChange}
                   placeholder="Selecciona una billetera secundaria"
                 />
               </div>

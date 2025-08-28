@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
-import { ComboBoxMultiRows, type ComboBoxMultiRowsOption } from '@/components/ui-custom/ComboBoxMultiRows'
+import { ComboBoxMultiSelectField, type ComboBoxMultiSelectFieldOption } from '@/components/ui-custom/fields/ComboBoxMultiSelectField'
 import { StepModalConfig, StepModalFooterConfig } from '@/components/modal/form/types'
 import { Plus, FileText, GripVertical, Settings, Eye, Trash2, Check, X } from 'lucide-react'
 
@@ -65,7 +65,7 @@ function SortableParameterItem({
   
   // Encontrar las opciones del parámetro actual
   const parameterWithOptions = parametersData?.find(p => p.id === parameter?.id)
-  const realOptions: ComboBoxMultiRowsOption[] = parameterWithOptions?.options?.map(option => ({
+  const realOptions: ComboBoxMultiSelectFieldOption[] = parameterWithOptions?.options?.map(option => ({
     value: option.id,
     label: option.label
   })) || []
@@ -136,10 +136,10 @@ function SortableParameterItem({
       
       {/* Segunda fila: selector de opciones a 100% ancho */}
       <div className="w-full">
-        <ComboBoxMultiRows
+        <ComboBoxMultiSelectField
           options={realOptions}
           value={selectedOptions}
-          onValueChange={setSelectedOptions}
+          onChange={setSelectedOptions}
           placeholder={realOptions.length > 0 ? "Seleccionar opciones..." : "No hay opciones disponibles"}
           className="w-full h-7 text-xs"
           disabled={realOptions.length === 0}
