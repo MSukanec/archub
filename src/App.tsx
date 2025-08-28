@@ -10,15 +10,15 @@ import { AuthGuard } from "@/components/ui-custom/security/AuthGuard";
 import { AuthAdmin } from "@/components/ui-custom/security/AuthAdmin";
 
 // Public Pages
-import Landing from "@/pages/Landing";
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
+import Landing from "@/pages/public/Landing";
+import Login from "@/pages/public/Login";
+import Register from "@/pages/public/Register";
+import ForgotPassword from "@/pages/public/ForgotPassword";
 
 // Protected Pages
 
 
-import Projects from "@/pages/organization/Projects";
+import Projects from "@/pages/professional/organization/Projects";
 
 
 
@@ -32,7 +32,7 @@ import FinancesCapitalMovements from "@/pages/finances/FinancesCapitalMovements"
 import { Clients } from "@/pages/finances/clients/Clients";
 
 
-import Preferences from "@/pages/organization/Preferences";
+import Preferences from "@/pages/professional/organization/Preferences";
 import ConstructionDashboard from "@/pages/construction/ConstructionDashboard";
 import Logs from "@/pages/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/construction/ConstructionPersonnel";
@@ -51,13 +51,13 @@ import Contacts from "@/pages/resources/Contacts";
 import Board from "@/pages/resources/Board";
 
 import Dashboard from "@/pages/dashboard/Dashboard";
-import Members from "@/pages/organization/members/Members";
+import Members from "@/pages/professional/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
-import OrganizationData from "@/pages/organization/data/OrganizationData";
+import OrganizationData from "@/pages/professional/organization/data/OrganizationData";
 
-import Onboarding from "@/pages/Onboarding";
-import SelectMode from "@/pages/SelectMode";
+import Onboarding from "@/pages/public/Onboarding";
+import SelectMode from "@/pages/public/SelectMode";
 
 // Admin Pages
 import AdminCommunity from "@/pages/admin/community/AdminCommunity";
@@ -86,7 +86,7 @@ import AnalysisIndirects from "@/pages/analysis/indirects/Indirects";
 
 
 
-import NotFound from "@/pages/NotFound";
+import NotFound from "@/pages/public/NotFound";
 import { ModalFactory } from "@/components/modal/form/ModalFactory";
 import { ProjectContextInitializer } from "@/components/navigation/ProjectContextInitializer";
 
