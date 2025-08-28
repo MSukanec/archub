@@ -47,7 +47,7 @@ import SubcontractView from "@/pages/professional/project/construction/subcontra
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
 import Documentation from "@/pages/professional/organization/Library/Documentation";
 import Gallery from "@/pages/professional/organization/Library/Gallery";
-import Contacts from "@/pages/professional/organization/Library/Contacts";
+import Contacts from "@/pages/professional/organization/library/Contacts";
 import Board from "@/pages/professional/organization/Library/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
@@ -137,7 +137,7 @@ function Router() {
         {/* Resources Routes */}
         <Route path="/library/documentation" component={Documentation} />
         <Route path="/library/gallery" component={Gallery} />
-        <Route path="/library/contacts" component={Contacts} />
+        <Route path="/organization/contacts" component={Contacts} />
 
         {/* Design Routes */}
         <Route path="/design/dashboard" component={DesignDashboard} />

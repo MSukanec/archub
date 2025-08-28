@@ -381,6 +381,7 @@ export function Sidebar() {
     ],
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -428,7 +429,6 @@ export function Sidebar() {
     ],
     library: [
       { icon: FileText, label: 'Documentación', href: '/library/documentation' },
-      { icon: Contact, label: 'Contactos', href: '/library/contacts' },
       { icon: Images, label: 'Galería', href: '/library/gallery' },
       { icon: Layout, label: 'Tablero', href: '/library/board' },
       { 
