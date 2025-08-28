@@ -283,8 +283,7 @@ export function Sidebar() {
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
     if (location.startsWith('/finances')) return 'finanzas';
-    if (location.startsWith('/recursos')) return 'recursos';
-    if (location.startsWith('/analysis')) return 'analisis';
+    if (location.startsWith('/library')) return 'biblioteca';
     if (location.startsWith('/proveedor')) return 'proveedor';
     if (location.startsWith('/admin')) return 'administracion';
     if (location === '/dashboard') return null; // Resumen es independiente
@@ -307,6 +306,9 @@ export function Sidebar() {
       case 'proyecto':
         setSidebarLevel('project');
         break;
+      case 'biblioteca':
+        setSidebarLevel('library');
+        break;
       case 'proveedor':
         setSidebarLevel('provider');
         break;
@@ -322,7 +324,7 @@ export function Sidebar() {
   // Función para manejar acordeón en subniveles
   const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
     // Si es una sección con submenu, toggle acordeón
-    if (['construccion', 'finanzas', 'diseno'].includes(sectionId)) {
+    if (['construccion', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
       setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     } else {
       // Si no tiene submenu, navegar directamente
