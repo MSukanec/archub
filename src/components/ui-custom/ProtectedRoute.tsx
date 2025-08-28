@@ -38,6 +38,30 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check if user needs to complete onboarding
   useEffect(() => {
     if (user && userData && !userDataLoading) {
+      const { completingOnboarding } = useAuthStore.getState();
+      
+      // Check localStorage bypass flag - this overrides all onboarding logic
+      const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
+      
+      // If user has completed onboarding but bypass is set, respect it
+      // If user has NOT completed onboarding and bypass is set, clear it (fresh user)
+      if (onboardingBypass) {
+        if (!userData.preferences?.onboarding_completed) {
+          console.log('ProtectedRoute: Clearing bypass flag for user who has not completed onboarding');
+          localStorage.removeItem('onboarding_bypass');
+        } else {
+          console.log('ProtectedRoute: Onboarding bypass active - skipping onboarding redirects');
+          lastNavigationRef.current = null;
+          return;
+        }
+      }
+      
+      // If completing onboarding, don't interfere
+      if (completingOnboarding) {
+        console.log('ProtectedRoute: Onboarding completion in progress - avoiding redirect');
+        return;
+      }
+      
       const hasUserType = userData.preferences?.last_user_type;
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;

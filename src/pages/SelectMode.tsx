@@ -130,7 +130,8 @@ export default function SelectMode() {
     onSuccess: async () => {
       console.log('SelectMode: SUCCESS - Forcing RPC refresh to get updated onboarding status');
       
-      // Force cache invalidation
+      // Clear any potentially stale cache first
+      await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       
       // Force refetch with refresh parameter to ensure RPC returns fresh data  
@@ -151,9 +152,15 @@ export default function SelectMode() {
         console.warn('SelectMode: No valid session token found, skipping refresh');
       }
       
-      // Set the bypass flag
+      // Small delay to ensure all state is synchronized
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Set the bypass flag to prevent future onboarding redirects
       console.log('SelectMode: Completed onboarding, preventing future redirects');
       localStorage.setItem('onboarding_bypass', 'true');
+      
+      // Reset completion flag to allow normal flow
+      setCompletingOnboarding(false);
       
       // Navigate immediately with React Router
       setSidebarContext('organization');

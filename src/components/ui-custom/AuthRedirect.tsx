@@ -44,10 +44,16 @@ export function AuthRedirect({ children }: AuthRedirectProps) {
     // Check localStorage bypass flag first - this completely overrides onboarding checks
     const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
     
-    // If bypass is set, completely skip all onboarding logic
+    // If user has completed onboarding but bypass is set, respect it
+    // If user has NOT completed onboarding and bypass is set, clear it (fresh user)
     if (onboardingBypass) {
-      console.log('AuthRedirect: Onboarding bypass active - skipping all onboarding redirects');
-      return; // Exit early, don't do any redirects
+      if (user && userData && !userData.preferences?.onboarding_completed) {
+        console.log('AuthRedirect: Clearing bypass flag for user who has not completed onboarding');
+        localStorage.removeItem('onboarding_bypass');
+      } else {
+        console.log('AuthRedirect: Onboarding bypass active - skipping all onboarding redirects');
+        return; // Exit early, don't do any redirects
+      }
     }
 
     // Original onboarding logic only if bypass is NOT set
