@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { AnalysisTaskRow } from '@/components/data-row/rows'
+import { AnalysisTaskRow } from '@/components/ui/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 

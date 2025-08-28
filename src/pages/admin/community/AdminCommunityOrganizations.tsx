@@ -12,7 +12,7 @@ import { Edit, Trash2, Building, Crown } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useToast } from '@/hooks/use-toast';
-import AdminOrganizationRow from '@/components/data-row/rows/AdminOrganizationRow';
+import AdminOrganizationRow from '@/components/ui/data-row/rows/AdminOrganizationRow';
 
 interface Organization {
   id: string;

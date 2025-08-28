@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { useClientAnalysis } from '@/hooks/use-client-analysis'
 import { useMobile } from '@/hooks/use-mobile'
-import { ClientObligationRow } from '@/components/data-row/rows'
+import { ClientObligationRow } from '@/components/ui/data-row/rows'
 import { useNavigationStore } from '@/stores/navigationStore'
 
 interface ClientObligationsProps {

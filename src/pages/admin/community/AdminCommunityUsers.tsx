@@ -11,7 +11,7 @@ import { Edit, Trash2, Building, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminUserRow from '@/components/data-row/rows/AdminUserRow'
+import AdminUserRow from '@/components/ui/data-row/rows/AdminUserRow'
 
 interface User {
   id: string

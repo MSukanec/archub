@@ -9,7 +9,7 @@ import { Edit, Trash2, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminChangelogRow from '@/components/data-row/rows/AdminChangelogRow'
+import AdminChangelogRow from '@/components/ui/data-row/rows/AdminChangelogRow'
 
 interface ChangelogEntry {
   id: string;

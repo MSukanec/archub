@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import MemberRow from "@/components/data-row/rows/MemberRow";
+import MemberRow from "@/components/ui/data-row/rows/MemberRow";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";

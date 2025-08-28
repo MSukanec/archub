@@ -41,8 +41,8 @@ import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 
-import { TransferGroup } from "@/components/data-row";
-import { MovementRow, ConversionRow, TransferRow } from "@/components/data-row";
+import { TransferGroup } from "@/components/ui/data-row";
+import { MovementRow, ConversionRow, TransferRow } from "@/components/ui/data-row";
 import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
 import { Star } from "lucide-react";
 

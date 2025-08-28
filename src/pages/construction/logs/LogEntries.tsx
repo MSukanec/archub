@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
-import { LogRow } from "@/components/data-row/rows";
+import { LogRow } from "@/components/ui/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 

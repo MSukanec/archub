@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
-import MaterialRow from '@/components/data-row/rows/MaterialRow'
+import MaterialRow from '@/components/ui/data-row/rows/MaterialRow'
 import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale'
 import { toast } from '@/hooks/use-toast'
 import { useUnitPresentations, UnitPresentation, useDeleteUnitPresentation } from '@/hooks/use-unit-presentations'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminUnitRow from '@/components/data-row/rows/AdminUnitRow'
+import AdminUnitRow from '@/components/ui/data-row/rows/AdminUnitRow'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import AdminTaskRow from '@/components/data-row/rows/AdminTaskRow'
+import AdminTaskRow from '@/components/ui/data-row/rows/AdminTaskRow'
 import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'

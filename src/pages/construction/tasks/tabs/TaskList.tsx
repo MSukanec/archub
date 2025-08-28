@@ -14,7 +14,7 @@ import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import TaskLaborSubtotal from '@/components/construction/TaskLaborSubtotal'
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 import GroupSubtotal from '@/components/construction/GroupSubtotal'
-import TaskRow from '@/components/data-row/rows/TaskRow'
+import TaskRow from '@/components/ui/data-row/rows/TaskRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { cn } from '@/lib/utils'
 

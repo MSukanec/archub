@@ -17,7 +17,7 @@ import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts"
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
-import { SubcontractRow } from '@/components/data-row/rows';
+import { SubcontractRow } from '@/components/ui/data-row/rows';
 
 interface SubcontractListProps {
   filterByStatus?: string;

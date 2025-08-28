@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast'
 import { useMaterials, Material, useDeleteMaterial } from '@/hooks/use-materials'
 import { useMaterialCategories } from '@/hooks/use-material-categories'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import AdminMaterialRow from '@/components/data-row/rows/AdminMaterialRow'
+import AdminMaterialRow from '@/components/ui/data-row/rows/AdminMaterialRow'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import ContactRow from '@/components/data-row/rows/ContactRow'
+import ContactRow from '@/components/ui/data-row/rows/ContactRow'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 
