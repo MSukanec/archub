@@ -412,13 +412,25 @@ export function Sidebar() {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Logo Section */}
+      {/* Header Section - Dinámico según el nivel */}
       <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
         {isExpanded ? (
-          <div className="ml-3 text-lg font-bold text-[var(--main-sidebar-fg)]">ARCHUB</div>
+          <div className="ml-3 text-lg font-bold text-[var(--main-sidebar-fg)]">
+            {sidebarLevel === 'main' ? 'ARCHUB' : 
+             sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+             sidebarLevel === 'project' ? 'PROYECTO' :
+             sidebarLevel === 'provider' ? 'PROVEEDOR' :
+             sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
+          </div>
         ) : (
           <div className="w-full flex items-center justify-center">
-            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">A</div>
+            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
+              {sidebarLevel === 'main' ? 'A' :
+               sidebarLevel === 'organization' ? 'O' :
+               sidebarLevel === 'project' ? 'P' :
+               sidebarLevel === 'provider' ? 'PR' :
+               sidebarLevel === 'admin' ? 'AD' : 'A'}
+            </div>
           </div>
         )}
       </div>
@@ -438,6 +450,8 @@ export function Sidebar() {
                   onClick={goToMainLevel}
                   variant="main"
                 />
+                {/* Línea divisoria después del botón Volver */}
+                <div className="h-px bg-white/20 my-2"></div>
               </div>
             )}
             
