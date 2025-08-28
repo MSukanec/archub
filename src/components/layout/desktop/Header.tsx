@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from "@/hooks/use-projects";
 import { useUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";

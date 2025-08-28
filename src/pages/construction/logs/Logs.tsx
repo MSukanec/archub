@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FileText, Plus, TrendingUp, Users, AlertTriangle, Package, Sun, Cloud, CloudRain, CloudSnow, Wind, CloudDrizzle, CloudLightning, CheckCircle, Search, Camera, StickyNote, CloudSun } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { EmptyState } from "@/components/ui-custom/EmptyState";
+import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";

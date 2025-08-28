@@ -1,6 +1,6 @@
 import { DollarSign } from 'lucide-react'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
 
 export default function AnalysisOverheads() {
   return (

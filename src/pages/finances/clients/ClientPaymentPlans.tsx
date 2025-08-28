@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { supabase } from '@/lib/supabase'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import IndexedInstallmentPlan from '@/components/charts/clients/IndexedInstallmentPlan'
 
 interface ClientPaymentPlansProps {

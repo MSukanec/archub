@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
 
 interface TaskPhasesProps {

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { TableTopBar } from '@/components/ui-custom/tables-and-trees/TableTopBar';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 

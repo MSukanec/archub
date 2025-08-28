@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useDropzone } from 'react-dropzone';
 import { useToast } from "@/hooks/use-toast";
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/ImageLightbox';
 import {
   AlertDialog,

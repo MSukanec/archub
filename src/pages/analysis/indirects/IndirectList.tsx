@@ -1,7 +1,7 @@
 import { DollarSign, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
 
 interface IndirectListProps {
   onNewIndirectCost: () => void

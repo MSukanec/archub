@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 import { Plus, MoreHorizontal, List, Edit, Trash2, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 

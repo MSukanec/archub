@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'

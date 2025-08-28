@@ -5,7 +5,7 @@ import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@/lib/utils";
 import SidebarButton from "./SidebarButton";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 import Plan from "@/components/ui-custom/Plan";
 

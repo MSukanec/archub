@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Calendar, Trash2, BarChart3, CheckSquare } from 'lucide-react'
 import { Plus } from 'lucide-react'
 
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 
 import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
@@ -20,7 +20,7 @@ import { es } from 'date-fns/locale'
 import { GanttContainer } from '@/components/gantt/GanttContainer'
 import { GanttRowProps } from '@/components/gantt/types'
 
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted'
+import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted'
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {

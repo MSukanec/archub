@@ -7,7 +7,7 @@ import { UnifiedViewer } from '@/components/viewers/UnifiedViewer';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useDesignDocuments } from '@/hooks/use-design-documents';

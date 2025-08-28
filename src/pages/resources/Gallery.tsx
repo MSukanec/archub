@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Gallery as GalleryComponent } from '@/components/ui-custom/Gallery';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useCurrentUser } from '@/hooks/use-current-user';

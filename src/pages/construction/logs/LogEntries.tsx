@@ -14,7 +14,7 @@ import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore
 import { useMobile } from "@/hooks/use-mobile";
 import { LogRow } from "@/components/data-row/rows";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
-import { EmptyState } from "@/components/ui-custom/EmptyState";
+import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 // Entry types enum with their icons and labels
 const entryTypes = {

@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

@@ -5,7 +5,7 @@ import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

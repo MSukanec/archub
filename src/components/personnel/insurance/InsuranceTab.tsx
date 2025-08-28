@@ -5,7 +5,7 @@ import { useInsuranceList } from '@/hooks/useInsurances'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { InsuranceKpis } from './InsuranceKpis'
 import { InsuranceGrid } from './InsuranceGrid'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Button } from '@/components/ui/button'
 
 export function InsuranceTab() {

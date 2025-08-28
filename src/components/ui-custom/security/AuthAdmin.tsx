@@ -5,7 +5,7 @@ interface AdminProtectedRouteProps {
   children: React.ReactNode
 }
 
-export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
+export function AuthAdmin({ children }: AdminProtectedRouteProps) {
   const { data, isLoading } = useAdminPermissions()
 
   if (isLoading) {

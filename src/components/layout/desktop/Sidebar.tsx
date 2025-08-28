@@ -63,7 +63,7 @@ import { Input } from "@/components/ui/input";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
-import CustomRestricted from "@/components/ui-custom/CustomRestricted";
+import CustomRestricted from "@/components/ui-custom/security/CustomRestricted";
 import Plan from "@/components/ui-custom/Plan";
 import { useProjectContext } from "@/stores/projectContext";
 

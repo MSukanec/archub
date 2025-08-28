@@ -10,7 +10,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
 import { Building, Package, Hammer, Eye, CheckCircle, Loader2 } from "lucide-react";
 import { HelpPopover } from "@/components/ui-custom/HelpPopover";
 

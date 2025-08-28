@@ -10,7 +10,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Calculator, Plus, Trash2, Building2, Edit, FileText, Settings } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 // Using Table component for budget tasks display
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 

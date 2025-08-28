@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/components/layout/mobile/ActionBarMobileContext";
 import { AuthGuard } from "@/components/ui-custom/security/AuthGuard";
-import { AdminProtectedRoute } from "@/components/ui-custom/AdminProtectedRoute";
+import { AuthAdmin } from "@/components/ui-custom/security/AuthAdmin";
 
 // Public Pages
 import Landing from "@/pages/Landing";
@@ -185,9 +185,9 @@ function Router() {
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard">
-          <AdminProtectedRoute>
+          <AuthAdmin>
             <AdminCommunity />
-          </AdminProtectedRoute>
+          </AuthAdmin>
         </Route>
 
 
@@ -203,21 +203,21 @@ function Router() {
 
 
         <Route path="/admin/materials">
-          <AdminProtectedRoute>
+          <AuthAdmin>
             <AdminMaterials />
-          </AdminProtectedRoute>
+          </AuthAdmin>
         </Route>
 
         <Route path="/admin/tasks">
-          <AdminProtectedRoute>
+          <AuthAdmin>
             <AdminTasks />
-          </AdminProtectedRoute>
+          </AuthAdmin>
         </Route>
 
         <Route path="/admin/general">
-          <AdminProtectedRoute>
+          <AuthAdmin>
             <AdminGeneral />
-          </AdminProtectedRoute>
+          </AuthAdmin>
         </Route>
 
         {/* Provider Routes */}

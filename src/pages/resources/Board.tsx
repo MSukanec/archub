@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { KanbanBox } from '@/components/ui-custom/KanbanBox';
-import { EmptyState } from '@/components/ui-custom/EmptyState';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
@@ -14,7 +14,7 @@ import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-import { CustomRestricted } from '@/components/ui-custom/CustomRestricted';
+import { CustomRestricted } from '@/components/ui-custom/security/CustomRestricted';
 import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 

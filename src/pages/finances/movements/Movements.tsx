@@ -37,9 +37,9 @@ import {
 import { Label } from "@/components/ui/label";
 
 import { Table } from "@/components/ui-custom/tables-and-trees/Table";
-import { EmptyState } from "@/components/ui-custom/EmptyState";
+import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
-import { CustomRestricted } from "@/components/ui-custom/CustomRestricted";
+import { CustomRestricted } from "@/components/ui-custom/security/CustomRestricted";
 
 import { TransferGroup } from "@/components/data-row";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/data-row";

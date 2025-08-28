@@ -3,7 +3,7 @@ import { ChevronRight, ChevronDown, Link, Settings, Plus, Edit, Trash2 } from 'l
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui-custom/EmptyState'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useParameterDependenciesTree, ParameterDependencyNode, ParameterDependencyChild } from '@/hooks/use-parameter-dependencies-tree'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 

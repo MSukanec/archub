@@ -55,7 +55,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/hooks/use-projects";
-import CustomRestricted from "@/components/ui-custom/CustomRestricted";
+import CustomRestricted from "@/components/ui-custom/security/CustomRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 
 interface MobileMenuProps {
