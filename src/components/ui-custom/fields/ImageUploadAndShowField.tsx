@@ -167,20 +167,19 @@ export default function ImageUploadAndShowField({
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="default"
                   onClick={() => document.getElementById('hero-image-input')?.click()}
                   disabled={isUploading}
-                  className="bg-white/90 text-black hover:bg-white"
                 >
                   <Camera className="h-4 w-4 mr-1" />
                   Cambiar
                 </Button>
                 <Button
                   size="sm"
-                  variant="destructive"
+                  variant="default"
                   onClick={() => removeMutation.mutate()}
                   disabled={removeMutation.isPending}
-                  className="bg-red-500/90 hover:bg-red-500"
+                  className="bg-red-500 hover:bg-red-600 text-white"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Eliminar
