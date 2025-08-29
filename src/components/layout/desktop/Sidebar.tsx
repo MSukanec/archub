@@ -475,7 +475,7 @@ export function Sidebar() {
   // Función para manejar acordeón en subniveles
   const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
     // Si es una sección con submenu, toggle acordeón
-    if (['construccion', 'finanzas', 'diseno', 'analysis', 'finanzas-org'].includes(sectionId)) {
+    if (['construccion', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
       setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     } else {
       // Si no tiene submenu, navegar directamente
@@ -531,15 +531,6 @@ export function Sidebar() {
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      {
-        id: 'finanzas-org',
-        icon: DollarSign,
-        label: 'Finanzas',
-        defaultRoute: '/organization/capital',
-        submenu: [
-          { icon: TrendingUp, label: 'Capital', href: '/organization/capital' }
-        ]
-      },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -589,7 +580,8 @@ export function Sidebar() {
         submenu: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
           { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true }
+          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
+          { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
         ]
       },
       {
