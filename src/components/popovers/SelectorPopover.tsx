@@ -1,11 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface SelectorItem {
   id: string;
@@ -31,40 +27,31 @@ export function SelectorPopover({
   emptyMessage,
   getInitials
 }: SelectorPopoverProps) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {trigger}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]"
-        style={{
-          position: 'fixed',
-          left: '50vw',
-          top: '50vh',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 9999,
-          pointerEvents: 'auto'
-        }}
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onPointerEnter={(e) => e.stopPropagation()}
-        onPointerLeave={(e) => e.stopPropagation()}
-        onMouseEnter={(e) => e.stopPropagation()}
-        onMouseLeave={(e) => e.stopPropagation()}
-        sideOffset={0}
-        alignOffset={0}
-        avoidCollisions={false}
-        side="bottom"
-        align="center"
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = (id: string) => {
+    onSelect(id);
+    setIsOpen(false);
+  };
+
+  const popoverContent = isOpen && (
+    <div 
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+      onClick={() => setIsOpen(false)}
+    >
+      <div 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] rounded-md shadow-lg"
+        onClick={(e) => e.stopPropagation()}
       >
         {items.length > 0 ? (
           items.map((item) => (
-            <DropdownMenuItem
+            <Button
               key={item.id}
-              onClick={() => onSelect(item.id)}
+              onClick={() => handleSelect(item.id)}
+              variant="ghost"
               className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)] p-3 cursor-pointer",
-                selectedId === item.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
+                "w-full flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] p-3 h-auto rounded-none first:rounded-t-md last:rounded-b-md",
+                selectedId === item.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)]"
               )}
             >
               <div className="flex items-center gap-3">
@@ -79,7 +66,7 @@ export function SelectorPopover({
                     {getInitials(item.name)}
                   </div>
                 )}
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <span className="font-medium">{item.name}</span>
                   <span className="text-xs opacity-70">{item.type}</span>
                 </div>
@@ -87,14 +74,23 @@ export function SelectorPopover({
               {selectedId === item.id && (
                 <div className="w-2 h-2 rounded-full ml-auto bg-white" />
               )}
-            </DropdownMenuItem>
+            </Button>
           ))
         ) : (
           <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
             {emptyMessage}
           </div>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <div onClick={() => setIsOpen(true)}>
+        {trigger}
+      </div>
+      {typeof document !== 'undefined' && createPortal(popoverContent, document.body)}
+    </>
   );
 }
