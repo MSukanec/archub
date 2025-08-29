@@ -111,7 +111,7 @@ export default function ProjectItem({
         {/* Header con avatar y badge de status */}
         <div className="flex items-start justify-between">
           {/* Avatar con iniciales del proyecto */}
-          <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+          <Avatar className="h-12 w-12 shadow-sm">
             <AvatarFallback 
               className="text-white font-semibold text-sm"
               style={{ backgroundColor: projectColor }}

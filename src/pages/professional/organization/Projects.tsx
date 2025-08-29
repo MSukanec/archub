@@ -372,15 +372,15 @@ export default function Projects() {
                   ))}
                 </div>
               ) : (
-                /* Desktop: Grid con ProjectItem */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                /* Desktop: Lista con ProjectItem de ancho completo */
+                <div className="space-y-4">
                   {sortedProjects.map((project) => (
                     <ProjectItem
                       key={project.id}
                       project={project}
                       onClick={() => handleSelectProject(project.id)}
                       isActive={project.id === userOrgPrefs?.last_project_id}
-                      projectColor={`hsl(${(project.id.charCodeAt(0) * 137.5) % 360}, 70%, 50%)`}
+                      projectColor={project.color || 'var(--accent)'}
                     />
                   ))}
                 </div>
