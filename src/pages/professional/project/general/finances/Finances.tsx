@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Plus, BarChart3, FileSpreadsheet } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 // Import the existing components
 import Movements from './Movements';
@@ -10,7 +11,8 @@ import FinancesAnalysis from './FinancesAnalysis';
 
 export default function Finances() {
   const { setSidebarContext } = useNavigationStore();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const { openModal } = useGlobalModalStore();
+  const [activeTab, setActiveTab] = useState('movements');
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -18,21 +20,52 @@ export default function Finances() {
   }, [setSidebarContext]);
 
   const tabs = [
-    { id: 'dashboard', label: 'Resumen', isActive: activeTab === 'dashboard' },
     { id: 'movements', label: 'Movimientos', isActive: activeTab === 'movements' },
+    { id: 'dashboard', label: 'Resumen', isActive: activeTab === 'dashboard' },
     { id: 'analysis', label: 'Análisis', isActive: activeTab === 'analysis' }
   ];
 
+  const getActionButton = () => {
+    switch (activeTab) {
+      case 'movements':
+        return {
+          label: "Nuevo Movimiento",
+          icon: Plus,
+          onClick: () => openModal('movement', {})
+        };
+      case 'dashboard':
+        return {
+          label: "Exportar Resumen",
+          icon: FileSpreadsheet,
+          onClick: () => {
+            // TODO: Implement export functionality
+            console.log('Export dashboard data');
+          }
+        };
+      case 'analysis':
+        return {
+          label: "Exportar Análisis",
+          icon: BarChart3,
+          onClick: () => {
+            // TODO: Implement export functionality
+            console.log('Export analysis data');
+          }
+        };
+      default:
+        return undefined;
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <FinancesDashboard />;
       case 'movements':
         return <Movements />;
+      case 'dashboard':
+        return <FinancesDashboard />;
       case 'analysis':
         return <FinancesAnalysis />;
       default:
-        return <FinancesDashboard />;
+        return <Movements />;
     }
   };
 
@@ -40,7 +73,8 @@ export default function Finances() {
     icon: DollarSign,
     title: "Finanzas",
     tabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actionButton: getActionButton()
   };
 
   return (
