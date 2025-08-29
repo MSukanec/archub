@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ImageIcon, FileText, Users, MapPin } from 'lucide-react'
-import ProjectHeroImage from '@/components/ui-custom/ProjectHeroImage'
+import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 export default function ProjectInfoBasicData() {
@@ -214,7 +214,7 @@ export default function ProjectInfoBasicData() {
         {/* Right Column - Imagen Principal Content */}
         <div>
           {activeProjectId && organizationId && (
-            <ProjectHeroImage
+            <ImageUploadAndShowField
               projectId={activeProjectId}
               organizationId={organizationId}
               currentImageUrl={projectImageUrl}

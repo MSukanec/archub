@@ -6,19 +6,19 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/lib/storage/uploadProjectImage';
 
-interface ProjectHeroImageProps {
+interface ImageUploadAndShowFieldProps {
   projectId: string;
   organizationId: string;
   currentImageUrl?: string | null;
   onImageUpdate?: (imageUrl: string | null) => void;
 }
 
-export default function ProjectHeroImage({
+export default function ImageUploadAndShowField({
   projectId,
   organizationId,
   currentImageUrl,
   onImageUpdate
-}: ProjectHeroImageProps) {
+}: ImageUploadAndShowFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
