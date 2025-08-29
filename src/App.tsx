@@ -47,7 +47,7 @@ import SubcontractView from "@/pages/professional/project/construction/subcontra
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
 import Documentation from "@/pages/professional/organization/Library/Documentation";
 import Gallery from "@/pages/professional/organization/Library/Gallery";
-import Contacts from "@/pages/professional/organization/library/Contacts";
+import Contacts from "@/pages/professional/organization/contacts/Contacts";
 import Board from "@/pages/professional/organization/Library/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
