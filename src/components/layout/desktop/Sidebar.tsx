@@ -59,7 +59,8 @@ import {
   Building2,
   ChevronUp
 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { SelectorPopover } from "@/components/popovers/SelectorPopover";
 import { Input } from "@/components/ui/input";
 import { useProjects } from "@/hooks/use-projects";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
@@ -123,9 +124,17 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     updateProjectMutation.mutate(projectId);
   };
   
+  // Preparar items para el selector
+  const selectorItems = projects.map((project: any) => ({
+    id: project.id,
+    name: project.name,
+    logo_url: project.logo_url,
+    type: "Proyecto" as const
+  }));
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <SelectorPopover
+      trigger={
         <div>
           <SidebarButton
             icon={<Folder className="w-[18px] h-[18px]" />}
@@ -139,63 +148,13 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
             rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
           />
         </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        side="bottom"
-        align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]"
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 9999
-        }} 
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        sideOffset={0}
-        alignOffset={0}
-        avoidCollisions={false}
-        sticky="partial"
-      >
-        {projects.length > 0 ? (
-          projects.map((project: any) => (
-            <DropdownMenuItem
-              key={project.id}
-              onClick={() => handleProjectSelect(project.id)}
-              className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)] p-3",
-                selectedProjectId === project.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                {project.logo_url ? (
-                  <img 
-                    src={project.logo_url} 
-                    alt="Avatar"
-                    className="w-6 h-6 rounded-full"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
-                    {getProjectInitials(project.name)}
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <span className="font-medium">{project.name}</span>
-                  <span className="text-xs opacity-70">Proyecto</span>
-                </div>
-              </div>
-              {selectedProjectId === project.id && (
-                <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
-              )}
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
-            No hay proyectos disponibles
-          </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+      items={selectorItems}
+      selectedId={selectedProjectId}
+      onSelect={handleProjectSelect}
+      emptyMessage="No hay proyectos disponibles"
+      getInitials={getProjectInitials}
+    />
   );
 }
 // Componente selector de organizaciones para el header (con avatar)
@@ -238,9 +197,17 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     updateOrganizationMutation.mutate(organizationId);
   };
   
+  // Preparar items para el selector
+  const selectorItems = organizations.map((organization: any) => ({
+    id: organization.id,
+    name: organization.name,
+    logo_url: organization.logo_url,
+    type: "Organización" as const
+  }));
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <SelectorPopover
+      trigger={
         <div>
           <SidebarButton
             icon={<Building2 className="w-[18px] h-[18px]" />}
@@ -254,63 +221,13 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
             rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
           />
         </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        side="bottom"
-        align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]"
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 9999
-        }} 
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        sideOffset={0}
-        alignOffset={0}
-        avoidCollisions={false}
-        sticky="partial"
-      >
-        {organizations.length > 0 ? (
-          organizations.map((organization: any) => (
-            <DropdownMenuItem
-              key={organization.id}
-              onClick={() => handleOrganizationSelect(organization.id)}
-              className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)] p-3",
-                currentOrganization?.id === organization.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                {organization.logo_url ? (
-                  <img 
-                    src={organization.logo_url} 
-                    alt="Avatar"
-                    className="w-6 h-6 rounded-full"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
-                    {getOrganizationInitials(organization.name)}
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <span className="font-medium">{organization.name}</span>
-                  <span className="text-xs opacity-70">Organización</span>
-                </div>
-              </div>
-              {currentOrganization?.id === organization.id && (
-                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
-              )}
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
-            No hay organizaciones disponibles
-          </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+      items={selectorItems}
+      selectedId={currentOrganization?.id}
+      onSelect={handleOrganizationSelect}
+      emptyMessage="No hay organizaciones disponibles"
+      getInitials={getOrganizationInitials}
+    />
   );
 }
 export function Sidebar() {
