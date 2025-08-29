@@ -385,10 +385,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: Layout, label: 'Tablero', href: '/project/board' }
     ],
     library: [
-      { icon: CheckSquare, label: 'Análisis de Tareas', href: '/library/analysis-tasks' },
-      { icon: Package2, label: 'Análisis de Materiales', href: '/library/analysis-materials' },
-      { icon: Users, label: 'Análisis de Mano de Obra', href: '/library/analysis-labor' },
-      { icon: TrendingUp, label: 'Análisis de Gastos Generales', href: '/library/analysis-overheads' }
+      { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
+      { icon: Package2, label: 'Materiales', href: '/library/materials' },
+      { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
+      { icon: TrendingUp, label: 'Gastos Generales', href: '/library/overheads' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }

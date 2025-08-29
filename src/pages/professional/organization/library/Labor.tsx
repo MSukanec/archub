@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useNavigationStore } from '@/stores/navigationStore'
 
-export default function AnalysisLabor() {
+export default function Labor() {
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -16,7 +16,7 @@ export default function AnalysisLabor() {
   return (
     <Layout
       headerProps={{
-        title: "Análisis de Mano de Obra",
+        title: "Mano de Obra",
         icon: Users,
         description: "Análisis de costos de mano de obra",
       }}
@@ -25,7 +25,7 @@ export default function AnalysisLabor() {
         <PlanRestricted reason="coming_soon">
           <EmptyState
             icon={<Users className="h-16 w-16" />}
-            title="Análisis de Mano de Obra"
+            title="Mano de Obra"
             description="Funcionalidad coming soon"
           />
         </PlanRestricted>

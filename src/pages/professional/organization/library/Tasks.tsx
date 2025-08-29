@@ -14,7 +14,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 
-export default function AnalysisTasks() {
+export default function Tasks() {
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -218,7 +218,7 @@ export default function AnalysisTasks() {
     return (
       <Layout
         headerProps={{
-          title: "Análisis de Tareas",
+          title: "Tareas",
           icon: TableIcon,
           description: "Análisis de costos para tareas parametrizadas",
         }}
@@ -235,7 +235,7 @@ export default function AnalysisTasks() {
   return (
     <Layout
       headerProps={{
-        title: "Análisis de Tareas",
+        title: "Tareas",
         icon: TableIcon,
         description: "Análisis de costos para tareas parametrizadas",
       }}

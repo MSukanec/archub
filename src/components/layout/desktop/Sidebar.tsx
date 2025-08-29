@@ -432,13 +432,10 @@ export function Sidebar() {
       { icon: Layout, label: 'Tablero', href: '/project/board' }
     ],
     library: [
-      { icon: FileText, label: 'Documentación', href: '/library/documentation' },
-      { icon: Images, label: 'Galería', href: '/library/gallery' },
-      { icon: Layout, label: 'Tablero', href: '/library/board' },
-      { icon: CheckSquare, label: 'Análisis de Tareas', href: '/library/analysis-tasks' },
-      { icon: Package2, label: 'Análisis de Materiales', href: '/library/analysis-materials' },
-      { icon: Users, label: 'Análisis de Mano de Obra', href: '/library/analysis-labor' },
-      { icon: TrendingUp, label: 'Análisis de Gastos Generales', href: '/library/analysis-overheads' }
+      { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
+      { icon: Package2, label: 'Materiales', href: '/library/materials' },
+      { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
+      { icon: TrendingUp, label: 'Gastos Generales', href: '/library/overheads' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
@@ -488,6 +485,7 @@ export function Sidebar() {
           <div className="ml-3 text-lg font-bold text-[var(--main-sidebar-fg)]">
             {sidebarLevel === 'main' ? 'ARCHUB' : 
              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+             sidebarLevel === 'library' ? 'BIBLIOTECA' :
              sidebarLevel === 'project' ? 'PROYECTO' :
              sidebarLevel === 'provider' ? 'PROVEEDOR' :
              sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
@@ -497,6 +495,7 @@ export function Sidebar() {
             <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
               {sidebarLevel === 'main' ? 'A' :
                sidebarLevel === 'organization' ? 'O' :
+               sidebarLevel === 'library' ? 'B' :
                sidebarLevel === 'project' ? 'P' :
                sidebarLevel === 'provider' ? 'PR' :
                sidebarLevel === 'admin' ? 'AD' : 'A'}

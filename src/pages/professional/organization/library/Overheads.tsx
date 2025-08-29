@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useNavigationStore } from '@/stores/navigationStore'
 
-export default function AnalysisOverheads() {
+export default function Overheads() {
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -16,7 +16,7 @@ export default function AnalysisOverheads() {
   return (
     <Layout
       headerProps={{
-        title: "Análisis de Gastos Generales",
+        title: "Gastos Generales",
         icon: DollarSign,
         description: "Análisis de costos indirectos y gastos generales",
       }}
@@ -25,7 +25,7 @@ export default function AnalysisOverheads() {
         <PlanRestricted reason="coming_soon">
           <EmptyState
             icon={<DollarSign className="h-16 w-16" />}
-            title="Análisis de Gastos Generales"
+            title="Gastos Generales"
             description="Funcionalidad coming soon"
           />
         </PlanRestricted>

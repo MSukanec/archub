@@ -38,7 +38,6 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import Analysis from "@/pages/professional/organization/library/Analysis";
 import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
 
 
@@ -73,10 +72,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
-import AnalysisTasks from "@/pages/professional/organization/library/AnalysisTasks";
-import AnalysisLabor from "@/pages/professional/organization/library/AnalysisLabor";
-import AnalysisMaterials from "@/pages/professional/organization/library/AnalysisMaterials";
-import AnalysisOverheads from "@/pages/professional/organization/library/AnalysisOverheads";
+import Tasks from "@/pages/professional/organization/library/Tasks";
+import Labor from "@/pages/professional/organization/library/Labor";
+import Materials from "@/pages/professional/organization/library/Materials";
+import Overheads from "@/pages/professional/organization/library/Overheads";
 
 
 
@@ -151,19 +150,11 @@ function Router() {
         <Route path="/construction/personnel" component={ConstructionPersonnel} />
         <Route path="/construction/budgets" component={ConstructionBudgets} />
         <Route path="/construction/materials" component={ConstructionMaterials} />
-        <Route path="/library/analysis" component={Analysis} />
-        <Route path="/library/analysis-tasks" component={AnalysisTasks} />
-        <Route path="/library/analysis-materials" component={AnalysisMaterials} />
-        <Route path="/library/analysis-labor" component={AnalysisLabor} />
-        <Route path="/library/analysis-overheads" component={AnalysisOverheads} />
-        <Route path="/resources/analysis" component={Analysis} />
-        <Route path="/resources/analysis/:tab?" component={Analysis} />
+        <Route path="/library/tasks" component={Tasks} />
+        <Route path="/library/materials" component={Materials} />
+        <Route path="/library/labor" component={Labor} />
+        <Route path="/library/overheads" component={Overheads} />
         
-        {/* Analysis Routes */}
-        <Route path="/analysis/tasks" component={AnalysisTasks} />
-        <Route path="/analysis/labor" component={AnalysisLabor} />
-        <Route path="/analysis/materials" component={AnalysisMaterials} />
-        <Route path="/analysis/indirects" component={AnalysisOverheads} />
 
 
         {/* Finances Routes */}

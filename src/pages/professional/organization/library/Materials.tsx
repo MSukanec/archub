@@ -13,7 +13,7 @@ import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/Im
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 
-export default function AnalysisMaterials() {
+export default function Materials() {
   const { setSidebarContext } = useNavigationStore()
 
   // Set sidebar context on mount
@@ -308,7 +308,7 @@ export default function AnalysisMaterials() {
   return (
     <Layout
       headerProps={{
-        title: "Análisis de Materiales",
+        title: "Materiales",
         icon: Package,
         description: "Análisis de costos para materiales de construcción",
       }}
