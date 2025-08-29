@@ -14,6 +14,7 @@ import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormMod
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
 import { MovementModal } from '../modals/finances/movements/MovementModal'
 import { MovementModalView } from '../modals/finances/movements/MovementModalView';
+import { OrganizationMovementModal } from '../modals/professional/organization/finances/OrganizationMovementModal';
 import MovementConceptFormModal from '../modals/admin/MovementConceptFormModal';
 import { OrganizationMovementConceptFormModal } from '../modals/organizations/OrganizationMovementConceptFormModal';
 
@@ -101,6 +102,8 @@ export function ModalFactory() {
       return <DocumentFolderFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement':
       return <MovementModal modalData={data || undefined} onClose={closeModal} />;
+    case 'organization-movement':
+      return <OrganizationMovementModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement-view':
       return <MovementModalView modalData={data || {}} onClose={closeModal} />;
     case 'movement-concept':

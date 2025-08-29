@@ -1253,6 +1253,11 @@ export default function Movements() {
   const headerProps = {
     title: "Movimientos",
     icon: DollarSign,
+    actionButton: {
+      label: "Nuevo Movimiento",
+      icon: Plus,
+      onClick: () => openModal('organization-movement')
+    }
   };
 
 
