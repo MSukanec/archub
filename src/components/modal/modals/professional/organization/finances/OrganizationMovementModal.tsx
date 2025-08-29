@@ -292,7 +292,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     if (!isEditing) {
       // Para nuevos movimientos, usar valores por defecto
       form.reset({
-        project_id: defaultProject || '',
+        project_id: 'organization',
         movement_date: new Date(),
         created_by: currentMember.id,
         type_id: '',
@@ -307,7 +307,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     } else {
       // Para edición, usar datos del movimiento
       form.reset({
-        project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
+        project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : 'organization'),
         movement_date: parseMovementDate(editingMovement?.movement_date),
         created_by: editingMovement?.created_by || currentMember.id,
         type_id: editingMovement?.type_id || '',
@@ -326,7 +326,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
-      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
+      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : 'organization'),
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
@@ -345,7 +345,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
-      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
+      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : 'organization'),
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
