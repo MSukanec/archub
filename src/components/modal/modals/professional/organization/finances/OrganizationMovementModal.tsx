@@ -31,7 +31,7 @@ import { supabase } from '@/lib/supabase'
 import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from '@/components/modal/modals/finances/movements/forms/PersonnelForm'
 import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from '@/components/modal/modals/finances/movements/forms/SubcontractsForm'
 import { ClientsForm, ClientsFormHandle, CommitmentItem } from '@/components/modal/modals/finances/movements/forms/ClientsForm'
-import { PartnerWithdrawalsForm, PartnerWithdrawalsFormHandle, PartnerWithdrawalItem } from '@/components/modal/modals/finances/movements/forms/PartnerWithdrawalsForm'
+import { PartnerForm, PartnerFormHandle, PartnerItem } from '@/components/modal/modals/finances/movements/forms/PartnerForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
@@ -166,8 +166,8 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [showClientsForm, setShowClientsForm] = React.useState(false)
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
-  const [showPartnerWithdrawalsForm, setShowPartnerWithdrawalsForm] = React.useState(false)
-  const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
+  const [showPartnerForm, setShowPartnerForm] = React.useState(false)
+  const [selectedPartner, setSelectedPartner] = React.useState<PartnerItem | null>(null)
   
   // Flags para controlar efectos problemáticos
   const [isInitialLoading, setIsInitialLoading] = React.useState(false)
@@ -1290,7 +1290,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         !showPersonnelForm && 
         !showSubcontractsForm && 
         !showClientsForm && 
-        !showPartnerWithdrawalsForm
+        !showPartnerForm
       ) {
         // Evitar el comportamiento por defecto
         event.preventDefault()
@@ -1318,7 +1318,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     showPersonnelForm, 
     showSubcontractsForm, 
     showClientsForm, 
-    showPartnerWithdrawalsForm,
+    showPartnerForm,
     movementType,
     form,
     conversionForm,
@@ -1349,7 +1349,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       'c04a82f8-6fd8-439d-81f7-325c63905a1b': {
         text: 'Gestionar Retiros de Socios',
         icon: Users,
-        onClick: () => setShowPartnerWithdrawalsForm(true)
+        onClick: () => setShowPartnerForm(true)
       }
     }
 
@@ -1584,20 +1584,11 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         )}
 
         {/* RETIROS DE SOCIOS SELECCIONADOS (si hay) */}
-        {selectedPartnerWithdrawals.length > 0 && (
+        {selectedPartner && (
           <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Retiros de Socios Seleccionados:</h4>
-            {selectedPartnerWithdrawals.map((partnerWithdrawal, index) => (
-              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                <div className="truncate">{partnerWithdrawal.partner_name}</div>
-                <div className="text-right font-medium">${(partnerWithdrawal.amount || 0).toFixed(2)}</div>
-              </div>
-            ))}
-            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-              <div className="font-medium">Total:</div>
-              <div className="text-right font-bold">
-                ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
-              </div>
+            <h4 className="text-sm font-medium text-foreground">Socio Seleccionado:</h4>
+            <div className="text-xs">
+              <div className="truncate">{selectedPartner.partner_name}</div>
             </div>
           </div>
         )}
@@ -1889,25 +1880,14 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
               </div>
             )}
 
-            {selectedPartnerWithdrawals && selectedPartnerWithdrawals.length > 0 && (
+            {selectedPartner && (
               <div className="bg-muted/50 p-3 rounded-lg">
                 <div className="text-sm font-medium mb-2 flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Retiros de socios seleccionados:
+                  Socio seleccionado:
                 </div>
-                <div className="space-y-1">
-                  {selectedPartnerWithdrawals.map((pw, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{pw.partner_name}</div>
-                      <div className="text-right">${(pw.amount || 0).toFixed(2)}</div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-                    <div className="font-medium">Total:</div>
-                    <div className="text-right font-bold">
-                      ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
-                    </div>
-                  </div>
+                <div className="text-xs">
+                  <div>{selectedPartner.partner_name}</div>
                 </div>
               </div>
             )}
@@ -1930,7 +1910,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
   const subcontractsFormRef = React.useRef<SubcontractsFormHandle>(null)
   const clientsFormRef = React.useRef<ClientsFormHandle>(null)
-  const partnerWithdrawalsFormRef = React.useRef<PartnerWithdrawalsFormHandle>(null)
+  const partnerFormRef = React.useRef<PartnerFormHandle>(null)
   
   const personnelPanel = (
     <PersonnelForm 
@@ -1969,14 +1949,14 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   )
 
   const partnerWithdrawalsPanel = (
-    <PartnerWithdrawalsForm 
-      ref={partnerWithdrawalsFormRef}
-      onClose={() => setShowPartnerWithdrawalsForm(false)} 
-      onConfirm={(partnerWithdrawalsList) => {
-        setSelectedPartnerWithdrawals(partnerWithdrawalsList)
-        setShowPartnerWithdrawalsForm(false)
+    <PartnerForm 
+      ref={partnerFormRef}
+      onClose={() => setShowPartnerForm(false)} 
+      onConfirm={(partner) => {
+        setSelectedPartner(partner)
+        setShowPartnerForm(false)
       }}
-      initialPartnerWithdrawals={selectedPartnerWithdrawals}
+      initialPartner={selectedPartner}
     />
   )
 
@@ -1987,7 +1967,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       ? subcontractsPanel 
       : showClientsForm
         ? clientsPanel
-        : showPartnerWithdrawalsForm
+        : showPartnerForm
           ? partnerWithdrawalsPanel
           : editPanel
 
@@ -2000,7 +1980,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
           ? "Gestión de Subcontratos"
           : showClientsForm
             ? "Gestión de Clientes"
-            : showPartnerWithdrawalsForm
+            : showPartnerForm
               ? "Gestión de Retiros de Socios"
               : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
       description={showPersonnelForm 
@@ -2009,7 +1989,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
           ? "Asigna subcontratos y montos para este movimiento financiero"
           : showClientsForm
             ? "Asigna clientes de proyecto y montos para este movimiento financiero"
-            : showPartnerWithdrawalsForm
+            : showPartnerForm
               ? "Asigna socios y montos para retiros en este movimiento financiero"
               : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
       icon={showPersonnelForm 
@@ -2018,7 +1998,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
           ? FileText
           : showClientsForm
             ? Users
-            : showPartnerWithdrawalsForm
+            : showPartnerForm
               ? Users
               : DollarSign}
     />
@@ -2052,13 +2032,13 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         clientsFormRef.current?.confirmClients()
       }}
     />
-  ) : showPartnerWithdrawalsForm ? (
+  ) : showPartnerForm ? (
     <FormModalFooter
       leftLabel="Volver"
-      onLeftClick={() => setShowPartnerWithdrawalsForm(false)}
+      onLeftClick={() => setShowPartnerForm(false)}
       rightLabel="Confirmar Retiros"
       onRightClick={() => {
-        partnerWithdrawalsFormRef.current?.confirmPartnerWithdrawals()
+        partnerFormRef.current?.confirmPartner()
       }}
     />
   ) : (
