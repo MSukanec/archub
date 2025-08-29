@@ -96,8 +96,8 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos */}
-      {!isChild && (
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header sin icono */}
+      {!isChild && !(isHeaderButton && React.isValidElement(icon) && icon.type === 'div') && (
         <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
@@ -119,7 +119,9 @@ export default function SidebarButton({
       {isExpanded && (
         <div className={cn(
           "flex items-center justify-between w-full",
-          isChild ? "ml-2" : "ml-10" // Más margen para separar del icono
+          isChild ? "ml-2" : 
+          (isHeaderButton && React.isValidElement(icon) && icon.type === 'div') ? "ml-2" : // Sin margen para ARCHUB
+          "ml-10" // Más margen para separar del icono
         )}>
           <span className={cn(
             "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
