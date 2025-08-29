@@ -3,11 +3,9 @@ import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useToast } from "@/hooks/use-toast";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-
 import { 
   Settings, 
   UserCircle,
@@ -69,7 +67,241 @@ import SidebarButton from "./SidebarButton";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectContext } from "@/stores/projectContext";
-
+// Función auxiliar para generar iniciales de organizaciones
+function getOrganizationInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+}
+// Función auxiliar para generar iniciales de proyectos
+function getProjectInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+}
+// Componente selector de proyectos para el header (con avatar)
+function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
+  const { data: userData } = useCurrentUser();
+  const { data: projects = [] } = useProjects(userData?.organization?.id);
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const queryClient = useQueryClient();
+  
+  // Encontrar proyecto actual
+  const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
+  const displayName = currentProject?.name || "Sin proyecto";
+  
+  // Mutación para cambiar proyecto
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!userData?.user?.id || !userData?.organization?.id) {
+        throw new Error('Usuario u organización no disponibles');
+      }
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+  
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate(projectId);
+  };
+  
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div>
+          <SidebarButton
+            icon={<Folder className="w-[18px] h-[18px]" />}
+            label={isExpanded ? displayName : ""}
+            isActive={false}
+            isExpanded={isExpanded}
+            variant="main"
+            isHeaderButton={true}
+            avatarUrl={currentProject?.logo_url || undefined}
+            userFullName={currentProject ? getProjectInitials(currentProject.name) : undefined}
+            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="start" 
+        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          // Solo cerrar si hacen click fuera del sidebar completo
+          const sidebar = document.querySelector('aside');
+          if (sidebar && sidebar.contains(e.target as Node)) {
+            e.preventDefault();
+          }
+        }}
+      >
+        {projects.length > 0 ? (
+          projects.map((project: any) => (
+            <DropdownMenuItem
+              key={project.id}
+              onClick={() => handleProjectSelect(project.id)}
+              className={cn(
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                selectedProjectId === project.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                {project.logo_url ? (
+                  <img 
+                    src={project.logo_url} 
+                    alt="Avatar"
+                    className="w-4 h-4 rounded-full"
+                  />
+                ) : (
+                  <div className="w-4 h-4 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                    {getProjectInitials(project.name)}
+                  </div>
+                )}
+                <span className="truncate">{project.name}</span>
+              </div>
+              {selectedProjectId === project.id && (
+                <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
+              )}
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
+            No hay proyectos disponibles
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+// Componente selector de organizaciones para el header (con avatar)
+function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
+  const { data: userData } = useCurrentUser();
+  const organizations = userData?.organizations || [];
+  const { setCurrentOrganization } = useProjectContext();
+  const queryClient = useQueryClient();
+  
+  // Encontrar organización actual
+  const currentOrganization = userData?.organization;
+  const displayName = currentOrganization?.name || "Sin organización";
+  
+  // Mutación para cambiar organización
+  const updateOrganizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      if (!userData?.user?.id) {
+        throw new Error('Usuario no disponible');
+      }
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({
+          last_organization_id: organizationId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userData.user.id);
+      if (error) throw error;
+      return organizationId;
+    },
+    onSuccess: (organizationId) => {
+      setCurrentOrganization(organizationId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Recargar la página para aplicar el cambio de organización completamente
+      window.location.reload();
+    }
+  });
+  
+  const handleOrganizationSelect = (organizationId: string) => {
+    if (currentOrganization?.id === organizationId) return;
+    updateOrganizationMutation.mutate(organizationId);
+  };
+  
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div>
+          <SidebarButton
+            icon={<Building2 className="w-[18px] h-[18px]" />}
+            label={isExpanded ? displayName : ""}
+            isActive={false}
+            isExpanded={isExpanded}
+            variant="main"
+            isHeaderButton={true}
+            avatarUrl={currentOrganization?.logo_url || undefined}
+            userFullName={currentOrganization ? getOrganizationInitials(currentOrganization.name) : undefined}
+            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="start" 
+        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          // Solo cerrar si hacen click fuera del sidebar completo
+          const sidebar = document.querySelector('aside');
+          if (sidebar && sidebar.contains(e.target as Node)) {
+            e.preventDefault();
+          }
+        }}
+      >
+        {organizations.length > 0 ? (
+          organizations.map((organization: any) => (
+            <DropdownMenuItem
+              key={organization.id}
+              onClick={() => handleOrganizationSelect(organization.id)}
+              className={cn(
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                currentOrganization?.id === organization.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                {organization.logo_url ? (
+                  <img 
+                    src={organization.logo_url} 
+                    alt="Avatar"
+                    className="w-4 h-4 rounded-full"
+                  />
+                ) : (
+                  <div className="w-4 h-4 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                    {getOrganizationInitials(organization.name)}
+                  </div>
+                )}
+                <span className="truncate">{organization.name}</span>
+              </div>
+              {currentOrganization?.id === organization.id && (
+                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
+              )}
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
+            No hay organizaciones disponibles
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -169,10 +401,8 @@ export function Sidebar() {
     const saved = localStorage.getItem('sidebar-accordion');
     return saved || null;
   });
-
   // Estado para transiciones
   const [isTransitioning, setIsTransitioning] = useState(false);
-
   // Función para navegación con transición hacia adelante
   const navigateForward = (newContext: string, href: string) => {
     setIsTransitioning(true);
@@ -182,7 +412,6 @@ export function Sidebar() {
       setIsTransitioning(false);
     }, 150);
   };
-
   // Función para navegación con transición hacia atrás
   const navigateBackward = (newContext: string, href: string) => {
     setIsTransitioning(true);
@@ -192,7 +421,6 @@ export function Sidebar() {
       setIsTransitioning(false);
     }, 150);
   };
-
   // Guardar estado de acordeón en localStorage
   useEffect(() => {
     if (expandedAccordion) {
@@ -201,19 +429,16 @@ export function Sidebar() {
       localStorage.removeItem('sidebar-accordion');
     }
   }, [expandedAccordion]);
-
   // Theme toggle mutation
   const themeToggleMutation = useMutation({
     mutationFn: async (newTheme: 'light' | 'dark') => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
-
       const { error } = await supabase
         .from('user_preferences')
         .update({ theme: newTheme })
         .eq('id', userData.preferences.id);
-
       if (error) throw error;
       return newTheme;
     },
@@ -229,19 +454,16 @@ export function Sidebar() {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     }
   });
-
   // Sidebar toggle mutation
   const sidebarToggleMutation = useMutation({
     mutationFn: async (newDockedState: boolean) => {
       if (!supabase || !userData?.preferences?.id) {
         throw new Error('No user preferences available');
       }
-
       const { error } = await supabase
         .from('user_preferences')
         .update({ sidebar_docked: newDockedState })
         .eq('id', userData.preferences.id);
-
       if (error) throw error;
       return newDockedState;
     },
@@ -256,8 +478,6 @@ export function Sidebar() {
   const [projectSearchValue, setProjectSearchValue] = useState('');
   const prevContextRef = useRef(currentSidebarContext);
   
-
-
   // Handle fade animation when context changes
   useEffect(() => {
     prevContextRef.current = currentSidebarContext;
@@ -268,7 +488,6 @@ export function Sidebar() {
   const toggleAccordion = (key: string) => {
     setExpandedAccordion(prev => prev === key ? null : key);
   };
-
   // Context titles - removing all titles as requested
   const sidebarContextTitles = {
     organization: null,
@@ -280,7 +499,6 @@ export function Sidebar() {
     commercialization: null,
     admin: null // Admin title removed as requested
   };
-
   // Función para detectar qué sección debería estar expandida basándose en la ubicación actual
   const getActiveSectionFromLocation = () => {
     if (location.startsWith('/organization')) return 'organizacion';
@@ -293,7 +511,6 @@ export function Sidebar() {
     if (location === '/dashboard') return null; // Resumen es independiente
     return null;
   };
-
   // Función para manejar clicks en botones principales
   const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
     // Dashboard no tiene submenu, navegar directamente
@@ -324,7 +541,6 @@ export function Sidebar() {
         navigate(defaultRoute);
     }
   };
-
   // Función para manejar acordeón en subniveles
   const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
     // Si es una sección con submenu, toggle acordeón
@@ -335,7 +551,6 @@ export function Sidebar() {
       navigate(defaultRoute);
     }
   };
-
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     main: [
@@ -450,14 +665,10 @@ export function Sidebar() {
       { icon: Settings, label: 'General', href: '/admin/general' }
     ]
   };
-
   // Función para obtener el contenido actual del sidebar según el nivel
   const getCurrentSidebarItems = () => {
     return sidebarContent[sidebarLevel] || sidebarContent.main;
   };
-
-
-
   return (
     <aside 
       className={cn(
@@ -482,8 +693,7 @@ export function Sidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-
-      {/* Header Button Section - Misma altura que header original */}
+      {/* Selector Section - Ahora arriba */}
       <div className="h-9 flex items-center">
         <div className="w-full p-1">
         {sidebarLevel === 'main' ? (
@@ -495,13 +705,15 @@ export function Sidebar() {
             variant="main"
             isHeaderButton={true}
           />
+        ) : sidebarLevel === 'project' ? (
+          <ProjectSelectorSidebarHeader isExpanded={isExpanded} />
+        ) : sidebarLevel === 'organization' ? (
+          <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />
         ) : (
           <SidebarButton
             icon={<ArrowLeft className="w-[18px] h-[18px]" />}
             label={
-              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
               sidebarLevel === 'library' ? 'BIBLIOTECA' :
-              sidebarLevel === 'project' ? 'PROYECTO' :
               sidebarLevel === 'provider' ? 'PROVEEDOR' :
               sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'SECCIÓN'
             }
@@ -514,34 +726,33 @@ export function Sidebar() {
         )}
         </div>
       </div>
-
       {/* Navigation Items */}
       <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Selector de Proyectos (solo en nivel proyecto) */}
-            {sidebarLevel === 'project' && (
+            {/* Botón de título - Ahora abajo */}
+            {(sidebarLevel === 'project' || sidebarLevel === 'organization') && (
               <div>
                 <div className="mb-[2px]">
-                  <ProjectSelectorSidebar isExpanded={isExpanded} />
+                  <SidebarButton
+                    icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+                    label={
+                      sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+                      sidebarLevel === 'project' ? 'PROYECTO' : 'SECCIÓN'
+                    }
+                    isActive={false}
+                    isExpanded={isExpanded}
+                    onClick={goToMainLevel}
+                    variant="main"
+                    isHeaderButton={true}
+                  />
                 </div>
-                {/* Línea divisoria después del selector */}
+                {/* Línea divisoria después del botón de título */}
                 <div className="h-px bg-white/20 my-2"></div>
               </div>
             )}
             
-            {/* Selector de Organizaciones (solo en nivel organization) */}
-            {sidebarLevel === 'organization' && (
-              <div>
-                <div className="mb-[2px]">
-                  <OrganizationSelectorSidebar isExpanded={isExpanded} />
-                </div>
-                {/* Línea divisoria después del selector */}
-                <div className="h-px bg-white/20 my-2"></div>
-              </div>
-            )}
-            
-            {/* Línea divisoria después del botón header (para niveles que no son proyecto ni organization) */}
+            {/* Línea divisoria después del botón header (para otros niveles) */}
             {sidebarLevel !== 'main' && sidebarLevel !== 'project' && sidebarLevel !== 'organization' && (
               <div className="h-px bg-white/20 my-2"></div>
             )}
@@ -554,7 +765,6 @@ export function Sidebar() {
                   <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
                 );
               }
-
               const itemKey = 'id' in item ? item.id : ('label' in item ? item.label : `item-${index}`);
               const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
               const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
@@ -571,7 +781,6 @@ export function Sidebar() {
                 ('defaultRoute' in item && 'id' in item) || // Botones de sección principal (organización, proyecto, etc.)
                 (hasSubmenu) // Botones con submenu (diseño, construcción, finanzas)
               );
-
               const buttonElement = (
                 <SidebarButton
                   icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -598,7 +807,6 @@ export function Sidebar() {
                   rightIcon={needsChevronRight && isExpanded ? <ChevronRight className="w-3 h-3" /> : undefined}
                 />
               );
-
               return (
                 <div key={`${itemKey}-${index}`}>
                   <div className="mb-[2px]">
@@ -652,7 +860,6 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
@@ -662,7 +869,6 @@ export function Sidebar() {
               <PlanBadge isExpanded={isExpanded} />
             </div>
           )}
-
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
           
@@ -705,202 +911,5 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
-  );
-}
-
-// Componente selector de proyectos para el sidebar
-function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
-  const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.organization?.id);
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
-  const queryClient = useQueryClient();
-  
-  // Encontrar proyecto actual
-  const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
-  const displayName = currentProject?.name || "Sin proyecto";
-  
-  // Mutación para cambiar proyecto
-  const updateProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!userData?.user?.id || !userData?.organization?.id) {
-        throw new Error('Usuario u organización no disponibles');
-      }
-
-      const { error } = await supabase
-        .from('user_organization_preferences')
-        .upsert(
-          {
-            user_id: userData.user.id,
-            organization_id: userData.organization.id,
-            last_project_id: projectId,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: 'user_id,organization_id' }
-        );
-
-      if (error) throw error;
-      return projectId;
-    },
-    onSuccess: (projectId) => {
-      setSelectedProject(projectId);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
-    }
-  });
-  
-  const handleProjectSelect = (projectId: string) => {
-    if (selectedProjectId === projectId) return;
-    updateProjectMutation.mutate(projectId);
-  };
-  
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div>
-          <SidebarButton
-            icon={<Folder className="w-[18px] h-[18px]" />}
-            label={isExpanded ? displayName : ""}
-            isActive={false}
-            isExpanded={isExpanded}
-            variant="main"
-            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
-          />
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="start" 
-        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => {
-          // Solo cerrar si hacen click fuera del sidebar completo
-          const sidebar = document.querySelector('aside');
-          if (sidebar && sidebar.contains(e.target as Node)) {
-            e.preventDefault();
-          }
-        }}
-      >
-        {projects.length > 0 ? (
-          projects.map((project: any) => (
-            <DropdownMenuItem
-              key={project.id}
-              onClick={() => handleProjectSelect(project.id)}
-              className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
-                selectedProjectId === project.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <Folder className="w-4 h-4" />
-                <span className="truncate">{project.name}</span>
-              </div>
-              {selectedProjectId === project.id && (
-                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
-              )}
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
-            No hay proyectos disponibles
-          </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-// Componente selector de organizaciones para el sidebar
-function OrganizationSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
-  const { data: userData } = useCurrentUser();
-  const organizations = userData?.organizations || [];
-  const { setCurrentOrganization } = useProjectContext();
-  const queryClient = useQueryClient();
-  
-  // Encontrar organización actual
-  const currentOrganization = userData?.organization;
-  const displayName = currentOrganization?.name || "Sin organización";
-  
-  // Mutación para cambiar organización
-  const updateOrganizationMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      if (!userData?.user?.id) {
-        throw new Error('Usuario no disponible');
-      }
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({
-          last_organization_id: organizationId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userData.user.id);
-
-      if (error) throw error;
-      return organizationId;
-    },
-    onSuccess: (organizationId) => {
-      setCurrentOrganization(organizationId);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      // Recargar la página para aplicar el cambio de organización completamente
-      window.location.reload();
-    }
-  });
-  
-  const handleOrganizationSelect = (organizationId: string) => {
-    if (currentOrganization?.id === organizationId) return;
-    updateOrganizationMutation.mutate(organizationId);
-  };
-  
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div>
-          <SidebarButton
-            icon={<Building2 className="w-[18px] h-[18px]" />}
-            label={isExpanded ? displayName : ""}
-            isActive={false}
-            isExpanded={isExpanded}
-            variant="main"
-            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
-          />
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="start" 
-        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => {
-          // Solo cerrar si hacen click fuera del sidebar completo
-          const sidebar = document.querySelector('aside');
-          if (sidebar && sidebar.contains(e.target as Node)) {
-            e.preventDefault();
-          }
-        }}
-      >
-        {organizations.length > 0 ? (
-          organizations.map((organization: any) => (
-            <DropdownMenuItem
-              key={organization.id}
-              onClick={() => handleOrganizationSelect(organization.id)}
-              className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
-                currentOrganization?.id === organization.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                <span className="truncate">{organization.name}</span>
-              </div>
-              {currentOrganization?.id === organization.id && (
-                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
-              )}
-            </DropdownMenuItem>
-          ))
-        ) : (
-          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
-            No hay organizaciones disponibles
-          </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
