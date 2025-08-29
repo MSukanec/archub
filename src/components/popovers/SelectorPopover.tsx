@@ -43,9 +43,14 @@ export function SelectorPopover({
           left: '50vw',
           top: '50vh',
           transform: 'translate(-50%, -50%)',
-          zIndex: 50
+          zIndex: 9999,
+          pointerEvents: 'auto'
         }}
         onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerEnter={(e) => e.stopPropagation()}
+        onPointerLeave={(e) => e.stopPropagation()}
+        onMouseEnter={(e) => e.stopPropagation()}
+        onMouseLeave={(e) => e.stopPropagation()}
         sideOffset={0}
         alignOffset={0}
         avoidCollisions={false}

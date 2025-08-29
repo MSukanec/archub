@@ -187,8 +187,8 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     onSuccess: (organizationId) => {
       setCurrentOrganization(organizationId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      // Recargar la página para aplicar el cambio de organización completamente
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
   });
   
