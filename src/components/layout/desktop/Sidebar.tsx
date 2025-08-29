@@ -652,6 +652,7 @@ export function Sidebar() {
             onClick={goToMainLevel}
             variant="main"
             isHeaderButton={true}
+            isSectionTitleButton={true}
           />
         )}
         </div>
@@ -675,6 +676,7 @@ export function Sidebar() {
                     onClick={goToMainLevel}
                     variant="main"
                     isHeaderButton={true}
+                    isSectionTitleButton={true}
                   />
                 </div>
                 {/* Línea divisoria después del botón de título */}
