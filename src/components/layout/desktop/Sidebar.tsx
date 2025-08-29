@@ -590,8 +590,7 @@ export function Sidebar() {
         submenu: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
           { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
-          { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
+          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true }
         ]
       },
       {
