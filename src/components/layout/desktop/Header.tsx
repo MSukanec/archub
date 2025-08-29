@@ -26,7 +26,6 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
-import { ProjectSelector } from "@/components/navigation/ProjectSelector";
 import { useProjectContext } from "@/stores/projectContext";
 import { useEffect } from "react";
 import {
@@ -256,74 +255,6 @@ export function Header({
           )}
         </div>
 
-        {/* Right: Project Selector - SIEMPRE VISIBLE */}
-        <div className="flex items-center">
-          <PlanRestricted feature="project_management">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-xs font-normal flex items-center gap-1"
-                >
-                  <Folder className="w-4 h-4" />
-                  <span className="max-w-32 truncate">
-                    {projects.length === 0
-                      ? "No hay proyectos"
-                      : projects.find((p) => p.id === userOrgPrefs?.last_project_id)
-                          ?.name || "Sin proyecto"}
-                  </span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                {projects.length > 0 ? (
-                  projects.map((project) => (
-                    <DropdownMenuItem
-                      key={project.id}
-                      onClick={() =>
-                        updateProjectMutation.mutate(project.id)
-                      }
-                      className={`${userOrgPrefs?.last_project_id === project.id ? "bg-[var(--accent)] text-white" : ""}`}
-                    >
-                      <div className="flex items-center w-full">
-                        <Folder className="w-4 h-4 mr-2" />
-                        <span className="truncate">{project.name}</span>
-                      </div>
-                      {userOrgPrefs?.last_project_id === project.id && (
-                        <div
-                          className="w-2 h-2 rounded-full ml-auto"
-                          style={{ backgroundColor: "var(--accent)" }}
-                        />
-                      )}
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <div className="px-3 py-4 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Folder className="w-8 h-8 text-[var(--layout-text-muted)]" />
-                      <div className="text-sm text-[var(--layout-text)]">
-                        No hay proyectos
-                      </div>
-                      <div className="text-xs text-[var(--layout-text-muted)] mb-2">
-                        Crea tu primer proyecto para comenzar
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          navigate("/profile/projects");
-                        }}
-                        className="h-7 px-3 text-xs"
-                      >
-                        Crear proyecto
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </PlanRestricted>
-        </div>
       </div>
 
       {/* Segunda fila: Tabs a la izquierda + Botones de acción a la derecha */}

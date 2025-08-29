@@ -1,10 +1,8 @@
 import React from 'react'
 import { FolderX } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useProjectContext } from '@/stores/projectContext'
-import { ProjectSelector } from '@/components/navigation/ProjectSelector'
 
 interface RequireProjectWrapperProps {
   children: React.ReactNode
@@ -29,9 +27,8 @@ export function RequireProjectWrapper({ children, headerProps }: RequireProjectW
               </p>
               <div className="flex flex-col items-center gap-4">
                 <p className="text-sm text-muted-foreground">
-                  Selecciona un proyecto para continuar:
+                  Utiliza el selector de proyectos en la barra lateral para seleccionar un proyecto y continuar.
                 </p>
-                <ProjectSelector />
               </div>
             </CardContent>
           </Card>
