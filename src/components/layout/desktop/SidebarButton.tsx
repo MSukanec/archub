@@ -74,11 +74,11 @@ export default function SidebarButton({
         }}
         style={{ 
         borderRadius: '4px', // All buttons have 4px rounded corners
-        backgroundColor: isActive 
-          ? `var(--main-sidebar-button-active-bg)` // Usar siempre las variables main para consistencia
+        backgroundColor: (isActive || isHeaderButton)
+          ? `var(--main-sidebar-button-active-bg)` // Header buttons también usan active bg
           : `var(--main-sidebar-button-bg)`,
-        color: isActive 
-          ? `var(--main-sidebar-button-active-fg)` // Usar siempre las variables main para consistencia
+        color: (isActive || isHeaderButton)
+          ? `var(--main-sidebar-button-active-fg)` // Header buttons también usan active fg
           : `var(--main-sidebar-button-fg)`,
         '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
