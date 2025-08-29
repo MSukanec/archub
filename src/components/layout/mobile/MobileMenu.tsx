@@ -379,7 +379,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
         ]
       },
-      'divider',
+      { type: 'divider' },
       { icon: FileText, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería', href: '/project/gallery' },
       { icon: Layout, label: 'Tablero', href: '/project/board' }
@@ -520,6 +520,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             // Submenu - mostrar opciones de la sección seleccionada
             <nav className="space-y-2">
               {mobileMenuContent[currentView as keyof typeof mobileMenuContent]?.map((item, index) => {
+                // Si es un divisor, renderizar línea divisoria
+                if ('type' in item && item.type === 'divider') {
+                  return (
+                    <div key={`divider-${index}`} className="h-px bg-gray-200 dark:bg-gray-700 my-3"></div>
+                  );
+                }
+
                 const hasSubmenu = 'submenu' in item && item.submenu;
                 const isExpanded = expandedAccordion === ('id' in item ? item.id : null);
                 

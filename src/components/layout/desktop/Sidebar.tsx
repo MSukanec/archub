@@ -426,7 +426,7 @@ export function Sidebar() {
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
         ]
       },
-      'divider',
+      { type: 'divider' },
       { icon: FileText, label: 'Documentación', href: '/project/documentation' },
       { icon: Images, label: 'Galería', href: '/project/gallery' },
       { icon: Layout, label: 'Tablero', href: '/project/board' }
@@ -529,11 +529,23 @@ export function Sidebar() {
             
             {/* Renderizar contenido según el nivel actual */}
             {getCurrentSidebarItems().map((item, index) => {
-              const itemKey = 'id' in item ? item.id : item.label;
+              // Si es un divisor, renderizar línea divisoria
+              if ('type' in item && item.type === 'divider') {
+                return (
+                  <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                );
+              }
+
+              const itemKey = 'id' in item ? item.id : ('label' in item ? item.label : `item-${index}`);
               const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
               const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
               const isDashboard = 'id' in item && item.id === 'dashboard';
               const hasSubmenu = 'submenu' in item && item.submenu;
+              
+              // Verificar que tengamos icon y label antes de renderizar
+              if (!('icon' in item) || !('label' in item) || !item.icon || !item.label) {
+                return null;
+              }
               
               const buttonElement = (
                 <SidebarButton
