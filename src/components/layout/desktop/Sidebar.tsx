@@ -706,8 +706,7 @@ export function Sidebar() {
               
               // Determinar el tipo de chevron que necesita este botón
               const isAccordionExpanded = hasSubmenu && expandedAccordion === ('id' in item ? item.id : null);
-              const isDashboardButton = ('href' in item && item.href?.includes('/dashboard'));
-              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu && !isDashboardButton); // Solo secciones principales que no son acordeón ni dashboard
+              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu && !isDashboard); // Solo secciones principales que no son acordeón ni dashboard
               const needsChevronRight = navigatesToOtherSection;
               const needsAccordionChevron = hasSubmenu;
               const buttonElement = (
