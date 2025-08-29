@@ -5,7 +5,6 @@ import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Uploa
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-import { Layout } from "@/components/layout/desktop/Layout";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +153,6 @@ export default function Movements() {
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
 
-  const { setSidebarContext } = useNavigationStore();
   const { 
     setActions, 
     setShowActionBar, 
@@ -165,10 +163,6 @@ export default function Movements() {
   } = useActionBarMobile();
   const isMobile = useMobile();
 
-  // Set sidebar context to finances when component mounts
-  useEffect(() => {
-    setSidebarContext("finances");
-  }, [setSidebarContext]);
 
   // Sync search values between mobile and desktop
   useEffect(() => {
@@ -1469,17 +1463,7 @@ export default function Movements() {
                           filterByWallet !== "all";
 
   return (
-    <Layout
-      headerProps={{
-        title: "Movimientos",
-        actionButton: {
-          label: "Nuevo Movimiento",
-          icon: Plus,
-          onClick: () => openModal("movement")
-        }
-      }}
-      wide={true}
-    >
+    <>
       {/* Solo mostrar contenido si no está cargando */}
       {isLoading ? (
         <div className="space-y-4">
@@ -1815,6 +1799,6 @@ export default function Movements() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </>
   );
 }

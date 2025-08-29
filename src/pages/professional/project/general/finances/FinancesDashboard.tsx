@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Layout } from '@/components/layout/desktop/Layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, TrendingUp, TrendingDown, FileText, Calendar, ArrowUpDown, Wallet, Building } from 'lucide-react'
@@ -24,12 +23,7 @@ export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
-  const { setSidebarContext } = useNavigationStore()
 
-  // Establecer contexto del sidebar al montar el componente
-  useEffect(() => {
-    setSidebarContext('finances')
-  }, [])
   
   // State for view mode toggle
   const [viewMode, setViewMode] = useState<'project' | 'all'>('project')
@@ -91,7 +85,7 @@ export default function FinancesDashboard() {
   }
 
   return (
-    <Layout headerProps={{ title: "Resumen Financiero", icon: DollarSign }} wide={true}>
+    <>
       <div>
         {/* View mode toggle */}
         <div className="flex items-center justify-between p-4 border-b bg-background/50 backdrop-blur-sm mb-4">
@@ -399,6 +393,6 @@ export default function FinancesDashboard() {
         </>
         )}
       </div>
-    </Layout>
+    </>
   )
 }

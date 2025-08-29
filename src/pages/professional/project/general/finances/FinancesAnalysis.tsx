@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Layout } from '@/components/layout/desktop/Layout'
 import { BarChart3, TrendingUp, TrendingDown, LayoutGrid, Calculator } from 'lucide-react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -431,12 +430,7 @@ export default function FinancesAnalysis() {
   ]
 
   return (
-    <Layout 
-      headerProps={{
-        tabs: headerTabs,
-        onTabChange: setActiveTab
-      }}
-    >
+    <>
       <div className="space-y-4">
         {/* Tab Content */}
         {activeTab === "analysis" ? (
@@ -577,6 +571,6 @@ export default function FinancesAnalysis() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   )
 }
