@@ -68,26 +68,41 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext, setActiveSidebarSection } = useNavigationStore();
-  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
 
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
   // Estado local para forzar re-render
   const [isClosing, setIsClosing] = useState(false);
   
-  // Estado para determinar si estamos en menu principal o submenu
+  // Estado para los 3 niveles del menu móvil
+  const [currentLevel, setCurrentLevel] = useState<'main' | 'section' | 'subsection'>('main');
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
+  
   // Detectar automáticamente la sección basada en la ruta actual
-  const getInitialView = () => {
-    if (location === '/dashboard') return 'main';
-    if (location.startsWith('/organization')) return 'organization';
-    if (location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')) return 'project';
-    if (location.startsWith('/library')) return 'library';
-    if (location.startsWith('/proveedor')) return 'provider';
-    if (location.startsWith('/admin')) return 'admin';
-    return 'main';
+  const getInitialState = () => {
+    if (location === '/dashboard') return { level: 'main', section: null, subsection: null };
+    if (location.startsWith('/organization')) return { level: 'section', section: 'organization', subsection: null };
+    if (location.startsWith('/professional/library')) return { level: 'section', section: 'library', subsection: null };
+    if (location.startsWith('/proveedor')) return { level: 'section', section: 'provider', subsection: null };
+    if (location.startsWith('/admin')) return { level: 'section', section: 'admin', subsection: null };
+    
+    // Para proyecto, detectar subsección
+    if (location.startsWith('/design')) return { level: 'subsection', section: 'project', subsection: 'diseno' };
+    if (location.startsWith('/construction')) return { level: 'subsection', section: 'project', subsection: 'construccion' };
+    if (location.startsWith('/finances')) return { level: 'subsection', section: 'project', subsection: 'finanzas' };
+    if (location.startsWith('/project')) return { level: 'section', section: 'project', subsection: null };
+    
+    return { level: 'main', section: null, subsection: null };
   };
   
-  const [currentView, setCurrentView] = useState<'main' | string>(getInitialView());
+  // Inicializar estado basado en ruta actual
+  useEffect(() => {
+    const initialState = getInitialState();
+    setCurrentLevel(initialState.level as any);
+    setSelectedSection(initialState.section);
+    setSelectedSubsection(initialState.subsection);
+  }, [location]);
   
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -96,12 +111,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       document.body.style.overflow = 'unset';
     };
   }, []);
-  
-  // Actualizar vista cuando cambie la ubicación
-  useEffect(() => {
-    const newView = getInitialView();
-    setCurrentView(newView);
-  }, [location]);
 
   const queryClient = useQueryClient();
 
@@ -224,41 +233,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
   });
 
-  const handleNavigationWithAnimation = (href: string, newContext?: string, direction?: 'left' | 'right') => {
-    if (newContext && direction) {
-      // Cambio inmediato sin animación
-      setSidebarContext(newContext as any);
-      navigate(href);
-      // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    } else {
-      // Para navegación normal (sin cambio de contexto), cerrar menú
-      if (newContext) {
-        setSidebarContext(newContext as any);
-      }
-      navigate(href);
-      onClose();
-      // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    }
-  };
-
-  const handleNavigation = (href: string, newContext?: string) => {
-    if (newContext) {
-      // Si hay cambio de contexto, no cerrar menú
-      setSidebarContext(newContext as any);
-      navigate(href);
-      // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    } else {
-      // Si no hay cambio de contexto, cerrar menú
-      navigate(href);
-      onClose();
-      // Scroll to top on mobile navigation
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    }
-  };
-
   // Function to check if a button is active based on current location
   const isButtonActive = (href: string) => {
     if (!href || href === '#') return false;
@@ -282,157 +256,190 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     projectMutation.mutate(projectId);
   };
 
-  const toggleAccordion = (key: string) => {
-    setExpandedAccordion(prev => prev === key ? null : key);
-  };
-
-  // Definir contenido para cada nivel del sidebar móvil
+  // Definir contenido para cada nivel del menú móvil
   const mobileMenuContent = {
+    // NIVEL 1: General
     main: [
       {
         id: 'dashboard',
         icon: Home,
         label: 'Dashboard',
-        defaultRoute: '/dashboard',
-        isActive: location === '/dashboard'
+        href: '/dashboard',
+        action: 'navigate'
       },
       {
-        id: 'organizacion',
+        id: 'organization',
         icon: Building,
         label: 'Organización',
-        defaultRoute: '/organization',
-        isActive: location.startsWith('/organization')
+        action: 'section'
       },
       {
-        id: 'proyecto',
+        id: 'project',
         icon: FolderOpen,
         label: 'Proyecto',
-        defaultRoute: '/construction/dashboard',
-        isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
+        action: 'section'
       },
       {
-        id: 'biblioteca',
+        id: 'library',
         icon: Library,
         label: 'Biblioteca',
-        defaultRoute: '/library/documentation',
-        isActive: location.startsWith('/library')
+        action: 'section'
       },
       {
-        id: 'proveedor',
+        id: 'provider',
         icon: Package,
         label: 'Proveedor',
-        defaultRoute: '/proveedor/productos',
-        isActive: location.startsWith('/proveedor')
+        action: 'section'
       },
       ...(isAdmin ? [{
-        id: 'administracion',
+        id: 'admin',
         icon: Crown,
         label: 'Administración',
-        defaultRoute: '/admin/dashboard',
-        isActive: location.startsWith('/admin')
+        action: 'section'
       }] : [])
     ],
-    organization: [
-      { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
-      { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
-      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
-      { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
-    ],
-    project: [
-      {
-        id: 'diseno',
-        icon: Brush,
-        label: 'Diseño',
-        defaultRoute: '/design/dashboard',
-        restricted: true,
-        submenu: [
-          { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
-        ]
-      },
-      {
-        id: 'construccion',
-        icon: HardHat,
-        label: 'Construcción',
-        defaultRoute: '/construction/dashboard',
-        submenu: [
-          { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
-          { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-          { icon: Users, label: 'Personal', href: '/construction/personnel' },
-          { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-          { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-          { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
-        ]
-      },
-      {
-        id: 'finanzas',
-        icon: DollarSign,
-        label: 'Finanzas',
-        defaultRoute: '/finances/dashboard',
-        submenu: [
-          { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-          { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-          { icon: Users, label: 'Clientes', href: '/finances/clients' },
-          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
-          { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
-        ]
-      },
-      { type: 'divider' },
-      { icon: FileText, label: 'Documentación', href: '/project/documentation' },
-      { icon: Images, label: 'Galería', href: '/project/gallery' },
-      { icon: Layout, label: 'Tablero', href: '/project/board' }
-    ],
-    library: [
-      { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
-      { icon: Package2, label: 'Materiales', href: '/library/materials' },
-      { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
-      { icon: TrendingUp, label: 'Costos Indirectos', href: '/library/indirects' }
-    ],
-    provider: [
-      { icon: Package, label: 'Productos', href: '/proveedor/productos' }
-    ],
-    admin: [
-      { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
-      { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
-      { icon: Database, label: 'Materiales', href: '/admin/materials' },
-      { icon: Settings, label: 'General', href: '/admin/general' }
-    ]
+    
+    // NIVEL 2: Específico de sección
+    sections: {
+      organization: [
+        { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+        { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
+        { icon: Users, label: 'Miembros', href: '/organization/members' },
+        { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
+        { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+        { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
+      ],
+      project: [
+        {
+          id: 'diseno',
+          icon: Brush,
+          label: 'Diseño',
+          action: 'subsection',
+          restricted: true
+        },
+        {
+          id: 'construccion',
+          icon: HardHat,
+          label: 'Construcción',
+          action: 'subsection'
+        },
+        {
+          id: 'finanzas',
+          icon: DollarSign,
+          label: 'Finanzas',
+          action: 'subsection'
+        },
+        { type: 'divider' },
+        { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+        { icon: Images, label: 'Galería', href: '/project/gallery' },
+        { icon: Layout, label: 'Tablero', href: '/project/board' }
+      ],
+      library: [
+        { icon: CheckSquare, label: 'Tareas', href: '/professional/library/tasks' },
+        { icon: Package2, label: 'Materiales', href: '/professional/library/materials' },
+        { icon: Users, label: 'Mano de Obra', href: '/professional/library/labor' },
+        { icon: TrendingUp, label: 'Costos Indirectos', href: '/professional/library/indirects' }
+      ],
+      provider: [
+        { icon: Package, label: 'Productos', href: '/proveedor/productos' }
+      ],
+      admin: [
+        { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
+        { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
+        { icon: Database, label: 'Materiales', href: '/admin/materials' },
+        { icon: Settings, label: 'General', href: '/admin/general' }
+      ]
+    },
+    
+    // NIVEL 3: Subsecciones (solo para proyecto)
+    subsections: {
+      diseno: [
+        { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
+      ],
+      construccion: [
+        { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+        { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+        { icon: Users, label: 'Personal', href: '/construction/personnel' },
+        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+        { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+        { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+        { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+      ],
+      finanzas: [
+        { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+        { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+        { icon: Users, label: 'Clientes', href: '/finances/clients' },
+        { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
+        { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
+      ]
+    }
   };
 
-
-  // Función para obtener el título de la vista actual
-  const getCurrentViewTitle = () => {
-    if (currentView === 'main') return 'Menú Principal';
+  // Función para obtener el título actual
+  const getCurrentTitle = () => {
+    if (currentLevel === 'main') return 'Menú Principal';
     
-    const titleMap = {
-      'organization': 'Organización',
-      'project': 'Proyecto',
-      'library': 'Biblioteca', 
-      'provider': 'Proveedor',
-      'admin': 'Administración'
-    };
-    
-    return titleMap[currentView as keyof typeof titleMap] || 'Menú';
-  };
-  
-  // Función para manejar navegación desde menu principal a submenu
-  const handleMenuItemClick = (menuId: string, defaultRoute: string) => {
-    // Dashboard no tiene submenu, navegar directamente y cerrar
-    if (menuId === 'dashboard') {
-      navigate(defaultRoute);
-      handleCloseMenu();
-      return;
+    if (currentLevel === 'section') {
+      const titleMap = {
+        'organization': 'Organización',
+        'project': 'Proyecto',
+        'library': 'Biblioteca', 
+        'provider': 'Proveedor',
+        'admin': 'Administración'
+      };
+      return titleMap[selectedSection as keyof typeof titleMap] || 'Menú';
     }
     
-    // Cambiar al nivel correspondiente
-    setCurrentView(menuId);
+    if (currentLevel === 'subsection') {
+      const titleMap = {
+        'diseno': 'Diseño',
+        'construccion': 'Construcción',
+        'finanzas': 'Finanzas'
+      };
+      return titleMap[selectedSubsection as keyof typeof titleMap] || 'Submenu';
+    }
+    
+    return 'Menú';
   };
   
-  // Función para volver al menu principal
-  const handleBackToMain = () => {
-    setCurrentView('main');
+  // Función para manejar clicks en el nivel principal
+  const handleMainLevelClick = (item: any) => {
+    if (item.action === 'navigate') {
+      navigate(item.href);
+      handleCloseMenu();
+    } else if (item.action === 'section') {
+      setCurrentLevel('section');
+      setSelectedSection(item.id);
+      setSelectedSubsection(null);
+    }
+  };
+  
+  // Función para manejar clicks en el nivel de sección
+  const handleSectionLevelClick = (item: any) => {
+    if (item.href) {
+      navigate(item.href);
+      handleCloseMenu();
+    } else if (item.action === 'subsection') {
+      setCurrentLevel('subsection');
+      setSelectedSubsection(item.id);
+    }
+  };
+  
+  // Función para manejar clicks en el nivel de subsección
+  const handleSubsectionLevelClick = (item: any) => {
+    navigate(item.href);
+    handleCloseMenu();
+  };
+  
+  // Función para ir hacia atrás
+  const handleBack = () => {
+    if (currentLevel === 'subsection') {
+      setCurrentLevel('section');
+      setSelectedSubsection(null);
+    } else if (currentLevel === 'section') {
+      setCurrentLevel('main');
+      setSelectedSection(null);
+    }
   };
 
   const { closeMenu } = useMobileMenuStore();
@@ -444,6 +451,123 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     }
     closeMenu();
     onClose();
+  };
+
+  // Función para renderizar el contenido actual
+  const renderCurrentContent = () => {
+    if (currentLevel === 'main') {
+      return (
+        <nav className="space-y-2">
+          {mobileMenuContent.main.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleMainLevelClick(item)}
+              className={cn(
+                "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                (item.href && isButtonActive(item.href))
+                  ? "bg-[hsl(76,100%,40%)] text-white" 
+                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+              {item.action === 'section' && <ChevronRight className="h-4 w-4 ml-auto" />}
+            </button>
+          ))}
+        </nav>
+      );
+    }
+    
+    if (currentLevel === 'section' && selectedSection) {
+      const sectionItems = mobileMenuContent.sections[selectedSection as keyof typeof mobileMenuContent.sections];
+      return (
+        <nav className="space-y-2">
+          {sectionItems?.map((item, index) => {
+            // Si es un divisor, renderizar línea divisoria
+            if ('type' in item && item.type === 'divider') {
+              return (
+                <div key={`divider-${index}`} className="h-px bg-gray-200 dark:bg-gray-700 my-3"></div>
+              );
+            }
+
+            const isRestricted = 'restricted' in item && item.restricted;
+            
+            return (
+              <div key={index}>
+                {isRestricted ? (
+                  <PlanRestricted reason="general_mode" functionName={item.label}>
+                    <button
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                      disabled
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                      {('action' in item && item.action === 'subsection') && <ChevronRight className="h-4 w-4 ml-auto" />}
+                    </button>
+                  </PlanRestricted>
+                ) : (
+                  <button
+                    onClick={() => handleSectionLevelClick(item)}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                      (item.href && isButtonActive(item.href))
+                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                    {('action' in item && item.action === 'subsection') && <ChevronRight className="h-4 w-4 ml-auto" />}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      );
+    }
+    
+    if (currentLevel === 'subsection' && selectedSubsection) {
+      const subsectionItems = mobileMenuContent.subsections[selectedSubsection as keyof typeof mobileMenuContent.subsections];
+      return (
+        <nav className="space-y-2">
+          {subsectionItems?.map((item, index) => {
+            const isRestricted = 'restricted' in item && item.restricted;
+            
+            return (
+              <div key={index}>
+                {isRestricted ? (
+                  <PlanRestricted reason="general_mode" functionName={item.label}>
+                    <button
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                      disabled
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                    </button>
+                  </PlanRestricted>
+                ) : (
+                  <button
+                    onClick={() => handleSubsectionLevelClick(item)}
+                    className={cn(
+                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
+                      (item.href && isButtonActive(item.href))
+                        ? "bg-[hsl(76,100%,40%)] text-white" 
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      );
+    }
+    
+    return null;
   };
 
   const menuContent = (
@@ -472,17 +596,17 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-2 overflow-y-auto">
-          {/* Título de la sección actual */}
+          {/* Título de la sección actual con botón volver */}
           <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
-            {currentView !== 'main' ? (
+            {currentLevel !== 'main' ? (
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
-                  {getCurrentViewTitle()}
+                  {getCurrentTitle()}
                 </h2>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleBackToMain}
+                  onClick={handleBack}
                   className="text-[var(--menues-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -491,224 +615,99 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               </div>
             ) : (
               <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
-                {getCurrentViewTitle()}
+                {getCurrentTitle()}
               </h2>
             )}
           </div>
-          {currentView === 'main' ? (
-            // Menu principal
-            <nav className="space-y-2">
-              {mobileMenuContent.main.map((item) => (
-                <div key={item.id}>
-                  <button
-                    onClick={() => handleMenuItemClick(item.id, item.defaultRoute)}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      item.isActive 
-                        ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {item.label}
-                    {item.id !== 'dashboard' && <ChevronRight className="h-4 w-4 ml-auto" />}
-                  </button>
-                </div>
-              ))}
-            </nav>
-          ) : (
-            // Submenu - mostrar opciones de la sección seleccionada
-            <nav className="space-y-2">
-              {mobileMenuContent[currentView as keyof typeof mobileMenuContent]?.map((item, index) => {
-                // Si es un divisor, renderizar línea divisoria
-                if ('type' in item && item.type === 'divider') {
-                  return (
-                    <div key={`divider-${index}`} className="h-px bg-gray-200 dark:bg-gray-700 my-3"></div>
-                  );
-                }
-
-                const hasSubmenu = 'submenu' in item && item.submenu;
-                const isExpanded = expandedAccordion === ('id' in item ? item.id : null);
-                
-                return (
-                  <div key={index}>
-                    {('restricted' in item && item.restricted) ? (
-                      <PlanRestricted reason="coming_soon" functionName={item.label}>
-                        <button
-                          className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
-                          disabled
-                        >
-                          <item.icon className="h-5 w-5" />
-                          {item.label}
-                          {hasSubmenu && <ChevronRight className="h-4 w-4 ml-auto" />}
-                        </button>
-                      </PlanRestricted>
-                    ) : (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (hasSubmenu && 'id' in item) {
-                              toggleAccordion(item.id);
-                            } else if ('href' in item) {
-                              navigate(item.href);
-                              handleCloseMenu();
-                            } else if ('defaultRoute' in item) {
-                              navigate(item.defaultRoute);
-                              handleCloseMenu();
-                            }
-                          }}
-                          className={cn(
-                            "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                            (('href' in item && location === item.href) || ('defaultRoute' in item && location.startsWith(item.defaultRoute.split('/').slice(0, 2).join('/'))))
-                              ? "bg-[hsl(76,100%,40%)] text-white" 
-                              : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-                          )}
-                        >
-                          <item.icon className="h-5 w-5" />
-                          {item.label}
-                          {hasSubmenu && (
-                            <ChevronRight className={cn(
-                              "h-4 w-4 ml-auto transition-transform duration-200",
-                              isExpanded && "rotate-90"
-                            )} />
-                          )}
-                        </button>
-                        
-                        {/* Submenu expandido */}
-                        {hasSubmenu && isExpanded && (
-                          <div className="ml-6 mt-2 space-y-1">
-                            {item.submenu.map((subItem, subIndex) => (
-                              <div key={subIndex}>
-                                {('restricted' in subItem && subItem.restricted) ? (
-                                  <PlanRestricted reason="coming_soon" functionName={subItem.label}>
-                                    <button
-                                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50"
-                                      disabled
-                                    >
-                                      <subItem.icon className="h-4 w-4" />
-                                      {subItem.label}
-                                    </button>
-                                  </PlanRestricted>
-                                ) : (
-                                  <button
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      navigate(subItem.href);
-                                      handleCloseMenu();
-                                    }}
-                                    className={cn(
-                                      "flex w-full items-center gap-3 px-3 py-2 text-left text-sm font-medium rounded-lg transition-all duration-150",
-                                      location === subItem.href
-                                        ? "bg-[hsl(76,100%,40%)] text-white" 
-                                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
-                                    )}
-                                  >
-                                    <subItem.icon className="h-4 w-4" />
-                                    {subItem.label}
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              }) || (
-                <div className="text-center py-4 text-[var(--menues-fg)] opacity-60">
-                  No hay opciones disponibles
-                </div>
-              )}
-            </nav>
-          )}
+          
+          {/* Contenido del menu actual */}
+          {renderCurrentContent()}
         </div>
 
-        {/* Footer with project selector and avatar - Fixed at bottom */}
-        <div className="px-4 pb-4 border-t border-[var(--card-border)] pt-4 flex-shrink-0">
-          {/* Project Selector and Avatar Row */}
-          <div className="flex items-center gap-3">
-            {/* Project Selector Button - Takes most space */}
-            <div className="relative flex-1">
+        {/* Footer con selector de organización y proyecto */}
+        <div className="border-t border-[var(--menues-border)] p-4 bg-[var(--card-bg)]">
+          {/* Selector de organización */}
+          <div className="mb-3">
+            <label className="block text-xs font-medium text-[var(--menues-fg)] mb-1">Organización:</label>
+            <div className="relative">
               <button
-                onClick={() => {
-                  setExpandedProjectSelector(!expandedProjectSelector);
-                }}
-                className="w-full h-12 flex items-center justify-between px-3 rounded-xl transition-all duration-150 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)] shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5"
+                onClick={() => setExpandedProjectSelector(false)}
+                className="w-full p-2 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center"
               >
-                <span className="text-sm font-medium truncate">{currentProjectName}</span>
-                <FolderOpen className="h-5 w-5 ml-2 flex-shrink-0" />
+                <Building className="h-4 w-4 mr-2" />
+                <span className="flex-1 truncate text-sm">
+                  {currentOrganization?.name || 'Sin organización'}
+                </span>
+                <ChevronDown className="h-4 w-4" />
               </button>
+            </div>
+          </div>
 
+          {/* Selector de proyecto */}
+          <div className="mb-3">
+            <label className="block text-xs font-medium text-[var(--menues-fg)] mb-1">Proyecto:</label>
+            <div className="relative">
+              <button
+                onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
+                className="w-full p-2 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center"
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                <span className="flex-1 truncate text-sm">
+                  {currentProjectName}
+                </span>
+                <ChevronDown className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  expandedProjectSelector && "rotate-180"
+                )} />
+              </button>
+              
+              {/* Lista de proyectos expandida */}
               {expandedProjectSelector && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setExpandedProjectSelector(false)}>
-                  <div 
-                    className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border overflow-y-auto"
-                    style={{ 
-                      backgroundColor: 'var(--menues-bg)',
-                      borderColor: 'var(--menues-border)',
-                      width: 'calc(100vw - 32px)',
-                      maxWidth: '400px',
-                      maxHeight: '50vh',
-                      zIndex: 60
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Proyectos</h3>
-                      <button
-                        onClick={() => setExpandedProjectSelector(false)}
-                        className=" rounded hover:bg-[var(--menues-hover-bg)] flex items-center justify-center"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--menues-fg)' }}>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {projectsData?.map((project: any) => (
-                        <button
-                          key={project.id}
-                          onClick={() => {
-                            projectMutation.mutate(project.id);
-                            setExpandedProjectSelector(false);
-                          }}
-                          className="w-full px-3 py-3 text-left text-base hover:bg-[var(--menues-hover-bg)] transition-all duration-150 rounded-lg"
-                          style={{ color: 'var(--menues-fg)' }}
-                        >
-                          {project.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg max-h-40 overflow-y-auto z-10">
+                  {projectsData?.map((project: any) => (
+                    <button
+                      key={project.id}
+                      onClick={() => handleProjectSelect(project.id)}
+                      className={cn(
+                        "w-full p-2 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--menues-fg)]",
+                        project.id === effectiveCurrentProject && "bg-[hsl(76,100%,40%)] text-white"
+                      )}
+                    >
+                      {project.name}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Avatar Button - Direct circular avatar as button */}
-            <button
+          {/* Información del usuario */}
+          <div className="flex items-center gap-2 pt-2 border-t border-[var(--menues-border)]">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={userData?.user?.avatar_url} />
+              <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
+                {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-[var(--menues-fg)] truncate">
+                {userData?.user?.full_name || userData?.user?.email}
+              </p>
+              <p className="text-xs text-[var(--menues-fg)] opacity-60 truncate">
+                {userData?.user?.email}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 navigate('/profile');
                 handleCloseMenu();
               }}
-              className="p-0 border-0 bg-transparent hover:scale-105 transition-transform duration-150"
+              className="text-[var(--menues-fg)] p-1"
             >
-              <Avatar className="h-12 w-12 shadow-button-normal hover:shadow-button-hover transition-shadow duration-150">
-                {(userData?.user?.avatar_url && userData.user.avatar_url.trim() !== '') && (
-                  <AvatarImage 
-                    src={userData.user.avatar_url} 
-                    className="object-cover"
-                  />
-                )}
-                <AvatarFallback className="text-sm font-medium bg-[var(--accent)] text-white">
-                  {userData?.user?.email?.substring(0, 2).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </button>
+              <UserCircle className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
