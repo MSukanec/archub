@@ -532,6 +532,7 @@ export function Sidebar() {
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { 
         type: 'accordion',
+        icon: DollarSign,
         label: 'Finanzas',
         submenu: [
           { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' }
