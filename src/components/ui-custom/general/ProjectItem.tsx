@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Edit } from 'lucide-react';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -24,12 +25,23 @@ interface Project {
     state?: string;
     country?: string;
     project_image_url?: string | null;
+    project_type_id?: string;
+    modality_id?: string;
+    project_type?: {
+      id: string;
+      name: string;
+    };
+    modality?: {
+      id: string;
+      name: string;
+    };
   };
 }
 
 interface ProjectItemProps {
   project: Project;
   onClick?: () => void;
+  onEdit?: () => void;
   selected?: boolean;
   className?: string;
   isActive?: boolean;
@@ -72,6 +84,7 @@ const getProjectInitials = (name: string): string => {
 export default function ProjectItem({ 
   project, 
   onClick, 
+  onEdit,
   selected, 
   className,
   isActive = false,
@@ -88,7 +101,6 @@ export default function ProjectItem({
         bg-white dark:bg-card rounded-2xl shadow-sm border cursor-pointer
         transition-all duration-200 ease-in-out
         hover:shadow-md hover:-translate-y-1
-        ${isActive ? 'ring-2 ring-[var(--accent)] ring-offset-2' : ''}
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${className || ''}
       `}
@@ -110,7 +122,7 @@ export default function ProjectItem({
 
         {/* Contenido sobre la imagen */}
         <div className="relative z-10 p-4 h-full flex flex-col justify-between">
-          {/* Header con avatar */}
+          {/* Header con avatar y botón editar */}
           <div className="flex items-start justify-between">
             {/* Avatar con iniciales del proyecto */}
             <Avatar className="h-10 w-10 shadow-sm">
@@ -121,6 +133,19 @@ export default function ProjectItem({
                 {initials}
               </AvatarFallback>
             </Avatar>
+
+            {/* Botón Editar */}
+            <Button 
+              variant="ghost" 
+              size="icon-sm"
+              className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Botón "Ir al Proyecto" */}
@@ -144,30 +169,32 @@ export default function ProjectItem({
       <div className="p-4 space-y-3 min-h-[140px]">
         {/* Nombre del proyecto */}
         <div>
-          <h3 className="font-semibold text-lg text-foreground leading-tight">
+          <h3 className="font-semibold text-base text-foreground leading-tight">
             {project.name}
           </h3>
           
           {/* Badges de tipo y modalidad */}
           <div className="flex gap-2 mt-2">
-            <Badge 
-              variant="secondary" 
-              className="bg-blue-100 text-blue-800 border-blue-200 text-xs"
-            >
-              Construcción
-            </Badge>
-            <Badge 
-              variant="secondary" 
-              className="bg-green-100 text-green-800 border-green-200 text-xs"
-            >
-              Privado
-            </Badge>
+            {project.project_data?.project_type?.name && (
+              <Badge 
+                className="bg-[var(--accent)] text-white border-0 text-xs"
+              >
+                {project.project_data.project_type.name}
+              </Badge>
+            )}
+            {project.project_data?.modality?.name && (
+              <Badge 
+                className="bg-[var(--accent)] text-white border-0 text-xs"
+              >
+                {project.project_data.modality.name}
+              </Badge>
+            )}
           </div>
         </div>
 
         {/* Descripción */}
         <div>
-          <p className="text-muted-foreground text-sm line-clamp-2">
+          <p className="text-muted-foreground text-xs line-clamp-2">
             {project.description || "Sin descripción"}
           </p>
         </div>

@@ -22,6 +22,17 @@ interface Project {
     city?: string;
     state?: string;
     country?: string;
+    project_image_url?: string | null;
+    project_type_id?: string;
+    modality_id?: string;
+    project_type?: {
+      id: string;
+      name: string;
+    };
+    modality?: {
+      id: string;
+      name: string;
+    };
   };
 }
 

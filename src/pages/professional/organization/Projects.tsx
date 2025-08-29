@@ -379,6 +379,7 @@ export default function Projects() {
                       key={project.id}
                       project={project}
                       onClick={() => handleSelectProject(project.id)}
+                      onEdit={() => openModal('project', { editingProject: project, isEditing: true })}
                       isActive={project.id === userOrgPrefs?.last_project_id}
                       projectColor={project.color || 'var(--accent)'}
                     />
