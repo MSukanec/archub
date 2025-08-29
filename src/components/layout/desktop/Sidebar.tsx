@@ -61,6 +61,7 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useProjects } from "@/hooks/use-projects";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
@@ -483,13 +484,25 @@ export function Sidebar() {
       {/* Header Section - Dinámico según el nivel */}
       <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
         {isExpanded ? (
-          <div className="ml-3 text-lg font-bold text-[var(--main-sidebar-fg)]">
-            {sidebarLevel === 'main' ? 'ARCHUB' : 
-             sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
-             sidebarLevel === 'library' ? 'BIBLIOTECA' :
-             sidebarLevel === 'project' ? 'PROYECTO' :
-             sidebarLevel === 'provider' ? 'PROVEEDOR' :
-             sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
+          <div className="ml-3 flex items-center justify-between pr-3">
+            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
+              {sidebarLevel === 'main' ? 'ARCHUB' : 
+               sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+               sidebarLevel === 'library' ? 'BIBLIOTECA' :
+               sidebarLevel === 'project' ? 'PROYECTO' :
+               sidebarLevel === 'provider' ? 'PROVEEDOR' :
+               sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
+            </div>
+            {/* Botón Volver pequeño solo en nivel proyecto */}
+            {sidebarLevel === 'project' && (
+              <button
+                onClick={goToMainLevel}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                <span>Volver</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="w-full flex items-center justify-center">
@@ -509,8 +522,19 @@ export function Sidebar() {
       <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Botón Volver (solo en niveles secundarios) */}
-            {sidebarLevel !== 'main' && (
+            {/* Selector de Proyectos (solo en nivel proyecto) */}
+            {sidebarLevel === 'project' && (
+              <div>
+                <div className="mb-[2px]">
+                  <ProjectSelectorSidebar isExpanded={isExpanded} />
+                </div>
+                {/* Línea divisoria después del selector */}
+                <div className="h-px bg-white/20 my-2"></div>
+              </div>
+            )}
+            
+            {/* Botón Volver (solo en niveles secundarios que NO son proyecto) */}
+            {sidebarLevel !== 'main' && sidebarLevel !== 'project' && (
               <div>
                 <div className="mb-[2px]">
                   <SidebarButton
@@ -556,9 +580,13 @@ export function Sidebar() {
                   onClick={() => {
                     if ('defaultRoute' in item && 'id' in item) {
                       if (hasSubmenu) {
-                        handleSubSectionClick(item.id, item.defaultRoute);
+                        if (item.id) {
+                          handleSubSectionClick(item.id, item.defaultRoute);
+                        }
                       } else {
-                        handleMainSectionClick(item.id, item.defaultRoute);
+                        if (item.id) {
+                          handleMainSectionClick(item.id, item.defaultRoute);
+                        }
                       }
                     } else if ('href' in item) {
                       navigate(item.href);
@@ -676,4 +704,127 @@ export function Sidebar() {
       </div>
     </aside>
   );
+}
+
+// Componente selector de proyectos para el sidebar
+function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
+  const { data: userData } = useCurrentUser();
+  const { data: projects = [] } = useProjects(userData?.organization?.id);
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const queryClient = useQueryClient();
+  
+  // Encontrar proyecto actual
+  const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
+  const displayName = currentProject?.name || "Sin proyecto";
+  
+  // Mutación para cambiar proyecto
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!userData?.user?.id || !userData?.organization?.id) {
+        throw new Error('Usuario u organización no disponibles');
+      }
+
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
+
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+  
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate(projectId);
+  };
+  
+  if (isExpanded) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex w-full items-center gap-2 px-3 py-2 text-left rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] transition-all duration-150">
+            <Folder className="w-4 h-4" />
+            <span className="flex-1 truncate text-sm">{displayName}</span>
+            <ChevronDown className="w-3 h-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          {projects.length > 0 ? (
+            projects.map((project: any) => (
+              <DropdownMenuItem
+                key={project.id}
+                onClick={() => handleProjectSelect(project.id)}
+                className={cn(
+                  "flex items-center justify-between",
+                  selectedProjectId === project.id && "bg-[var(--accent)] text-white"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Folder className="w-4 h-4" />
+                  <span className="truncate">{project.name}</span>
+                </div>
+                {selectedProjectId === project.id && (
+                  <div className="w-2 h-2 rounded-full ml-auto bg-white" />
+                )}
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+              No hay proyectos disponibles
+            </div>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  } else {
+    // Versión colapsada - solo icono
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] transition-all duration-150">
+            <Folder className="w-4 h-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          {projects.length > 0 ? (
+            projects.map((project: any) => (
+              <DropdownMenuItem
+                key={project.id}
+                onClick={() => handleProjectSelect(project.id)}
+                className={cn(
+                  "flex items-center justify-between",
+                  selectedProjectId === project.id && "bg-[var(--accent)] text-white"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Folder className="w-4 h-4" />
+                  <span className="truncate">{project.name}</span>
+                </div>
+                {selectedProjectId === project.id && (
+                  <div className="w-2 h-2 rounded-full ml-auto bg-white" />
+                )}
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+              No hay proyectos disponibles
+            </div>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 }
