@@ -560,6 +560,7 @@ export function Sidebar() {
           { icon: FileText, label: 'Media', href: '/general/media' }
         ]
       },
+      { type: 'divider' },
       {
         id: 'diseno',
         icon: Brush,
@@ -584,19 +585,7 @@ export function Sidebar() {
           { icon: Package2, label: 'Materiales', href: '/construction/materials' },
           { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
         ]
-      },
-      {
-        id: 'finanzas',
-        icon: DollarSign,
-        label: 'Finanzas',
-        defaultRoute: '/finances/dashboard',
-        submenu: [
-          { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-          { icon: DollarSign, label: 'Movimientos', href: '/general/finances' },
-          { icon: BarChart3, label: 'Análisis de Obra', href: '/general/finances', generalModeRestricted: true }
-        ]
-      },
-      { type: 'divider' }
+      }
     ],
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
