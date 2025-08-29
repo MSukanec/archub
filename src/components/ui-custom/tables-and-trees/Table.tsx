@@ -10,11 +10,13 @@ import {
   X,
   Download,
   Group,
-  FileText
+  FileText,
+  Upload
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import {
   Popover,
   PopoverContent,
@@ -85,6 +87,9 @@ interface TableProps<T = any> {
     onGroupingChange?: (value: string) => void;
     showClearFilters?: boolean;
     onClearFilters?: () => void;
+    showImport?: boolean;
+    onImport?: () => void;
+    isImporting?: boolean;
     showExport?: boolean;
     onExport?: () => void;
     onExportPDF?: () => void;
@@ -480,6 +485,24 @@ export function Table<T = any>({
               </PopoverContent>
             </Popover>
 
+            {/* Botón de importar */}
+            {topBar?.showImport && (
+              <PlanRestricted 
+                functionName="Importación de Excel"
+                reason="general_mode"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={topBar.onImport}
+                  disabled={topBar.isImporting}
+                  className="gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="text-xs">Importar</span>
+                </Button>
+              </PlanRestricted>
+            )}
 
             {/* Botón de exportar - SIEMPRE visible */}
             <Popover>
