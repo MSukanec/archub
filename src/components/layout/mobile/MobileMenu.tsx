@@ -329,10 +329,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           label: 'Finanzas',
           action: 'subsection'
         },
-        { type: 'divider' },
-        { icon: FileText, label: 'Documentación', href: '/project/documentation' },
-        { icon: Images, label: 'Galería', href: '/project/gallery' },
-        { icon: Layout, label: 'Tablero', href: '/project/board' }
+        {
+          id: 'recursos',
+          icon: FolderOpen,
+          label: 'Recursos',
+          action: 'subsection'
+        },
+        { type: 'divider' }
       ],
       library: [
         { icon: CheckSquare, label: 'Tareas', href: '/professional/library/tasks' },
@@ -371,6 +374,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: Users, label: 'Clientes', href: '/finances/clients' },
         { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
         { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
+      ],
+      recursos: [
+        { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+        { icon: Images, label: 'Galería', href: '/project/gallery' },
+        { icon: Layout, label: 'Tablero', href: '/project/board' }
       ]
     }
   };
@@ -394,7 +402,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       const titleMap = {
         'diseno': 'Diseño',
         'construccion': 'Construcción',
-        'finanzas': 'Finanzas'
+        'finanzas': 'Finanzas',
+        'recursos': 'Recursos'
       };
       return titleMap[selectedSubsection as keyof typeof titleMap] || 'Submenu';
     }

@@ -574,10 +574,18 @@ export function Sidebar() {
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
         ]
       },
-      { type: 'divider' },
-      { icon: FileText, label: 'Documentación', href: '/project/documentation' },
-      { icon: Images, label: 'Galería', href: '/project/gallery' },
-      { icon: Layout, label: 'Tablero', href: '/project/board' }
+      {
+        id: 'recursos',
+        icon: FolderOpen,
+        label: 'Recursos',
+        defaultRoute: '/project/documentation',
+        submenu: [
+          { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+          { icon: Images, label: 'Galería', href: '/project/gallery' },
+          { icon: Layout, label: 'Tablero', href: '/project/board' }
+        ]
+      },
+      { type: 'divider' }
     ],
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
@@ -618,6 +626,8 @@ export function Sidebar() {
             setExpandedAccordion('finanzas');
           } else if (location.startsWith('/design')) {
             setExpandedAccordion('diseno');
+          } else if (location.startsWith('/project/')) {
+            setExpandedAccordion('recursos');
           }
         }
       }}

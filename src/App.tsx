@@ -44,10 +44,10 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
-import Documentation from "@/pages/professional/project/Documentation";
-import Gallery from "@/pages/professional/project/Gallery";
+import Documentation from "@/pages/professional/project/resources/Documentation";
+import Gallery from "@/pages/professional/project/resources/Gallery";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
-import Board from "@/pages/professional/project/Board";
+import Board from "@/pages/professional/project/resources/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
