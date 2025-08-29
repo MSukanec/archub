@@ -9,7 +9,7 @@ import { ListFormModal } from '../modals/organizations/ListFormModal';
 import ContactModal from '../modals/resources/contacts/ContactModal'
 import { ContactModalView } from '../modals/resources/contacts/ContactModalView'
 import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
-import ClientObligationModal from '../modals/finances/clients/ClientObligationModal';
+import ClientObligationModal from '../modals/general/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
 import { MovementModal } from '../modals/finances/movements/MovementModal'
@@ -25,9 +25,9 @@ import { TaskSingleModal } from '../modals/construction/tasks/TaskSingleModal';
 import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
-import { ClientPaymentModal } from '../modals/finances/clients/ClientPaymentModal';
-import ClientPaymentPlans from '../modals/finances/clients/ClientPaymentPlans';
-import ClientInstallment from '../modals/finances/clients/ClientInstallment';
+import { ClientPaymentModal } from '../modals/general/clients/ClientPaymentModal';
+import ClientPaymentPlans from '../modals/general/clients/ClientPaymentPlans';
+import ClientInstallment from '../modals/general/clients/ClientInstallment';
 import { MaterialFormModal } from '../modals/admin/MaterialFormModal'
 import { MaterialCategoryFormModal } from '../modals/admin/MaterialCategoryFormModal';
 import { BrandFormModal } from '../modals/admin/BrandFormModal';

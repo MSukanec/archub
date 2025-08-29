@@ -29,7 +29,7 @@ import FinancesDashboard from "@/pages/professional/project/finances/FinancesDas
 import Movements from "@/pages/professional/project/finances/movements/Movements";
 import FinancesAnalysis from "@/pages/professional/project/finances/FinancesAnalysis";
 import FinancesCapitalMovements from "@/pages/professional/project/finances/FinancesCapitalMovements";
-import { Clients } from "@/pages/professional/project/finances/clients/Clients";
+import { Clients } from "@/pages/professional/project/general/clients/Clients";
 
 
 import Preferences from "@/pages/professional/organization/Preferences";
@@ -125,7 +125,7 @@ function Router() {
         <Route path="/projects" component={Projects} />
 
 
-        <Route path="/finances/clients" component={Clients} />
+        <Route path="/general/clients" component={Clients} />
         
 
 
@@ -164,7 +164,7 @@ function Router() {
         <Route path="/finances/analysis" component={FinancesAnalysis} />
 
         <Route path="/finances/capital-movements" component={FinancesCapitalMovements} />
-        <Route path="/finances/clients" component={Clients} />
+        <Route path="/general/clients" component={Clients} />
 
 
         {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}

@@ -537,6 +537,15 @@ export function Sidebar() {
     ],
     project: [
       {
+        id: 'general',
+        icon: Settings,
+        label: 'General',
+        defaultRoute: '/general/clients',
+        submenu: [
+          { icon: Users, label: 'Clientes', href: '/general/clients' }
+        ]
+      },
+      {
         id: 'diseno',
         icon: Brush,
         label: 'Diseño',
@@ -569,7 +578,6 @@ export function Sidebar() {
         submenu: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
           { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-          { icon: Users, label: 'Clientes', href: '/finances/clients' },
           { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
         ]
@@ -620,7 +628,9 @@ export function Sidebar() {
         setHovered(true);
         // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
         if (sidebarLevel === 'project') {
-          if (location.startsWith('/construction')) {
+          if (location.startsWith('/general')) {
+            setExpandedAccordion('general');
+          } else if (location.startsWith('/construction')) {
             setExpandedAccordion('construccion');
           } else if (location.startsWith('/finances')) {
             setExpandedAccordion('finanzas');

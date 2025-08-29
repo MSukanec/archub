@@ -311,6 +311,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ],
       project: [
         {
+          id: 'general',
+          icon: Settings,
+          label: 'General',
+          action: 'subsection'
+        },
+        {
           id: 'diseno',
           icon: Brush,
           label: 'Diseño',
@@ -356,6 +362,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     
     // NIVEL 3: Subsecciones (solo para proyecto)
     subsections: {
+      general: [
+        { icon: Users, label: 'Clientes', href: '/general/clients' }
+      ],
       diseno: [
         { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
       ],
@@ -371,7 +380,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       finanzas: [
         { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
         { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-        { icon: Users, label: 'Clientes', href: '/finances/clients' },
         { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
         { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
       ],
@@ -400,6 +408,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     
     if (currentLevel === 'subsection') {
       const titleMap = {
+        'general': 'General',
         'diseno': 'Diseño',
         'construccion': 'Construcción',
         'finanzas': 'Finanzas',

@@ -109,7 +109,9 @@ export function SidebarSubmenu() {
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
     
-
+    'general': [
+      { icon: Users, label: 'Clientes', href: '/general/clients', requiresProject: true },
+    ],
 
     'diseno': [
       { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard', requiresProject: true },
@@ -128,11 +130,10 @@ export function SidebarSubmenu() {
 
     ],
 
-    // Finanzas section - Clientes debe estar DEBAJO de Movimientos
+    // Finanzas section - Clientes movido a General
     'finanzas': [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
-      { icon: Users, label: 'Clientes', href: '/finances/clients', requiresProject: true },
       { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
       { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
     ],
@@ -191,6 +192,7 @@ export function SidebarSubmenu() {
       'perfil': { title: 'Mi Perfil', icon: UserCircle },
       'organizacion': { title: 'Organización', icon: Building },
 
+      'general': { title: 'General', icon: Settings },
       'diseno': { title: 'Diseño', icon: Brush },
       'construccion': { title: 'Construcción', icon: HardHat },
       'finanzas': { title: 'Finanzas', icon: DollarSign },
