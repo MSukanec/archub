@@ -21,6 +21,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useProjects } from '@/hooks/use-projects'
 import { DefaultMovementFields } from '@/components/modal/modals/finances/movements/fields/DefaultFields'
 import { ConversionFields } from '@/components/modal/modals/finances/movements/fields/ConversionFields'
 import { TransferFields } from '@/components/modal/modals/finances/movements/fields/TransferFields'
@@ -38,6 +39,7 @@ import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMo
 
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
+  project_id: z.string().min(1, 'Proyecto es requerido'),
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
@@ -52,6 +54,7 @@ const basicMovementSchema = z.object({
 
 // Schema para conversión (como en el modal original)
 const conversionSchema = z.object({
+  project_id: z.string().min(1, 'Proyecto es requerido'),
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
@@ -73,6 +76,7 @@ const conversionSchema = z.object({
 
 // Schema para transferencia interna
 const transferSchema = z.object({
+  project_id: z.string().min(1, 'Proyecto es requerido'),
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
@@ -126,6 +130,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
   const { data: members } = useOrganizationMembers(userData?.organization?.id)
+  const { data: projects } = useProjects(userData?.organization?.id)
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -255,10 +260,14 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     return new Date(dateString)
   }
 
+  // Get default project
+  const defaultProject = userData?.organization?.preferences?.last_project_id || projects?.[0]?.id
+
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
     defaultValues: {
+      project_id: '',
       movement_date: new Date(),
       created_by: '',
       type_id: '',
@@ -282,6 +291,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     if (!isEditing) {
       // Para nuevos movimientos, usar valores por defecto
       form.reset({
+        project_id: defaultProject || '',
         movement_date: new Date(),
         created_by: currentMember.id,
         type_id: '',
@@ -296,6 +306,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     } else {
       // Para edición, usar datos del movimiento
       form.reset({
+        project_id: editingMovement?.project_id || defaultProject || '',
         movement_date: parseMovementDate(editingMovement?.movement_date),
         created_by: editingMovement?.created_by || currentMember.id,
         type_id: editingMovement?.type_id || '',
@@ -308,12 +319,13 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         exchange_rate: editingMovement?.exchange_rate || undefined
       })
     }
-  }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
+  }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, defaultProject, isEditing, editingMovement, form, projects])
 
   // Conversion form (como en el modal original)
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
+      project_id: editingMovement?.project_id || defaultProject || '',
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
@@ -332,6 +344,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
+      project_id: editingMovement?.project_id || defaultProject || '',
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
@@ -361,18 +374,21 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     const getCurrentCommonValues = () => {
       if (movementType === 'conversion') {
         return {
+          project_id: conversionForm.getValues('project_id'),
           movement_date: conversionForm.getValues('movement_date'),
           description: conversionForm.getValues('description'),
           created_by: conversionForm.getValues('created_by')
         }
       } else if (movementType === 'transfer') {
         return {
+          project_id: transferForm.getValues('project_id'),
           movement_date: transferForm.getValues('movement_date'),
           description: transferForm.getValues('description'),
           created_by: transferForm.getValues('created_by')
         }
       } else {
         return {
+          project_id: form.getValues('project_id'),
           movement_date: form.getValues('movement_date'),
           description: form.getValues('description'),
           created_by: form.getValues('created_by')
@@ -387,16 +403,19 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     form.setValue('movement_date', commonValues.movement_date)
     form.setValue('description', commonValues.description)
     form.setValue('created_by', commonValues.created_by)
+    form.setValue('project_id', commonValues.project_id)
     
     conversionForm.setValue('type_id', newTypeId)
     conversionForm.setValue('movement_date', commonValues.movement_date)
     conversionForm.setValue('description', commonValues.description)
     conversionForm.setValue('created_by', commonValues.created_by)
+    conversionForm.setValue('project_id', commonValues.project_id)
     
     transferForm.setValue('type_id', newTypeId)
     transferForm.setValue('movement_date', commonValues.movement_date)
     transferForm.setValue('description', commonValues.description)
     transferForm.setValue('created_by', commonValues.created_by)
+    transferForm.setValue('project_id', commonValues.project_id)
     
     // Cambiar tipo de movimiento DESPUÉS de sincronizar - con comparación más robusta
     const newMovementType = viewMode.includes("conversion") ? 'conversion' : 
@@ -418,6 +437,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     
     // Forzar actualización de valores en el formulario activo
     const commonValues = {
+      project_id: form.getValues('project_id'),
       movement_date: form.getValues('movement_date'),
       description: form.getValues('description'),
       created_by: form.getValues('created_by'),
@@ -425,12 +445,14 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     }
     
     if (movementType === 'conversion') {
+      conversionForm.setValue('project_id', commonValues.project_id)
       conversionForm.setValue('movement_date', commonValues.movement_date)
       conversionForm.setValue('description', commonValues.description)
       conversionForm.setValue('created_by', commonValues.created_by)
       conversionForm.setValue('type_id', commonValues.type_id)
 
     } else if (movementType === 'transfer') {
+      transferForm.setValue('project_id', commonValues.project_id)
       transferForm.setValue('movement_date', commonValues.movement_date)
       transferForm.setValue('description', commonValues.description)
       transferForm.setValue('created_by', commonValues.created_by)
@@ -478,6 +500,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
 
 
       // Llenar formulario de conversión
+      conversionForm.setValue('project_id', movement.project_id)
       conversionForm.setValue('movement_date', new Date(movement.movement_date))
       conversionForm.setValue('description', movement.description)
       conversionForm.setValue('created_by', movement.created_by)
@@ -533,6 +556,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       const destinationMovement = isOrigin ? transferMovements : movement
 
       // Llenar formulario de transferencia
+      transferForm.setValue('project_id', movement.project_id)
       transferForm.setValue('movement_date', new Date(movement.movement_date))
       transferForm.setValue('description', movement.description)
       transferForm.setValue('created_by', movement.created_by)
@@ -1590,6 +1614,43 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   // Campos comunes (siempre los mismos)
   const commonFields = (
     <div className="space-y-4">
+      {/* PROYECTO - OCUPA EL ANCHO COMPLETO */}
+      <FormField
+        control={form.control}
+        name="project_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Proyecto *</FormLabel>
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value)
+                // Sincronizar con otros formularios
+                if (movementType === 'conversion') {
+                  conversionForm.setValue('project_id', value)
+                } else if (movementType === 'transfer') {
+                  transferForm.setValue('project_id', value)
+                }
+              }} 
+              value={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar proyecto..." />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {projects?.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* LAYOUT: FECHA 1/3 Y TIPO DE MOVIMIENTO 2/3 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 1. FECHA */}
