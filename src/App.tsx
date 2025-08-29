@@ -112,15 +112,11 @@ function Router() {
         <Route path="/organization/preferences" component={Preferences} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/data" component={OrganizationData} />
-
+        <Route path="/organization/contacts" component={Contacts} />
+        <Route path="/organization/projects" component={Projects} />
         <Route path="/organization/members" component={Members} />
         
         <Route path="/organization" component={Members} />
-
-
-        <Route path="/organization/projects" component={Projects} />
-
-
 
         <Route path="/library/board" component={Board} />
 
@@ -137,7 +133,6 @@ function Router() {
         {/* Resources Routes */}
         <Route path="/library/documentation" component={Documentation} />
         <Route path="/library/gallery" component={Gallery} />
-        <Route path="/organization/contacts" component={Contacts} />
 
         {/* Design Routes */}
         <Route path="/design/dashboard" component={DesignDashboard} />
