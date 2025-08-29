@@ -245,7 +245,7 @@ export function SidebarSubmenu() {
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-1 pt-3">
         <div className="flex flex-col gap-[1px]">
           {filteredSubmenu.length > 0 ? (
-            filteredSubmenu.map((item, index) => {
+            filteredSubmenu.map((item: any, index) => {
               if (item.type === 'accordion') {
                 return (
                   <div key={index} className="mb-[1px]">
@@ -259,7 +259,7 @@ export function SidebarSubmenu() {
                     )}
                     {/* Items del acordeón */}
                     <div className="flex flex-col gap-[1px]">
-                      {item.items?.map((subItem, subIndex) => (
+                      {item.items?.map((subItem: any, subIndex: number) => (
                         <div key={subIndex} className="mb-[1px]">
                           <SidebarButton
                             icon={<subItem.icon className="w-[18px] h-[18px]" />}
@@ -279,10 +279,10 @@ export function SidebarSubmenu() {
 
 
               // Botón normal con posible restricción
-              if (item.restricted) {
+              if ((item as any).restricted) {
                 return (
                   <div key={index} className="mb-[1px]">
-                    <PlanRestricted reason={typeof item.restricted === 'string' ? item.restricted : 'coming_soon'}>
+                    <PlanRestricted reason={typeof (item as any).restricted === 'string' ? (item as any).restricted : 'coming_soon'}>
                       <SidebarButton
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         href="#"
@@ -298,7 +298,7 @@ export function SidebarSubmenu() {
               }
 
               // Botón con restricción de modo general
-              if (item.generalModeRestricted) {
+              if ((item as any).generalModeRestricted) {
                 return (
                   <div key={index} className="mb-[1px]">
                     <PlanRestricted reason="general_mode" functionName={item.label}>
