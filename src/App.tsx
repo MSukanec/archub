@@ -47,7 +47,7 @@ import SubcontractView from "@/pages/professional/project/construction/subcontra
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
 import Media from "@/pages/professional/project/general/media/Media";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
-import Board from "@/pages/professional/project/resources/Board";
+import Calendar from "@/pages/professional/project/general/calendar/Calendar";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
@@ -117,7 +117,7 @@ function Router() {
         
         <Route path="/organization" component={Members} />
 
-        <Route path="/project/board" component={Board} />
+        <Route path="/general/calendar" component={Calendar} />
 
         <Route path="/organization/:organizationId" component={Members} />
 

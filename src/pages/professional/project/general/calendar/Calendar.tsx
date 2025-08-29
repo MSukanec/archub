@@ -21,7 +21,7 @@ import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 
 import { Card } from '@/components/ui/card';
 
-function BoardContent() {
+function CalendarContent() {
   const { setSidebarContext } = useNavigationStore();
 
   // Set sidebar context on mount
@@ -152,24 +152,13 @@ function BoardContent() {
     updateLastBoardMutation.mutate(boardId);
   };
 
-
-
-
-
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
 
-  // Breadcrumb configuration
-  const breadcrumb = [
-    { name: "Recursos", href: "/recursos/documentacion" },
-    { name: "Tablero", href: "/recursos/board" }
-  ];
-
-  // Header configuration following ai-page-template.md
+  // Header configuration
   const headerProps = {
     icon: CheckSquare,
     title: "Tablero",
-    breadcrumb,
     actionButton: currentBoardId ? {
       label: 'Nueva Lista',
       icon: Plus,
@@ -191,7 +180,7 @@ function BoardContent() {
   if (boardsLoading) {
     const loadingHeaderProps = {
       icon: CheckSquare,
-      title: "Tareas para Hacer"
+      title: "Tablero"
     };
 
     return (
@@ -210,7 +199,6 @@ function BoardContent() {
     const emptyHeaderProps = {
       icon: CheckSquare,
       title: "Tablero",
-      breadcrumb,
       actionButton: {
         label: 'Nuevo Tablero',
         icon: Plus,
@@ -291,10 +279,10 @@ function BoardContent() {
   );
 }
 
-export default function OrganizationBoard() {
+export default function Calendar() {
   return (
     <ActionBarMobileProvider>
-      <BoardContent />
+      <CalendarContent />
       <ActionBarMobile />
     </ActionBarMobileProvider>
   );
