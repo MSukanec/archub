@@ -115,6 +115,7 @@ function Router() {
         <Route path="/organization/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
         <Route path="/organization/members" component={Members} />
+        <Route path="/organization/capital" component={Capital} />
         
         <Route path="/organization" component={Members} />
 
@@ -164,8 +165,6 @@ function Router() {
         <Route path="/finances/dashboard" component={FinancesDashboard} />
         <Route path="/finances/movements" component={Movements} />
         <Route path="/finances/analysis" component={FinancesAnalysis} />
-
-        <Route path="/organization/capital" component={Capital} />
         
         {/* Duplicate General Routes for compatibility */}
         <Route path="/general/info" component={ProjectInfo} />
