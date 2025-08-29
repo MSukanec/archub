@@ -17,7 +17,6 @@ interface SidebarButtonProps {
   variant?: 'main' | 'secondary';
   isHeaderButton?: boolean;
   projectColor?: string;
-  isSectionTitleButton?: boolean;
 }
 
 export default function SidebarButton({ 
@@ -33,8 +32,7 @@ export default function SidebarButton({
   isChild = false,
   variant = 'main',
   isHeaderButton = false,
-  projectColor,
-  isSectionTitleButton = false
+  projectColor
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -132,8 +130,8 @@ export default function SidebarButton({
           "ml-10" // Más margen para separar del icono
         )}>
           <span className={cn(
-            "whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isSectionTitleButton ? "text-sm font-bold" : "font-medium" // Título de sección mantiene texto pequeño y negrita, resto usa font-medium
+            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
           )}>
             {label}
           </span>
