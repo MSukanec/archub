@@ -378,12 +378,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
         ]
-      }
+      },
+      'divider',
+      { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+      { icon: Images, label: 'Galería', href: '/project/gallery' },
+      { icon: Layout, label: 'Tablero', href: '/project/board' }
     ],
     library: [
-      { icon: FileText, label: 'Documentación', href: '/library/documentation' },
-      { icon: Images, label: 'Galería', href: '/library/gallery' },
-      { icon: Layout, label: 'Tablero', href: '/library/board' },
       { icon: CheckSquare, label: 'Análisis de Tareas', href: '/library/analysis-tasks' },
       { icon: Package2, label: 'Análisis de Materiales', href: '/library/analysis-materials' },
       { icon: Users, label: 'Análisis de Mano de Obra', href: '/library/analysis-labor' },

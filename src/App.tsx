@@ -45,10 +45,10 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
-import Documentation from "@/pages/professional/organization/library/Documentation";
-import Gallery from "@/pages/professional/organization/library/Gallery";
+import Documentation from "@/pages/professional/project/Documentation";
+import Gallery from "@/pages/professional/project/Gallery";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
-import Board from "@/pages/professional/organization/library/Board";
+import Board from "@/pages/professional/project/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
@@ -118,7 +118,7 @@ function Router() {
         
         <Route path="/organization" component={Members} />
 
-        <Route path="/library/board" component={Board} />
+        <Route path="/project/board" component={Board} />
 
         <Route path="/organization/:organizationId" component={Members} />
 
@@ -131,8 +131,8 @@ function Router() {
 
 
         {/* Resources Routes */}
-        <Route path="/library/documentation" component={Documentation} />
-        <Route path="/library/gallery" component={Gallery} />
+        <Route path="/project/documentation" component={Documentation} />
+        <Route path="/project/gallery" component={Gallery} />
 
         {/* Design Routes */}
         <Route path="/design/dashboard" component={DesignDashboard} />

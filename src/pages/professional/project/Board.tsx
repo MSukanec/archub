@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { ActionBarMobileProvider, useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
@@ -21,7 +22,12 @@ import { ActionBarMobile } from '@/components/layout/mobile/ActionBarMobile';
 import { Card } from '@/components/ui/card';
 
 function BoardContent() {
+  const { setSidebarContext } = useNavigationStore();
 
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('project');
+  }, [setSidebarContext]);
 
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useActionBarMobile();

@@ -14,9 +14,16 @@ import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { FileText, FolderOpen, Clock, Upload, Plus, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function Documentation() {
+  const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('project');
+  }, [setSidebarContext]);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   

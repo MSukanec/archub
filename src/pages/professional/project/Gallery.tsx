@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Images, Plus } from 'lucide-react';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 // Gallery file interface - compatible with Gallery component
 interface GalleryFile {
@@ -27,7 +28,13 @@ interface GalleryFile {
 }
 
 export default function Gallery() {
+  const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
+
+  // Set sidebar context on mount
+  React.useEffect(() => {
+    setSidebarContext('project');
+  }, [setSidebarContext]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();

@@ -425,7 +425,11 @@ export function Sidebar() {
           { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
           { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true }
         ]
-      }
+      },
+      'divider',
+      { icon: FileText, label: 'Documentación', href: '/project/documentation' },
+      { icon: Images, label: 'Galería', href: '/project/gallery' },
+      { icon: Layout, label: 'Tablero', href: '/project/board' }
     ],
     library: [
       { icon: FileText, label: 'Documentación', href: '/library/documentation' },
