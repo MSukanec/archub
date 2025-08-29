@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
-import { useProjectContext } from '@/stores/projectContext'
+import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
 import { supabase } from '@/lib/supabase'
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { Label } from '@/components/ui/label'
@@ -14,10 +14,10 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 export default function ProjectInfoBasicData() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { activeProject } = useProjectContext()
-  const activeProjectId = activeProject?.id
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
+  const activeProjectId = userOrgPrefs?.last_project_id
 
   // Form states
   const [projectName, setProjectName] = useState('')
