@@ -751,80 +751,46 @@ function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
     updateProjectMutation.mutate(projectId);
   };
   
-  if (isExpanded) {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex w-full items-center gap-2 px-3 py-2 text-left rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] transition-all duration-150">
-            <Folder className="w-4 h-4" />
-            <span className="flex-1 truncate text-sm">{displayName}</span>
-            <ChevronDown className="w-3 h-3" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          {projects.length > 0 ? (
-            projects.map((project: any) => (
-              <DropdownMenuItem
-                key={project.id}
-                onClick={() => handleProjectSelect(project.id)}
-                className={cn(
-                  "flex items-center justify-between",
-                  selectedProjectId === project.id && "bg-[var(--accent)] text-white"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  <span className="truncate">{project.name}</span>
-                </div>
-                {selectedProjectId === project.id && (
-                  <div className="w-2 h-2 rounded-full ml-auto bg-white" />
-                )}
-              </DropdownMenuItem>
-            ))
-          ) : (
-            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              No hay proyectos disponibles
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  } else {
-    // Versión colapsada - solo icono
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)] transition-all duration-150">
-            <Folder className="w-4 h-4" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          {projects.length > 0 ? (
-            projects.map((project: any) => (
-              <DropdownMenuItem
-                key={project.id}
-                onClick={() => handleProjectSelect(project.id)}
-                className={cn(
-                  "flex items-center justify-between",
-                  selectedProjectId === project.id && "bg-[var(--accent)] text-white"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <Folder className="w-4 h-4" />
-                  <span className="truncate">{project.name}</span>
-                </div>
-                {selectedProjectId === project.id && (
-                  <div className="w-2 h-2 rounded-full ml-auto bg-white" />
-                )}
-              </DropdownMenuItem>
-            ))
-          ) : (
-            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              No hay proyectos disponibles
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div>
+          <SidebarButton
+            icon={<Folder className="w-[18px] h-[18px]" />}
+            label={isExpanded ? displayName : ""}
+            isActive={false}
+            isExpanded={isExpanded}
+            variant="main"
+            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
+        {projects.length > 0 ? (
+          projects.map((project: any) => (
+            <DropdownMenuItem
+              key={project.id}
+              onClick={() => handleProjectSelect(project.id)}
+              className={cn(
+                "flex items-center justify-between",
+                selectedProjectId === project.id && "bg-[var(--accent)] text-white"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Folder className="w-4 h-4" />
+                <span className="truncate">{project.name}</span>
+              </div>
+              {selectedProjectId === project.id && (
+                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
+              )}
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+            No hay proyectos disponibles
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
