@@ -372,8 +372,8 @@ export default function Projects() {
                   ))}
                 </div>
               ) : (
-                /* Desktop: Lista con ProjectItem de ancho completo */
-                <div className="space-y-4">
+                /* Desktop: Grid de 3 columnas con ProjectItem, activo primero */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sortedProjects.map((project) => (
                     <ProjectItem
                       key={project.id}

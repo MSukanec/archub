@@ -84,73 +84,100 @@ export default function ProjectItem({
   return (
     <div
       className={`
-        relative overflow-hidden rounded-lg cursor-pointer
+        bg-card rounded-xl shadow-sm border cursor-pointer
         transition-all duration-200 ease-in-out
-        hover:shadow-lg hover:scale-[1.02]
+        hover:shadow-md hover:-translate-y-1
         ${isActive ? 'ring-2 ring-[var(--accent)] ring-offset-2' : ''}
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${className || ''}
       `}
       onClick={onClick}
-      style={{ height: '200px' }} // 2.5x más alto que una row normal (~80px)
     >
-      {/* Imagen de fondo del proyecto */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-gradient-to-br from-muted/20 to-muted/40"
-        style={{
-          backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-          backgroundColor: imageUrl ? 'transparent' : 'var(--muted)'
-        }}
-      >
-        {/* Overlay para mejorar legibilidad del texto */}
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
+      {/* Sección superior: Imagen de fondo */}
+      <div className="relative h-48 rounded-t-xl overflow-hidden">
+        {/* Imagen de fondo del proyecto */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? 'transparent' : 'var(--muted)'
+          }}
+        />
+        
+        {/* Overlay para mejorar legibilidad */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10" />
 
-      {/* Contenido superpuesto */}
-      <div className="relative z-10 p-4 h-full flex flex-col justify-between">
-        {/* Header con avatar y badge de status */}
-        <div className="flex items-start justify-between">
-          {/* Avatar con iniciales del proyecto */}
-          <Avatar className="h-12 w-12 shadow-sm">
-            <AvatarFallback 
-              className="text-white font-semibold text-sm"
-              style={{ backgroundColor: projectColor }}
+        {/* Contenido sobre la imagen */}
+        <div className="relative z-10 p-4 h-full flex flex-col justify-between">
+          {/* Header con avatar y badge de status */}
+          <div className="flex items-start justify-between">
+            {/* Avatar con iniciales del proyecto */}
+            <Avatar className="h-10 w-10 shadow-sm">
+              <AvatarFallback 
+                className="text-white font-semibold text-sm"
+                style={{ backgroundColor: projectColor }}
+              >
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Badge de status */}
+            <Badge 
+              variant="secondary" 
+              className="bg-white/90 text-gray-800 shadow-sm border-0 text-xs backdrop-blur-sm"
             >
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+              {statusText}
+            </Badge>
+          </div>
 
-          {/* Badge de status */}
-          <Badge 
-            variant="secondary" 
-            className={`${statusColorClass} shadow-sm border text-xs`}
-          >
-            {statusText}
-          </Badge>
-        </div>
-
-        {/* Footer con nombre del proyecto */}
-        <div className="space-y-2">
-          <h3 className="text-white font-semibold text-lg leading-tight drop-shadow-sm">
-            {project.name}
-          </h3>
-          
-          {/* Información adicional si existe */}
-          {project.project_data?.client_name && (
-            <p className="text-white/80 text-sm truncate drop-shadow-sm">
-              Cliente: {project.project_data.client_name}
-            </p>
+          {/* Indicador de proyecto activo */}
+          {isActive && (
+            <div className="self-start">
+              <Badge 
+                className="bg-[var(--accent)] text-white border-0 text-xs font-medium"
+              >
+                Activo
+              </Badge>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Indicador de proyecto activo */}
-      {isActive && (
-        <div 
-          className="absolute top-2 left-2 w-3 h-3 rounded-full shadow-sm"
-          style={{ backgroundColor: projectColor }}
-        />
-      )}
+      {/* Sección inferior: Datos del proyecto */}
+      <div className="p-4 space-y-3">
+        {/* Nombre del proyecto */}
+        <div>
+          <h3 className="font-semibold text-lg text-foreground leading-tight">
+            {project.name}
+          </h3>
+          
+          {/* Descripción si existe */}
+          {project.description && (
+            <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+              {project.description}
+            </p>
+          )}
+        </div>
+
+        {/* Información adicional */}
+        {project.project_data?.client_name && (
+          <div className="flex items-center text-sm text-muted-foreground">
+            <span className="font-medium">Cliente:</span>
+            <span className="ml-1 truncate">{project.project_data.client_name}</span>
+          </div>
+        )}
+
+        {/* Ubicación si existe */}
+        {project.project_data?.city && (
+          <div className="flex items-center text-sm text-muted-foreground">
+            <span className="font-medium">Ubicación:</span>
+            <span className="ml-1 truncate">
+              {project.project_data.city}
+              {project.project_data.state && `, ${project.project_data.state}`}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
