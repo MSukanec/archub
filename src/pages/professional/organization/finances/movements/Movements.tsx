@@ -191,7 +191,7 @@ export default function Movements() {
 
   const { data: rawMovements = [], isLoading } = useMovements(
     organizationId,
-    projectId || undefined,
+    undefined, // No filtrar por proyecto - mostrar todos los movimientos de la organización
   );
 
   // Safe movements with defensive checks
@@ -214,8 +214,8 @@ export default function Movements() {
   // Get projects map for the project badges (only when in GENERAL mode)
   const { data: projectsMap = {} } = useProjectsMap(organizationId);
   
-  // Use isGlobalView from store instead of deriving from projectId  
-  const isGeneralMode = isGlobalView;
+  // En página organizacional siempre mostrar columna proyecto
+  const isGeneralMode = true;
 
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();
@@ -1294,9 +1294,9 @@ export default function Movements() {
       ) : (
         <>
           {/* Movement KPIs - Solo mostrar cuando hay datos */}
+          {/* Solo mostrar balance de organización, no del proyecto */}
           <MovementKPICardsWithWallets 
-            organizationId={organizationId} 
-            projectId={projectId || undefined} 
+            organizationId={organizationId}
           />
           <Table
             columns={tableColumns}
