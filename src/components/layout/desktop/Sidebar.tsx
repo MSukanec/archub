@@ -566,6 +566,12 @@ export function Sidebar() {
                 return null;
               }
               
+              // Determinar si este botón necesita chevron right
+              const needsChevronRight = (
+                ('defaultRoute' in item && 'id' in item) || // Botones de sección principal (organización, proyecto, etc.)
+                (hasSubmenu) // Botones con submenu (diseño, construcción, finanzas)
+              );
+
               const buttonElement = (
                 <SidebarButton
                   icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -589,6 +595,7 @@ export function Sidebar() {
                   }}
                   href={'href' in item ? item.href : undefined}
                   variant="main"
+                  rightIcon={needsChevronRight && isExpanded ? <ChevronRight className="w-3 h-3" /> : undefined}
                 />
               );
 

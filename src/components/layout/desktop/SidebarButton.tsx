@@ -131,7 +131,7 @@ export default function SidebarButton({
             {label}
           </span>
           {rightIcon && (
-            <div className="flex-shrink-0 ml-2">
+            <div className="flex-shrink-0 ml-2 mr-2">
               {rightIcon}
             </div>
           )}
