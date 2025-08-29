@@ -483,7 +483,8 @@ export function Sidebar() {
     >
 
       {/* Header Button Section - Misma altura que header original */}
-      <div className="h-9 flex items-center p-1 w-full">
+      <div className="h-9 flex items-center">
+        <div className="w-full p-1">
         {sidebarLevel === 'main' ? (
           <SidebarButton
             icon={null} // Sin icono para ARCHUB
@@ -510,6 +511,7 @@ export function Sidebar() {
             isHeaderButton={true}
           />
         )}
+        </div>
       </div>
 
       {/* Navigation Items */}
