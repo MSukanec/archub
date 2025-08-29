@@ -537,6 +537,7 @@ export function Sidebar() {
         label: 'Finanzas',
         defaultRoute: '/organization/finances/capital',
         submenu: [
+          { icon: TrendingUp, label: 'Movimientos', href: '/organization/finances/movements' },
           { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' }
         ]
       },
