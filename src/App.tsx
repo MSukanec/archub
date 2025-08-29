@@ -26,7 +26,7 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 import Finances from "@/pages/professional/project/general/finances/Finances";
-import FinancesCapitalMovements from "@/pages/professional/organization/finances/capital";
+import FinancesCapitalMovements from "@/pages/professional/organization/finances/capital/Capital";
 import OrganizationMovements from "@/pages/professional/organization/finances/movements/Movements";
 import { Clients } from "@/pages/professional/project/general/clients/Clients";
 import ProjectInfo from "@/pages/professional/project/general/info/ProjectInfo";
