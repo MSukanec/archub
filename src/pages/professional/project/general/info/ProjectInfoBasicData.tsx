@@ -168,7 +168,6 @@ export default function ProjectInfoBasicData() {
   useEffect(() => {
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
-      setProjectImageUrl(projectInfo.image_url || null);
     }
   }, [projectInfo]);
 
@@ -184,6 +183,7 @@ export default function ProjectInfoBasicData() {
       setState(projectData.state || '');
       setCountry(projectData.country || '');
       setZipCode(projectData.zip_code || '');
+      setProjectImageUrl(projectData.project_image_url || null);
     }
   }, [projectData]);
 
