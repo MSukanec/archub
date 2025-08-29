@@ -143,12 +143,12 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
       <DropdownMenuContent 
         side="bottom"
         align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" 
         onCloseAutoFocus={(e) => e.preventDefault()}
-        sideOffset={8}
+        sideOffset={0}
         alignOffset={0}
-        avoidCollisions={true}
-        sticky="always"
+        avoidCollisions={false}
+        sticky="partial"
       >
         {projects.length > 0 ? (
           projects.map((project: any) => (
@@ -251,12 +251,12 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
       <DropdownMenuContent 
         side="bottom"
         align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" 
         onCloseAutoFocus={(e) => e.preventDefault()}
-        sideOffset={8}
+        sideOffset={0}
         alignOffset={0}
-        avoidCollisions={true}
-        sticky="always"
+        avoidCollisions={false}
+        sticky="partial"
       >
         {organizations.length > 0 ? (
           organizations.map((organization: any) => (
