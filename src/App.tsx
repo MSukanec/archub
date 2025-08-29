@@ -72,10 +72,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Library Pages
-import Tasks from "@/pages/professional/organization/library/tasks/Tasks";
-import Materials from "@/pages/professional/organization/library/materials/Materials";
-import Labor from "@/pages/professional/organization/library/labor/Labor";
-import Indirects from "@/pages/professional/organization/library/indirects/Indirects";
+import Tasks from "@/pages/professional/library/tasks/Tasks";
+import Materials from "@/pages/professional/library/materials/Materials";
+import Labor from "@/pages/professional/library/labor/Labor";
+import Indirects from "@/pages/professional/library/indirects/Indirects";
 
 
 
