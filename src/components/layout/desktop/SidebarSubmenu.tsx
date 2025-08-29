@@ -107,9 +107,6 @@ export function SidebarSubmenu() {
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/organization' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { type: 'accordion' as const, label: 'FINANZAS', items: [
-        { icon: TrendingUp, label: 'Capital', href: '/organization/finances/capital' },
-      ]},
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -186,16 +183,6 @@ export function SidebarSubmenu() {
   };
 
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
-
-  // DEBUG: Log para verificar
-  console.log('🔍 SidebarSubmenu DEBUG:', {
-    location,
-    currentSection,
-    currentSubmenu: currentSubmenu.map(item => ({ 
-      type: (item as any).type || 'button', 
-      label: item.label 
-    }))
-  });
 
   // Filter menu items based on project requirement
   // POR AHORA: En "TODOS LOS PROYECTOS" no quiero que desaparezca NINGÚN botón del sidebar

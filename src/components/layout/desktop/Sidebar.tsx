@@ -530,6 +530,13 @@ export function Sidebar() {
     ],
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { 
+        type: 'accordion',
+        label: 'Finanzas',
+        submenu: [
+          { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' }
+        ]
+      },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
