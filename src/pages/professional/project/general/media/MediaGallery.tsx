@@ -1,5 +1,4 @@
 import React from 'react';
-import { Layout } from '@/components/layout/desktop/Layout';
 import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Images, Plus } from 'lucide-react';
-import { useNavigationStore } from '@/stores/navigationStore';
 
 // Gallery file interface - compatible with Gallery component
 interface GalleryFile {
@@ -27,14 +25,8 @@ interface GalleryFile {
   site_log_id?: string | null;
 }
 
-export default function Gallery() {
-  const { setSidebarContext } = useNavigationStore();
+export function MediaGallery() {
   const { openModal } = useGlobalModalStore();
-
-  // Set sidebar context on mount
-  React.useEffect(() => {
-    setSidebarContext('project');
-  }, [setSidebarContext]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
@@ -196,16 +188,6 @@ export default function Gallery() {
     },
   });
 
-  const headerProps = {
-    icon: Images,
-    title: "Galería",
-    actionButton: {
-      label: 'Subir Archivo',
-      icon: Plus,
-      onClick: () => openModal('gallery', {})
-    }
-  };
-
   // Gallery handlers
   const handleEdit = (file: GalleryFile) => {
     openModal('gallery', { fileId: file.id });
@@ -226,46 +208,54 @@ export default function Gallery() {
     deleteFileMutation.mutate(file.id);
   };
 
-  return (
-    <Layout headerProps={headerProps} wide={true}>
-      {galleryLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Cargando galería...</p>
-          </div>
+  if (galleryLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando galería...</p>
         </div>
-      ) : galleryError ? (
-        <EmptyState
-          icon={<Images />}
-          title="Error al cargar la galería"
-          description="Hubo un problema al cargar los archivos de la galería"
-          action={
-            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['galleryFiles'] })}>
-              Reintentar
-            </Button>
-          }
-        />
-      ) : galleryFiles.length === 0 ? (
-        <EmptyState
-          icon={<Images />}
-          title="No hay archivos en la galería"
-          description="Sube imágenes y videos para comenzar a construir tu galería de proyecto"
-          action={
-            <Button onClick={() => openModal('gallery', {})}>
-              <Plus className="w-4 h-4 mr-2" />
-              Subir Archivo
-            </Button>
-          }
-        />
-      ) : (
-        <GalleryComponent
-          files={galleryFiles}
-          onEdit={handleEdit}
-          onDownload={handleDownload}
-          onDelete={handleDelete}
-        />
-      )}
-    </Layout>
+      </div>
+    );
+  }
+
+  if (galleryError) {
+    return (
+      <EmptyState
+        icon={<Images />}
+        title="Error al cargar la galería"
+        description="Hubo un problema al cargar los archivos de la galería"
+        action={
+          <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['galleryFiles'] })}>
+            Reintentar
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (galleryFiles.length === 0) {
+    return (
+      <EmptyState
+        icon={<Images />}
+        title="No hay archivos en la galería"
+        description="Sube imágenes y videos para comenzar a construir tu galería de proyecto"
+        action={
+          <Button onClick={() => openModal('gallery', {})}>
+            <Plus className="w-4 h-4 mr-2" />
+            Subir Archivo
+          </Button>
+        }
+      />
+    );
+  }
+
+  return (
+    <GalleryComponent
+      files={galleryFiles}
+      onEdit={handleEdit}
+      onDownload={handleDownload}
+      onDelete={handleDelete}
+    />
   );
 }

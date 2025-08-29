@@ -554,7 +554,8 @@ export function Sidebar() {
         defaultRoute: '/general/info',
         submenu: [
           { icon: Info, label: 'Información', href: '/general/info' },
-          { icon: Users, label: 'Clientes', href: '/general/clients' }
+          { icon: Users, label: 'Clientes', href: '/general/clients' },
+          { icon: FileText, label: 'Media', href: '/general/media' }
         ]
       },
       {
@@ -597,10 +598,8 @@ export function Sidebar() {
         id: 'recursos',
         icon: FolderOpen,
         label: 'Recursos',
-        defaultRoute: '/project/documentation',
+        defaultRoute: '/project/board',
         submenu: [
-          { icon: FileText, label: 'Documentación', href: '/project/documentation' },
-          { icon: Images, label: 'Galería', href: '/project/gallery' },
           { icon: Layout, label: 'Tablero', href: '/project/board' }
         ]
       },

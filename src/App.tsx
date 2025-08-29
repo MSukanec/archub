@@ -45,8 +45,7 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
-import Documentation from "@/pages/professional/project/resources/Documentation";
-import Gallery from "@/pages/professional/project/resources/Gallery";
+import Media from "@/pages/professional/project/general/media/Media";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
 import Board from "@/pages/professional/project/resources/Board";
 
@@ -128,12 +127,10 @@ function Router() {
         {/* General Routes */}
         <Route path="/general/info" component={ProjectInfo} />
         <Route path="/general/clients" component={Clients} />
+        <Route path="/general/media" component={Media} />
         
 
 
-        {/* Resources Routes */}
-        <Route path="/project/documentation" component={Documentation} />
-        <Route path="/project/gallery" component={Gallery} />
 
         {/* Design Routes */}
         <Route path="/design/dashboard" component={DesignDashboard} />
