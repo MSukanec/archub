@@ -384,18 +384,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       { icon: FileText, label: 'Documentación', href: '/library/documentation' },
       { icon: Images, label: 'Galería', href: '/library/gallery' },
       { icon: Layout, label: 'Tablero', href: '/library/board' },
-      { 
-        id: 'analysis',
-        icon: BarChart3, 
-        label: 'Análisis', 
-        defaultRoute: '/library/analysis',
-        submenu: [
-          { icon: CheckSquare, label: 'Tareas', href: '/library/analysis/tasks' },
-          { icon: Package2, label: 'Materiales', href: '/library/analysis/materials' },
-          { icon: Users, label: 'Mano de obra', href: '/library/analysis/labor' },
-          { icon: TrendingUp, label: 'Gastos generales', href: '/library/analysis/overheads' }
-        ]
-      }
+      { icon: CheckSquare, label: 'Análisis de Tareas', href: '/library/analysis-tasks' },
+      { icon: Package2, label: 'Análisis de Materiales', href: '/library/analysis-materials' },
+      { icon: Users, label: 'Análisis de Mano de Obra', href: '/library/analysis-labor' },
+      { icon: TrendingUp, label: 'Análisis de Gastos Generales', href: '/library/analysis-overheads' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }

@@ -38,7 +38,7 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import Analysis from "@/pages/professional/organization/library/analysis/Analysis";
+import Analysis from "@/pages/professional/organization/library/Analysis";
 import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
 
 
@@ -73,10 +73,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
-import AnalysisTasks from "@/pages/professional/organization/library/analysis/AnalysisTasks";
-import AnalysisLabor from "@/pages/professional/organization/library/analysis/AnalysisLabor";
-import AnalysisMaterials from "@/pages/professional/organization/library/analysis/AnalysisMaterials";
-import AnalysisOverheads from "@/pages/professional/organization/library/analysis/AnalysisOverheads";
+import AnalysisTasks from "@/pages/professional/organization/library/AnalysisTasks";
+import AnalysisLabor from "@/pages/professional/organization/library/AnalysisLabor";
+import AnalysisMaterials from "@/pages/professional/organization/library/AnalysisMaterials";
+import AnalysisOverheads from "@/pages/professional/organization/library/AnalysisOverheads";
 
 
 
@@ -152,10 +152,10 @@ function Router() {
         <Route path="/construction/budgets" component={ConstructionBudgets} />
         <Route path="/construction/materials" component={ConstructionMaterials} />
         <Route path="/library/analysis" component={Analysis} />
-        <Route path="/library/analysis/tasks" component={AnalysisTasks} />
-        <Route path="/library/analysis/materials" component={AnalysisMaterials} />
-        <Route path="/library/analysis/labor" component={AnalysisLabor} />
-        <Route path="/library/analysis/overheads" component={AnalysisOverheads} />
+        <Route path="/library/analysis-tasks" component={AnalysisTasks} />
+        <Route path="/library/analysis-materials" component={AnalysisMaterials} />
+        <Route path="/library/analysis-labor" component={AnalysisLabor} />
+        <Route path="/library/analysis-overheads" component={AnalysisOverheads} />
         <Route path="/resources/analysis" component={Analysis} />
         <Route path="/resources/analysis/:tab?" component={Analysis} />
         

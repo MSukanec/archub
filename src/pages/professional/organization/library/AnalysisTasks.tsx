@@ -11,8 +11,16 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { AnalysisTaskRow } from '@/components/ui/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
+import { Layout } from '@/components/layout/desktop/Layout'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function AnalysisTasks() {
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('library')
+  }, [setSidebarContext])
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -208,16 +216,31 @@ export default function AnalysisTasks() {
 
   if (tasks.length === 0) {
     return (
-      <EmptyState
-        icon={<TableIcon className="h-16 w-16" />}
-        title="No hay tareas para analizar"
-        description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
-      />
+      <Layout
+        headerProps={{
+          title: "Análisis de Tareas",
+          icon: TableIcon,
+          description: "Análisis de costos para tareas parametrizadas",
+        }}
+      >
+        <EmptyState
+          icon={<TableIcon className="h-16 w-16" />}
+          title="No hay tareas para analizar"
+          description="Las tareas parametrizadas aparecerán aquí para análisis de costos."
+        />
+      </Layout>
     )
   }
 
   return (
-    <Table
+    <Layout
+      headerProps={{
+        title: "Análisis de Tareas",
+        icon: TableIcon,
+        description: "Análisis de costos para tareas parametrizadas",
+      }}
+    >
+      <Table
       columns={columns}
       data={filteredTasks}
       isLoading={tasksLoading}
@@ -251,5 +274,6 @@ export default function AnalysisTasks() {
         />
       }
     />
+    </Layout>
   )
 }

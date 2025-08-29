@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/hooks/use-products'
 import MaterialRow from '@/components/ui/data-row/rows/MaterialRow'
@@ -10,8 +10,16 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox'
+import { Layout } from '@/components/layout/desktop/Layout'
+import { useNavigationStore } from '@/stores/navigationStore'
 
 export default function AnalysisMaterials() {
+  const { setSidebarContext } = useNavigationStore()
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('library')
+  }, [setSidebarContext])
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
   const [groupingType, setGroupingType] = useState('category')  // Por defecto agrupar por categoría
@@ -298,7 +306,14 @@ export default function AnalysisMaterials() {
   }, [groupingType]);
 
   return (
-    <div className="space-y-6">
+    <Layout
+      headerProps={{
+        title: "Análisis de Materiales",
+        icon: Package,
+        description: "Análisis de costos para materiales de construcción",
+      }}
+    >
+      <div className="space-y-6">
       {/* Products Table */}
       <div className="w-full">
         {productsLoading ? (
@@ -376,6 +391,7 @@ export default function AnalysisMaterials() {
         currentIndex={currentIndex}
         onClose={closeLightbox}
       />
-    </div>
+      </div>
+    </Layout>
   )
 }
