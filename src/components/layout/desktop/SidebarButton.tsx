@@ -82,8 +82,8 @@ export default function SidebarButton({
           : `var(--main-sidebar-button-fg)`,
         '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
-        // Extend active main buttons to overlap the border
-        ...(variant === 'main' && isActive && {
+        // Extend active main buttons to overlap the border, también para headers
+        ...(variant === 'main' && (isActive || isHeaderButton) && {
           width: 'calc(100% + 1px)',
           marginRight: '-1px',
           zIndex: 10,
