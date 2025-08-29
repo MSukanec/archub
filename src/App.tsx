@@ -25,9 +25,9 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 
-import FinancesDashboard from "@/pages/professional/project/finances/FinancesDashboard";
-import Movements from "@/pages/professional/project/general/movements/Movements";
-import FinancesAnalysis from "@/pages/professional/project/finances/FinancesAnalysis";
+import FinancesDashboard from "@/pages/professional/project/general/finances/FinancesDashboard";
+import Movements from "@/pages/professional/project/general/finances/Movements";
+import FinancesAnalysis from "@/pages/professional/project/general/finances/FinancesAnalysis";
 import FinancesCapitalMovements from "@/pages/professional/organization/finances/FinancesCapitalMovements";
 import { Clients } from "@/pages/professional/project/general/clients/Clients";
 import ProjectInfo from "@/pages/professional/project/general/info/ProjectInfo";
