@@ -143,7 +143,14 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
       <DropdownMenuContent 
         side="bottom"
         align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999
+        }} 
         onCloseAutoFocus={(e) => e.preventDefault()}
         sideOffset={0}
         alignOffset={0}
@@ -251,7 +258,14 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
       <DropdownMenuContent 
         side="bottom"
         align="center" 
-        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999
+        }} 
         onCloseAutoFocus={(e) => e.preventDefault()}
         sideOffset={0}
         alignOffset={0}
@@ -775,7 +789,8 @@ export function Sidebar() {
               
               // Determinar el tipo de chevron que necesita este botón
               const isAccordionExpanded = hasSubmenu && expandedAccordion === ('id' in item ? item.id : null);
-              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu); // Solo secciones principales que no son acordeón
+              const isDashboardButton = ('href' in item && item.href?.includes('/dashboard'));
+              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu && !isDashboardButton); // Solo secciones principales que no son acordeón ni dashboard
               const needsChevronRight = navigatesToOtherSection;
               const needsAccordionChevron = hasSubmenu;
               const buttonElement = (
