@@ -57,7 +57,8 @@ import {
   TrendingUp,
   ListTodo,
   TableIcon,
-  Library
+  Library,
+  Building2
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -529,8 +530,19 @@ export function Sidebar() {
               </div>
             )}
             
-            {/* Línea divisoria después del botón header (para niveles que no son proyecto) */}
-            {sidebarLevel !== 'main' && sidebarLevel !== 'project' && (
+            {/* Selector de Organizaciones (solo en nivel organization) */}
+            {sidebarLevel === 'organization' && (
+              <div>
+                <div className="mb-[2px]">
+                  <OrganizationSelectorSidebar isExpanded={isExpanded} />
+                </div>
+                {/* Línea divisoria después del selector */}
+                <div className="h-px bg-white/20 my-2"></div>
+              </div>
+            )}
+            
+            {/* Línea divisoria después del botón header (para niveles que no son proyecto ni organization) */}
+            {sidebarLevel !== 'main' && sidebarLevel !== 'project' && sidebarLevel !== 'organization' && (
               <div className="h-px bg-white/20 my-2"></div>
             )}
             
@@ -782,6 +794,103 @@ function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
         ) : (
           <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
             No hay proyectos disponibles
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// Componente selector de organizaciones para el sidebar
+function OrganizationSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
+  const { data: userData } = useCurrentUser();
+  const organizations = userData?.organizations || [];
+  const { setCurrentOrganization } = useProjectContext();
+  const queryClient = useQueryClient();
+  
+  // Encontrar organización actual
+  const currentOrganization = userData?.organization;
+  const displayName = currentOrganization?.name || "Sin organización";
+  
+  // Mutación para cambiar organización
+  const updateOrganizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      if (!userData?.user?.id) {
+        throw new Error('Usuario no disponible');
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({
+          last_organization_id: organizationId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userData.user.id);
+
+      if (error) throw error;
+      return organizationId;
+    },
+    onSuccess: (organizationId) => {
+      setCurrentOrganization(organizationId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Recargar la página para aplicar el cambio de organización completamente
+      window.location.reload();
+    }
+  });
+  
+  const handleOrganizationSelect = (organizationId: string) => {
+    if (currentOrganization?.id === organizationId) return;
+    updateOrganizationMutation.mutate(organizationId);
+  };
+  
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div>
+          <SidebarButton
+            icon={<Building2 className="w-[18px] h-[18px]" />}
+            label={isExpanded ? displayName : ""}
+            isActive={false}
+            isExpanded={isExpanded}
+            variant="main"
+            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="start" 
+        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          // Solo cerrar si hacen click fuera del sidebar completo
+          const sidebar = document.querySelector('aside');
+          if (sidebar && sidebar.contains(e.target as Node)) {
+            e.preventDefault();
+          }
+        }}
+      >
+        {organizations.length > 0 ? (
+          organizations.map((organization: any) => (
+            <DropdownMenuItem
+              key={organization.id}
+              onClick={() => handleOrganizationSelect(organization.id)}
+              className={cn(
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                currentOrganization?.id === organization.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                <span className="truncate">{organization.name}</span>
+              </div>
+              {currentOrganization?.id === organization.id && (
+                <div className="w-2 h-2 rounded-full ml-auto bg-white" />
+              )}
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
+            No hay organizaciones disponibles
           </div>
         )}
       </DropdownMenuContent>
