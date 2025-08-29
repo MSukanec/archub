@@ -19,7 +19,7 @@ import { motion } from 'framer-motion'
 import { useNavigationStore } from '@/stores/navigationStore'
 
 
-export default function FinancesDashboard() {
+export default function MovementsDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
