@@ -12,7 +12,6 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import ProjectHeroCard from '@/components/ui-custom/ProjectHeroCard'
 import ProjectRow from '@/components/ui/data-row/rows/ProjectRow'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
@@ -355,13 +354,6 @@ export default function Projects() {
         {/* Tab: Proyectos */}
         {activeTab === 'projects' && (
           <>
-            {/* ProjectHeroCard - Show for active project */}
-            {activeProjectId && (
-              <ProjectHeroCard 
-                project={sortedProjects.find(p => p.id === activeProjectId)}
-                organizationId={organizationId}
-              />
-            )}
 
             {/* Projects List */}
             {sortedProjects.length > 0 ? (
