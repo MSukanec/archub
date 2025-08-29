@@ -12,7 +12,7 @@ export default function Tasks() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('organization')
+    setSidebarContext('library')
   }, [setSidebarContext])
 
   // Header tabs configuration

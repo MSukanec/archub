@@ -435,7 +435,12 @@ export function Sidebar() {
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
       { icon: Package2, label: 'Materiales', href: '/library/materials' },
       { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
-      { icon: TrendingUp, label: 'Gastos Generales', href: '/library/overheads' }
+      { icon: TrendingUp, label: 'Gastos Generales', href: '/library/overheads' },
+      { type: 'divider' },
+      { icon: CheckSquare, label: 'Análisis Tareas', href: '/library/analysis-tasks' },
+      { icon: Package2, label: 'Análisis Materiales', href: '/library/analysis-materials' },
+      { icon: Users, label: 'Análisis Mano de Obra', href: '/library/analysis-labor' },
+      { icon: TrendingUp, label: 'Análisis Indirectos', href: '/library/analysis-indirects' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
