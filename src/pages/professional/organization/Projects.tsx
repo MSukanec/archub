@@ -13,6 +13,7 @@ import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import ProjectRow from '@/components/ui/data-row/rows/ProjectRow'
+import ProjectItem from '@/components/ui-custom/general/ProjectItem'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 
@@ -357,17 +358,33 @@ export default function Projects() {
 
             {/* Projects List */}
             {sortedProjects.length > 0 ? (
-              <div className="space-y-2">
-                {sortedProjects.map((project) => (
-                  <ProjectRow
-                    key={project.id}
-                    project={project}
-                    onClick={() => handleSelectProject(project.id)}
-                    isActive={project.id === userOrgPrefs?.last_project_id}
-                    density="normal"
-                  />
-                ))}
-              </div>
+              isMobile ? (
+                /* Mobile: Lista vertical con ProjectRow */
+                <div className="space-y-2">
+                  {sortedProjects.map((project) => (
+                    <ProjectRow
+                      key={project.id}
+                      project={project}
+                      onClick={() => handleSelectProject(project.id)}
+                      isActive={project.id === userOrgPrefs?.last_project_id}
+                      density="normal"
+                    />
+                  ))}
+                </div>
+              ) : (
+                /* Desktop: Grid con ProjectItem */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {sortedProjects.map((project) => (
+                    <ProjectItem
+                      key={project.id}
+                      project={project}
+                      onClick={() => handleSelectProject(project.id)}
+                      isActive={project.id === userOrgPrefs?.last_project_id}
+                      projectColor={`hsl(${(project.id.charCodeAt(0) * 137.5) % 360}, 70%, 50%)`}
+                    />
+                  ))}
+                </div>
+              )
             ) : (
               <EmptyState
                 icon={<Folder className="w-12 h-12" />}
