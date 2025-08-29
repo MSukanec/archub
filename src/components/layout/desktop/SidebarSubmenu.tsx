@@ -70,7 +70,7 @@ export function SidebarSubmenu() {
   const getDefaultSection = () => {
     if (location.startsWith('/profile')) return 'perfil';
 
-    if (location.startsWith('/organization')) return 'organizacion';
+    if (location.startsWith('/organization') || location === '/dashboard') return 'organizacion';
 
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construccion';
@@ -186,6 +186,16 @@ export function SidebarSubmenu() {
   };
 
   const currentSubmenu = submenuContent[currentSection as keyof typeof submenuContent] || [];
+
+  // DEBUG: Log para verificar
+  console.log('🔍 SidebarSubmenu DEBUG:', {
+    location,
+    currentSection,
+    currentSubmenu: currentSubmenu.map(item => ({ 
+      type: (item as any).type || 'button', 
+      label: item.label 
+    }))
+  });
 
   // Filter menu items based on project requirement
   // POR AHORA: En "TODOS LOS PROYECTOS" no quiero que desaparezca NINGÚN botón del sidebar
