@@ -481,51 +481,32 @@ export function Sidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Header Section - Dinámico según el nivel */}
-      <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
-        {isExpanded ? (
-          <div className="ml-3 flex items-center gap-3 pr-3">
-            {/* Botón Volver - solo flecha, en todas las secciones menos main */}
-            {sidebarLevel !== 'main' && (
-              <button
-                onClick={goToMainLevel}
-                className="flex items-center justify-center w-6 h-6 text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150 flex-shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            )}
-            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
-              {sidebarLevel === 'main' ? 'ARCHUB' : 
-               sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
-               sidebarLevel === 'library' ? 'BIBLIOTECA' :
-               sidebarLevel === 'project' ? 'PROYECTO' :
-               sidebarLevel === 'provider' ? 'PROVEEDOR' :
-               sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
-            </div>
-          </div>
-        ) : (
-          <div className="w-full flex items-center justify-center relative">
-            {/* Botón Volver colapsado - solo flecha, en todas las secciones menos main */}
-            {sidebarLevel !== 'main' ? (
-              <button
-                onClick={goToMainLevel}
-                className="flex items-center justify-center w-8 h-8 text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            ) : (
-              <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
-                A
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* Navigation Items */}
       <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+            
+            {/* Botón Header/Volver - solo en niveles secundarios */}
+            {sidebarLevel !== 'main' && (
+              <div className="mb-[2px]">
+                <SidebarButton
+                  icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+                  label={
+                    sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+                    sidebarLevel === 'library' ? 'BIBLIOTECA' :
+                    sidebarLevel === 'project' ? 'PROYECTO' :
+                    sidebarLevel === 'provider' ? 'PROVEEDOR' :
+                    sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'SECCIÓN'
+                  }
+                  isActive={false}
+                  isExpanded={isExpanded}
+                  onClick={goToMainLevel}
+                  variant="main"
+                  isHeaderButton={true}
+                />
+              </div>
+            )}
             {/* Selector de Proyectos (solo en nivel proyecto) */}
             {sidebarLevel === 'project' && (
               <div>
@@ -537,22 +518,9 @@ export function Sidebar() {
               </div>
             )}
             
-            {/* Botón Volver (solo en niveles secundarios que NO son proyecto) */}
+            {/* Línea divisoria después del botón header (para niveles que no son proyecto) */}
             {sidebarLevel !== 'main' && sidebarLevel !== 'project' && (
-              <div>
-                <div className="mb-[2px]">
-                  <SidebarButton
-                    icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-                    label="Volver"
-                    isActive={false}
-                    isExpanded={isExpanded}
-                    onClick={goToMainLevel}
-                    variant="main"
-                  />
-                </div>
-                {/* Línea divisoria después del botón Volver */}
-                <div className="h-px bg-white/20 my-2"></div>
-              </div>
+              <div className="h-px bg-white/20 my-2"></div>
             )}
             
             {/* Renderizar contenido según el nivel actual */}

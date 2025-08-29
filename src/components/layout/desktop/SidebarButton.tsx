@@ -14,6 +14,7 @@ interface SidebarButtonProps {
   rightIcon?: React.ReactNode;
   isChild?: boolean;
   variant?: 'main' | 'secondary';
+  isHeaderButton?: boolean;
 }
 
 export default function SidebarButton({ 
@@ -27,7 +28,8 @@ export default function SidebarButton({
   userFullName,
   rightIcon,
   isChild = false,
-  variant = 'main'
+  variant = 'main',
+  isHeaderButton = false
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -121,7 +123,7 @@ export default function SidebarButton({
         )}>
           <span className={cn(
             "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            "font-normal" // Quitar negrita de todos los textos
+            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
           )}>
             {label}
           </span>
