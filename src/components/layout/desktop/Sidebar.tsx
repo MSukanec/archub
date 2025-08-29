@@ -475,7 +475,7 @@ export function Sidebar() {
   // Función para manejar acordeón en subniveles
   const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
     // Si es una sección con submenu, toggle acordeón
-    if (['construccion', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
+    if (['construccion', 'finanzas', 'diseno', 'analysis', 'finanzas-org'].includes(sectionId)) {
       setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     } else {
       // Si no tiene submenu, navegar directamente
@@ -532,8 +532,10 @@ export function Sidebar() {
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       {
+        id: 'finanzas-org',
         icon: DollarSign,
         label: 'Finanzas',
+        defaultRoute: '/organization/capital',
         submenu: [
           { icon: TrendingUp, label: 'Capital', href: '/organization/capital' }
         ]
