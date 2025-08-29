@@ -307,7 +307,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
     } else {
       // Para edición, usar datos del movimiento
       form.reset({
-        project_id: editingMovement?.project_id || defaultProject || '',
+        project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
         movement_date: parseMovementDate(editingMovement?.movement_date),
         created_by: editingMovement?.created_by || currentMember.id,
         type_id: editingMovement?.type_id || '',
@@ -326,7 +326,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
-      project_id: editingMovement?.project_id || defaultProject || '',
+      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
@@ -345,7 +345,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
-      project_id: editingMovement?.project_id || defaultProject || '',
+      project_id: editingMovement?.project_id ? editingMovement.project_id : (editingMovement && editingMovement.project_id === null ? 'organization' : defaultProject || 'organization'),
       movement_date: parseMovementDate(editingMovement?.movement_date),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
@@ -815,7 +815,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       // Preparar datos del movimiento según la estructura de la tabla
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id === 'organization' ? null : data.project_id,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1081,7 +1081,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         // Crear movimiento de egreso
         const egressMovementData = {
           organization_id: userData.organization.id,
-          project_id: userData.preferences?.last_project_id || null,
+          project_id: data.project_id === 'organization' ? null : data.project_id,
           movement_date: data.movement_date.getFullYear() + '-' + 
             String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1100,7 +1100,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         // Crear movimiento de ingreso
         const ingressMovementData = {
           organization_id: userData.organization.id,
-          project_id: userData.preferences?.last_project_id || null,
+          project_id: data.project_id === 'organization' ? null : data.project_id,
           movement_date: data.movement_date.getFullYear() + '-' + 
             String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1186,7 +1186,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       // Crear movimiento de egreso (salida)
       const egressMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id === 'organization' ? null : data.project_id,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1204,7 +1204,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
       // Crear movimiento de ingreso (entrada)
       const ingressMovementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id === 'organization' ? null : data.project_id,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1636,6 +1636,7 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
                   }
                 }}
                 placeholder="Seleccionar proyecto..."
+                showOrganizationOption={true}
               />
             </FormControl>
             <FormMessage />

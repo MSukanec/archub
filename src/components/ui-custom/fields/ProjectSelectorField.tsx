@@ -15,6 +15,7 @@ interface ProjectSelectorFieldProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  showOrganizationOption?: boolean;
 }
 
 // Function to get project initials
@@ -32,7 +33,8 @@ export default function ProjectSelectorField({
   value,
   onChange,
   placeholder = "Seleccionar proyecto",
-  className = ""
+  className = "",
+  showOrganizationOption = false
 }: ProjectSelectorFieldProps) {
   // Sort projects alphabetically by name
   const sortedProjects = React.useMemo(() => {
@@ -44,12 +46,27 @@ export default function ProjectSelectorField({
   }, [projects]);
 
   const selectedProject = sortedProjects.find(project => project.id === value);
+  const isOrganizationSelected = value === "organization";
 
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className={className}>
         <div className="flex items-center gap-2">
-          {selectedProject ? (
+          {isOrganizationSelected ? (
+            <>
+              <Avatar className="h-6 w-6">
+                <AvatarFallback 
+                  className="text-xs font-medium text-white"
+                  style={{ 
+                    backgroundColor: '#000000' 
+                  }}
+                >
+                  OR
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate">Organización</span>
+            </>
+          ) : selectedProject ? (
             <>
               <Avatar className="h-6 w-6">
                 <AvatarFallback 
@@ -72,6 +89,23 @@ export default function ProjectSelectorField({
         </div>
       </SelectTrigger>
       <SelectContent>
+        {showOrganizationOption && (
+          <SelectItem value="organization">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarFallback 
+                  className="text-xs font-medium text-white"
+                  style={{ 
+                    backgroundColor: '#000000' 
+                  }}
+                >
+                  OR
+                </AvatarFallback>
+              </Avatar>
+              <span>Organización</span>
+            </div>
+          </SelectItem>
+        )}
         {sortedProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
             <div className="flex items-center gap-2">
