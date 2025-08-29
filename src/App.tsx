@@ -38,17 +38,17 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import Analysis from "@/pages/professional/organization/Library/analysis/Analysis";
+import Analysis from "@/pages/professional/organization/library/analysis/Analysis";
 import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
 
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
-import Documentation from "@/pages/professional/organization/Library/Documentation";
-import Gallery from "@/pages/professional/organization/Library/Gallery";
+import Documentation from "@/pages/professional/organization/library/Documentation";
+import Gallery from "@/pages/professional/organization/library/Gallery";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
-import Board from "@/pages/professional/organization/Library/Board";
+import Board from "@/pages/professional/organization/library/Board";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 import Members from "@/pages/professional/organization/members/Members";
@@ -73,10 +73,10 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
-import AnalysisTasks from "@/pages/professional/organization/Library/analysis/AnalysisTasks";
-import AnalysisLabor from "@/pages/professional/organization/Library/analysis/AnalysisLabor";
-import AnalysisMaterials from "@/pages/professional/organization/Library/analysis/AnalysisMaterials";
-import AnalysisOverheads from "@/pages/professional/organization/Library/analysis/AnalysisOverheads";
+import AnalysisTasks from "@/pages/professional/organization/library/analysis/AnalysisTasks";
+import AnalysisLabor from "@/pages/professional/organization/library/analysis/AnalysisLabor";
+import AnalysisMaterials from "@/pages/professional/organization/library/analysis/AnalysisMaterials";
+import AnalysisOverheads from "@/pages/professional/organization/library/analysis/AnalysisOverheads";
 
 
 
