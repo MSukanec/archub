@@ -484,7 +484,16 @@ export function Sidebar() {
       {/* Header Section - Dinámico según el nivel */}
       <div className="h-9 flex items-center bg-[var(--main-sidebar-bg)]">
         {isExpanded ? (
-          <div className="ml-3 flex items-center justify-between pr-3">
+          <div className="ml-3 flex items-center gap-3 pr-3">
+            {/* Botón Volver - solo flecha, en todas las secciones menos main */}
+            {sidebarLevel !== 'main' && (
+              <button
+                onClick={goToMainLevel}
+                className="flex items-center justify-center w-6 h-6 text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150 flex-shrink-0"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
             <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
               {sidebarLevel === 'main' ? 'ARCHUB' : 
                sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
@@ -493,27 +502,22 @@ export function Sidebar() {
                sidebarLevel === 'provider' ? 'PROVEEDOR' :
                sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'ARCHUB'}
             </div>
-            {/* Botón Volver pequeño solo en nivel proyecto */}
-            {sidebarLevel === 'project' && (
-              <button
-                onClick={goToMainLevel}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150"
-              >
-                <ArrowLeft className="w-3 h-3" />
-                <span>Volver</span>
-              </button>
-            )}
           </div>
         ) : (
-          <div className="w-full flex items-center justify-center">
-            <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
-              {sidebarLevel === 'main' ? 'A' :
-               sidebarLevel === 'organization' ? 'O' :
-               sidebarLevel === 'library' ? 'B' :
-               sidebarLevel === 'project' ? 'P' :
-               sidebarLevel === 'provider' ? 'PR' :
-               sidebarLevel === 'admin' ? 'AD' : 'A'}
-            </div>
+          <div className="w-full flex items-center justify-center relative">
+            {/* Botón Volver colapsado - solo flecha, en todas las secciones menos main */}
+            {sidebarLevel !== 'main' ? (
+              <button
+                onClick={goToMainLevel}
+                className="flex items-center justify-center w-8 h-8 text-[var(--main-sidebar-fg)] hover:bg-white/10 rounded transition-colors duration-150"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            ) : (
+              <div className="text-lg font-bold text-[var(--main-sidebar-fg)]">
+                A
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -765,15 +769,26 @@ function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
           />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuContent 
+        align="start" 
+        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          // Solo cerrar si hacen click fuera del sidebar completo
+          const sidebar = document.querySelector('aside');
+          if (sidebar && sidebar.contains(e.target as Node)) {
+            e.preventDefault();
+          }
+        }}
+      >
         {projects.length > 0 ? (
           projects.map((project: any) => (
             <DropdownMenuItem
               key={project.id}
               onClick={() => handleProjectSelect(project.id)}
               className={cn(
-                "flex items-center justify-between",
-                selectedProjectId === project.id && "bg-[var(--accent)] text-white"
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                selectedProjectId === project.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
               )}
             >
               <div className="flex items-center gap-2">
@@ -786,7 +801,7 @@ function ProjectSelectorSidebar({ isExpanded }: { isExpanded: boolean }) {
             </DropdownMenuItem>
           ))
         ) : (
-          <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+          <div className="px-3 py-4 text-center text-sm text-[var(--main-sidebar-fg)]">
             No hay proyectos disponibles
           </div>
         )}
