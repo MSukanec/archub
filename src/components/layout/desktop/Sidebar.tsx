@@ -482,40 +482,38 @@ export function Sidebar() {
       onMouseLeave={() => setHovered(false)}
     >
 
-      {/* Header Button Section - Siempre presente */}
-      <div className="p-1 pt-3 pb-0">
-        <div className="mb-[2px]">
-          {sidebarLevel === 'main' ? (
-            <SidebarButton
-              icon={null} // Sin icono para ARCHUB
-              label="ARCHUB"
-              isActive={false}
-              isExpanded={isExpanded}
-              variant="main"
-              isHeaderButton={true}
-            />
-          ) : (
-            <SidebarButton
-              icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-              label={
-                sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
-                sidebarLevel === 'library' ? 'BIBLIOTECA' :
-                sidebarLevel === 'project' ? 'PROYECTO' :
-                sidebarLevel === 'provider' ? 'PROVEEDOR' :
-                sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'SECCIÓN'
-              }
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={goToMainLevel}
-              variant="main"
-              isHeaderButton={true}
-            />
-          )}
-        </div>
+      {/* Header Button Section - Misma altura que header original */}
+      <div className="h-9 flex items-center px-1">
+        {sidebarLevel === 'main' ? (
+          <SidebarButton
+            icon={null} // Sin icono para ARCHUB
+            label="ARCHUB"
+            isActive={false}
+            isExpanded={isExpanded}
+            variant="main"
+            isHeaderButton={true}
+          />
+        ) : (
+          <SidebarButton
+            icon={<ArrowLeft className="w-[18px] h-[18px]" />}
+            label={
+              sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
+              sidebarLevel === 'library' ? 'BIBLIOTECA' :
+              sidebarLevel === 'project' ? 'PROYECTO' :
+              sidebarLevel === 'provider' ? 'PROVEEDOR' :
+              sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'SECCIÓN'
+            }
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={goToMainLevel}
+            variant="main"
+            isHeaderButton={true}
+          />
+        )}
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 p-1 pt-0">
+      <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Selector de Proyectos (solo en nivel proyecto) */}
