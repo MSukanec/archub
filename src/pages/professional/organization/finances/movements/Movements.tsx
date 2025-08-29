@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-import { Table } from "@/components/ui-custom/tables-and-trees/Table";
+import { Table, ProjectBadge } from "@/components/ui-custom/tables-and-trees/Table";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
@@ -52,7 +52,6 @@ import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hoo
 import { useOrganizationWallets } from "@/hooks/use-organization-wallets";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectsMap } from "@/hooks/use-projects";
-import { ProjectBadge } from "@/components/ui-custom/ProjectBadge";
 
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
