@@ -129,7 +129,8 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     id: project.id,
     name: project.name,
     logo_url: project.logo_url,
-    type: "Proyecto" as const
+    type: "Proyecto" as const,
+    color: project.color
   }));
 
   return (
@@ -145,6 +146,7 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
             isHeaderButton={true}
             avatarUrl={currentProject?.logo_url || undefined}
             userFullName={currentProject ? getProjectInitials(currentProject.name) : undefined}
+            projectColor={currentProject?.color || undefined}
             rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
           />
         </div>

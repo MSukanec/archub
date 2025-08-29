@@ -99,7 +99,10 @@ export function SelectorPopover({
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
+                  <div 
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium text-white"
+                    style={{ backgroundColor: (item as any).color || 'hsl(var(--accent))' }}
+                  >
                     {getInitials(item.name)}
                   </div>
                 )}

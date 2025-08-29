@@ -16,6 +16,7 @@ interface SidebarButtonProps {
   isChild?: boolean;
   variant?: 'main' | 'secondary';
   isHeaderButton?: boolean;
+  projectColor?: string;
 }
 
 export default function SidebarButton({ 
@@ -30,7 +31,8 @@ export default function SidebarButton({
   rightIcon,
   isChild = false,
   variant = 'main',
-  isHeaderButton = false
+  isHeaderButton = false,
+  projectColor
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -107,7 +109,10 @@ export default function SidebarButton({
               className="w-[28px] h-[28px] rounded-full"
             />
           ) : userFullName ? (
-            <div className="w-[28px] h-[28px] rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+            <div 
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white"
+              style={{ backgroundColor: projectColor || 'hsl(var(--accent))' }}
+            >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
             </div>
           ) : (
