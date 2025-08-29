@@ -106,6 +106,13 @@ export function SidebarSubmenu() {
     
     'organizacion': [
       { icon: Home, label: 'Resumen de Organización', href: '/organization' },
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
+      { type: 'accordion', label: 'FINANZAS', items: [
+        { icon: TrendingUp, label: 'Capital', href: '/organization/finances/capital' },
+      ]},
+      { icon: Users, label: 'Miembros', href: '/organization/members' },
+      { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
+      { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' },
       { type: 'plan', label: 'Plan', icon: Crown },
     ],
@@ -137,7 +144,6 @@ export function SidebarSubmenu() {
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard', requiresProject: true },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements', requiresProject: true },
       { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true },
-      { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', generalModeRestricted: true },
     ],
 
 

@@ -165,7 +165,7 @@ function Router() {
         <Route path="/finances/movements" component={Movements} />
         <Route path="/finances/analysis" component={FinancesAnalysis} />
 
-        <Route path="/finances/capital-movements" component={FinancesCapitalMovements} />
+        <Route path="/organization/finances/capital" component={FinancesCapitalMovements} />
         
         {/* Duplicate General Routes for compatibility */}
         <Route path="/general/info" component={ProjectInfo} />
