@@ -1256,34 +1256,6 @@ export default function Movements() {
     icon: DollarSign,
   };
 
-  // Preparar acciones personalizadas para el ActionBar
-  const customActions = [
-    ...(selectedMovements.length > 0 ? [
-      <Button
-        key="delete-selected"
-        variant="ghost"
-        onClick={handleDeleteSelected}
-        disabled={deleteMultipleMovementsMutation.isPending}
-        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        title="Eliminar seleccionados"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    ] : []),
-    <PlanRestricted 
-      key="import-movements"
-      functionName="Importación de Excel"
-      reason="general_mode"
-    >
-      <Button
-        variant="secondary"
-        onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
-      >
-        <Upload className="mr-2 h-4 w-4" />
-        Importar
-      </Button>
-    </PlanRestricted>
-  ];
 
   // Detectar si hay filtros activos
   const hasActiveFilters = searchValue.trim() !== "" || 
@@ -1457,7 +1429,35 @@ export default function Movements() {
             setFilterByCurrency("all");
             setFilterByWallet("all");
           },
-          customActions: customActions
+          customActions: (
+            <>
+              {selectedMovements.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteSelected}
+                  disabled={deleteMultipleMovementsMutation.isPending}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  title="Eliminar seleccionados"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+              <PlanRestricted 
+                functionName="Importación de Excel"
+                reason="general_mode"
+              >
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => openModal('movement-import', { projectId: selectedProjectId })}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Importar
+                </Button>
+              </PlanRestricted>
+            </>
+          )
         }}
 
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
