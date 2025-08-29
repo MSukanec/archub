@@ -37,6 +37,7 @@ import {
   Contact,
   Database,
   Layout,
+  Info,
 
   NotebookPen,
   FileImage,
@@ -110,6 +111,7 @@ export function SidebarSubmenu() {
     ],
     
     'general': [
+      { icon: Info, label: 'Información', href: '/general/info', requiresProject: true },
       { icon: Users, label: 'Clientes', href: '/general/clients', requiresProject: true },
     ],
 

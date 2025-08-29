@@ -30,6 +30,7 @@ import Movements from "@/pages/professional/project/finances/movements/Movements
 import FinancesAnalysis from "@/pages/professional/project/finances/FinancesAnalysis";
 import FinancesCapitalMovements from "@/pages/professional/project/finances/FinancesCapitalMovements";
 import { Clients } from "@/pages/professional/project/general/clients/Clients";
+import ProjectInfo from "@/pages/professional/project/general/info/ProjectInfo";
 
 
 import Preferences from "@/pages/professional/organization/Preferences";
@@ -124,7 +125,8 @@ function Router() {
         {/* Projects Routes */}
         <Route path="/projects" component={Projects} />
 
-
+        {/* General Routes */}
+        <Route path="/general/info" component={ProjectInfo} />
         <Route path="/general/clients" component={Clients} />
         
 
@@ -164,6 +166,9 @@ function Router() {
         <Route path="/finances/analysis" component={FinancesAnalysis} />
 
         <Route path="/finances/capital-movements" component={FinancesCapitalMovements} />
+        
+        {/* Duplicate General Routes for compatibility */}
+        <Route path="/general/info" component={ProjectInfo} />
         <Route path="/general/clients" component={Clients} />
 
 

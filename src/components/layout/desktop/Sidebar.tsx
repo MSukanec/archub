@@ -43,6 +43,7 @@ import {
   Images,
   Database,
   Layout,
+  Info,
   CreditCard,
   Handshake,
   Brush,
@@ -540,8 +541,9 @@ export function Sidebar() {
         id: 'general',
         icon: Settings,
         label: 'General',
-        defaultRoute: '/general/clients',
+        defaultRoute: '/general/info',
         submenu: [
+          { icon: Info, label: 'Información', href: '/general/info' },
           { icon: Users, label: 'Clientes', href: '/general/clients' }
         ]
       },

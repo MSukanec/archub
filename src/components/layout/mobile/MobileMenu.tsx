@@ -43,6 +43,7 @@ import {
   Tag,
   TrendingUp,
   ListTodo,
+  Info,
   Library,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -363,6 +364,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     // NIVEL 3: Subsecciones (solo para proyecto)
     subsections: {
       general: [
+        { icon: Info, label: 'Información', href: '/general/info' },
         { icon: Users, label: 'Clientes', href: '/general/clients' }
       ],
       diseno: [
