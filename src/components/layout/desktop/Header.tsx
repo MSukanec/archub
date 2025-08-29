@@ -225,7 +225,7 @@ export function Header({
           : "left-[40px]" // 40px main sidebar when collapsed
       }`}
     >
-      {/* Primera fila: Botón Volver + Título + Selector de proyectos */}
+      {/* Primera fila: Botón Volver + Título + Botones de acción */}
       <div className="w-full h-10 px-12 flex items-center justify-between">
         {/* Left: Back Button + Page Title */}
         <div className="flex items-center gap-4">
@@ -255,57 +255,7 @@ export function Header({
           )}
         </div>
 
-      </div>
-
-      {/* Segunda fila: Tabs a la izquierda + Botones de acción a la derecha */}
-      <div className="w-full h-10 px-12 flex items-center justify-between">
-        {/* Left: Tabs */}
-        <div className="flex items-center">
-          {hasTabs && (
-            <div className="flex items-center space-x-6">
-              {tabs.map((tab) => {
-                const tabContent = (
-                  <button
-                    key={tab.id}
-                    onClick={() =>
-                      tab.isDisabled || tab.isRestricted
-                        ? undefined
-                        : onTabChange?.(tab.id)
-                    }
-                    disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
-                      tab.isDisabled || tab.isRestricted
-                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                        : tab.isActive
-                          ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
-                          : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-
-                // Si la tab está restringida, envolverla con PlanRestricted
-                if (tab.isRestricted && tab.restrictionReason) {
-                  return (
-                    <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
-                      {tabContent}
-                    </PlanRestricted>
-                  );
-                }
-
-                return tabContent;
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Right: Header Action Buttons + Main Action Buttons */}
+        {/* Right: Action Buttons */}
         <div className="flex items-center gap-1">
           {/* Header Search Button (expandible) */}
           {showHeaderSearch && (
@@ -476,6 +426,52 @@ export function Header({
           )}
         </div>
       </div>
+
+      {/* Segunda fila: Solo Tabs */}
+      {hasTabs && (
+        <div className="w-full h-10 px-12 flex items-center">
+          <div className="flex items-center space-x-6">
+            {tabs.map((tab) => {
+              const tabContent = (
+                <button
+                  key={tab.id}
+                  onClick={() =>
+                    tab.isDisabled || tab.isRestricted
+                      ? undefined
+                      : onTabChange?.(tab.id)
+                  }
+                  disabled={tab.isDisabled}
+                  className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
+                    tab.isDisabled || tab.isRestricted
+                      ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                      : tab.isActive
+                        ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
+                        : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+
+              // Si la tab está restringida, envolverla con PlanRestricted
+              if (tab.isRestricted && tab.restrictionReason) {
+                return (
+                  <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
+                    {tabContent}
+                  </PlanRestricted>
+                );
+              }
+
+              return tabContent;
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
