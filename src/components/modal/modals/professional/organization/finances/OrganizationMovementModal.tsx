@@ -36,6 +36,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
+import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
 
 // Schema básico para el modal simple
 const basicMovementSchema = z.object({
@@ -1621,31 +1622,22 @@ export function OrganizationMovementModal({ modalData, onClose, editingMovement:
         render={({ field }) => (
           <FormItem>
             <FormLabel>Proyecto *</FormLabel>
-            <Select 
-              onValueChange={(value) => {
-                field.onChange(value)
-                // Sincronizar con otros formularios
-                if (movementType === 'conversion') {
-                  conversionForm.setValue('project_id', value)
-                } else if (movementType === 'transfer') {
-                  transferForm.setValue('project_id', value)
-                }
-              }} 
-              value={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar proyecto..." />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {projects?.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <FormControl>
+              <ProjectSelectorField
+                projects={projects || []}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value)
+                  // Sincronizar con otros formularios
+                  if (movementType === 'conversion') {
+                    conversionForm.setValue('project_id', value)
+                  } else if (movementType === 'transfer') {
+                    transferForm.setValue('project_id', value)
+                  }
+                }}
+                placeholder="Seleccionar proyecto..."
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
