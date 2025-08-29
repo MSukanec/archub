@@ -71,17 +71,11 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 // Provider Pages  
 import Products from "@/pages/providers/products/Products";
 
-// Analysis Pages
-import Tasks from "@/pages/professional/organization/library/Tasks";
-import Labor from "@/pages/professional/organization/library/Labor";
-import Materials from "@/pages/professional/organization/library/Materials";
-import Overheads from "@/pages/professional/organization/library/Overheads";
-
-// Analysis Complete Pages
-import AnalysisTasks from "@/pages/professional/analysis/tasks/Tasks";
-import AnalysisMaterials from "@/pages/professional/analysis/materials/Materials";
-import AnalysisLabor from "@/pages/professional/analysis/labor/Labor";
-import AnalysisIndirects from "@/pages/professional/analysis/indirects/Indirects";
+// Library Pages
+import Tasks from "@/pages/professional/organization/library/tasks/Tasks";
+import Materials from "@/pages/professional/organization/library/materials/Materials";
+import Labor from "@/pages/professional/organization/library/labor/Labor";
+import Indirects from "@/pages/professional/organization/library/indirects/Indirects";
 
 
 
@@ -159,13 +153,7 @@ function Router() {
         <Route path="/library/tasks" component={Tasks} />
         <Route path="/library/materials" component={Materials} />
         <Route path="/library/labor" component={Labor} />
-        <Route path="/library/overheads" component={Overheads} />
-        
-        {/* Páginas de análisis completas */}
-        <Route path="/library/analysis-tasks" component={AnalysisTasks} />
-        <Route path="/library/analysis-materials" component={AnalysisMaterials} />
-        <Route path="/library/analysis-labor" component={AnalysisLabor} />
-        <Route path="/library/analysis-indirects" component={AnalysisIndirects} />
+        <Route path="/library/indirects" component={Indirects} />
         
 
 
