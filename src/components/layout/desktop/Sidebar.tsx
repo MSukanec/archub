@@ -56,7 +56,8 @@ import {
   ListTodo,
   TableIcon,
   Library,
-  Building2
+  Building2,
+  ChevronUp
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -772,11 +773,11 @@ export function Sidebar() {
                 return null;
               }
               
-              // Determinar si este botón necesita chevron right
-              const needsChevronRight = (
-                ('defaultRoute' in item && 'id' in item) || // Botones de sección principal (organización, proyecto, etc.)
-                (hasSubmenu) // Botones con submenu (diseño, construcción, finanzas)
-              );
+              // Determinar el tipo de chevron que necesita este botón
+              const isAccordionExpanded = hasSubmenu && expandedAccordion === ('id' in item ? item.id : null);
+              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu); // Solo secciones principales que no son acordeón
+              const needsChevronRight = navigatesToOtherSection;
+              const needsAccordionChevron = hasSubmenu;
               const buttonElement = (
                 <SidebarButton
                   icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -800,7 +801,14 @@ export function Sidebar() {
                   }}
                   href={'href' in item ? item.href : undefined}
                   variant="main"
-                  rightIcon={needsChevronRight && isExpanded ? <ChevronRight className="w-3 h-3" /> : undefined}
+                  rightIcon={
+                    isExpanded ? (
+                      needsChevronRight ? <ChevronRight className="w-3 h-3" /> :
+                      needsAccordionChevron ? (
+                        isAccordionExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                      ) : undefined
+                    ) : undefined
+                  }
                 />
               );
               return (
