@@ -101,6 +101,7 @@ export default function ProjectItem({
         bg-white dark:bg-card rounded-2xl shadow-sm border cursor-pointer
         transition-all duration-200 ease-in-out
         hover:shadow-md hover:-translate-y-1
+        ${isActive ? 'ring-2 ring-[var(--accent)] ring-offset-2' : ''}
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${className || ''}
       `}
@@ -202,8 +203,13 @@ export default function ProjectItem({
         {/* Badge de status abajo */}
         <div className="flex justify-between items-center">
           <Badge 
-            variant="secondary" 
-            className={`${statusColorClass} text-xs`}
+            className={`text-xs ${
+              project.status === 'completed' 
+                ? 'bg-[var(--accent)] text-white border-0' 
+                : project.status === 'active'
+                ? 'bg-transparent text-[var(--accent)] border border-[var(--accent)]'
+                : statusColorClass
+            }`}
           >
             {statusText}
           </Badge>
