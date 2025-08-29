@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { useState, useRef } from "react";
+import React from "react";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -96,8 +97,8 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header sin icono */}
-      {!isChild && !(isHeaderButton && React.isValidElement(icon) && icon.type === 'div') && (
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
+      {!isChild && !(isHeaderButton && icon === null) && (
         <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
@@ -120,7 +121,7 @@ export default function SidebarButton({
         <div className={cn(
           "flex items-center justify-between w-full",
           isChild ? "ml-2" : 
-          (isHeaderButton && React.isValidElement(icon) && icon.type === 'div') ? "ml-2" : // Sin margen para ARCHUB
+          (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
           "ml-10" // Más margen para separar del icono
         )}>
           <span className={cn(

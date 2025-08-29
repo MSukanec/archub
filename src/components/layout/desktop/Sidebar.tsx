@@ -487,7 +487,7 @@ export function Sidebar() {
         <div className="mb-[2px]">
           {sidebarLevel === 'main' ? (
             <SidebarButton
-              icon={<div></div>} // Icono vacío para ARCHUB
+              icon={null} // Sin icono para ARCHUB
               label="ARCHUB"
               isActive={false}
               isExpanded={isExpanded}
