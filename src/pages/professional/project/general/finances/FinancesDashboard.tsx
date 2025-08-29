@@ -236,7 +236,7 @@ export default function FinancesDashboard() {
                     No hay movimientos registrados
                   </p>
                   <Link 
-                    href="/finances/movements"
+                    href="/general/finances"
                     className="inline-flex items-center px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                   >
                     Crear Primer Movimiento

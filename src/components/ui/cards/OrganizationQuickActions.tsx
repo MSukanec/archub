@@ -46,7 +46,7 @@ export function OrganizationQuickActions() {
       icon: DollarSign,
       color: "text-accent-foreground",
       bgColor: "bg-accent",
-      onClick: () => navigate('/finances/movements')
+      onClick: () => navigate('/general/finances')
     },
     {
       title: "Bitácora de Obra",

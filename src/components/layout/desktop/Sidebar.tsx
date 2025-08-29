@@ -554,6 +554,7 @@ export function Sidebar() {
         defaultRoute: '/general/info',
         submenu: [
           { icon: Info, label: 'Información', href: '/general/info' },
+          { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
           { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
           { icon: Users, label: 'Clientes', href: '/general/clients' },
           { icon: FileText, label: 'Media', href: '/general/media' }
@@ -591,8 +592,8 @@ export function Sidebar() {
         defaultRoute: '/finances/dashboard',
         submenu: [
           { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-          { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
-          { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', generalModeRestricted: true }
+          { icon: DollarSign, label: 'Movimientos', href: '/general/finances' },
+          { icon: BarChart3, label: 'Análisis de Obra', href: '/general/finances', generalModeRestricted: true }
         ]
       },
       { type: 'divider' }

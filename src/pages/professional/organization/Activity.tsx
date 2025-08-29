@@ -46,7 +46,7 @@ export default function Activity() {
     // Navigate to related sections based on activity type
     switch (activity.target_table) {
       case 'movements':
-        navigate('/finances/movements');
+        navigate('/general/finances');
         break;
       case 'site_logs':
         navigate('/construction/logs');
