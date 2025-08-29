@@ -62,6 +62,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { FILTER_LABELS } from "@/constants/actionBarConstants";
 import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
+import { Layout } from "@/components/layout/desktop/Layout";
 
 interface Movement {
   id: string;
@@ -1295,7 +1296,7 @@ export default function Movements() {
                           filterByWallet !== "all";
 
   return (
-    <>
+    <Layout headerProps={headerProps} wide={true}>
       {/* Solo mostrar contenido si no está cargando */}
       {isLoading ? (
         <div className="space-y-4">
@@ -1631,6 +1632,6 @@ export default function Movements() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </Layout>
   );
 }
