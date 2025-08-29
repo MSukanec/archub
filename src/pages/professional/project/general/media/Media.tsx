@@ -1,46 +1,67 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
-import { FileText, Images } from 'lucide-react';
+import { FileText, Images, Upload, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function Media() {
   const { setSidebarContext } = useNavigationStore();
+  const { openModal } = useGlobalModalStore();
+  const [activeTab, setActiveTab] = useState('documentation');
 
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
 
+  const tabs = [
+    { id: 'documentation', label: 'Documentación', isActive: activeTab === 'documentation' },
+    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery' }
+  ];
+
+  const getActionButton = () => {
+    switch (activeTab) {
+      case 'documentation':
+        return {
+          label: "Subir Documentos",
+          icon: Upload,
+          onClick: () => openModal('document-upload', {})
+        };
+      case 'gallery':
+        return {
+          label: 'Subir Archivo',
+          icon: Plus,
+          onClick: () => openModal('gallery', {})
+        };
+      default:
+        return undefined;
+    }
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'documentation':
+        return <MediaDocumentation />;
+      case 'gallery':
+        return <MediaGallery />;
+      default:
+        return <MediaDocumentation />;
+    }
+  };
+
   const headerProps = {
     icon: FileText,
-    title: "Media"
+    title: "Media",
+    tabs,
+    onTabChange: setActiveTab,
+    actionButton: getActionButton()
   };
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <Tabs defaultValue="documentation" className="h-full flex flex-col">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="documentation" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Documentación
-          </TabsTrigger>
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
-            <Images className="w-4 h-4" />
-            Galería
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="documentation" className="flex-1 mt-6">
-          <MediaDocumentation />
-        </TabsContent>
-        
-        <TabsContent value="gallery" className="flex-1 mt-6">
-          <MediaGallery />
-        </TabsContent>
-      </Tabs>
+      {renderTabContent()}
     </Layout>
   );
 }
