@@ -70,19 +70,13 @@ import { useProjectContext } from "@/stores/projectContext";
 // Función auxiliar para generar iniciales de organizaciones
 function getOrganizationInitials(name: string): string {
   return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .substring(0, 2)
+    .charAt(0)
     .toUpperCase();
 }
 // Función auxiliar para generar iniciales de proyectos
 function getProjectInitials(name: string): string {
   return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .substring(0, 2)
+    .charAt(0)
     .toUpperCase();
 }
 // Componente selector de proyectos para el header (con avatar)
@@ -146,16 +140,14 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        align="start" 
-        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        side="bottom"
+        align="center" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
         onCloseAutoFocus={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => {
-          // Solo cerrar si hacen click fuera del sidebar completo
-          const sidebar = document.querySelector('aside');
-          if (sidebar && sidebar.contains(e.target as Node)) {
-            e.preventDefault();
-          }
-        }}
+        sideOffset={8}
+        alignOffset={0}
+        avoidCollisions={true}
+        sticky="always"
       >
         {projects.length > 0 ? (
           projects.map((project: any) => (
@@ -163,23 +155,26 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
               key={project.id}
               onClick={() => handleProjectSelect(project.id)}
               className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)] p-3",
                 selectedProjectId === project.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
               )}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {project.logo_url ? (
                   <img 
                     src={project.logo_url} 
                     alt="Avatar"
-                    className="w-4 h-4 rounded-full"
+                    className="w-6 h-6 rounded-full"
                   />
                 ) : (
-                  <div className="w-4 h-4 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                  <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
                     {getProjectInitials(project.name)}
                   </div>
                 )}
-                <span className="truncate">{project.name}</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{project.name}</span>
+                  <span className="text-xs opacity-70">Proyecto</span>
+                </div>
               </div>
               {selectedProjectId === project.id && (
                 <div className="w-2 h-2 rounded-full ml-auto" style={{ backgroundColor: 'var(--accent)' }} />
@@ -253,16 +248,14 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        align="start" 
-        className="w-56 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
+        side="bottom"
+        align="center" 
+        className="w-80 bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)]" 
         onCloseAutoFocus={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => {
-          // Solo cerrar si hacen click fuera del sidebar completo
-          const sidebar = document.querySelector('aside');
-          if (sidebar && sidebar.contains(e.target as Node)) {
-            e.preventDefault();
-          }
-        }}
+        sideOffset={8}
+        alignOffset={0}
+        avoidCollisions={true}
+        sticky="always"
       >
         {organizations.length > 0 ? (
           organizations.map((organization: any) => (
@@ -270,23 +263,26 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
               key={organization.id}
               onClick={() => handleOrganizationSelect(organization.id)}
               className={cn(
-                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)]",
+                "flex items-center justify-between text-[var(--main-sidebar-fg)] hover:bg-[var(--main-sidebar-button-hover-bg)] focus:bg-[var(--main-sidebar-button-hover-bg)] p-3",
                 currentOrganization?.id === organization.id && "bg-[var(--accent)] text-white hover:bg-[var(--accent)] focus:bg-[var(--accent)]"
               )}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {organization.logo_url ? (
                   <img 
                     src={organization.logo_url} 
                     alt="Avatar"
-                    className="w-4 h-4 rounded-full"
+                    className="w-6 h-6 rounded-full"
                   />
                 ) : (
-                  <div className="w-4 h-4 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                  <div className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
                     {getOrganizationInitials(organization.name)}
                   </div>
                 )}
-                <span className="truncate">{organization.name}</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{organization.name}</span>
+                  <span className="text-xs opacity-70">Organización</span>
+                </div>
               </div>
               {currentOrganization?.id === organization.id && (
                 <div className="w-2 h-2 rounded-full ml-auto bg-white" />
