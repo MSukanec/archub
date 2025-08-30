@@ -279,9 +279,10 @@ export default function FinancesCapitalMovements() {
       }
     })
 
-    // Create summary for ALL members (including those without movements)
-    const summary = members.map(member => {
-      // Calculate dollarized total from movements for this member
+    const summaryMap = new Map()
+    
+    // First, process regular members (for retiros and old aportes)
+    members.forEach(member => {
       let dollarizedTotal = 0
       let totalAportes = 0
       let totalRetiros = 0
@@ -336,7 +337,7 @@ export default function FinancesCapitalMovements() {
       
       const saldo = totalAportes - totalRetiros
       
-      return {
+      summaryMap.set(member.id, {
         member_id: member.id,
         member,
         currencies,
@@ -344,14 +345,82 @@ export default function FinancesCapitalMovements() {
         totalAportes,
         totalRetiros,
         saldo
-      }
+      })
     })
 
+    // Now process partner contributions (new aportes structure)
+    allPartnerContributions.forEach(contribution => {
+      const movement = movements.find(m => m.id === contribution.movement_id)
+      if (!movement || !contribution.partners?.contacts) return
+
+      const contact = Array.isArray(contribution.partners.contacts) 
+        ? contribution.partners.contacts[0] 
+        : contribution.partners.contacts
+
+      if (!contact) return
+
+      const partnerName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+      const partnerId = contribution.partner_id
+
+      // Create a fake member object for partners
+      const partnerAsMember = {
+        id: partnerId,
+        user_id: partnerId,
+        user: [{
+          id: partnerId,
+          full_name: partnerName,
+          email: contact.email || ''
+        }]
+      }
+
+      let existing = summaryMap.get(partnerId) || {
+        member_id: partnerId,
+        member: partnerAsMember,
+        currencies: {},
+        dollarizedTotal: 0,
+        totalAportes: 0,
+        totalRetiros: 0,
+        saldo: 0
+      }
+
+      const amount = movement.amount || 0
+      const currencyCode = movement.currency_code || 'N/A'
+
+      // This is an aporte (contribution)
+      existing.totalAportes += amount
+
+      if (currencyCode === 'USD') {
+        existing.dollarizedTotal += amount
+      } else if (currencyCode === 'ARS' && movement.exchange_rate) {
+        existing.dollarizedTotal += (amount / movement.exchange_rate)
+      }
+
+      // Add to currencies
+      if (!existing.currencies[currencyCode]) {
+        existing.currencies[currencyCode] = {
+          amount: 0,
+          currency: {
+            code: movement.currency_code,
+            symbol: movement.currency_symbol,
+            name: movement.currency_name
+          }
+        }
+      }
+      existing.currencies[currencyCode].amount += amount
+
+      existing.saldo = existing.totalAportes - existing.totalRetiros
+
+      summaryMap.set(partnerId, existing)
+    })
+
+    // Convert to array and filter
+    const summary = Array.from(summaryMap.values())
+
     return {
-      memberSummary: summary,
-      availableCurrencies: Array.from(currenciesSet)
+      memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
+      availableCurrencies: Array.from(currenciesSet).sort()
     }
-  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept])
+  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allPartnerContributions])
 
   // Filter movements based on search
   const filteredMovements = movements.filter(movement => {
