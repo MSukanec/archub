@@ -171,8 +171,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   
   // State para detectar tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
-  const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
-  const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
+  const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
+  const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
@@ -755,7 +755,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_personnel')
         .select(`
           personnel_id,
-          amount,
           personnel:personnel_id (
             id,
             contact:contact_id (
@@ -777,8 +776,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
           return {
             personnel_id: assignment.personnel_id,
-            contact_name: contactName,
-            amount: assignment.amount
+            contact_name: contactName
           }
         })
 
@@ -992,8 +990,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (selectedPersonnel && selectedPersonnel.length > 0) {
         const personnelData = selectedPersonnel.map(person => ({
           movement_id: result.id,
-          personnel_id: person.personnel_id,
-          amount: person.amount
+          personnel_id: person.personnel_id
         }))
 
         const { error: personnelError } = await supabase
@@ -1255,8 +1252,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
           const egressPersonnelData = selectedPersonnel.map(person => ({
             movement_id: results[0].id, // Movimiento de egreso
-            personnel_id: person.personnel_id,
-            amount: person.amount
+            personnel_id: person.personnel_id
           }))
 
           const { error: personnelError } = await supabase
@@ -1358,8 +1354,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
         const egressPersonnelData = selectedPersonnel.map(person => ({
           movement_id: results[0].id, // Movimiento de egreso
-          personnel_id: person.personnel_id,
-          amount: person.amount
+          personnel_id: person.personnel_id
         }))
 
         const { error: personnelError } = await supabase

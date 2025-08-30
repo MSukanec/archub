@@ -19,13 +19,13 @@ interface DefaultFieldsProps {
   wallets: any[]
   // Props para campos integrados
   selectedSubcategoryId?: string
-  selectedPersonnel?: Array<{personnel_id: string, contact_name: string, amount: number}>
-  selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string, amount: number}>
+  selectedPersonnel?: Array<{personnel_id: string, contact_name: string}>
+  selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
-  selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string, amount: number}>
+  selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string}>
   selectedPartnerContributions?: Array<{partner_id: string, partner_name: string}>
-  onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string, amount: number}>) => void
-  onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string, amount: number}>) => void
+  onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string}>) => void
+  onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
   onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
   onPartnerContributionsChange?: (partnerContributionsList: Array<{partner_id: string, partner_name: string}>) => void
