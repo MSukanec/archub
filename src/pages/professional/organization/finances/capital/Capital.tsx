@@ -351,9 +351,10 @@ export default function FinancesCapitalMovements() {
       const movement = movements.find(m => m.id === partnerData.movement_id)
       if (!movement || !partnerData.partners?.contacts) return
 
-      // Only process if this is an aporte movement (new structure)
+      // Only process if this is an aporte or retiro movement (new structure)
       const isAporteMovement = movement.subcategory_id === aportesPropriosConcept?.id
-      if (!isAporteMovement) return
+      const isRetiroMovement = movement.subcategory_id === retirosPropriosConcept?.id
+      if (!isAporteMovement && !isRetiroMovement) return
 
       const contact = partnerData.partners.contacts
 
@@ -386,13 +387,18 @@ export default function FinancesCapitalMovements() {
       const amount = movement.amount || 0
       const currencyCode = movement.currency_code || 'N/A'
 
-      // This is an aporte (contribution)
-      existing.totalAportes += amount
+      // Check if it's aporte or retiro and update accordingly
+      if (isAporteMovement) {
+        existing.totalAportes += amount
+      } else if (isRetiroMovement) {
+        existing.totalRetiros += amount
+      }
 
       if (currencyCode === 'USD') {
-        existing.dollarizedTotal += amount
+        existing.dollarizedTotal += isAporteMovement ? amount : -amount
       } else if (currencyCode === 'ARS' && movement.exchange_rate) {
-        existing.dollarizedTotal += (amount / movement.exchange_rate)
+        const convertedAmount = amount / movement.exchange_rate
+        existing.dollarizedTotal += isAporteMovement ? convertedAmount : -convertedAmount
       }
 
       // Add to currencies
@@ -406,7 +412,7 @@ export default function FinancesCapitalMovements() {
           }
         }
       }
-      existing.currencies[currencyCode].amount += amount
+      existing.currencies[currencyCode].amount += isAporteMovement ? amount : -amount
 
       existing.saldo = existing.totalAportes - existing.totalRetiros
 
@@ -662,10 +668,11 @@ export default function FinancesCapitalMovements() {
       render: (item: CapitalMovement) => {
         let displayName = null
         
-        // Check if this is an "Aportes de Socios" movement that uses partner system
+        // Check if this is an "Aportes de Socios" or "Retiros de Socios" movement that uses partner system
         const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
+        const isRetiroDeSocios = item.subcategory_id === retirosPropriosConcept?.id
         
-        if (isAporteDeSocios) {
+        if (isAporteDeSocios || isRetiroDeSocios) {
           // Find movement partner for this movement
           const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
           if (movementPartner?.partners?.contacts) {
