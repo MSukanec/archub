@@ -1,6 +1,5 @@
 import React from "react";
-import { Folder } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Project {
@@ -51,28 +50,18 @@ export default function ProjectSelectorField({
         <div className="flex items-center gap-2">
           {selectedProject ? (
             <>
-              <Avatar className="w-6 h-6">
-                {selectedProject.project_data?.project_image_url ? (
-                  <AvatarImage 
-                    src={selectedProject.project_data.project_image_url} 
-                    alt="Proyecto" 
-                  />
-                ) : (
-                  <AvatarFallback 
-                    className="text-xs font-medium text-white"
-                    style={{ backgroundColor: selectedProject.color || 'hsl(var(--accent))' }}
-                  >
-                    {getProjectInitials(selectedProject.name)}
-                  </AvatarFallback>
-                )}
+              <Avatar className="w-4 h-4">
+                <AvatarFallback 
+                  className="text-xs font-medium text-white"
+                  style={{ backgroundColor: selectedProject.color || 'hsl(var(--accent))' }}
+                >
+                  {getProjectInitials(selectedProject.name)}
+                </AvatarFallback>
               </Avatar>
               <span className="truncate">{selectedProject.name || 'Sin nombre'}</span>
             </>
           ) : (
-            <>
-              <Folder className="w-6 h-6 text-muted-foreground" />
-              <span className="text-muted-foreground">{placeholder}</span>
-            </>
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
         </div>
       </SelectTrigger>
@@ -80,20 +69,13 @@ export default function ProjectSelectorField({
         {sortedProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
             <div className="flex items-center gap-2">
-              <Avatar className="w-6 h-6">
-                {project.project_data?.project_image_url ? (
-                  <AvatarImage 
-                    src={project.project_data.project_image_url} 
-                    alt="Proyecto" 
-                  />
-                ) : (
-                  <AvatarFallback 
-                    className="text-xs font-medium text-white"
-                    style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
-                  >
-                    {getProjectInitials(project.name)}
-                  </AvatarFallback>
-                )}
+              <Avatar className="w-4 h-4">
+                <AvatarFallback 
+                  className="text-xs font-medium text-white"
+                  style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
+                >
+                  {getProjectInitials(project.name)}
+                </AvatarFallback>
               </Avatar>
               <span>{project.name || 'Sin nombre'}</span>
             </div>
