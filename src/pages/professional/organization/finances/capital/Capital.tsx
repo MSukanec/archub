@@ -27,6 +27,7 @@ interface CapitalMovement {
   project_id: string
   created_by: string
   category_id: string
+  subcategory_id?: string
   type_id: string
   exchange_rate?: number
   member?: {
@@ -41,6 +42,7 @@ interface CapitalMovement {
   currency_symbol?: string
   wallet_name?: string
   category_name?: string
+  subcategory_name?: string
   type_name?: string
 }
 
@@ -94,39 +96,93 @@ export default function FinancesCapitalMovements() {
     enabled: !!organizationId && !!supabase
   })
 
-  // Find concepts by exact ID since we know they exist from the movement data
+  // Find concepts for partner contributions and withdrawals by IDs
   const aportesPropriosConcept = concepts.find(c => 
-    c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || c.name === 'Aportes Propios'
+    c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' // Aportes de Socios
   )
   
   const retirosPropriosConcept = concepts.find(c => 
-    c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' || c.name === 'Retiros Propios'
+    c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' // Retiros de Socios
+  )
+
+  // Also find old concepts by name for backward compatibility
+  const aportesPropriosOld = concepts.find(c => 
+    c.name === 'Aportes Propios'
+  )
+  
+  const retirosPropriosOld = concepts.find(c => 
+    c.name === 'Retiros Propios'
   )
 
   // Concepts found successfully
 
-  // Get capital movements (aportes and retiros propios)
+  // Get capital movements (aportes and retiros de socios)
   const { data: movements = [], isLoading } = useQuery({
-    queryKey: ['capital-movements', organizationId, projectId, aportesPropriosConcept?.id, retirosPropriosConcept?.id],
+    queryKey: ['capital-movements', organizationId, aportesPropriosConcept?.id, retirosPropriosConcept?.id],
     queryFn: async () => {
-      if (!supabase || !organizationId || !projectId) return []
+      if (!supabase || !organizationId) return []
 
-      // Filter movements by category name since we know the exact names exist
-      const { data: movements, error } = await supabase
-        .from('movement_view')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('project_id', projectId)
-        .in('category_name', ['Aportes Propios', 'Retiros Propios'])
-        .order('movement_date', { ascending: false })
+      console.log('🔍 Searching for capital movements with subcategory IDs:', {
+        aportes: aportesPropriosConcept?.id,
+        retiros: retirosPropriosConcept?.id
+      })
 
-      if (error) {
-        throw error
-      }
+      // Build subcategory IDs array for new structure
+      const subcategoryIds = []
+      if (aportesPropriosConcept?.id) subcategoryIds.push(aportesPropriosConcept.id)
+      if (retirosPropriosConcept?.id) subcategoryIds.push(retirosPropriosConcept.id)
       
-      return movements || []
+      // Build category names array for old structure  
+      const categoryNames = []
+      if (aportesPropriosOld?.name) categoryNames.push(aportesPropriosOld.name)
+      if (retirosPropriosOld?.name) categoryNames.push(retirosPropriosOld.name)
+
+      // Query both new structure (by subcategory_id) and old structure (by category_name)
+      let allMovements = []
+
+      // Get new structure movements (subcategory based)
+      if (subcategoryIds.length > 0) {
+        const { data: newMovements, error: newError } = await supabase
+          .from('movement_view')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .in('subcategory_id', subcategoryIds)
+          .order('movement_date', { ascending: false })
+
+        if (newError) {
+          console.error('Error fetching new structure movements:', newError)
+        } else {
+          console.log('🔍 Found new structure movements:', newMovements?.length || 0)
+          if (newMovements) allMovements = [...allMovements, ...newMovements]
+        }
+      }
+
+      // Get old structure movements (category based) for backward compatibility
+      if (categoryNames.length > 0) {
+        const { data: oldMovements, error: oldError } = await supabase
+          .from('movement_view')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .in('category_name', categoryNames)
+          .order('movement_date', { ascending: false })
+
+        if (oldError) {
+          console.error('Error fetching old structure movements:', oldError)
+        } else {
+          console.log('🔍 Found old structure movements:', oldMovements?.length || 0)
+          if (oldMovements) allMovements = [...allMovements, ...oldMovements]
+        }
+      }
+
+      // Remove duplicates by ID
+      const uniqueMovements = allMovements.filter((movement, index, self) =>
+        index === self.findIndex(m => m.id === movement.id)
+      )
+
+      console.log('🔍 Total unique capital movements found:', uniqueMovements.length)
+      return uniqueMovements
     },
-    enabled: !!organizationId && !!projectId && !!supabase
+    enabled: !!organizationId && !!supabase && (!!aportesPropriosConcept || !!retirosPropriosConcept || !!aportesPropriosOld || !!retirosPropriosOld)
   })
 
   // Get all currencies for display
@@ -195,7 +251,10 @@ export default function FinancesCapitalMovements() {
       memberMovements.forEach(movement => {
         const amount = movement.amount || 0
         const currencyCode = movement.currency_code || 'N/A'
-        const isAporte = movement.category_id === aportesPropriosConcept?.id
+        
+        // Check both new structure (subcategory_id) and old structure (category_id)
+        const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
+                         movement.category_id === aportesPropriosOld?.id
         
         if (isAporte) {
           totalAportes += amount
@@ -215,7 +274,10 @@ export default function FinancesCapitalMovements() {
       const currencies: { [key: string]: { amount: number; currency: any } } = {}
       memberMovements.forEach(movement => {
         const currencyCode = movement.currency_code || 'N/A'
-        const isAporte = movement.category_id === aportesPropriosConcept?.id
+        
+        // Check both new structure (subcategory_id) and old structure (category_id)
+        const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
+                         movement.category_id === aportesPropriosOld?.id
         
         if (!currencies[currencyCode]) {
           currencies[currencyCode] = {
@@ -280,7 +342,10 @@ export default function FinancesCapitalMovements() {
   }
 
   const handleEdit = (movement: CapitalMovement) => {
-    const movementType = movement.category_id === aportesPropriosConcept?.id ? 'aportes_propios' : 'retiros_propios'
+    // Check both new structure (subcategory_id) and old structure (category_id)
+    const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
+                     movement.category_id === aportesPropriosOld?.id
+    const movementType = isAporte ? 'aportes_propios' : 'retiros_propios'
     openModal('NewMovementModal', { 
       movementType,
       editingMovement: movement 
@@ -515,10 +580,12 @@ export default function FinancesCapitalMovements() {
       sortable: true,
       sortType: "string" as const,
       render: (item: CapitalMovement) => {
-        const isAporte = item.category_id === aportesPropriosConcept?.id
+        // Check both new structure (subcategory_id) and old structure (category_id)
+        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
+                         item.category_id === aportesPropriosOld?.id
         return (
           <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
-            {item.category_name || 'Sin especificar'}
+            {item.subcategory_name || item.category_name || 'Sin especificar'}
           </Badge>
         )
       }
@@ -542,7 +609,9 @@ export default function FinancesCapitalMovements() {
       sortable: true,
       sortType: "number" as const,
       render: (item: CapitalMovement) => {
-        const isAporte = item.category_id === aportesPropriosConcept?.id
+        // Check both new structure (subcategory_id) and old structure (category_id)
+        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
+                         item.category_id === aportesPropriosOld?.id
         const formattedAmount = new Intl.NumberFormat('es-AR').format(item.amount || 0)
         
         return (
