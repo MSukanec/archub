@@ -34,7 +34,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
-import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartners } from '@/hooks/use-movement-partners'
+import { useMovementPartnerWithdrawals, useCreateMovementPartnerWithdrawals, useUpdateMovementPartnerWithdrawals } from '@/hooks/use-movement-partner-withdrawals'
+import { useMovementPartnerContributions, useCreateMovementPartnerContributions, useUpdateMovementPartnerContributions } from '@/hooks/use-movement-partner-contributions'
 
 // Función para crear schema dinámico basado en contexto
 const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
@@ -155,12 +156,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Mutaciones para partners (unificado para aportes y retiros)
-  const createMovementPartnersMutation = useCreateMovementPartners()
-  const updateMovementPartnersMutation = useUpdateMovementPartners()
+  // Mutaciones para retiros de socios
+  const createMovementPartnerWithdrawalsMutation = useCreateMovementPartnerWithdrawals()
+  const updateMovementPartnerWithdrawalsMutation = useUpdateMovementPartnerWithdrawals()
 
-  // Query para cargar partners existentes en modo edición
-  const { data: existingMovementPartners } = useMovementPartners(
+  // Query para cargar retiros de socios existentes en modo edición
+  const { data: existingPartnerWithdrawals } = useMovementPartnerWithdrawals(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
+
+  // Mutaciones para aportes de socios
+  const createMovementPartnerContributionsMutation = useCreateMovementPartnerContributions()
+  const updateMovementPartnerContributionsMutation = useUpdateMovementPartnerContributions()
+
+  // Query para cargar aportes de socios existentes en modo edición
+  const { data: existingPartnerContributions } = useMovementPartnerContributions(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
@@ -174,7 +184,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
-  const [selectedPartners, setSelectedPartners] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
+  const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
+  const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   
   // Flags para controlar efectos problemáticos
   const [isInitialLoading, setIsInitialLoading] = React.useState(false)
@@ -216,8 +227,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Load existing partner withdrawals when editing
   React.useEffect(() => {
-    if (isEditing && existingMovementPartners && existingMovementPartners.length > 0) {
-      const transformedPartners = existingMovementPartners.map((partner: any) => {
+    if (isEditing && existingPartnerWithdrawals && existingPartnerWithdrawals.length > 0) {
+      const transformedWithdrawals = existingPartnerWithdrawals.map((withdrawal: any) => {
         // Get partner display name
         let partnerName = 'Socio sin nombre'
         if (withdrawal.partners?.contacts) {
@@ -241,11 +252,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       })
       setSelectedPartnerWithdrawals(transformedWithdrawals)
     }
-  }, [isEditing, existingMovementPartners])
+  }, [isEditing, existingPartnerWithdrawals])
 
   // Load existing partner contributions when editing
   React.useEffect(() => {
-    // Este useEffect ya no es necesario ya que ambos usan el mismo estado selectedPartners
+    if (isEditing && existingPartnerContributions && existingPartnerContributions.length > 0) {
+      const transformedContributions = existingPartnerContributions.map((contribution: any) => {
         // Get partner display name
         let partnerName = 'Socio sin nombre'
         if (contribution.partners?.contacts) {
@@ -269,7 +281,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       })
       setSelectedPartnerContributions(transformedContributions)
     }
-  // }, [isEditing, existingMovementPartners]) // Este useEffect comentado
+  }, [isEditing, existingPartnerContributions])
 
   // Load existing subcontracts when editing
   React.useEffect(() => {
