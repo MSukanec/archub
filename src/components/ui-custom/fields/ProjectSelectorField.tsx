@@ -50,9 +50,9 @@ export default function ProjectSelectorField({
         <div className="flex items-center gap-2">
           {selectedProject ? (
             <>
-              <Avatar className="w-4 h-4">
+              <Avatar className="w-5 h-5 border-0">
                 <AvatarFallback 
-                  className="text-xs font-medium text-white"
+                  className="text-xs font-medium text-white border-0"
                   style={{ backgroundColor: selectedProject.color || 'hsl(var(--accent))' }}
                 >
                   {getProjectInitials(selectedProject.name)}
@@ -69,9 +69,9 @@ export default function ProjectSelectorField({
         {sortedProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
             <div className="flex items-center gap-2">
-              <Avatar className="w-4 h-4">
+              <Avatar className="w-5 h-5 border-0">
                 <AvatarFallback 
-                  className="text-xs font-medium text-white"
+                  className="text-xs font-medium text-white border-0"
                   style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
                 >
                   {getProjectInitials(project.name)}
