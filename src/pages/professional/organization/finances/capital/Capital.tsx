@@ -13,8 +13,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useMovementPartnerContributions } from '@/hooks/use-movement-partner-contributions'
-import { useMovementPartnerWithdrawals } from '@/hooks/use-movement-partner-withdrawals'
 
 import { useToast } from '@/hooks/use-toast'
 
@@ -203,18 +201,18 @@ export default function FinancesCapitalMovements() {
     enabled: !!supabase
   })
 
-  // Get all movement partner contributions to match partner data with movements
-  const { data: allPartnerContributions = [] } = useQuery({
-    queryKey: ['all-partner-contributions-for-capital', organizationId],
+  // Get all movement partners to match partner data with movements
+  const { data: allMovementPartners = [] } = useQuery({
+    queryKey: ['all-movement-partners-for-capital', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return []
 
-      // Get all partner contributions for movements in this organization
+      // Get all movement partners for movements in this organization
       const movementIds = movements.map(m => m.id)
       if (movementIds.length === 0) return []
 
       const { data, error } = await supabase
-        .from('movement_partner_contributions')
+        .from('movement_partners')
         .select(`
           id,
           movement_id,
@@ -233,7 +231,7 @@ export default function FinancesCapitalMovements() {
         .in('movement_id', movementIds)
 
       if (error) {
-        console.error('Error fetching partner contributions:', error)
+        console.error('Error fetching movement partners:', error)
         throw error
       }
 
@@ -348,19 +346,21 @@ export default function FinancesCapitalMovements() {
       })
     })
 
-    // Now process partner contributions (new aportes structure)
-    allPartnerContributions.forEach(contribution => {
-      const movement = movements.find(m => m.id === contribution.movement_id)
-      if (!movement || !contribution.partners?.contacts) return
+    // Now process movement partners (for aportes that use partner system)
+    allMovementPartners.forEach(partnerData => {
+      const movement = movements.find(m => m.id === partnerData.movement_id)
+      if (!movement || !partnerData.partners?.contacts) return
 
-      const contact = Array.isArray(contribution.partners.contacts) 
-        ? contribution.partners.contacts[0] 
-        : contribution.partners.contacts
+      // Only process if this is an aporte movement (new structure)
+      const isAporteMovement = movement.subcategory_id === aportesPropriosConcept?.id
+      if (!isAporteMovement) return
+
+      const contact = partnerData.partners.contacts
 
       if (!contact) return
 
       const partnerName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-      const partnerId = contribution.partner_id
+      const partnerId = partnerData.partner_id
 
       // Create a fake member object for partners
       const partnerAsMember = {
@@ -420,7 +420,7 @@ export default function FinancesCapitalMovements() {
       memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
       availableCurrencies: Array.from(currenciesSet).sort()
     }
-  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allPartnerContributions])
+  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allMovementPartners])
 
   // Filter movements based on search
   const filteredMovements = movements.filter(movement => {
@@ -437,14 +437,14 @@ export default function FinancesCapitalMovements() {
   })
 
   const handleAddAportePpropio = () => {
-    openModal('NewMovementModal', { 
+    openModal('movement', { 
       movementType: 'aportes_propios',
       editingMovement: null 
     })
   }
 
   const handleAddRetiroPpropio = () => {
-    openModal('NewMovementModal', { 
+    openModal('movement', { 
       movementType: 'retiros_propios',
       editingMovement: null 
     })
@@ -455,7 +455,7 @@ export default function FinancesCapitalMovements() {
     const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
                      movement.category_id === aportesPropriosOld?.id
     const movementType = isAporte ? 'aportes_propios' : 'retiros_propios'
-    openModal('NewMovementModal', { 
+    openModal('movement', { 
       movementType,
       editingMovement: movement 
     })
@@ -491,7 +491,7 @@ export default function FinancesCapitalMovements() {
   })
 
   const handleDelete = (movement: CapitalMovement) => {
-    openModal('ConfirmDeleteModal', {
+    openModal('delete-confirmation', {
       title: 'Eliminar Movimiento',
       message: `¿Estás seguro de que deseas eliminar este ${movement.category_name?.toLowerCase() || 'movimiento'}?`,
       onConfirm: () => deleteMutation.mutate(movement.id)
@@ -666,12 +666,10 @@ export default function FinancesCapitalMovements() {
         const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
         
         if (isAporteDeSocios) {
-          // Find partner contribution for this movement
-          const partnerContribution = allPartnerContributions.find(pc => pc.movement_id === item.id)
-          if (partnerContribution?.partners?.contacts) {
-            const contact = Array.isArray(partnerContribution.partners.contacts) 
-              ? partnerContribution.partners.contacts[0] 
-              : partnerContribution.partners.contacts
+          // Find movement partner for this movement
+          const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
+          if (movementPartner?.partners?.contacts) {
+            const contact = movementPartner.partners.contacts
             if (contact) {
               displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
             }

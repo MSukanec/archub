@@ -34,8 +34,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
-import { useMovementPartnerWithdrawals, useCreateMovementPartnerWithdrawals, useUpdateMovementPartnerWithdrawals } from '@/hooks/use-movement-partner-withdrawals'
-import { useMovementPartnerContributions, useCreateMovementPartnerContributions, useUpdateMovementPartnerContributions } from '@/hooks/use-movement-partner-contributions'
+import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartners } from '@/hooks/use-movement-partners'
 
 // Función para crear schema dinámico basado en contexto
 const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
@@ -156,21 +155,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Mutaciones para retiros de socios
-  const createMovementPartnerWithdrawalsMutation = useCreateMovementPartnerWithdrawals()
-  const updateMovementPartnerWithdrawalsMutation = useUpdateMovementPartnerWithdrawals()
+  // Mutaciones para partners (unificado)
+  const createMovementPartnersMutation = useCreateMovementPartners()
+  const updateMovementPartnersMutation = useUpdateMovementPartners()
 
-  // Query para cargar retiros de socios existentes en modo edición
-  const { data: existingPartnerWithdrawals } = useMovementPartnerWithdrawals(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
-
-  // Mutaciones para aportes de socios
-  const createMovementPartnerContributionsMutation = useCreateMovementPartnerContributions()
-  const updateMovementPartnerContributionsMutation = useUpdateMovementPartnerContributions()
-
-  // Query para cargar aportes de socios existentes en modo edición
-  const { data: existingPartnerContributions } = useMovementPartnerContributions(
+  // Query para cargar partners existentes en modo edición
+  const { data: existingPartners } = useMovementPartners(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
@@ -225,14 +215,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [movementData, movementConcepts, hasLoadedInitialData])
 
-  // Load existing partner withdrawals when editing
+  // Load existing partners when editing (unificado)
   React.useEffect(() => {
-    if (isEditing && existingPartnerWithdrawals && existingPartnerWithdrawals.length > 0) {
-      const transformedWithdrawals = existingPartnerWithdrawals.map((withdrawal: any) => {
+    if (isEditing && existingPartners && existingPartners.length > 0) {
+      const transformedPartners = existingPartners.map((partner: any) => {
         // Get partner display name
         let partnerName = 'Socio sin nombre'
-        if (withdrawal.partners?.contacts) {
-          const { contacts } = withdrawal.partners
+        if (partner.partners?.contacts) {
+          const { contacts } = partner.partners
           if (contacts.company_name) {
             partnerName = contacts.company_name
           } else {
@@ -246,42 +236,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
 
         return {
-          partner_id: withdrawal.partner_id,
+          partner_id: partner.partner_id,
           partner_name: partnerName
         }
       })
-      setSelectedPartnerWithdrawals(transformedWithdrawals)
+      
+      // Determinar si es aporte o retiro basado en el subcategory_id del movimiento actual
+      if (editingMovement?.subcategory_id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb') {
+        // Es aporte de socios
+        setSelectedPartnerContributions(transformedPartners)
+      } else if (editingMovement?.subcategory_id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') {
+        // Es retiro de socios
+        setSelectedPartnerWithdrawals(transformedPartners)
+      }
     }
-  }, [isEditing, existingPartnerWithdrawals])
-
-  // Load existing partner contributions when editing
-  React.useEffect(() => {
-    if (isEditing && existingPartnerContributions && existingPartnerContributions.length > 0) {
-      const transformedContributions = existingPartnerContributions.map((contribution: any) => {
-        // Get partner display name
-        let partnerName = 'Socio sin nombre'
-        if (contribution.partners?.contacts) {
-          const { contacts } = contribution.partners
-          if (contacts.company_name) {
-            partnerName = contacts.company_name
-          } else {
-            const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-            if (fullName) {
-              partnerName = fullName
-            } else if (contacts.email) {
-              partnerName = contacts.email
-            }
-          }
-        }
-
-        return {
-          partner_id: contribution.partner_id,
-          partner_name: partnerName
-        }
-      })
-      setSelectedPartnerContributions(transformedContributions)
-    }
-  }, [isEditing, existingPartnerContributions])
+  }, [isEditing, existingPartners, editingMovement?.subcategory_id])
 
   // Load existing subcontracts when editing
   React.useEffect(() => {
@@ -1083,18 +1052,23 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (projectClientsError) throw projectClientsError
       }
 
-      // Si hay aportes de socios seleccionados, guardar las asignaciones en movement_partner_contributions
-      if (selectedPartnerContributions && selectedPartnerContributions.length > 0) {
-        const partnerContributionsData = selectedPartnerContributions.map(contribution => ({
+      // Si hay partners seleccionados (aportes y retiros), guardar en movement_partners
+      const allPartners = [
+        ...(selectedPartnerWithdrawals || []),
+        ...(selectedPartnerContributions || [])
+      ]
+      
+      if (allPartners.length > 0) {
+        const partnerData = allPartners.map(partner => ({
           movement_id: result.id,
-          partner_id: contribution.partner_id
+          partner_id: partner.partner_id
         }))
 
-        const { error: partnerContributionsError } = await supabase
-          .from('movement_partner_contributions')
-          .insert(partnerContributionsData)
+        const { error: partnerError } = await supabase
+          .from('movement_partners')
+          .insert(partnerData)
 
-        if (partnerContributionsError) throw partnerContributionsError
+        if (partnerError) throw partnerError
       }
 
       return result
@@ -1122,10 +1096,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           queryKey: ['movement-project-clients', result.id] 
         })
         queryClient.invalidateQueries({ 
-          queryKey: ['movement-partner-withdrawals', result.id] 
+          queryKey: ['movement-partners', result.id] 
         })
         queryClient.invalidateQueries({ 
-          queryKey: ['movement-partner-contributions', result.id] 
+          queryKey: ['all-movement-partners'] 
         })
       }
       

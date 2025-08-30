@@ -4,11 +4,10 @@ import { usePartners, Partner } from '@/hooks/use-partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
+import type { PartnerItem } from '@/hooks/use-movement-partners'
 
-export interface PartnerWithdrawalItem {
-  partner_id: string
-  partner_name: string
-}
+// Re-export for compatibility
+export type PartnerWithdrawalItem = PartnerItem
 
 interface PartnerWithdrawalsFieldsProps {
   selectedPartnerWithdrawals: PartnerWithdrawalItem[]
