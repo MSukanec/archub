@@ -333,7 +333,7 @@ export default function Movements() {
   });
 
   const handleEdit = (movement: Movement) => {
-    openModal('organization-movement', { editingMovement: movement });
+    openModal('movement', { editingMovement: movement });
   };
 
   const handleView = (movement: Movement) => {
@@ -353,7 +353,7 @@ export default function Movements() {
       _conversionData: conversionGroup
     };
     
-    openModal('organization-movement', { editingMovement: conversionMovement as any });
+    openModal('movement', { editingMovement: conversionMovement as any });
   };
 
   const handleViewConversion = (conversionGroup: ConversionGroup) => {
@@ -384,7 +384,7 @@ export default function Movements() {
       _transferData: transferGroup
     };
     
-    openModal('organization-movement', { editingMovement: transferMovement as any });
+    openModal('movement', { editingMovement: transferMovement as any });
   };
 
   const handleViewTransfer = (transferGroup: TransferGroup) => {
@@ -555,7 +555,7 @@ export default function Movements() {
           id: 'create',
           icon: <Plus className="h-6 w-6" />,
           label: 'Nuevo Movimiento',
-          onClick: () => openModal('organization-movement'),
+          onClick: () => openModal('movement'),
           variant: 'primary'
         },
         filter: {
@@ -1253,11 +1253,6 @@ export default function Movements() {
   const headerProps = {
     title: "Movimientos",
     icon: DollarSign,
-    actionButton: {
-      label: "Nuevo Movimiento",
-      icon: Plus,
-      onClick: () => openModal('organization-movement')
-    }
   };
 
 
@@ -1287,7 +1282,7 @@ export default function Movements() {
           description="Crea el primer movimiento del proyecto"
           action={
             <Button 
-              onClick={() => openModal("organization-movement")}
+              onClick={() => openModal("movement")}
               className="w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
