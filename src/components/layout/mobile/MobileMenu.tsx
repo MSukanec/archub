@@ -286,12 +286,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         label: 'Biblioteca',
         action: 'section'
       },
-      {
+      ...(isAdmin ? [{
         id: 'provider',
         icon: Package,
         label: 'Proveedor',
         action: 'section'
-      },
+      }] : []),
       ...(isAdmin ? [{
         id: 'admin',
         icon: Crown,

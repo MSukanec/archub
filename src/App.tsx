@@ -211,7 +211,11 @@ function Router() {
         </Route>
 
         {/* Provider Routes */}
-        <Route path="/proveedor/productos" component={Products} />
+        <Route path="/proveedor/productos">
+          <AuthAdmin>
+            <Products />
+          </AuthAdmin>
+        </Route>
 
 
 

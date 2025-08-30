@@ -513,13 +513,13 @@ export function Sidebar() {
         defaultRoute: '/library/documentation',
         isActive: location.startsWith('/library')
       },
-      {
+      ...(isAdmin ? [{
         id: 'proveedor',
         icon: Package,
         label: 'Proveedor',
         defaultRoute: '/proveedor/productos',
         isActive: location.startsWith('/proveedor')
-      },
+      }] : []),
       ...(isAdmin ? [{
         id: 'administracion',
         icon: Crown,
