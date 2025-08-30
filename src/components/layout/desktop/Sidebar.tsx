@@ -68,7 +68,6 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
-import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectContext } from "@/stores/projectContext";
 // Función auxiliar para generar iniciales de organizaciones
 function getOrganizationInitials(name: string): string {
@@ -813,12 +812,6 @@ export function Sidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Plan Badge - solo en nivel organization */}
-          {sidebarLevel === 'organization' && (
-            <div className="mb-2">
-              <PlanBadge isExpanded={isExpanded} />
-            </div>
-          )}
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
           
