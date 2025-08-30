@@ -1,20 +1,51 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, X, Users } from 'lucide-react'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { X, Plus } from 'lucide-react'
 import { usePartners, Partner } from '@/hooks/use-partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 
-interface PartnerWithdrawalsFieldsProps {
-  selectedPartnerWithdrawals: Array<{partner_id: string, partner_name: string, amount: number}>
-  onPartnerWithdrawalsChange: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string, amount: number}>) => void
+export interface PartnerWithdrawalRow {
+  partner_id: string
+  amount: string
 }
 
-export function PartnerWithdrawalsFields({ selectedPartnerWithdrawals, onPartnerWithdrawalsChange }: PartnerWithdrawalsFieldsProps) {
+export interface PartnerWithdrawalItem {
+  partner_id: string
+  partner_name: string
+  amount: number
+}
+
+interface PartnerWithdrawalsFieldsProps {
+  selectedPartnerWithdrawals: PartnerWithdrawalItem[]
+  onPartnerWithdrawalsChange: (partnerWithdrawals: PartnerWithdrawalItem[]) => void
+}
+
+export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> = ({
+  selectedPartnerWithdrawals,
+  onPartnerWithdrawalsChange
+}) => {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const { data: partners = [], isLoading } = usePartners(organizationId, { enabled: !!organizationId })
+
+  const { data: partners = [], isLoading } = usePartners(
+    organizationId,
+    { enabled: !!organizationId }
+  )
+
+  // Initialize rows from initial partner withdrawals or create one empty row
+  const initializeRows = (): PartnerWithdrawalRow[] => {
+    if (selectedPartnerWithdrawals.length > 0) {
+      return selectedPartnerWithdrawals.map(partnerWithdrawal => ({
+        partner_id: partnerWithdrawal.partner_id,
+        amount: partnerWithdrawal.amount.toString()
+      }))
+    }
+    return [{ partner_id: '', amount: '' }]
+  }
+
+  const [partnerWithdrawalRows, setPartnerWithdrawalRows] = useState<PartnerWithdrawalRow[]>(initializeRows())
 
   // Function to get partner display name
   const getPartnerDisplayName = (partner: Partner): string => {
@@ -41,106 +72,129 @@ export function PartnerWithdrawalsFields({ selectedPartnerWithdrawals, onPartner
     label: getPartnerDisplayName(partner)
   }))
 
+  // Handle partner change
   const handlePartnerChange = (index: number, partnerId: string) => {
-    const selectedPartner = partners.find(p => p.id === partnerId)
-    const partnerName = selectedPartner ? getPartnerDisplayName(selectedPartner) : 'Sin nombre'
-
-    const updatedPartnerWithdrawals = selectedPartnerWithdrawals.map((row, i) => 
-      i === index 
-        ? { ...row, partner_id: partnerId, partner_name: partnerName }
-        : row
-    )
-    onPartnerWithdrawalsChange(updatedPartnerWithdrawals)
+    const newRows = [...partnerWithdrawalRows]
+    newRows[index] = { ...newRows[index], partner_id: partnerId }
+    setPartnerWithdrawalRows(newRows)
+    updateSelectedPartnerWithdrawals(newRows)
   }
 
+  // Handle amount change
   const handleAmountChange = (index: number, amount: string) => {
-    const updatedPartnerWithdrawals = selectedPartnerWithdrawals.map((row, i) => 
-      i === index 
-        ? { ...row, amount: parseFloat(amount) || 0 }
-        : row
-    )
-    onPartnerWithdrawalsChange(updatedPartnerWithdrawals)
+    const newRows = [...partnerWithdrawalRows]
+    newRows[index] = { ...newRows[index], amount }
+    setPartnerWithdrawalRows(newRows)
+    updateSelectedPartnerWithdrawals(newRows)
   }
 
-  const addPartnerWithdrawalRow = () => {
-    onPartnerWithdrawalsChange([...selectedPartnerWithdrawals, { partner_id: '', partner_name: '', amount: 0 }])
+  // Add new row
+  const addNewRow = () => {
+    const newRows = [...partnerWithdrawalRows, { partner_id: '', amount: '' }]
+    setPartnerWithdrawalRows(newRows)
+    updateSelectedPartnerWithdrawals(newRows)
   }
 
-  const removePartnerWithdrawalRow = (index: number) => {
-    if (selectedPartnerWithdrawals.length > 1) {
-      const updatedPartnerWithdrawals = selectedPartnerWithdrawals.filter((_, i) => i !== index)
-      onPartnerWithdrawalsChange(updatedPartnerWithdrawals)
+  // Remove row
+  const removeRow = (index: number) => {
+    if (partnerWithdrawalRows.length > 1) {
+      const newRows = partnerWithdrawalRows.filter((_, i) => i !== index)
+      setPartnerWithdrawalRows(newRows)
+      updateSelectedPartnerWithdrawals(newRows)
     }
   }
 
-  const totalAmount = selectedPartnerWithdrawals.reduce((sum, partnerWithdrawal) => sum + (partnerWithdrawal.amount || 0), 0)
+  // Update selectedPartnerWithdrawals based on rows
+  const updateSelectedPartnerWithdrawals = (rows: PartnerWithdrawalRow[]) => {
+    const validPartnerWithdrawals = rows
+      .filter(row => row.partner_id && row.amount && parseFloat(row.amount) > 0)
+      .map(row => {
+        const partner = partners.find((p: Partner) => p.id === row.partner_id)
+        return {
+          partner_id: row.partner_id,
+          partner_name: partner ? getPartnerDisplayName(partner) : 'Socio desconocido',
+          amount: parseFloat(row.amount)
+        }
+      })
+
+    onPartnerWithdrawalsChange(validPartnerWithdrawals)
+  }
+
+  // Sync external changes with internal state
+  useEffect(() => {
+    const currentRows = partnerWithdrawalRows
+    const expectedRows = selectedPartnerWithdrawals.length > 0
+      ? selectedPartnerWithdrawals.map(partnerWithdrawal => ({
+          partner_id: partnerWithdrawal.partner_id,
+          amount: partnerWithdrawal.amount.toString()
+        }))
+      : [{ partner_id: '', amount: '' }]
+
+    if (JSON.stringify(currentRows) !== JSON.stringify(expectedRows)) {
+      setPartnerWithdrawalRows(expectedRows)
+    }
+  }, [selectedPartnerWithdrawals])
 
   return (
-    <div className="space-y-4 p-4 bg-muted/20 rounded-lg border">
-      <div className="flex items-center gap-2">
-        <Users className="h-4 w-4" />
-        <h3 className="font-medium text-sm">Gestión de Retiros de Socios</h3>
-      </div>
-      
-      {selectedPartnerWithdrawals.map((partnerWithdrawal, index) => (
-        <div key={index} className="grid grid-cols-[2fr,1fr,auto] gap-3 items-end">
+    <div className="space-y-4">
+      {/* Partner Withdrawal Rows - Default two columns */}
+      {partnerWithdrawalRows.map((row, index) => (
+        <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">
+          {/* Left Column - Partner Selector */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Socio
-            </label>
             <ComboBox
-              options={partnerOptions}
-              value={partnerWithdrawal.partner_id}
+              value={row.partner_id}
               onValueChange={(value) => handlePartnerChange(index, value)}
+              options={partnerOptions}
               placeholder="Seleccionar socio..."
+              searchPlaceholder="Buscar socio..."
+              emptyMessage={isLoading ? "Cargando..." : "No hay socios disponibles"}
+              disabled={isLoading}
             />
           </div>
           
-          <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Monto
-            </label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={partnerWithdrawal.amount || ''}
-              onChange={(e) => handleAmountChange(index, e.target.value)}
-            />
-          </div>
-          
-          <div className="flex gap-1">
-            {index === selectedPartnerWithdrawals.length - 1 && (
+          {/* Right Column - Amount */}
+          <div className="flex items-end gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+              <Input
+                type="number"
+                value={row.amount}
+                onChange={(e) => handleAmountChange(index, e.target.value)}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                className="text-right pl-8"
+              />
+            </div>
+            {partnerWithdrawalRows.length > 1 && (
               <Button
                 type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={addPartnerWithdrawalRow}
+                variant="ghost"
+                size="default"
+                onClick={() => removeRow(index)}
+                className="h-10 w-10 p-0"
               >
-                <Plus className="h-3 w-3" />
-              </Button>
-            )}
-            {selectedPartnerWithdrawals.length > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={() => removePartnerWithdrawalRow(index)}
-              >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
         </div>
       ))}
       
-      {totalAmount > 0 && (
-        <div className="flex justify-between items-center pt-3 border-t border-border">
-          <span className="text-sm font-medium">Total:</span>
-          <span className="text-sm font-bold">${totalAmount.toFixed(2)}</span>
-        </div>
-      )}
+      {/* Add New Row Button */}
+      <div className="flex justify-center pt-2">
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={addNewRow}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Agregar Otro
+        </Button>
+      </div>
     </div>
   )
 }

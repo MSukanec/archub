@@ -1,23 +1,46 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, X, FileText } from 'lucide-react'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { Plus, X } from 'lucide-react'
 import { useProjectSubcontracts } from '@/hooks/use-project-subcontracts'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-interface SubcontractsFieldsProps {
-  selectedSubcontracts: Array<{subcontract_id: string, contact_name: string, amount: number}>
-  onSubcontractsChange: (subcontractsList: Array<{subcontract_id: string, contact_name: string, amount: number}>) => void
+// Subcontract item interface
+export interface SubcontractItem {
+  subcontract_id: string
+  contact_name: string
+  amount: number
 }
 
-export function SubcontractsFields({ selectedSubcontracts, onSubcontractsChange }: SubcontractsFieldsProps) {
+// Props interface
+interface SubcontractsFieldsProps {
+  selectedSubcontracts: SubcontractItem[]
+  onSubcontractsChange: (subcontractsList: SubcontractItem[]) => void
+}
+
+export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
+  selectedSubcontracts,
+  onSubcontractsChange
+}) => {
+  // Initialize with existing subcontracts or one empty row
+  const [subcontractsRows, setSubcontractsRows] = useState<SubcontractItem[]>(() => {
+    if (selectedSubcontracts && selectedSubcontracts.length > 0) {
+      return selectedSubcontracts
+    }
+    return [{ subcontract_id: '', contact_name: '', amount: 0 }]
+  })
+  
+  // Get current user data to access project info
   const { data: userData } = useCurrentUser()
   const projectId = userData?.preferences?.last_project_id
+
+  // Get project subcontracts
   const { data: projectSubcontracts = [], isLoading } = useProjectSubcontracts(projectId)
 
   // Transform subcontracts data for ComboBox  
   const subcontractsOptions = projectSubcontracts.map((subcontract: any) => {
+    // Handle both array and object contact structures
     const contact = Array.isArray(subcontract.contact) ? subcontract.contact[0] : subcontract.contact
     const contactName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || contact?.company_name || 'Sin nombre'
     return {
@@ -31,107 +54,112 @@ export function SubcontractsFields({ selectedSubcontracts, onSubcontractsChange 
     let contactName = 'Sin nombre'
     
     if (selectedSubcontract) {
+      // Handle both array and object contact structures
       const contact = Array.isArray(selectedSubcontract.contact) ? selectedSubcontract.contact[0] : selectedSubcontract.contact
       const fullContactName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || contact?.company_name || 'Sin nombre'
       contactName = selectedSubcontract.title || fullContactName
     }
 
-    const updatedSubcontracts = selectedSubcontracts.map((row, i) => 
+    const newRows = subcontractsRows.map((row, i) => 
       i === index 
         ? { ...row, subcontract_id: subcontractId, contact_name: contactName }
         : row
     )
-    onSubcontractsChange(updatedSubcontracts)
+    setSubcontractsRows(newRows)
+    onSubcontractsChange(newRows)
   }
 
   const handleAmountChange = (index: number, amount: string) => {
-    const updatedSubcontracts = selectedSubcontracts.map((row, i) => 
+    const newRows = subcontractsRows.map((row, i) => 
       i === index 
         ? { ...row, amount: parseFloat(amount) || 0 }
         : row
     )
-    onSubcontractsChange(updatedSubcontracts)
+    setSubcontractsRows(newRows)
+    onSubcontractsChange(newRows)
   }
 
-  const addSubcontractRow = () => {
-    onSubcontractsChange([...selectedSubcontracts, { subcontract_id: '', contact_name: '', amount: 0 }])
+  const addNewRow = () => {
+    const newRows = [...subcontractsRows, { subcontract_id: '', contact_name: '', amount: 0 }]
+    setSubcontractsRows(newRows)
+    onSubcontractsChange(newRows)
   }
 
-  const removeSubcontractRow = (index: number) => {
-    if (selectedSubcontracts.length > 1) {
-      const updatedSubcontracts = selectedSubcontracts.filter((_, i) => i !== index)
-      onSubcontractsChange(updatedSubcontracts)
+  const removeRow = (index: number) => {
+    if (subcontractsRows.length > 1) {
+      const newRows = subcontractsRows.filter((_, i) => i !== index)
+      setSubcontractsRows(newRows)
+      onSubcontractsChange(newRows)
     }
   }
 
-  const totalAmount = selectedSubcontracts.reduce((sum, subcontract) => sum + (subcontract.amount || 0), 0)
+  // Sync external changes with internal state
+  useEffect(() => {
+    if (selectedSubcontracts !== subcontractsRows) {
+      setSubcontractsRows(selectedSubcontracts.length > 0 ? selectedSubcontracts : [{ subcontract_id: '', contact_name: '', amount: 0 }])
+    }
+  }, [selectedSubcontracts])
 
   return (
-    <div className="space-y-4 p-4 bg-muted/20 rounded-lg border">
-      <div className="flex items-center gap-2">
-        <FileText className="h-4 w-4" />
-        <h3 className="font-medium text-sm">Gestión de Subcontratos</h3>
-      </div>
-      
-      {selectedSubcontracts.map((subcontract, index) => (
-        <div key={index} className="grid grid-cols-[2fr,1fr,auto] gap-3 items-end">
+    <div className="space-y-4">
+      {/* Subcontracts Rows - Default two columns */}
+      {subcontractsRows.map((row, index) => (
+        <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">
+          {/* Left Column - Subcontract Selector */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Subcontrato
-            </label>
             <ComboBox
-              options={subcontractsOptions}
-              value={subcontract.subcontract_id}
+              value={row.subcontract_id}
               onValueChange={(value) => handleSubcontractChange(index, value)}
+              options={subcontractsOptions}
               placeholder="Seleccionar subcontrato..."
+              searchPlaceholder="Buscar subcontrato..."
+              emptyMessage={isLoading ? "Cargando..." : "No hay subcontratos disponibles"}
+              disabled={isLoading}
             />
           </div>
           
-          <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Monto
-            </label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={subcontract.amount || ''}
-              onChange={(e) => handleAmountChange(index, e.target.value)}
-            />
-          </div>
-          
-          <div className="flex gap-1">
-            {index === selectedSubcontracts.length - 1 && (
+          {/* Right Column - Amount */}
+          <div className="flex items-end gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+              <Input
+                type="number"
+                value={row.amount}
+                onChange={(e) => handleAmountChange(index, e.target.value)}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                className="text-right pl-8"
+              />
+            </div>
+            {subcontractsRows.length > 1 && (
               <Button
                 type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={addSubcontractRow}
+                variant="ghost"
+                size="default"
+                onClick={() => removeRow(index)}
+                className="h-10 w-10 p-0"
               >
-                <Plus className="h-3 w-3" />
-              </Button>
-            )}
-            {selectedSubcontracts.length > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={() => removeSubcontractRow(index)}
-              >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
         </div>
       ))}
       
-      {totalAmount > 0 && (
-        <div className="flex justify-between items-center pt-3 border-t border-border">
-          <span className="text-sm font-medium">Total:</span>
-          <span className="text-sm font-bold">${totalAmount.toFixed(2)}</span>
-        </div>
-      )}
+      {/* Add New Row Button */}
+      <div className="flex justify-center pt-2">
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={addNewRow}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Agregar Otro
+        </Button>
+      </div>
     </div>
   )
 }
