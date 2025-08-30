@@ -90,6 +90,32 @@ export function DefaultMovementFields({
       />
       */}
 
+      {/* Fila: Moneda y Monto (ancho completo) */}
+      <div className="col-span-2">
+        <FormItem>
+          <FormLabel>Moneda y Monto *</FormLabel>
+          <FormControl>
+            <CurrencyAmountField
+              value={form.watch('amount') || undefined}
+              currency={form.watch('currency_id') || ''}
+              currencies={currencies?.map(orgCurrency => ({
+                id: orgCurrency.currency?.id || '',
+                name: orgCurrency.currency?.name || 'Sin nombre',
+                symbol: orgCurrency.currency?.symbol || '$'
+              })) || []}
+              onValueChange={(value) => {
+                form.setValue('amount', value || 0)
+              }}
+              onCurrencyChange={(currencyId) => {
+                form.setValue('currency_id', currencyId)
+              }}
+              placeholder="0.00"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </div>
+
       {/* Fila: Billetera | Cotización */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
@@ -137,32 +163,6 @@ export function DefaultMovementFields({
             </FormItem>
           )}
         />
-      </div>
-
-      {/* Fila: Moneda y Monto (ancho completo) */}
-      <div className="col-span-2">
-        <FormItem>
-          <FormLabel>Moneda y Monto *</FormLabel>
-          <FormControl>
-            <CurrencyAmountField
-              value={form.watch('amount') || undefined}
-              currency={form.watch('currency_id') || ''}
-              currencies={currencies?.map(orgCurrency => ({
-                id: orgCurrency.currency?.id || '',
-                name: orgCurrency.currency?.name || 'Sin nombre',
-                symbol: orgCurrency.currency?.symbol || '$'
-              })) || []}
-              onValueChange={(value) => {
-                form.setValue('amount', value || 0)
-              }}
-              onCurrencyChange={(currencyId) => {
-                form.setValue('currency_id', currencyId)
-              }}
-              placeholder="0.00"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
       </div>
 
       {/* Botón para Selección de Persona - Solo si showPersonButton es true */}
