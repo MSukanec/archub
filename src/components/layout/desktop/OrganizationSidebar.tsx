@@ -10,6 +10,10 @@ import {
   PanelLeftOpen,
   PanelLeftClose,
   Home,
+  DollarSign,
+  Images,
+  Calendar,
+  Users,
 } from "lucide-react";
 import SidebarButton from "./SidebarButton";
 
@@ -58,7 +62,7 @@ export function OrganizationSidebar() {
           {/* Dashboard Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<Home className="w-[18px] h-[18px]" />}
+              icon={<Home className="w-[18px] h-[18px] text-white" />}
               label="Dashboard"
               href="/dashboard"
               isActive={location === '/dashboard'}
@@ -68,8 +72,57 @@ export function OrganizationSidebar() {
             />
           </div>
           
-          {/* Línea divisoria después de Dashboard */}
-          <div className="h-px bg-white/30 my-2"></div>
+          {/* Movements Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<DollarSign className="w-[18px] h-[18px] text-white" />}
+              label="Movimientos"
+              href="/organization/finances/movements"
+              isActive={location === '/organization/finances/movements'}
+              isExpanded={false}
+              variant="main"
+              iconColor="text-white"
+            />
+          </div>
+          
+          {/* Media Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<Images className="w-[18px] h-[18px] text-white" />}
+              label="Media"
+              href="/general/media"
+              isActive={location === '/general/media'}
+              isExpanded={false}
+              variant="main"
+              iconColor="text-white"
+            />
+          </div>
+          
+          {/* Calendar Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<Calendar className="w-[18px] h-[18px] text-white" />}
+              label="Calendario"
+              href="/general/calendar"
+              isActive={location === '/general/calendar'}
+              isExpanded={false}
+              variant="main"
+              iconColor="text-white"
+            />
+          </div>
+          
+          {/* Contacts Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<Users className="w-[18px] h-[18px] text-white" />}
+              label="Contactos"
+              href="/organization/contacts"
+              isActive={location === '/organization/contacts'}
+              isExpanded={false}
+              variant="main"
+              iconColor="text-white"
+            />
+          </div>
         </div>
       </div>
 
