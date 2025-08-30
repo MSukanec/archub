@@ -13,8 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { useMovementPartnerContributions } from '@/hooks/use-movement-partner-contributions'
-import { useMovementPartnerWithdrawals } from '@/hooks/use-movement-partner-withdrawals'
+import { useMovementPartners } from '@/hooks/use-movement-partners'
 
 import { useToast } from '@/hooks/use-toast'
 
@@ -203,18 +202,18 @@ export default function FinancesCapitalMovements() {
     enabled: !!supabase
   })
 
-  // Get all movement partner contributions to match partner data with movements
-  const { data: allPartnerContributions = [] } = useQuery({
-    queryKey: ['all-partner-contributions-for-capital', organizationId],
+  // Get all movement partners to match partner data with movements
+  const { data: allMovementPartners = [] } = useQuery({
+    queryKey: ['all-movement-partners-for-capital', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return []
 
-      // Get all partner contributions for movements in this organization
+      // Get all movement partners for movements in this organization
       const movementIds = movements.map(m => m.id)
       if (movementIds.length === 0) return []
 
       const { data, error } = await supabase
-        .from('movement_partner_contributions')
+        .from('movement_partners')
         .select(`
           id,
           movement_id,
@@ -233,7 +232,7 @@ export default function FinancesCapitalMovements() {
         .in('movement_id', movementIds)
 
       if (error) {
-        console.error('Error fetching partner contributions:', error)
+        console.error('Error fetching movement partners:', error)
         throw error
       }
 
@@ -348,19 +347,19 @@ export default function FinancesCapitalMovements() {
       })
     })
 
-    // Now process partner contributions (new aportes structure)
-    allPartnerContributions.forEach(contribution => {
-      const movement = movements.find(m => m.id === contribution.movement_id)
-      if (!movement || !contribution.partners?.contacts) return
+    // Now process movement partners (both aportes and retiros using partner system)
+    allMovementPartners.forEach(movementPartner => {
+      const movement = movements.find(m => m.id === movementPartner.movement_id)
+      if (!movement || !movementPartner.partners?.contacts) return
 
-      const contact = Array.isArray(contribution.partners.contacts) 
-        ? contribution.partners.contacts[0] 
-        : contribution.partners.contacts
+      const contact = Array.isArray(movementPartner.partners.contacts) 
+        ? movementPartner.partners.contacts[0] 
+        : movementPartner.partners.contacts
 
       if (!contact) return
 
       const partnerName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-      const partnerId = contribution.partner_id
+      const partnerId = movementPartner.partner_id
 
       // Create a fake member object for partners
       const partnerAsMember = {
@@ -386,13 +385,19 @@ export default function FinancesCapitalMovements() {
       const amount = movement.amount || 0
       const currencyCode = movement.currency_code || 'N/A'
 
-      // This is an aporte (contribution)
-      existing.totalAportes += amount
+      // Check if this is an aporte or retiro based on subcategory
+      const isAporte = movement.subcategory_id === aportesPropriosConcept?.id
+      
+      if (isAporte) {
+        existing.totalAportes += amount
+      } else {
+        existing.totalRetiros += amount
+      }
 
       if (currencyCode === 'USD') {
-        existing.dollarizedTotal += amount
+        existing.dollarizedTotal += isAporte ? amount : -amount
       } else if (currencyCode === 'ARS' && movement.exchange_rate) {
-        existing.dollarizedTotal += (amount / movement.exchange_rate)
+        existing.dollarizedTotal += isAporte ? (amount / movement.exchange_rate) : -(amount / movement.exchange_rate)
       }
 
       // Add to currencies
@@ -406,7 +411,7 @@ export default function FinancesCapitalMovements() {
           }
         }
       }
-      existing.currencies[currencyCode].amount += amount
+      existing.currencies[currencyCode].amount += isAporte ? amount : -amount
 
       existing.saldo = existing.totalAportes - existing.totalRetiros
 
@@ -420,7 +425,7 @@ export default function FinancesCapitalMovements() {
       memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
       availableCurrencies: Array.from(currenciesSet).sort()
     }
-  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allPartnerContributions])
+  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allMovementPartners])
 
   // Filter movements based on search
   const filteredMovements = movements.filter(movement => {
@@ -662,16 +667,17 @@ export default function FinancesCapitalMovements() {
       render: (item: CapitalMovement) => {
         let displayName = null
         
-        // Check if this is an "Aportes de Socios" movement that uses partner system
-        const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
+        // Check if this movement uses the partner system (both aportes and retiros de socios)
+        const usesPartnerSystem = item.subcategory_id === aportesPropriosConcept?.id || 
+                                  item.subcategory_id === retirosPropriosConcept?.id
         
-        if (isAporteDeSocios) {
-          // Find partner contribution for this movement
-          const partnerContribution = allPartnerContributions.find(pc => pc.movement_id === item.id)
-          if (partnerContribution?.partners?.contacts) {
-            const contact = Array.isArray(partnerContribution.partners.contacts) 
-              ? partnerContribution.partners.contacts[0] 
-              : partnerContribution.partners.contacts
+        if (usesPartnerSystem) {
+          // Find partner for this movement
+          const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
+          if (movementPartner?.partners?.contacts) {
+            const contact = Array.isArray(movementPartner.partners.contacts) 
+              ? movementPartner.partners.contacts[0] 
+              : movementPartner.partners.contacts
             if (contact) {
               displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
             }
