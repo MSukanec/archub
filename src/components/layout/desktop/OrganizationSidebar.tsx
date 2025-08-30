@@ -14,6 +14,7 @@ import {
   Images,
   Calendar,
   Users,
+  FolderOpen,
 } from "lucide-react";
 import SidebarButton from "./SidebarButton";
 
@@ -123,6 +124,19 @@ export function OrganizationSidebar() {
               label="Contactos"
               href="/organization/contacts"
               isActive={location === '/organization/contacts'}
+              isExpanded={false}
+              variant="main"
+              iconColor="rgb(235, 235, 235)"
+            />
+          </div>
+          
+          {/* Projects Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<FolderOpen className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
+              label="Proyectos"
+              href="/construction/dashboard"
+              isActive={location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')}
               isExpanded={false}
               variant="main"
               iconColor="rgb(235, 235, 235)"
