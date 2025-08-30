@@ -134,10 +134,7 @@ export function useCreateMovementPartners() {
       queryClient.invalidateQueries({ queryKey: ['movement-partners', variables.movementId] })
       queryClient.invalidateQueries({ queryKey: ['all-movement-partners'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      toast({
-        title: 'Socios asignados',
-        description: 'Los socios han sido asignados al movimiento correctamente',
-      })
+      // No mostrar toast aquí - el componente padre maneja las notificaciones
     },
     onError: (error) => {
       console.error('Error creating movement partners:', error)
@@ -192,10 +189,7 @@ export function useUpdateMovementPartners() {
       queryClient.invalidateQueries({ queryKey: ['movement-partners', variables.movementId] })
       queryClient.invalidateQueries({ queryKey: ['all-movement-partners'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      toast({
-        title: 'Socios actualizados',
-        description: 'Los socios del movimiento han sido actualizados correctamente',
-      })
+      // No mostrar toast aquí - el componente padre maneja las notificaciones
     },
     onError: (error) => {
       console.error('Error updating movement partners:', error)
