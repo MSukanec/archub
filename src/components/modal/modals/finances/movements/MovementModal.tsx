@@ -794,9 +794,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
 
       // Preparar datos del movimiento según la estructura de la tabla
+      console.log('🔧 MovementModal mutation - data.project_id:', data.project_id)
       const movementData = {
         organization_id: userData.organization.id,
-        project_id: userData.preferences?.last_project_id || null,
+        project_id: data.project_id || null,
         movement_date: data.movement_date.getFullYear() + '-' + 
           String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(data.movement_date.getDate()).padStart(2, '0'),
@@ -1249,6 +1250,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
+    console.log('🔧 MovementModal onSubmit - values.project_id:', values.project_id)
+    console.log('🔧 MovementModal onSubmit - full values:', values)
     createMovementMutation.mutate(values)
   }
 
