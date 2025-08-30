@@ -208,3 +208,27 @@ TABLA MOVEMENT_CLIENTS:
     "data_type": "timestamp with time zone"
   }
 ]
+
+TABLE MOVEMENT_PARTNER_WITHDRAWALS:
+
+create table public.movement_partner_withdrawals (
+  id uuid not null default gen_random_uuid (),
+  movement_id uuid not null,
+  partner_id uuid not null,
+  created_at timestamp with time zone not null default now(),
+  constraint movement_partner_withdrawals_pkey primary key (id),
+  constraint movement_partner_withdrawals_movement_id_fkey foreign KEY (movement_id) references movements (id) on delete CASCADE,
+  constraint movement_partner_withdrawals_partner_id_fkey foreign KEY (partner_id) references partners (id) on delete set null
+) TABLESPACE pg_default;
+
+TABLE MOVEMENT_PARTNER_CONTRIBUTONS:
+
+create table public.movement_partner_contributions (
+  id uuid not null default gen_random_uuid (),
+  movement_id uuid not null,
+  partner_id uuid not null,
+  created_at timestamp with time zone not null default now(),
+  constraint movement_partner_contributions_pkey primary key (id),
+  constraint movement_partner_contributions_movement_id_fkey foreign KEY (movement_id) references movements (id) on delete CASCADE,
+  constraint movement_partner_contributions_partner_id_fkey foreign KEY (partner_id) references partners (id) on delete CASCADE
+) TABLESPACE pg_default;
