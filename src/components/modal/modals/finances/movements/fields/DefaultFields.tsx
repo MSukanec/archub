@@ -3,13 +3,14 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton'
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
-import { Package, Users } from 'lucide-react'
+import { Package, Users, Folder } from 'lucide-react'
+import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
 import { UseFormReturn } from 'react-hook-form'
 import { PersonnelFields } from './PersonnelFields'
 import { SubcontractsFields } from './SubcontractsFields'
 import { ClientsFields } from './ClientsFields'
 import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
-import { CommitmentItem } from '../forms/ClientsForm'
+import { CommitmentItem } from './ClientsFields'
 
 interface DefaultFieldsProps {
   form: UseFormReturn<any>
@@ -24,7 +25,10 @@ interface DefaultFieldsProps {
   onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string, amount: number}>) => void
   onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string, amount: number}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
-  onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string, amount: number}>) => void
+  onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
+  // Props para el selector de proyecto
+  projects?: any[]
+  isOrganizationalContext?: boolean
   // Props opcionales para botones específicos (mantenidas para compatibilidad)
   showPersonButton?: boolean
   showTaskButton?: boolean
@@ -50,6 +54,8 @@ export function DefaultMovementFields({
   onSubcontractsChange,
   onClientsChange,
   onPartnerWithdrawalsChange,
+  projects = [],
+  isOrganizationalContext = false,
   showPersonButton = false,
   showTaskButton = false,
   showSubcontractButton = false,

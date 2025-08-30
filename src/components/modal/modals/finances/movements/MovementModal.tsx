@@ -16,11 +16,14 @@ import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 
 import DatePicker from '@/components/ui-custom/fields/DatePickerField'
 import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
+import ProjectSelectorField from '@/components/ui-custom/fields/ProjectSelectorField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useProjects } from '@/hooks/use-projects'
+import { useLocation } from 'wouter'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { ConversionFields } from './fields/ConversionFields'
 import { TransferFields } from './fields/TransferFields'
@@ -32,8 +35,8 @@ import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
 
-// Schema básico para el modal simple
-const basicMovementSchema = z.object({
+// Función para crear schema dinámico basado en contexto
+const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   type_id: z.string().min(1, 'Tipo de movimiento es requerido'),
@@ -43,7 +46,10 @@ const basicMovementSchema = z.object({
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
-  exchange_rate: z.number().optional()
+  exchange_rate: z.number().optional(),
+  project_id: isOrganizationalContext 
+    ? z.string().min(1, 'Proyecto es requerido') 
+    : z.string().optional()
 })
 
 // Schema para conversión (como en el modal original)
@@ -122,8 +128,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const { data: wallets } = useWallets(userData?.organization?.id)
   const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
   const { data: members } = useOrganizationMembers(userData?.organization?.id)
+  const { data: projects } = useProjects(userData?.organization?.id)
+  const [location] = useLocation()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  
+  // Detectar si estamos en contexto organizacional (mostrar selector de proyecto)
+  const isOrganizationalContext = location.includes('/organization/')
 
   // Mutaciones para subcontratos
   const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
@@ -153,7 +164,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
-  const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
+  const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   
   // Flags para controlar efectos problemáticos
   const [isInitialLoading, setIsInitialLoading] = React.useState(false)
@@ -249,7 +260,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Form setup with proper fallbacks like the original modal
   const form = useForm<BasicMovementForm>({
-    resolver: zodResolver(basicMovementSchema),
+    resolver: zodResolver(createBasicMovementSchema(isOrganizationalContext)),
     defaultValues: {
       movement_date: new Date(),
       created_by: '',
@@ -260,7 +271,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       currency_id: '',
       wallet_id: '',
       amount: 0,
-      exchange_rate: undefined
+      exchange_rate: undefined,
+      project_id: ''
     }
   })
 
@@ -283,7 +295,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         currency_id: defaultCurrency || currencies[0]?.currency?.id || '',
         wallet_id: defaultWallet || wallets[0]?.id || '',
         amount: 0,
-        exchange_rate: undefined
+        exchange_rate: undefined,
+        project_id: isOrganizationalContext ? '' : undefined
       })
     } else {
       // Para edición, usar datos del movimiento
@@ -297,7 +310,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id || '',
         wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id || '',
         amount: editingMovement?.amount || 0,
-        exchange_rate: editingMovement?.exchange_rate || undefined
+        exchange_rate: editingMovement?.exchange_rate || undefined,
+        project_id: editingMovement?.project_id || (isOrganizationalContext ? '' : undefined)
       })
     }
   }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
@@ -1462,6 +1476,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Campos comunes (siempre los mismos)
   const commonFields = (
     <div className="space-y-4">
+      {/* SELECTOR DE PROYECTO - Solo aparece en contexto organizacional */}
+      {isOrganizationalContext && (
+        <FormField
+          control={form.control}
+          name="project_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proyecto *</FormLabel>
+              <FormControl>
+                <ProjectSelectorField
+                  projects={projects || []}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar proyecto..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+      
       {/* LAYOUT: FECHA 1/3 Y TIPO DE MOVIMIENTO 2/3 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 1. FECHA */}
