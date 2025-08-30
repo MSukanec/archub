@@ -31,6 +31,26 @@ export function OrganizationSidebar() {
       className="fixed left-0 top-0 h-full w-10 z-40 flex flex-col"
       style={{ backgroundColor: "var(--accent)" }}
     >
+      {/* Organization Avatar at top */}
+      <div className="p-1">
+        <div className="w-8 h-8 flex items-center justify-center">
+          {userData?.organization?.logo_url ? (
+            <img 
+              src={userData.organization.logo_url} 
+              alt={userData.organization.name}
+              className="w-[28px] h-[28px] rounded-full"
+            />
+          ) : (
+            <div 
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white"
+              style={{ backgroundColor: 'var(--accent)' }}
+            >
+              {userData?.organization?.name?.charAt(0)?.toUpperCase() || 'O'}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-1">

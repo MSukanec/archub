@@ -809,50 +809,7 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="p-1">
-        <div className="flex flex-col gap-[2px]">
-          {/* Divisor */}
-          <div className="h-px bg-white/20 mb-2"></div>
-          
-          {/* Settings buttons */}
-          <div className="flex flex-col gap-[2px] mb-[2px]">
-            {/* Dock/Undock button */}
-            <SidebarButton
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleDockToggle}
-              variant="main"
-            />
-            
-            {/* Theme toggle button */}
-            <SidebarButton
-              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-              label={isDark ? "Modo Claro" : "Modo Oscuro"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleThemeToggle}
-              variant="main"
-            />
-          </div>
-          
-          {/* Profile */}
-          <div className="mb-[2px]">
-            <SidebarButton
-              icon={<UserCircle className="w-[18px] h-[18px]" />}
-              label="Mi Perfil"
-              href="/profile"
-              isActive={location.startsWith('/profile')}
-              isExpanded={isExpanded}
-              avatarUrl={userData?.user?.avatar_url}
-              userFullName={userData?.user?.full_name}
-              variant="main"
-            />
-          </div>
-        </div>
-      </div>
+      {/* Bottom Section - ELIMINADO TEMPORALMENTE - MOVIDO AL ORGANIZATION SIDEBAR */}
     </aside>
   );
 }
