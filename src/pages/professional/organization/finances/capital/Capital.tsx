@@ -285,7 +285,14 @@ export default function FinancesCapitalMovements() {
       let totalAportes = 0
       let totalRetiros = 0
       
-      const memberMovements = movements.filter(movement => movement.member_id === member.id)
+      const memberMovements = movements.filter(movement => {
+        // Exclude movements that use the partner system
+        const usesPartnerSystem = (movement.subcategory_id === aportesPropriosConcept?.id || 
+                                 movement.subcategory_id === retirosPropriosConcept?.id) &&
+                                 movement.member_id === null
+        
+        return movement.member_id === member.id && !usesPartnerSystem
+      })
       
       memberMovements.forEach(movement => {
         const amount = movement.amount || 0
