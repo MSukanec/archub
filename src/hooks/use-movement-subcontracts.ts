@@ -6,14 +6,12 @@ export interface MovementSubcontract {
   id: string
   movement_id: string
   subcontract_id: string
-  amount: number
   created_at: string
 }
 
 export interface SubcontractItem {
   subcontract_id: string
   contact_name: string
-  amount: number
 }
 
 // Hook para obtener subcontratos de un movimiento
@@ -31,7 +29,6 @@ export function useMovementSubcontracts(movementId?: string) {
           id,
           movement_id,
           subcontract_id,
-          amount,
           created_at,
           subcontracts:subcontracts(
             id,
@@ -73,8 +70,7 @@ export function useCreateMovementSubcontracts() {
       // Preparar los datos para inserción
       const subcontractsToInsert = data.subcontracts.map(subcontract => ({
         movement_id: data.movementId,
-        subcontract_id: subcontract.subcontract_id,
-        amount: subcontract.amount
+        subcontract_id: subcontract.subcontract_id
       }))
 
       const { data: insertedData, error } = await supabase
@@ -128,8 +124,7 @@ export function useUpdateMovementSubcontracts() {
       if (data.subcontracts.length > 0) {
         const subcontractsToInsert = data.subcontracts.map(subcontract => ({
           movement_id: data.movementId,
-          subcontract_id: subcontract.subcontract_id,
-          amount: subcontract.amount
+          subcontract_id: subcontract.subcontract_id
         }))
 
         const { data: insertedData, error: insertError } = await supabase
