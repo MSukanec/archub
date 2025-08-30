@@ -5,12 +5,27 @@ import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButt
 import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 import { Package, Users } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
+import { PersonnelFields } from './PersonnelFields'
+import { SubcontractsFields } from './SubcontractsFields'
+import { ClientsFields } from './ClientsFields'
+import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
+import { CommitmentItem } from '../forms/ClientsForm'
 
 interface DefaultFieldsProps {
   form: UseFormReturn<any>
   currencies: any[]
   wallets: any[]
-  // Props opcionales para botones específicos
+  // Props para campos integrados
+  selectedSubcategoryId?: string
+  selectedPersonnel?: Array<{personnel_id: string, contact_name: string, amount: number}>
+  selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string, amount: number}>
+  selectedClients?: CommitmentItem[]
+  selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string, amount: number}>
+  onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string, amount: number}>) => void
+  onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string, amount: number}>) => void
+  onClientsChange?: (clientsList: CommitmentItem[]) => void
+  onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string, amount: number}>) => void
+  // Props opcionales para botones específicos (mantenidas para compatibilidad)
   showPersonButton?: boolean
   showTaskButton?: boolean
   showSubcontractButton?: boolean
@@ -26,6 +41,15 @@ export function DefaultMovementFields({
   form,
   currencies,
   wallets,
+  selectedSubcategoryId,
+  selectedPersonnel = [],
+  selectedSubcontracts = [],
+  selectedClients = [],
+  selectedPartnerWithdrawals = [],
+  onPersonnelChange,
+  onSubcontractsChange,
+  onClientsChange,
+  onPartnerWithdrawalsChange,
   showPersonButton = false,
   showTaskButton = false,
   showSubcontractButton = false,
@@ -177,6 +201,42 @@ export function DefaultMovementFields({
         </div>
       )}
 
+      {/* CAMPOS ESPECÍFICOS SEGÚN SUBCATEGORÍA */}
+      {selectedSubcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff' && onPersonnelChange && (
+        <div className="col-span-2">
+          <PersonnelFields 
+            selectedPersonnel={selectedPersonnel}
+            onPersonnelChange={onPersonnelChange}
+          />
+        </div>
+      )}
+
+      {selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && onSubcontractsChange && (
+        <div className="col-span-2">
+          <SubcontractsFields 
+            selectedSubcontracts={selectedSubcontracts}
+            onSubcontractsChange={onSubcontractsChange}
+          />
+        </div>
+      )}
+
+      {selectedSubcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && onClientsChange && (
+        <div className="col-span-2">
+          <ClientsFields 
+            selectedClients={selectedClients}
+            onClientsChange={onClientsChange}
+          />
+        </div>
+      )}
+
+      {selectedSubcategoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
+        <div className="col-span-2">
+          <PartnerWithdrawalsFields 
+            selectedPartnerWithdrawals={selectedPartnerWithdrawals}
+            onPartnerWithdrawalsChange={onPartnerWithdrawalsChange}
+          />
+        </div>
+      )}
 
     </>
   )

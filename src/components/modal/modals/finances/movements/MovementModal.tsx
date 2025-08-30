@@ -24,13 +24,9 @@ import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { ConversionFields } from './fields/ConversionFields'
 import { TransferFields } from './fields/TransferFields'
-import { CustomButton } from '@/components/ui-custom/CustomButton'
-import { Users, FileText, ShoppingCart, Package, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { Users, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { PersonnelForm, PersonnelFormHandle, PersonnelItem } from './forms/PersonnelForm'
-import { SubcontractsForm, SubcontractsFormHandle, SubcontractItem } from './forms/SubcontractsForm'
-import { ClientsForm, ClientsFormHandle, CommitmentItem } from './forms/ClientsForm'
-import { PartnerWithdrawalsForm, PartnerWithdrawalsFormHandle, PartnerWithdrawalItem } from './forms/PartnerWithdrawalsForm'
+import { CommitmentItem } from './forms/ClientsForm'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
@@ -154,13 +150,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   
   // State para detectar tipo de movimiento
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
-  const [showPersonnelForm, setShowPersonnelForm] = React.useState(false)
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string, amount: number}>>([])
-  const [showSubcontractsForm, setShowSubcontractsForm] = React.useState(false)
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
-  const [showClientsForm, setShowClientsForm] = React.useState(false)
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
-  const [showPartnerWithdrawalsForm, setShowPartnerWithdrawalsForm] = React.useState(false)
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string, amount: number}>>([])
   
   // Flags para controlar efectos problemáticos
@@ -1257,15 +1249,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Effect para manejar ENTER key para submit
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Solo procesar ENTER si no estamos en subformularios
+      // Solo procesar ENTER
       if (
         event.key === 'Enter' && 
         event.ctrlKey === false && 
-        event.altKey === false && 
-        !showPersonnelForm && 
-        !showSubcontractsForm && 
-        !showClientsForm && 
-        !showPartnerWithdrawalsForm
+        event.altKey === false
       ) {
         // Evitar el comportamiento por defecto
         event.preventDefault()
@@ -1290,10 +1278,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [
-    showPersonnelForm, 
-    showSubcontractsForm, 
-    showClientsForm, 
-    showPartnerWithdrawalsForm,
     movementType,
     form,
     conversionForm,
@@ -1303,53 +1287,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     onSubmitTransfer
   ])
 
-  // Función para determinar qué botón mostrar según el subcategory_id
-  const getActionButton = (subcategoryId: string) => {
-    const buttonConfig = {
-      '7ef27d3f-ef17-49c3-a392-55282b3576ff': { 
-        text: 'Gestionar Personal', 
-        icon: Users,
-        onClick: () => setShowPersonnelForm(true) 
-      },
-      'f40a8fda-69e6-4e81-bc8a-464359cd8498': {
-        text: 'Gestionar Subcontratos',
-        icon: FileText,
-        onClick: () => setShowSubcontractsForm(true)
-      },
-      'f3b96eda-15d5-4c96-ade7-6f53685115d3': {
-        text: 'Gestionar Clientes',
-        icon: Users,
-        onClick: () => setShowClientsForm(true)
-      },
-      'c04a82f8-6fd8-439d-81f7-325c63905a1b': {
-        text: 'Gestionar Retiros de Socios',
-        icon: Users,
-        onClick: () => setShowPartnerWithdrawalsForm(true)
-      }
-    }
-
-    const config = buttonConfig[subcategoryId as keyof typeof buttonConfig]
-    
-    if (!config) return null
-
-    return (
-      <div className="mt-4">
-        <CustomButton
-          icon={config.icon}
-          title={config.text}
-          onClick={config.onClick}
-        />
-      </div>
-    )
-  }
 
   // Renderizar panel para conversiones
   const conversionPanel = (
     <Form {...conversionForm} key={`conversion-${movementType}`}>
       <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
-        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedCategoryId)}
-
         {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
           form={conversionForm}
@@ -1436,9 +1378,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           )}
         />
 
-        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedCategoryId)}
-
         {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
         <TransferFields
           form={transferForm}
@@ -1500,88 +1439,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           )}
         />
 
-        {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-        {getActionButton(selectedSubcategoryId)}
-
-        {/* PERSONAL SELECCIONADO (si hay) */}
-        {selectedPersonnel.length > 0 && (
-          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Personal Seleccionado:</h4>
-            {selectedPersonnel.map((person, index) => (
-              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                <div className="truncate">{person.contact_name}</div>
-                <div className="text-right font-medium">${(person.amount || 0).toFixed(2)}</div>
-              </div>
-            ))}
-            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-              <div className="font-medium">Total:</div>
-              <div className="text-right font-bold">
-                ${selectedPersonnel.reduce((sum, p) => sum + (p.amount || 0), 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBCONTRATOS SELECCIONADOS (si hay) */}
-        {selectedSubcontracts.length > 0 && (
-          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Subcontratos Seleccionados:</h4>
-            {selectedSubcontracts.map((subcontract, index) => (
-              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                <div className="truncate">{subcontract.contact_name}</div>
-                <div className="text-right font-medium">${(subcontract.amount || 0).toFixed(2)}</div>
-              </div>
-            ))}
-            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-              <div className="font-medium">Total:</div>
-              <div className="text-right font-bold">
-                ${selectedSubcontracts.reduce((sum, s) => sum + (s.amount || 0), 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* CLIENTES DE PROYECTO SELECCIONADOS (si hay) */}
-        {selectedClients.length > 0 && (
-          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Compromisos Seleccionados:</h4>
-            {selectedClients.map((client, index) => (
-              <div key={index} className="text-xs">
-                <div className="truncate">
-                  {client.unit} - {client.client_name}
-                  {client.installment_display && (
-                    <span className="text-blue-600 ml-2">({client.installment_display})</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* RETIROS DE SOCIOS SELECCIONADOS (si hay) */}
-        {selectedPartnerWithdrawals.length > 0 && (
-          <div className="space-y-2 p-3 bg-muted/20 rounded-md">
-            <h4 className="text-sm font-medium text-foreground">Retiros de Socios Seleccionados:</h4>
-            {selectedPartnerWithdrawals.map((partnerWithdrawal, index) => (
-              <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                <div className="truncate">{partnerWithdrawal.partner_name}</div>
-                <div className="text-right font-medium">${(partnerWithdrawal.amount || 0).toFixed(2)}</div>
-              </div>
-            ))}
-            <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-              <div className="font-medium">Total:</div>
-              <div className="text-right font-bold">
-                ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
           form={form}
           currencies={currencies || []}
           wallets={wallets || []}
+          selectedSubcategoryId={selectedSubcategoryId}
+          selectedPersonnel={selectedPersonnel}
+          selectedSubcontracts={selectedSubcontracts}
+          selectedClients={selectedClients}
+          selectedPartnerWithdrawals={selectedPartnerWithdrawals}
+          onPersonnelChange={setSelectedPersonnel}
+          onSubcontractsChange={setSelectedSubcontracts}
+          onClientsChange={setSelectedClients}
+          onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
         />
       </form>
     </Form>
@@ -1719,8 +1591,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         )}
       />
 
-      {/* 3.5. BOTÓN DE GESTIÓN (si aplica) */}
-      {getActionButton(selectedSubcategoryId)}
     </div>
   )
 
@@ -1764,106 +1634,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         )}
 
         {movementType === 'normal' && (
-          <>
-            {/* Mostrar resúmenes si hay personal/subcontratos/clientes seleccionados */}
-            {selectedPersonnel && selectedPersonnel.length > 0 && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <div className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Personal seleccionado:
-                </div>
-                <div className="space-y-1">
-                  {selectedPersonnel.map((person, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{person.contact_name}</div>
-                      <div className="text-right">${(person.amount || 0).toFixed(2)}</div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-                    <div className="font-medium">Total:</div>
-                    <div className="text-right font-bold">
-                      ${selectedPersonnel.reduce((sum, person) => sum + (person.amount || 0), 0).toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {selectedSubcontracts && selectedSubcontracts.length > 0 && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <div className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Subcontratos seleccionados:
-                </div>
-                <div className="space-y-1">
-                  {selectedSubcontracts.map((subcontract, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{subcontract.contact_name}</div>
-                      <div className="text-right">${(subcontract.amount || 0).toFixed(2)}</div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-                    <div className="font-medium">Total:</div>
-                    <div className="text-right font-bold">
-                      ${selectedSubcontracts.reduce((sum, subcontract) => sum + (subcontract.amount || 0), 0).toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {selectedClients && selectedClients.length > 0 && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <div className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Clientes seleccionados:
-                </div>
-                <div className="space-y-1">
-                  {selectedClients.map((client, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{client.client_name}</div>
-                      <div className="text-right">${(client as any).planned_amount?.toFixed(2) || '0.00'}</div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-                    <div className="font-medium">Total:</div>
-                    <div className="text-right font-bold">
-                      ${selectedClients.reduce((sum, client) => sum + ((client as any).planned_amount || 0), 0).toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {selectedPartnerWithdrawals && selectedPartnerWithdrawals.length > 0 && (
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <div className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Retiros de socios seleccionados:
-                </div>
-                <div className="space-y-1">
-                  {selectedPartnerWithdrawals.map((pw, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,120px] gap-3 text-xs">
-                      <div>{pw.partner_name}</div>
-                      <div className="text-right">${(pw.amount || 0).toFixed(2)}</div>
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-[1fr,120px] gap-3 text-xs border-t border-border pt-2">
-                    <div className="font-medium">Total:</div>
-                    <div className="text-right font-bold">
-                      ${selectedPartnerWithdrawals.reduce((sum, pw) => sum + (pw.amount || 0), 0).toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <DefaultMovementFields
-              form={form}
-              currencies={currencies || []}
-              wallets={wallets || []}
-            />
-          </>
+          <DefaultMovementFields
+            form={form}
+            currencies={currencies || []}
+            wallets={wallets || []}
+            selectedSubcategoryId={selectedSubcategoryId}
+            selectedPersonnel={selectedPersonnel}
+            selectedSubcontracts={selectedSubcontracts}
+            selectedClients={selectedClients}
+            selectedPartnerWithdrawals={selectedPartnerWithdrawals}
+            onPersonnelChange={setSelectedPersonnel}
+            onSubcontractsChange={setSelectedSubcontracts}
+            onClientsChange={setSelectedClients}
+            onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
+          />
         )}
       </form>
     </Form>
@@ -1872,142 +1656,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
 
-  // Panel para PersonnelForm
-  const personnelFormRef = React.useRef<PersonnelFormHandle>(null)
-  const subcontractsFormRef = React.useRef<SubcontractsFormHandle>(null)
-  const clientsFormRef = React.useRef<ClientsFormHandle>(null)
-  const partnerWithdrawalsFormRef = React.useRef<PartnerWithdrawalsFormHandle>(null)
-  
-  const personnelPanel = (
-    <PersonnelForm 
-      ref={personnelFormRef}
-      onClose={() => setShowPersonnelForm(false)} 
-      onConfirm={(personnelList) => {
-        setSelectedPersonnel(personnelList)
-        setShowPersonnelForm(false)
-      }}
-      initialPersonnel={selectedPersonnel}
-    />
-  )
 
-  const subcontractsPanel = (
-    <SubcontractsForm 
-      ref={subcontractsFormRef}
-      onClose={() => setShowSubcontractsForm(false)} 
-      onConfirm={(subcontractsList) => {
-        setSelectedSubcontracts(subcontractsList)
-        setShowSubcontractsForm(false)
-      }}
-      initialSubcontracts={selectedSubcontracts}
-    />
-  )
-
-  const clientsPanel = (
-    <ClientsForm 
-      ref={clientsFormRef}
-      onClose={() => setShowClientsForm(false)} 
-      onConfirm={(clientsList) => {
-        setSelectedClients(clientsList)
-        setShowClientsForm(false)
-      }}
-      initialClients={selectedClients}
-    />
-  )
-
-  const partnerWithdrawalsPanel = (
-    <PartnerWithdrawalsForm 
-      ref={partnerWithdrawalsFormRef}
-      onClose={() => setShowPartnerWithdrawalsForm(false)} 
-      onConfirm={(partnerWithdrawalsList) => {
-        setSelectedPartnerWithdrawals(partnerWithdrawalsList)
-        setShowPartnerWithdrawalsForm(false)
-      }}
-      initialPartnerWithdrawals={selectedPartnerWithdrawals}
-    />
-  )
-
-  // Seleccionar panel a mostrar
-  const currentPanel = showPersonnelForm 
-    ? personnelPanel 
-    : showSubcontractsForm 
-      ? subcontractsPanel 
-      : showClientsForm
-        ? clientsPanel
-        : showPartnerWithdrawalsForm
-          ? partnerWithdrawalsPanel
-          : editPanel
+  // Panel a mostrar siempre es editPanel
+  const currentPanel = editPanel
 
   // Header del modal
   const headerContent = (
     <FormModalHeader 
-      title={showPersonnelForm 
-        ? "Gestión de Personal" 
-        : showSubcontractsForm 
-          ? "Gestión de Subcontratos"
-          : showClientsForm
-            ? "Gestión de Clientes"
-            : showPartnerWithdrawalsForm
-              ? "Gestión de Retiros de Socios"
-              : (isEditing ? "Editar Movimiento" : "Nuevo Movimiento")}
-      description={showPersonnelForm 
-        ? "Asigna personal y montos para este movimiento financiero" 
-        : showSubcontractsForm
-          ? "Asigna subcontratos y montos para este movimiento financiero"
-          : showClientsForm
-            ? "Asigna clientes de proyecto y montos para este movimiento financiero"
-            : showPartnerWithdrawalsForm
-              ? "Asigna socios y montos para retiros en este movimiento financiero"
-              : (isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema")}
-      icon={showPersonnelForm 
-        ? Users 
-        : showSubcontractsForm
-          ? FileText
-          : showClientsForm
-            ? Users
-            : showPartnerWithdrawalsForm
-              ? Users
-              : DollarSign}
+      title={isEditing ? "Editar Movimiento" : "Nuevo Movimiento"}
+      description={isEditing ? "Modifica los datos del movimiento financiero existente" : "Registra un nuevo movimiento financiero en el sistema"}
+      icon={DollarSign}
     />
   )
 
   // Footer del modal
-  const footerContent = showPersonnelForm ? (
-    <FormModalFooter
-      leftLabel="Volver"
-      onLeftClick={() => setShowPersonnelForm(false)}
-      rightLabel="Confirmar Personal"
-      onRightClick={() => {
-        personnelFormRef.current?.confirmPersonnel()
-      }}
-    />
-  ) : showSubcontractsForm ? (
-    <FormModalFooter
-      leftLabel="Volver"
-      onLeftClick={() => setShowSubcontractsForm(false)}
-      rightLabel="Confirmar Subcontratos"
-      onRightClick={() => {
-        subcontractsFormRef.current?.confirmSubcontracts()
-      }}
-    />
-  ) : showClientsForm ? (
-    <FormModalFooter
-      leftLabel="Volver"
-      onLeftClick={() => setShowClientsForm(false)}
-      rightLabel="Confirmar Clientes"
-      onRightClick={() => {
-        clientsFormRef.current?.confirmClients()
-      }}
-    />
-  ) : showPartnerWithdrawalsForm ? (
-    <FormModalFooter
-      leftLabel="Volver"
-      onLeftClick={() => setShowPartnerWithdrawalsForm(false)}
-      rightLabel="Confirmar Retiros"
-      onRightClick={() => {
-        partnerWithdrawalsFormRef.current?.confirmPartnerWithdrawals()
-      }}
-    />
-  ) : (
+  const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
