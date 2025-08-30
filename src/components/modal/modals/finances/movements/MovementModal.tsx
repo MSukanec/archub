@@ -165,6 +165,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string, amount: number}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
+  const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   
   // Flags para controlar efectos problemáticos
   const [isInitialLoading, setIsInitialLoading] = React.useState(false)
@@ -794,7 +795,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
 
       // Preparar datos del movimiento según la estructura de la tabla
-      console.log('🔧 MovementModal mutation - data.project_id:', data.project_id)
       const movementData = {
         organization_id: userData.organization.id,
         project_id: data.project_id || null,
@@ -1250,8 +1250,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
-    console.log('🔧 MovementModal onSubmit - values.project_id:', values.project_id)
-    console.log('🔧 MovementModal onSubmit - full values:', values)
     createMovementMutation.mutate(values)
   }
 
@@ -1467,10 +1465,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           selectedSubcontracts={selectedSubcontracts}
           selectedClients={selectedClients}
           selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
+          selectedPartnerContributions={selectedPartnerContributions}
           onPersonnelChange={setSelectedPersonnel}
           onSubcontractsChange={setSelectedSubcontracts}
           onClientsChange={setSelectedClients}
           onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
+          onPartnerContributionsChange={setSelectedPartnerContributions}
         />
       </form>
     </Form>
@@ -1490,8 +1490,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <FormControl>
                 <ProjectSelectorField
                   projects={projects || []}
-                  organization={userData?.organization}
-                  value={field.value}
+                  organization={userData?.organization || undefined}
+                  value={field.value || null}
                   onChange={field.onChange}
                   placeholder="Seleccionar proyecto..."
                 />
@@ -1683,10 +1683,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             selectedSubcontracts={selectedSubcontracts}
             selectedClients={selectedClients}
             selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
+            selectedPartnerContributions={selectedPartnerContributions}
             onPersonnelChange={setSelectedPersonnel}
             onSubcontractsChange={setSelectedSubcontracts}
             onClientsChange={setSelectedClients}
             onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
+            onPartnerContributionsChange={setSelectedPartnerContributions}
           />
         )}
       </form>

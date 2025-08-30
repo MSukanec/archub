@@ -10,6 +10,7 @@ import { PersonnelFields } from './PersonnelFields'
 import { SubcontractsFields } from './SubcontractsFields'
 import { ClientsFields } from './ClientsFields'
 import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
+import { PartnerContributionsFields } from './PartnerContributionsFields'
 import { CommitmentItem } from './ClientsFields'
 
 interface DefaultFieldsProps {
@@ -22,10 +23,12 @@ interface DefaultFieldsProps {
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string, amount: number}>
   selectedClients?: CommitmentItem[]
   selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string, amount: number}>
+  selectedPartnerContributions?: Array<{partner_id: string, partner_name: string}>
   onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string, amount: number}>) => void
   onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string, amount: number}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
   onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
+  onPartnerContributionsChange?: (partnerContributionsList: Array<{partner_id: string, partner_name: string}>) => void
   // Props para el selector de proyecto
   projects?: any[]
   isOrganizationalContext?: boolean
@@ -50,10 +53,12 @@ export function DefaultMovementFields({
   selectedSubcontracts = [],
   selectedClients = [],
   selectedPartnerWithdrawals = [],
+  selectedPartnerContributions = [],
   onPersonnelChange,
   onSubcontractsChange,
   onClientsChange,
   onPartnerWithdrawalsChange,
+  onPartnerContributionsChange,
   projects = [],
   isOrganizationalContext = false,
   showPersonButton = false,
@@ -240,6 +245,15 @@ export function DefaultMovementFields({
           <PartnerWithdrawalsFields 
             selectedPartnerWithdrawals={selectedPartnerWithdrawals}
             onPartnerWithdrawalsChange={onPartnerWithdrawalsChange}
+          />
+        </div>
+      )}
+
+      {selectedSubcategoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' && onPartnerContributionsChange && (
+        <div className="col-span-2">
+          <PartnerContributionsFields 
+            selectedPartnerContributions={selectedPartnerContributions}
+            onPartnerContributionsChange={onPartnerContributionsChange}
           />
         </div>
       )}
