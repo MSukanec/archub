@@ -17,6 +17,7 @@ interface SidebarButtonProps {
   variant?: 'main' | 'secondary';
   isHeaderButton?: boolean;
   projectColor?: string;
+  iconColor?: string;
 }
 
 export default function SidebarButton({ 
@@ -32,7 +33,8 @@ export default function SidebarButton({
   isChild = false,
   variant = 'main',
   isHeaderButton = false,
-  projectColor
+  projectColor,
+  iconColor
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -79,9 +81,9 @@ export default function SidebarButton({
         backgroundColor: (isActive || isHeaderButton)
           ? `var(--main-sidebar-button-active-bg)` // Header buttons también usan active bg
           : `var(--main-sidebar-button-bg)`,
-        color: (isActive || isHeaderButton)
+        color: iconColor || ((isActive || isHeaderButton)
           ? `var(--main-sidebar-button-active-fg)` // Header buttons también usan active fg
-          : `var(--main-sidebar-button-fg)`,
+          : `var(--main-sidebar-button-fg)`),
         '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
         // Extend active main buttons to overlap the border, también para headers

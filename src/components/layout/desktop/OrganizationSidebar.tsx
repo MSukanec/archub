@@ -1,0 +1,90 @@
+import React from "react";
+import { useLocation } from "wouter";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useThemeStore } from "@/stores/themeStore";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import {
+  UserCircle,
+  Sun,
+  Moon,
+  PanelLeftOpen,
+  PanelLeftClose,
+} from "lucide-react";
+import SidebarButton from "./SidebarButton";
+
+export function OrganizationSidebar() {
+  const [location] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const { isDark, toggleTheme } = useThemeStore();
+  const { isDocked, setDocked } = useSidebarStore();
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+  };
+
+  const handleDockToggle = () => {
+    setDocked(!isDocked);
+  };
+
+  return (
+    <aside
+      className="fixed left-0 top-0 h-full w-10 z-40 flex flex-col"
+      style={{ backgroundColor: "var(--accent)" }}
+    >
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-1">
+          {/* Aquí irían los botones principales de organizaciones en el futuro */}
+        </div>
+      </div>
+
+      {/* Bottom Section - Fixed Buttons */}
+      <div className="p-1">
+        <div className="flex flex-col gap-[2px]">
+          {/* Divisor */}
+          <div className="h-px bg-white/20 mb-2"></div>
+          
+          {/* Settings buttons */}
+          <div className="flex flex-col gap-[2px] mb-[2px]">
+            {/* Dock/Undock button */}
+            <SidebarButton
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+              isActive={false}
+              isExpanded={false}
+              onClick={handleDockToggle}
+              variant="main"
+              iconColor="white"
+            />
+            
+            {/* Theme toggle button */}
+            <SidebarButton
+              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              label={isDark ? "Modo Claro" : "Modo Oscuro"}
+              isActive={false}
+              isExpanded={false}
+              onClick={handleThemeToggle}
+              variant="main"
+              iconColor="white"
+            />
+          </div>
+          
+          {/* Profile */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<UserCircle className="w-[18px] h-[18px]" />}
+              label="Mi Perfil"
+              href="/profile"
+              isActive={location.startsWith('/profile')}
+              isExpanded={false}
+              avatarUrl={userData?.user?.avatar_url}
+              userFullName={userData?.user?.full_name}
+              variant="main"
+              iconColor="white"
+            />
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}

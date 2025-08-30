@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
+import { OrganizationSidebar } from "./OrganizationSidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { useAuthStore } from "@/stores/authStore";
@@ -97,8 +98,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       className="min-h-screen"
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
-      {/* Sidebar - hidden on mobile */}
+      {/* Sidebars - hidden on mobile */}
       <div className="hidden md:block">
+        <OrganizationSidebar />
         <Sidebar />
         {/* <SidebarSubmenu /> */}{" "}
         {/* Commented out - using accordion sidebar instead */}
@@ -127,10 +129,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // Calculate top padding based on new double-row header (h-20)
               "md:pt-24" // h-20 header + 4 units padding
             } ${
-              // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
+              // Calculate margin based on both sidebars: 40px (OrganizationSidebar) + main sidebar
               isMainDocked || isMainHovered
-                ? "md:ml-[264px]" // 264px main sidebar when expanded
-                : "md:ml-[40px]" // 40px main sidebar when collapsed
+                ? "md:ml-[304px]" // 40px + 264px when main sidebar expanded
+                : "md:ml-[80px]" // 40px + 40px when main sidebar collapsed
             } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
