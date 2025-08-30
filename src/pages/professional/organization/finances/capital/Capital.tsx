@@ -13,6 +13,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useMovementPartnerContributions } from '@/hooks/use-movement-partner-contributions'
+import { useMovementPartnerWithdrawals } from '@/hooks/use-movement-partner-withdrawals'
 
 import { useToast } from '@/hooks/use-toast'
 
@@ -138,7 +140,7 @@ export default function FinancesCapitalMovements() {
       if (retirosPropriosOld?.name) categoryNames.push(retirosPropriosOld.name)
 
       // Query both new structure (by subcategory_id) and old structure (by category_name)
-      let allMovements = []
+      let allMovements: any[] = []
 
       // Get new structure movements (subcategory based)
       if (subcategoryIds.length > 0) {
@@ -179,8 +181,6 @@ export default function FinancesCapitalMovements() {
         index === self.findIndex(m => m.id === movement.id)
       )
 
-      console.log('🔍 Total unique capital movements found:', uniqueMovements.length)
-      console.log('🔍 Sample movement data:', uniqueMovements[0])
       return uniqueMovements
     },
     enabled: !!organizationId && !!supabase && (!!aportesPropriosConcept || !!retirosPropriosConcept || !!aportesPropriosOld || !!retirosPropriosOld)
@@ -201,6 +201,45 @@ export default function FinancesCapitalMovements() {
       return data || []
     },
     enabled: !!supabase
+  })
+
+  // Get all movement partner contributions to match partner data with movements
+  const { data: allPartnerContributions = [] } = useQuery({
+    queryKey: ['all-partner-contributions-for-capital', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+
+      // Get all partner contributions for movements in this organization
+      const movementIds = movements.map(m => m.id)
+      if (movementIds.length === 0) return []
+
+      const { data, error } = await supabase
+        .from('movement_partner_contributions')
+        .select(`
+          id,
+          movement_id,
+          partner_id,
+          partners:partners(
+            id,
+            contacts:contacts(
+              id,
+              first_name,
+              last_name,
+              company_name,
+              email
+            )
+          )
+        `)
+        .in('movement_id', movementIds)
+
+      if (error) {
+        console.error('Error fetching partner contributions:', error)
+        throw error
+      }
+
+      return data || []
+    },
+    enabled: !!supabase && !!organizationId && movements.length > 0
   })
 
   // Get organization members
@@ -552,23 +591,41 @@ export default function FinancesCapitalMovements() {
       label: "Socio",
       width: "14.3%",
       render: (item: CapitalMovement) => {
-        console.log('🔍 Movement item for member display:', {
-          member_id: item.member_id,
-          member: item.member,
-          has_member_from_list: !!members.find(m => m.id === item.member_id)
-        })
-
-        // Try to get member data from the movement_view first
-        let member = item.member
         let displayName = null
         
-        // If not available in movement_view, fall back to members list
-        if (!member?.user?.full_name) {
-          member = members.find(m => m.id === item.member_id)
-        }
+        // Check if this is an "Aportes de Socios" movement that uses partner system
+        const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
         
-        if (member?.user?.full_name) {
-          displayName = member.user.full_name
+        if (isAporteDeSocios) {
+          // Find partner contribution for this movement
+          const partnerContribution = allPartnerContributions.find(pc => pc.movement_id === item.id)
+          if (partnerContribution?.partners?.contacts) {
+            const contact = Array.isArray(partnerContribution.partners.contacts) 
+              ? partnerContribution.partners.contacts[0] 
+              : partnerContribution.partners.contacts
+            if (contact) {
+              displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+            }
+          }
+        } else {
+          // Use regular member logic for other movements (like Retiros de Socios)
+          let member = item.member
+          
+          // If not available in movement_view, fall back to members list
+          if (!member?.user?.full_name) {
+            const foundMember = members.find(m => m.id === item.member_id)
+            if (foundMember?.user) {
+              const user = Array.isArray(foundMember.user) ? foundMember.user[0] : foundMember.user
+              if (user?.full_name) {
+                displayName = user.full_name
+              }
+            }
+          } else {
+            const user = Array.isArray(member.user) ? member.user[0] : member.user
+            if (user?.full_name) {
+              displayName = user.full_name
+            }
+          }
         }
 
         if (!displayName) {
