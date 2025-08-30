@@ -150,6 +150,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const createMovementProjectClientsMutation = useCreateMovementProjectClients()
   const updateMovementProjectClientsMutation = useUpdateMovementProjectClients()
 
+  // Mutaciones para partners unificadas
+  const createMovementPartnersMutation = useCreateMovementPartners()
+  const updateMovementPartnersMutation = useUpdateMovementPartners()
+
   // Query para cargar clientes existentes en modo edición
   const { data: existingProjectClients } = useMovementProjectClients(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
@@ -956,21 +960,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (deleteProjectClientsError) throw deleteProjectClientsError
 
-        // Actualizar retiros de socios - eliminar existentes y crear nuevos
-        const { error: deletePartnerWithdrawalsError } = await supabase
-          .from('movement_partner_withdrawals')
-          .delete()
-          .eq('movement_id', editingMovement.id)
+        // Actualizar partners (retiros y aportes) - usar hook unificado
+        const allPartners = [
+          ...(selectedPartnerWithdrawals || []),
+          ...(selectedPartnerContributions || [])
+        ]
+        
+        if (allPartners.length > 0) {
+          await updateMovementPartnersMutation.mutateAsync({
+            movementId: editingMovement.id,
+            partners: allPartners
+          })
+        } else {
+          // Si no hay partners, eliminar los existentes
+          const { error: deletePartnersError } = await supabase
+            .from('movement_partners')
+            .delete()
+            .eq('movement_id', editingMovement.id)
 
-        if (deletePartnerWithdrawalsError) throw deletePartnerWithdrawalsError
-
-        // Actualizar aportes de socios - eliminar existentes y crear nuevos
-        const { error: deletePartnerContributionsError } = await supabase
-          .from('movement_partner_contributions')
-          .delete()
-          .eq('movement_id', editingMovement.id)
-
-        if (deletePartnerContributionsError) throw deletePartnerContributionsError
+          if (deletePartnersError) throw deletePartnersError
+        }
       } else {
         // Crear nuevo movimiento
         const { data: insertResult, error } = await supabase
@@ -1013,18 +1022,17 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (subcontractsError) throw subcontractsError
       }
 
-      // Si hay retiros de socios seleccionados, guardar las asignaciones en movement_partner_withdrawals
-      if (selectedPartnerWithdrawals && selectedPartnerWithdrawals.length > 0) {
-        const partnerWithdrawalsData = selectedPartnerWithdrawals.map(withdrawal => ({
-          movement_id: result.id,
-          partner_id: withdrawal.partner_id
-        }))
-
-        const { error: partnerWithdrawalsError } = await supabase
-          .from('movement_partner_withdrawals')
-          .insert(partnerWithdrawalsData)
-
-        if (partnerWithdrawalsError) throw partnerWithdrawalsError
+      // Si hay partners seleccionados (retiros y aportes), usar hook unificado
+      const allPartners = [
+        ...(selectedPartnerWithdrawals || []),
+        ...(selectedPartnerContributions || [])
+      ]
+      
+      if (allPartners.length > 0) {
+        await createMovementPartnersMutation.mutateAsync({
+          movementId: result.id,
+          partners: allPartners
+        })
       }
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
@@ -1052,24 +1060,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (projectClientsError) throw projectClientsError
       }
 
-      // Si hay partners seleccionados (aportes y retiros), guardar en movement_partners
-      const allPartners = [
-        ...(selectedPartnerWithdrawals || []),
-        ...(selectedPartnerContributions || [])
-      ]
-      
-      if (allPartners.length > 0) {
-        const partnerData = allPartners.map(partner => ({
-          movement_id: result.id,
-          partner_id: partner.partner_id
-        }))
-
-        const { error: partnerError } = await supabase
-          .from('movement_partners')
-          .insert(partnerData)
-
-        if (partnerError) throw partnerError
-      }
 
       return result
     },
