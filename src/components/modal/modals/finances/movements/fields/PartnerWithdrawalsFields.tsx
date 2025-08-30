@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, TrendingDown } from 'lucide-react'
 import { usePartners, Partner } from '@/hooks/use-partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
@@ -137,6 +137,16 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
 
   return (
     <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2 pb-2 border-b border-[var(--card-border)]">
+        <TrendingDown className="h-4 w-4 text-[var(--accent)]" />
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-[var(--card-fg)]">Detalle de Retiro de Socios</h3>
+          <p className="text-xs text-[var(--text-muted)] leading-tight">
+            Especifica los socios y montos de retiro
+          </p>
+        </div>
+      </div>
       {/* Partner Withdrawal Rows - Default two columns */}
       {partnerWithdrawalRows.map((row, index) => (
         <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, FileText } from 'lucide-react'
 import { useProjectSubcontracts } from '@/hooks/use-project-subcontracts'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -102,6 +102,16 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2 pb-2 border-b border-[var(--card-border)]">
+        <FileText className="h-4 w-4 text-[var(--accent)]" />
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-[var(--card-fg)]">Detalle de Subcontratos</h3>
+          <p className="text-xs text-[var(--text-muted)] leading-tight">
+            Especifica los subcontratos y montos correspondientes
+          </p>
+        </div>
+      </div>
       {/* Subcontracts Rows - Default two columns */}
       {subcontractsRows.map((row, index) => (
         <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">

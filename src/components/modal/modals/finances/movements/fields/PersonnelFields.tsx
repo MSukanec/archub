@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Users } from 'lucide-react'
 import { useProjectPersonnel, ProjectPersonnel } from '@/hooks/use-project-personnel'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
@@ -100,6 +100,16 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2 pb-2 border-b border-[var(--card-border)]">
+        <Users className="h-4 w-4 text-[var(--accent)]" />
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-[var(--card-fg)]">Detalle de Personal</h3>
+          <p className="text-xs text-[var(--text-muted)] leading-tight">
+            Especifica el personal y los montos asignados
+          </p>
+        </div>
+      </div>
       {/* Personnel Rows - Default two columns */}
       {personnelRows.map((row, index) => (
         <div key={index} className="grid grid-cols-[3fr,1fr] gap-3 items-end">

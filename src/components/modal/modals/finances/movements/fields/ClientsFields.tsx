@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Building } from 'lucide-react'
 import { useProjectClients } from '@/hooks/use-project-clients'
 import { useProjectInstallments } from '@/hooks/use-project-installments'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -281,6 +281,16 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2 pb-2 border-b border-[var(--card-border)]">
+        <Building className="h-4 w-4 text-[var(--accent)]" />
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-[var(--card-fg)]">Detalle de Clientes de Proyecto</h3>
+          <p className="text-xs text-[var(--text-muted)] leading-tight">
+            Selecciona compromisos y cuotas de clientes
+          </p>
+        </div>
+      </div>
       {/* Payment Plan Information */}
       {paymentPlan?.payment_plans && (
         <div className="space-y-3 p-4 bg-muted/30 rounded-md border">
