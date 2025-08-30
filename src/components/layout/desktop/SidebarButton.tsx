@@ -71,7 +71,7 @@ export default function SidebarButton({
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
-          if (!isActive) {
+          if (!isActive && !iconColor) { // No aplicar hover si iconColor está definido (sidebar organizaciones)
             e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-hover-bg)`; // Usar siempre main
             e.currentTarget.style.color = `var(--main-sidebar-button-hover-fg)`; // Usar siempre main
           }
@@ -95,7 +95,7 @@ export default function SidebarButton({
         })
       } as React.CSSProperties}
       onMouseLeave={(e) => {
-        if (!isActive) {
+        if (!isActive && !iconColor) { // No aplicar hover si iconColor está definido (sidebar organizaciones)
           e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-bg)`; // Usar siempre main
           e.currentTarget.style.color = `var(--main-sidebar-button-fg)`; // Usar siempre main
         }

@@ -38,11 +38,11 @@ export function OrganizationSidebar() {
             <img 
               src={userData.organization.logo_url} 
               alt={userData.organization.name}
-              className="w-[28px] h-[28px] rounded-full"
+              className="w-[28px] h-[28px] rounded-full border-2 border-white"
             />
           ) : (
             <div 
-              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white"
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white border-2 border-white"
               style={{ backgroundColor: 'var(--accent)' }}
             >
               {userData?.organization?.name?.charAt(0)?.toUpperCase() || 'O'}
