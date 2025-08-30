@@ -1,6 +1,7 @@
 import React from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface Project {
   id: string;
@@ -11,10 +12,17 @@ interface Project {
   };
 }
 
+interface Organization {
+  id: string;
+  name: string;
+  logo_url?: string;
+}
+
 interface ProjectSelectorFieldProps {
   projects: Project[];
-  value: string;
-  onChange: (value: string) => void;
+  organization?: Organization;
+  value: string | null;
+  onChange: (value: string | null) => void;
   placeholder?: string;
   className?: string;
 }
@@ -26,8 +34,16 @@ function getProjectInitials(name: string): string {
     .toUpperCase();
 }
 
+// Función para generar iniciales de organizaciones (como en Sidebar.tsx)
+function getOrganizationInitials(name: string): string {
+  return name
+    .charAt(0)
+    .toUpperCase();
+}
+
 export default function ProjectSelectorField({
   projects,
+  organization,
   value,
   onChange,
   placeholder = "Seleccionar proyecto",
@@ -42,13 +58,32 @@ export default function ProjectSelectorField({
     });
   }, [projects]);
 
-  const selectedProject = sortedProjects.find(project => project.id === value);
+  // Convertir null a string especial para el Select
+  const selectValue = value === null ? '__organization__' : (value || '');
+  const selectedProject = value ? sortedProjects.find(project => project.id === value) : null;
+  const isOrganizationSelected = value === null;
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={selectValue} onValueChange={(val) => onChange(val === '__organization__' ? null : val)}>
       <SelectTrigger className={className}>
         <div className="flex items-center gap-2">
-          {selectedProject ? (
+          {isOrganizationSelected ? (
+            <>
+              <Avatar className="w-5 h-5 border-0">
+                {organization?.logo_url ? (
+                  <AvatarImage src={organization.logo_url} alt="Organización" />
+                ) : (
+                  <AvatarFallback 
+                    className="text-xs font-medium text-white border-0"
+                    style={{ backgroundColor: 'hsl(var(--accent))' }}
+                  >
+                    {organization ? getOrganizationInitials(organization.name) : 'O'}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <span className="truncate">Organización</span>
+            </>
+          ) : selectedProject ? (
             <>
               <Avatar className="w-5 h-5 border-0">
                 <AvatarFallback 
@@ -66,6 +101,29 @@ export default function ProjectSelectorField({
         </div>
       </SelectTrigger>
       <SelectContent>
+        {/* Opción Organización - siempre primera */}
+        <SelectItem value="__organization__">
+          <div className="flex items-center gap-2">
+            <Avatar className="w-5 h-5 border-0">
+              {organization?.logo_url ? (
+                <AvatarImage src={organization.logo_url} alt="Organización" />
+              ) : (
+                <AvatarFallback 
+                  className="text-xs font-medium text-white border-0"
+                  style={{ backgroundColor: 'hsl(var(--accent))' }}
+                >
+                  {organization ? getOrganizationInitials(organization.name) : 'O'}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <span>Organización</span>
+          </div>
+        </SelectItem>
+        
+        {/* Separador */}
+        {sortedProjects.length > 0 && <Separator className="my-1" />}
+        
+        {/* Proyectos */}
         {sortedProjects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
             <div className="flex items-center gap-2">

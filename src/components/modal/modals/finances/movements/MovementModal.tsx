@@ -29,7 +29,7 @@ import { ConversionFields } from './fields/ConversionFields'
 import { TransferFields } from './fields/TransferFields'
 import { Users, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { CommitmentItem } from './forms/ClientsForm'
+import { CommitmentItem } from './fields/ClientsFields'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
@@ -48,8 +48,8 @@ const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
   project_id: isOrganizationalContext 
-    ? z.string().min(1, 'Proyecto es requerido') 
-    : z.string().optional()
+    ? z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' })
+    : z.string().optional().nullable()
 })
 
 // Schema para conversión (como en el modal original)
@@ -88,7 +88,7 @@ const transferSchema = z.object({
   path: ["wallet_id_to"]
 })
 
-type BasicMovementForm = z.infer<typeof basicMovementSchema>
+type BasicMovementForm = z.infer<ReturnType<typeof createBasicMovementSchema>>
 type ConversionForm = z.infer<typeof conversionSchema>
 type TransferForm = z.infer<typeof transferSchema>
 
@@ -296,7 +296,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         wallet_id: defaultWallet || wallets[0]?.id || '',
         amount: 0,
         exchange_rate: undefined,
-        project_id: isOrganizationalContext ? '' : undefined
+        project_id: isOrganizationalContext ? null : undefined
       })
     } else {
       // Para edición, usar datos del movimiento
@@ -311,7 +311,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id || '',
         amount: editingMovement?.amount || 0,
         exchange_rate: editingMovement?.exchange_rate || undefined,
-        project_id: editingMovement?.project_id || (isOrganizationalContext ? '' : undefined)
+        project_id: editingMovement?.project_id || (isOrganizationalContext ? null : undefined)
       })
     }
   }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
@@ -1463,7 +1463,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           selectedPersonnel={selectedPersonnel}
           selectedSubcontracts={selectedSubcontracts}
           selectedClients={selectedClients}
-          selectedPartnerWithdrawals={selectedPartnerWithdrawals}
+          selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
           onPersonnelChange={setSelectedPersonnel}
           onSubcontractsChange={setSelectedSubcontracts}
           onClientsChange={setSelectedClients}
@@ -1487,7 +1487,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               <FormControl>
                 <ProjectSelectorField
                   projects={projects || []}
-                  value={field.value || ''}
+                  organization={userData?.organization}
+                  value={field.value}
                   onChange={field.onChange}
                   placeholder="Seleccionar proyecto..."
                 />
@@ -1678,7 +1679,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             selectedPersonnel={selectedPersonnel}
             selectedSubcontracts={selectedSubcontracts}
             selectedClients={selectedClients}
-            selectedPartnerWithdrawals={selectedPartnerWithdrawals}
+            selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
             onPersonnelChange={setSelectedPersonnel}
             onSubcontractsChange={setSelectedSubcontracts}
             onClientsChange={setSelectedClients}
