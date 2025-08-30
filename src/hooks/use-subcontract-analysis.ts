@@ -19,7 +19,6 @@ export function useSubcontractAnalysis(projectId: string | null) {
           contact:contacts(id, first_name, last_name, full_name),
           movement_subcontracts(
             id,
-            amount,
             movement:movements(
               id,
               amount,
@@ -38,12 +37,15 @@ export function useSubcontractAnalysis(projectId: string | null) {
       const processedData = data?.map(subcontract => {
         // Calcular total pagado sumando todos los movimientos asociados
         const totalPaid = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
-          if (ms.movement && ms.movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
-            const movementAmount = ms.movement.amount || 0
-            const exchangeRate = ms.movement.exchange_rate || 1
+          // Manejar si movement es un array (relación múltiple) o un objeto (relación única)
+          const movement = Array.isArray(ms.movement) ? ms.movement[0] : ms.movement
+          
+          if (movement && movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
+            const movementAmount = movement.amount || 0
+            const exchangeRate = movement.exchange_rate || 1
             
             // Convertir a pesos (pesificado) para comparación uniforme
-            const convertedAmount = ms.movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
+            const convertedAmount = movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
               ? movementAmount * exchangeRate
               : movementAmount
             
@@ -60,11 +62,14 @@ export function useSubcontractAnalysis(projectId: string | null) {
 
         // Calcular pago total en USD
         const totalPaidUSD = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
-          if (ms.movement && ms.movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
-            const movementAmount = ms.movement.amount || 0
-            const movementAmountUSD = ms.movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
+          // Manejar si movement es un array (relación múltiple) o un objeto (relación única)
+          const movement = Array.isArray(ms.movement) ? ms.movement[0] : ms.movement
+          
+          if (movement && movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') { // Solo EGRESOS
+            const movementAmount = movement.amount || 0
+            const movementAmountUSD = movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' // USD
               ? movementAmount
-              : movementAmount / (ms.movement.exchange_rate || 1)
+              : movementAmount / (movement.exchange_rate || 1)
             return sum + movementAmountUSD
           }
           return sum
@@ -76,7 +81,11 @@ export function useSubcontractAnalysis(projectId: string | null) {
         return {
           id: subcontract.id,
           subcontrato: subcontract.title,
-          proveedor: subcontract.contact?.full_name || `${subcontract.contact?.first_name || ''} ${subcontract.contact?.last_name || ''}`.trim() || 'Sin proveedor',
+          proveedor: Array.isArray(subcontract.contact) 
+            ? (subcontract.contact.length > 0 
+                ? (subcontract.contact[0]?.full_name || `${subcontract.contact[0]?.first_name || ''} ${subcontract.contact[0]?.last_name || ''}`.trim() || 'Sin proveedor')
+                : 'Sin proveedor')
+            : (subcontract.contact?.full_name || `${subcontract.contact?.first_name || ''} ${subcontract.contact?.last_name || ''}`.trim() || 'Sin proveedor'),
           montoTotal: totalAmountOriginal,
           montoTotalUSD: totalAmountUSD,
           pagoALaFecha: totalPaid,

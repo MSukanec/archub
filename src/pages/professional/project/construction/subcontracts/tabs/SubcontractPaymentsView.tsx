@@ -58,8 +58,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         .from('movement_subcontracts')
         .select(`
           id,
-          amount,
-          movement:movements!inner(
+          movements!inner(
             id,
             movement_date,
             amount,
@@ -76,8 +75,8 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
           )
         `)
         .eq('subcontract_id', subcontract.id)
-        .eq('movement.organization_id', userData.organization?.id)
-        .order('movement(movement_date)', { ascending: false });
+        .eq('movements.organization_id', userData.organization?.id)
+        .order('movements(movement_date)', { ascending: false });
 
       if (error) {
         console.error('Error fetching subcontract payments:', error);
@@ -92,15 +91,15 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
 
         return {
           id: item.id,
-          movement_date: item.movement.movement_date,
-          amount: item.amount || item.movement.amount, // Usar amount del movement_subcontract si está disponible
-          exchange_rate: item.movement.exchange_rate || 1,
+          movement_date: item.movements.movement_date,
+          amount: item.movements.amount, // Usar amount directamente del movement
+          exchange_rate: item.movements.exchange_rate || 1,
           subcontract_title: item.subcontract.title,
           contact_name: contactName,
-          wallet_name: item.movement.wallet?.wallets?.name || 'Sin billetera',
-          currency_name: item.movement.currency.name,
-          currency_symbol: item.movement.currency.symbol,
-          currency_code: item.movement.currency.code
+          wallet_name: item.movements.wallet?.wallets?.name || 'Sin billetera',
+          currency_name: item.movements.currency.name,
+          currency_symbol: item.movements.currency.symbol,
+          currency_code: item.movements.currency.code
         };
       });
     },
