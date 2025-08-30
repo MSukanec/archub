@@ -197,17 +197,15 @@ export function CascadingSelect({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Botón de volver - solo visible si no estamos en el nivel raíz */}
           {currentLevel > 0 && isOpen && (
-            <Button 
-              type="button"
-              size="sm"
-              className="h-5 w-5 p-0 flex-shrink-0" 
+            <div 
+              className="inline-flex items-center justify-center h-5 w-5 p-0 flex-shrink-0 rounded-md border border-input bg-background text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation()
                 handleBack()
               }}
             >
               <ArrowLeft className="h-3 w-3" />
-            </Button>
+            </div>
           )}
           
           {/* Texto del valor seleccionado */}

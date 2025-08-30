@@ -1452,13 +1452,26 @@ export default function MovementsList() {
           // For regular movements, determine type
           const typeName = item.movement_data?.type?.name || "";
           const categoryName = item.movement_data?.category?.name || "";
+          const subcategoryName = item.movement_data?.subcategory?.name || "";
           
-          // Check for APORTES PROPIOS and RETIROS PROPIOS based on category name
-          if (categoryName && (categoryName.toLowerCase().includes("aportes propios") || 
-              categoryName.toLowerCase().includes("aportes_propios"))) {
+          // Check for deprecated concepts (old patterns) - both in category and subcategory names
+          const isDeprecatedAportes = (categoryName.toLowerCase().includes("aportes propios") || 
+                                      categoryName.toLowerCase().includes("aportes_propios") ||
+                                      subcategoryName.toLowerCase().includes("aportes propios") || 
+                                      subcategoryName.toLowerCase().includes("aportes_propios") ||
+                                      subcategoryName.toLowerCase().includes("aportes de socios") ||
+                                      categoryName.toLowerCase().includes("aportes de socios"));
+          
+          const isDeprecatedRetiros = (categoryName.toLowerCase().includes("retiros propios") || 
+                                      categoryName.toLowerCase().includes("retiros_propios") ||
+                                      subcategoryName.toLowerCase().includes("retiros propios") || 
+                                      subcategoryName.toLowerCase().includes("retiros_propios") ||
+                                      subcategoryName.toLowerCase().includes("retiros de socios") ||
+                                      categoryName.toLowerCase().includes("retiros de socios"));
+          
+          if (isDeprecatedAportes) {
             return "movement-row-aportes-propios";
-          } else if (categoryName && (categoryName.toLowerCase().includes("retiros propios") || 
-                     categoryName.toLowerCase().includes("retiros_propios"))) {
+          } else if (isDeprecatedRetiros) {
             return "movement-row-retiros-propios";
           }
           
