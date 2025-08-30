@@ -43,12 +43,17 @@ export function OrganizationSidebar() {
             <img 
               src={userData.organization.logo_url} 
               alt={userData.organization.name}
-              className="w-[28px] h-[28px] rounded-full border-2 border-white"
+              className="w-[28px] h-[28px] rounded-full border-2"
+              style={{ borderColor: 'rgb(235, 235, 235)' }}
             />
           ) : (
             <div 
-              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white border-2 border-white"
-              style={{ backgroundColor: 'var(--accent)' }}
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border-2"
+              style={{ 
+                backgroundColor: 'var(--accent)',
+                color: 'rgb(235, 235, 235)',
+                borderColor: 'rgb(235, 235, 235)'
+              }}
             >
               {userData?.organization?.name?.charAt(0)?.toUpperCase() || 'O'}
             </div>
@@ -58,69 +63,69 @@ export function OrganizationSidebar() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-1">
+        <div className="p-1 pt-3">
           {/* Dashboard Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<Home className="w-[18px] h-[18px] text-white" />}
+              icon={<Home className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
               label="Dashboard"
               href="/dashboard"
               isActive={location === '/dashboard'}
               isExpanded={false} // Siempre false para este sidebar
               variant="main"
-              iconColor="text-white"
+              iconColor="rgb(235, 235, 235)"
             />
           </div>
           
           {/* Movements Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<DollarSign className="w-[18px] h-[18px] text-white" />}
+              icon={<DollarSign className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
               label="Movimientos"
               href="/organization/finances/movements"
               isActive={location === '/organization/finances/movements'}
               isExpanded={false}
               variant="main"
-              iconColor="text-white"
+              iconColor="rgb(235, 235, 235)"
             />
           </div>
           
           {/* Media Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<Images className="w-[18px] h-[18px] text-white" />}
+              icon={<Images className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
               label="Media"
               href="/general/media"
               isActive={location === '/general/media'}
               isExpanded={false}
               variant="main"
-              iconColor="text-white"
+              iconColor="rgb(235, 235, 235)"
             />
           </div>
           
           {/* Calendar Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<Calendar className="w-[18px] h-[18px] text-white" />}
+              icon={<Calendar className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
               label="Calendario"
               href="/general/calendar"
               isActive={location === '/general/calendar'}
               isExpanded={false}
               variant="main"
-              iconColor="text-white"
+              iconColor="rgb(235, 235, 235)"
             />
           </div>
           
           {/* Contacts Button */}
           <div className="mb-[2px]">
             <SidebarButton
-              icon={<Users className="w-[18px] h-[18px] text-white" />}
+              icon={<Users className="w-[18px] h-[18px]" style={{ color: 'rgb(235, 235, 235)' }} />}
               label="Contactos"
               href="/organization/contacts"
               isActive={location === '/organization/contacts'}
               isExpanded={false}
               variant="main"
-              iconColor="text-white"
+              iconColor="rgb(235, 235, 235)"
             />
           </div>
         </div>
