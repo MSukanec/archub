@@ -47,7 +47,7 @@ function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
           lineHeight: '12px'
         }}
       >
-        General
+        Organización
       </Badge>
     );
   }
