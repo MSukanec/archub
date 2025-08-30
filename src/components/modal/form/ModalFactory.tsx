@@ -101,7 +101,7 @@ export function ModalFactory() {
       return <DocumentFolderFormModal modalData={data || undefined} onClose={closeModal} />;
     case 'movement':
       return <MovementModal modalData={data || undefined} onClose={closeModal} />;
-    case 'movement-view':
+    case 'movements-view':
       return <MovementModalView modalData={data || {}} onClose={closeModal} />;
     case 'movement-concept':
       return <MovementConceptFormModal modalData={data || undefined} onClose={closeModal} />;

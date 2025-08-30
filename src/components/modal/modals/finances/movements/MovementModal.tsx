@@ -159,10 +159,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Mutaciones para partners (unificado)
-  const createMovementPartnersMutation = useCreateMovementPartners()
-  const updateMovementPartnersMutation = useUpdateMovementPartners()
-
   // Query para cargar partners existentes en modo edición
   const { data: existingPartners } = useMovementPartners(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
@@ -1066,7 +1062,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     onSuccess: async (result) => {
       // Invalidar todas las queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1276,7 +1272,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
@@ -1377,7 +1373,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })

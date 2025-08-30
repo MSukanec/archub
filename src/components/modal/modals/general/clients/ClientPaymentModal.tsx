@@ -289,7 +289,7 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movement-view'] })
+      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       toast({
         title: editingInstallment ? 'Aporte actualizado' : 'Aporte registrado',
         description: editingInstallment 

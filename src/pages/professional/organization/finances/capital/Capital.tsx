@@ -143,7 +143,7 @@ export default function FinancesCapitalMovements() {
       // Get new structure movements (subcategory based)
       if (subcategoryIds.length > 0) {
         const { data: newMovements, error: newError } = await supabase
-          .from('movement_view')
+          .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
           .in('subcategory_id', subcategoryIds)
@@ -160,7 +160,7 @@ export default function FinancesCapitalMovements() {
       // Get old structure movements (category based) for backward compatibility
       if (categoryNames.length > 0) {
         const { data: oldMovements, error: oldError } = await supabase
-          .from('movement_view')
+          .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
           .in('category_name', categoryNames)
