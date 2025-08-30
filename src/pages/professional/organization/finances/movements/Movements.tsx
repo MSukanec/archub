@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { DollarSign, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -10,15 +10,22 @@ import MovementsList from './MovementsList';
 export default function Movements() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
+  const [activeTab, setActiveTab] = useState('movements');
 
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('organization');
   }, [setSidebarContext]);
 
+  const tabs = [
+    { id: 'movements', label: 'Movimientos', isActive: activeTab === 'movements' }
+  ];
+
   const headerProps = {
     icon: DollarSign,
     title: "Movimientos",
+    tabs,
+    onTabChange: setActiveTab,
     actionButton: {
       label: "Nuevo Movimiento",
       icon: Plus,
