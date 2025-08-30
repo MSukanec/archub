@@ -180,6 +180,7 @@ export default function FinancesCapitalMovements() {
       )
 
       console.log('🔍 Total unique capital movements found:', uniqueMovements.length)
+      console.log('🔍 Sample movement data:', uniqueMovements[0])
       return uniqueMovements
     },
     enabled: !!organizationId && !!supabase && (!!aportesPropriosConcept || !!retirosPropriosConcept || !!aportesPropriosOld || !!retirosPropriosOld)
@@ -551,14 +552,29 @@ export default function FinancesCapitalMovements() {
       label: "Socio",
       width: "14.3%",
       render: (item: CapitalMovement) => {
-        // Find the member from our members list using member_id
-        const member = members.find(m => m.id === item.member_id)
+        console.log('🔍 Movement item for member display:', {
+          member_id: item.member_id,
+          member: item.member,
+          has_member_from_list: !!members.find(m => m.id === item.member_id)
+        })
+
+        // Try to get member data from the movement_view first
+        let member = item.member
+        let displayName = null
         
+        // If not available in movement_view, fall back to members list
         if (!member?.user?.full_name) {
+          member = members.find(m => m.id === item.member_id)
+        }
+        
+        if (member?.user?.full_name) {
+          displayName = member.user.full_name
+        }
+
+        if (!displayName) {
           return <div className="text-sm text-muted-foreground">Sin socio</div>
         }
 
-        const displayName = member.user.full_name
         const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
         return (
