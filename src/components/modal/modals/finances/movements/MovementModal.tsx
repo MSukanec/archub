@@ -225,6 +225,121 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [movementData, movementConcepts, hasLoadedInitialData])
 
+  // Load existing partner withdrawals when editing
+  React.useEffect(() => {
+    if (isEditing && existingPartnerWithdrawals && existingPartnerWithdrawals.length > 0) {
+      const transformedWithdrawals = existingPartnerWithdrawals.map((withdrawal: any) => {
+        // Get partner display name
+        let partnerName = 'Socio sin nombre'
+        if (withdrawal.partners?.contacts) {
+          const { contacts } = withdrawal.partners
+          if (contacts.company_name) {
+            partnerName = contacts.company_name
+          } else {
+            const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+            if (fullName) {
+              partnerName = fullName
+            } else if (contacts.email) {
+              partnerName = contacts.email
+            }
+          }
+        }
+
+        return {
+          partner_id: withdrawal.partner_id,
+          partner_name: partnerName
+        }
+      })
+      setSelectedPartnerWithdrawals(transformedWithdrawals)
+    }
+  }, [isEditing, existingPartnerWithdrawals])
+
+  // Load existing partner contributions when editing
+  React.useEffect(() => {
+    if (isEditing && existingPartnerContributions && existingPartnerContributions.length > 0) {
+      const transformedContributions = existingPartnerContributions.map((contribution: any) => {
+        // Get partner display name
+        let partnerName = 'Socio sin nombre'
+        if (contribution.partners?.contacts) {
+          const { contacts } = contribution.partners
+          if (contacts.company_name) {
+            partnerName = contacts.company_name
+          } else {
+            const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+            if (fullName) {
+              partnerName = fullName
+            } else if (contacts.email) {
+              partnerName = contacts.email
+            }
+          }
+        }
+
+        return {
+          partner_id: contribution.partner_id,
+          partner_name: partnerName
+        }
+      })
+      setSelectedPartnerContributions(transformedContributions)
+    }
+  }, [isEditing, existingPartnerContributions])
+
+  // Load existing subcontracts when editing
+  React.useEffect(() => {
+    if (isEditing && existingSubcontracts && existingSubcontracts.length > 0) {
+      const transformedSubcontracts = existingSubcontracts.map((subcontract: any) => {
+        // Get subcontract display name
+        let contactName = 'Sin nombre'
+        if (subcontract.subcontracts?.contact) {
+          const contact = subcontract.subcontracts.contact
+          const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+          if (fullName) {
+            contactName = fullName
+          }
+        }
+
+        return {
+          subcontract_id: subcontract.subcontract_id,
+          contact_name: contactName,
+          amount: subcontract.amount
+        }
+      })
+      setSelectedSubcontracts(transformedSubcontracts)
+    }
+  }, [isEditing, existingSubcontracts])
+
+  // Load existing project clients when editing
+  React.useEffect(() => {
+    if (isEditing && existingProjectClients && existingProjectClients.length > 0) {
+      const transformedClients = existingProjectClients.map((client: any) => {
+        // Get client display name
+        let clientName = 'Sin nombre'
+        if (client.project_clients?.contact) {
+          const contact = client.project_clients.contact
+          const fullName = contact.full_name || 
+            `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+          if (fullName) {
+            clientName = fullName
+          }
+        }
+
+        // Get installment display
+        const installmentNumber = client.project_installments?.number
+        const installmentDisplay = installmentNumber ? 
+          `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
+          'Sin cuota'
+
+        return {
+          project_client_id: client.project_client_id,
+          unit: client.project_clients?.unit || 'N/A',
+          client_name: clientName,
+          project_installment_id: client.project_installment_id,
+          installment_display: installmentDisplay
+        }
+      })
+      setSelectedClients(transformedClients)
+    }
+  }, [isEditing, existingProjectClients])
+
   // Extract default values like the original modal
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
   const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
