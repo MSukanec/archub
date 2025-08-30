@@ -484,13 +484,14 @@ export function Sidebar() {
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     main: [
-      {
+      // COMENTADO - MOVIDO AL ORGANIZATION SIDEBAR
+      /*{
         id: 'dashboard',
         icon: Home,
         label: 'Dashboard',
         defaultRoute: '/dashboard',
         isActive: location === '/dashboard'
-      },
+      },*/
       {
         id: 'organizacion',
         icon: Building,
@@ -799,10 +800,10 @@ export function Sidebar() {
                     </div>
                   )}
                   
-                  {/* Línea divisoria después de Dashboard */}
-                  {isDashboard && sidebarLevel === 'main' && (
+                  {/* Línea divisoria después de Dashboard - COMENTADO - MOVIDO AL ORGANIZATION SIDEBAR */}
+                  {/*{isDashboard && sidebarLevel === 'main' && (
                     <div className="h-px bg-white/20 my-2"></div>
-                  )}
+                  )}*/}
                 </div>
               );
             })}

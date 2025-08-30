@@ -9,6 +9,7 @@ import {
   Moon,
   PanelLeftOpen,
   PanelLeftClose,
+  Home,
 } from "lucide-react";
 import SidebarButton from "./SidebarButton";
 
@@ -54,7 +55,21 @@ export function OrganizationSidebar() {
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-1">
-          {/* Aquí irían los botones principales de organizaciones en el futuro */}
+          {/* Dashboard Button */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<Home className="w-[18px] h-[18px]" />}
+              label="Dashboard"
+              href="/dashboard"
+              isActive={location === '/dashboard'}
+              isExpanded={false} // Siempre false para este sidebar
+              variant="main"
+              iconColor="text-white"
+            />
+          </div>
+          
+          {/* Línea divisoria después de Dashboard */}
+          <div className="h-px bg-white/30 my-2"></div>
         </div>
       </div>
 
