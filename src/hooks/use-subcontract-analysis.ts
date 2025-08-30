@@ -81,11 +81,17 @@ export function useSubcontractAnalysis(projectId: string | null) {
         return {
           id: subcontract.id,
           subcontrato: subcontract.title,
-          proveedor: Array.isArray(subcontract.contact) 
-            ? (subcontract.contact.length > 0 
-                ? (subcontract.contact[0]?.full_name || `${subcontract.contact[0]?.first_name || ''} ${subcontract.contact[0]?.last_name || ''}`.trim() || 'Sin proveedor')
-                : 'Sin proveedor')
-            : (subcontract.contact?.full_name || `${subcontract.contact?.first_name || ''} ${subcontract.contact?.last_name || ''}`.trim() || 'Sin proveedor'),
+          proveedor: (() => {
+            const contact = Array.isArray(subcontract.contact) 
+              ? subcontract.contact[0] 
+              : subcontract.contact;
+            
+            if (!contact) return 'Sin proveedor';
+            
+            return contact.full_name || 
+                   `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
+                   'Sin proveedor';
+          })(),
           montoTotal: totalAmountOriginal,
           montoTotalUSD: totalAmountUSD,
           pagoALaFecha: totalPaid,
