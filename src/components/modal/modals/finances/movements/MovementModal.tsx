@@ -268,8 +268,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         return {
           subcontract_id: subcontract.subcontract_id,
-          contact_name: contactName,
-          amount: subcontract.amount
+          contact_name: contactName
         }
       })
       setSelectedSubcontracts(transformedSubcontracts)
@@ -401,7 +400,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         wallet_id: defaultWallet || wallets[0]?.id || '',
         amount: 0,
         exchange_rate: undefined,
-        project_id: isOrganizationalContext ? null : undefined
+        project_id: isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null)
       })
     } else {
       // Para edición, usar datos del movimiento
@@ -416,7 +415,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id || '',
         amount: editingMovement?.amount || 0,
         exchange_rate: editingMovement?.exchange_rate || undefined,
-        project_id: editingMovement?.project_id || (isOrganizationalContext ? null : undefined)
+        project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null))
       })
     }
   }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
@@ -794,7 +793,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_subcontracts')
         .select(`
           subcontract_id,
-          amount,
           subcontracts:subcontract_id (
             id,
             contact:contact_id (
@@ -816,8 +814,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
           return {
             subcontract_id: assignment.subcontract_id,
-            contact_name: contactName,
-            amount: assignment.amount
+            contact_name: contactName
           }
         })
 
