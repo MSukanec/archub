@@ -484,14 +484,13 @@ export function Sidebar() {
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     main: [
-      // COMENTADO - MOVIDO AL ORGANIZATION SIDEBAR
-      /*{
+      {
         id: 'dashboard',
         icon: Home,
         label: 'Dashboard',
         defaultRoute: '/dashboard',
         isActive: location === '/dashboard'
-      },*/
+      },
       {
         id: 'organizacion',
         icon: Building,
@@ -611,7 +610,7 @@ export function Sidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-10 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-50 flex flex-col",
+        "fixed top-0 left-0 h-screen border-r bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-50 flex flex-col",
         isExpanded ? "w-64" : "w-[40px]"
       )}
       style={{
@@ -800,17 +799,60 @@ export function Sidebar() {
                     </div>
                   )}
                   
-                  {/* Línea divisoria después de Dashboard - COMENTADO - MOVIDO AL ORGANIZATION SIDEBAR */}
-                  {/*{isDashboard && sidebarLevel === 'main' && (
+                  {/* Línea divisoria después de Dashboard */}
+                  {isDashboard && sidebarLevel === 'main' && (
                     <div className="h-px bg-white/20 my-2"></div>
-                  )}*/}
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
       </div>
-      {/* Bottom Section - ELIMINADO TEMPORALMENTE - MOVIDO AL ORGANIZATION SIDEBAR */}
+      {/* Bottom Section - Fixed Buttons */}
+      <div className="p-1">
+        <div className="flex flex-col gap-[2px]">
+          {/* Divisor */}
+          <div className="h-px bg-white/20 mb-2"></div>
+          
+          {/* Settings buttons */}
+          <div className="flex flex-col gap-[2px] mb-[2px]">
+            {/* Dock/Undock button */}
+            <SidebarButton
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="main"
+            />
+            
+            {/* Theme toggle button */}
+            <SidebarButton
+              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+              label={isDark ? "Modo Claro" : "Modo Oscuro"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleThemeToggle}
+              variant="main"
+            />
+          </div>
+          
+          {/* Profile */}
+          <div className="mb-[2px]">
+            <SidebarButton
+              icon={<UserCircle className="w-[18px] h-[18px]" />}
+              label="Mi Perfil"
+              href="/profile"
+              isActive={location.startsWith('/profile')}
+              isExpanded={isExpanded}
+              avatarUrl={userData?.user?.avatar_url}
+              userFullName={userData?.user?.full_name}
+              variant="main"
+            />
+          </div>
+        </div>
+      </div>
     </aside>
   );
 }
