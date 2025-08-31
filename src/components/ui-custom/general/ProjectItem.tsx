@@ -98,7 +98,7 @@ export default function ProjectItem({
   return (
     <div
       className={`
-        bg-card rounded-2xl shadow-sm border cursor-pointer
+        bg-[var(--card-bg)] border-[var(--card-border)] rounded-2xl shadow-sm cursor-pointer
         transition-all duration-200 ease-in-out
         hover:shadow-md hover:-translate-y-1
         ${isActive ? 'ring-2 ring-[var(--accent)] ring-offset-2' : ''}
