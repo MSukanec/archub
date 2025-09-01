@@ -151,12 +151,6 @@ export default function Indirects() {
     if (activeTab === 'lista') {
       return {
         ...baseProps,
-        showHeaderSearch: true,
-        headerSearchValue: searchQuery,
-        onHeaderSearchChange: setSearchQuery,
-        showCurrencySelector: true,
-        currencyView: currencyView,
-        onCurrencyViewChange: setCurrencyView,
         actionButton: {
           icon: Plus,
           label: "Nuevo Costo Indirecto",

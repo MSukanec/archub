@@ -538,6 +538,12 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
           icon={<TrendingUp className="w-12 h-12 text-muted-foreground" />}
           title="No hay costos indirectos"
           description={searchQuery ? "No se encontraron costos indirectos que coincidan con tu búsqueda." : "Aún no has creado ningún costo indirecto. Haz clic en 'Nuevo Costo Indirecto' para comenzar."}
+          action={
+            <Button onClick={handleCreateIndirect}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Costo Indirecto
+            </Button>
+          }
         />
       ) : (
         // Vista desktop - usar Table
