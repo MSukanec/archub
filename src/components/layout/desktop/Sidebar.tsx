@@ -253,25 +253,18 @@ export function Sidebar() {
   const queryClient = useQueryClient();
   
   // Auto-detect and set correct sidebarLevel based on current location
+  // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
   useEffect(() => {
-    if (location.startsWith('/organization/')) {
-      if (sidebarLevel !== 'organization') {
+    if (sidebarLevel === 'main') {
+      if (location.startsWith('/organization/')) {
         setSidebarLevel('organization');
-      }
-    } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/construction/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
-      if (sidebarLevel !== 'project') {
+      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/construction/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
         setSidebarLevel('project');
-      }
-    } else if (location.startsWith('/library/')) {
-      if (sidebarLevel !== 'library') {
+      } else if (location.startsWith('/library/')) {
         setSidebarLevel('library');
-      }
-    } else if (location.startsWith('/proveedor/')) {
-      if (sidebarLevel !== 'provider') {
+      } else if (location.startsWith('/proveedor/')) {
         setSidebarLevel('provider');
-      }
-    } else if (location.startsWith('/admin/')) {
-      if (sidebarLevel !== 'admin') {
+      } else if (location.startsWith('/admin/')) {
         setSidebarLevel('admin');
       }
     }
