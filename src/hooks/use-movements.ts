@@ -34,6 +34,8 @@ interface Movement {
   client: string | null
   partner: string | null
   subcontract: string | null
+  member: string | null
+  member_avatar: string | null
 }
 
 interface MovementWithData extends Movement {
@@ -96,7 +98,9 @@ export function useMovements(organizationId: string | null, projectId?: string |
           subcategory_name,
           client,
           partner,
-          subcontract
+          subcontract,
+          member,
+          member_avatar
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
@@ -133,40 +137,16 @@ export function useMovements(organizationId: string | null, projectId?: string |
         console.log('Expected project_id:', projectId)
       }
 
-      // Get creators data only
-      const [membersResult] = await Promise.all([
-        supabase
-          .from('organization_members')
-          .select(`
-            id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
-          `)
-          .in('id', Array.from(new Set(data.map(m => m.created_by).filter(Boolean))))
-      ]);
-
-      // Create lookup map for creators
-      const membersMap = new Map();
-      membersResult.data?.forEach(member => {
-        if (member.users) {
-          membersMap.set(member.id, {
-            id: member.users.id,
-            full_name: member.users.full_name,
-            email: member.users.email,
-            avatar_url: member.users.avatar_url
-          });
-        }
-      });
-
       // Map movements with enriched data using the view columns directly
       const enrichedMovements: MovementWithData[] = data.map(movement => ({
         ...movement,
         movement_data: {
-          creator: membersMap.get(movement.created_by),
+          creator: movement.member ? {
+            id: movement.created_by,
+            full_name: movement.member,
+            email: '',
+            avatar_url: movement.member_avatar || ''
+          } : null,
           type: { id: movement.type_id, name: movement.type_name },
           category: { id: movement.category_id, name: movement.category_name },
           subcategory: { id: movement.subcategory_id, name: movement.subcategory_name },
