@@ -969,12 +969,41 @@ export default function MovementsList() {
         
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
+        const subcategoryId = (item as any).subcategory_id;
+        
+        // Helper para obtener los datos seleccionados basándose en el UUID de subcategoría
+        const getSelectedData = () => {
+          const movement = item as any;
+          
+          // UUIDs específicos
+          const APORTES_CLIENTES = 'f3b96eda-15d5-4c96-ade7-6f53685115d3';
+          const APORTES_PROPIOS = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb';
+          const RETIROS_PROPIOS = 'c04a82f8-6fd8-439d-81f7-325c63905a1b';
+          const SUBCONTRATOS = 'f40a8fda-69e6-4e81-bc8a-464359cd8498';
+          
+          switch (subcategoryId) {
+            case APORTES_CLIENTES:
+              return movement.client || 'Sin cliente';
+            case APORTES_PROPIOS:
+            case RETIROS_PROPIOS:
+              return movement.partner || 'Sin socio';
+            case SUBCONTRATOS:
+              return movement.subcontract || 'Sin subcontrato';
+            default:
+              return null;
+          }
+        };
+        
+        const selectedData = getSelectedData();
         
         return (
           <div className="space-y-1">
             <div className="text-xs font-bold">{categoryName}</div>
             {subcategoryName && (
               <div className="text-xs text-muted-foreground">{subcategoryName}</div>
+            )}
+            {selectedData && (
+              <div className="text-xs text-muted-foreground">{selectedData}</div>
             )}
           </div>
         );
