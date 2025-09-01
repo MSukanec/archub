@@ -965,8 +965,18 @@ export default function MovementsList() {
           const subcatLower = subcategoryName?.toLowerCase() || '';
           const movementData = movement as any;
           
+          console.log('🔍 Movement data check:', {
+            subcategory: subcategoryName,
+            subcatLower,
+            client: movementData.client,
+            partner: movementData.partner,
+            subcontract: movementData.subcontract,
+            movementId: movementData.id
+          });
+          
           // Para subcontratos - usar la columna "subcontract" de la vista
           if (subcatLower.includes('subcontrato') && movementData.subcontract) {
+            console.log('✅ Found subcontract:', movementData.subcontract);
             return movementData.subcontract;
           }
           
@@ -974,6 +984,7 @@ export default function MovementsList() {
           if ((subcatLower.includes('aporte') && subcatLower.includes('propio')) || 
               (subcatLower.includes('retiro') && subcatLower.includes('propio'))) {
             if (movementData.partner) {
+              console.log('✅ Found partner:', movementData.partner);
               return movementData.partner;
             }
             return null;
@@ -982,6 +993,7 @@ export default function MovementsList() {
           // Para aportes de clientes - usar la columna "client" de la vista
           if (subcatLower.includes('cliente')) {
             if (movementData.client) {
+              console.log('✅ Found client:', movementData.client);
               return movementData.client;
             }
             return null;
