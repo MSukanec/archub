@@ -133,7 +133,7 @@ export function Header({}: HeaderProps = {}) {
 
   return (
     <div className="fixed top-0 left-0 right-0 w-full z-50 h-12 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] transition-all duration-300">
-      <div className="w-full h-12 p-1 flex items-center justify-between">
+      <div className="w-full h-12 px-1 py-2 flex items-center justify-between">
         {/* Left: Navigation Buttons */}
         <div className="flex items-center gap-1">
           {/* Inicio */}
@@ -269,16 +269,15 @@ export function Header({}: HeaderProps = {}) {
             onClick={() => {
               setSidebarLevel('provider');
             }}
-            className={`h-8 flex items-center rounded transition-all duration-200 ${
+            className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
               activeSection === 'proveedor' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
             title="Proveedor"
           >
             <Package className="w-4 h-4" />
-            {activeSection === 'proveedor' && <span className="ml-2 text-sm">Proveedor</span>}
           </button>
 
           {/* Administración */}
@@ -286,16 +285,15 @@ export function Header({}: HeaderProps = {}) {
             onClick={() => {
               setSidebarLevel('admin');
             }}
-            className={`h-8 flex items-center rounded transition-all duration-200 ${
+            className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
               activeSection === 'administracion' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
             title="Administración"
           >
             <Crown className="w-4 h-4" />
-            {activeSection === 'administracion' && <span className="ml-2 text-sm">Administración</span>}
           </button>
 
           {/* Settings */}
