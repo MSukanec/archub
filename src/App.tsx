@@ -107,6 +107,7 @@ function Router() {
         <Route path="/dashboard" component={OrganizationDashboard} />
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
+        <Route path="/organization/dashboard" component={OrganizationDashboard} />
         <Route path="/organization/preferences" component={Preferences} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/data" component={OrganizationData} />
@@ -114,7 +115,7 @@ function Router() {
         <Route path="/organization/projects" component={Projects} />
         <Route path="/organization/members" component={Members} />
         
-        <Route path="/organization" component={Members} />
+        <Route path="/organization" component={OrganizationDashboard} />
 
         <Route path="/general/calendar" component={Calendar} />
 
