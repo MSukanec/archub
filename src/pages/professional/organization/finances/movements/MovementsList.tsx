@@ -970,32 +970,34 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
-        // Obtener información específica según el tipo de movimiento usando las columnas de la vista
+        // Obtener información específica según el tipo de movimiento usando UUIDs específicos
         const getSpecificInfo = (movement: Movement) => {
-          const subcatLower = subcategoryName?.toLowerCase() || '';
           const movementData = movement as any;
+          const subcategoryId = movementData.movement_data?.subcategory?.id;
           
-          // Para subcontratos - usar la columna "subcontract" de la vista
-          if (subcatLower.includes('subcontrato') && movementData.subcontract) {
-            return movementData.subcontract;
+          // Aportes de clientes - usar la columna "client" de la vista
+          if (subcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3') {
+            return movementData.client || null;
           }
           
-          // Para aportes propios, retiros propios y retiros de socios - usar la columna "partner" de la vista
-          if ((subcatLower.includes('aporte') && subcatLower.includes('propio')) || 
-              (subcatLower.includes('retiro') && subcatLower.includes('propio')) ||
-              (subcatLower.includes('retiro') && subcatLower.includes('socio'))) {
-            if (movementData.partner) {
-              return movementData.partner;
-            }
-            return null;
+          // Aportes propios - usar la columna "partner" de la vista
+          if (subcategoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb') {
+            return movementData.partner || null;
           }
           
-          // Para aportes de clientes - usar la columna "client" de la vista
-          if (subcatLower.includes('cliente')) {
-            if (movementData.client) {
-              return movementData.client;
-            }
-            return null;
+          // Personal - usar la columna "subcontract" de la vista
+          if (subcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff') {
+            return movementData.subcontract || null;
+          }
+          
+          // Retiros de socios - usar la columna "partner" de la vista
+          if (subcategoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') {
+            return movementData.partner || null;
+          }
+          
+          // Subcontratos - usar la columna "subcontract" de la vista
+          if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
+            return movementData.subcontract || null;
           }
           
           return null;
