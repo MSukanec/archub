@@ -89,7 +89,13 @@ export default function TaskList() {
     
     // Filtrar por modo de vista
     if (viewMode === 'organization') {
+      // Solo tareas de la organización (no del sistema)
       filtered = filtered.filter(task => !task.is_system && task.organization_id === userData?.organization?.id);
+    } else {
+      // Modo "Todas": tareas del sistema O de mi organización (nunca de otras organizaciones)
+      filtered = filtered.filter(task => 
+        task.is_system || task.organization_id === userData?.organization?.id
+      );
     }
     
     return filtered.map(task => {
