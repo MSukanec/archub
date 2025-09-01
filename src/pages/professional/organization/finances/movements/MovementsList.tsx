@@ -197,9 +197,8 @@ export default function MovementsList() {
   const movements = useMemo(() => {
     return rawMovements.filter(movement => 
       movement && 
-      movement.id &&
-      movement.movement_data &&
-      typeof movement.movement_data === 'object'
+      movement.id
+      // NO filtrar por movement_data porque las conversiones pueden no tenerlo
     );
   }, [rawMovements]);
 
