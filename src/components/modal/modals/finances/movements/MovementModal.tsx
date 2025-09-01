@@ -1867,6 +1867,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       rightLabel={isEditing ? "Actualizar" : "Guardar"}
       onRightClick={() => {
         if (movementType === 'conversion') {
+          console.log('🔧 INTENTANDO SUBMIT CONVERSIÓN...')
+          console.log('🔧 ERRORES FORMULARIO CONVERSIÓN:', conversionForm.formState.errors)
+          console.log('🔧 FORMULARIO VÁLIDO:', conversionForm.formState.isValid)
+          console.log('🔧 VALORES ACTUALES:', conversionForm.getValues())
           conversionForm.handleSubmit(onSubmitConversion)()
         } else if (movementType === 'transfer') {
           transferForm.handleSubmit(onSubmitTransfer)()
