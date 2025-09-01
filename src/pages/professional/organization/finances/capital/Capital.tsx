@@ -119,9 +119,9 @@ export default function FinancesCapitalMovements() {
     queryFn: async () => {
       if (!supabase || !organizationId) return []
 
-      console.log('🔍 Searching for capital movements with subcategory IDs:', {
-        aportes: aportesPropriosConcept?.id,
-        retiros: retirosPropriosConcept?.id
+      console.log('🔍 Searching for capital movements with criteria:', {
+        subcategoryIds: { aportes: aportesPropriosConcept?.id, retiros: retirosPropriosConcept?.id },
+        categoryNames: { aportes: aportesPropriosOld?.name, retiros: retirosPropriosOld?.name }
       })
 
       // Build subcategory IDs array for new structure
@@ -134,47 +134,77 @@ export default function FinancesCapitalMovements() {
       if (aportesPropriosOld?.name) categoryNames.push(aportesPropriosOld.name)
       if (retirosPropriosOld?.name) categoryNames.push(retirosPropriosOld.name)
 
-      // Query both new structure (by subcategory_id) and old structure (by category_name)
+      // Query multiple ways to find capital movements
       let allMovements: any[] = []
 
-      // Get new structure movements (subcategory based)
+      // Strategy 1: Search by subcategory names (most reliable)
+      const subcategoryNames = ['Aportes de Socios', 'Retiros de Socios']
+      
+      const { data: nameBasedMovements, error: nameError } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('subcategory_name', subcategoryNames)
+        .order('movement_date', { ascending: false })
+
+      if (nameError) {
+        console.error('Error fetching name-based movements:', nameError)
+      } else {
+        console.log('🔍 Found name-based movements:', nameBasedMovements?.length || 0)
+        if (nameBasedMovements) allMovements = [...allMovements, ...nameBasedMovements]
+      }
+
+      // Strategy 2: Search by subcategory IDs (if found)
       if (subcategoryIds.length > 0) {
-        const { data: newMovements, error: newError } = await supabase
+        const { data: idBasedMovements, error: idError } = await supabase
           .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
           .in('subcategory_id', subcategoryIds)
           .order('movement_date', { ascending: false })
 
-        if (newError) {
-          console.error('Error fetching new structure movements:', newError)
+        if (idError) {
+          console.error('Error fetching ID-based movements:', idError)
         } else {
-          console.log('🔍 Found new structure movements:', newMovements?.length || 0)
-          if (newMovements) allMovements = [...allMovements, ...newMovements]
+          console.log('🔍 Found ID-based movements:', idBasedMovements?.length || 0)
+          if (idBasedMovements) allMovements = [...allMovements, ...idBasedMovements]
         }
       }
 
-      // Get old structure movements (category based) for backward compatibility
+      // Strategy 3: Search by old category names (backward compatibility)
       if (categoryNames.length > 0) {
-        const { data: oldMovements, error: oldError } = await supabase
+        const { data: categoryBasedMovements, error: categoryError } = await supabase
           .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
           .in('category_name', categoryNames)
           .order('movement_date', { ascending: false })
 
-        if (oldError) {
-          console.error('Error fetching old structure movements:', oldError)
+        if (categoryError) {
+          console.error('Error fetching category-based movements:', categoryError)
         } else {
-          console.log('🔍 Found old structure movements:', oldMovements?.length || 0)
-          if (oldMovements) allMovements = [...allMovements, ...oldMovements]
+          console.log('🔍 Found category-based movements:', categoryBasedMovements?.length || 0)
+          if (categoryBasedMovements) allMovements = [...allMovements, ...categoryBasedMovements]
         }
       }
+
+      console.log('🔍 Total movements before deduplication:', allMovements.length)
 
       // Remove duplicates by ID
       const uniqueMovements = allMovements.filter((movement, index, self) =>
         index === self.findIndex(m => m.id === movement.id)
       )
+
+      console.log('🔍 Unique movements after deduplication:', uniqueMovements.length)
+      if (uniqueMovements.length > 0) {
+        console.log('🔍 Sample movement:', {
+          id: uniqueMovements[0].id,
+          description: uniqueMovements[0].description,
+          subcategory_name: uniqueMovements[0].subcategory_name,
+          category_name: uniqueMovements[0].category_name,
+          amount: uniqueMovements[0].amount
+        })
+      }
 
       return uniqueMovements
     },
