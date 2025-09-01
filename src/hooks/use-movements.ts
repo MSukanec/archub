@@ -86,7 +86,6 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           subcategory_id,
           currency_id,
           wallet_id,
-          member_id,
           contact_id,
           file_url,
           is_conversion,
