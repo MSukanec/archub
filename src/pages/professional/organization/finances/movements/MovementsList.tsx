@@ -963,37 +963,32 @@ export default function MovementsList() {
         // Obtener información específica según el tipo de movimiento
         const getSpecificInfo = (movement: Movement) => {
           const subcatLower = subcategoryName?.toLowerCase() || '';
+          const movementData = movement as any;
           
-          // Usar los datos que vienen en el movimiento desde el hook useMovements
-          const movementWithRelations = movement as any;
+          // Para subcontratos - usar la nueva columna "subcontract" de la vista
+          if (subcatLower.includes('subcontrato') && movementData.subcontract) {
+            return movementData.subcontract;
+          }
           
           // Para aportes propios y retiros propios, obtener info de socios
           if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
-            if (movementWithRelations.partners && movementWithRelations.partners.length > 0) {
-              return movementWithRelations.partners[0].partner_name;
+            if (movementData.partners && movementData.partners.length > 0) {
+              return movementData.partners[0].partner_name;
             }
             return null;
           }
           
           if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
-            if (movementWithRelations.partners && movementWithRelations.partners.length > 0) {
-              return movementWithRelations.partners[0].partner_name;
-            }
-            return null;
-          }
-          
-          // Para subcontratos
-          if (subcatLower.includes('subcontrato')) {
-            if (movementWithRelations.subcontracts && movementWithRelations.subcontracts.length > 0) {
-              return movementWithRelations.subcontracts[0].contact_name;
+            if (movementData.partners && movementData.partners.length > 0) {
+              return movementData.partners[0].partner_name;
             }
             return null;
           }
           
           // Para aportes de clientes
           if (subcatLower.includes('cliente')) {
-            if (movementWithRelations.clients && movementWithRelations.clients.length > 0) {
-              return movementWithRelations.clients[0].client_name;
+            if (movementData.clients && movementData.clients.length > 0) {
+              return movementData.clients[0].client_name;
             }
             return null;
           }
