@@ -61,11 +61,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
   }, [movements, searchValue])
 
   const handleEdit = (movement: any) => {
-    openModal('movement', {
-      title: 'Editar Movimiento de Capital',
-      editingMovement: movement,
-      isEditing: true
-    })
+    openModal('movement', { editingMovement: movement })
   }
 
   const handleDelete = (movement: any) => {
