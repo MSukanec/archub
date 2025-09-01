@@ -24,6 +24,7 @@ export default function Movements() {
   const headerProps = {
     icon: DollarSign,
     title: "Movimientos",
+    description: "Registro y control de todos los ingresos y egresos financieros de la organización.",
     tabs,
     onTabChange: setActiveTab,
     actionButton: {

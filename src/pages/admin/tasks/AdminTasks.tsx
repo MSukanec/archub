@@ -96,6 +96,7 @@ const AdminTasks = () => {
 
   const headerProps = {
     title: 'Tareas',
+    description: "Configuración y gestión del sistema de tareas paramétricas, categorías y flujos de trabajo.",
     icon: ListTodo,
     showSearch: false,
     showFilters: false,

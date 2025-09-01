@@ -33,7 +33,7 @@ export default function Members() {
   const headerProps = {
     icon: Users,
     title: 'Miembros',
-    subtitle: `Gestión de miembros y clientes de ${organization?.name || 'la organización'}`,
+    description: `Gestión de miembros del equipo y socios de ${organization?.name || 'la organización'}.`,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
 
