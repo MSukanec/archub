@@ -851,71 +851,68 @@ export default function MovementsList() {
       },
     }] : []),
     {
-      key: "movement_date",
-      label: "Fecha",
-      width: "5%",
+      key: "date_creator",
+      label: "Fecha / Creador",
+      width: "10%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Movement | ConversionGroup) => {
         const displayDate = item.movement_date;
 
+        // Formatear fecha
+        let dateElement;
         if (!displayDate) {
-          return <div className="text-xs text-muted-foreground">Sin fecha</div>;
+          dateElement = <div className="text-xs text-muted-foreground">Sin fecha</div>;
+        } else {
+          try {
+            // Handle PostgreSQL date type correctly - treat as local date, not UTC
+            let date: Date;
+            
+            if (typeof displayDate === 'string' && displayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+              // For PostgreSQL date format "YYYY-MM-DD", create local date without timezone issues
+              const [year, month, day] = displayDate.split('-').map(Number);
+              date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+            } else {
+              // Fallback for other date formats
+              date = new Date(displayDate);
+            }
+            
+            if (isNaN(date.getTime())) {
+              dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+            } else {
+              dateElement = <div className="text-xs font-medium">{format(date, "dd/MM/yyyy")}</div>;
+            }
+          } catch (error) {
+            dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
+          }
         }
 
-        try {
-          // Handle PostgreSQL date type correctly - treat as local date, not UTC
-          let date: Date;
-          
-          if (typeof displayDate === 'string' && displayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            // For PostgreSQL date format "YYYY-MM-DD", create local date without timezone issues
-            const [year, month, day] = displayDate.split('-').map(Number);
-            date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-          } else {
-            // Fallback for other date formats
-            date = new Date(displayDate);
-          }
-          
-          if (isNaN(date.getTime())) {
-            console.log('Invalid date for item:', displayDate, item);
-            return (
-              <div className="text-xs text-muted-foreground">
-                Fecha inválida
-              </div>
-            );
-          }
+        // Formatear creador con avatar y nombre
+        const creatorElement = (
+          <div className="flex items-center gap-2 mt-1">
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={item.creator?.avatar_url} />
+              <AvatarFallback className="text-xs">
+                {item.creator?.full_name?.charAt(0) ||
+                  item.creator?.email?.charAt(0) ||
+                  "U"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground truncate">
+              {item.creator?.full_name || 
+               item.creator?.email || 
+               "Usuario"}
+            </span>
+          </div>
+        );
 
-          return (
-            <div className="text-xs">
-              <div>{format(date, "dd/MM/yyyy")}</div>
-            </div>
-          );
-        } catch (error) {
-          console.log('Date formatting error:', error, displayDate, item);
-          return (
-            <div className="text-xs text-muted-foreground">Fecha inválida</div>
-          );
-        }
+        return (
+          <div className="py-1">
+            {dateElement}
+            {creatorElement}
+          </div>
+        );
       },
-    },
-    {
-      key: "creator",
-      label: "Creador",
-      width: "8%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => (
-        <div className="flex justify-center">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={item.creator?.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {item.creator?.full_name?.charAt(0) ||
-                item.creator?.email?.charAt(0) ||
-                "U"}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      ),
     },
     {
       key: "type",
