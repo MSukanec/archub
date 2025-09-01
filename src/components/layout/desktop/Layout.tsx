@@ -124,8 +124,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 md:px-12 md:py-6 pb-12 ${
-              // Calculate top padding based on new double-row header (h-20)
-              "md:pt-24" // h-20 header + 4 units padding
+              // Calculate top padding based on new single-row header (h-12)
+              "md:pt-16" // h-12 header + 4 units padding
             } ${
               // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
               isMainDocked || isMainHovered
