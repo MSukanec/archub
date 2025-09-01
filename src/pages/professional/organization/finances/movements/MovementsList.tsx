@@ -980,9 +980,10 @@ export default function MovementsList() {
             return movementData.subcontract;
           }
           
-          // Para aportes propios y retiros propios - usar la columna "partner" de la vista
+          // Para aportes propios, retiros propios y retiros de socios - usar la columna "partner" de la vista
           if ((subcatLower.includes('aporte') && subcatLower.includes('propio')) || 
-              (subcatLower.includes('retiro') && subcatLower.includes('propio'))) {
+              (subcatLower.includes('retiro') && subcatLower.includes('propio')) ||
+              (subcatLower.includes('retiro') && subcatLower.includes('socio'))) {
             if (movementData.partner) {
               return movementData.partner;
             }
