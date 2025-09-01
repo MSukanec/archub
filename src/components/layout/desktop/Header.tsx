@@ -150,7 +150,7 @@ export function Header({}: HeaderProps = {}) {
             style={{color: activeSection === 'organizacion' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <Building className="w-[18px] h-[18px]" />
-            {activeSection === 'organizacion' && <span className="ml-2 text-sm">Organización</span>}
+            {activeSection === 'organizacion' && <span className="ml-2 text-xs font-normal">Organización</span>}
           </button>
 
           {/* Proyecto */}
@@ -166,7 +166,7 @@ export function Header({}: HeaderProps = {}) {
             style={{color: activeSection === 'proyecto' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <FolderOpen className="w-[18px] h-[18px]" />
-            {activeSection === 'proyecto' && <span className="ml-2 text-sm">Proyecto</span>}
+            {activeSection === 'proyecto' && <span className="ml-2 text-xs font-normal">Proyecto</span>}
           </button>
 
           {/* Biblioteca */}
@@ -182,7 +182,7 @@ export function Header({}: HeaderProps = {}) {
             style={{color: activeSection === 'biblioteca' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <Library className="w-[18px] h-[18px]" />
-            {activeSection === 'biblioteca' && <span className="ml-2 text-sm">Biblioteca</span>}
+            {activeSection === 'biblioteca' && <span className="ml-2 text-xs font-normal">Biblioteca</span>}
           </button>
 
         </div>
