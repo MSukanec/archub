@@ -113,7 +113,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching movements:', error)
+        console.error('❌ Error fetching movements from movements_view:', error)
+        console.error('❌ Error details:', error.message, error.details, error.hint)
         return []
       }
 
