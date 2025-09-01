@@ -123,7 +123,7 @@ export function CapitalHistory({
       }
     },
     {
-      key: "category",
+      key: "type",
       label: "Tipo",
       width: "14.3%",
       sortable: true,
@@ -134,7 +134,7 @@ export function CapitalHistory({
                          item.category_id === aportesPropriosOld?.id
         return (
           <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
-            {item.subcategory_name || item.category_name || 'Sin especificar'}
+            {item.type_name || 'Sin especificar'}
           </Badge>
         )
       }
@@ -178,7 +178,7 @@ export function CapitalHistory({
       sortType: "number" as const,
       render: (item: CapitalMovement) => (
         <div className="text-sm">
-          {item.exchange_rate ? item.exchange_rate.toFixed(4) : '-'}
+          {item.exchange_rate ? Math.round(item.exchange_rate).toLocaleString() : '-'}
         </div>
       )
     },
