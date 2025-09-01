@@ -117,9 +117,9 @@ export function PageLayout({
     <div className="flex flex-col h-full">
       {/* Page Header */}
       <div className="bg-[var(--layout-bg)] border-b border-[var(--menues-border)]">
-        {/* Primera fila: Botón Volver + Título + Botones de acción */}
+        {/* Única fila: Tabs a la izquierda + Botones de acción a la derecha */}
         <div className="h-12 px-6 flex items-center justify-between">
-          {/* Left: Back Button + Page Title */}
+          {/* Left: Tabs */}
           <div className="flex items-center gap-4">
             {showBackButton && (
               <Button
@@ -132,18 +132,47 @@ export function PageLayout({
                 {backButtonText}
               </Button>
             )}
-            {title && (
-              <h1 className="text-xl font-light text-foreground tracking-wider flex items-center gap-3">
-                {icon && (
-                  React.createElement(icon as React.ComponentType<any>, { 
-                    className: "h-6 w-6", 
-                    style: { color: 'var(--accent)' } 
-                  })
-                )}
-                <span>
-                  {isViewMode && showBackButton ? `Editando: ${title}` : title}
-                </span>
-              </h1>
+            {hasTabs && (
+              <div className="flex items-center space-x-6">
+                {tabs.map((tab) => {
+                  const tabContent = (
+                    <button
+                      key={tab.id}
+                      onClick={() =>
+                        tab.isDisabled || tab.isRestricted
+                          ? undefined
+                          : onTabChange?.(tab.id)
+                      }
+                      disabled={tab.isDisabled}
+                      className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
+                        tab.isDisabled || tab.isRestricted
+                          ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                          : tab.isActive
+                            ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
+                            : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab.label}
+                      {tab.badge && (
+                        <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                          {tab.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+
+                  // Si la tab está restringida, envolverla con PlanRestricted
+                  if (tab.isRestricted && tab.restrictionReason) {
+                    return (
+                      <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
+                        {tabContent}
+                      </PlanRestricted>
+                    );
+                  }
+
+                  return tabContent;
+                })}
+              </div>
             )}
           </div>
 
@@ -347,51 +376,6 @@ export function PageLayout({
           </div>
         </div>
 
-        {/* Segunda fila: Solo Tabs */}
-        {hasTabs && (
-          <div className="h-12 px-6 flex items-center justify-start border-t border-[var(--menues-border)]">
-            <div className="flex items-center space-x-6">
-              {tabs.map((tab) => {
-                const tabContent = (
-                  <button
-                    key={tab.id}
-                    onClick={() =>
-                      tab.isDisabled || tab.isRestricted
-                        ? undefined
-                        : onTabChange?.(tab.id)
-                    }
-                    disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
-                      tab.isDisabled || tab.isRestricted
-                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                        : tab.isActive
-                          ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
-                          : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-
-                // Si la tab está restringida, envolverla con PlanRestricted
-                if (tab.isRestricted && tab.restrictionReason) {
-                  return (
-                    <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
-                      {tabContent}
-                    </PlanRestricted>
-                  );
-                }
-
-                return tabContent;
-              })}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Page Content */}
