@@ -71,28 +71,50 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
               )}
             />
 
-            <FormItem>
-              <FormLabel>Moneda y Monto Origen *</FormLabel>
-              <FormControl>
-                <CurrencyAmountField
-                  value={form.watch('amount_from') || undefined}
-                  currency={form.watch('currency_id_from') || ''}
-                  currencies={currencies?.map(orgCurrency => ({
-                    id: orgCurrency.currency?.id || '',
-                    name: orgCurrency.currency?.name || 'Sin nombre',
-                    symbol: orgCurrency.currency?.symbol || '$'
-                  })) || []}
-                  onValueChange={(value) => {
-                    form.setValue('amount_from', value || 0)
-                  }}
-                  onCurrencyChange={(currencyId) => {
-                    form.setValue('currency_id_from', currencyId)
-                  }}
-                  placeholder="0.00"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="amount_from"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moneda y Monto Origen *</FormLabel>
+                    <FormControl>
+                      <CurrencyAmountField
+                        value={field.value || undefined}
+                        currency={form.watch('currency_id_from') || ''}
+                        currencies={currencies?.map(orgCurrency => ({
+                          id: orgCurrency.currency?.id || '',
+                          name: orgCurrency.currency?.name || 'Sin nombre',
+                          symbol: orgCurrency.currency?.symbol || '$'
+                        })) || []}
+                        onValueChange={(value) => {
+                          field.onChange(value || 0)
+                          form.setValue('amount_from', value || 0, { shouldValidate: true })
+                        }}
+                        onCurrencyChange={(currencyId) => {
+                          form.setValue('currency_id_from', currencyId, { shouldValidate: true })
+                        }}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Campo oculto para currency_id_from */}
+              <FormField
+                control={form.control}
+                name="currency_id_from"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input type="hidden" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
 
@@ -132,28 +154,50 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
               )}
             />
 
-            <FormItem>
-              <FormLabel>Moneda y Monto Destino *</FormLabel>
-              <FormControl>
-                <CurrencyAmountField
-                  value={form.watch('amount_to') || undefined}
-                  currency={form.watch('currency_id_to') || ''}
-                  currencies={currencies?.map(orgCurrency => ({
-                    id: orgCurrency.currency?.id || '',
-                    name: orgCurrency.currency?.name || 'Sin nombre',
-                    symbol: orgCurrency.currency?.symbol || '$'
-                  })) || []}
-                  onValueChange={(value) => {
-                    form.setValue('amount_to', value || 0)
-                  }}
-                  onCurrencyChange={(currencyId) => {
-                    form.setValue('currency_id_to', currencyId)
-                  }}
-                  placeholder="0.00"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="amount_to"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moneda y Monto Destino *</FormLabel>
+                    <FormControl>
+                      <CurrencyAmountField
+                        value={field.value || undefined}
+                        currency={form.watch('currency_id_to') || ''}
+                        currencies={currencies?.map(orgCurrency => ({
+                          id: orgCurrency.currency?.id || '',
+                          name: orgCurrency.currency?.name || 'Sin nombre',
+                          symbol: orgCurrency.currency?.symbol || '$'
+                        })) || []}
+                        onValueChange={(value) => {
+                          field.onChange(value || 0)
+                          form.setValue('amount_to', value || 0, { shouldValidate: true })
+                        }}
+                        onCurrencyChange={(currencyId) => {
+                          form.setValue('currency_id_to', currencyId, { shouldValidate: true })
+                        }}
+                        placeholder="0.00"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Campo oculto para currency_id_to */}
+              <FormField
+                control={form.control}
+                name="currency_id_to"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input type="hidden" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
           {/* Cotización */}

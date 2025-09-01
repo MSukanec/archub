@@ -538,7 +538,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('movement_date', commonValues.movement_date)
       conversionForm.setValue('description', commonValues.description)
       conversionForm.setValue('created_by', commonValues.created_by)
-      conversionForm.setValue('type_id', commonValues.type_id)
+      conversionForm.setValue('type_id', selectedTypeId || commonValues.type_id)
 
     } else if (movementType === 'transfer') {
       transferForm.setValue('movement_date', commonValues.movement_date)
