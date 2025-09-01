@@ -80,6 +80,21 @@ interface Movement {
   is_favorite?: boolean;
   conversion_group_id?: string;
   transfer_group_id?: string;
+  project_name?: string;
+  project_color?: string;
+  currency_name?: string;
+  currency_symbol?: string;
+  currency_code?: string;
+  currency_country?: string;
+  wallet_name?: string;
+  type_name?: string;
+  category_name?: string;
+  subcategory_name?: string;
+  partner?: string;
+  subcontract?: string;
+  client?: string;
+  member?: string;
+  member_avatar?: string;
   movement_data?: {
     type?: {
       id: string;
@@ -97,6 +112,7 @@ interface Movement {
       id: string;
       name: string;
       code: string;
+      symbol?: string;
     };
     wallet?: {
       id: string;
@@ -104,9 +120,7 @@ interface Movement {
     };
   };
   creator?: {
-    id: string;
     full_name?: string;
-    email: string;
     avatar_url?: string;
   };
 }
