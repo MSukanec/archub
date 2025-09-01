@@ -31,7 +31,6 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
     queryFn: async () => {
       if (!supabase || !organizationId) return []
       
-      console.log('🔍 CapitalHistory: Searching for partner movements...')
       
       const { data, error } = await supabase
         .from('movements_view')
@@ -45,18 +44,6 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
         return []
       }
       
-      console.log('🔍 CapitalHistory: Found movements:', data?.length || 0)
-      
-      // CRÍTICO: Debug la estructura del partner
-      if (data && data.length > 0) {
-        console.log('🐛 PARTNER DEBUG History:', {
-          movement_id: data[0].id,
-          partner_full: data[0].partner,
-          partner_keys: data[0].partner ? Object.keys(data[0].partner) : 'null',
-          all_movement_keys: Object.keys(data[0]).filter(k => k.includes('partner') || k.includes('socio') || k.includes('user'))
-        })
-      }
-      
       return data || []
     },
     enabled: !!organizationId && !!supabase
@@ -68,15 +55,17 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
     
     return movements.filter(movement => 
       movement.description?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      movement.partner?.company_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      movement.partner?.toLowerCase().includes(searchValue.toLowerCase()) ||
       movement.subcategory_name?.toLowerCase().includes(searchValue.toLowerCase())
     )
   }, [movements, searchValue])
 
   const handleEdit = (movement: any) => {
-    const isAporte = movement.subcategory_id === APORTES_PROPIOS_UUID
-    
-    console.log('Edit movement:', movement.id)
+    openModal('movement', {
+      title: 'Editar Movimiento de Capital',
+      editingMovement: movement,
+      isEditing: true
+    })
   }
 
   const handleDelete = (movement: any) => {
@@ -102,7 +91,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
       label: "Socio",
       width: "20%",
       render: (item: any) => {
-        const partnerName = item.partner?.company_name || item.partner?.first_name || item.partner?.email || 'Sin Socio'
+        const partnerName = item.partner || 'Sin Socio'
         const initials = partnerName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
         return (

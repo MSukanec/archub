@@ -25,7 +25,6 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
     queryFn: async () => {
       if (!supabase || !organizationId) return []
       
-      console.log('🔍 CapitalDashboard: Searching for partner movements...')
       
       // SOLO buscar los 2 UUIDs exactos especificados por el usuario
       const { data, error } = await supabase
@@ -40,18 +39,6 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
         return []
       }
       
-      console.log('🔍 CapitalDashboard: Found movements:', data?.length || 0)
-      
-      // CRÍTICO: Debug la estructura del partner
-      if (data && data.length > 0) {
-        console.log('🐛 PARTNER DEBUG:', {
-          movement_id: data[0].id,
-          partner_full: data[0].partner,
-          partner_keys: data[0].partner ? Object.keys(data[0].partner) : 'null',
-          all_movement_keys: Object.keys(data[0]).filter(k => k.includes('partner') || k.includes('socio') || k.includes('user'))
-        })
-      }
-      
       return data || []
     },
     enabled: !!organizationId && !!supabase
@@ -64,14 +51,14 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
     const summaryMap = new Map()
     
     movements.forEach(movement => {
-      const partnerId = movement.partner?.id || 'sin-socio'
-      const partnerName = movement.partner?.company_name || movement.partner?.first_name || movement.partner?.email || 'Sin Socio'
+      const partnerId = movement.partner || 'sin-socio'
+      const partnerName = movement.partner || 'Sin Socio'
       
       if (!summaryMap.has(partnerId)) {
         summaryMap.set(partnerId, {
           partner_id: partnerId,
           partner: movement.partner || null,
-          partnerName: partnerName,
+          partnerName: movement.partner || 'Sin Socio',
           totalAportes: 0,
           totalRetiros: 0,
           dollarizedTotal: 0,

@@ -24,7 +24,6 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
     queryFn: async () => {
       if (!supabase || !organizationId) return []
       
-      console.log('🔍 CapitalDetail: Searching for partner movements...')
       
       const { data, error } = await supabase
         .from('movements_view')
@@ -36,18 +35,6 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
       if (error) {
         console.error('Error fetching partner movements:', error)
         return []
-      }
-      
-      console.log('🔍 CapitalDetail: Found movements:', data?.length || 0)
-      
-      // CRÍTICO: Debug la estructura del partner
-      if (data && data.length > 0) {
-        console.log('🐛 PARTNER DEBUG Detail:', {
-          movement_id: data[0].id,
-          partner_full: data[0].partner,
-          partner_keys: data[0].partner ? Object.keys(data[0].partner) : 'null',
-          all_movement_keys: Object.keys(data[0]).filter(k => k.includes('partner') || k.includes('socio') || k.includes('user'))
-        })
       }
       
       return data || []
@@ -73,7 +60,7 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
     const summaryMap = new Map()
     
     movements.forEach(movement => {
-      const memberId = movement.member_id || 'sin-socio'
+      const memberId = movement.partner || 'sin-socio'
       
       if (!summaryMap.has(memberId)) {
         summaryMap.set(memberId, {
