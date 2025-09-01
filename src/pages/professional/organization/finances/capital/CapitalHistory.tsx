@@ -57,32 +57,19 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
     
     return movements.filter(movement => 
       movement.description?.toLowerCase().includes(searchValue.toLowerCase()) ||
-      movement.member?.user?.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      movement.partner?.company_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
       movement.subcategory_name?.toLowerCase().includes(searchValue.toLowerCase())
     )
   }, [movements, searchValue])
 
   const handleEdit = (movement: any) => {
-    const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
+    const isAporte = movement.subcategory_id === APORTES_PROPIOS_UUID
     
-    openModal('movements', {
-      title: isAporte ? 'Editar Aporte de Capital' : 'Editar Retiro de Capital',
-      editData: movement,
-      defaultData: { 
-        movement_type: isAporte ? 'aportes_propios' : 'retiros_propios'
-      }
-    })
+    console.log('Edit movement:', movement.id)
   }
 
   const handleDelete = (movement: any) => {
-    openModal('deleteConfirmation', {
-      title: 'Eliminar Movimiento',
-      description: `¿Estás seguro de que deseas eliminar el movimiento "${movement.description}"?`,
-      onConfirm: async () => {
-        // TODO: Implement delete logic
-        console.log('Deleting movement:', movement.id)
-      }
-    })
+    console.log('Delete movement:', movement.id)
   }
 
   // Movement history table columns
@@ -104,19 +91,15 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
       label: "Socio",
       width: "20%",
       render: (item: any) => {
-        if (!item.member?.user) {
-          return <div className="text-xs text-muted-foreground">Sin socio</div>
-        }
-
-        const displayName = item.member.user.full_name || 'Sin nombre'
-        const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
+        const partnerName = item.partner?.company_name || item.partner?.first_name || item.partner?.email || 'Sin Socio'
+        const initials = partnerName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-6 h-6">
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
-            <div className="text-xs font-medium">{displayName}</div>
+            <div className="text-xs font-medium">{partnerName}</div>
           </div>
         )
       }
@@ -126,7 +109,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
       label: "Tipo",
       width: "15%",
       render: (item: any) => {
-        const isAporte = item.subcategory_id === APORTES_SOCIOS_UUID
+        const isAporte = item.subcategory_id === APORTES_PROPIOS_UUID
         return (
           <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
             {item.subcategory_name || (isAporte ? 'Aporte' : 'Retiro')}
@@ -157,7 +140,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
       sortable: true,
       sortType: 'number' as const,
       render: (item: any) => {
-        const isAporte = item.subcategory_id === APORTES_SOCIOS_UUID
+        const isAporte = item.subcategory_id === APORTES_PROPIOS_UUID
         const symbol = item.currency_symbol || item.currency_code || '$'
         
         return (
@@ -214,8 +197,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
     <Table
       data={filteredMovements}
       columns={movementColumns}
-      defaultSortBy="movement_date"
-      defaultSortDirection="desc"
+      defaultSort={{ key: "movement_date", direction: "desc" }}
     />
   )
 }

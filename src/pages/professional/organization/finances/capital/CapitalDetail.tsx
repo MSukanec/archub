@@ -75,7 +75,7 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
       const summary = summaryMap.get(memberId)
       const amount = movement.amount || 0
       const currencyCode = movement.currency_code || 'N/A'
-      const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
+      const isAporte = movement.subcategory_id === APORTES_PROPIOS_UUID
       
       if (!summary.currencies[currencyCode]) {
         summary.currencies[currencyCode] = {
@@ -183,8 +183,7 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
     <Table
       data={filteredSummary}
       columns={currencyColumns}
-      defaultSortBy="member"
-      defaultSortDirection="asc"
+      defaultSort={{ key: "member", direction: "asc" }}
     />
   )
 }

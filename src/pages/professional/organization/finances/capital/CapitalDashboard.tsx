@@ -215,8 +215,7 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
     <Table
       data={filteredSummary}
       columns={memberSummaryColumns}
-      defaultSortBy="dollarized_total"
-      defaultSortDirection="desc"
+      defaultSort={{ key: "dollarized_total", direction: "desc" }}
     />
   )
 }

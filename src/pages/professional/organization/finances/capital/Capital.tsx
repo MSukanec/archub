@@ -25,7 +25,7 @@ export default function FinancesCapitalMovements() {
   ]
 
   const handleNewMovement = () => {
-    openModal('movements', {
+    openModal('movement', {
       title: 'Nuevo Aporte de Capital',
       // Force partner movement type
       defaultData: { 
