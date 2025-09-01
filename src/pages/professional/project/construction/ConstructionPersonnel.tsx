@@ -308,7 +308,7 @@ export default function ConstructionPersonnel() {
     tabs: [
       {
         id: 'active',
-        label: 'Activos',
+        label: 'Personal',
         isActive: activeTab === 'active'
       },
       {
