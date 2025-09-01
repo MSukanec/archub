@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
+import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -123,19 +124,44 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </div>
 
           <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 md:px-12 md:py-6 pb-12 ${
+            className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
               // Calculate top padding based on new single-row header (h-12)
-              "md:pt-16" // h-12 header + 4 units padding
+              "md:pt-12" // h-12 header
             } ${
               // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
               isMainDocked || isMainHovered
                 ? "md:ml-[264px]" // 264px main sidebar when expanded
                 : "md:ml-[40px]" // 40px main sidebar when collapsed
-            } ml-0 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            } ml-0 pt-12 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
-            <div className={(wide ? "" : "max-w-[1440px] mx-auto") + " pb-32"}>
-              {children}
-            </div>
+            {headerProps ? (
+              <PageLayout
+                icon={headerProps.icon}
+                title={headerProps.title}
+                tabs={headerProps.tabs?.map(tab => ({
+                  id: tab.id,
+                  label: tab.label,
+                  isActive: tab.isActive,
+                  onClick: () => headerProps.onTabChange?.(tab.id)
+                }))}
+                onTabChange={headerProps.onTabChange}
+                showHeaderSearch={headerProps.showHeaderSearch}
+                headerSearchValue={headerProps.headerSearchValue}
+                onHeaderSearchChange={headerProps.onHeaderSearchChange}
+                showCurrencySelector={headerProps.showCurrencySelector}
+                currencyView={headerProps.currencyView}
+                onCurrencyViewChange={headerProps.onCurrencyViewChange}
+                actionButton={headerProps.actionButton}
+              >
+                <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} p-6 pb-32 h-full overflow-auto`}>
+                  {children}
+                </div>
+              </PageLayout>
+            ) : (
+              <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-12 md:py-6 pb-32`}>
+                {children}
+              </div>
+            )}
           </main>
         </>
       )}
