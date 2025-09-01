@@ -964,40 +964,25 @@ export default function MovementsList() {
           // Check for partner data (stored in movement_data or directly in movement)
           if ((movement as any).partners && (movement as any).partners.length > 0) {
             const partner = (movement as any).partners[0];
-            return partner.partner_name || partner.name || 'Socio';
+            return partner.partner_name || partner.name;
           }
           
           // Check for personnel data
           if ((movement as any).personnel && (movement as any).personnel.length > 0) {
             const personnel = (movement as any).personnel[0];
-            return personnel.contact_name || 'Personal';
+            return personnel.contact_name;
           }
           
           // Check for subcontract data
           if ((movement as any).subcontracts && (movement as any).subcontracts.length > 0) {
             const subcontract = (movement as any).subcontracts[0];
-            return subcontract.contact_name || 'Subcontratista';
+            return subcontract.contact_name;
           }
           
           // Check for client data
           if ((movement as any).clients && (movement as any).clients.length > 0) {
             const client = (movement as any).clients[0];
-            return client.client_name || 'Cliente';
-          }
-          
-          // Check based on subcategory names for common patterns
-          const subcatLower = subcategoryName?.toLowerCase() || '';
-          if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
-            return 'Socio';
-          }
-          if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
-            return 'Socio';
-          }
-          if (subcatLower.includes('subcontrato')) {
-            return 'Subcontratista';
-          }
-          if (subcatLower.includes('cliente')) {
-            return 'Cliente';
+            return client.client_name;
           }
           
           return null;
@@ -1012,7 +997,7 @@ export default function MovementsList() {
               <div className="text-xs text-muted-foreground">{subcategoryName}</div>
             )}
             {specificInfo && (
-              <div className="text-xs text-blue-600 font-medium">{specificInfo}</div>
+              <div className="text-xs text-muted-foreground">{specificInfo}</div>
             )}
           </div>
         );
