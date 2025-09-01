@@ -405,45 +405,27 @@ export function Sidebar() {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     project: [
-      {
-        id: 'general',
-        icon: Settings,
-        label: 'General',
-        defaultRoute: '/general/info',
-        submenu: [
-          { icon: Info, label: 'Información', href: '/general/info' },
-          { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
-          { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
-          { icon: Users, label: 'Clientes', href: '/general/clients' },
-          { icon: FileText, label: 'Media', href: '/general/media' }
-        ]
-      },
-      { type: 'divider' },
-      {
-        id: 'diseno',
-        icon: Brush,
-        label: 'Diseño',
-        defaultRoute: '/design/dashboard',
-        generalModeRestricted: true,
-        submenu: [
-          { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }
-        ]
-      },
-      {
-        id: 'construccion',
-        icon: HardHat,
-        label: 'Construcción',
-        defaultRoute: '/construction/dashboard',
-        submenu: [
-          { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
-          { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-          { icon: Users, label: 'Personal', href: '/construction/personnel' },
-          { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-          { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-          { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-          { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
-        ]
-      }
+      // General Section
+      { type: 'section', label: 'GENERAL' },
+      { icon: Info, label: 'Información', href: '/general/info' },
+      { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
+      { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
+      { icon: Users, label: 'Clientes', href: '/general/clients' },
+      { icon: FileText, label: 'Media', href: '/general/media' },
+      
+      // Design Section
+      { type: 'section', label: 'DISEÑO' },
+      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
+      
+      // Construction Section
+      { type: 'section', label: 'CONSTRUCCIÓN' },
+      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+      { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
     ],
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
@@ -586,6 +568,19 @@ export function Sidebar() {
               if ('type' in item && item.type === 'divider') {
                 return (
                   <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                );
+              }
+              
+              // Si es una sección, renderizar separador de texto
+              if ('type' in item && item.type === 'section') {
+                return (
+                  <div key={`section-${index}`} className="px-2 py-1 mt-3 mb-1">
+                    {isExpanded && (
+                      <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">
+                        {item.label}
+                      </div>
+                    )}
+                  </div>
                 );
               }
               const itemKey = 'id' in item ? item.id : ('label' in item ? item.label : `item-${index}`);
