@@ -787,7 +787,9 @@ export default function MovementsList() {
       filtered = filtered.filter(m => m.wallet_name === filterByWallet);
     }
 
-    const grouped = groupConversions(filtered);
+    // TEMPORAL: Deshabilitar agrupación para mostrar conversiones
+    // const grouped = groupConversions(filtered);
+    const grouped = filtered;
     
     // 🚨 CRITICAL: Detect duplicates but KEEP ALL items for visibility
     const seenIds = new Set();
