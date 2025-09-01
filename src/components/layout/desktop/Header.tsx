@@ -200,37 +200,6 @@ export function Header({}: HeaderProps = {}) {
             {activeSection === 'biblioteca' && <span className="ml-2 text-sm">Biblioteca</span>}
           </button>
 
-          {/* Proveedor */}
-          <button
-            onClick={() => {
-              setSidebarLevel('provider');
-            }}
-            className={`h-8 flex items-center rounded transition-all duration-200 ${
-              activeSection === 'proveedor' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
-            }`}
-            style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
-          >
-            <Package className="w-4 h-4" />
-            {activeSection === 'proveedor' && <span className="ml-2 text-sm">Proveedor</span>}
-          </button>
-
-          {/* Administración */}
-          <button
-            onClick={() => {
-              setSidebarLevel('admin');
-            }}
-            className={`h-8 flex items-center rounded transition-all duration-200 ${
-              activeSection === 'administracion' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
-            }`}
-            style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
-          >
-            <Crown className="w-4 h-4" />
-            {activeSection === 'administracion' && <span className="ml-2 text-sm">Administración</span>}
-          </button>
         </div>
 
         {/* Center: Global Search */}
@@ -293,6 +262,40 @@ export function Header({}: HeaderProps = {}) {
             style={{color: 'var(--main-sidebar-fg)'}}
           >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
+          {/* Proveedor */}
+          <button
+            onClick={() => {
+              setSidebarLevel('provider');
+            }}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'proveedor' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
+            title="Proveedor"
+          >
+            <Package className="w-4 h-4" />
+            {activeSection === 'proveedor' && <span className="ml-2 text-sm">Proveedor</span>}
+          </button>
+
+          {/* Administración */}
+          <button
+            onClick={() => {
+              setSidebarLevel('admin');
+            }}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'administracion' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
+            title="Administración"
+          >
+            <Crown className="w-4 h-4" />
+            {activeSection === 'administracion' && <span className="ml-2 text-sm">Administración</span>}
           </button>
 
           {/* Settings */}
