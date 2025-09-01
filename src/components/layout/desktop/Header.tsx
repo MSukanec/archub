@@ -308,7 +308,7 @@ export function Header({}: HeaderProps = {}) {
               }}
               className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
                 activeSection === 'proveedor' 
-                  ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                  ? 'bg-[var(--accent)]' 
                   : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
               }`}
               style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
@@ -326,7 +326,7 @@ export function Header({}: HeaderProps = {}) {
               }}
               className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
                 activeSection === 'administracion' 
-                  ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                  ? 'bg-[var(--accent)]' 
                   : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
               }`}
               style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
