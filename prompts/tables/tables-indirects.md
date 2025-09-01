@@ -20,16 +20,8 @@ TABLA INDIRECT_COSTS:
     "data_type": "text"
   },
   {
-    "column_name": "category",
-    "data_type": "text"
-  },
-  {
     "column_name": "unit_id",
     "data_type": "uuid"
-  },
-  {
-    "column_name": "is_active",
-    "data_type": "boolean"
   },
   {
     "column_name": "created_at",
@@ -38,6 +30,10 @@ TABLA INDIRECT_COSTS:
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
   }
 ]
 
