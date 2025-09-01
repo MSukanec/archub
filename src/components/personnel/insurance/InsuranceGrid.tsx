@@ -72,8 +72,8 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium truncate">
-                {record.first_name && record.last_name 
-                  ? `${record.first_name} ${record.last_name}`
+                {record.first_name || record.last_name 
+                  ? `${record.first_name || ''} ${record.last_name || ''}`.trim()
                   : record.full_name || 'Sin nombre'
                 }
               </span>
