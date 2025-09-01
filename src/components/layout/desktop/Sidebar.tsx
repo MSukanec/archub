@@ -531,9 +531,29 @@ export function Sidebar() {
         <div className="w-full p-1">
         {(() => {
           const activeSection = getActiveHeaderSection();
+          const [, headerNavigate] = useLocation();
           
           if (sidebarLevel === 'project') {
-            return <ProjectSelectorSidebarHeader isExpanded={isExpanded} />;
+            return (
+              <div className="flex gap-1">
+                <div className="flex-1">
+                  <ProjectSelectorSidebarHeader isExpanded={isExpanded} />
+                </div>
+                {isExpanded && (
+                  <div className="w-8">
+                    <SidebarButton
+                      icon={<HardHat className="w-[18px] h-[18px]" />}
+                      label=""
+                      isActive={false}
+                      isExpanded={false}
+                      variant="main"
+                      isHeaderButton={true}
+                      onClick={() => headerNavigate('/construction/tasks')}
+                    />
+                  </div>
+                )}
+              </div>
+            );
           }
           if (sidebarLevel === 'construction') {
             return <ConstructionSidebarHeader isExpanded={isExpanded} />;
