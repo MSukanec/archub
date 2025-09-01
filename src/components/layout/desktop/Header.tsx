@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, Library, Package, Crown } from "lucide-react";
+import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, Library, Package, Crown, HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -122,6 +122,7 @@ export function Header({}: HeaderProps = {}) {
     switch (sidebarLevel) {
       case 'organization': return 'organizacion';
       case 'project': return 'proyecto';
+      case 'construction': return 'construccion';
       case 'library': return 'biblioteca';
       case 'provider': return 'proveedor';
       case 'admin': return 'administracion';
@@ -167,6 +168,22 @@ export function Header({}: HeaderProps = {}) {
           >
             <FolderOpen className="w-[18px] h-[18px]" />
             {activeSection === 'proyecto' && <span className="ml-2 text-xs font-normal">Proyecto</span>}
+          </button>
+
+          {/* Construcción */}
+          <button
+            onClick={() => {
+              setSidebarLevel('construction');
+            }}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'construccion' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'construccion' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <HardHat className="w-[18px] h-[18px]" />
+            {activeSection === 'construccion' && <span className="ml-2 text-xs font-normal">Construcción</span>}
           </button>
 
           {/* Biblioteca */}

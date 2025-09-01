@@ -258,8 +258,10 @@ export function Sidebar() {
     if (sidebarLevel === 'main') {
       if (location.startsWith('/organization/')) {
         setSidebarLevel('organization');
-      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/construction/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
+      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
         setSidebarLevel('project');
+      } else if (location.startsWith('/construction/')) {
+        setSidebarLevel('construction');
       } else if (location.startsWith('/library/')) {
         setSidebarLevel('library');
       } else if (location.startsWith('/proveedor/')) {
@@ -383,7 +385,8 @@ export function Sidebar() {
   };
   // Función para determinar qué sección está activa en el header
   const getActiveHeaderSection = () => {
-    if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
+    if (location.includes('/construction')) return 'construccion';
+    if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
     if (location.includes('/project')) return 'proyecto';
     if (location.includes('/library')) return 'biblioteca';
     if (location.includes('/proveedor')) return 'proveedor';
@@ -415,6 +418,14 @@ export function Sidebar() {
       
       // Construction Section
       { type: 'section', label: 'CONSTRUCCIÓN' },
+      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+      { icon: Users, label: 'Personal', href: '/construction/personnel' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+    ],
+    construction: [
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
@@ -455,6 +466,9 @@ export function Sidebar() {
     if (sidebarLevel === 'provider') {
       return sidebarContent.provider || [];
     }
+    if (sidebarLevel === 'construction') {
+      return sidebarContent.construction || [];
+    }
     if (sidebarLevel === 'admin') {
       return sidebarContent.admin || [];
     }
@@ -465,6 +479,8 @@ export function Sidebar() {
         return sidebarContent.organization || [];
       case 'proyecto':
         return sidebarContent.project || [];
+      case 'construccion':
+        return sidebarContent.construction || [];
       case 'biblioteca':
         return sidebarContent.library || [];
       case 'proveedor':
