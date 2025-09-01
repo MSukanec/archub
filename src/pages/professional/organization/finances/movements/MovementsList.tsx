@@ -975,6 +975,14 @@ export default function MovementsList() {
           const movementData = movement as any;
           const subcategoryId = movementData.movement_data?.subcategory?.id;
           
+          console.log('🔍 UUID Debug:', {
+            subcategoryName,
+            subcategoryId,
+            partner: movementData.partner,
+            client: movementData.client,
+            subcontract: movementData.subcontract
+          });
+          
           // Aportes de clientes - usar la columna "client" de la vista
           if (subcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3') {
             return movementData.client || null;
