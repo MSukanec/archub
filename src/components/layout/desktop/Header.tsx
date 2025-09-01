@@ -21,6 +21,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useProjects, useProject } from "@/hooks/use-projects";
 import { useUpdateUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
 import { SelectorPopover } from "@/components/popovers/SelectorPopover";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 
 interface HeaderProps {
   // Header principal simplificado - solo props básicas si son necesarias
@@ -42,6 +43,9 @@ export function Header({}: HeaderProps = {}) {
   const { data: projects = [] } = useProjects(userData?.organization?.id);
   const { data: currentProject } = useProject(selectedProjectId || undefined);
   const updateProjectMutation = useUpdateUserOrganizationPreferences();
+  
+  // Admin permissions
+  const isAdmin = useIsAdmin();
   
   // Theme state
   const [isDark, setIsDark] = useState(false);
@@ -227,16 +231,12 @@ export function Header({}: HeaderProps = {}) {
               trigger={
                 <button className="h-8 px-3 flex items-center gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] hover:bg-[var(--accent)] transition-all duration-200">
                   <Avatar className="w-5 h-5">
-                    {currentProject.project_data?.project_image_url ? (
-                      <AvatarImage src={currentProject.project_data.project_image_url} alt={currentProject.name} />
-                    ) : (
-                      <AvatarFallback 
-                        className="text-xs font-medium text-white"
-                        style={{ backgroundColor: currentProject.color || 'hsl(var(--accent))' }}
-                      >
-                        {getProjectInitials(currentProject.name)}
-                      </AvatarFallback>
-                    )}
+                    <AvatarFallback 
+                      className="text-xs font-medium text-white"
+                      style={{ backgroundColor: currentProject.color || 'hsl(var(--accent))' }}
+                    >
+                      {getProjectInitials(currentProject.name)}
+                    </AvatarFallback>
                   </Avatar>
                   <span className="text-xs font-normal" style={{color: 'var(--main-sidebar-fg)'}}>
                     {currentProject.name}
@@ -247,11 +247,11 @@ export function Header({}: HeaderProps = {}) {
               items={projects.map((project: any) => ({
                 id: project.id,
                 name: project.name,
-                logo_url: project.project_data?.project_image_url,
+                logo_url: undefined, // No mostrar imagen, solo avatar con iniciales
                 type: "Proyecto" as const,
                 color: project.color
               }))}
-              selectedId={selectedProjectId}
+              selectedId={selectedProjectId || undefined}
               onSelect={handleProjectSelect}
               emptyMessage="No hay proyectos disponibles"
               getInitials={getProjectInitials}
@@ -271,7 +271,7 @@ export function Header({}: HeaderProps = {}) {
 
         {/* Right: User Actions */}
         <div className="flex items-center gap-1">
-          {/* Notifications */}
+          {/* Notificaciones - se mantiene fuera del popover */}
           <button
             className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
             title="Notificaciones"
@@ -280,67 +280,41 @@ export function Header({}: HeaderProps = {}) {
             <Bell className="h-[18px] w-[18px]" />
           </button>
 
-          {/* Sidebar Pin/Unpin */}
-          <button
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
-            title={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-            onClick={handleDockToggle}
-            style={{color: 'var(--main-sidebar-fg)'}}
-          >
-            {isDocked ? <PanelLeftClose className="h-[18px] w-[18px]" /> : <PanelLeftOpen className="h-[18px] w-[18px]" />}
-          </button>
+          {/* Proveedor - Solo para administradores */}
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setSidebarLevel('provider');
+              }}
+              className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
+                activeSection === 'proveedor' 
+                  ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                  : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
+              }`}
+              style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
+              title="Proveedor"
+            >
+              <Package className="w-[18px] h-[18px]" />
+            </button>
+          )}
 
-          {/* Theme Toggle */}
-          <button
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
-            title={isDark ? "Modo Claro" : "Modo Oscuro"}
-            onClick={handleThemeToggle}
-            style={{color: 'var(--main-sidebar-fg)'}}
-          >
-            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-          </button>
-
-          {/* Proveedor */}
-          <button
-            onClick={() => {
-              setSidebarLevel('provider');
-            }}
-            className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
-              activeSection === 'proveedor' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
-                : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
-            }`}
-            style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
-            title="Proveedor"
-          >
-            <Package className="w-[18px] h-[18px]" />
-          </button>
-
-          {/* Administración */}
-          <button
-            onClick={() => {
-              setSidebarLevel('admin');
-            }}
-            className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
-              activeSection === 'administracion' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
-                : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
-            }`}
-            style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
-            title="Administración"
-          >
-            <Crown className="w-[18px] h-[18px]" />
-          </button>
-
-          {/* Settings */}
-          <button
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
-            title="Configuración"
-            onClick={() => navigate('/settings')}
-            style={{color: 'var(--main-sidebar-fg)'}}
-          >
-            <Settings className="h-[18px] w-[18px]" />
-          </button>
+          {/* Administración - Solo para administradores */}
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setSidebarLevel('admin');
+              }}
+              className={`h-8 w-8 flex items-center justify-center rounded transition-all duration-200 ${
+                activeSection === 'administracion' 
+                  ? 'bg-[var(--main-sidebar-button-hover-bg)]' 
+                  : 'hover:bg-[var(--main-sidebar-button-hover-bg)]'
+              }`}
+              style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
+              title="Administración"
+            >
+              <Crown className="w-[18px] h-[18px]" />
+            </button>
+          )}
 
           {/* User Menu */}
           <DropdownMenu>
@@ -364,10 +338,25 @@ export function Header({}: HeaderProps = {}) {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <Settings className="h-4 w-4 mr-2" />
                 Mi Perfil
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/profile/organizations')}>
+                <Building className="h-4 w-4 mr-2" />
                 Organizaciones
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDockToggle}>
+                {isDocked ? <PanelLeftClose className="h-4 w-4 mr-2" /> : <PanelLeftOpen className="h-4 w-4 mr-2" />}
+                {isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleThemeToggle}>
+                {isDark ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+                {isDark ? "Modo Claro" : "Modo Oscuro"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Configuración
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
