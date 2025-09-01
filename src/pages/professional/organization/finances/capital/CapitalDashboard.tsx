@@ -18,6 +18,38 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
   const APORTES_SOCIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
   const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
 
+  // First, let's see what subcategories exist with "aporte" or "retiro" in the name
+  const { data: debugSubcategories } = useQuery({
+    queryKey: ['debug-subcategories', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('movements_view')
+        .select('subcategory_id, subcategory_name, category_name')
+        .eq('organization_id', organizationId)
+        .not('subcategory_name', 'is', null)
+        
+      if (error) return []
+      
+      // Get unique subcategories that might be related to capital
+      const unique = data?.filter((item, index, self) => 
+        index === self.findIndex(t => t.subcategory_id === item.subcategory_id)
+      ).filter(item => 
+        item.subcategory_name?.toLowerCase().includes('aporte') ||
+        item.subcategory_name?.toLowerCase().includes('retiro') ||
+        item.subcategory_name?.toLowerCase().includes('socio') ||
+        item.subcategory_name?.toLowerCase().includes('propio') ||
+        item.category_name?.toLowerCase().includes('aporte') ||
+        item.category_name?.toLowerCase().includes('retiro')
+      ) || []
+      
+      console.log('🐛 DEBUG: Found capital-related subcategories:', unique)
+      return unique
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
   // Fetch partner capital movements
   const { data: movements = [], isLoading } = useQuery({
     queryKey: ['partner-capital-movements', organizationId],
@@ -26,12 +58,32 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
       
       console.log('🔍 CapitalDashboard: Searching for partner movements...')
       
-      const { data, error } = await supabase
+      // Try both hardcoded UUIDs AND search by name patterns
+      const { data: exactMatches, error: exactError } = await supabase
         .from('movements_view')
         .select('*')
         .eq('organization_id', organizationId)
         .in('subcategory_id', [APORTES_SOCIOS_UUID, RETIROS_SOCIOS_UUID])
         .order('movement_date', { ascending: false })
+        
+      const { data: nameMatches, error: nameError } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .or(`subcategory_name.ilike.%aporte%propio%,subcategory_name.ilike.%retiro%propio%,subcategory_name.ilike.%aportes%propio%,subcategory_name.ilike.%retiros%propio%`)
+        .order('movement_date', { ascending: false })
+      
+      console.log('🔍 Exact UUID matches:', exactMatches?.length || 0)
+      console.log('🔍 Name pattern matches:', nameMatches?.length || 0)
+      
+      // Combine and deduplicate results
+      const allMatches = [...(exactMatches || []), ...(nameMatches || [])]
+      const uniqueMatches = allMatches.filter((movement, index, self) =>
+        index === self.findIndex(m => m.id === movement.id)
+      )
+      
+      const data = uniqueMatches
+      const error = exactError || nameError
 
       if (error) {
         console.error('Error fetching partner movements:', error)
@@ -197,6 +249,14 @@ export default function CapitalDashboard({ organizationId, searchValue }: Capita
         <div className="text-sm text-muted-foreground">Cargando resumen de socios...</div>
       </div>
     )
+  }
+  
+  // Show debug info if no movements found
+  if (movements.length === 0 && debugSubcategories && debugSubcategories.length > 0) {
+    console.log('🐛 DEBUG: No movements found with hardcoded UUIDs, but found these capital subcategories:')
+    debugSubcategories.forEach(sub => {
+      console.log(`   - "${sub.subcategory_name}" (${sub.subcategory_id}) in category "${sub.category_name}"`)
+    })
   }
 
   if (filteredSummary.length === 0) {
