@@ -78,8 +78,16 @@ interface Movement {
   currency_id: string;
   wallet_id: string;
   is_favorite?: boolean;
-  conversion_group_id?: string;
-  transfer_group_id?: string;
+  conversion_group_id?: string | null;
+  transfer_group_id?: string | null;
+  // Campos de la vista
+  currency_name?: string;
+  currency_code?: string;
+  currency_symbol?: string;
+  wallet_name?: string;
+  type_name?: string;
+  category_name?: string;
+  subcategory_name?: string;
   movement_data?: {
     type?: {
       id: string;
@@ -119,6 +127,7 @@ interface ConversionGroup {
   to_currency: string;
   from_amount: number;
   to_amount: number;
+  amount: number; // Para compatibilidad con detección de duplicados
   description: string;
   movement_date: string;
   created_at: string;
@@ -336,7 +345,7 @@ export default function MovementsList() {
   };
 
   const handleView = (movement: Movement) => {
-    openModal('movements-view', { viewingMovement: movement });
+    openModal('movement', { viewingMovement: movement });
   };
 
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
@@ -367,7 +376,7 @@ export default function MovementsList() {
       _conversionData: conversionGroup
     };
     
-    openModal('movements-view', { viewingMovement: conversionMovement as any });
+    openModal('movement', { viewingMovement: conversionMovement as any });
   };
 
   const handleEditTransfer = (transferGroup: TransferGroup) => {
@@ -398,7 +407,7 @@ export default function MovementsList() {
       _transferData: transferGroup
     };
     
-    openModal('movements-view', { viewingMovement: transferMovement as any });
+    openModal('movement', { viewingMovement: transferMovement as any });
   };
 
   const handleDelete = (movement: Movement) => {
@@ -696,10 +705,11 @@ export default function MovementsList() {
             id: groupId,
             conversion_group_id: groupId,
             movements: groupMovements,
-            from_currency: egresoMovement.currency_code || '',
-            to_currency: ingresoMovement.currency_code || '',
+            from_currency: egresoMovement.currency_name || '',
+            to_currency: ingresoMovement.currency_name || '',
             from_amount: Math.abs(egresoMovement.amount),
             to_amount: Math.abs(ingresoMovement.amount),
+            amount: Math.abs(egresoMovement.amount), // Para compatibilidad
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
@@ -787,9 +797,7 @@ export default function MovementsList() {
       filtered = filtered.filter(m => m.wallet_name === filterByWallet);
     }
 
-    // TEMPORAL: Deshabilitar agrupación para mostrar conversiones
-    // const grouped = groupConversions(filtered);
-    const grouped = filtered;
+    const grouped = groupConversions(filtered);
     
     // 🚨 CRITICAL: Detect duplicates but KEEP ALL items for visibility
     const seenIds = new Set();
@@ -992,7 +1000,7 @@ export default function MovementsList() {
             <div className="text-xs space-y-1">
               <div className="flex items-center gap-1">
                 {isDuplicate(item) && (
-                  <AlertTriangle className="h-3 w-3 text-yellow-600" title="Elemento duplicado detectado" />
+                  <AlertTriangle className="h-3 w-3 text-yellow-600" />
                 )}
                 <span>{format(date, "dd/MM/yyyy")}</span>
               </div>
@@ -1194,9 +1202,11 @@ export default function MovementsList() {
         }
         
         if ('is_transfer_group' in item) {
+          // Para transferencias, usar la moneda del primer movimiento
+          const firstMovement = item.movements[0];
           return (
             <div className="text-xs">
-              <div>{item.currency}</div>
+              <div>{firstMovement?.currency_name || firstMovement?.movement_data?.currency?.code || "USD"}</div>
             </div>
           );
         }
@@ -1465,7 +1475,7 @@ export default function MovementsList() {
           />
           <Table
             columns={tableColumns}
-            data={processedMovements}
+            data={processedMovements as any}
             isLoading={false} // Ya no está cargando cuando llegamos aquí
             selectable={true}
             getItemId={(item: any) => {
