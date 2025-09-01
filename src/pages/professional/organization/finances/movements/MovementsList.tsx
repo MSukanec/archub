@@ -959,11 +959,60 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
+        // Obtener información específica según el tipo de movimiento
+        const getSpecificInfo = (movement: Movement) => {
+          // Check for partner data (stored in movement_data or directly in movement)
+          if ((movement as any).partners && (movement as any).partners.length > 0) {
+            const partner = (movement as any).partners[0];
+            return partner.partner_name || partner.name || 'Socio';
+          }
+          
+          // Check for personnel data
+          if ((movement as any).personnel && (movement as any).personnel.length > 0) {
+            const personnel = (movement as any).personnel[0];
+            return personnel.contact_name || 'Personal';
+          }
+          
+          // Check for subcontract data
+          if ((movement as any).subcontracts && (movement as any).subcontracts.length > 0) {
+            const subcontract = (movement as any).subcontracts[0];
+            return subcontract.contact_name || 'Subcontratista';
+          }
+          
+          // Check for client data
+          if ((movement as any).clients && (movement as any).clients.length > 0) {
+            const client = (movement as any).clients[0];
+            return client.client_name || 'Cliente';
+          }
+          
+          // Check based on subcategory names for common patterns
+          const subcatLower = subcategoryName?.toLowerCase() || '';
+          if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
+            return 'Socio';
+          }
+          if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
+            return 'Socio';
+          }
+          if (subcatLower.includes('subcontrato')) {
+            return 'Subcontratista';
+          }
+          if (subcatLower.includes('cliente')) {
+            return 'Cliente';
+          }
+          
+          return null;
+        };
+        
+        const specificInfo = getSpecificInfo(item as Movement);
+        
         return (
           <div className="space-y-1">
             <div className="text-xs font-bold">{categoryName}</div>
             {subcategoryName && (
               <div className="text-xs text-muted-foreground">{subcategoryName}</div>
+            )}
+            {specificInfo && (
+              <div className="text-xs text-blue-600 font-medium">{specificInfo}</div>
             )}
           </div>
         );
