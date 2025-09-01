@@ -917,6 +917,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (isEditing && editingMovement?.id) {
         // Actualizar movimiento existente
+        console.log('🔧 EDITANDO MOVIMIENTO:', editingMovement.id, 'isEditing:', isEditing)
         const { data: updateResult, error } = await supabase
           .from('movements')
           .update(movementData)
@@ -973,6 +974,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       } else {
         // Crear nuevo movimiento
+        console.log('🚨 CREANDO NUEVO MOVIMIENTO (NO DEBERÍA SI ES EDICIÓN):', 'isEditing:', isEditing, 'editingMovement?.id:', editingMovement?.id)
         const { data: insertResult, error } = await supabase
           .from('movements')
           .insert(movementData)
