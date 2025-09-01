@@ -408,22 +408,11 @@ export function Sidebar() {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     project: [
-      // General Section
-      { type: 'section', label: 'GENERAL' },
       { icon: Info, label: 'Información', href: '/general/info' },
       { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
       { icon: Users, label: 'Clientes', href: '/general/clients' },
-      { icon: FileText, label: 'Media', href: '/general/media' },
-      
-      // Construction Section
-      { type: 'section', label: 'CONSTRUCCIÓN' },
-      { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+      { icon: FileText, label: 'Media', href: '/general/media' }
     ],
     construction: [
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
