@@ -1865,11 +1865,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Guardar"}
-      onRightClick={movementType === 'conversion' 
-        ? conversionForm.handleSubmit(onSubmitConversion)
-        : movementType === 'transfer'
-          ? transferForm.handleSubmit(onSubmitTransfer)
-          : form.handleSubmit(onSubmit)}
+      onRightClick={() => {
+        if (movementType === 'conversion') {
+          conversionForm.handleSubmit(onSubmitConversion)()
+        } else if (movementType === 'transfer') {
+          transferForm.handleSubmit(onSubmitTransfer)()
+        } else {
+          form.handleSubmit(onSubmit)()
+        }
+      }}
       showLoadingSpinner={movementType === 'conversion' 
         ? createConversionMutation.isPending 
         : movementType === 'transfer'
