@@ -367,52 +367,19 @@ export function Sidebar() {
       navigate(defaultRoute);
     }
   };
+  // Función para determinar qué sección está activa en el header
+  const getActiveHeaderSection = () => {
+    if (location === '/' || location.includes('/dashboard')) return 'inicio';
+    if (location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
+    if (location.includes('/project')) return 'proyecto';
+    if (location.includes('/library')) return 'biblioteca';
+    if (location.includes('/proveedor')) return 'proveedor';
+    if (location.includes('/admin')) return 'administracion';
+    return 'inicio';
+  };
+
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
-    main: [
-      {
-        id: 'dashboard',
-        icon: Home,
-        label: 'Dashboard',
-        defaultRoute: '/dashboard',
-        isActive: location === '/dashboard'
-      },
-      {
-        id: 'organizacion',
-        icon: Building,
-        label: 'Organización',
-        defaultRoute: '/organization',
-        isActive: location.startsWith('/organization')
-      },
-      {
-        id: 'proyecto',
-        icon: FolderOpen,
-        label: 'Proyecto',
-        defaultRoute: '/construction/dashboard',
-        isActive: location.startsWith('/design') || location.startsWith('/construction') || location.startsWith('/finances')
-      },
-      {
-        id: 'biblioteca',
-        icon: Library,
-        label: 'Biblioteca',
-        defaultRoute: '/library/documentation',
-        isActive: location.startsWith('/library')
-      },
-      ...(isAdmin ? [{
-        id: 'proveedor',
-        icon: Package,
-        label: 'Proveedor',
-        defaultRoute: '/proveedor/productos',
-        isActive: location.startsWith('/proveedor')
-      }] : []),
-      ...(isAdmin ? [{
-        id: 'administracion',
-        icon: Crown,
-        label: 'Administración',
-        defaultRoute: '/admin/dashboard',
-        isActive: location.startsWith('/admin')
-      }] : [])
-    ],
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { 
@@ -489,9 +456,49 @@ export function Sidebar() {
       { icon: Settings, label: 'General', href: '/admin/general' }
     ]
   };
-  // Función para obtener el contenido actual del sidebar según el nivel
+  // Función para obtener el contenido actual del sidebar según la sección activa del header
   const getCurrentSidebarItems = () => {
-    return sidebarContent[sidebarLevel] || sidebarContent.main;
+    const activeSection = getActiveHeaderSection();
+    
+    // Si estamos en una subsección (project, organization), usar el sidebarLevel actual
+    if (sidebarLevel === 'project') {
+      return sidebarContent.project || [];
+    }
+    if (sidebarLevel === 'organization') {
+      return sidebarContent.organization || [];
+    }
+    if (sidebarLevel === 'library') {
+      return sidebarContent.library || [];
+    }
+    if (sidebarLevel === 'provider') {
+      return sidebarContent.provider || [];
+    }
+    if (sidebarLevel === 'admin') {
+      return sidebarContent.admin || [];
+    }
+    
+    // Para la sección de inicio, mostrar contenido contextual basado en header
+    switch (activeSection) {
+      case 'organizacion':
+        return sidebarContent.organization || [];
+      case 'proyecto':
+        return sidebarContent.project || [];
+      case 'biblioteca':
+        return sidebarContent.library || [];
+      case 'proveedor':
+        return sidebarContent.provider || [];
+      case 'administracion':
+        return sidebarContent.admin || [];
+      default:
+        // Para la sección de inicio, mostrar un dashboard simple
+        return [{
+          id: 'dashboard',
+          icon: Home,
+          label: 'Dashboard',
+          href: '/dashboard',
+          isActive: location === '/dashboard'
+        }];
+    }
   };
   return (
     <aside 
@@ -524,64 +531,53 @@ export function Sidebar() {
       {/* Selector Section - Ahora arriba */}
       <div className="h-9 flex items-center">
         <div className="w-full p-1">
-        {sidebarLevel === 'main' ? (
-          <SidebarButton
-            icon={null} // Sin icono para ARCHUB
-            label="ARCHUB"
-            isActive={false}
-            isExpanded={isExpanded}
-            variant="main"
-            isHeaderButton={true}
-          />
-        ) : sidebarLevel === 'project' ? (
-          <ProjectSelectorSidebarHeader isExpanded={isExpanded} />
-        ) : sidebarLevel === 'organization' ? (
-          <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />
-        ) : (
-          <SidebarButton
-            icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-            label={
-              sidebarLevel === 'library' ? 'BIBLIOTECA' :
-              sidebarLevel === 'provider' ? 'PROVEEDOR' :
-              sidebarLevel === 'admin' ? 'ADMINISTRACIÓN' : 'SECCIÓN'
+        {(() => {
+          const activeSection = getActiveHeaderSection();
+          
+          if (sidebarLevel === 'project') {
+            return <ProjectSelectorSidebarHeader isExpanded={isExpanded} />;
+          }
+          if (sidebarLevel === 'organization') {
+            return <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />;
+          }
+          
+          // Para otras secciones, mostrar el título basado en la sección activa del header
+          const getSectionLabel = () => {
+            switch (activeSection) {
+              case 'organizacion': return 'ORGANIZACIÓN';
+              case 'proyecto': return 'PROYECTO';
+              case 'biblioteca': return 'BIBLIOTECA';
+              case 'proveedor': return 'PROVEEDOR';
+              case 'administracion': return 'ADMINISTRACIÓN';
+              default: return 'ARCHUB';
             }
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={goToMainLevel}
-            variant="main"
-            isHeaderButton={true}
-          />
-        )}
+          };
+          
+          return (
+            <SidebarButton
+              icon={activeSection === 'inicio' ? null : <ArrowLeft className="w-[18px] h-[18px]" />}
+              label={getSectionLabel()}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={activeSection === 'inicio' ? undefined : goToMainLevel}
+              variant="main"
+              isHeaderButton={true}
+            />
+          );
+        })()}
         </div>
       </div>
       {/* Navigation Items */}
       <div className="flex-1 p-1 pt-3">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Botón de título - Ahora abajo */}
+            {/* Línea divisoria para secciones con subsecciones */}
             {(sidebarLevel === 'project' || sidebarLevel === 'organization') && (
-              <div>
-                <div className="mb-[2px]">
-                  <SidebarButton
-                    icon={<ArrowLeft className="w-[18px] h-[18px]" />}
-                    label={
-                      sidebarLevel === 'organization' ? 'ORGANIZACIÓN' :
-                      sidebarLevel === 'project' ? 'PROYECTO' : 'SECCIÓN'
-                    }
-                    isActive={false}
-                    isExpanded={isExpanded}
-                    onClick={goToMainLevel}
-                    variant="main"
-                    isHeaderButton={true}
-                  />
-                </div>
-                {/* Línea divisoria después del botón de título */}
-                <div className="h-px bg-white/20 my-2"></div>
-              </div>
+              <div className="h-px bg-white/20 my-2"></div>
             )}
             
-            {/* Línea divisoria después del botón header (para otros niveles) */}
-            {sidebarLevel !== 'main' && sidebarLevel !== 'project' && sidebarLevel !== 'organization' && (
+            {/* Línea divisoria para otras secciones */}
+            {getActiveHeaderSection() !== 'inicio' && sidebarLevel !== 'project' && sidebarLevel !== 'organization' && (
               <div className="h-px bg-white/20 my-2"></div>
             )}
             

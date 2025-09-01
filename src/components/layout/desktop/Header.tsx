@@ -13,6 +13,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -33,6 +34,7 @@ export function Header({}: HeaderProps = {}) {
   
   // Sidebar state
   const { isDocked, setDocked } = useSidebarStore();
+  const { setSidebarLevel } = useNavigationStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
   // Theme state
@@ -135,7 +137,10 @@ export function Header({}: HeaderProps = {}) {
         <div className="flex items-center gap-1">
           {/* Inicio */}
           <button
-            onClick={() => navigate('/')}
+            onClick={() => {
+              navigate('/');
+              setSidebarLevel('main');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'inicio' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
@@ -149,7 +154,10 @@ export function Header({}: HeaderProps = {}) {
 
           {/* Organización */}
           <button
-            onClick={() => navigate('/finances')}
+            onClick={() => {
+              navigate('/finances');
+              setSidebarLevel('organization');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'organizacion' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
@@ -163,7 +171,10 @@ export function Header({}: HeaderProps = {}) {
 
           {/* Proyecto */}
           <button
-            onClick={() => navigate('/project')}
+            onClick={() => {
+              navigate('/project');
+              setSidebarLevel('project');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'proyecto' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
@@ -177,7 +188,10 @@ export function Header({}: HeaderProps = {}) {
 
           {/* Biblioteca */}
           <button
-            onClick={() => navigate('/library')}
+            onClick={() => {
+              navigate('/library');
+              setSidebarLevel('library');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'biblioteca' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
@@ -191,7 +205,10 @@ export function Header({}: HeaderProps = {}) {
 
           {/* Proveedor */}
           <button
-            onClick={() => navigate('/proveedor')}
+            onClick={() => {
+              navigate('/proveedor');
+              setSidebarLevel('provider');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'proveedor' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
@@ -205,7 +222,10 @@ export function Header({}: HeaderProps = {}) {
 
           {/* Administración */}
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => {
+              navigate('/admin');
+              setSidebarLevel('admin');
+            }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'administracion' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
