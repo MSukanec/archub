@@ -19,11 +19,24 @@ interface Movement {
   subcategory_id?: string
   currency_id: string
   wallet_id: string
-  member_id?: string
-  contact_id?: string
   is_favorite?: boolean
   conversion_group_id?: string
   transfer_group_id?: string
+  project_name?: string
+  project_color?: string
+  currency_name?: string
+  currency_symbol?: string
+  currency_code?: string
+  currency_country?: string
+  wallet_name?: string
+  type_name?: string
+  category_name?: string
+  subcategory_name?: string
+  partner?: string
+  subcontract?: string
+  client?: string
+  member?: string
+  member_avatar?: string
   movement_data?: {
     type?: {
       id: string
@@ -41,6 +54,7 @@ interface Movement {
       id: string
       name: string
       code: string
+      symbol?: string
     }
     wallet?: {
       id: string
@@ -48,9 +62,7 @@ interface Movement {
     }
   }
   creator?: {
-    id: string
     full_name?: string
-    email: string
     avatar_url?: string
   }
 }
@@ -68,9 +80,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw new Error('Supabase client not initialized')
       }
 
-      // First, get basic movements data
+      // Get movements data from the view
       let query = supabase
-        .from('movements')
+        .from('movements_view')
         .select(`
           id,
           description,
@@ -86,13 +98,25 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           subcategory_id,
           currency_id,
           wallet_id,
-          member_id,
-          contact_id,
-          file_url,
           is_conversion,
           is_favorite,
           conversion_group_id,
-          transfer_group_id
+          transfer_group_id,
+          project_name,
+          project_color,
+          currency_name,
+          currency_symbol,
+          currency_code,
+          currency_country,
+          wallet_name,
+          type_name,
+          category_name,
+          subcategory_name,
+          partner,
+          subcontract,
+          client,
+          member,
+          member_avatar
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
@@ -130,118 +154,46 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         console.log('Expected project_id:', projectId)
       }
 
-      // Get related data in parallel
-      const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult] = await Promise.all([
-        // Get creators data
-        supabase
-          .from('organization_members')
-          .select(`
-            id,
-            users (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
-          `)
-          .in('id', [...new Set(data.map(m => m.created_by).filter(Boolean))]),
-        
-        // Get movement types
-        supabase
-          .from('movement_concepts')
-          .select('id, name')
-          .in('id', [...new Set(data.map(m => m.type_id).filter(Boolean))]),
-        
-        // Get movement categories
-        supabase
-          .from('movement_concepts')
-          .select('id, name')
-          .in('id', [...new Set(data.map(m => m.category_id).filter(Boolean))]),
-        
-        // Get movement subcategories
-        supabase
-          .from('movement_concepts')
-          .select('id, name')
-          .in('id', [...new Set(data.map(m => m.subcategory_id).filter(Boolean))]),
-        
-        // Get currencies
-        supabase
-          .from('currencies')
-          .select('id, name, code, symbol')
-          .in('id', [...new Set(data.map(m => m.currency_id).filter(Boolean))]),
-        
-        // Get wallets through organization_wallets
-        supabase
-          .from('organization_wallets')
-          .select(`
-            id,
-            wallets (
-              id,
-              name
-            )
-          `)
-          .in('id', [...new Set(data.map(m => m.wallet_id).filter(Boolean))])
-      ]);
+      // All data now comes from the view, no need for additional queries
 
-      // Create lookup maps
-      const membersMap = new Map();
-      membersResult.data?.forEach(member => {
-        membersMap.set(member.id, {
-          id: member.users?.id,
-          full_name: member.users?.full_name,
-          email: member.users?.email,
-          avatar_url: member.users?.avatar_url
-        });
-      });
-
-      const typesMap = new Map();
-      typesResult.data?.forEach(type => {
-        typesMap.set(type.id, type);
-      });
-
-      const categoriesMap = new Map();
-      categoriesResult.data?.forEach(category => {
-        categoriesMap.set(category.id, category);
-      });
-
-      const subcategoriesMap = new Map();
-      subcategoriesResult.data?.forEach(subcategory => {
-        subcategoriesMap.set(subcategory.id, subcategory);
-      });
-
-      const currenciesMap = new Map();
-      currenciesResult.data?.forEach(currency => {
-        currenciesMap.set(currency.id, currency);
-      });
-
-      const walletsMap = new Map();
-      walletsResult.data?.forEach(orgWallet => {
-        walletsMap.set(orgWallet.id, {
-          id: orgWallet.wallets?.id,
-          name: orgWallet.wallets?.name
-        });
-      });
-
-      // Transform the data with related information
+      // Transform the data using view columns
       const transformedData = data.map((movement) => {
-        const creator = membersMap.get(movement.created_by);
-        const type = typesMap.get(movement.type_id);
-        const category = categoriesMap.get(movement.category_id);
-        const subcategory = subcategoriesMap.get(movement.subcategory_id);
-        const currency = currenciesMap.get(movement.currency_id);
-        const wallet = walletsMap.get(movement.wallet_id);
-
         return {
           ...movement,
-          exchange_rate: movement.exchange_rate, // Ensure exchange_rate is preserved
-          creator,
+          exchange_rate: movement.exchange_rate,
+          creator: {
+            full_name: movement.member,
+            avatar_url: movement.member_avatar
+          },
           movement_data: {
-            type,
-            category,
-            subcategory,
-            currency,
-            wallet
-          }
+            type: {
+              id: movement.type_id,
+              name: movement.type_name
+            },
+            category: {
+              id: movement.category_id,
+              name: movement.category_name
+            },
+            subcategory: movement.subcategory_id ? {
+              id: movement.subcategory_id,
+              name: movement.subcategory_name
+            } : undefined,
+            currency: {
+              id: movement.currency_id,
+              name: movement.currency_name,
+              code: movement.currency_code,
+              symbol: movement.currency_symbol
+            },
+            wallet: {
+              id: movement.wallet_id,
+              name: movement.wallet_name
+            }
+          },
+          project_name: movement.project_name,
+          project_color: movement.project_color,
+          partner: movement.partner,
+          subcontract: movement.subcontract,
+          client: movement.client
         }
       });
 
