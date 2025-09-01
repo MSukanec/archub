@@ -159,6 +159,24 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     />
   );
 }
+
+// Componente header para construcción (sin selector, solo navegación)
+function ConstructionSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
+  const [, navigate] = useLocation();
+  
+  return (
+    <SidebarButton
+      icon={<HardHat className="w-[18px] h-[18px]" />}
+      label={isExpanded ? "CONSTRUCCIÓN" : ""}
+      isActive={false}
+      isExpanded={isExpanded}
+      variant="main"
+      isHeaderButton={true}
+      onClick={() => navigate('/construction/tasks')}
+    />
+  );
+}
+
 // Componente selector de organizaciones para el header (con avatar)
 function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
@@ -258,7 +276,9 @@ export function Sidebar() {
     if (sidebarLevel === 'main') {
       if (location.startsWith('/organization/')) {
         setSidebarLevel('organization');
-      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/construction/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
+      } else if (location.startsWith('/construction/')) {
+        setSidebarLevel('construction');
+      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
         setSidebarLevel('project');
       } else if (location.startsWith('/library/')) {
         setSidebarLevel('library');
@@ -405,16 +425,15 @@ export function Sidebar() {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     project: [
-      // General Section
-      { type: 'section', label: 'GENERAL' },
+      // Project main buttons (previously General section)
       { icon: Info, label: 'Información', href: '/general/info' },
       { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
       { icon: Users, label: 'Clientes', href: '/general/clients' },
-      { icon: FileText, label: 'Media', href: '/general/media' },
-      
-      // Construction Section
-      { type: 'section', label: 'CONSTRUCCIÓN' },
+      { icon: FileText, label: 'Media', href: '/general/media' }
+    ],
+    construction: [
+      // Construction section buttons
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
@@ -445,6 +464,9 @@ export function Sidebar() {
     // Si estamos en una subsección (project, organization), usar el sidebarLevel actual
     if (sidebarLevel === 'project') {
       return sidebarContent.project || [];
+    }
+    if (sidebarLevel === 'construction') {
+      return sidebarContent.construction || [];
     }
     if (sidebarLevel === 'organization') {
       return sidebarContent.organization || [];
@@ -512,6 +534,9 @@ export function Sidebar() {
           
           if (sidebarLevel === 'project') {
             return <ProjectSelectorSidebarHeader isExpanded={isExpanded} />;
+          }
+          if (sidebarLevel === 'construction') {
+            return <ConstructionSidebarHeader isExpanded={isExpanded} />;
           }
           if (sidebarLevel === 'organization') {
             return <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />;
