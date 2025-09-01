@@ -1,6 +1,7 @@
 import React from 'react'
 import { TrendingUp } from 'lucide-react'
-import { usePartners, Partner } from '@/hooks/use-partners'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
@@ -14,6 +15,16 @@ interface PartnerContributionsFieldsProps {
   onPartnerContributionsChange: (partnerContributions: PartnerContributionItem[]) => void
 }
 
+interface OrganizationMember {
+  id: string
+  user_id: string
+  user: {
+    id: string
+    full_name: string
+    email: string
+  }
+}
+
 export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProps> = ({
   selectedPartnerContributions,
   onPartnerContributionsChange
@@ -21,31 +32,50 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
 
-  const { data: partners = [], isLoading } = usePartners(
-    organizationId,
-    { enabled: !!organizationId }
-  )
+  // Get organization members with user data
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ['organization-members', organizationId],
+    queryFn: async (): Promise<OrganizationMember[]> => {
+      if (!organizationId || !supabase) return []
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          user_id,
+          user:users(
+            id,
+            full_name,
+            email
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
 
-  // Function to get partner display name
-  const getPartnerDisplayName = (partner: Partner): string => {
-    if (!partner?.contacts) return 'Socio sin nombre'
+      if (error) {
+        console.error('Error fetching organization members:', error)
+        throw error
+      }
+      
+      return (data as OrganizationMember[]) || []
+    },
+    enabled: !!organizationId && !!supabase,
+  })
+
+  // Function to get member display name
+  const getMemberDisplayName = (member: OrganizationMember): string => {
+    if (!member?.user) return 'Socio sin nombre'
     
-    const { contacts } = partner
+    const { user } = member
     
-    // Priority 1: Company name
-    if (contacts.company_name) {
-      return contacts.company_name
+    // Priority 1: Full name from user data
+    if (user.full_name) {
+      return user.full_name
     }
     
-    // Priority 2: Full name
-    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-    if (fullName) {
-      return fullName
-    }
-    
-    // Priority 3: Extract name from email
-    if (contacts.email) {
-      const emailPart = contacts.email.split('@')[0]
+    // Priority 2: Extract name from email
+    if (user.email) {
+      const emailPart = user.email.split('@')[0]
       if (emailPart) {
         // Convert email username to a more readable format
         const friendlyName = emailPart
@@ -53,26 +83,26 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
           .join(' ')
-        return friendlyName || contacts.email
+        return friendlyName || user.email
       }
-      return contacts.email
+      return user.email
     }
     
     return 'Socio sin nombre'
   }
 
   // Create options for ComboBox
-  const partnerOptions = partners.map(partner => ({
-    value: partner.id,
-    label: getPartnerDisplayName(partner)
+  const memberOptions = members.map(member => ({
+    value: member.id,
+    label: getMemberDisplayName(member)
   }))
 
-  // Handle partner change
-  const handlePartnerChange = (partnerId: string) => {
-    const selectedPartner = partners.find(p => p.id === partnerId)
+  // Handle member change
+  const handlePartnerChange = (memberId: string) => {
+    const selectedMember = members.find(m => m.id === memberId)
     const partnerContribution: PartnerContributionItem = {
-      partner_id: partnerId,
-      partner_name: selectedPartner ? getPartnerDisplayName(selectedPartner) : 'Socio desconocido'
+      partner_id: memberId,
+      partner_name: selectedMember ? getMemberDisplayName(selectedMember) : 'Socio desconocido'
     }
     onPartnerContributionsChange([partnerContribution])
   }
@@ -99,7 +129,7 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
         <ComboBox
           value={currentSelectedPartner?.partner_id || ''}
           onValueChange={handlePartnerChange}
-          options={partnerOptions}
+          options={memberOptions}
           placeholder="Seleccionar socio..."
           searchPlaceholder="Buscar socio..."
           emptyMessage={isLoading ? "Cargando..." : "No hay socios disponibles"}
