@@ -131,7 +131,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       }
 
       // Get related data in parallel
-      const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult] = await Promise.all([
+      const [membersResult, typesResult, categoriesResult, subcategoriesResult, currenciesResult, walletsResult, partnersResult, subcontractsResult, clientsResult] = await Promise.all([
         // Get creators data
         supabase
           .from('organization_members')
@@ -144,31 +144,31 @@ export function useMovements(organizationId: string | undefined, projectId: stri
               avatar_url
             )
           `)
-          .in('id', [...new Set(data.map(m => m.created_by).filter(Boolean))]),
+          .in('id', Array.from(new Set(data.map(m => m.created_by).filter(Boolean)))),
         
         // Get movement types
         supabase
           .from('movement_concepts')
           .select('id, name')
-          .in('id', [...new Set(data.map(m => m.type_id).filter(Boolean))]),
+          .in('id', Array.from(new Set(data.map(m => m.type_id).filter(Boolean)))),
         
         // Get movement categories
         supabase
           .from('movement_concepts')
           .select('id, name')
-          .in('id', [...new Set(data.map(m => m.category_id).filter(Boolean))]),
+          .in('id', Array.from(new Set(data.map(m => m.category_id).filter(Boolean)))),
         
         // Get movement subcategories
         supabase
           .from('movement_concepts')
           .select('id, name')
-          .in('id', [...new Set(data.map(m => m.subcategory_id).filter(Boolean))]),
+          .in('id', Array.from(new Set(data.map(m => m.subcategory_id).filter(Boolean)))),
         
         // Get currencies
         supabase
           .from('currencies')
           .select('id, name, code, symbol')
-          .in('id', [...new Set(data.map(m => m.currency_id).filter(Boolean))]),
+          .in('id', Array.from(new Set(data.map(m => m.currency_id).filter(Boolean)))),
         
         // Get wallets through organization_wallets
         supabase
@@ -180,18 +180,38 @@ export function useMovements(organizationId: string | undefined, projectId: stri
               name
             )
           `)
-          .in('id', [...new Set(data.map(m => m.wallet_id).filter(Boolean))])
+          .in('id', Array.from(new Set(data.map(m => m.wallet_id).filter(Boolean)))),
+        
+        // Get movement partners (simplified approach)
+        supabase
+          .from('movement_partner_contributions')
+          .select('*')
+          .in('movement_id', data.map(m => m.id)),
+        
+        // Get movement subcontracts
+        supabase
+          .from('movement_subcontracts')
+          .select('*')
+          .in('movement_id', data.map(m => m.id)),
+        
+        // Get movement clients
+        supabase
+          .from('movement_clients')
+          .select('*')
+          .in('movement_id', data.map(m => m.id))
       ]);
 
       // Create lookup maps
       const membersMap = new Map();
       membersResult.data?.forEach(member => {
-        membersMap.set(member.id, {
-          id: member.users?.id,
-          full_name: member.users?.full_name,
-          email: member.users?.email,
-          avatar_url: member.users?.avatar_url
-        });
+        if (member.users) {
+          membersMap.set(member.id, {
+            id: member.users.id,
+            full_name: member.users.full_name,
+            email: member.users.email,
+            avatar_url: member.users.avatar_url
+          });
+        }
       });
 
       const typesMap = new Map();
@@ -216,9 +236,48 @@ export function useMovements(organizationId: string | undefined, projectId: stri
 
       const walletsMap = new Map();
       walletsResult.data?.forEach(orgWallet => {
-        walletsMap.set(orgWallet.id, {
-          id: orgWallet.wallets?.id,
-          name: orgWallet.wallets?.name
+        if (orgWallet.wallets) {
+          walletsMap.set(orgWallet.id, {
+            id: orgWallet.wallets.id,
+            name: orgWallet.wallets.name
+          });
+        }
+      });
+
+      // Create simplified maps for basic tracking
+      const partnersMap = new Map();
+      partnersResult.data?.forEach(partnerMovement => {
+        const movementId = partnerMovement.movement_id;
+        if (!partnersMap.has(movementId)) {
+          partnersMap.set(movementId, []);
+        }
+        partnersMap.get(movementId).push({
+          partner_id: partnerMovement.partner_id,
+          partner_name: 'Socio' // Simple fallback for now
+        });
+      });
+
+      const subcontractsMap = new Map();
+      subcontractsResult.data?.forEach(subcontractMovement => {
+        const movementId = subcontractMovement.movement_id;
+        if (!subcontractsMap.has(movementId)) {
+          subcontractsMap.set(movementId, []);
+        }
+        subcontractsMap.get(movementId).push({
+          subcontract_id: subcontractMovement.subcontract_id,
+          contact_name: 'Subcontratista' // Simple fallback for now
+        });
+      });
+
+      const clientsMap = new Map();
+      clientsResult.data?.forEach(clientMovement => {
+        const movementId = clientMovement.movement_id;
+        if (!clientsMap.has(movementId)) {
+          clientsMap.set(movementId, []);
+        }
+        clientsMap.get(movementId).push({
+          project_client_id: clientMovement.project_client_id,
+          client_name: 'Cliente' // Simple fallback for now
         });
       });
 
@@ -235,6 +294,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           ...movement,
           exchange_rate: movement.exchange_rate, // Ensure exchange_rate is preserved
           creator,
+          partners: partnersMap.get(movement.id) || [],
+          subcontracts: subcontractsMap.get(movement.id) || [],
+          clients: clientsMap.get(movement.id) || [],
           movement_data: {
             type,
             category,
