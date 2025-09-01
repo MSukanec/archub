@@ -50,52 +50,46 @@ export function Header({}: HeaderProps = {}) {
         {/* Left: Navigation Buttons */}
         <div className="flex items-center gap-1">
           {/* Inicio */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => navigate('/')}
-            className={`h-8 transition-all duration-200 ${
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'inicio' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'inicio' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <Home className="w-4 h-4" />
             {activeSection === 'inicio' && <span className="ml-2 text-sm">Inicio</span>}
-          </Button>
+          </button>
 
           {/* Organización */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => navigate('/finances')}
-            className={`h-8 transition-all duration-200 ${
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'organizacion' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'organizacion' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <Building className="w-4 h-4" />
             {activeSection === 'organizacion' && <span className="ml-2 text-sm">Organización</span>}
-          </Button>
+          </button>
 
           {/* Proyecto */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => navigate('/project')}
-            className={`h-8 transition-all duration-200 ${
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'proyecto' 
                 ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'proyecto' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <FolderOpen className="w-4 h-4" />
             {activeSection === 'proyecto' && <span className="ml-2 text-sm">Proyecto</span>}
-          </Button>
+          </button>
         </div>
 
         {/* Center: Global Search */}
