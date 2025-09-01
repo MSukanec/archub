@@ -49,8 +49,6 @@ interface HeaderProps {
   title?: string;
   // Título de página que se mostrará en el lado izquierdo
   pageTitle?: string;
-  // Descripción de la página que se mostrará debajo del título
-  description?: string;
   showSearch?: boolean;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
@@ -99,7 +97,6 @@ export function Header({
   icon,
   title,
   pageTitle,
-  description,
   showSearch = false,
   searchValue = "",
   onSearchChange,
@@ -244,24 +241,17 @@ export function Header({
             </Button>
           )}
           {(pageTitle || title) && (
-            <div className="flex items-center gap-3">
+            <h1 className="text-xl font-light text-foreground tracking-wider flex items-center gap-3">
               {icon && (
                 React.createElement(icon as React.ComponentType<any>, { 
                   className: "h-6 w-6", 
                   style: { color: 'var(--accent)' } 
                 })
               )}
-              <div>
-                <h1 className="text-xl font-light text-foreground tracking-wider">
-                  {isViewMode && showBackButton ? `Editando: ${pageTitle || title}` : (pageTitle || title)}
-                </h1>
-                {description && (
-                  <p className="text-xs text-muted-foreground mt-1 leading-tight">
-                    {description}
-                  </p>
-                )}
-              </div>
-            </div>
+              <span>
+                {isViewMode && showBackButton ? `Editando: ${pageTitle || title}` : (pageTitle || title)}
+              </span>
+            </h1>
           )}
         </div>
 

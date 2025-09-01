@@ -322,7 +322,6 @@ export default function FinancesCapitalMovements() {
 
   const headerProps = {
     title: "Movimientos de Capital",
-    description: "Gestión y seguimiento de aportes y retiros de capital de los socios del proyecto.",
     icon: TrendingUp,
     tabs: headerTabs,
     onTabChange: setActiveTab
