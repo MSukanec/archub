@@ -47,18 +47,12 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     if (indirects.length === 0) return null;
 
     const totalIndirects = indirects.length;
-    const activeIndirects = indirects.filter(i => i.is_active);
-    const inactiveIndirects = indirects.filter(i => !i.is_active);
 
     // Calcular valores totales usando el valor más reciente de cada costo indirecto
     const totalValueARS = indirects.reduce((sum, indirect) => {
-      const latestValue = indirect.indirect_cost_values?.[0]; // Asumiendo orden por fecha
-      if (latestValue && indirect.is_active) {
-        const amount = latestValue.amount || 0;
-        // Convertir a ARS si es USD
-        if (latestValue.currencies?.code === 'USD') {
-          return sum + (amount * 1125); // Tasa de cambio aproximada
-        }
+      const currentValue = indirect.current_value;
+      if (currentValue) {
+        const amount = currentValue.amount || 0;
         return sum + amount;
       }
       return sum;
@@ -68,19 +62,16 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
 
     // Distribución por categoría
     const categoryDistribution = indirects.reduce((acc, indirect) => {
-      const category = indirect.category || 'other';
+      const category = indirect.category?.name || 'Sin categoría';
       acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     return {
       totalIndirects,
-      activeCount: activeIndirects.length,
-      inactiveCount: inactiveIndirects.length,
       totalValueARS,
       totalValueUSD,
-      categoryDistribution,
-      activePercentage: (activeIndirects.length / totalIndirects) * 100
+      categoryDistribution
     };
   }, [indirects]);
 
@@ -138,13 +129,11 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     const descriptionMatch = indirect.description?.toLowerCase().includes(searchLower);
     const searchMatch = !searchQuery || nameMatch || descriptionMatch;
     
-    // Filtro por status
-    const statusMatch = filterByStatus === 'all' || 
-      (filterByStatus === 'active' && indirect.is_active) ||
-      (filterByStatus === 'inactive' && !indirect.is_active);
+    // Filtro por status (siempre true ya que no hay campo is_active)
+    const statusMatch = true;
     
     // Filtro por categoría
-    const typeMatch = filterByType === 'all' || indirect.category === filterByType;
+    const typeMatch = filterByType === 'all' || indirect.category?.name === filterByType;
     
     return searchMatch && statusMatch && typeMatch;
   });
@@ -197,39 +186,11 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'category',
       label: 'Categoría',
-      render: (indirect: any) => {
-        const category = indirect.category;
-        let displayText = '';
-        let badgeStyle = {};
-        
-        switch (category) {
-          case 'administrative':
-            displayText = 'Administrativo';
-            badgeStyle = { backgroundColor: '#3b82f6', color: 'white' };
-            break;
-          case 'operational':
-            displayText = 'Operacional';
-            badgeStyle = { backgroundColor: '#f59e0b', color: 'white' };
-            break;
-          case 'equipment':
-            displayText = 'Equipos';
-            badgeStyle = { backgroundColor: '#8b5cf6', color: 'white' };
-            break;
-          case 'other':
-            displayText = 'Otros';
-            badgeStyle = { backgroundColor: '#6b7280', color: 'white' };
-            break;
-          default:
-            displayText = category || 'Sin categoría';
-            badgeStyle = { backgroundColor: '#f3f4f6', color: '#374151' };
-        }
-        
-        return (
-          <Badge style={badgeStyle} className="border-0">
-            {displayText}
-          </Badge>
-        );
-      }
+      render: (indirect: any) => (
+        <div className="text-sm">
+          {indirect.category_id ? 'Categoría asignada' : 'Sin categoría'}
+        </div>
+      )
     },
     {
       key: 'current_value',
@@ -340,7 +301,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 <div>
                   <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalIndirects}</p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.activeCount} activos
+                    {kpiData.totalIndirects} activos
                   </p>
                 </div>
               </div>
@@ -382,7 +343,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                     }
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {((kpiData.activeCount / kpiData.totalIndirects) * 100).toFixed(1)}%
+                    100%
                   </p>
                 </div>
               </div>
@@ -406,7 +367,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
                       style={{ 
-                        width: `${Math.min((kpiData.activeCount / (kpiData.totalIndirects || 1)) * 100, 100)}%`,
+                        width: `100%`,
                         background: 'linear-gradient(90deg, var(--accent) 0%, #22c55e 100%)'
                       }}
                     />
@@ -415,7 +376,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 
                 <div>
                   <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {kpiData.activeCount}
+                    {kpiData.totalIndirects}
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     de {kpiData.totalIndirects}
@@ -446,14 +407,14 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                       </linearGradient>
                     </defs>
                     <path
-                      d={`M 0,32 L 0,${32 - (kpiData.activePercentage * 0.3)} Q 25,${20 - (kpiData.activePercentage * 0.2)} 50,${16 - (kpiData.activePercentage * 0.25)} T 100,${12 - (kpiData.activePercentage * 0.2)} L 100,32 Z`}
+                      d={`M 0,32 L 0,20 Q 25,16 50,12 T 100,8 L 100,32 Z`}
                       fill="url(#areaGradient)"
                     />
                   </svg>
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.activePercentage.toFixed(0)}%</p>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>100%</p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     Activos
                   </p>

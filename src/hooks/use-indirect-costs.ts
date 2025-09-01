@@ -8,6 +8,7 @@ export interface IndirectCost {
   organization_id: string;
   name: string;
   description: string | null;
+  category_id: string | null;
   created_at: string;
   updated_at: string | null;
   current_value?: {
@@ -22,6 +23,7 @@ export interface InsertIndirectCost {
   organization_id: string;
   name: string;
   description?: string | undefined;
+  category_id?: string | undefined;
 }
 
 // Tipo para insertar un valor de costo indirecto

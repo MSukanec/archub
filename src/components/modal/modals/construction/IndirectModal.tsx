@@ -14,14 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCreateIndirectCost, useUpdateIndirectCost, useIndirectCost } from '@/hooks/use-indirect-costs'
+import { useMovementConcepts } from '@/hooks/use-movement-concepts'
 
 // Schema de validación
 const indirectSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  description: z.string().optional()
+  description: z.string().optional(),
+  category_id: z.string().optional()
 })
 
 type IndirectForm = z.infer<typeof indirectSchema>
+
+// UUID del concepto padre para Indirectos
+const INDIRECT_PARENT_UUID = 'e854de08-da8f-4769-a2c5-b24b622f20b0'
 
 interface IndirectModalProps {
   modalData?: {
@@ -47,13 +52,17 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
 
   // Fetch existing indirect cost data if editing
   const { data: existingIndirect } = useIndirectCost(isEditing ? modalData?.indirectId || null : null)
+  
+  // Fetch movement concepts for categories (children of Indirectos concept)
+  const { data: indirectCategories = [] } = useMovementConcepts('categories', INDIRECT_PARENT_UUID)
 
 
   const form = useForm<IndirectForm>({
     resolver: zodResolver(indirectSchema),
     defaultValues: {
       name: '',
-      description: ''
+      description: '',
+      category_id: ''
     }
   })
 
@@ -62,6 +71,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
     if (existingIndirect) {
       form.setValue('name', existingIndirect.name || '')
       form.setValue('description', existingIndirect.description || '')
+      form.setValue('category_id', (existingIndirect as any).category_id || '')
     }
   }, [existingIndirect, form])
 
@@ -87,7 +97,8 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
           indirectCostId: modalData.indirectId,
           indirectCost: {
             name: data.name,
-            description: data.description || undefined
+            description: data.description || undefined,
+            category_id: data.category_id || undefined
           }
         })
       } else {
@@ -96,7 +107,8 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
           indirectCost: {
             organization_id: organizationId,
             name: data.name,
-            description: data.description || undefined
+            description: data.description || undefined,
+            category_id: data.category_id || undefined
           }
         })
       }
@@ -115,6 +127,32 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           
+          {/* Categoría */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categoría</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {indirectCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Nombre */}
           <FormField
             control={form.control}
@@ -171,7 +209,8 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       onLeftClick={onClose}
       rightLabel={isEditing ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
-      isRightLoading={isSubmitting}
+      submitDisabled={isSubmitting}
+      showLoadingSpinner={isSubmitting}
     />
   )
 
