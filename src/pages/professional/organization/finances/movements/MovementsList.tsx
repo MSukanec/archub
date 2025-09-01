@@ -898,7 +898,7 @@ export default function MovementsList() {
         const memberAvatar = creatorData?.avatar_url;
         
         return (
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage src={memberAvatar} />
               <AvatarFallback className="text-xs">
@@ -907,6 +907,9 @@ export default function MovementsList() {
                   "U"}
               </AvatarFallback>
             </Avatar>
+            <span className="text-xs truncate max-w-20">
+              {memberName || "Usuario"}
+            </span>
           </div>
         );
       },
