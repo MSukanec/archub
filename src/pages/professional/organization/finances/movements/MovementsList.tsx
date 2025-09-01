@@ -959,30 +959,46 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
-        // Obtener información específica según el tipo de movimiento
+        // Obtener información específica según el tipo de movimiento usando los hooks específicos
         const getSpecificInfo = (movement: Movement) => {
-          // Check for partner data (stored in movement_data or directly in movement)
-          if ((movement as any).partners && (movement as any).partners.length > 0) {
-            const partner = (movement as any).partners[0];
-            return partner.partner_name || partner.name;
+          const subcatLower = subcategoryName?.toLowerCase() || '';
+          const movementId = movement.id;
+          
+          // Para aportes propios y retiros propios, obtener info de socios
+          if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
+            // Buscar en los datos de partners contributions que ya cargamos
+            const partnerData = partnerContributionsData?.find(pc => pc.movement_id === movementId);
+            if (partnerData?.partner_name) {
+              return partnerData.partner_name;
+            }
+            return null; // No mostrar nada si no hay datos específicos
           }
           
-          // Check for personnel data
-          if ((movement as any).personnel && (movement as any).personnel.length > 0) {
-            const personnel = (movement as any).personnel[0];
-            return personnel.contact_name;
+          if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
+            // Buscar en los datos de partners withdrawals
+            const partnerData = partnerWithdrawalsData?.find(pw => pw.movement_id === movementId);
+            if (partnerData?.partner_name) {
+              return partnerData.partner_name;
+            }
+            return null;
           }
           
-          // Check for subcontract data
-          if ((movement as any).subcontracts && (movement as any).subcontracts.length > 0) {
-            const subcontract = (movement as any).subcontracts[0];
-            return subcontract.contact_name;
+          // Para subcontratos
+          if (subcatLower.includes('subcontrato')) {
+            const subcontractData = subcontractsData?.find(sc => sc.movement_id === movementId);
+            if (subcontractData?.contact_name) {
+              return subcontractData.contact_name;
+            }
+            return null;
           }
           
-          // Check for client data
-          if ((movement as any).clients && (movement as any).clients.length > 0) {
-            const client = (movement as any).clients[0];
-            return client.client_name;
+          // Para aportes de clientes
+          if (subcatLower.includes('cliente')) {
+            const clientData = clientsData?.find(cl => cl.movement_id === movementId);
+            if (clientData?.client_name) {
+              return clientData.client_name;
+            }
+            return null;
           }
           
           return null;
