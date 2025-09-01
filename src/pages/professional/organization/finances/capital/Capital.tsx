@@ -1,20 +1,17 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { TrendingUp, Edit, Trash2 } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Button } from '@/components/ui/button'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-
 import { useToast } from '@/hooks/use-toast'
+
+import CapitalDashboard from './CapitalDashboard'
+import CapitalDetail from './CapitalDetail'
+import CapitalHistory from './CapitalHistory'
 
 interface CapitalMovement {
   id: string
@@ -511,309 +508,6 @@ export default function FinancesCapitalMovements() {
     })
   }
 
-  // Member summary table columns
-  const memberSummaryColumns = [
-    {
-      key: "member",
-      label: "Socio",
-      width: "25%",
-      render: (item: MemberSummary) => {
-        if (!item.member?.user) {
-          return <div className="text-sm text-muted-foreground">Sin usuario</div>
-        }
-
-        const displayName = item.member.user.full_name || 'Sin nombre'
-        const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar className="w-8 h-8">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="text-sm font-medium">{displayName}</div>
-              <div className="text-xs text-muted-foreground">{item.member.user.email}</div>
-            </div>
-          </div>
-        )
-      }
-    },
-    {
-      key: "total_aportes",
-      label: "Total Aportes",
-      width: "18.75%",
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: MemberSummary) => (
-        <div className="text-sm font-medium text-green-600">
-          ${item.totalAportes.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-        </div>
-      )
-    },
-    {
-      key: "total_retiros",
-      label: "Total Retiros",
-      width: "18.75%",
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: MemberSummary) => (
-        <div className="text-sm font-medium text-red-600">
-          ${item.totalRetiros.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-        </div>
-      )
-    },
-    {
-      key: "saldo",
-      label: "Saldo",
-      width: "18.75%",
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: MemberSummary) => {
-        const isPositive = item.saldo >= 0
-        return (
-          <div className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            ${item.saldo.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-        )
-      }
-    },
-    {
-      key: "saldo_dolarizado",
-      label: "Saldo Dolarizado",
-      width: "18.75%",
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: MemberSummary) => {
-        const isPositive = item.dollarizedTotal >= 0
-        return (
-          <div className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            US$ {item.dollarizedTotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-        )
-      }
-    }
-  ]
-
-  // Create dynamic columns based on available currencies
-  const currencyColumns = React.useMemo(() => {
-    const baseColumns = [
-      {
-        key: "member",
-        label: "Socio",
-        width: "30%",
-        render: (item: MemberSummary) => {
-          if (!item.member?.user) {
-            return <div className="text-sm text-muted-foreground">Sin usuario</div>
-          }
-
-          const displayName = item.member.user.full_name || 'Sin nombre'
-          const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
-
-          return (
-            <div className="flex items-center gap-2">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{displayName}</div>
-                <div className="text-xs text-muted-foreground">{item.member.user.email}</div>
-              </div>
-            </div>
-          )
-        }
-      }
-    ]
-
-    // Add dynamic currency columns
-    const currencyColumnsData = availableCurrencies.map(currencyCode => ({
-      key: `currency_${currencyCode}`,
-      label: currencyCode,
-      width: `${Math.max(50 / availableCurrencies.length, 12)}%`,
-      sortable: true,
-      sortType: 'number' as const,
-      render: (item: MemberSummary) => {
-        const currencyData = item.currencies[currencyCode]
-        if (!currencyData || currencyData.amount === 0) {
-          return <div className="text-sm text-muted-foreground">-</div>
-        }
-
-        const isPositive = currencyData.amount >= 0
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(Math.abs(currencyData.amount))
-        
-        return (
-          <div className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? '' : '-'}{currencyData.currency?.symbol || currencyCode} {formattedAmount}
-          </div>
-        )
-      }
-    }))
-
-    return [...baseColumns, ...currencyColumnsData]
-  }, [availableCurrencies])
-
-  // Detailed table columns
-  const detailColumns = [
-    {
-      key: "movement_date",
-      label: "Fecha",
-      width: "14.3%",
-      sortable: true,
-      sortType: "date" as const,
-      render: (item: CapitalMovement) => {
-        const date = new Date(item.movement_date + 'T00:00:00')
-        return (
-          <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
-          </div>
-        )
-      }
-    },
-    {
-      key: "member",
-      label: "Socio",
-      width: "14.3%",
-      render: (item: CapitalMovement) => {
-        let displayName = null
-        
-        // Check if this is an "Aportes de Socios" or "Retiros de Socios" movement that uses partner system
-        const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
-        const isRetiroDeSocios = item.subcategory_id === retirosPropriosConcept?.id
-        
-        if (isAporteDeSocios || isRetiroDeSocios) {
-          // Find movement partner for this movement
-          const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
-          if (movementPartner?.partners?.contacts) {
-            const contact = movementPartner.partners.contacts
-            if (contact) {
-              displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-            }
-          }
-        } else {
-          // Use regular member logic for other movements (like Retiros de Socios)
-          let member = item.member
-          
-          // If not available in movement_view, fall back to members list
-          if (!member?.user?.full_name) {
-            const foundMember = members.find(m => m.id === item.member_id)
-            if (foundMember?.user) {
-              const user = Array.isArray(foundMember.user) ? foundMember.user[0] : foundMember.user
-              if (user?.full_name) {
-                displayName = user.full_name
-              }
-            }
-          } else {
-            const user = Array.isArray(member.user) ? member.user[0] : member.user
-            if (user?.full_name) {
-              displayName = user.full_name
-            }
-          }
-        }
-
-        if (!displayName) {
-          return <div className="text-sm text-muted-foreground">Sin socio</div>
-        }
-
-        const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
-
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar className="w-8 h-8">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="text-sm font-medium">{displayName}</div>
-            </div>
-          </div>
-        )
-      }
-    },
-    {
-      key: "category",
-      label: "Tipo",
-      width: "14.3%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: CapitalMovement) => {
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
-                         item.category_id === aportesPropriosOld?.id
-        return (
-          <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
-            {item.subcategory_name || item.category_name || 'Sin especificar'}
-          </Badge>
-        )
-      }
-    },
-    {
-      key: "wallet",
-      label: "Billetera",
-      width: "14.3%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: CapitalMovement) => (
-        <div className="text-sm">
-          {item.wallet_name || 'Sin especificar'}
-        </div>
-      )
-    },
-    {
-      key: "amount",
-      label: "Monto",
-      width: "14.3%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: CapitalMovement) => {
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
-                         item.category_id === aportesPropriosOld?.id
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(item.amount || 0)
-        
-        return (
-          <div className={`text-sm font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
-            {item.currency_symbol || '$'} {formattedAmount}
-          </div>
-        )
-      }
-    },
-    {
-      key: "exchange_rate",
-      label: "Cotización",
-      width: "14.3%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: CapitalMovement) => (
-        <div className="text-sm">
-          {item.exchange_rate ? item.exchange_rate.toFixed(4) : '-'}
-        </div>
-      )
-    },
-    {
-      key: "actions",
-      label: "Acciones",
-      width: "14.4%",
-      render: (item: CapitalMovement) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(item)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(item)}
-            className=" text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      )
-    }
-  ]
-
   // Create tabs for the header
   const headerTabs = [
     {
@@ -874,38 +568,35 @@ export default function FinancesCapitalMovements() {
         />
       ) : (
         <div className="space-y-4">
-          {activeTab === "members" && memberSummary.length > 0 && (
-            <Table
-              data={memberSummary}
-              columns={memberSummaryColumns}
-              defaultSort={{ key: 'member', direction: 'asc' }}
-              getItemId={(item) => item.member_id || 'unknown'}
+          {activeTab === "members" && (
+            <CapitalDashboard 
+              memberSummary={memberSummary}
+              isLoading={isLoading}
             />
           )}
 
-          {activeTab === "currencies" && memberSummary.length > 0 && (
-            <Table
-              data={memberSummary}
-              columns={currencyColumns}
-              defaultSort={{ key: 'member', direction: 'asc' }}
-              getItemId={(item) => item.member_id || 'unknown'}
+          {activeTab === "currencies" && (
+            <CapitalDetail 
+              memberSummary={memberSummary}
+              availableCurrencies={availableCurrencies}
+              isLoading={isLoading}
             />
           )}
 
           {activeTab === "details" && (
-            filteredMovements.length > 0 ? (
-              <Table
-                data={filteredMovements}
-                columns={detailColumns}
-                defaultSort={{ key: 'movement_date', direction: 'desc' }}
-                getItemId={(item) => item.id || 'unknown'}
-              />
-            ) : (
-              <EmptyState
-                title="No se encontraron movimientos"
-                description="No hay movimientos que coincidan con los filtros aplicados"
-              />
-            )
+            <CapitalHistory 
+              movements={movements}
+              filteredMovements={filteredMovements}
+              members={members}
+              allMovementPartners={allMovementPartners}
+              aportesPropriosConcept={aportesPropriosConcept}
+              retirosPropriosConcept={retirosPropriosConcept}
+              aportesPropriosOld={aportesPropriosOld}
+              retirosPropriosOld={retirosPropriosOld}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isLoading={isLoading}
+            />
           )}
         </div>
       )}
