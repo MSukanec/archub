@@ -821,12 +821,12 @@ export default function MovementsList() {
       }
     });
     
-    // Store duplicates for visual warning
+    // Store duplicates for visual warning in table rows
     if (duplicates.length > 0) {
       console.error('🚨 TOTAL DUPLICATES FOUND:', duplicates.length);
-      (window as any).__duplicateWarnings = duplicates;
+      (window as any).__duplicateIds = new Set(duplicates.map(d => d.split(' - ')[0].replace('🚨 DUPLICATE FOUND: ', '')));
     } else {
-      (window as any).__duplicateWarnings = null;
+      (window as any).__duplicateIds = new Set();
     }
     
     return Array.from(uniqueItems.values());
@@ -849,37 +849,20 @@ export default function MovementsList() {
     setSidebarContext('organization');
   }, [setSidebarContext]);
 
-  // 🚨 DUPLICATE WARNING COMPONENT
-  const DuplicateWarning = () => {
-    const duplicateWarnings = (window as any).__duplicateWarnings;
+  // 🚨 Helper function to check if an item is duplicate
+  const isDuplicate = (item: any) => {
+    const duplicateIds = (window as any).__duplicateIds || new Set();
+    let uniqueId: string;
     
-    if (!duplicateWarnings || duplicateWarnings.length === 0) {
-      return null;
+    if ('is_conversion_group' in item) {
+      uniqueId = `conversion_${item.conversion_group_id}`;
+    } else if ('is_transfer_group' in item) {
+      uniqueId = `transfer_${item.transfer_group_id}`;
+    } else {
+      uniqueId = `movement_${item.id}`;
     }
-
-    return (
-      <div className="mb-4 p-4 bg-red-50 border-2 border-red-500 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertTriangle className="h-5 w-5 text-red-600" />
-          <h3 className="text-red-800 font-bold text-sm">
-            🚨 DATOS DUPLICADOS DETECTADOS - REVISAR INMEDIATAMENTE
-          </h3>
-        </div>
-        <div className="text-red-700 text-xs space-y-1">
-          <p className="font-medium">Se encontraron {duplicateWarnings.length} elementos duplicados:</p>
-          <div className="max-h-32 overflow-y-auto space-y-1">
-            {duplicateWarnings.map((warning: string, index: number) => (
-              <div key={index} className="text-xs bg-red-100 p-1 rounded">
-                {warning}
-              </div>
-            ))}
-          </div>
-          <p className="text-xs mt-2 font-medium">
-            ⚠️ Esto puede indicar problemas en el sistema. Revisar logs de consola para más detalles.
-          </p>
-        </div>
-      </div>
-    );
+    
+    return duplicateIds.has(uniqueId);
   };
 
   const tableColumns = useMemo(() => [
@@ -982,7 +965,12 @@ export default function MovementsList() {
 
           return (
             <div className="text-xs space-y-1">
-              <div>{format(date, "dd/MM/yyyy")}</div>
+              <div className="flex items-center gap-1">
+                {isDuplicate(item) && (
+                  <AlertTriangle className="h-3 w-3 text-yellow-600" title="Elemento duplicado detectado" />
+                )}
+                <span>{format(date, "dd/MM/yyyy")}</span>
+              </div>
               <div className="flex items-center gap-1">
                 <Avatar className="h-4 w-4">
                   <AvatarImage src={memberAvatar} />
@@ -1444,8 +1432,6 @@ export default function MovementsList() {
         />
       ) : (
         <>
-          {/* 🚨 DUPLICATE WARNING - Show FIRST and PROMINENTLY */}
-          <DuplicateWarning />
           
           {/* Movement KPIs - Solo mostrar cuando hay datos */}
           {/* Solo mostrar balance de organización, no del proyecto */}
@@ -1610,6 +1596,11 @@ export default function MovementsList() {
         }}
 
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
+          // 🚨 PRIORITY: Check for duplicates first - mark with yellow background
+          if (isDuplicate(item)) {
+            return "bg-yellow-100 border-l-4 border-l-yellow-500";
+          }
+          
           if ('is_conversion_group' in item) {
             return "movement-row-conversion";
           }
