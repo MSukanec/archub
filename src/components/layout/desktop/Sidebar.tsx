@@ -520,58 +520,10 @@ export function Sidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Selector Section - Ahora arriba */}
-      <div className="h-9 flex items-center">
-        <div className="w-full p-1">
-        {(() => {
-          const activeSection = getActiveHeaderSection();
-          
-          if (sidebarLevel === 'project') {
-            return <ProjectSelectorSidebarHeader isExpanded={isExpanded} />;
-          }
-          if (sidebarLevel === 'organization') {
-            return <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />;
-          }
-          
-          // Para otras secciones, mostrar el título basado en la sección activa del header
-          const getSectionLabel = () => {
-            switch (activeSection) {
-              case 'organizacion': return 'ORGANIZACIÓN';
-              case 'proyecto': return 'PROYECTO';
-              case 'biblioteca': return 'BIBLIOTECA';
-              case 'proveedor': return 'PROVEEDOR';
-              case 'administracion': return 'ADMINISTRACIÓN';
-              default: return 'ORGANIZACIÓN';
-            }
-          };
-          
-          return (
-            <SidebarButton
-              icon={activeSection === 'organizacion' ? null : <ArrowLeft className="w-[18px] h-[18px]" />}
-              label={getSectionLabel()}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={activeSection === 'organizacion' ? undefined : goToMainLevel}
-              variant="main"
-              isHeaderButton={true}
-            />
-          );
-        })()}
-        </div>
-      </div>
       {/* Navigation Items */}
-      <div className="flex-1 p-1 pt-3">
+      <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Línea divisoria para secciones con subsecciones */}
-            {(sidebarLevel === 'project' || sidebarLevel === 'organization') && (
-              <div className="h-px bg-white/20 my-2"></div>
-            )}
-            
-            {/* Línea divisoria para otras secciones */}
-            {getActiveHeaderSection() !== 'inicio' && sidebarLevel !== 'project' && sidebarLevel !== 'organization' && (
-              <div className="h-px bg-white/20 my-2"></div>
-            )}
             
             {/* Renderizar contenido según el nivel actual */}
             {getCurrentSidebarItems().map((item, index) => {
