@@ -1001,8 +1001,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (selectedSubcontracts && selectedSubcontracts.length > 0) {
         const subcontractsData = selectedSubcontracts.map(subcontract => ({
           movement_id: result.id,
-          subcontract_id: subcontract.subcontract_id,
-          amount: subcontract.amount
+          subcontract_id: subcontract.subcontract_id
         }))
 
         const { error: subcontractsError } = await supabase
