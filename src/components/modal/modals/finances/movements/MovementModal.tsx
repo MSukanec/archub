@@ -985,6 +985,16 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       // Si hay personal seleccionado, guardar las asignaciones en movement_personnel
       if (selectedPersonnel && selectedPersonnel.length > 0) {
+        // Primero eliminar registros existentes si es edición
+        if (isEditing && editingMovement?.id) {
+          const { error: deleteError } = await supabase
+            .from('movement_personnel')
+            .delete()
+            .eq('movement_id', editingMovement.id)
+
+          if (deleteError) throw deleteError
+        }
+        
         const personnelData = selectedPersonnel.map(person => ({
           movement_id: result.id,
           personnel_id: person.personnel_id
@@ -999,6 +1009,16 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       // Si hay subcontratos seleccionados, guardar las asignaciones en movement_subcontracts
       if (selectedSubcontracts && selectedSubcontracts.length > 0) {
+        // Primero eliminar registros existentes si es edición
+        if (isEditing && editingMovement?.id) {
+          const { error: deleteError } = await supabase
+            .from('movement_subcontracts')
+            .delete()
+            .eq('movement_id', editingMovement.id)
+
+          if (deleteError) throw deleteError
+        }
+        
         const subcontractsData = selectedSubcontracts.map(subcontract => ({
           movement_id: result.id,
           subcontract_id: subcontract.subcontract_id,
