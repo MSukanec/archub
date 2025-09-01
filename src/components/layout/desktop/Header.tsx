@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, Library, Package, Crown, HardHat } from "lucide-react";
+import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, Library, Package, Crown, HardHat, Folder, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,16 +17,16 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { useProjectContext } from "@/stores/projectContext";
+import { useProjects, useProject } from "@/hooks/use-projects";
+import { useUpdateUserOrganizationPreferences } from "@/hooks/use-user-organization-preferences";
+import { SelectorPopover } from "@/components/popovers/SelectorPopover";
 
 interface HeaderProps {
   // Header principal simplificado - solo props básicas si son necesarias
 }
 
 export function Header({}: HeaderProps = {}) {
-  const [globalSearchValue, setGlobalSearchValue] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
-
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
@@ -36,6 +36,12 @@ export function Header({}: HeaderProps = {}) {
   const { isDocked, setDocked } = useSidebarStore();
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  
+  // Project context
+  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { data: projects = [] } = useProjects(userData?.organization?.id);
+  const { data: currentProject } = useProject(selectedProjectId || undefined);
+  const updateProjectMutation = useUpdateUserOrganizationPreferences();
   
   // Theme state
   const [isDark, setIsDark] = useState(false);
@@ -56,9 +62,19 @@ export function Header({}: HeaderProps = {}) {
     }
   }, [userData?.preferences?.theme]);
 
-  const handleGlobalSearch = (value: string) => {
-    setGlobalSearchValue(value);
-    // Aquí puedes implementar la lógica de búsqueda global
+  // Project selection logic
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate({ 
+      organizationId: userData?.organization?.id || '',
+      lastProjectId: projectId 
+    });
+    setSelectedProject(projectId, userData?.organization?.id);
+  };
+
+  // Function to get project initials
+  const getProjectInitials = (name: string): string => {
+    return name.charAt(0).toUpperCase();
   };
 
   const handleLogout = async () => {
@@ -204,35 +220,53 @@ export function Header({}: HeaderProps = {}) {
 
         </div>
 
-        {/* Center: Global Search */}
-        <div className="flex-1 max-w-md mx-8">
-          <div 
-            className="relative flex items-center"
-            onMouseLeave={() => {
-              if (isSearchExpanded && !searchFocused) {
-                setIsSearchExpanded(false);
-                setSearchFocused(false);
+        {/* Center: Project Selector */}
+        <div className="flex-1 max-w-md mx-8 flex justify-center">
+          {currentProject ? (
+            <SelectorPopover
+              trigger={
+                <button className="h-8 px-3 flex items-center gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] hover:bg-[var(--accent)] transition-all duration-200">
+                  <Avatar className="w-5 h-5">
+                    {currentProject.project_data?.project_image_url ? (
+                      <AvatarImage src={currentProject.project_data.project_image_url} alt={currentProject.name} />
+                    ) : (
+                      <AvatarFallback 
+                        className="text-xs font-medium text-white"
+                        style={{ backgroundColor: currentProject.color || 'hsl(var(--accent))' }}
+                      >
+                        {getProjectInitials(currentProject.name)}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span className="text-xs font-normal" style={{color: 'var(--main-sidebar-fg)'}}>
+                    {currentProject.name}
+                  </span>
+                  <ChevronDown className="w-3 h-3" style={{color: 'var(--main-sidebar-fg)'}} />
+                </button>
               }
-            }}
-          >
-            <div className={`
-              transition-all duration-300 overflow-hidden w-full
-              ${isSearchExpanded ? "opacity-100" : "opacity-100"}
-            `}>
-              <div className="relative flex items-center h-8 border border-[var(--main-sidebar-button-hover-bg)] rounded-lg bg-[var(--main-sidebar-button-hover-bg)]">
-                <Search className="h-[18px] w-[18px] ml-3 flex-shrink-0" style={{color: 'var(--main-sidebar-fg)'}} />
-                <Input
-                  placeholder="Buscar en toda la aplicación..."
-                  value={globalSearchValue}
-                  onChange={(e) => handleGlobalSearch(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  className="flex-1 h-full text-sm border-0 bg-transparent font-normal focus:ring-0 focus:outline-none pl-2 pr-3"
-                  style={{color: 'var(--main-sidebar-button-hover-fg)', '--placeholder-color': 'var(--main-sidebar-fg)'} as React.CSSProperties}
-                />
-              </div>
-            </div>
-          </div>
+              items={projects.map((project: any) => ({
+                id: project.id,
+                name: project.name,
+                logo_url: project.project_data?.project_image_url,
+                type: "Proyecto" as const,
+                color: project.color
+              }))}
+              selectedId={selectedProjectId}
+              onSelect={handleProjectSelect}
+              emptyMessage="No hay proyectos disponibles"
+              getInitials={getProjectInitials}
+            />
+          ) : (
+            <button 
+              className="h-8 px-3 flex items-center gap-2 rounded-lg bg-[var(--main-sidebar-button-hover-bg)] hover:bg-[var(--accent)] transition-all duration-200"
+              disabled
+            >
+              <Folder className="w-[18px] h-[18px]" style={{color: 'var(--main-sidebar-fg)'}} />
+              <span className="text-xs font-normal" style={{color: 'var(--main-sidebar-fg)'}}>
+                Seleccionar proyecto
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Right: User Actions */}
