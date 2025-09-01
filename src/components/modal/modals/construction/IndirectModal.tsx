@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useUnits } from '@/hooks/use-units'
 
 // Schema de validación
 const indirectSchema = z.object({
@@ -64,22 +65,8 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
     enabled: isEditing && !!modalData?.indirectId
   })
 
-  // Fetch available units
-  const { data: units = [] } = useQuery({
-    queryKey: ['units'],
-    queryFn: async () => {
-      if (!supabase) return []
-      
-      const { data, error } = await supabase
-        .from('units')
-        .select('id, name, symbol')
-        .order('name')
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!supabase
-  })
+  // Fetch available units using existing hook
+  const { data: units = [], isLoading: unitsLoading } = useUnits()
 
   const form = useForm<IndirectForm>({
     resolver: zodResolver(indirectSchema),
@@ -223,7 +210,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
                   <SelectContent>
                     {units.map((unit) => (
                       <SelectItem key={unit.id} value={unit.id}>
-                        {unit.name} ({unit.symbol})
+                        {unit.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
