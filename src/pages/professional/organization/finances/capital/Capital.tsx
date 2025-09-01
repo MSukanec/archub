@@ -149,7 +149,7 @@ export default function FinancesCapitalMovements() {
 
   const headerProps = {
     title: "Movimientos de Capital",
-    icon: <TrendingUp className="h-5 w-5" />,
+    icon: TrendingUp,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: {
