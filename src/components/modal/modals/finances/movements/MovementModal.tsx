@@ -1698,6 +1698,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 // Actualizar formularios según el tipo activo
                 if (movementType === 'conversion') {
                   conversionForm.setValue('type_id', typeId)
+                  console.log('🔧 SET type_id en conversión:', typeId)
                   // Los formularios de conversión no tienen category_id/subcategory_id
                 } else if (movementType === 'transfer') {
                   transferForm.setValue('type_id', typeId)
@@ -1722,6 +1723,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                     if (viewMode.includes("conversion")) {
                       console.log('🎯 Setting movement type to CONVERSION')
                       setMovementType('conversion')
+                      // FORZAR asignación del type_id cuando cambia a conversion
+                      setTimeout(() => conversionForm.setValue('type_id', typeId), 100)
                     } else if (viewMode.includes("transfer")) {
                       console.log('🎯 Setting movement type to TRANSFER')
                       setMovementType('transfer')
@@ -1868,6 +1871,24 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       onRightClick={() => {
         if (movementType === 'conversion') {
           console.log('🔧 INTENTANDO SUBMIT CONVERSIÓN...')
+          
+          // FORZAR asignación de campos faltantes antes del submit
+          if (!conversionForm.getValues('type_id')) {
+            console.log('🔧 ASIGNANDO type_id:', selectedTypeId)
+            conversionForm.setValue('type_id', selectedTypeId, { shouldValidate: true })
+          }
+          
+          // Buscar moneda de pesos argentinos para destino si está vacía
+          if (!conversionForm.getValues('currency_id_to')) {
+            const pesosCurrency = currencies?.find(orgCur => 
+              orgCur.currency?.code === 'ARS' || orgCur.currency?.name?.includes('Peso')
+            )
+            console.log('🔧 ASIGNANDO currency_id_to:', pesosCurrency?.currency?.id)
+            if (pesosCurrency) {
+              conversionForm.setValue('currency_id_to', pesosCurrency.currency.id, { shouldValidate: true })
+            }
+          }
+          
           console.log('🔧 ERRORES FORMULARIO CONVERSIÓN:', conversionForm.formState.errors)
           console.log('🔧 FORMULARIO VÁLIDO:', conversionForm.formState.isValid)
           console.log('🔧 VALORES ACTUALES:', conversionForm.getValues())
