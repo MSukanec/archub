@@ -194,6 +194,7 @@ export default function CapitalHistory({ organizationId, searchValue }: CapitalH
       data={filteredMovements}
       columns={movementColumns}
       defaultSort={{ key: "movement_date", direction: "desc" }}
+      getItemId={(item) => item.id}
     />
   )
 }
