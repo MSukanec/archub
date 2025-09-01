@@ -149,7 +149,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'organizacion' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <Building className="w-4 h-4" />
+            <Building className="w-[18px] h-[18px]" />
             {activeSection === 'organizacion' && <span className="ml-2 text-sm">Organización</span>}
           </button>
 
@@ -165,7 +165,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'proyecto' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <FolderOpen className="w-4 h-4" />
+            <FolderOpen className="w-[18px] h-[18px]" />
             {activeSection === 'proyecto' && <span className="ml-2 text-sm">Proyecto</span>}
           </button>
 
@@ -181,7 +181,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'biblioteca' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <Library className="w-4 h-4" />
+            <Library className="w-[18px] h-[18px]" />
             {activeSection === 'biblioteca' && <span className="ml-2 text-sm">Biblioteca</span>}
           </button>
 
@@ -203,7 +203,7 @@ export function Header({}: HeaderProps = {}) {
               ${isSearchExpanded ? "opacity-100" : "opacity-100"}
             `}>
               <div className="relative flex items-center h-8 border border-[var(--main-sidebar-button-hover-bg)] rounded-lg bg-[var(--main-sidebar-button-hover-bg)]">
-                <Search className="h-4 w-4 ml-3 flex-shrink-0" style={{color: 'var(--main-sidebar-fg)'}} />
+                <Search className="h-[18px] w-[18px] ml-3 flex-shrink-0" style={{color: 'var(--main-sidebar-fg)'}} />
                 <Input
                   placeholder="Buscar en toda la aplicación..."
                   value={globalSearchValue}
@@ -226,7 +226,7 @@ export function Header({}: HeaderProps = {}) {
             title="Notificaciones"
             style={{color: 'var(--main-sidebar-fg)'}}
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-[18px] w-[18px]" />
           </button>
 
           {/* Sidebar Pin/Unpin */}
@@ -236,7 +236,7 @@ export function Header({}: HeaderProps = {}) {
             onClick={handleDockToggle}
             style={{color: 'var(--main-sidebar-fg)'}}
           >
-            {isDocked ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+            {isDocked ? <PanelLeftClose className="h-[18px] w-[18px]" /> : <PanelLeftOpen className="h-[18px] w-[18px]" />}
           </button>
 
           {/* Theme Toggle */}
@@ -246,7 +246,7 @@ export function Header({}: HeaderProps = {}) {
             onClick={handleThemeToggle}
             style={{color: 'var(--main-sidebar-fg)'}}
           >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
           </button>
 
           {/* Proveedor */}
@@ -262,7 +262,7 @@ export function Header({}: HeaderProps = {}) {
             style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
             title="Proveedor"
           >
-            <Package className="w-4 h-4" />
+            <Package className="w-[18px] h-[18px]" />
           </button>
 
           {/* Administración */}
@@ -278,7 +278,7 @@ export function Header({}: HeaderProps = {}) {
             style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
             title="Administración"
           >
-            <Crown className="w-4 h-4" />
+            <Crown className="w-[18px] h-[18px]" />
           </button>
 
           {/* Settings */}
@@ -288,7 +288,7 @@ export function Header({}: HeaderProps = {}) {
             onClick={() => navigate('/settings')}
             style={{color: 'var(--main-sidebar-fg)'}}
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-[18px] w-[18px]" />
           </button>
 
           {/* User Menu */}
