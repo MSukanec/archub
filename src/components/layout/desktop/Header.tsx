@@ -127,7 +127,7 @@ export function Header({}: HeaderProps = {}) {
 
   return (
     <div className="fixed top-0 left-0 right-0 w-full z-50 h-12 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] transition-all duration-300">
-      <div className="w-full h-12 px-6 flex items-center justify-between">
+      <div className="w-full h-12 px-1 flex items-center justify-between">
         {/* Left: Navigation Buttons */}
         <div className="flex items-center gap-1">
           {/* Inicio */}
