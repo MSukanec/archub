@@ -838,16 +838,39 @@ export default function MovementsList() {
       },
     }] : []),
     {
-      key: "movement_date",
-      label: "Fecha",
-      width: "5%",
+      key: "date_creator",
+      label: "Fecha / Creador",
+      width: "12%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Movement | ConversionGroup) => {
         const displayDate = item.movement_date;
+        
+        // Creator data
+        const movementData = item as any;
+        const creatorData = movementData.movement_data?.creator;
+        const memberName = creatorData?.full_name;
+        const memberAvatar = creatorData?.avatar_url;
 
         if (!displayDate) {
-          return <div className="text-xs text-muted-foreground">Sin fecha</div>;
+          return (
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div>Sin fecha</div>
+              <div className="flex items-center gap-1">
+                <Avatar className="h-4 w-4">
+                  <AvatarImage src={memberAvatar} />
+                  <AvatarFallback className="text-xs">
+                    {memberName?.charAt(0) ||
+                      creatorData?.email?.charAt(0) ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate text-xs">
+                  {memberName || "Usuario"}
+                </span>
+              </div>
+            </div>
+          );
         }
 
         try {
@@ -866,52 +889,64 @@ export default function MovementsList() {
           if (isNaN(date.getTime())) {
             console.log('Invalid date for item:', displayDate, item);
             return (
-              <div className="text-xs text-muted-foreground">
-                Fecha inválida
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Fecha inválida</div>
+                <div className="flex items-center gap-1">
+                  <Avatar className="h-4 w-4">
+                    <AvatarImage src={memberAvatar} />
+                    <AvatarFallback className="text-xs">
+                      {memberName?.charAt(0) ||
+                        creatorData?.email?.charAt(0) ||
+                        "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="truncate text-xs">
+                    {memberName || "Usuario"}
+                  </span>
+                </div>
               </div>
             );
           }
 
           return (
-            <div className="text-xs">
+            <div className="text-xs space-y-1">
               <div>{format(date, "dd/MM/yyyy")}</div>
+              <div className="flex items-center gap-1">
+                <Avatar className="h-4 w-4">
+                  <AvatarImage src={memberAvatar} />
+                  <AvatarFallback className="text-xs">
+                    {memberName?.charAt(0) ||
+                      creatorData?.email?.charAt(0) ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate text-xs text-muted-foreground">
+                  {memberName || "Usuario"}
+                </span>
+              </div>
             </div>
           );
         } catch (error) {
           console.log('Date formatting error:', error, displayDate, item);
           return (
-            <div className="text-xs text-muted-foreground">Fecha inválida</div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div>Fecha inválida</div>
+              <div className="flex items-center gap-1">
+                <Avatar className="h-4 w-4">
+                  <AvatarImage src={memberAvatar} />
+                  <AvatarFallback className="text-xs">
+                    {memberName?.charAt(0) ||
+                      creatorData?.email?.charAt(0) ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate text-xs">
+                  {memberName || "Usuario"}
+                </span>
+              </div>
+            </div>
           );
         }
-      },
-    },
-    {
-      key: "creator",
-      label: "Creador",
-      width: "8%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => {
-        const movementData = item as any;
-        const creatorData = movementData.movement_data?.creator;
-        const memberName = creatorData?.full_name;
-        const memberAvatar = creatorData?.avatar_url;
-        
-        return (
-          <div className="flex items-center justify-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={memberAvatar} />
-              <AvatarFallback className="text-xs">
-                {memberName?.charAt(0) ||
-                  creatorData?.email?.charAt(0) ||
-                  "U"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs truncate max-w-20">
-              {memberName || "Usuario"}
-            </span>
-          </div>
-        );
       },
     },
     {
@@ -975,16 +1010,6 @@ export default function MovementsList() {
           const movementData = movement as any;
           const subcategoryId = movementData.movement_data?.subcategory?.id;
           
-          if (subcategoryName === 'Retiros de Socios') {
-            console.log('🔥 RETIROS DE SOCIOS DEBUG:', {
-              subcategoryName,
-              subcategoryId,
-              partner: movementData.partner,
-              client: movementData.client,
-              subcontract: movementData.subcontract,
-              movement_data: movementData.movement_data
-            });
-          }
           
           // Aportes de clientes - usar la columna "client" de la vista
           if (subcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3') {
