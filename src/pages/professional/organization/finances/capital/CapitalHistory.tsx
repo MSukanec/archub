@@ -154,7 +154,7 @@ export function CapitalHistory({
     {
       key: "amount",
       label: "Monto",
-      width: "14.3%",
+      width: "16.7%",
       sortable: true,
       sortType: "number" as const,
       render: (item: CapitalMovement) => {
@@ -164,28 +164,23 @@ export function CapitalHistory({
         const formattedAmount = new Intl.NumberFormat('es-AR').format(item.amount || 0)
         
         return (
-          <div className={`text-sm font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
-            {item.currency_symbol || '$'} {formattedAmount}
+          <div>
+            <div className={`text-sm font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
+              {item.currency_symbol || '$'} {formattedAmount}
+            </div>
+            {item.exchange_rate && (
+              <div className="text-xs text-muted-foreground">
+                Cotiz: {Math.round(item.exchange_rate).toLocaleString()}
+              </div>
+            )}
           </div>
         )
       }
     },
     {
-      key: "exchange_rate",
-      label: "Cotización",
-      width: "14.3%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: CapitalMovement) => (
-        <div className="text-sm">
-          {item.exchange_rate ? Math.round(item.exchange_rate).toLocaleString() : '-'}
-        </div>
-      )
-    },
-    {
       key: "actions",
       label: "Acciones",
-      width: "14.4%",
+      width: "16.7%",
       render: (item: CapitalMovement) => (
         <div className="flex items-center gap-1">
           <Button
