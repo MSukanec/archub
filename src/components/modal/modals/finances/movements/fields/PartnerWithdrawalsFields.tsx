@@ -31,18 +31,34 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
     if (!partner?.contacts) return 'Socio sin nombre'
     
     const { contacts } = partner
+    
+    // Priority 1: Company name
     if (contacts.company_name) {
       return contacts.company_name
-    } else {
-      const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-      if (fullName) {
-        return fullName
-      } else if (contacts.email) {
-        return contacts.email
-      } else {
-        return 'Socio sin nombre'
-      }
     }
+    
+    // Priority 2: Full name
+    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+    if (fullName) {
+      return fullName
+    }
+    
+    // Priority 3: Extract name from email
+    if (contacts.email) {
+      const emailPart = contacts.email.split('@')[0]
+      if (emailPart) {
+        // Convert email username to a more readable format
+        const friendlyName = emailPart
+          .replace(/[._]/g, ' ') // Replace dots and underscores with spaces
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+          .join(' ')
+        return friendlyName || contacts.email
+      }
+      return contacts.email
+    }
+    
+    return 'Socio sin nombre'
   }
 
   // Create options for ComboBox
