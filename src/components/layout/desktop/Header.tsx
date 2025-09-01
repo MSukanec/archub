@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon } from "lucide-react";
+import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, BookOpen, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -120,6 +120,9 @@ export function Header({}: HeaderProps = {}) {
     if (location === '/' || location.includes('/dashboard')) return 'inicio';
     if (location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
     if (location.includes('/project')) return 'proyecto';
+    if (location.includes('/library')) return 'biblioteca';
+    if (location.includes('/proveedor')) return 'proveedor';
+    if (location.includes('/admin')) return 'administracion';
     return 'inicio';
   };
 
@@ -170,6 +173,48 @@ export function Header({}: HeaderProps = {}) {
           >
             <FolderOpen className="w-4 h-4" />
             {activeSection === 'proyecto' && <span className="ml-2 text-sm">Proyecto</span>}
+          </button>
+
+          {/* Biblioteca */}
+          <button
+            onClick={() => navigate('/library')}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'biblioteca' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'biblioteca' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <BookOpen className="w-4 h-4" />
+            {activeSection === 'biblioteca' && <span className="ml-2 text-sm">Biblioteca</span>}
+          </button>
+
+          {/* Proveedor */}
+          <button
+            onClick={() => navigate('/proveedor')}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'proveedor' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <Truck className="w-4 h-4" />
+            {activeSection === 'proveedor' && <span className="ml-2 text-sm">Proveedor</span>}
+          </button>
+
+          {/* Administración */}
+          <button
+            onClick={() => navigate('/admin')}
+            className={`h-8 flex items-center rounded transition-all duration-200 ${
+              activeSection === 'administracion' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <Shield className="w-4 h-4" />
+            {activeSection === 'administracion' && <span className="ml-2 text-sm">Administración</span>}
           </button>
         </div>
 
