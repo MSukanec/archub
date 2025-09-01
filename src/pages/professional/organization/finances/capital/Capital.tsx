@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { Banknote } from 'lucide-react'
 
 import CapitalDashboard from './CapitalDashboard'
 import CapitalDetail from './CapitalDetail'
@@ -29,7 +30,7 @@ export default function FinancesCapitalMovements() {
       // Force partner movement type
       defaultData: { 
         movement_type: 'aportes_propios',
-        subcategory_id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Aportes de Clientes (for now)
+        subcategory_id: 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' // Aportes Propios
       }
     })
   }
@@ -61,6 +62,7 @@ export default function FinancesCapitalMovements() {
     <Layout
       headerProps={{
         title: "Movimientos de Capital",
+        icon: Banknote,
         showSearch: true,
         searchValue: searchValue,
         onSearchChange: setSearchValue,

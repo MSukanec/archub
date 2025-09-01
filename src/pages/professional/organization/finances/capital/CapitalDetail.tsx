@@ -14,9 +14,9 @@ interface CapitalDetailProps {
 }
 
 export default function CapitalDetail({ organizationId, searchValue }: CapitalDetailProps) {
-  // Partner capital concept UUIDs (REAL ONES from database)
-  const APORTES_SOCIOS_UUID = 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Aportes de Clientes (for now)
-  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b' // Retiros Propios (confirmed)
+  // EXACT UUIDs que el usuario especificó
+  const APORTES_PROPIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' // Aportes Propios 
+  const RETIROS_PROPIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b' // Retiros Propios
 
   // Fetch partner capital movements
   const { data: movements = [], isLoading } = useQuery({
@@ -30,7 +30,7 @@ export default function CapitalDetail({ organizationId, searchValue }: CapitalDe
         .from('movements_view')
         .select('*')
         .eq('organization_id', organizationId)
-        .in('subcategory_id', [APORTES_SOCIOS_UUID, RETIROS_SOCIOS_UUID])
+        .in('subcategory_id', [APORTES_PROPIOS_UUID, RETIROS_PROPIOS_UUID])
         .order('movement_date', { ascending: false })
 
       if (error) {
