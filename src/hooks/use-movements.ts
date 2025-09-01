@@ -68,20 +68,34 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw new Error('Supabase client not initialized')
       }
 
-      // First, get basic movements data using the movements table
+      // First, get basic movements data using the movements view with the new columns
       let query = supabase
-        .from('movements')
+        .from('movements_view')
         .select(`
-          *,
-          movement_clients!inner(
-            client_name
-          ),
-          movement_partners!inner(
-            partner_name  
-          ),
-          movement_subcontracts!inner(
-            contact_name
-          )
+          id,
+          description,
+          amount,
+          exchange_rate,
+          created_at,
+          movement_date,
+          created_by,
+          organization_id,
+          project_id,
+          type_id,
+          category_id,
+          subcategory_id,
+          currency_id,
+          wallet_id,
+          member_id,
+          contact_id,
+          file_url,
+          is_conversion,
+          is_favorite,
+          conversion_group_id,
+          transfer_group_id,
+          client,
+          partner,
+          subcontract
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
@@ -99,8 +113,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       const { data, error } = await query;
 
       if (error) {
-        console.error('❌ Error fetching movements from movements_view:', error)
-        console.error('❌ Error details:', error.message, error.details, error.hint)
+        console.error('Error fetching movements:', error)
         return []
       }
 
