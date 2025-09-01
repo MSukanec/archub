@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Bell, Settings, Home, ChevronRight } from "lucide-react";
+import { Search, Bell, Settings, Home, Building, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,32 +35,67 @@ export function Header({}: HeaderProps = {}) {
     navigate("/");
   };
 
-  const getBreadcrumb = () => {
-    // Generar breadcrumb basado en la ruta actual
-    if (location.includes('/finances')) return 'Finanzas';
-    if (location.includes('/construction')) return 'Construcción';
-    if (location.includes('/design')) return 'Diseño';
-    if (location.includes('/resources')) return 'Recursos';
-    if (location.includes('/members')) return 'Miembros';
-    return 'Dashboard';
+  const getActiveSection = () => {
+    if (location === '/' || location.includes('/dashboard')) return 'inicio';
+    if (location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
+    if (location.includes('/project')) return 'proyecto';
+    return 'inicio';
   };
+
+  const activeSection = getActiveSection();
 
   return (
     <div className="fixed top-0 left-0 right-0 w-full z-50 h-12 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] transition-all duration-300">
       <div className="w-full h-12 px-6 flex items-center justify-between">
-        {/* Left: Navigation Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm" style={{color: 'var(--main-sidebar-fg)'}}>
+        {/* Left: Navigation Buttons */}
+        <div className="flex items-center gap-1">
+          {/* Inicio */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate('/')}
-            className="h-8 px-2 text-sm hover:text-white"
-            style={{color: 'var(--main-sidebar-fg)'}}
+            className={`h-8 transition-all duration-200 ${
+              activeSection === 'inicio' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'inicio' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
             <Home className="w-4 h-4" />
+            {activeSection === 'inicio' && <span className="ml-2 text-sm">Inicio</span>}
           </Button>
-          <ChevronRight className="w-3 h-3" />
-          <span>{getBreadcrumb()}</span>
+
+          {/* Organización */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/finances')}
+            className={`h-8 transition-all duration-200 ${
+              activeSection === 'organizacion' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'organizacion' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <Building className="w-4 h-4" />
+            {activeSection === 'organizacion' && <span className="ml-2 text-sm">Organización</span>}
+          </Button>
+
+          {/* Proyecto */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/project')}
+            className={`h-8 transition-all duration-200 ${
+              activeSection === 'proyecto' 
+                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                : 'w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+            style={{color: activeSection === 'proyecto' ? 'white' : 'var(--main-sidebar-fg)'}}
+          >
+            <FolderOpen className="w-4 h-4" />
+            {activeSection === 'proyecto' && <span className="ml-2 text-sm">Proyecto</span>}
+          </Button>
         </div>
 
         {/* Center: Global Search */}
