@@ -1063,6 +1063,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     },
     onSuccess: async (result) => {
       // Invalidar todas las queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1272,6 +1273,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1372,6 +1374,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       return results
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
