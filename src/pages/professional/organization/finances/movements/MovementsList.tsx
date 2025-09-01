@@ -790,10 +790,11 @@ export default function MovementsList() {
 
     const grouped = groupConversions(filtered);
     
-    // 🚨 CRITICAL: Detect and report duplicates
-    const uniqueItems = new Map();
-    const duplicates: string[] = [];
+    // 🚨 CRITICAL: Detect duplicates but KEEP ALL items for visibility
+    const seenIds = new Set();
+    const duplicatedIds = new Set();
     
+    // First pass: identify which IDs appear more than once
     grouped.forEach(item => {
       let uniqueId: string;
       
@@ -805,31 +806,54 @@ export default function MovementsList() {
         uniqueId = `movement_${item.id}`;
       }
       
-      // Check for duplicates and log them
-      if (uniqueItems.has(uniqueId)) {
-        duplicates.push(`🚨 DUPLICATE FOUND: ${uniqueId} - ${item.description || 'Sin descripción'}`);
+      if (seenIds.has(uniqueId)) {
+        duplicatedIds.add(uniqueId);
         console.error('🚨 DUPLICATE MOVEMENT DETECTED:', {
           id: uniqueId,
           description: item.description,
           amount: item.amount,
-          date: item.movement_date,
-          existing: uniqueItems.get(uniqueId),
-          duplicate: item
+          date: item.movement_date
         });
       } else {
-        uniqueItems.set(uniqueId, item);
+        seenIds.add(uniqueId);
       }
     });
     
-    // Store duplicates for visual warning in table rows
-    if (duplicates.length > 0) {
-      console.error('🚨 TOTAL DUPLICATES FOUND:', duplicates.length);
-      (window as any).__duplicateIds = new Set(duplicates.map(d => d.split(' - ')[0].replace('🚨 DUPLICATE FOUND: ', '')));
-    } else {
-      (window as any).__duplicateIds = new Set();
+    // Store duplicated IDs for visual marking
+    (window as any).__duplicateIds = duplicatedIds;
+    
+    if (duplicatedIds.size > 0) {
+      console.error('🚨 TOTAL DUPLICATE IDS FOUND:', duplicatedIds.size);
+      console.error('🚨 DUPLICATE IDS:', Array.from(duplicatedIds));
     }
     
-    return Array.from(uniqueItems.values());
+    // Add unique suffixes to duplicate items to prevent React key conflicts
+    const itemCounters = new Map();
+    const uniqueItems = grouped.map(item => {
+      let baseId: string;
+      
+      if ('is_conversion_group' in item) {
+        baseId = `conversion_${item.conversion_group_id}`;
+      } else if ('is_transfer_group' in item) {
+        baseId = `transfer_${item.transfer_group_id}`;
+      } else {
+        baseId = `movement_${item.id}`;
+      }
+      
+      // Count occurrences to create unique IDs
+      const count = itemCounters.get(baseId) || 0;
+      itemCounters.set(baseId, count + 1);
+      
+      // Add unique suffix for duplicates
+      const uniqueKey = count > 0 ? `${baseId}_dup${count}` : baseId;
+      
+      return {
+        ...item,
+        __uniqueKey: uniqueKey
+      };
+    });
+    
+    return uniqueItems;
   }, [
     movements,
     searchValue,
@@ -1444,6 +1468,11 @@ export default function MovementsList() {
             isLoading={false} // Ya no está cargando cuando llegamos aquí
             selectable={true}
             getItemId={(item: any) => {
+              // Use the unique key if available, otherwise fall back to original logic
+              if (item.__uniqueKey) {
+                return item.__uniqueKey;
+              }
+              
               if ('is_conversion_group' in item) {
                 return `conversion_${item.conversion_group_id}`;
               } else if ('is_transfer_group' in item) {
