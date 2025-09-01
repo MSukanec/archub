@@ -23,11 +23,6 @@ export default function OrganizationDashboard() {
   const organization = userData?.organization;
   const currentTime = new Date();
 
-  const headerProps = {
-    icon: Building,
-    title: organization?.name || 'Organización',
-    subtitle: `${organization?.is_system ? 'Organización del sistema' : 'Organización'} • Plan ${organization?.plan?.name || 'Free'}`,
-  };
 
   // Dashboard no debe mostrar action bar
   useEffect(() => {
@@ -38,7 +33,7 @@ export default function OrganizationDashboard() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando organización...</div>
         </div>
@@ -48,7 +43,7 @@ export default function OrganizationDashboard() {
 
   if (!organization) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout wide={true}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Organización no encontrada</div>
         </div>
@@ -57,7 +52,7 @@ export default function OrganizationDashboard() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout wide={true}>
       <div className="space-y-6">
         {/* Welcome Card - Full Width */}
         <Card className="relative overflow-hidden">
