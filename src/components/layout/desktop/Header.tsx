@@ -34,7 +34,7 @@ export function Header({}: HeaderProps = {}) {
   
   // Sidebar state
   const { isDocked, setDocked } = useSidebarStore();
-  const { setSidebarLevel } = useNavigationStore();
+  const { sidebarLevel, setSidebarLevel } = useNavigationStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
   // Theme state
@@ -119,13 +119,14 @@ export function Header({}: HeaderProps = {}) {
   };
 
   const getActiveSection = () => {
-    if (location === '/' || location.includes('/dashboard')) return 'inicio';
-    if (location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
-    if (location.includes('/project')) return 'proyecto';
-    if (location.includes('/library')) return 'biblioteca';
-    if (location.includes('/proveedor')) return 'proveedor';
-    if (location.includes('/admin')) return 'administracion';
-    return 'inicio';
+    switch (sidebarLevel) {
+      case 'organization': return 'organizacion';
+      case 'project': return 'proyecto';
+      case 'library': return 'biblioteca';
+      case 'provider': return 'proveedor';
+      case 'admin': return 'administracion';
+      default: return 'inicio';
+    }
   };
 
   const activeSection = getActiveSection();
@@ -138,7 +139,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Inicio */}
           <button
             onClick={() => {
-              navigate('/');
               setSidebarLevel('main');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
@@ -155,7 +155,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Organización */}
           <button
             onClick={() => {
-              navigate('/finances');
               setSidebarLevel('organization');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
@@ -172,7 +171,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Proyecto */}
           <button
             onClick={() => {
-              navigate('/project');
               setSidebarLevel('project');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
@@ -189,7 +187,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Biblioteca */}
           <button
             onClick={() => {
-              navigate('/library');
               setSidebarLevel('library');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
@@ -206,7 +203,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Proveedor */}
           <button
             onClick={() => {
-              navigate('/proveedor');
               setSidebarLevel('provider');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
@@ -223,7 +219,6 @@ export function Header({}: HeaderProps = {}) {
           {/* Administración */}
           <button
             onClick={() => {
-              navigate('/admin');
               setSidebarLevel('admin');
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
