@@ -1399,6 +1399,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   }
 
   const onSubmitConversion = (values: ConversionForm) => {
+    console.log('🔧 DATOS DE CONVERSIÓN ENVIADOS:', values)
+    console.log('🔧 FORMULARIO VÁLIDO:', conversionForm.formState.isValid)
+    console.log('🔧 ERRORES FORMULARIO:', conversionForm.formState.errors)
     createConversionMutation.mutate(values)
   }
 
