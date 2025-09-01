@@ -359,5 +359,13 @@ VISTA MOVEMENTS_VIEW:
   {
     "column_name": "client",
     "data_type": "text"
+  },
+  {
+    "column_name": "member",
+    "data_type": "text"
+  },
+  {
+    "column_name": "member_avatar",
+    "data_type": "text"
   }
 ]

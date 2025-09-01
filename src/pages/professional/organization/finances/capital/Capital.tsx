@@ -113,16 +113,46 @@ export default function FinancesCapitalMovements() {
 
   // Concepts found successfully
 
+  // Debug: Test basic query first
+  const { data: allMovements = [] } = useQuery({
+    queryKey: ['debug-all-movements', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .limit(10)
+        
+      if (error) {
+        console.error('Error fetching any movements:', error)
+        return []
+      }
+      
+      console.log('🐛 DEBUG: Found any movements:', data?.length || 0)
+      if (data && data.length > 0) {
+        console.log('🐛 DEBUG: Sample movement:', {
+          id: data[0].id,
+          description: data[0].description,
+          subcategory_name: data[0].subcategory_name,
+          category_name: data[0].category_name
+        })
+        console.log('🐛 DEBUG: All subcategory names:', [...new Set(data.map(m => m.subcategory_name).filter(Boolean))])
+      }
+      
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
   // Get capital movements (aportes and retiros de socios)
   const { data: movements = [], isLoading } = useQuery({
-    queryKey: ['capital-movements', organizationId, aportesPropriosConcept?.id, retirosPropriosConcept?.id],
+    queryKey: ['capital-movements', organizationId, allMovements.length],
     queryFn: async () => {
       if (!supabase || !organizationId) return []
 
-      console.log('🔍 Searching for capital movements with criteria:', {
-        subcategoryIds: { aportes: aportesPropriosConcept?.id, retiros: retirosPropriosConcept?.id },
-        categoryNames: { aportes: aportesPropriosOld?.name, retiros: retirosPropriosOld?.name }
-      })
+      console.log('🔍 Starting capital movements search...')
 
       // Build subcategory IDs array for new structure
       const subcategoryIds = []
@@ -134,70 +164,57 @@ export default function FinancesCapitalMovements() {
       if (aportesPropriosOld?.name) categoryNames.push(aportesPropriosOld.name)
       if (retirosPropriosOld?.name) categoryNames.push(retirosPropriosOld.name)
 
-      // Query multiple ways to find capital movements
-      let allMovements: any[] = []
+      // First, let's try to find ANY movements with capital-related names
+      let capitalMovements: any[] = []
 
-      // Strategy 1: Search by subcategory names (most reliable)
-      const subcategoryNames = ['Aportes de Socios', 'Retiros de Socios']
+      // Strategy 1: Search by various subcategory names that might exist
+      const possibleNames = [
+        'Aportes de Socios', 'Retiros de Socios',
+        'Aportes Propios', 'Retiros Propios', 
+        'Aportes', 'Retiros',
+        'Capital', 'Socio'
+      ]
       
-      const { data: nameBasedMovements, error: nameError } = await supabase
-        .from('movements_view')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .in('subcategory_name', subcategoryNames)
-        .order('movement_date', { ascending: false })
-
-      if (nameError) {
-        console.error('Error fetching name-based movements:', nameError)
-      } else {
-        console.log('🔍 Found name-based movements:', nameBasedMovements?.length || 0)
-        if (nameBasedMovements) allMovements = [...allMovements, ...nameBasedMovements]
-      }
-
-      // Strategy 2: Search by subcategory IDs (if found)
-      if (subcategoryIds.length > 0) {
-        const { data: idBasedMovements, error: idError } = await supabase
+      // Try exact matches first
+      for (const name of possibleNames) {
+        const { data, error } = await supabase
           .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
-          .in('subcategory_id', subcategoryIds)
+          .ilike('subcategory_name', `%${name}%`)
           .order('movement_date', { ascending: false })
-
-        if (idError) {
-          console.error('Error fetching ID-based movements:', idError)
-        } else {
-          console.log('🔍 Found ID-based movements:', idBasedMovements?.length || 0)
-          if (idBasedMovements) allMovements = [...allMovements, ...idBasedMovements]
+          
+        if (!error && data && data.length > 0) {
+          console.log(`🔍 Found ${data.length} movements with subcategory containing "${name}"`)
+          capitalMovements = [...capitalMovements, ...data]
         }
       }
-
-      // Strategy 3: Search by old category names (backward compatibility)
-      if (categoryNames.length > 0) {
-        const { data: categoryBasedMovements, error: categoryError } = await supabase
+      
+      // Also try category names
+      for (const name of possibleNames) {
+        const { data, error } = await supabase
           .from('movements_view')
           .select('*')
           .eq('organization_id', organizationId)
-          .in('category_name', categoryNames)
+          .ilike('category_name', `%${name}%`)
           .order('movement_date', { ascending: false })
-
-        if (categoryError) {
-          console.error('Error fetching category-based movements:', categoryError)
-        } else {
-          console.log('🔍 Found category-based movements:', categoryBasedMovements?.length || 0)
-          if (categoryBasedMovements) allMovements = [...allMovements, ...categoryBasedMovements]
+          
+        if (!error && data && data.length > 0) {
+          console.log(`🔍 Found ${data.length} movements with category containing "${name}"`)
+          capitalMovements = [...capitalMovements, ...data]
         }
       }
 
-      console.log('🔍 Total movements before deduplication:', allMovements.length)
+      console.log('🔍 Total capital movements before deduplication:', capitalMovements.length)
 
       // Remove duplicates by ID
-      const uniqueMovements = allMovements.filter((movement, index, self) =>
+      const uniqueMovements = capitalMovements.filter((movement, index, self) =>
         index === self.findIndex(m => m.id === movement.id)
       )
 
-      console.log('🔍 Unique movements after deduplication:', uniqueMovements.length)
+      console.log('🔍 Unique capital movements after deduplication:', uniqueMovements.length)
       if (uniqueMovements.length > 0) {
-        console.log('🔍 Sample movement:', {
+        console.log('🔍 Sample capital movement:', {
           id: uniqueMovements[0].id,
           description: uniqueMovements[0].description,
           subcategory_name: uniqueMovements[0].subcategory_name,
@@ -208,7 +225,7 @@ export default function FinancesCapitalMovements() {
 
       return uniqueMovements
     },
-    enabled: !!organizationId && !!supabase && (!!aportesPropriosConcept || !!retirosPropriosConcept || !!aportesPropriosOld || !!retirosPropriosOld)
+    enabled: !!organizationId && !!supabase && allMovements.length >= 0
   })
 
   // Get all currencies for display
