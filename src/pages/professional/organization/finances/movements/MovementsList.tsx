@@ -960,35 +960,29 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
-        // Obtener información específica según el tipo de movimiento
+        // Obtener información específica según el tipo de movimiento usando las columnas de la vista
         const getSpecificInfo = (movement: Movement) => {
           const subcatLower = subcategoryName?.toLowerCase() || '';
           const movementData = movement as any;
           
-          // Para subcontratos - usar los datos de subcontracts que ya están cargados
-          if (subcatLower.includes('subcontrato') && movementData.subcontracts && movementData.subcontracts.length > 0) {
-            return movementData.subcontracts[0].contact_name;
+          // Para subcontratos - usar la columna "subcontract" de la vista
+          if (subcatLower.includes('subcontrato') && movementData.subcontract) {
+            return movementData.subcontract;
           }
           
-          // Para aportes propios y retiros propios, obtener info de socios
-          if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
-            if (movementData.partners && movementData.partners.length > 0) {
-              return movementData.partners[0].partner_name;
+          // Para aportes propios y retiros propios - usar la columna "partner" de la vista
+          if ((subcatLower.includes('aporte') && subcatLower.includes('propio')) || 
+              (subcatLower.includes('retiro') && subcatLower.includes('propio'))) {
+            if (movementData.partner) {
+              return movementData.partner;
             }
             return null;
           }
           
-          if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
-            if (movementData.partners && movementData.partners.length > 0) {
-              return movementData.partners[0].partner_name;
-            }
-            return null;
-          }
-          
-          // Para aportes de clientes
+          // Para aportes de clientes - usar la columna "client" de la vista
           if (subcatLower.includes('cliente')) {
-            if (movementData.clients && movementData.clients.length > 0) {
-              return movementData.clients[0].client_name;
+            if (movementData.client) {
+              return movementData.client;
             }
             return null;
           }
