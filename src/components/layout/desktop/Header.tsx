@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, Bell, Settings, Home, Building, FolderOpen } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface HeaderProps {
   // Header principal simplificado - solo props básicas si son necesarias
@@ -24,6 +28,31 @@ export function Header({}: HeaderProps = {}) {
 
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Sidebar state
+  const { isDocked, setDocked } = useSidebarStore();
+  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  
+  // Theme state
+  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  // Initialize theme from user preferences
+  useEffect(() => {
+    const currentTheme = (userData?.preferences?.theme as 'light' | 'dark') || 'light';
+    setTheme(currentTheme);
+    setIsDark(currentTheme === 'dark');
+    
+    // Apply theme to document
+    const rootElement = document.documentElement;
+    if (currentTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+  }, [userData?.preferences?.theme]);
 
   const handleGlobalSearch = (value: string) => {
     setGlobalSearchValue(value);
@@ -33,6 +62,58 @@ export function Header({}: HeaderProps = {}) {
   const handleLogout = async () => {
     // Implementar logout
     navigate("/");
+  };
+
+  // Save preferences mutation
+  const savePreferencesMutation = useMutation({
+    mutationFn: async (preferences: { sidebar_docked?: boolean; theme?: 'light' | 'dark' }) => {
+      if (!userData?.user?.id) throw new Error('User not found');
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update(preferences)
+        .eq('user_id', userData.user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+
+  // Handle dock toggle
+  const handleDockToggle = () => {
+    const newDocked = !isDocked;
+    setDocked(newDocked);
+    setSecondarySidebarDocked(newDocked);
+    savePreferencesMutation.mutate({ sidebar_docked: newDocked });
+    
+    toast({
+      title: newDocked ? "Sidebar anclado" : "Sidebar desanclado",
+      description: newDocked ? "El sidebar permanecerá siempre visible" : "El sidebar se ocultará automáticamente",
+    });
+  };
+
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    setIsDark(newTheme === 'dark');
+    
+    // Apply theme to document immediately
+    const rootElement = document.documentElement;
+    if (newTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+    
+    savePreferencesMutation.mutate({ theme: newTheme });
+    
+    toast({
+      title: `Tema ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`,
+      description: `La aplicación ahora utiliza el tema ${newTheme === 'dark' ? 'oscuro' : 'claro'}`,
+    });
   };
 
   const getActiveSection = () => {
@@ -132,6 +213,26 @@ export function Header({}: HeaderProps = {}) {
             style={{color: 'var(--main-sidebar-fg)'}}
           >
             <Bell className="h-4 w-4" />
+          </button>
+
+          {/* Sidebar Pin/Unpin */}
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
+            title={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+            onClick={handleDockToggle}
+            style={{color: 'var(--main-sidebar-fg)'}}
+          >
+            {isDocked ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
+            title={isDark ? "Modo Claro" : "Modo Oscuro"}
+            onClick={handleThemeToggle}
+            style={{color: 'var(--main-sidebar-fg)'}}
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
           {/* Settings */}

@@ -252,79 +252,9 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
-  // Theme state
-  const [isDark, setIsDark] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
-  // Initialize theme from user preferences
-  useEffect(() => {
-    const currentTheme = (userData?.preferences?.theme as 'light' | 'dark') || 'light';
-    setTheme(currentTheme);
-    setIsDark(currentTheme === 'dark');
-    
-    // Apply theme to document
-    const rootElement = document.documentElement;
-    if (currentTheme === 'dark') {
-      rootElement.classList.add('dark');
-    } else {
-      rootElement.classList.remove('dark');
-    }
-  }, [userData?.preferences?.theme]);
   
-  // Save preferences mutation
-  const savePreferencesMutation = useMutation({
-    mutationFn: async (preferences: { sidebar_docked?: boolean; theme?: 'light' | 'dark' }) => {
-      if (!userData?.user?.id) throw new Error('User not found');
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .update(preferences)
-        .eq('user_id', userData.user.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
   
-  // Handle dock toggle
-  const handleDockToggle = () => {
-    const newDocked = !isDocked;
-    setDocked(newDocked);
-    // Update secondary sidebar store to trigger visual changes
-    setSecondarySidebarDocked(newDocked);
-    savePreferencesMutation.mutate({ sidebar_docked: newDocked });
-    
-    // Show toast notification
-    toast({
-      title: newDocked ? "Sidebar anclado" : "Sidebar desanclado",
-      description: newDocked ? "El sidebar permanecerá siempre visible" : "El sidebar se ocultará automáticamente",
-    });
-  };
-  
-  // Handle theme toggle
-  const handleThemeToggle = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    setIsDark(newTheme === 'dark');
-    
-    // Apply theme to document immediately
-    const rootElement = document.documentElement;
-    if (newTheme === 'dark') {
-      rootElement.classList.add('dark');
-    } else {
-      rootElement.classList.remove('dark');
-    }
-    
-    savePreferencesMutation.mutate({ theme: newTheme });
-    
-    // Show toast notification
-    toast({
-      title: `Tema ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`,
-      description: `La aplicación ahora utiliza el tema ${newTheme === 'dark' ? 'oscuro' : 'claro'}`,
-    });
-  };
   
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
@@ -359,50 +289,6 @@ export function Sidebar() {
       localStorage.removeItem('sidebar-accordion');
     }
   }, [expandedAccordion]);
-  // Theme toggle mutation
-  const themeToggleMutation = useMutation({
-    mutationFn: async (newTheme: 'light' | 'dark') => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('No user preferences available');
-      }
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ theme: newTheme })
-        .eq('id', userData.preferences.id);
-      if (error) throw error;
-      return newTheme;
-    },
-    onSuccess: (newTheme) => {
-      // Apply theme to document
-      if (newTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      
-      // Invalidate current user cache
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
-  // Sidebar toggle mutation
-  const sidebarToggleMutation = useMutation({
-    mutationFn: async (newDockedState: boolean) => {
-      if (!supabase || !userData?.preferences?.id) {
-        throw new Error('No user preferences available');
-      }
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({ sidebar_docked: newDockedState })
-        .eq('id', userData.preferences.id);
-      if (error) throw error;
-      return newDockedState;
-    },
-    onSuccess: (newDockedState) => {
-      // Update local sidebar store immediately
-      useSidebarStore.getState().setDocked(newDockedState);
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
   
   // Estado para búsqueda de proyectos
   const [projectSearchValue, setProjectSearchValue] = useState('');
@@ -815,42 +701,7 @@ export function Sidebar() {
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
           
-          {/* Settings buttons */}
-          <div className="flex flex-col gap-[2px] mb-[2px]">
-            {/* Dock/Undock button */}
-            <SidebarButton
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleDockToggle}
-              variant="main"
-            />
-            
-            {/* Theme toggle button */}
-            <SidebarButton
-              icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-              label={isDark ? "Modo Claro" : "Modo Oscuro"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleThemeToggle}
-              variant="main"
-            />
-          </div>
           
-          {/* Profile */}
-          <div className="mb-[2px]">
-            <SidebarButton
-              icon={<UserCircle className="w-[18px] h-[18px]" />}
-              label="Mi Perfil"
-              href="/profile"
-              isActive={location.startsWith('/profile')}
-              isExpanded={isExpanded}
-              avatarUrl={userData?.user?.avatar_url}
-              userFullName={userData?.user?.full_name}
-              variant="main"
-            />
-          </div>
         </div>
       </div>
     </aside>
