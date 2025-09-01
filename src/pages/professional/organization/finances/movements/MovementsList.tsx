@@ -718,6 +718,7 @@ export default function MovementsList() {
             creator: egresoMovement.creator,
             is_conversion_group: true
           };
+          console.log('✅ ADDING CONVERSION GROUP:', conversionGroup.id, conversionGroup.from_currency, '→', conversionGroup.to_currency);
           result.push(conversionGroup);
         }
       }
@@ -750,11 +751,16 @@ export default function MovementsList() {
     });
 
     // Sort by movement_date descending
-    return result.sort((a, b) => {
+    const finalResult = result.sort((a, b) => {
       const dateA = new Date(a.movement_date);
       const dateB = new Date(b.movement_date);
       return dateB.getTime() - dateA.getTime();
     });
+    
+    console.log('🎯 FINAL RESULT:', finalResult.length, 'items total');
+    console.log('🎯 CONVERSIONS IN FINAL:', finalResult.filter(item => 'is_conversion_group' in item).length);
+    
+    return finalResult;
   };
 
   // Apply filters to grouped items
