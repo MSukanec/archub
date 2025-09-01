@@ -93,14 +93,13 @@ export default function FinancesCapitalMovements() {
     enabled: !!organizationId && !!supabase
   })
 
-  // Find concepts for partner contributions and withdrawals by IDs
-  const aportesPropriosConcept = concepts.find(c => 
-    c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' // Aportes de Socios
-  )
+  // Partner capital concept UUIDs (hardcoded for reliability)
+  const APORTES_SOCIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
+  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
   
-  const retirosPropriosConcept = concepts.find(c => 
-    c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' // Retiros de Socios
-  )
+  // Find concepts for partner contributions and withdrawals by IDs
+  const aportesPropriosConcept = concepts.find(c => c.id === APORTES_SOCIOS_UUID)
+  const retirosPropriosConcept = concepts.find(c => c.id === RETIROS_SOCIOS_UUID)
 
   // Also find old concepts by name for backward compatibility
   const aportesPropriosOld = concepts.find(c => 
@@ -164,66 +163,41 @@ export default function FinancesCapitalMovements() {
       if (aportesPropriosOld?.name) categoryNames.push(aportesPropriosOld.name)
       if (retirosPropriosOld?.name) categoryNames.push(retirosPropriosOld.name)
 
-      // First, let's try to find ANY movements with capital-related names
-      let capitalMovements: any[] = []
-
-      // Strategy 1: Search by various subcategory names that might exist
-      const possibleNames = [
-        'Aportes de Socios', 'Retiros de Socios',
-        'Aportes Propios', 'Retiros Propios', 
-        'Aportes', 'Retiros',
-        'Capital', 'Socio'
+      // Search ONLY for partner capital movements by specific UUIDs
+      const partnerSubcategoryIds = [
+        'c04a82f8-6fd8-439d-81f7-325c63905a1b', // Retiros de Socios
+        'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'  // Aportes de Socios  
       ]
       
-      // Try exact matches first
-      for (const name of possibleNames) {
-        const { data, error } = await supabase
-          .from('movements_view')
-          .select('*')
-          .eq('organization_id', organizationId)
-          .ilike('subcategory_name', `%${name}%`)
-          .order('movement_date', { ascending: false })
-          
-        if (!error && data && data.length > 0) {
-          console.log(`🔍 Found ${data.length} movements with subcategory containing "${name}"`)
-          capitalMovements = [...capitalMovements, ...data]
-        }
+      console.log('🔍 Searching for partner movements with specific UUIDs:', partnerSubcategoryIds)
+      
+      const { data: partnerMovements, error } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('subcategory_id', partnerSubcategoryIds)
+        .order('movement_date', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching partner movements:', error)
+        return []
       }
       
-      // Also try category names
-      for (const name of possibleNames) {
-        const { data, error } = await supabase
-          .from('movements_view')
-          .select('*')
-          .eq('organization_id', organizationId)
-          .ilike('category_name', `%${name}%`)
-          .order('movement_date', { ascending: false })
-          
-        if (!error && data && data.length > 0) {
-          console.log(`🔍 Found ${data.length} movements with category containing "${name}"`)
-          capitalMovements = [...capitalMovements, ...data]
-        }
-      }
-
-      console.log('🔍 Total capital movements before deduplication:', capitalMovements.length)
-
-      // Remove duplicates by ID
-      const uniqueMovements = capitalMovements.filter((movement, index, self) =>
-        index === self.findIndex(m => m.id === movement.id)
-      )
-
-      console.log('🔍 Unique capital movements after deduplication:', uniqueMovements.length)
-      if (uniqueMovements.length > 0) {
-        console.log('🔍 Sample capital movement:', {
-          id: uniqueMovements[0].id,
-          description: uniqueMovements[0].description,
-          subcategory_name: uniqueMovements[0].subcategory_name,
-          category_name: uniqueMovements[0].category_name,
-          amount: uniqueMovements[0].amount
+      console.log('🔍 Found partner movements by UUID:', partnerMovements?.length || 0)
+      if (partnerMovements && partnerMovements.length > 0) {
+        console.log('🔍 Sample partner movement:', {
+          id: partnerMovements[0].id,
+          description: partnerMovements[0].description,
+          subcategory_name: partnerMovements[0].subcategory_name,
+          subcategory_id: partnerMovements[0].subcategory_id,
+          amount: partnerMovements[0].amount
         })
       }
+      
+      const capitalMovements = partnerMovements || []
 
-      return uniqueMovements
+      console.log('🔍 Total partner movements found:', capitalMovements.length)
+      return capitalMovements
     },
     enabled: !!organizationId && !!supabase && allMovements.length >= 0
   })
@@ -331,8 +305,8 @@ export default function FinancesCapitalMovements() {
       
       const memberMovements = movements.filter(movement => {
         // Exclude movements that use the partner system
-        const usesPartnerSystem = (movement.subcategory_id === aportesPropriosConcept?.id || 
-                                 movement.subcategory_id === retirosPropriosConcept?.id) &&
+        const usesPartnerSystem = (movement.subcategory_id === APORTES_SOCIOS_UUID || 
+                                 movement.subcategory_id === RETIROS_SOCIOS_UUID) &&
                                  movement.member_id === null
         
         return movement.member_id === member.id && !usesPartnerSystem
@@ -342,9 +316,8 @@ export default function FinancesCapitalMovements() {
         const amount = movement.amount || 0
         const currencyCode = movement.currency_code || 'N/A'
         
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
-                         movement.category_id === aportesPropriosOld?.id
+        // Check for partner aportes by UUID
+        const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
         
         if (isAporte) {
           totalAportes += amount
@@ -365,9 +338,8 @@ export default function FinancesCapitalMovements() {
       memberMovements.forEach(movement => {
         const currencyCode = movement.currency_code || 'N/A'
         
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
-                         movement.category_id === aportesPropriosOld?.id
+        // Check for partner aportes by UUID
+        const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
         
         if (!currencies[currencyCode]) {
           currencies[currencyCode] = {
@@ -402,9 +374,9 @@ export default function FinancesCapitalMovements() {
       const movement = movements.find(m => m.id === partnerData.movement_id)
       if (!movement || !partnerData.partners?.contacts) return
 
-      // Only process if this is an aporte or retiro movement (new structure)
-      const isAporteMovement = movement.subcategory_id === aportesPropriosConcept?.id
-      const isRetiroMovement = movement.subcategory_id === retirosPropriosConcept?.id
+      // Only process if this is an aporte or retiro movement (by UUID)
+      const isAporteMovement = movement.subcategory_id === APORTES_SOCIOS_UUID
+      const isRetiroMovement = movement.subcategory_id === RETIROS_SOCIOS_UUID
       if (!isAporteMovement && !isRetiroMovement) return
 
       const contact = partnerData.partners.contacts
@@ -477,7 +449,7 @@ export default function FinancesCapitalMovements() {
       memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
       availableCurrencies: Array.from(currenciesSet).sort()
     }
-  }, [movements, members, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld, allMovementPartners])
+  }, [movements, members, allMovementPartners])
 
   // Filter movements based on search
   const filteredMovements = movements.filter(movement => {
@@ -509,8 +481,7 @@ export default function FinancesCapitalMovements() {
 
   const handleEdit = (movement: CapitalMovement) => {
     // Check both new structure (subcategory_id) and old structure (category_id)
-    const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
-                     movement.category_id === aportesPropriosOld?.id
+    const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
     const movementType = isAporte ? 'aportes_propios' : 'retiros_propios'
     openModal('movement', { 
       movementType,
