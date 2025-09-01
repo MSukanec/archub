@@ -8,16 +8,8 @@ export interface IndirectCost {
   organization_id: string;
   name: string;
   description: string | null;
-  category: string | null;
-  unit_id: string | null;
-  is_active: boolean;
   created_at: string;
   updated_at: string | null;
-  unit?: {
-    id: string;
-    name: string;
-    symbol: string;
-  };
   current_value?: {
     amount: number;
     currency_id: string;
@@ -30,9 +22,6 @@ export interface InsertIndirectCost {
   organization_id: string;
   name: string;
   description?: string | undefined;
-  category?: string | undefined;
-  unit_id?: string | undefined;
-  is_active?: boolean;
 }
 
 // Tipo para insertar un valor de costo indirecto
@@ -54,7 +43,6 @@ export function useIndirectCosts(organizationId: string | null) {
         .from('indirect_costs')
         .select(`
           *,
-          unit:units(id, name, symbol),
           current_value:indirect_cost_values!indirect_cost_values_indirect_cost_id_fkey(
             amount,
             currency_id,
@@ -62,7 +50,6 @@ export function useIndirectCosts(organizationId: string | null) {
           )
         `)
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -93,7 +80,6 @@ export function useIndirectCost(indirectCostId: string | null) {
         .from('indirect_costs')
         .select(`
           *,
-          unit:units(id, name, symbol),
           values:indirect_cost_values!indirect_cost_values_indirect_cost_id_fkey(
             id,
             amount,
@@ -241,10 +227,10 @@ export function useDeleteIndirectCost() {
     mutationFn: async (indirectCostId: string) => {
       if (!supabase) throw new Error('Supabase not available');
 
-      // Soft delete - cambiar is_active a false
+      // Hard delete - eliminar el registro
       const { error } = await supabase
         .from('indirect_costs')
-        .update({ is_active: false })
+        .delete()
         .eq('id', indirectCostId);
 
       if (error) throw error;

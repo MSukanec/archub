@@ -12,15 +12,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { useUnits } from '@/hooks/use-units'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCreateIndirectCost, useUpdateIndirectCost, useIndirectCost } from '@/hooks/use-indirect-costs'
 
 // Schema de validación
 const indirectSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  description: z.string().optional(),
-  unit_id: z.string().min(1, 'La unidad es requerida')
+  description: z.string().optional()
 })
 
 type IndirectForm = z.infer<typeof indirectSchema>
@@ -48,32 +46,14 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
   const isEditing = modalData?.isEditing || false
 
   // Fetch existing indirect cost data if editing
-  const { data: existingIndirect } = useQuery({
-    queryKey: ['indirect-cost', modalData?.indirectId],
-    queryFn: async () => {
-      if (!modalData?.indirectId || !supabase) return null
-      
-      const { data, error } = await supabase
-        .from('indirect_costs')
-        .select('*')
-        .eq('id', modalData.indirectId)
-        .single()
+  const { data: existingIndirect } = useIndirectCost(isEditing ? modalData?.indirectId || null : null)
 
-      if (error) throw error
-      return data
-    },
-    enabled: isEditing && !!modalData?.indirectId
-  })
-
-  // Fetch available units using existing hook
-  const { data: units = [], isLoading: unitsLoading } = useUnits()
 
   const form = useForm<IndirectForm>({
     resolver: zodResolver(indirectSchema),
     defaultValues: {
       name: '',
-      description: '',
-      unit_id: ''
+      description: ''
     }
   })
 
@@ -82,15 +62,17 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
     if (existingIndirect) {
       form.setValue('name', existingIndirect.name || '')
       form.setValue('description', existingIndirect.description || '')
-      form.setValue('unit_id', existingIndirect.unit_id || '')
     }
   }, [existingIndirect, form])
 
+  const createIndirectCost = useCreateIndirectCost()
+  const updateIndirectCost = useUpdateIndirectCost()
+
   const onSubmit = async (data: IndirectForm) => {
-    if (!organizationId || !projectId) {
+    if (!organizationId) {
       toast({
         title: 'Error',
-        description: 'Faltan datos de organización o proyecto',
+        description: 'Faltan datos de organización',
         variant: 'destructive'
       })
       return
@@ -101,52 +83,28 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
     try {
       if (isEditing && modalData?.indirectId) {
         // Modo edición
-        const { error } = await supabase
-          .from('indirect_costs')
-          .update({
+        await updateIndirectCost.mutateAsync({
+          indirectCostId: modalData.indirectId,
+          indirectCost: {
             name: data.name,
-            description: data.description || null,
-            unit_id: data.unit_id
-          })
-          .eq('id', modalData.indirectId)
-
-        if (error) throw error
-
-        toast({
-          title: 'Éxito',
-          description: 'Costo indirecto actualizado correctamente'
+            description: data.description || undefined
+          }
         })
       } else {
         // Modo creación
-        const { error } = await supabase
-          .from('indirect_costs')
-          .insert({
+        await createIndirectCost.mutateAsync({
+          indirectCost: {
             organization_id: organizationId,
-            project_id: projectId,
             name: data.name,
-            description: data.description || null,
-            unit_id: data.unit_id
-          })
-
-        if (error) throw error
-
-        toast({
-          title: 'Éxito',
-          description: 'Costo indirecto creado correctamente'
+            description: data.description || undefined
+          }
         })
       }
-
-      // Invalidar cache para refrescar datos
-      queryClient.invalidateQueries({ queryKey: ['indirect-costs'] })
       
       onClose()
     } catch (error) {
       console.error('Error saving indirect cost:', error)
-      toast({
-        title: 'Error',
-        description: 'Hubo un problema al guardar el costo indirecto',
-        variant: 'destructive'
-      })
+      // Los hooks ya manejan el toast de error
     } finally {
       setIsSubmitting(false)
     }
@@ -194,31 +152,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
             )}
           />
 
-          {/* Unidad */}
-          <FormField
-            control={form.control}
-            name="unit_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar unidad..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {unit.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
         </form>
       </Form>

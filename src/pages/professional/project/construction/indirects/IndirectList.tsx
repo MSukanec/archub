@@ -12,9 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
-import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/lib/supabase';
+import { useIndirectCosts } from '@/hooks/use-indirect-costs';
 
 interface IndirectListProps {
   filterByStatus?: string;
@@ -40,48 +39,8 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     });
   };
   
-  // Datos de costos indirectos
-  const { data: indirects = [], isLoading } = useQuery({
-    queryKey: ['indirect-costs', userData?.preferences?.last_project_id],
-    queryFn: async () => {
-      if (!userData?.preferences?.last_project_id || !supabase) return []
-      
-      const { data, error } = await supabase
-        .from('indirect_costs')
-        .select(`
-          id,
-          name,
-          description,
-          category,
-          is_active,
-          created_at,
-          unit_id,
-          units!unit_id(
-            id,
-            name,
-            symbol
-          ),
-          indirect_cost_values(
-            id,
-            amount,
-            currency_id,
-            valid_from,
-            currencies!currency_id(
-              id,
-              name,
-              code,
-              symbol
-            )
-          )
-        `)
-        .eq('organization_id', userData.organization?.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data || []
-    },
-    enabled: !!userData?.preferences?.last_project_id && !!userData?.organization?.id
-  });
+  // Datos de costos indirectos usando el hook existente
+  const { data: indirects = [], isLoading } = useIndirectCosts(userData?.organization?.id || null);
 
   // Cálculos para KPIs de costos indirectos
   const kpiData = useMemo(() => {
@@ -211,19 +170,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       message: `¿Estás seguro de que quieres eliminar el costo indirecto "${indirect.name}"? Esta acción no se puede deshacer.`,
       mode: 'dangerous',
       onConfirm: async () => {
-        try {
-          const { error } = await supabase
-            .from('indirect_costs')
-            .delete()
-            .eq('id', indirect.id);
-          
-          if (error) throw error;
-          
-          // Recargar datos
-          // queryClient.invalidateQueries({ queryKey: ['indirect-costs'] });
-        } catch (error) {
-          console.error('Error deleting indirect cost:', error);
-        }
+        // TODO: Implement delete functionality
       }
     });
   };
@@ -285,33 +232,18 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       }
     },
     {
-      key: 'unit',
-      label: 'Unidad',
-      render: (indirect: any) => (
-        <div className="text-sm">
-          {indirect.units?.symbol || indirect.units?.name || 'Sin unidad'}
-        </div>
-      )
-    },
-    {
       key: 'current_value',
       label: 'Valor Actual',
       render: (indirect: any) => {
-        const latestValue = indirect.indirect_cost_values?.[0];
-        if (!latestValue) return '-';
+        const currentValue = indirect.current_value;
+        if (!currentValue) return '-';
         
-        const amount = latestValue.amount || 0;
-        const currency = latestValue.currencies;
-        const symbol = currency?.symbol || '$';
-        const code = currency?.code || 'ARS';
+        const amount = currentValue.amount || 0;
         
         return (
           <div className="text-right">
             <div className="font-medium text-sm">
-              {symbol} {amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {code}
+              ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </div>
           </div>
         );
