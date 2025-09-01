@@ -893,8 +893,9 @@ export default function MovementsList() {
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => {
         const movementData = item as any;
-        const memberName = movementData.member || item.creator?.full_name;
-        const memberAvatar = movementData.member_avatar || item.creator?.avatar_url;
+        const creatorData = movementData.movement_data?.creator;
+        const memberName = creatorData?.full_name;
+        const memberAvatar = creatorData?.avatar_url;
         
         return (
           <div className="flex justify-center">
@@ -902,7 +903,7 @@ export default function MovementsList() {
               <AvatarImage src={memberAvatar} />
               <AvatarFallback className="text-xs">
                 {memberName?.charAt(0) ||
-                  item.creator?.email?.charAt(0) ||
+                  creatorData?.email?.charAt(0) ||
                   "U"}
               </AvatarFallback>
             </Avatar>
