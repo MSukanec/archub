@@ -232,3 +232,132 @@ create table public.movement_partner_contributions (
   constraint movement_partner_contributions_movement_id_fkey foreign KEY (movement_id) references movements (id) on delete CASCADE,
   constraint movement_partner_contributions_partner_id_fkey foreign KEY (partner_id) references partners (id) on delete CASCADE
 ) TABLESPACE pg_default;
+
+VISTA MOVEMENTS_VIEW:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "movement_date",
+    "data_type": "date"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "exchange_rate",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "is_conversion",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "is_favorite",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "currency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "wallet_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "type_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "subcategory_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "conversion_group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "transfer_group_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_by",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "project_color",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency_symbol",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency_country",
+    "data_type": "text"
+  },
+  {
+    "column_name": "wallet_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "type_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "category_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "subcategory_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "partner",
+    "data_type": "text"
+  },
+  {
+    "column_name": "subcontract",
+    "data_type": "text"
+  },
+  {
+    "column_name": "client",
+    "data_type": "text"
+  }
+]
