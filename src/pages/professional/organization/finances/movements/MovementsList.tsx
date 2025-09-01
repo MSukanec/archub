@@ -43,7 +43,7 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { TransferGroup } from "@/components/ui/data-row";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/ui/data-row";
 import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
-import { Star } from "lucide-react";
+import { Star, AlertTriangle } from "lucide-react";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -790,8 +790,9 @@ export default function MovementsList() {
 
     const grouped = groupConversions(filtered);
     
-    // Remove duplicates by creating unique identifiers
+    // 🚨 CRITICAL: Detect and report duplicates
     const uniqueItems = new Map();
+    const duplicates: string[] = [];
     
     grouped.forEach(item => {
       let uniqueId: string;
@@ -804,11 +805,29 @@ export default function MovementsList() {
         uniqueId = `movement_${item.id}`;
       }
       
-      // Only add if not already exists
-      if (!uniqueItems.has(uniqueId)) {
+      // Check for duplicates and log them
+      if (uniqueItems.has(uniqueId)) {
+        duplicates.push(`🚨 DUPLICATE FOUND: ${uniqueId} - ${item.description || 'Sin descripción'}`);
+        console.error('🚨 DUPLICATE MOVEMENT DETECTED:', {
+          id: uniqueId,
+          description: item.description,
+          amount: item.amount,
+          date: item.movement_date,
+          existing: uniqueItems.get(uniqueId),
+          duplicate: item
+        });
+      } else {
         uniqueItems.set(uniqueId, item);
       }
     });
+    
+    // Store duplicates for visual warning
+    if (duplicates.length > 0) {
+      console.error('🚨 TOTAL DUPLICATES FOUND:', duplicates.length);
+      (window as any).__duplicateWarnings = duplicates;
+    } else {
+      (window as any).__duplicateWarnings = null;
+    }
     
     return Array.from(uniqueItems.values());
   }, [
@@ -830,7 +849,38 @@ export default function MovementsList() {
     setSidebarContext('organization');
   }, [setSidebarContext]);
 
+  // 🚨 DUPLICATE WARNING COMPONENT
+  const DuplicateWarning = () => {
+    const duplicateWarnings = (window as any).__duplicateWarnings;
+    
+    if (!duplicateWarnings || duplicateWarnings.length === 0) {
+      return null;
+    }
 
+    return (
+      <div className="mb-4 p-4 bg-red-50 border-2 border-red-500 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <AlertTriangle className="h-5 w-5 text-red-600" />
+          <h3 className="text-red-800 font-bold text-sm">
+            🚨 DATOS DUPLICADOS DETECTADOS - REVISAR INMEDIATAMENTE
+          </h3>
+        </div>
+        <div className="text-red-700 text-xs space-y-1">
+          <p className="font-medium">Se encontraron {duplicateWarnings.length} elementos duplicados:</p>
+          <div className="max-h-32 overflow-y-auto space-y-1">
+            {duplicateWarnings.map((warning: string, index: number) => (
+              <div key={index} className="text-xs bg-red-100 p-1 rounded">
+                {warning}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs mt-2 font-medium">
+            ⚠️ Esto puede indicar problemas en el sistema. Revisar logs de consola para más detalles.
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   const tableColumns = useMemo(() => [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
@@ -1394,6 +1444,9 @@ export default function MovementsList() {
         />
       ) : (
         <>
+          {/* 🚨 DUPLICATE WARNING - Show FIRST and PROMINENTLY */}
+          <DuplicateWarning />
+          
           {/* Movement KPIs - Solo mostrar cuando hay datos */}
           {/* Solo mostrar balance de organización, no del proyecto */}
           <MovementKPICardsWithWallets 
