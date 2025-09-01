@@ -43,6 +43,7 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
+import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
 import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
 import Media from "@/pages/professional/project/general/media/Media";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
@@ -145,6 +146,7 @@ function Router() {
 
         <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />
         <Route path="/construction/subcontracts/:id" component={SubcontractView} />
+        <Route path="/construction/indirects" component={ConstructionIndirects} />
         <Route path="/construction/logs" component={Logs} />
         <Route path="/construction/personnel" component={ConstructionPersonnel} />
         <Route path="/construction/budgets" component={ConstructionBudgets} />

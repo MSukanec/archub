@@ -418,9 +418,10 @@ export function Sidebar() {
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
+      { icon: Package2, label: 'Materiales', href: '/construction/materials' }
     ],
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
