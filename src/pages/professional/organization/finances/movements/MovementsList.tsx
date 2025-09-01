@@ -701,9 +701,9 @@ export default function MovementsList() {
     // Add conversion groups
     conversionGroups.forEach((groupMovements, groupId) => {
       if (groupMovements.length === 2) {
-        // Find the egreso and ingreso movements
-        const egresoMovement = groupMovements.find(m => m.amount < 0);
-        const ingresoMovement = groupMovements.find(m => m.amount > 0);
+        // Find the egreso and ingreso movements by type_name instead of amount
+        const egresoMovement = groupMovements.find(m => m.type_name === 'Egresos');
+        const ingresoMovement = groupMovements.find(m => m.type_name === 'Ingresos');
         
         if (egresoMovement && ingresoMovement) {
           const conversionGroup: ConversionGroup = {
@@ -712,8 +712,8 @@ export default function MovementsList() {
             movements: groupMovements,
             from_currency: egresoMovement.movement_data?.currency?.code || '',
             to_currency: ingresoMovement.movement_data?.currency?.code || '',
-            from_amount: Math.abs(egresoMovement.amount),
-            to_amount: Math.abs(ingresoMovement.amount),
+            from_amount: egresoMovement.amount,
+            to_amount: ingresoMovement.amount,
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
@@ -728,9 +728,9 @@ export default function MovementsList() {
     // Add transfer groups
     transferGroups.forEach((groupMovements, groupId) => {
       if (groupMovements.length === 2) {
-        // Find the egreso and ingreso movements
-        const egresoMovement = groupMovements.find(m => m.amount < 0);
-        const ingresoMovement = groupMovements.find(m => m.amount > 0);
+        // Find the egreso and ingreso movements by type_name
+        const egresoMovement = groupMovements.find(m => m.type_name === 'Egresos');
+        const ingresoMovement = groupMovements.find(m => m.type_name === 'Ingresos');
         
         if (egresoMovement && ingresoMovement) {
           const transferGroup: TransferGroup = {
@@ -739,7 +739,7 @@ export default function MovementsList() {
             movements: groupMovements,
             from_wallet: egresoMovement.movement_data?.wallet?.name || '',
             to_wallet: ingresoMovement.movement_data?.wallet?.name || '',
-            amount: Math.abs(egresoMovement.amount),
+            amount: egresoMovement.amount,
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
