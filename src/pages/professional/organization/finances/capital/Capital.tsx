@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import React, { useState, useMemo } from 'react'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { TrendingUp } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useMovements } from '@/hooks/use-movements'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useToast } from '@/hooks/use-toast'
@@ -54,17 +55,189 @@ export default function FinancesCapitalMovements() {
 
   const organizationId = userData?.organization?.id
 
-  // For now, simple empty data to make it work
-  const movements = []
-  const memberSummary = []
-  const availableCurrencies = []
+  // Get all movements for the organization
+  const { data: allMovements = [], isLoading } = useMovements(organizationId, null)
+
+  // Get movement concepts to identify capital movements
+  const { data: concepts = [] } = useQuery({
+    queryKey: ['movement-concepts', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('movement_concepts')
+        .select('*')
+        .or(`organization_id.eq.${organizationId},organization_id.is.null`)
+        
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Find concepts for partner contributions and withdrawals
+  const aportesPropriosConcept = concepts.find(c => 
+    c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
+  )
+  
+  const retirosPropriosConcept = concepts.find(c => 
+    c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
+  )
+
+  // Also find old concepts by name for backward compatibility
+  const aportesPropriosOld = concepts.find(c => 
+    c.name === 'Aportes Propios'
+  )
+  
+  const retirosPropriosOld = concepts.find(c => 
+    c.name === 'Retiros Propios'
+  )
+
+  // Filter movements to only include capital movements
+  const movements = useMemo(() => {
+    return allMovements.filter(movement => {
+      // Check both new structure (subcategory_id) and old structure (category_id)
+      const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
+                       movement.category_id === aportesPropriosOld?.id
+      const isRetiro = movement.subcategory_id === retirosPropriosConcept?.id ||
+                       movement.category_id === retirosPropriosOld?.id
+      
+      return isAporte || isRetiro
+    })
+  }, [allMovements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
+
+  // Get organization members
+  const { data: members = [] } = useQuery({
+    queryKey: ['organization-members', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          user_id,
+          user:users(
+            id,
+            full_name,
+            email
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Calculate member summary using partner column from movements_view
+  const { memberSummary, availableCurrencies } = useMemo(() => {
+    const currenciesSet = new Set<string>()
+    
+    // Track currencies from movements
+    movements.forEach(movement => {
+      if (movement.currency_code) {
+        currenciesSet.add(movement.currency_code)
+      }
+    })
+
+    const summaryMap = new Map()
+    
+    // Process movements and group by partner or member
+    movements.forEach(movement => {
+      let partnerId = null
+      let partnerName = null
+      let partnerEmail = ''
+
+      // Use partner column from movements_view if available
+      if (movement.partner) {
+        partnerName = movement.partner
+        partnerId = `partner_${movement.id}` // Create a unique ID for grouping
+        partnerEmail = ''
+      } else if (movement.member) {
+        // Use member data if no partner
+        partnerName = movement.member
+        partnerId = movement.created_by || `member_${movement.id}`
+        partnerEmail = ''
+      } else {
+        // Fallback to "Sin Nombre" if no partner or member info
+        partnerName = 'Sin Nombre'
+        partnerId = `unknown_${movement.id}`
+        partnerEmail = ''
+      }
+
+      // Create a unique key for grouping (using partner name for now)
+      const groupKey = partnerName
+
+      let existing = summaryMap.get(groupKey) || {
+        member_id: partnerId,
+        member: {
+          id: partnerId,
+          user_id: partnerId,
+          user: {
+            id: partnerId,
+            full_name: partnerName,
+            email: partnerEmail
+          }
+        },
+        currencies: {},
+        dollarizedTotal: 0,
+        totalAportes: 0,
+        totalRetiros: 0,
+        saldo: 0
+      }
+
+      const amount = movement.amount || 0
+      const currencyCode = movement.currency_code || 'N/A'
+
+      // Check if it's aporte or retiro
+      const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
+                       movement.category_id === aportesPropriosOld?.id
+      
+      if (isAporte) {
+        existing.totalAportes += amount
+      } else {
+        existing.totalRetiros += amount
+      }
+
+      if (currencyCode === 'USD') {
+        existing.dollarizedTotal += isAporte ? amount : -amount
+      } else if (currencyCode === 'ARS' && movement.exchange_rate) {
+        const convertedAmount = amount / movement.exchange_rate
+        existing.dollarizedTotal += isAporte ? convertedAmount : -convertedAmount
+      }
+
+      // Add to currencies
+      if (!existing.currencies[currencyCode]) {
+        existing.currencies[currencyCode] = {
+          amount: 0,
+          currency: {
+            code: movement.currency_code,
+            symbol: movement.currency_symbol,
+            name: movement.currency_name
+          }
+        }
+      }
+      existing.currencies[currencyCode].amount += isAporte ? amount : -amount
+
+      existing.saldo = existing.totalAportes - existing.totalRetiros
+
+      summaryMap.set(groupKey, existing)
+    })
+
+    // Convert to array and filter
+    const summary = Array.from(summaryMap.values())
+
+    return {
+      memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
+      availableCurrencies: Array.from(currenciesSet).sort()
+    }
+  }, [movements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
+
+  // For compatibility with existing components
   const allMovementPartners = []
-  const members = []
-  const aportesPropriosConcept = null
-  const retirosPropriosConcept = null
-  const aportesPropriosOld = null
-  const retirosPropriosOld = null
-  const isLoading = false
 
   const handleAddAportePpropio = () => {
     openModal('movement', { 
