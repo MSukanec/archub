@@ -1,4 +1,5 @@
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { History, Edit, Trash2 } from 'lucide-react'
@@ -8,222 +9,183 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-
-interface CapitalMovement {
-  id: string
-  movement_date: string
-  amount: number
-  description: string
-  member_id: string
-  currency_id: string
-  wallet_id: string
-  project_id: string
-  created_by: string
-  category_id: string
-  subcategory_id?: string
-  type_id: string
-  exchange_rate?: number
-  member?: {
-    id: string
-    user?: {
-      full_name: string
-      email: string
-    }
-  }
-  currency_name?: string
-  currency_code?: string
-  currency_symbol?: string
-  wallet_name?: string
-  category_name?: string
-  subcategory_name?: string
-  type_name?: string
-}
+import { supabase } from '@/lib/supabase'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface CapitalHistoryProps {
-  movements: CapitalMovement[]
-  filteredMovements: CapitalMovement[]
-  members: any[]
-  allMovementPartners: any[]
-  aportesPropriosConcept: any
-  retirosPropriosConcept: any
-  aportesPropriosOld: any
-  retirosPropriosOld: any
-  onEdit: (movement: CapitalMovement) => void
-  onDelete: (movement: CapitalMovement) => void
-  isLoading: boolean
+  organizationId?: string
+  projectId?: string
+  searchValue?: string
 }
 
-export default function CapitalHistory({ 
-  movements,
-  filteredMovements, 
-  members, 
-  allMovementPartners, 
-  aportesPropriosConcept, 
-  retirosPropriosConcept, 
-  aportesPropriosOld, 
-  retirosPropriosOld,
-  onEdit, 
-  onDelete,
-  isLoading
-}: CapitalHistoryProps) {
+export default function CapitalHistory({ organizationId, searchValue }: CapitalHistoryProps) {
+  const { openModal } = useGlobalModalStore()
   
-  // Detailed table columns
-  const detailColumns = [
+  // Partner capital concept UUIDs
+  const APORTES_SOCIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
+  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
+
+  // Fetch partner capital movements
+  const { data: movements = [], isLoading } = useQuery({
+    queryKey: ['partner-capital-history', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      console.log('🔍 CapitalHistory: Searching for partner movements...')
+      
+      const { data, error } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('subcategory_id', [APORTES_SOCIOS_UUID, RETIROS_SOCIOS_UUID])
+        .order('movement_date', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching partner movements:', error)
+        return []
+      }
+      
+      console.log('🔍 CapitalHistory: Found movements:', data?.length || 0)
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Filter movements by search
+  const filteredMovements = React.useMemo(() => {
+    if (!searchValue) return movements
+    
+    return movements.filter(movement => 
+      movement.description?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      movement.member?.user?.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      movement.subcategory_name?.toLowerCase().includes(searchValue.toLowerCase())
+    )
+  }, [movements, searchValue])
+
+  const handleEdit = (movement: any) => {
+    const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
+    
+    openModal('movements', {
+      title: isAporte ? 'Editar Aporte de Capital' : 'Editar Retiro de Capital',
+      editData: movement,
+      defaultData: { 
+        movement_type: isAporte ? 'aportes_propios' : 'retiros_propios'
+      }
+    })
+  }
+
+  const handleDelete = (movement: any) => {
+    openModal('deleteConfirmation', {
+      title: 'Eliminar Movimiento',
+      description: `¿Estás seguro de que deseas eliminar el movimiento "${movement.description}"?`,
+      onConfirm: async () => {
+        // TODO: Implement delete logic
+        console.log('Deleting movement:', movement.id)
+      }
+    })
+  }
+
+  // Movement history table columns
+  const movementColumns = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "14.3%",
+      width: "12%",
       sortable: true,
-      sortType: "date" as const,
-      render: (item: CapitalMovement) => {
-        const date = new Date(item.movement_date + 'T00:00:00')
-        return (
-          <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
-          </div>
-        )
-      }
+      sortType: 'date' as const,
+      render: (item: any) => (
+        <div className="text-xs font-medium">
+          {format(new Date(item.movement_date), 'dd/MM/yyyy', { locale: es })}
+        </div>
+      )
     },
     {
       key: "member",
       label: "Socio",
-      width: "14.3%",
-      render: (item: CapitalMovement) => {
-        let displayName = null
-        
-        // Check if this is an "Aportes de Socios" or "Retiros de Socios" movement that uses partner system
-        const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
-        const isRetiroDeSocios = item.subcategory_id === retirosPropriosConcept?.id
-        
-        if (isAporteDeSocios || isRetiroDeSocios) {
-          // Find movement partner for this movement
-          const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
-          if (movementPartner?.partners?.contacts) {
-            const contact = movementPartner.partners.contacts
-            if (contact) {
-              displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-            }
-          }
-        } else {
-          // Use regular member logic for other movements (like Retiros de Socios)
-          let member = item.member
-          
-          // If not available in movement_view, fall back to members list
-          if (!member?.user?.full_name) {
-            const foundMember = members.find(m => m.id === item.member_id)
-            if (foundMember?.user) {
-              const user = Array.isArray(foundMember.user) ? foundMember.user[0] : foundMember.user
-              if (user?.full_name) {
-                displayName = user.full_name
-              }
-            }
-          } else {
-            const user = Array.isArray(member.user) ? member.user[0] : member.user
-            if (user?.full_name) {
-              displayName = user.full_name
-            }
-          }
+      width: "20%",
+      render: (item: any) => {
+        if (!item.member?.user) {
+          return <div className="text-xs text-muted-foreground">Sin socio</div>
         }
 
-        if (!displayName) {
-          return <div className="text-sm text-muted-foreground">Sin socio</div>
-        }
-
+        const displayName = item.member.user.full_name || 'Sin nombre'
         const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
         return (
           <div className="flex items-center gap-2">
-            <Avatar className="w-8 h-8">
+            <Avatar className="w-6 h-6">
               <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
-            <div>
-              <div className="text-sm font-medium">{displayName}</div>
-            </div>
+            <div className="text-xs font-medium">{displayName}</div>
           </div>
         )
       }
     },
     {
-      key: "category",
+      key: "subcategory_name",
       label: "Tipo",
-      width: "14.3%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: CapitalMovement) => {
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
-                         item.category_id === aportesPropriosOld?.id
+      width: "15%",
+      render: (item: any) => {
+        const isAporte = item.subcategory_id === APORTES_SOCIOS_UUID
         return (
           <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
-            {item.subcategory_name || item.category_name || 'Sin especificar'}
+            {item.subcategory_name || (isAporte ? 'Aporte' : 'Retiro')}
           </Badge>
         )
       }
     },
     {
-      key: "wallet",
+      key: "description",
+      label: "Descripción",
+      width: "25%",
+      render: (item: any) => (
+        <div className="text-xs">{item.description}</div>
+      )
+    },
+    {
+      key: "wallet_name",
       label: "Billetera",
-      width: "14.3%",
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: CapitalMovement) => (
-        <div className="text-sm">
-          {item.wallet_name || 'Sin especificar'}
-        </div>
+      width: "10%",
+      render: (item: any) => (
+        <div className="text-xs text-muted-foreground">{item.wallet_name}</div>
       )
     },
     {
       key: "amount",
       label: "Monto",
-      width: "14.3%",
+      width: "12%",
       sortable: true,
-      sortType: "number" as const,
-      render: (item: CapitalMovement) => {
-        // Check both new structure (subcategory_id) and old structure (category_id)
-        const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
-                         item.category_id === aportesPropriosOld?.id
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(item.amount || 0)
+      sortType: 'number' as const,
+      render: (item: any) => {
+        const isAporte = item.subcategory_id === APORTES_SOCIOS_UUID
+        const symbol = item.currency_symbol || item.currency_code || '$'
         
         return (
-          <div className={`text-sm font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
-            {item.currency_symbol || '$'} {formattedAmount}
+          <div className={`text-xs font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
+            {symbol} {item.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         )
       }
     },
     {
-      key: "exchange_rate",
-      label: "Cotización",
-      width: "14.3%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: CapitalMovement) => (
-        <div className="text-sm">
-          {item.exchange_rate ? item.exchange_rate.toFixed(4) : '-'}
-        </div>
-      )
-    },
-    {
       key: "actions",
-      label: "Acciones",
-      width: "14.4%",
-      render: (item: CapitalMovement) => (
-        <div className="flex items-center gap-1">
+      label: "",
+      width: "6%",
+      render: (item: any) => (
+        <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => onEdit(item)}
-            className=""
+            size="icon-sm"
+            onClick={() => handleEdit(item)}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => onDelete(item)}
-            className=" text-destructive hover:text-destructive"
+            size="icon-sm"
+            onClick={() => handleDelete(item)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       )
@@ -238,34 +200,22 @@ export default function CapitalHistory({
     )
   }
 
-  if (movements.length === 0) {
-    return (
-      <EmptyState
-        icon={<History className="h-8 w-8" />}
-        title="No hay movimientos de capital registrados"
-        description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
-      />
-    )
-  }
-
   if (filteredMovements.length === 0) {
     return (
       <EmptyState
-        icon={<History className="h-8 w-8" />}
-        title="No se encontraron movimientos"
-        description="No hay movimientos que coincidan con los filtros aplicados."
+        icon={<History />}
+        title="Aún no hay movimientos de capital registrados"
+        description="Esta sección muestra el detalle de todos los aportes y retiros de capital de los socios del proyecto."
       />
     )
   }
 
   return (
-    <div className="space-y-4">
-      <Table
-        data={filteredMovements}
-        columns={detailColumns}
-        defaultSort={{ key: 'movement_date', direction: 'desc' }}
-        getItemId={(item) => item.id || 'unknown'}
-      />
-    </div>
+    <Table
+      data={filteredMovements}
+      columns={movementColumns}
+      defaultSortBy="movement_date"
+      defaultSortDirection="desc"
+    />
   )
 }

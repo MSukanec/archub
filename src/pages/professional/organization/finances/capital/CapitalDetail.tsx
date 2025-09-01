@@ -1,35 +1,109 @@
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { DollarSign } from 'lucide-react'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-
-interface MemberSummary {
-  member_id: string
-  member?: {
-    id: string
-    user_id: string
-    user: {
-      id: string
-      full_name: string
-      email: string
-    }
-  }
-  currencies: { [key: string]: { amount: number; currency: any } }
-  dollarizedTotal: number
-  totalAportes: number
-  totalRetiros: number
-  saldo: number
-}
+import { supabase } from '@/lib/supabase'
 
 interface CapitalDetailProps {
-  memberSummary: MemberSummary[]
-  availableCurrencies: string[]
-  isLoading: boolean
+  organizationId?: string
+  projectId?: string
+  searchValue?: string
 }
 
-export default function CapitalDetail({ memberSummary, availableCurrencies, isLoading }: CapitalDetailProps) {
+export default function CapitalDetail({ organizationId, searchValue }: CapitalDetailProps) {
+  // Partner capital concept UUIDs
+  const APORTES_SOCIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
+  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
+
+  // Fetch partner capital movements
+  const { data: movements = [], isLoading } = useQuery({
+    queryKey: ['partner-capital-detail', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return []
+      
+      console.log('🔍 CapitalDetail: Searching for partner movements...')
+      
+      const { data, error } = await supabase
+        .from('movements_view')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('subcategory_id', [APORTES_SOCIOS_UUID, RETIROS_SOCIOS_UUID])
+        .order('movement_date', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching partner movements:', error)
+        return []
+      }
+      
+      console.log('🔍 CapitalDetail: Found movements:', data?.length || 0)
+      return data || []
+    },
+    enabled: !!organizationId && !!supabase
+  })
+
+  // Get available currencies
+  const availableCurrencies = React.useMemo(() => {
+    const currencies = new Set()
+    movements.forEach(movement => {
+      if (movement.currency_code) {
+        currencies.add(movement.currency_code)
+      }
+    })
+    return Array.from(currencies) as string[]
+  }, [movements])
+
+  // Process member summary by currency
+  const memberSummary = React.useMemo(() => {
+    if (!movements || movements.length === 0) return []
+
+    const summaryMap = new Map()
+    
+    movements.forEach(movement => {
+      const memberId = movement.member_id || 'sin-socio'
+      
+      if (!summaryMap.has(memberId)) {
+        summaryMap.set(memberId, {
+          member_id: memberId,
+          member: movement.member || null,
+          currencies: {}
+        })
+      }
+      
+      const summary = summaryMap.get(memberId)
+      const amount = movement.amount || 0
+      const currencyCode = movement.currency_code || 'N/A'
+      const isAporte = movement.subcategory_id === APORTES_SOCIOS_UUID
+      
+      if (!summary.currencies[currencyCode]) {
+        summary.currencies[currencyCode] = {
+          amount: 0,
+          currency: {
+            code: movement.currency_code,
+            symbol: movement.currency_symbol,
+            name: movement.currency_name
+          }
+        }
+      }
+      
+      summary.currencies[currencyCode].amount += isAporte ? amount : -amount
+    })
+
+    return Array.from(summaryMap.values())
+  }, [movements])
+
+  // Filter by search
+  const filteredSummary = React.useMemo(() => {
+    if (!searchValue) return memberSummary
+    
+    return memberSummary.filter(summary => 
+      summary.member?.user?.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      summary.member?.user?.email?.toLowerCase().includes(searchValue.toLowerCase())
+    )
+  }, [memberSummary, searchValue])
+
   // Create dynamic columns based on available currencies
   const currencyColumns = React.useMemo(() => {
     const baseColumns = [
@@ -37,13 +111,13 @@ export default function CapitalDetail({ memberSummary, availableCurrencies, isLo
         key: "member",
         label: "Socio",
         width: "30%",
-        render: (item: MemberSummary) => {
+        render: (item: any) => {
           if (!item.member?.user) {
             return <div className="text-sm text-muted-foreground">Sin usuario</div>
           }
 
           const displayName = item.member.user.full_name || 'Sin nombre'
-          const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+          const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
 
           return (
             <div className="flex items-center gap-2">
@@ -60,25 +134,25 @@ export default function CapitalDetail({ memberSummary, availableCurrencies, isLo
       }
     ]
 
-    // Add dynamic currency columns
-    const currencyColumnsData = availableCurrencies.map(currencyCode => ({
-      key: `currency_${currencyCode}`,
-      label: currencyCode,
-      width: `${Math.max(50 / availableCurrencies.length, 12)}%`,
+    // Add currency columns dynamically
+    const currencyColumnsData = availableCurrencies.map(currency => ({
+      key: `currency_${currency}`,
+      label: currency,
+      width: `${70 / availableCurrencies.length}%`,
       sortable: true,
       sortType: 'number' as const,
-      render: (item: MemberSummary) => {
-        const currencyData = item.currencies[currencyCode]
+      render: (item: any) => {
+        const currencyData = item.currencies[currency]
         if (!currencyData || currencyData.amount === 0) {
           return <div className="text-sm text-muted-foreground">-</div>
         }
 
-        const isPositive = currencyData.amount >= 0
-        const formattedAmount = new Intl.NumberFormat('es-AR').format(Math.abs(currencyData.amount))
-        
+        const amount = currencyData.amount
+        const symbol = currencyData.currency?.symbol || currency
+
         return (
-          <div className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            {isPositive ? '' : '-'}{currencyData.currency?.symbol || currencyCode} {formattedAmount}
+          <div className={`text-sm font-medium ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {symbol} {amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         )
       }
@@ -95,34 +169,22 @@ export default function CapitalDetail({ memberSummary, availableCurrencies, isLo
     )
   }
 
-  if (memberSummary.length === 0) {
+  if (filteredSummary.length === 0) {
     return (
       <EmptyState
-        icon={<DollarSign className="h-8 w-8" />}
-        title="No hay datos por moneda disponibles"
-        description="No se encontraron movimientos de capital para mostrar el detalle por moneda."
-      />
-    )
-  }
-
-  if (availableCurrencies.length === 0) {
-    return (
-      <EmptyState
-        icon={<DollarSign className="h-8 w-8" />}
-        title="No hay monedas registradas"
-        description="No se encontraron movimientos con diferentes monedas para mostrar."
+        icon={<DollarSign />}
+        title="Aún no hay movimientos de capital registrados"
+        description="Esta sección muestra los aportes y retiros de capital de los socios organizados por moneda."
       />
     )
   }
 
   return (
-    <div className="space-y-4">
-      <Table
-        data={memberSummary}
-        columns={currencyColumns}
-        defaultSort={{ key: 'member', direction: 'asc' }}
-        getItemId={(item) => item.member_id || 'unknown'}
-      />
-    </div>
+    <Table
+      data={filteredSummary}
+      columns={currencyColumns}
+      defaultSortBy="member"
+      defaultSortDirection="asc"
+    />
   )
 }
