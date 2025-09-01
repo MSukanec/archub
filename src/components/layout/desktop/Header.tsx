@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, BookOpen, Truck, Shield } from "lucide-react";
+import { Search, Bell, Settings, Home, Building, FolderOpen, PanelLeftOpen, PanelLeftClose, Sun, Moon, Library, Package, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,7 +130,7 @@ export function Header({}: HeaderProps = {}) {
 
   return (
     <div className="fixed top-0 left-0 right-0 w-full z-50 h-12 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] transition-all duration-300">
-      <div className="w-full h-12 px-1 flex items-center justify-between">
+      <div className="w-full h-12 p-1 flex items-center justify-between">
         {/* Left: Navigation Buttons */}
         <div className="flex items-center gap-1">
           {/* Inicio */}
@@ -185,7 +185,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'biblioteca' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <BookOpen className="w-4 h-4" />
+            <Library className="w-4 h-4" />
             {activeSection === 'biblioteca' && <span className="ml-2 text-sm">Biblioteca</span>}
           </button>
 
@@ -199,7 +199,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'proveedor' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <Truck className="w-4 h-4" />
+            <Package className="w-4 h-4" />
             {activeSection === 'proveedor' && <span className="ml-2 text-sm">Proveedor</span>}
           </button>
 
@@ -213,7 +213,7 @@ export function Header({}: HeaderProps = {}) {
             }`}
             style={{color: activeSection === 'administracion' ? 'white' : 'var(--main-sidebar-fg)'}}
           >
-            <Shield className="w-4 h-4" />
+            <Crown className="w-4 h-4" />
             {activeSection === 'administracion' && <span className="ml-2 text-sm">Administración</span>}
           </button>
         </div>
