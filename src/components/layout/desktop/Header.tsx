@@ -126,32 +126,28 @@ export function Header({}: HeaderProps = {}) {
         {/* Right: User Actions */}
         <div className="flex items-center gap-1">
           {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]"
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
             title="Notificaciones"
             style={{color: 'var(--main-sidebar-fg)'}}
           >
             <Bell className="h-4 w-4" />
-          </Button>
+          </button>
 
           {/* Settings */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-[var(--main-sidebar-button-hover-bg)]"
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
             title="Configuración"
             onClick={() => navigate('/settings')}
             style={{color: 'var(--main-sidebar-fg)'}}
           >
             <Settings className="h-4 w-4" />
-          </Button>
+          </button>
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0 rounded-full hover:bg-[var(--main-sidebar-button-hover-bg)]">
+              <button className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200">
                 <Avatar className="h-7 w-7">
                   <AvatarImage 
                     src={userData?.user?.avatar_url || ''} 
@@ -161,7 +157,7 @@ export function Header({}: HeaderProps = {}) {
                     {userData?.user?.full_name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-              </Button>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-[var(--popover-bg)] border-[var(--menues-border)]">
               <div className="px-2 py-1.5 text-sm">
