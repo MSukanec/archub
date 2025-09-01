@@ -42,9 +42,33 @@ export function useGeneratedTasks() {
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
+      // Get current user to filter by organization
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+      
+      // Get user's current organization
+      const { data: userData, error: userError } = await supabase
+        .from('user_organization_preferences')
+        .select(`
+          organization_id,
+          organizations!inner (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (userError) throw userError;
+      if (!userData) throw new Error('User organization not found');
+      
+      const currentOrgId = userData.organization_id;
+      
+      // Fetch only system tasks OR tasks from current organization
       const { data, error } = await supabase
         .from('tasks_view')
         .select(`*`)
+        .or(`is_system.eq.true,organization_id.eq.${currentOrgId}`)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
