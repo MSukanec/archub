@@ -68,31 +68,20 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         throw new Error('Supabase client not initialized')
       }
 
-      // First, get basic movements data using the movements view with the new columns
+      // First, get basic movements data using the movements table
       let query = supabase
-        .from('movements_view')
+        .from('movements')
         .select(`
-          id,
-          description,
-          amount,
-          exchange_rate,
-          created_at,
-          movement_date,
-          created_by,
-          organization_id,
-          project_id,
-          type_id,
-          category_id,
-          subcategory_id,
-          currency_id,
-          wallet_id,
-          is_conversion,
-          is_favorite,
-          conversion_group_id,
-          transfer_group_id,
-          client,
-          partner,
-          subcontract
+          *,
+          movement_clients!inner(
+            client_name
+          ),
+          movement_partners!inner(
+            partner_name  
+          ),
+          movement_subcontracts!inner(
+            contact_name
+          )
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
