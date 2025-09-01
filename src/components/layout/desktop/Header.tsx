@@ -271,7 +271,27 @@ export function Header({}: HeaderProps = {}) {
 
         {/* Right: User Actions */}
         <div className="flex items-center gap-1">
-          {/* Notificaciones - se mantiene fuera del popover */}
+          {/* Theme Toggle */}
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
+            title={isDark ? "Modo Claro" : "Modo Oscuro"}
+            onClick={handleThemeToggle}
+            style={{color: 'var(--main-sidebar-fg)'}}
+          >
+            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+          </button>
+
+          {/* Sidebar Pin/Unpin */}
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
+            title={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+            onClick={handleDockToggle}
+            style={{color: 'var(--main-sidebar-fg)'}}
+          >
+            {isDocked ? <PanelLeftClose className="h-[18px] w-[18px]" /> : <PanelLeftOpen className="h-[18px] w-[18px]" />}
+          </button>
+
+          {/* Notificaciones */}
           <button
             className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
             title="Notificaciones"
@@ -346,14 +366,6 @@ export function Header({}: HeaderProps = {}) {
                 Organizaciones
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleDockToggle}>
-                {isDocked ? <PanelLeftClose className="h-4 w-4 mr-2" /> : <PanelLeftOpen className="h-4 w-4 mr-2" />}
-                {isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleThemeToggle}>
-                {isDark ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-                {isDark ? "Modo Claro" : "Modo Oscuro"}
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <Settings className="h-4 w-4 mr-2" />
                 Configuración
