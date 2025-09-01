@@ -694,7 +694,9 @@ export default function MovementsList() {
     const result: (Movement | ConversionGroup | TransferGroup)[] = [...regularMovements];
 
     // Add conversion groups
+    console.log('🔍 CONVERSION GROUPS FOUND:', conversionGroups.size);
     conversionGroups.forEach((groupMovements, groupId) => {
+      console.log('🔍 Processing conversion group:', groupId, 'with', groupMovements.length, 'movements');
       if (groupMovements.length === 2) {
         // Find the egreso and ingreso movements
         const egresoMovement = groupMovements.find(m => m.amount < 0);
