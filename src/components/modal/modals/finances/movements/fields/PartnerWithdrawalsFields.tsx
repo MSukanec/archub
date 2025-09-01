@@ -1,5 +1,6 @@
 import React from 'react'
 import { TrendingDown } from 'lucide-react'
+import { usePartners, Partner } from '@/hooks/use-partners'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -15,16 +16,6 @@ interface PartnerWithdrawalsFieldsProps {
   onPartnerWithdrawalsChange: (partnerWithdrawals: PartnerWithdrawalItem[]) => void
 }
 
-interface OrganizationMember {
-  id: string
-  user_id: string
-  user: {
-    id: string
-    full_name: string
-    email: string
-  }
-}
-
 export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> = ({
   selectedPartnerWithdrawals,
   onPartnerWithdrawalsChange
@@ -32,16 +23,20 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
 
-  // Get organization members with user data
-  const { data: members = [], isLoading } = useQuery({
-    queryKey: ['organization-members', organizationId],
-    queryFn: async (): Promise<OrganizationMember[]> => {
+  const { data: partners = [], isLoading } = usePartners(
+    organizationId,
+    { enabled: !!organizationId }
+  )
+
+  // Get user data for all organization members to map contact_id to user names
+  const { data: organizationMembers = [] } = useQuery({
+    queryKey: ['organization-members-for-names', organizationId],
+    queryFn: async () => {
       if (!organizationId || !supabase) return []
       
       const { data, error } = await supabase
         .from('organization_members')
         .select(`
-          id,
           user_id,
           user:users(
             id,
@@ -53,29 +48,43 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
         .eq('is_active', true)
 
       if (error) {
-        console.error('Error fetching organization members:', error)
-        throw error
+        console.error('Error fetching organization members for names:', error)
+        return []
       }
       
-      return (data as OrganizationMember[]) || []
+      return data || []
     },
     enabled: !!organizationId && !!supabase,
   })
 
-  // Function to get member display name
-  const getMemberDisplayName = (member: OrganizationMember): string => {
-    if (!member?.user) return 'Socio sin nombre'
+  // Function to get partner display name using the correct flow: partners → contacts → organization_members → user_data
+  const getPartnerDisplayName = (partner: Partner): string => {
+    if (!partner?.contacts) return 'Socio sin nombre'
     
-    const { user } = member
+    const { contacts } = partner
     
-    // Priority 1: Full name from user data
-    if (user.full_name) {
-      return user.full_name
+    // Find the user data using contact_id as user_id in organization_members
+    const memberWithUser = organizationMembers.find(member => member.user_id === contacts.id)
+    
+    if (memberWithUser?.user?.full_name) {
+      return memberWithUser.user.full_name
     }
     
-    // Priority 2: Extract name from email
-    if (user.email) {
-      const emailPart = user.email.split('@')[0]
+    // Fallback 1: Company name from contacts
+    if (contacts.company_name) {
+      return contacts.company_name
+    }
+    
+    // Fallback 2: Full name from contacts
+    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+    if (fullName) {
+      return fullName
+    }
+    
+    // Fallback 3: Extract name from email (user email or contact email)
+    const email = memberWithUser?.user?.email || contacts.email
+    if (email) {
+      const emailPart = email.split('@')[0]
       if (emailPart) {
         // Convert email username to a more readable format
         const friendlyName = emailPart
@@ -83,26 +92,26 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
           .join(' ')
-        return friendlyName || user.email
+        return friendlyName || email
       }
-      return user.email
+      return email
     }
     
     return 'Socio sin nombre'
   }
 
   // Create options for ComboBox
-  const memberOptions = members.map(member => ({
-    value: member.id,
-    label: getMemberDisplayName(member)
+  const partnerOptions = partners.map(partner => ({
+    value: partner.id,
+    label: getPartnerDisplayName(partner)
   }))
 
-  // Handle member change
-  const handlePartnerChange = (memberId: string) => {
-    const selectedMember = members.find(m => m.id === memberId)
+  // Handle partner change
+  const handlePartnerChange = (partnerId: string) => {
+    const selectedPartner = partners.find(p => p.id === partnerId)
     const partnerWithdrawal: PartnerWithdrawalItem = {
-      partner_id: memberId,
-      partner_name: selectedMember ? getMemberDisplayName(selectedMember) : 'Socio desconocido'
+      partner_id: partnerId,
+      partner_name: selectedPartner ? getPartnerDisplayName(selectedPartner) : 'Socio desconocido'
     }
     onPartnerWithdrawalsChange([partnerWithdrawal])
   }
@@ -129,7 +138,7 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
         <ComboBox
           value={currentSelectedPartner?.partner_id || ''}
           onValueChange={handlePartnerChange}
-          options={memberOptions}
+          options={partnerOptions}
           placeholder="Seleccionar socio..."
           searchPlaceholder="Buscar socio..."
           emptyMessage={isLoading ? "Cargando..." : "No hay socios disponibles"}
