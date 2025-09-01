@@ -415,13 +415,15 @@ export function Sidebar() {
       { icon: FileText, label: 'Media', href: '/general/media' }
     ],
     construction: [
+      { type: 'section', label: 'Planificación' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
-      { icon: Users, label: 'Personal', href: '/construction/personnel' },
-      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-      { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
-      { icon: FileText, label: 'Bitácora', href: '/construction/logs' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { icon: Package2, label: 'Materiales', href: '/construction/materials' }
+      { type: 'section', label: 'Proceso' },
+      { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
+      { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+      { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
+      { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+      { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
     ],
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
