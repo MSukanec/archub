@@ -165,7 +165,7 @@ export function Header({}: HeaderProps = {}) {
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'organizacion' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                ? 'bg-[var(--accent)] text-white px-3' 
                 : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'organizacion' ? 'white' : 'var(--main-sidebar-fg)'}}
@@ -181,7 +181,7 @@ export function Header({}: HeaderProps = {}) {
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'proyecto' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                ? 'bg-[var(--accent)] text-white px-3' 
                 : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'proyecto' ? 'white' : 'var(--main-sidebar-fg)'}}
@@ -197,7 +197,7 @@ export function Header({}: HeaderProps = {}) {
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'construccion' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                ? 'bg-[var(--accent)] text-white px-3' 
                 : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'construccion' ? 'white' : 'var(--main-sidebar-fg)'}}
@@ -213,7 +213,7 @@ export function Header({}: HeaderProps = {}) {
             }}
             className={`h-8 flex items-center rounded transition-all duration-200 ${
               activeSection === 'biblioteca' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
+                ? 'bg-[var(--accent)] text-white px-3' 
                 : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
             style={{color: activeSection === 'biblioteca' ? 'white' : 'var(--main-sidebar-fg)'}}

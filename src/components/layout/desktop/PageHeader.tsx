@@ -38,10 +38,10 @@ export function PageHeader({ tabs = [], actions = [], className }: PageHeaderPro
             key={tab.id}
             onClick={tab.onClick}
             className={cn(
-              "h-8 px-3 rounded text-sm font-medium transition-all duration-200",
+              "relative h-12 px-3 text-sm font-medium transition-all duration-200 border-b-2",
               tab.isActive
-                ? "bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                ? "text-[var(--accent)] border-[var(--accent)]"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-transparent"
             )}
           >
             {tab.label}
