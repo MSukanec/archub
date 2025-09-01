@@ -192,6 +192,7 @@ export default function MovementsList() {
     undefined, // No filtrar por proyecto - mostrar todos los movimientos de la organización
   );
 
+
   // Safe movements with defensive checks
   const movements = useMemo(() => {
     return rawMovements.filter(movement => 
@@ -959,44 +960,40 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
-        // Obtener información específica según el tipo de movimiento usando los hooks específicos
+        // Obtener información específica según el tipo de movimiento
         const getSpecificInfo = (movement: Movement) => {
           const subcatLower = subcategoryName?.toLowerCase() || '';
-          const movementId = movement.id;
+          
+          // Usar los datos que vienen en el movimiento desde el hook useMovements
+          const movementWithRelations = movement as any;
           
           // Para aportes propios y retiros propios, obtener info de socios
           if (subcatLower.includes('aporte') && subcatLower.includes('propio')) {
-            // Buscar en los datos de partners contributions que ya cargamos
-            const partnerData = partnerContributionsData?.find(pc => pc.movement_id === movementId);
-            if (partnerData?.partner_name) {
-              return partnerData.partner_name;
+            if (movementWithRelations.partners && movementWithRelations.partners.length > 0) {
+              return movementWithRelations.partners[0].partner_name;
             }
-            return null; // No mostrar nada si no hay datos específicos
+            return null;
           }
           
           if (subcatLower.includes('retiro') && subcatLower.includes('propio')) {
-            // Buscar en los datos de partners withdrawals
-            const partnerData = partnerWithdrawalsData?.find(pw => pw.movement_id === movementId);
-            if (partnerData?.partner_name) {
-              return partnerData.partner_name;
+            if (movementWithRelations.partners && movementWithRelations.partners.length > 0) {
+              return movementWithRelations.partners[0].partner_name;
             }
             return null;
           }
           
           // Para subcontratos
           if (subcatLower.includes('subcontrato')) {
-            const subcontractData = subcontractsData?.find(sc => sc.movement_id === movementId);
-            if (subcontractData?.contact_name) {
-              return subcontractData.contact_name;
+            if (movementWithRelations.subcontracts && movementWithRelations.subcontracts.length > 0) {
+              return movementWithRelations.subcontracts[0].contact_name;
             }
             return null;
           }
           
           // Para aportes de clientes
           if (subcatLower.includes('cliente')) {
-            const clientData = clientsData?.find(cl => cl.movement_id === movementId);
-            if (clientData?.client_name) {
-              return clientData.client_name;
+            if (movementWithRelations.clients && movementWithRelations.clients.length > 0) {
+              return movementWithRelations.clients[0].client_name;
             }
             return null;
           }
