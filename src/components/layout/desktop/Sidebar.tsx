@@ -413,13 +413,8 @@ export function Sidebar() {
       { icon: Users, label: 'Clientes', href: '/general/clients' },
       { icon: FileText, label: 'Media', href: '/general/media' },
       
-      // Design Section
-      { type: 'section', label: 'DISEÑO' },
-      { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' },
-      
       // Construction Section
       { type: 'section', label: 'CONSTRUCCIÓN' },
-      { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Users, label: 'Personal', href: '/construction/personnel' },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
