@@ -59,7 +59,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
-import { FILTER_LABELS } from "@/constants/actionBarConstants";
+import { FILTER_LABELS } from "@/hooks/constants/actionBarConstants";
 import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
 
 interface Movement {
@@ -188,7 +188,7 @@ export default function MovementsList() {
   const projectId = selectedProjectId;
 
   const { data: rawMovements = [], isLoading } = useMovements(
-    organizationId,
+    organizationId || null,
     undefined, // No filtrar por proyecto - mostrar todos los movimientos de la organización
   );
 
@@ -493,12 +493,12 @@ export default function MovementsList() {
 
   // Get unique types, categories, and subcategories from actual data
   const availableTypes = useMemo(() => Array.from(
-    new Set(movements.map((m) => m.movement_data?.type?.name).filter(Boolean)),
+    new Set(movements.map((m) => m.type_name).filter(Boolean)),
   ), [movements]);
 
   const availableCategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.category?.name).filter(Boolean),
+      movements.map((m) => m.category_name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -506,7 +506,7 @@ export default function MovementsList() {
 
   const availableSubcategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
+      movements.map((m) => m.subcategory_name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -517,8 +517,8 @@ export default function MovementsList() {
     return Array.from(
       new Set(
         movements
-          .filter(m => m.movement_data?.category?.name === categoryName)
-          .map(m => m.movement_data?.subcategory?.name)
+          .filter(m => m.category_name === categoryName)
+          .map(m => m.subcategory_name)
           .filter(Boolean)
       )
     );
@@ -528,13 +528,13 @@ export default function MovementsList() {
 
   const availableCurrencies = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
+      movements.map((m) => m.currency_name).filter(Boolean),
     ),
   ), [movements]);
 
   const availableWallets = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
+      movements.map((m) => m.wallet_name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -616,10 +616,10 @@ export default function MovementsList() {
               .filter(subcategory => {
                 if (filterByCategory === "all") return true;
                 const relevantMovements = movements.filter(m => 
-                  m.movement_data?.category?.name === filterByCategory
+                  m.category_name === filterByCategory
                 );
                 return relevantMovements.some(m => 
-                  m.movement_data?.subcategory?.name === subcategory
+                  m.subcategory_name === subcategory
                 );
               })
               .map(subcategory => ({ value: subcategory!, label: subcategory! }))
@@ -696,8 +696,8 @@ export default function MovementsList() {
             id: groupId,
             conversion_group_id: groupId,
             movements: groupMovements,
-            from_currency: egresoMovement.movement_data?.currency?.code || '',
-            to_currency: ingresoMovement.movement_data?.currency?.code || '',
+            from_currency: egresoMovement.currency_code || '',
+            to_currency: ingresoMovement.currency_code || '',
             from_amount: Math.abs(egresoMovement.amount),
             to_amount: Math.abs(ingresoMovement.amount),
             description: egresoMovement.description,
@@ -723,8 +723,8 @@ export default function MovementsList() {
             id: groupId,
             transfer_group_id: groupId,
             movements: groupMovements,
-            from_wallet: egresoMovement.movement_data?.wallet?.name || '',
-            to_wallet: ingresoMovement.movement_data?.wallet?.name || '',
+            from_wallet: egresoMovement.wallet_name || '',
+            to_wallet: ingresoMovement.wallet_name || '',
             amount: Math.abs(egresoMovement.amount),
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
@@ -753,22 +753,22 @@ export default function MovementsList() {
     if (searchValue) {
       filtered = filtered.filter(m => 
         m.description?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
-        m.movement_data?.category?.name?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
-        m.movement_data?.subcategory?.name?.toLowerCase()?.includes(searchValue.toLowerCase())
+        m.category_name?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
+        m.subcategory_name?.toLowerCase()?.includes(searchValue.toLowerCase())
       );
     }
 
     // Apply filters
     if (filterByType !== "all") {
-      filtered = filtered.filter(m => m.movement_data?.type?.name === filterByType);
+      filtered = filtered.filter(m => m.type_name === filterByType);
     }
 
     if (filterByCategory !== "all") {
-      filtered = filtered.filter(m => m.movement_data?.category?.name === filterByCategory);
+      filtered = filtered.filter(m => m.category_name === filterByCategory);
     }
 
     if (filterBySubcategory !== "all") {
-      filtered = filtered.filter(m => m.movement_data?.subcategory?.name === filterBySubcategory);
+      filtered = filtered.filter(m => m.subcategory_name === filterBySubcategory);
     }
 
     if (filterByFavorites !== "all") {
@@ -780,11 +780,11 @@ export default function MovementsList() {
     }
 
     if (filterByCurrency !== "all") {
-      filtered = filtered.filter(m => m.movement_data?.currency?.name === filterByCurrency);
+      filtered = filtered.filter(m => m.currency_name === filterByCurrency);
     }
 
     if (filterByWallet !== "all") {
-      filtered = filtered.filter(m => m.movement_data?.wallet?.name === filterByWallet);
+      filtered = filtered.filter(m => m.wallet_name === filterByWallet);
     }
 
     const grouped = groupConversions(filtered);
