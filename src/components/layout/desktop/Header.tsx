@@ -218,12 +218,7 @@ export function Header({
 
   return (
     <div
-      className={`fixed top-0 right-0 z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300 ${
-        // Calculate left margin based on main sidebar only (since we're using accordion sidebar now)
-        (isMainDocked || isMainHovered)
-          ? "left-[264px]" // 264px main sidebar when expanded
-          : "left-[40px]" // 40px main sidebar when collapsed
-      }`}
+      className={`fixed top-0 left-0 right-0 w-full z-50 ${getHeaderHeight()} border-b border-[var(--menues-border)] bg-[var(--layout-bg)] transition-all duration-300`}
     >
       {/* Primera fila: Botón Volver + Título + Botones de acción */}
       <div className="w-full h-10 px-12 flex items-center justify-between">
