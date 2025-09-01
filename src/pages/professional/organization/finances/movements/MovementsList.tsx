@@ -43,7 +43,7 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 import { TransferGroup } from "@/components/ui/data-row";
 import { MovementRow, ConversionRow, TransferRow } from "@/components/ui/data-row";
 import SwipeableCard from "@/components/layout/mobile/SwipeableCard";
-import { Star, AlertTriangle } from "lucide-react";
+import { Star } from "lucide-react";
 
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -59,7 +59,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
-import { FILTER_LABELS } from "@/hooks/constants/actionBarConstants";
+import { FILTER_LABELS } from "@/constants/actionBarConstants";
 import { MovementKPICardsWithWallets } from "@/components/kpis/MovementKPICardsWithWallets";
 
 interface Movement {
@@ -78,16 +78,8 @@ interface Movement {
   currency_id: string;
   wallet_id: string;
   is_favorite?: boolean;
-  conversion_group_id?: string | null;
-  transfer_group_id?: string | null;
-  // Campos de la vista
-  currency_name?: string;
-  currency_code?: string;
-  currency_symbol?: string;
-  wallet_name?: string;
-  type_name?: string;
-  category_name?: string;
-  subcategory_name?: string;
+  conversion_group_id?: string;
+  transfer_group_id?: string;
   movement_data?: {
     type?: {
       id: string;
@@ -127,7 +119,6 @@ interface ConversionGroup {
   to_currency: string;
   from_amount: number;
   to_amount: number;
-  amount: number; // Para compatibilidad con detección de duplicados
   description: string;
   movement_date: string;
   created_at: string;
@@ -197,17 +188,17 @@ export default function MovementsList() {
   const projectId = selectedProjectId;
 
   const { data: rawMovements = [], isLoading } = useMovements(
-    organizationId || null,
+    organizationId,
     undefined, // No filtrar por proyecto - mostrar todos los movimientos de la organización
   );
-
 
   // Safe movements with defensive checks
   const movements = useMemo(() => {
     return rawMovements.filter(movement => 
       movement && 
-      movement.id
-      // NO filtrar por movement_data porque las conversiones pueden no tenerlo
+      movement.id &&
+      movement.movement_data &&
+      typeof movement.movement_data === 'object'
     );
   }, [rawMovements]);
 
@@ -345,7 +336,7 @@ export default function MovementsList() {
   };
 
   const handleView = (movement: Movement) => {
-    openModal('movement', { viewingMovement: movement });
+    openModal('movements-view', { viewingMovement: movement });
   };
 
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
@@ -376,7 +367,7 @@ export default function MovementsList() {
       _conversionData: conversionGroup
     };
     
-    openModal('movement', { viewingMovement: conversionMovement as any });
+    openModal('movements-view', { viewingMovement: conversionMovement as any });
   };
 
   const handleEditTransfer = (transferGroup: TransferGroup) => {
@@ -407,7 +398,7 @@ export default function MovementsList() {
       _transferData: transferGroup
     };
     
-    openModal('movement', { viewingMovement: transferMovement as any });
+    openModal('movements-view', { viewingMovement: transferMovement as any });
   };
 
   const handleDelete = (movement: Movement) => {
@@ -502,12 +493,12 @@ export default function MovementsList() {
 
   // Get unique types, categories, and subcategories from actual data
   const availableTypes = useMemo(() => Array.from(
-    new Set(movements.map((m) => m.type_name).filter(Boolean)),
+    new Set(movements.map((m) => m.movement_data?.type?.name).filter(Boolean)),
   ), [movements]);
 
   const availableCategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.category_name).filter(Boolean),
+      movements.map((m) => m.movement_data?.category?.name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -515,7 +506,7 @@ export default function MovementsList() {
 
   const availableSubcategories = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.subcategory_name).filter(Boolean),
+      movements.map((m) => m.movement_data?.subcategory?.name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -526,8 +517,8 @@ export default function MovementsList() {
     return Array.from(
       new Set(
         movements
-          .filter(m => m.category_name === categoryName)
-          .map(m => m.subcategory_name)
+          .filter(m => m.movement_data?.category?.name === categoryName)
+          .map(m => m.movement_data?.subcategory?.name)
           .filter(Boolean)
       )
     );
@@ -537,13 +528,13 @@ export default function MovementsList() {
 
   const availableCurrencies = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.currency_name).filter(Boolean),
+      movements.map((m) => m.movement_data?.currency?.name).filter(Boolean),
     ),
   ), [movements]);
 
   const availableWallets = useMemo(() => Array.from(
     new Set(
-      movements.map((m) => m.wallet_name).filter(Boolean),
+      movements.map((m) => m.movement_data?.wallet?.name).filter(Boolean),
     ),
   ), [movements]);
 
@@ -625,10 +616,10 @@ export default function MovementsList() {
               .filter(subcategory => {
                 if (filterByCategory === "all") return true;
                 const relevantMovements = movements.filter(m => 
-                  m.category_name === filterByCategory
+                  m.movement_data?.category?.name === filterByCategory
                 );
                 return relevantMovements.some(m => 
-                  m.subcategory_name === subcategory
+                  m.movement_data?.subcategory?.name === subcategory
                 );
               })
               .map(subcategory => ({ value: subcategory!, label: subcategory! }))
@@ -694,9 +685,7 @@ export default function MovementsList() {
     const result: (Movement | ConversionGroup | TransferGroup)[] = [...regularMovements];
 
     // Add conversion groups
-    console.log('🔍 CONVERSION GROUPS FOUND:', conversionGroups.size);
     conversionGroups.forEach((groupMovements, groupId) => {
-      console.log('🔍 Processing conversion group:', groupId, 'with', groupMovements.length, 'movements');
       if (groupMovements.length === 2) {
         // Find the egreso and ingreso movements
         const egresoMovement = groupMovements.find(m => m.amount < 0);
@@ -707,18 +696,16 @@ export default function MovementsList() {
             id: groupId,
             conversion_group_id: groupId,
             movements: groupMovements,
-            from_currency: egresoMovement.currency_name || '',
-            to_currency: ingresoMovement.currency_name || '',
+            from_currency: egresoMovement.movement_data?.currency?.code || '',
+            to_currency: ingresoMovement.movement_data?.currency?.code || '',
             from_amount: Math.abs(egresoMovement.amount),
             to_amount: Math.abs(ingresoMovement.amount),
-            amount: Math.abs(egresoMovement.amount), // Para compatibilidad
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
             creator: egresoMovement.creator,
             is_conversion_group: true
           };
-          console.log('✅ ADDING CONVERSION GROUP:', conversionGroup.id, conversionGroup.from_currency, '→', conversionGroup.to_currency);
           result.push(conversionGroup);
         }
       }
@@ -736,8 +723,8 @@ export default function MovementsList() {
             id: groupId,
             transfer_group_id: groupId,
             movements: groupMovements,
-            from_wallet: egresoMovement.wallet_name || '',
-            to_wallet: ingresoMovement.wallet_name || '',
+            from_wallet: egresoMovement.movement_data?.wallet?.name || '',
+            to_wallet: ingresoMovement.movement_data?.wallet?.name || '',
             amount: Math.abs(egresoMovement.amount),
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
@@ -751,16 +738,11 @@ export default function MovementsList() {
     });
 
     // Sort by movement_date descending
-    const finalResult = result.sort((a, b) => {
+    return result.sort((a, b) => {
       const dateA = new Date(a.movement_date);
       const dateB = new Date(b.movement_date);
       return dateB.getTime() - dateA.getTime();
     });
-    
-    console.log('🎯 FINAL RESULT:', finalResult.length, 'items total');
-    console.log('🎯 CONVERSIONS IN FINAL:', finalResult.filter(item => 'is_conversion_group' in item).length);
-    
-    return finalResult;
   };
 
   // Apply filters to grouped items
@@ -771,22 +753,22 @@ export default function MovementsList() {
     if (searchValue) {
       filtered = filtered.filter(m => 
         m.description?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
-        m.category_name?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
-        m.subcategory_name?.toLowerCase()?.includes(searchValue.toLowerCase())
+        m.movement_data?.category?.name?.toLowerCase()?.includes(searchValue.toLowerCase()) ||
+        m.movement_data?.subcategory?.name?.toLowerCase()?.includes(searchValue.toLowerCase())
       );
     }
 
     // Apply filters
     if (filterByType !== "all") {
-      filtered = filtered.filter(m => m.type_name === filterByType);
+      filtered = filtered.filter(m => m.movement_data?.type?.name === filterByType);
     }
 
     if (filterByCategory !== "all") {
-      filtered = filtered.filter(m => m.category_name === filterByCategory);
+      filtered = filtered.filter(m => m.movement_data?.category?.name === filterByCategory);
     }
 
     if (filterBySubcategory !== "all") {
-      filtered = filtered.filter(m => m.subcategory_name === filterBySubcategory);
+      filtered = filtered.filter(m => m.movement_data?.subcategory?.name === filterBySubcategory);
     }
 
     if (filterByFavorites !== "all") {
@@ -798,79 +780,14 @@ export default function MovementsList() {
     }
 
     if (filterByCurrency !== "all") {
-      filtered = filtered.filter(m => m.currency_name === filterByCurrency);
+      filtered = filtered.filter(m => m.movement_data?.currency?.name === filterByCurrency);
     }
 
     if (filterByWallet !== "all") {
-      filtered = filtered.filter(m => m.wallet_name === filterByWallet);
+      filtered = filtered.filter(m => m.movement_data?.wallet?.name === filterByWallet);
     }
 
-    const grouped = groupConversions(filtered);
-    
-    // 🚨 CRITICAL: Detect duplicates but KEEP ALL items for visibility
-    const seenIds = new Set();
-    const duplicatedIds = new Set();
-    
-    // First pass: identify which IDs appear more than once
-    grouped.forEach(item => {
-      let uniqueId: string;
-      
-      if ('is_conversion_group' in item) {
-        uniqueId = `conversion_${item.conversion_group_id}`;
-      } else if ('is_transfer_group' in item) {
-        uniqueId = `transfer_${item.transfer_group_id}`;
-      } else {
-        uniqueId = `movement_${item.id}`;
-      }
-      
-      if (seenIds.has(uniqueId)) {
-        duplicatedIds.add(uniqueId);
-        console.error('🚨 DUPLICATE MOVEMENT DETECTED:', {
-          id: uniqueId,
-          description: item.description,
-          amount: item.amount,
-          date: item.movement_date
-        });
-      } else {
-        seenIds.add(uniqueId);
-      }
-    });
-    
-    // Store duplicated IDs for visual marking
-    (window as any).__duplicateIds = duplicatedIds;
-    
-    if (duplicatedIds.size > 0) {
-      console.error('🚨 TOTAL DUPLICATE IDS FOUND:', duplicatedIds.size);
-      console.error('🚨 DUPLICATE IDS:', Array.from(duplicatedIds));
-    }
-    
-    // Add unique suffixes to duplicate items to prevent React key conflicts
-    const itemCounters = new Map();
-    const uniqueItems = grouped.map(item => {
-      let baseId: string;
-      
-      if ('is_conversion_group' in item) {
-        baseId = `conversion_${item.conversion_group_id}`;
-      } else if ('is_transfer_group' in item) {
-        baseId = `transfer_${item.transfer_group_id}`;
-      } else {
-        baseId = `movement_${item.id}`;
-      }
-      
-      // Count occurrences to create unique IDs
-      const count = itemCounters.get(baseId) || 0;
-      itemCounters.set(baseId, count + 1);
-      
-      // Add unique suffix for duplicates
-      const uniqueKey = count > 0 ? `${baseId}_dup${count}` : baseId;
-      
-      return {
-        ...item,
-        __uniqueKey: uniqueKey
-      };
-    });
-    
-    return uniqueItems;
+    return groupConversions(filtered);
   }, [
     movements,
     searchValue,
@@ -890,21 +807,7 @@ export default function MovementsList() {
     setSidebarContext('organization');
   }, [setSidebarContext]);
 
-  // 🚨 Helper function to check if an item is duplicate
-  const isDuplicate = (item: any) => {
-    const duplicateIds = (window as any).__duplicateIds || new Set();
-    let uniqueId: string;
-    
-    if ('is_conversion_group' in item) {
-      uniqueId = `conversion_${item.conversion_group_id}`;
-    } else if ('is_transfer_group' in item) {
-      uniqueId = `transfer_${item.transfer_group_id}`;
-    } else {
-      uniqueId = `movement_${item.id}`;
-    }
-    
-    return duplicateIds.has(uniqueId);
-  };
+
 
   const tableColumns = useMemo(() => [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
@@ -934,39 +837,16 @@ export default function MovementsList() {
       },
     }] : []),
     {
-      key: "date_creator",
-      label: "Fecha / Creador",
-      width: "12%",
+      key: "movement_date",
+      label: "Fecha",
+      width: "5%",
       sortable: true,
       sortType: "date" as const,
       render: (item: Movement | ConversionGroup) => {
         const displayDate = item.movement_date;
-        
-        // Creator data
-        const movementData = item as any;
-        const creatorData = movementData.movement_data?.creator;
-        const memberName = creatorData?.full_name;
-        const memberAvatar = creatorData?.avatar_url;
 
         if (!displayDate) {
-          return (
-            <div className="text-xs text-muted-foreground space-y-1">
-              <div>Sin fecha</div>
-              <div className="flex items-center gap-1">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={memberAvatar} />
-                  <AvatarFallback className="text-xs">
-                    {memberName?.charAt(0) ||
-                      creatorData?.email?.charAt(0) ||
-                      "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate text-xs">
-                  {memberName || "Usuario"}
-                </span>
-              </div>
-            </div>
-          );
+          return <div className="text-xs text-muted-foreground">Sin fecha</div>;
         }
 
         try {
@@ -985,70 +865,43 @@ export default function MovementsList() {
           if (isNaN(date.getTime())) {
             console.log('Invalid date for item:', displayDate, item);
             return (
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div>Fecha inválida</div>
-                <div className="flex items-center gap-1">
-                  <Avatar className="h-4 w-4">
-                    <AvatarImage src={memberAvatar} />
-                    <AvatarFallback className="text-xs">
-                      {memberName?.charAt(0) ||
-                        creatorData?.email?.charAt(0) ||
-                        "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="truncate text-xs">
-                    {memberName || "Usuario"}
-                  </span>
-                </div>
+              <div className="text-xs text-muted-foreground">
+                Fecha inválida
               </div>
             );
           }
 
           return (
-            <div className="text-xs space-y-1">
-              <div className="flex items-center gap-1">
-                {isDuplicate(item) && (
-                  <AlertTriangle className="h-3 w-3 text-yellow-600" />
-                )}
-                <span>{format(date, "dd/MM/yyyy")}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={memberAvatar} />
-                  <AvatarFallback className="text-xs">
-                    {memberName?.charAt(0) ||
-                      creatorData?.email?.charAt(0) ||
-                      "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate text-xs text-muted-foreground">
-                  {memberName || "Usuario"}
-                </span>
-              </div>
+            <div className="text-xs">
+              <div>{format(date, "dd/MM/yyyy")}</div>
             </div>
           );
         } catch (error) {
           console.log('Date formatting error:', error, displayDate, item);
           return (
-            <div className="text-xs text-muted-foreground space-y-1">
-              <div>Fecha inválida</div>
-              <div className="flex items-center gap-1">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={memberAvatar} />
-                  <AvatarFallback className="text-xs">
-                    {memberName?.charAt(0) ||
-                      creatorData?.email?.charAt(0) ||
-                      "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate text-xs">
-                  {memberName || "Usuario"}
-                </span>
-              </div>
-            </div>
+            <div className="text-xs text-muted-foreground">Fecha inválida</div>
           );
         }
       },
+    },
+    {
+      key: "creator",
+      label: "Creador",
+      width: "8%",
+      sortable: true,
+      sortType: "string" as const,
+      render: (item: Movement | ConversionGroup) => (
+        <div className="flex justify-center">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={item.creator?.avatar_url} />
+            <AvatarFallback className="text-xs">
+              {item.creator?.full_name?.charAt(0) ||
+                item.creator?.email?.charAt(0) ||
+                "U"}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      ),
     },
     {
       key: "type",
@@ -1106,50 +959,11 @@ export default function MovementsList() {
         const categoryName = item.movement_data?.category?.name || "Sin categoría";
         const subcategoryName = item.movement_data?.subcategory?.name;
         
-        // Obtener información específica según el tipo de movimiento usando UUIDs específicos
-        const getSpecificInfo = (movement: Movement) => {
-          const movementData = movement as any;
-          const subcategoryId = movementData.movement_data?.subcategory?.id;
-          
-          
-          // Aportes de clientes - usar la columna "client" de la vista
-          if (subcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3') {
-            return movementData.client || null;
-          }
-          
-          // Aportes propios - usar la columna "partner" de la vista
-          if (subcategoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb') {
-            return movementData.partner || null;
-          }
-          
-          // Personal - usar la columna "subcontract" de la vista
-          if (subcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff') {
-            return movementData.subcontract || null;
-          }
-          
-          // Retiros de socios - usar la columna "partner" de la vista
-          if (subcategoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') {
-            return movementData.partner || null;
-          }
-          
-          // Subcontratos - usar la columna "subcontract" de la vista
-          if (subcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498') {
-            return movementData.subcontract || null;
-          }
-          
-          return null;
-        };
-        
-        const specificInfo = getSpecificInfo(item as Movement);
-        
         return (
           <div className="space-y-1">
             <div className="text-xs font-bold">{categoryName}</div>
             {subcategoryName && (
               <div className="text-xs text-muted-foreground">{subcategoryName}</div>
-            )}
-            {specificInfo && (
-              <div className="text-xs text-muted-foreground">{specificInfo}</div>
             )}
           </div>
         );
@@ -1210,11 +1024,9 @@ export default function MovementsList() {
         }
         
         if ('is_transfer_group' in item) {
-          // Para transferencias, usar la moneda del primer movimiento
-          const firstMovement = item.movements[0];
           return (
             <div className="text-xs">
-              <div>{firstMovement?.currency_name || firstMovement?.movement_data?.currency?.code || "USD"}</div>
+              <div>{item.currency}</div>
             </div>
           );
         }
@@ -1475,7 +1287,6 @@ export default function MovementsList() {
         />
       ) : (
         <>
-          
           {/* Movement KPIs - Solo mostrar cuando hay datos */}
           {/* Solo mostrar balance de organización, no del proyecto */}
           <MovementKPICardsWithWallets 
@@ -1483,23 +1294,9 @@ export default function MovementsList() {
           />
           <Table
             columns={tableColumns}
-            data={processedMovements as any}
+            data={processedMovements}
             isLoading={false} // Ya no está cargando cuando llegamos aquí
             selectable={true}
-            getItemId={(item: any) => {
-              // Use the unique key if available, otherwise fall back to original logic
-              if (item.__uniqueKey) {
-                return item.__uniqueKey;
-              }
-              
-              if ('is_conversion_group' in item) {
-                return `conversion_${item.conversion_group_id}`;
-              } else if ('is_transfer_group' in item) {
-                return `transfer_${item.transfer_group_id}`;
-              } else {
-                return `movement_${item.id}`;
-              }
-            }}
           defaultSort={{
             key: "movement_date",
             direction: "desc",
@@ -1644,11 +1441,6 @@ export default function MovementsList() {
         }}
 
         getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
-          // 🚨 PRIORITY: Check for duplicates first - mark with yellow background
-          if (isDuplicate(item)) {
-            return "bg-yellow-100 border-l-4 border-l-yellow-500";
-          }
-          
           if ('is_conversion_group' in item) {
             return "movement-row-conversion";
           }
@@ -1698,6 +1490,7 @@ export default function MovementsList() {
           ) as Movement[];
           setSelectedMovements(regularMovements);
         }}
+        getItemId={(item) => item.id}
         renderCard={(item: any) => {
           if ('is_conversion_group' in item) {
             // Render ConversionRow with SwipeableCard for conversion groups

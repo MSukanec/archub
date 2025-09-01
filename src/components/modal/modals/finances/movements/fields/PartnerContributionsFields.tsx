@@ -1,8 +1,6 @@
 import React from 'react'
 import { TrendingUp } from 'lucide-react'
 import { usePartners, Partner } from '@/hooks/use-partners'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
@@ -28,76 +26,23 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
     { enabled: !!organizationId }
   )
 
-  // Get user data for all organization members to map contact_id to user names
-  const { data: organizationMembers = [] } = useQuery({
-    queryKey: ['organization-members-for-names', organizationId],
-    queryFn: async () => {
-      if (!organizationId || !supabase) return []
-      
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select(`
-          user_id,
-          user:users(
-            id,
-            full_name,
-            email
-          )
-        `)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-
-      if (error) {
-        console.error('Error fetching organization members for names:', error)
-        return []
-      }
-      
-      return data || []
-    },
-    enabled: !!organizationId && !!supabase,
-  })
-
-  // Function to get partner display name using the correct flow: partners → contacts → organization_members → user_data
+  // Function to get partner display name
   const getPartnerDisplayName = (partner: Partner): string => {
     if (!partner?.contacts) return 'Socio sin nombre'
     
     const { contacts } = partner
-    
-    // Find the user data using contact_id as user_id in organization_members
-    const memberWithUser = organizationMembers.find(member => member.user_id === contacts.id)
-    
-    if (memberWithUser?.user?.full_name) {
-      return memberWithUser.user.full_name
-    }
-    
-    // Fallback 1: Company name from contacts
     if (contacts.company_name) {
       return contacts.company_name
-    }
-    
-    // Fallback 2: Full name from contacts
-    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-    if (fullName) {
-      return fullName
-    }
-    
-    // Fallback 3: Extract name from email (user email or contact email)
-    const email = memberWithUser?.user?.email || contacts.email
-    if (email) {
-      const emailPart = email.split('@')[0]
-      if (emailPart) {
-        // Convert email username to a more readable format
-        const friendlyName = emailPart
-          .replace(/[._]/g, ' ') // Replace dots and underscores with spaces
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
-          .join(' ')
-        return friendlyName || email
+    } else {
+      const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+      if (fullName) {
+        return fullName
+      } else if (contacts.email) {
+        return contacts.email
+      } else {
+        return 'Socio sin nombre'
       }
-      return email
     }
-    
-    return 'Socio sin nombre'
   }
 
   // Create options for ComboBox

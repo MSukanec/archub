@@ -1001,7 +1001,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (selectedSubcontracts && selectedSubcontracts.length > 0) {
         const subcontractsData = selectedSubcontracts.map(subcontract => ({
           movement_id: result.id,
-          subcontract_id: subcontract.subcontract_id
+          subcontract_id: subcontract.subcontract_id,
+          amount: subcontract.amount
         }))
 
         const { error: subcontractsError } = await supabase
@@ -1018,19 +1019,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       ]
       
       if (allPartners.length > 0) {
-        if (isEditing && editingMovement?.id) {
-          // Si es edición, usar update en lugar de create
-          await updateMovementPartnersMutation.mutateAsync({
-            movementId: result.id,
-            partners: allPartners
-          })
-        } else {
-          // Si es nuevo, usar create
-          await createMovementPartnersMutation.mutateAsync({
-            movementId: result.id,
-            partners: allPartners
-          })
-        }
+        await createMovementPartnersMutation.mutateAsync({
+          movementId: result.id,
+          partners: allPartners
+        })
       }
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
@@ -1063,7 +1055,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     },
     onSuccess: async (result) => {
       // Invalidar todas las queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1273,7 +1264,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1374,7 +1364,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       return results
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movements', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1402,9 +1391,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   }
 
   const onSubmitConversion = (values: ConversionForm) => {
-    console.log('🔧 DATOS DE CONVERSIÓN ENVIADOS:', values)
-    console.log('🔧 FORMULARIO VÁLIDO:', conversionForm.formState.isValid)
-    console.log('🔧 ERRORES FORMULARIO:', conversionForm.formState.errors)
     createConversionMutation.mutate(values)
   }
 
@@ -1701,7 +1687,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 // Actualizar formularios según el tipo activo
                 if (movementType === 'conversion') {
                   conversionForm.setValue('type_id', typeId)
-                  console.log('🔧 SET type_id en conversión:', typeId)
                   // Los formularios de conversión no tienen category_id/subcategory_id
                 } else if (movementType === 'transfer') {
                   transferForm.setValue('type_id', typeId)
@@ -1726,8 +1711,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                     if (viewMode.includes("conversion")) {
                       console.log('🎯 Setting movement type to CONVERSION')
                       setMovementType('conversion')
-                      // FORZAR asignación del type_id cuando cambia a conversion
-                      setTimeout(() => conversionForm.setValue('type_id', typeId), 100)
                     } else if (viewMode.includes("transfer")) {
                       console.log('🎯 Setting movement type to TRANSFER')
                       setMovementType('transfer')
@@ -1871,37 +1854,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Guardar"}
-      onRightClick={() => {
-        if (movementType === 'conversion') {
-          console.log('🔧 INTENTANDO SUBMIT CONVERSIÓN...')
-          
-          // FORZAR asignación de campos faltantes antes del submit
-          if (!conversionForm.getValues('type_id')) {
-            console.log('🔧 ASIGNANDO type_id:', selectedTypeId)
-            conversionForm.setValue('type_id', selectedTypeId, { shouldValidate: true })
-          }
-          
-          // Buscar moneda de pesos argentinos para destino si está vacía
-          if (!conversionForm.getValues('currency_id_to')) {
-            const pesosCurrency = currencies?.find(orgCur => 
-              orgCur.currency?.code === 'ARS' || orgCur.currency?.name?.includes('Peso')
-            )
-            console.log('🔧 ASIGNANDO currency_id_to:', pesosCurrency?.currency?.id)
-            if (pesosCurrency) {
-              conversionForm.setValue('currency_id_to', pesosCurrency.currency.id, { shouldValidate: true })
-            }
-          }
-          
-          console.log('🔧 ERRORES FORMULARIO CONVERSIÓN:', conversionForm.formState.errors)
-          console.log('🔧 FORMULARIO VÁLIDO:', conversionForm.formState.isValid)
-          console.log('🔧 VALORES ACTUALES:', conversionForm.getValues())
-          conversionForm.handleSubmit(onSubmitConversion)()
-        } else if (movementType === 'transfer') {
-          transferForm.handleSubmit(onSubmitTransfer)()
-        } else {
-          form.handleSubmit(onSubmit)()
-        }
-      }}
+      onRightClick={movementType === 'conversion' 
+        ? conversionForm.handleSubmit(onSubmitConversion)
+        : movementType === 'transfer'
+          ? transferForm.handleSubmit(onSubmitTransfer)
+          : form.handleSubmit(onSubmit)}
       showLoadingSpinner={movementType === 'conversion' 
         ? createConversionMutation.isPending 
         : movementType === 'transfer'

@@ -87,12 +87,6 @@ export default function TaskList() {
   const filteredTasks = useMemo(() => {
     let filtered = tasks;
     
-    // SEGURIDAD: Solo mostrar tareas del sistema O de la organización actual
-    // Nunca mostrar tareas de otras organizaciones
-    filtered = filtered.filter(task => 
-      task.is_system || task.organization_id === userData?.organization?.id
-    );
-    
     // Filtrar por modo de vista
     if (viewMode === 'organization') {
       filtered = filtered.filter(task => !task.is_system && task.organization_id === userData?.organization?.id);
