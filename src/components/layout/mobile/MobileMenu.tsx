@@ -82,7 +82,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   
   // Detectar automáticamente la sección basada en la ruta actual
   const getInitialState = () => {
-    if (location === '/dashboard') return { level: 'main', section: null, subsection: null };
+    if (location === '/organization/dashboard') return { level: 'main', section: null, subsection: null };
     if (location.startsWith('/organization')) return { level: 'section', section: 'organization', subsection: null };
     if (location.startsWith('/professional/library')) return { level: 'section', section: 'library', subsection: null };
     if (location.startsWith('/proveedor')) return { level: 'section', section: 'provider', subsection: null };
@@ -239,7 +239,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     if (!href || href === '#') return false;
     // Special case for organization dashboard - should be active when on /dashboard or /organization/dashboard
     if (href === '/organization/dashboard') {
-      return location === '/organization/dashboard' || location === '/dashboard';
+      return location === '/organization/dashboard';
     }
     return location === href || location.startsWith(href + '/');
   };
@@ -265,7 +265,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         id: 'dashboard',
         icon: Home,
         label: 'Dashboard',
-        href: '/dashboard',
+        href: '/organization/dashboard',
         action: 'navigate'
       },
       {

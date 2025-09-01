@@ -107,7 +107,7 @@ export default function Landing() {
                 user ? (
                   // Usuario autenticado
                   <div className="flex items-center space-x-3">
-                    <Link href="/dashboard">
+                    <Link href="/organization/dashboard">
                       <Button 
                         size="sm" 
                         className="h-8 px-3"

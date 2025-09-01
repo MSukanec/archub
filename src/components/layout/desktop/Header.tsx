@@ -125,7 +125,7 @@ export function Header({}: HeaderProps = {}) {
       case 'library': return 'biblioteca';
       case 'provider': return 'proveedor';
       case 'admin': return 'administracion';
-      default: return 'inicio';
+      default: return 'organizacion'; // Default to organization instead of inicio
     }
   };
 
@@ -136,21 +136,6 @@ export function Header({}: HeaderProps = {}) {
       <div className="w-full h-12 px-1 py-2 flex items-center justify-between">
         {/* Left: Navigation Buttons */}
         <div className="flex items-center gap-1">
-          {/* Inicio */}
-          <button
-            onClick={() => {
-              setSidebarLevel('main');
-            }}
-            className={`h-8 flex items-center rounded transition-all duration-200 ${
-              activeSection === 'inicio' 
-                ? 'bg-[var(--main-sidebar-button-hover-bg)] text-white px-3' 
-                : 'w-8 justify-center hover:bg-[var(--main-sidebar-button-hover-bg)]'
-            }`}
-            style={{color: activeSection === 'inicio' ? 'white' : 'var(--main-sidebar-fg)'}}
-          >
-            <Home className="w-4 h-4" />
-            {activeSection === 'inicio' && <span className="ml-2 text-sm">Inicio</span>}
-          </button>
 
           {/* Organización */}
           <button

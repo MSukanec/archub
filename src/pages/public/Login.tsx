@@ -39,7 +39,7 @@ export default function Login() {
           title: "¡Bienvenido!",
           description: "Has iniciado sesión correctamente."
         });
-        navigate("/dashboard");
+        navigate("/organization/dashboard");
       }
     } catch (error) {
       toast({

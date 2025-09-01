@@ -165,7 +165,7 @@ export default function SelectMode() {
       
       // Navigate immediately with React Router
       setSidebarContext('organization');
-      navigate('/dashboard');
+      navigate('/organization/dashboard');
       
       console.log('SelectMode: Navigation completed with fresh user data');
     },

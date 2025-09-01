@@ -75,7 +75,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // Redirect authenticated users away from public routes
     if (isPublicRoute) {
       console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
-      navigate('/dashboard');
+      navigate('/organization/dashboard');
       return;
     }
 

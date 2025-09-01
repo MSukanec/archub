@@ -324,7 +324,7 @@ export function Sidebar() {
     if (location.startsWith('/library')) return 'biblioteca';
     if (location.startsWith('/proveedor')) return 'proveedor';
     if (location.startsWith('/admin')) return 'administracion';
-    if (location === '/dashboard') return null; // Resumen es independiente
+    if (location === '/organization/dashboard') return null; // Dashboard es independiente
     return null;
   };
   // Función para manejar clicks en botones principales
@@ -369,18 +369,18 @@ export function Sidebar() {
   };
   // Función para determinar qué sección está activa en el header
   const getActiveHeaderSection = () => {
-    if (location === '/' || location.includes('/dashboard')) return 'inicio';
-    if (location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
+    if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/construction') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
     if (location.includes('/project')) return 'proyecto';
     if (location.includes('/library')) return 'biblioteca';
     if (location.includes('/proveedor')) return 'proveedor';
     if (location.includes('/admin')) return 'administracion';
-    return 'inicio';
+    return 'organizacion'; // Default to organization instead of inicio
   };
 
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     organization: [
+      { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { 
         id: 'finanzas',
@@ -490,14 +490,8 @@ export function Sidebar() {
       case 'administracion':
         return sidebarContent.admin || [];
       default:
-        // Para la sección de inicio, mostrar un dashboard simple
-        return [{
-          id: 'dashboard',
-          icon: Home,
-          label: 'Dashboard',
-          href: '/dashboard',
-          isActive: location === '/dashboard'
-        }];
+        // Por defecto, mostrar el contenido de organización
+        return sidebarContent.organization || [];
     }
   };
   return (
@@ -549,17 +543,17 @@ export function Sidebar() {
               case 'biblioteca': return 'BIBLIOTECA';
               case 'proveedor': return 'PROVEEDOR';
               case 'administracion': return 'ADMINISTRACIÓN';
-              default: return 'ARCHUB';
+              default: return 'ORGANIZACIÓN';
             }
           };
           
           return (
             <SidebarButton
-              icon={activeSection === 'inicio' ? null : <ArrowLeft className="w-[18px] h-[18px]" />}
+              icon={activeSection === 'organizacion' ? null : <ArrowLeft className="w-[18px] h-[18px]" />}
               label={getSectionLabel()}
               isActive={false}
               isExpanded={isExpanded}
-              onClick={activeSection === 'inicio' ? undefined : goToMainLevel}
+              onClick={activeSection === 'organizacion' ? undefined : goToMainLevel}
               variant="main"
               isHeaderButton={true}
             />
