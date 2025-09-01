@@ -891,18 +891,24 @@ export default function MovementsList() {
       width: "8%",
       sortable: true,
       sortType: "string" as const,
-      render: (item: Movement | ConversionGroup) => (
-        <div className="flex justify-center">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={item.creator?.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {item.creator?.full_name?.charAt(0) ||
-                item.creator?.email?.charAt(0) ||
-                "U"}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      ),
+      render: (item: Movement | ConversionGroup) => {
+        const movementData = item as any;
+        const memberName = movementData.member || item.creator?.full_name;
+        const memberAvatar = movementData.member_avatar || item.creator?.avatar_url;
+        
+        return (
+          <div className="flex justify-center">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={memberAvatar} />
+              <AvatarFallback className="text-xs">
+                {memberName?.charAt(0) ||
+                  item.creator?.email?.charAt(0) ||
+                  "U"}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        );
+      },
     },
     {
       key: "type",
@@ -965,18 +971,8 @@ export default function MovementsList() {
           const subcatLower = subcategoryName?.toLowerCase() || '';
           const movementData = movement as any;
           
-          console.log('🔍 Movement data check:', {
-            subcategory: subcategoryName,
-            subcatLower,
-            client: movementData.client,
-            partner: movementData.partner,
-            subcontract: movementData.subcontract,
-            movementId: movementData.id
-          });
-          
           // Para subcontratos - usar la columna "subcontract" de la vista
           if (subcatLower.includes('subcontrato') && movementData.subcontract) {
-            console.log('✅ Found subcontract:', movementData.subcontract);
             return movementData.subcontract;
           }
           
@@ -984,7 +980,6 @@ export default function MovementsList() {
           if ((subcatLower.includes('aporte') && subcatLower.includes('propio')) || 
               (subcatLower.includes('retiro') && subcatLower.includes('propio'))) {
             if (movementData.partner) {
-              console.log('✅ Found partner:', movementData.partner);
               return movementData.partner;
             }
             return null;
@@ -993,7 +988,6 @@ export default function MovementsList() {
           // Para aportes de clientes - usar la columna "client" de la vista
           if (subcatLower.includes('cliente')) {
             if (movementData.client) {
-              console.log('✅ Found client:', movementData.client);
               return movementData.client;
             }
             return null;
