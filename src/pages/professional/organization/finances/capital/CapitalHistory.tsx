@@ -37,6 +37,7 @@ interface CapitalMovement {
   category_name?: string
   subcategory_name?: string
   type_name?: string
+  partner?: string
 }
 
 interface CapitalHistoryProps {
@@ -100,41 +101,8 @@ export function CapitalHistory({
       label: "Socio",
       width: "14.3%",
       render: (item: CapitalMovement) => {
-        let displayName = null
-        
-        // Check if this is an "Aportes de Socios" or "Retiros de Socios" movement that uses partner system
-        const isAporteDeSocios = item.subcategory_id === aportesPropriosConcept?.id
-        const isRetiroDeSocios = item.subcategory_id === retirosPropriosConcept?.id
-        
-        if (isAporteDeSocios || isRetiroDeSocios) {
-          // Find movement partner for this movement
-          const movementPartner = allMovementPartners.find(mp => mp.movement_id === item.id)
-          if (movementPartner?.partners?.contacts) {
-            const contact = movementPartner.partners.contacts
-            if (contact) {
-              displayName = contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-            }
-          }
-        } else {
-          // Use regular member logic for other movements (like Retiros de Socios)
-          let member = item.member
-          
-          // If not available in movement_view, fall back to members list
-          if (!member?.user?.full_name) {
-            const foundMember = members.find(m => m.id === item.member_id)
-            if (foundMember?.user) {
-              const user = Array.isArray(foundMember.user) ? foundMember.user[0] : foundMember.user
-              if (user?.full_name) {
-                displayName = user.full_name
-              }
-            }
-          } else {
-            const user = Array.isArray(member.user) ? member.user[0] : member.user
-            if (user?.full_name) {
-              displayName = user.full_name
-            }
-          }
-        }
+        // Use partner column from movements_view first, then fallback to member
+        let displayName = item.partner
 
         if (!displayName) {
           return <div className="text-sm text-muted-foreground">Sin socio</div>
