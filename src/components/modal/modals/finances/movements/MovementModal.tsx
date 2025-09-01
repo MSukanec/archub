@@ -1007,29 +1007,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (personnelError) throw personnelError
       }
 
-      // Si hay subcontratos seleccionados, guardar las asignaciones en movement_subcontracts
+      // Si hay subcontratos seleccionados, usar hook unificado
       if (selectedSubcontracts && selectedSubcontracts.length > 0) {
-        // Primero eliminar registros existentes si es edición
-        if (isEditing && editingMovement?.id) {
-          const { error: deleteError } = await supabase
-            .from('movement_subcontracts')
-            .delete()
-            .eq('movement_id', editingMovement.id)
-
-          if (deleteError) throw deleteError
+        if (isEditing) {
+          // Modo edición: usar updateMovementSubcontractsMutation
+          await updateMovementSubcontractsMutation.mutateAsync({
+            movementId: result.id,
+            subcontracts: selectedSubcontracts
+          })
+        } else {
+          // Modo creación: usar createMovementSubcontractsMutation
+          await createMovementSubcontractsMutation.mutateAsync({
+            movementId: result.id,
+            subcontracts: selectedSubcontracts
+          })
         }
-        
-        const subcontractsData = selectedSubcontracts.map(subcontract => ({
-          movement_id: result.id,
-          subcontract_id: subcontract.subcontract_id,
-          amount: subcontract.amount
-        }))
-
-        const { error: subcontractsError } = await supabase
-          .from('movement_subcontracts')
-          .insert(subcontractsData)
-
-        if (subcontractsError) throw subcontractsError
       }
 
       // Si hay partners seleccionados (retiros y aportes), usar hook unificado
