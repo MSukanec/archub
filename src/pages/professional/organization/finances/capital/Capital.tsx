@@ -324,21 +324,7 @@ export default function FinancesCapitalMovements() {
     title: "Movimientos de Capital",
     icon: TrendingUp,
     tabs: headerTabs,
-    onTabChange: setActiveTab,
-    actionButton: {
-      label: "Nuevo Aporte",
-      onClick: handleAddAportePpropio,
-      dropdown: [
-        {
-          label: "Aporte Propio",
-          onClick: handleAddAportePpropio
-        },
-        {
-          label: "Retiro Propio", 
-          onClick: handleAddRetiroPpropio
-        }
-      ]
-    }
+    onTabChange: setActiveTab
   }
 
   if (isLoading) {

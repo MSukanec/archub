@@ -84,7 +84,7 @@ export function CapitalHistory({
     {
       key: "movement_date",
       label: "Fecha",
-      width: "14.3%",
+      width: "20%",
       sortable: true,
       sortType: "date" as const,
       render: (item: CapitalMovement) => {
@@ -99,7 +99,7 @@ export function CapitalHistory({
     {
       key: "member",
       label: "Socio",
-      width: "14.3%",
+      width: "20%",
       render: (item: CapitalMovement) => {
         // Use partner column from movements_view first, then fallback to member
         let displayName = item.partner
@@ -125,7 +125,7 @@ export function CapitalHistory({
     {
       key: "type",
       label: "Tipo",
-      width: "14.3%",
+      width: "20%",
       sortable: true,
       sortType: "string" as const,
       render: (item: CapitalMovement) => {
@@ -133,7 +133,7 @@ export function CapitalHistory({
         const isAporte = item.subcategory_id === aportesPropriosConcept?.id || 
                          item.category_id === aportesPropriosOld?.id
         return (
-          <Badge variant={isAporte ? "default" : "secondary"} className="text-xs">
+          <Badge variant={isAporte ? "default" : "secondary"} className="text-sm">
             {item.type_name || 'Sin especificar'}
           </Badge>
         )
@@ -142,7 +142,7 @@ export function CapitalHistory({
     {
       key: "wallet",
       label: "Billetera",
-      width: "14.3%",
+      width: "20%",
       sortable: true,
       sortType: "string" as const,
       render: (item: CapitalMovement) => (
@@ -154,7 +154,7 @@ export function CapitalHistory({
     {
       key: "amount",
       label: "Monto",
-      width: "16.7%",
+      width: "20%",
       sortable: true,
       sortType: "number" as const,
       render: (item: CapitalMovement) => {
@@ -180,7 +180,7 @@ export function CapitalHistory({
     {
       key: "actions",
       label: "Acciones",
-      width: "16.7%",
+      width: "20%",
       render: (item: CapitalMovement) => (
         <div className="flex items-center gap-1">
           <Button
