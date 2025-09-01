@@ -252,9 +252,30 @@ export function Sidebar() {
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
-  
-  
-  
+  // Auto-detect and set correct sidebarLevel based on current location
+  useEffect(() => {
+    if (location.startsWith('/organization/')) {
+      if (sidebarLevel !== 'organization') {
+        setSidebarLevel('organization');
+      }
+    } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/construction/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
+      if (sidebarLevel !== 'project') {
+        setSidebarLevel('project');
+      }
+    } else if (location.startsWith('/library/')) {
+      if (sidebarLevel !== 'library') {
+        setSidebarLevel('library');
+      }
+    } else if (location.startsWith('/proveedor/')) {
+      if (sidebarLevel !== 'provider') {
+        setSidebarLevel('provider');
+      }
+    } else if (location.startsWith('/admin/')) {
+      if (sidebarLevel !== 'admin') {
+        setSidebarLevel('admin');
+      }
+    }
+  }, [location, sidebarLevel, setSidebarLevel]);
   
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
