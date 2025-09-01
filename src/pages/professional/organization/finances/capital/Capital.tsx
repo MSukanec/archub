@@ -29,7 +29,7 @@ export default function FinancesCapitalMovements() {
       // Force partner movement type
       defaultData: { 
         movement_type: 'aportes_propios',
-        subcategory_id: 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' // Aportes Propios
+        subcategory_id: 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Aportes de Clientes (for now)
       }
     })
   }

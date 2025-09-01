@@ -14,9 +14,9 @@ interface CapitalDetailProps {
 }
 
 export default function CapitalDetail({ organizationId, searchValue }: CapitalDetailProps) {
-  // Partner capital concept UUIDs
-  const APORTES_SOCIOS_UUID = 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
-  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
+  // Partner capital concept UUIDs (REAL ONES from database)
+  const APORTES_SOCIOS_UUID = 'f3b96eda-15d5-4c96-ade7-6f53685115d3' // Aportes de Clientes (for now)
+  const RETIROS_SOCIOS_UUID = 'c04a82f8-6fd8-439d-81f7-325c63905a1b' // Retiros Propios (confirmed)
 
   // Fetch partner capital movements
   const { data: movements = [], isLoading } = useQuery({
