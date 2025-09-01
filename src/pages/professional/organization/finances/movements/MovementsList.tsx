@@ -788,7 +788,29 @@ export default function MovementsList() {
       filtered = filtered.filter(m => m.movement_data?.wallet?.name === filterByWallet);
     }
 
-    return groupConversions(filtered);
+    const grouped = groupConversions(filtered);
+    
+    // Remove duplicates by creating unique identifiers
+    const uniqueItems = new Map();
+    
+    grouped.forEach(item => {
+      let uniqueId: string;
+      
+      if ('is_conversion_group' in item) {
+        uniqueId = `conversion_${item.conversion_group_id}`;
+      } else if ('is_transfer_group' in item) {
+        uniqueId = `transfer_${item.transfer_group_id}`;
+      } else {
+        uniqueId = `movement_${item.id}`;
+      }
+      
+      // Only add if not already exists
+      if (!uniqueItems.has(uniqueId)) {
+        uniqueItems.set(uniqueId, item);
+      }
+    });
+    
+    return Array.from(uniqueItems.values());
   }, [
     movements,
     searchValue,
@@ -1382,6 +1404,15 @@ export default function MovementsList() {
             data={processedMovements}
             isLoading={false} // Ya no está cargando cuando llegamos aquí
             selectable={true}
+            getItemId={(item: any) => {
+              if ('is_conversion_group' in item) {
+                return `conversion_${item.conversion_group_id}`;
+              } else if ('is_transfer_group' in item) {
+                return `transfer_${item.transfer_group_id}`;
+              } else {
+                return `movement_${item.id}`;
+              }
+            }}
           defaultSort={{
             key: "movement_date",
             direction: "desc",
@@ -1575,7 +1606,6 @@ export default function MovementsList() {
           ) as Movement[];
           setSelectedMovements(regularMovements);
         }}
-        getItemId={(item) => item.id}
         renderCard={(item: any) => {
           if ('is_conversion_group' in item) {
             // Render ConversionRow with SwipeableCard for conversion groups
