@@ -1018,10 +1018,19 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       ]
       
       if (allPartners.length > 0) {
-        await createMovementPartnersMutation.mutateAsync({
-          movementId: result.id,
-          partners: allPartners
-        })
+        if (isEditing && editingMovement?.id) {
+          // Si es edición, usar update en lugar de create
+          await updateMovementPartnersMutation.mutateAsync({
+            movementId: result.id,
+            partners: allPartners
+          })
+        } else {
+          // Si es nuevo, usar create
+          await createMovementPartnersMutation.mutateAsync({
+            movementId: result.id,
+            partners: allPartners
+          })
+        }
       }
 
       // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
