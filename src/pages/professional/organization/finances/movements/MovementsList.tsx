@@ -965,9 +965,9 @@ export default function MovementsList() {
           const subcatLower = subcategoryName?.toLowerCase() || '';
           const movementData = movement as any;
           
-          // Para subcontratos - usar la nueva columna "subcontract" de la vista
-          if (subcatLower.includes('subcontrato') && movementData.subcontract) {
-            return movementData.subcontract;
+          // Para subcontratos - usar los datos de subcontracts que ya están cargados
+          if (subcatLower.includes('subcontrato') && movementData.subcontracts && movementData.subcontracts.length > 0) {
+            return movementData.subcontracts[0].contact_name;
           }
           
           // Para aportes propios y retiros propios, obtener info de socios
