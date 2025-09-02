@@ -96,6 +96,7 @@ export function ComboBox({
           aria-expanded={open}
           className={cn(
             "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1",
+            "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive aria-[invalid=true]:ring-1",
             !selectedOption && "text-[var(--input-placeholder)]",
             className
           )}

@@ -54,6 +54,8 @@ export default function DatePickerField({
           className={cn(
             // Exact SelectTrigger styles matching SELECT and INPUT components
             "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-2.5 md:py-2 px-3 md:px-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer",
+            // Validation error styling
+            "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive aria-[invalid=true]:ring-1",
             // Placeholder text styling
             !value && "text-[var(--input-placeholder)]",
             disabled && "cursor-not-allowed opacity-60",
