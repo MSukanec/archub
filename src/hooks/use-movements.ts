@@ -122,7 +122,10 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           indirect_id,
           indirect
         `)
-        .eq('organization_id', organizationId)
+        
+      console.log('🔍 QUERY DEBUG: About to execute query with select fields including indirect_id and indirect');
+      
+      query = query.eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
         .order('created_at', { ascending: false });
 
