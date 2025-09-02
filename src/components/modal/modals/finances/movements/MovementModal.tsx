@@ -59,6 +59,7 @@ const conversionSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
+  project_id: z.string().optional().nullable(),
   // Campos de origen (egreso)
   currency_id_from: z.string().min(1, 'Moneda origen es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
@@ -434,6 +435,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
+      project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null)),
       currency_id_from: editingMovement?.currency_id_from || defaultCurrency || '',
       wallet_id_from: editingMovement?.wallet_id_from || defaultWallet || '',
       amount_from: editingMovement?.amount_from || 0,
@@ -508,6 +510,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     conversionForm.setValue('movement_date', commonValues.movement_date)
     conversionForm.setValue('description', commonValues.description)
     conversionForm.setValue('created_by', commonValues.created_by)
+    conversionForm.setValue('project_id', form.getValues('project_id'))
     
     transferForm.setValue('type_id', newTypeId)
     transferForm.setValue('movement_date', commonValues.movement_date)
@@ -545,6 +548,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('description', commonValues.description)
       conversionForm.setValue('created_by', commonValues.created_by)
       conversionForm.setValue('type_id', selectedTypeId || commonValues.type_id)
+      conversionForm.setValue('project_id', form.getValues('project_id'))
 
     } else if (movementType === 'transfer') {
       transferForm.setValue('movement_date', commonValues.movement_date)
@@ -598,6 +602,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('description', movement.description)
       conversionForm.setValue('created_by', movement.created_by)
       conversionForm.setValue('type_id', selectedTypeId)
+      conversionForm.setValue('project_id', movement.project_id)
       
       // Datos de origen (usando los nombres correctos del formulario)
       conversionForm.setValue('currency_id_from', originMovement.currency_id)
@@ -1534,7 +1539,100 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const conversionPanel = (
     <Form {...conversionForm} key={`conversion-${movementType}`}>
       <form onSubmit={conversionForm.handleSubmit(onSubmitConversion)} className="space-y-4">
-        {/* 4. CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
+        {/* CAMPOS COMUNES PARA CONVERSIONES */}
+        {/* Selector de proyecto (solo en contexto organizacional) */}
+        {isOrganizationalContext && (
+          <FormField
+            control={conversionForm.control}
+            name="project_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proyecto *</FormLabel>
+                <FormControl>
+                  <ProjectSelectorField
+                    projects={projects || []}
+                    organization={userData?.organization || undefined}
+                    value={field.value || null}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar proyecto..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {/* Fecha */}
+        <FormField
+          control={conversionForm.control}
+          name="movement_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha *</FormLabel>
+              <FormControl>
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar fecha..."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Tipo de Movimiento */}
+        <FormField
+          control={conversionForm.control}
+          name="type_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Movimiento *</FormLabel>
+              <Select 
+                value={selectedTypeId} 
+                onValueChange={(value) => {
+                  handleTypeChange(value)
+                  field.onChange(value)
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {movementConcepts?.map((concept) => (
+                    <SelectItem key={concept.id} value={concept.id}>
+                      {concept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Descripción */}
+        <FormField
+          control={conversionForm.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción de la conversión..."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
           form={conversionForm}
           currencies={currencies || []}
