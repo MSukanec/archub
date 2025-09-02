@@ -9,6 +9,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { PersonnelFields } from './PersonnelFields'
 import { SubcontractsFields } from './SubcontractsFields'
 import { ClientsFields } from './ClientsFields'
+import { IndirectFields } from './IndirectFields'
 import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
 import { PartnerContributionsFields } from './PartnerContributionsFields'
 import { CommitmentItem } from './ClientsFields'
@@ -22,11 +23,13 @@ interface DefaultFieldsProps {
   selectedPersonnel?: Array<{personnel_id: string, contact_name: string}>
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
+  selectedIndirects?: Array<{indirect_id: string, indirect_name: string}>
   selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string}>
   selectedPartnerContributions?: Array<{partner_id: string, partner_name: string}>
   onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string}>) => void
   onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
+  onIndirectsChange?: (indirectsList: Array<{indirect_id: string, indirect_name: string}>) => void
   onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
   onPartnerContributionsChange?: (partnerContributionsList: Array<{partner_id: string, partner_name: string}>) => void
   // Props para el selector de proyecto
@@ -52,11 +55,13 @@ export function DefaultMovementFields({
   selectedPersonnel = [],
   selectedSubcontracts = [],
   selectedClients = [],
+  selectedIndirects = [],
   selectedPartnerWithdrawals = [],
   selectedPartnerContributions = [],
   onPersonnelChange,
   onSubcontractsChange,
   onClientsChange,
+  onIndirectsChange,
   onPartnerWithdrawalsChange,
   onPartnerContributionsChange,
   projects = [],
@@ -238,6 +243,16 @@ export function DefaultMovementFields({
           <ClientsFields 
             selectedClients={selectedClients}
             onClientsChange={onClientsChange}
+            projectId={form.watch('project_id')}
+          />
+        </div>
+      )}
+
+      {selectedCategoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0' && onIndirectsChange && (
+        <div className="col-span-2">
+          <IndirectFields 
+            selectedIndirects={selectedIndirects}
+            onIndirectsChange={onIndirectsChange}
             projectId={form.watch('project_id')}
           />
         </div>

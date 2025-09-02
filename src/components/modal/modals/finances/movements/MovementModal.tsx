@@ -173,6 +173,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
+  const [selectedIndirects, setSelectedIndirects] = React.useState<Array<{indirect_id: string, indirect_name: string}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
@@ -1627,11 +1628,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           selectedPersonnel={selectedPersonnel}
           selectedSubcontracts={selectedSubcontracts}
           selectedClients={selectedClients}
+          selectedIndirects={selectedIndirects}
           selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
           selectedPartnerContributions={selectedPartnerContributions}
           onPersonnelChange={setSelectedPersonnel}
           onSubcontractsChange={setSelectedSubcontracts}
           onClientsChange={setSelectedClients}
+          onIndirectsChange={setSelectedIndirects}
           onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
           onPartnerContributionsChange={setSelectedPartnerContributions}
         />
@@ -1845,11 +1848,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             selectedPersonnel={selectedPersonnel}
             selectedSubcontracts={selectedSubcontracts}
             selectedClients={selectedClients}
+            selectedIndirects={selectedIndirects}
             selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
             selectedPartnerContributions={selectedPartnerContributions}
             onPersonnelChange={setSelectedPersonnel}
             onSubcontractsChange={setSelectedSubcontracts}
             onClientsChange={setSelectedClients}
+            onIndirectsChange={setSelectedIndirects}
             onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
             onPartnerContributionsChange={setSelectedPartnerContributions}
           />
