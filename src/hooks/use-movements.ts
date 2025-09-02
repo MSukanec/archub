@@ -204,6 +204,19 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       });
 
       console.log('Transformed movements:', transformedData.length);
+      
+      // Debug: Log movements with indirect data
+      const indirectMovements = transformedData.filter(m => m.category_name === 'Indirectos');
+      if (indirectMovements.length > 0) {
+        console.log('🔍 Indirect movements debug:', indirectMovements.map(m => ({
+          id: m.id,
+          description: m.description,
+          category_name: m.category_name,
+          indirect_id: m.indirect_id,
+          indirect: m.indirect
+        })));
+      }
+      
       return transformedData as Movement[];
     },
     enabled: !!organizationId
