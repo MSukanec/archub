@@ -39,6 +39,13 @@ interface Movement {
     };
   };
   
+  // Datos específicos de la vista movements_view
+  partner?: string;
+  subcontract?: string;
+  client?: string;
+  member?: string;
+  indirect?: string;
+  
   // Proyecto expandido
   project?: {
     name: string;
@@ -105,6 +112,32 @@ const getConceptFullName = (movement: Movement): string => {
   return 'Sin categoría';
 };
 
+// Helper para obtener el texto de la tercera línea específica
+const getSpecificThirdLine = (movement: Movement): string | null => {
+  // Prioridad: partner -> subcontract -> client -> member -> indirect
+  if (movement.partner) {
+    return movement.partner;
+  }
+  
+  if (movement.subcontract) {
+    return movement.subcontract;
+  }
+  
+  if (movement.client) {
+    return movement.client;
+  }
+  
+  if (movement.member) {
+    return movement.member;
+  }
+  
+  if (movement.indirect) {
+    return movement.indirect;
+  }
+  
+  return null;
+};
+
 export default function MovementRow({ 
   movement, 
   onClick, 
@@ -158,6 +191,9 @@ export default function MovementRow({
     return 'A';
   };
 
+  // Obtener la información específica de la tercera línea
+  const specificThirdLine = getSpecificThirdLine(movement);
+
   // Contenido interno del card
   const cardContent = (
     <>
@@ -169,6 +205,11 @@ export default function MovementRow({
         {movement.movement_data?.subcategory?.name && (
           <div className="text-muted-foreground text-sm truncate">
             {movement.movement_data?.subcategory?.name}
+          </div>
+        )}
+        {specificThirdLine && (
+          <div className="text-muted-foreground text-sm truncate">
+            {specificThirdLine}
           </div>
         )}
       </div>
