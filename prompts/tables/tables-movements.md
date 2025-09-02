@@ -367,5 +367,13 @@ VISTA MOVEMENTS_VIEW:
   {
     "column_name": "member_avatar",
     "data_type": "text"
+  },
+  {
+    "column_name": "indirect_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "indirect",
+    "data_type": "text"
   }
 ]
