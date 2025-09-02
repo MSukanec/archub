@@ -951,16 +951,23 @@ export default function MovementsList() {
         const typeName = movement.movement_data?.type?.name || "Sin tipo";
         const categoryName = movement.movement_data?.category?.name || movement.category_name || "";
         
-        // Determinar el valor seleccionado basado en los datos disponibles (solo si realmente existen)
+        // Determinar el valor seleccionado basado en la categoría específica (solo si corresponde)
         let selectedValue = "";
-        if (movement.partner && movement.partner.trim() !== "") {
-          selectedValue = movement.partner;
-        } else if (movement.subcontract && movement.subcontract.trim() !== "") {
-          selectedValue = movement.subcontract;
-        } else if (movement.client && movement.client.trim() !== "") {
+        const categoryId = movement.category_id || movement.subcategory_id; // Usar subcategory_id si category_id es null (migración)
+        
+        // Solo mostrar datos específicos según UUIDs exactos
+        if (categoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && movement.client && movement.client.trim() !== "") {
+          // Aportes de Clientes
           selectedValue = movement.client;
-        } else if (movement.member && movement.member.trim() !== "") {
+        } else if (categoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && movement.subcontract && movement.subcontract.trim() !== "") {
+          // Subcontratos
+          selectedValue = movement.subcontract;
+        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.member && movement.member.trim() !== "") {
+          // Mano de Obra (Personal)
           selectedValue = movement.member;
+        } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
+          // Aportes Propios o Retiros Propios
+          selectedValue = movement.partner;
         }
         
         return (
