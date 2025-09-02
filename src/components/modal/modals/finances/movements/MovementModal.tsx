@@ -896,7 +896,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .from('movement_indirects')
         .select(`
           indirect_id,
-          project_id,
           indirect_costs:indirect_id (
             id,
             name
@@ -1132,8 +1131,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         
         const indirectsData = selectedIndirects.map(indirect => ({
           movement_id: result.id,
-          indirect_id: indirect.indirect_id,
-          project_id: data.project_id || null // CRÍTICO: Usar el project_id del formulario
+          indirect_id: indirect.indirect_id
         }))
 
         const { error: indirectsError } = await supabase
