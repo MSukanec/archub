@@ -951,15 +951,15 @@ export default function MovementsList() {
         const typeName = movement.movement_data?.type?.name || "Sin tipo";
         const categoryName = movement.movement_data?.category?.name || movement.category_name || "";
         
-        // Determinar el valor seleccionado basado en los datos disponibles
+        // Determinar el valor seleccionado basado en los datos disponibles (solo si realmente existen)
         let selectedValue = "";
-        if (movement.partner) {
+        if (movement.partner && movement.partner.trim() !== "") {
           selectedValue = movement.partner;
-        } else if (movement.subcontract) {
+        } else if (movement.subcontract && movement.subcontract.trim() !== "") {
           selectedValue = movement.subcontract;
-        } else if (movement.client) {
+        } else if (movement.client && movement.client.trim() !== "") {
           selectedValue = movement.client;
-        } else if (movement.member) {
+        } else if (movement.member && movement.member.trim() !== "") {
           selectedValue = movement.member;
         }
         
