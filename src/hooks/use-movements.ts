@@ -165,6 +165,18 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           indirect: data[0]?.indirect,
           has_indirect_columns: 'indirect_id' in data[0] && 'indirect' in data[0]
         })
+        
+        // DEBUG: Test specific query for movements with indirect data
+        console.log('🔍 TESTING SPECIFIC INDIRECT QUERY...')
+        const testQuery = await supabase
+          .from('movements_view')
+          .select('id, description, category_name, indirect_id, indirect')
+          .eq('organization_id', organizationId)
+          .eq('category_name', 'Indirectos')
+          .not('indirect_id', 'is', null)
+          .limit(5)
+          
+        console.log('🔍 SPECIFIC INDIRECT QUERY RESULT:', testQuery.data)
       }
 
       // All data now comes from the view, no need for additional queries
