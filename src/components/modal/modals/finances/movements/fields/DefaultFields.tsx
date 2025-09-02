@@ -222,7 +222,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedCategoryId === 'd376d404-734a-47a9-b851-d112d64147db' && onSubcontractsChange && (
+      {selectedCategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && onSubcontractsChange && (
         <div className="col-span-2">
           <SubcontractsFields 
             selectedSubcontracts={selectedSubcontracts}
