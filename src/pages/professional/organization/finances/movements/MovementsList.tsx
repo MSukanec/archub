@@ -917,30 +917,68 @@ export default function MovementsList() {
     {
       key: "type",
       label: "Tipo",
-      width: "5%",
+      width: "8%",
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <span className="text-xs font-medium">
-              Conversión
-            </span>
+            <div className="space-y-0.5">
+              <Badge 
+                variant="outline" 
+                className="text-xs px-1.5 py-0.5 bg-blue-50 border-blue-200 text-blue-700"
+              >
+                Conversión
+              </Badge>
+            </div>
           );
         }
         
         if ('is_transfer_group' in item) {
           return (
-            <span className="text-xs font-medium">
-              Transferencia
-            </span>
+            <div className="space-y-0.5">
+              <Badge 
+                variant="outline" 
+                className="text-xs px-1.5 py-0.5 bg-green-50 border-green-200 text-green-700"
+              >
+                Transferencia
+              </Badge>
+            </div>
           );
         }
         
+        const movement = item as Movement;
+        const typeName = movement.movement_data?.type?.name || "Sin tipo";
+        const categoryName = movement.movement_data?.category?.name || movement.category_name || "";
+        
+        // Determinar el valor seleccionado basado en los datos disponibles
+        let selectedValue = "";
+        if (movement.partner) {
+          selectedValue = movement.partner;
+        } else if (movement.subcontract) {
+          selectedValue = movement.subcontract;
+        } else if (movement.client) {
+          selectedValue = movement.client;
+        } else if (movement.member) {
+          selectedValue = movement.member;
+        }
+        
         return (
-          <span className="text-xs font-medium">
-            {item.movement_data?.type?.name || "Sin tipo"}
-          </span>
+          <div className="space-y-0.5">
+            <div className="text-xs font-medium text-gray-900">
+              {typeName}
+            </div>
+            {categoryName && (
+              <div className="text-xs text-gray-600">
+                {categoryName}
+              </div>
+            )}
+            {selectedValue && (
+              <div className="text-xs text-gray-500 truncate max-w-[120px]" title={selectedValue}>
+                {selectedValue}
+              </div>
+            )}
+          </div>
         );
       },
     },
