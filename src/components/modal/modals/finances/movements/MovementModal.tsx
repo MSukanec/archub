@@ -190,12 +190,17 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       if (movementData.type_id) {
         setSelectedTypeId(movementData.type_id)
       }
+      
+      // Migration logic: if category_id is null but subcategory_id exists, use subcategory_id as category_id
       if (movementData.category_id) {
         setSelectedCategoryId(movementData.category_id)
+      } else if (movementData.subcategory_id) {
+        // Migration: subcategory_id becomes category_id
+        setSelectedCategoryId(movementData.subcategory_id)
       }
-      if (movementData.subcategory_id) {
-        setSelectedSubcategoryId(movementData.subcategory_id)
-      }
+      
+      // Clear subcategory since they no longer exist
+      setSelectedSubcategoryId('')
       
       // Determine movement type based on the type_id
       if (movementData.type_id && movementConcepts) {

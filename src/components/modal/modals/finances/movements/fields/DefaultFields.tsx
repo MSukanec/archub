@@ -19,7 +19,6 @@ interface DefaultFieldsProps {
   wallets: any[]
   // Props para campos integrados
   selectedCategoryId?: string
-  selectedSubcategoryId?: string
   selectedPersonnel?: Array<{personnel_id: string, contact_name: string}>
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
@@ -50,7 +49,6 @@ export function DefaultMovementFields({
   currencies,
   wallets,
   selectedCategoryId,
-  selectedSubcategoryId,
   selectedPersonnel = [],
   selectedSubcontracts = [],
   selectedClients = [],
@@ -233,7 +231,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {(selectedCategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' || selectedSubcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3') && onClientsChange && (
+      {selectedCategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && onClientsChange && (
         <div className="col-span-2">
           <ClientsFields 
             selectedClients={selectedClients}
