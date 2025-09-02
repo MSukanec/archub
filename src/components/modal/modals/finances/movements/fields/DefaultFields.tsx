@@ -18,7 +18,7 @@ interface DefaultFieldsProps {
   currencies: any[]
   wallets: any[]
   // Props para campos integrados
-  selectedSubcategoryId?: string
+  selectedCategoryId?: string
   selectedPersonnel?: Array<{personnel_id: string, contact_name: string}>
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
@@ -48,7 +48,7 @@ export function DefaultMovementFields({
   form,
   currencies,
   wallets,
-  selectedSubcategoryId,
+  selectedCategoryId,
   selectedPersonnel = [],
   selectedSubcontracts = [],
   selectedClients = [],
@@ -212,8 +212,8 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {/* CAMPOS ESPECÍFICOS SEGÚN SUBCATEGORÍA */}
-      {selectedSubcategoryId === '7ef27d3f-ef17-49c3-a392-55282b3576ff' && onPersonnelChange && (
+      {/* CAMPOS ESPECÍFICOS SEGÚN CATEGORÍA */}
+      {selectedCategoryId === 'd376d404-734a-47a9-b851-d112d64147db' && onPersonnelChange && (
         <div className="col-span-2">
           <PersonnelFields 
             selectedPersonnel={selectedPersonnel}
@@ -222,7 +222,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedSubcategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && onSubcontractsChange && (
+      {selectedCategoryId === 'd376d404-734a-47a9-b851-d112d64147db' && onSubcontractsChange && (
         <div className="col-span-2">
           <SubcontractsFields 
             selectedSubcontracts={selectedSubcontracts}
@@ -231,7 +231,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedSubcategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && onClientsChange && (
+      {selectedCategoryId === '4fc83536-001c-4e27-ab50-68734369baad' && onClientsChange && (
         <div className="col-span-2">
           <ClientsFields 
             selectedClients={selectedClients}
@@ -240,7 +240,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedSubcategoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
+      {selectedCategoryId === 'f1234567-89ab-cdef-0123-456789abcdef' && onPartnerWithdrawalsChange && (
         <div className="col-span-2">
           <PartnerWithdrawalsFields 
             selectedPartnerWithdrawals={selectedPartnerWithdrawals}
@@ -249,7 +249,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedSubcategoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' && onPartnerContributionsChange && (
+      {selectedCategoryId === 'f1234567-89ab-cdef-0123-456789abcdef' && onPartnerContributionsChange && (
         <div className="col-span-2">
           <PartnerContributionsFields 
             selectedPartnerContributions={selectedPartnerContributions}

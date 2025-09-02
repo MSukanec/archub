@@ -1618,7 +1618,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           form={form}
           currencies={currencies || []}
           wallets={wallets || []}
-          selectedSubcategoryId={selectedSubcategoryId}
+          selectedCategoryId={selectedCategoryId}
           selectedPersonnel={selectedPersonnel}
           selectedSubcontracts={selectedSubcontracts}
           selectedClients={selectedClients}
@@ -1836,7 +1836,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             form={form}
             currencies={currencies || []}
             wallets={wallets || []}
-            selectedSubcategoryId={selectedSubcategoryId}
+            selectedCategoryId={selectedCategoryId}
             selectedPersonnel={selectedPersonnel}
             selectedSubcontracts={selectedSubcontracts}
             selectedClients={selectedClients}
