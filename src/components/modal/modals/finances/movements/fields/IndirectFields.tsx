@@ -69,7 +69,7 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
     if (indirectId !== expectedIndirectId) {
       setIndirectId(expectedIndirectId)
     }
-  }, [selectedIndirects, indirectId])
+  }, [selectedIndirects, indirectId, indirectCosts])
 
   return (
     <div className="space-y-4">

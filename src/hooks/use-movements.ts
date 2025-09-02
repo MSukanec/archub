@@ -123,8 +123,6 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           indirect
         `)
         
-      console.log('🔍 QUERY DEBUG: About to execute query with select fields including indirect_id and indirect');
-      
       query = query.eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
         .order('created_at', { ascending: false });
@@ -159,6 +157,14 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         })
         console.log('Expected organization_id:', organizationId)
         console.log('Expected project_id:', projectId)
+        
+        // Debug: Check specific indirect data immediately after query
+        console.log('🔍 FIRST MOVEMENT FROM QUERY:', {
+          id: data[0]?.id,
+          indirect_id: data[0]?.indirect_id,
+          indirect: data[0]?.indirect,
+          has_indirect_columns: 'indirect_id' in data[0] && 'indirect' in data[0]
+        })
       }
 
       // All data now comes from the view, no need for additional queries
