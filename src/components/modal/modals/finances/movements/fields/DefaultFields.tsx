@@ -231,7 +231,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {selectedCategoryId === '4fc83536-001c-4e27-ab50-68734369baad' && onClientsChange && (
+      {selectedCategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && onClientsChange && (
         <div className="col-span-2">
           <ClientsFields 
             selectedClients={selectedClients}
