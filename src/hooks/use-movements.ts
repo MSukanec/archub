@@ -158,25 +158,6 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         console.log('Expected organization_id:', organizationId)
         console.log('Expected project_id:', projectId)
         
-        // Debug: Check specific indirect data immediately after query
-        console.log('🔍 FIRST MOVEMENT FROM QUERY:', {
-          id: data[0]?.id,
-          indirect_id: data[0]?.indirect_id,
-          indirect: data[0]?.indirect,
-          has_indirect_columns: 'indirect_id' in data[0] && 'indirect' in data[0]
-        })
-        
-        // DEBUG: Test specific query for movements with indirect data
-        console.log('🔍 TESTING SPECIFIC INDIRECT QUERY...')
-        const testQuery = await supabase
-          .from('movements_view')
-          .select('id, description, category_name, indirect_id, indirect')
-          .eq('organization_id', organizationId)
-          .eq('category_name', 'Indirectos')
-          .not('indirect_id', 'is', null)
-          .limit(5)
-          
-        console.log('🔍 SPECIFIC INDIRECT QUERY RESULT:', testQuery.data)
       }
 
       // All data now comes from the view, no need for additional queries
@@ -226,29 +207,6 @@ export function useMovements(organizationId: string | undefined, projectId: stri
 
       console.log('Transformed movements:', transformedData.length);
       
-      // Debug: Log raw data before transformation
-      const rawIndirectMovements = data.filter(m => m.category_name === 'Indirectos');
-      if (rawIndirectMovements.length > 0) {
-        console.log('🔍 RAW Indirect movements from DB:', rawIndirectMovements.map(m => ({
-          id: m.id,
-          description: m.description,
-          category_name: m.category_name,
-          indirect_id: m.indirect_id,
-          indirect: m.indirect
-        })));
-      }
-      
-      // Debug: Log movements with indirect data AFTER transformation
-      const indirectMovements = transformedData.filter(m => m.category_name === 'Indirectos');
-      if (indirectMovements.length > 0) {
-        console.log('🔍 TRANSFORMED Indirect movements debug:', indirectMovements.map(m => ({
-          id: m.id,
-          description: m.description,
-          category_name: m.category_name,
-          indirect_id: m.indirect_id,
-          indirect: m.indirect
-        })));
-      }
       
       return transformedData as Movement[];
     },
