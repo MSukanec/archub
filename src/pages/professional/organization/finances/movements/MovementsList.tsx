@@ -924,12 +924,12 @@ export default function MovementsList() {
         if ('is_conversion_group' in item) {
           return (
             <div className="space-y-0.5">
-              <Badge 
-                variant="outline" 
-                className="text-xs px-1.5 py-0.5 bg-blue-50 border-blue-200 text-blue-700"
-              >
+              <div className="text-xs font-medium text-gray-900">
                 Conversión
-              </Badge>
+              </div>
+              <div className="text-xs text-gray-600">
+                {item.from_currency} → {item.to_currency}
+              </div>
             </div>
           );
         }
@@ -937,12 +937,9 @@ export default function MovementsList() {
         if ('is_transfer_group' in item) {
           return (
             <div className="space-y-0.5">
-              <Badge 
-                variant="outline" 
-                className="text-xs px-1.5 py-0.5 bg-green-50 border-green-200 text-green-700"
-              >
+              <div className="text-xs font-medium text-gray-900">
                 Transferencia
-              </Badge>
+              </div>
             </div>
           );
         }
