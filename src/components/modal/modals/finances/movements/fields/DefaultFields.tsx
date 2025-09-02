@@ -218,6 +218,7 @@ export function DefaultMovementFields({
           <PersonnelFields 
             selectedPersonnel={selectedPersonnel}
             onPersonnelChange={onPersonnelChange}
+            projectId={form.watch('project_id')}
           />
         </div>
       )}
@@ -227,6 +228,7 @@ export function DefaultMovementFields({
           <SubcontractsFields 
             selectedSubcontracts={selectedSubcontracts}
             onSubcontractsChange={onSubcontractsChange}
+            projectId={form.watch('project_id')}
           />
         </div>
       )}
@@ -236,6 +238,7 @@ export function DefaultMovementFields({
           <ClientsFields 
             selectedClients={selectedClients}
             onClientsChange={onClientsChange}
+            projectId={form.watch('project_id')}
           />
         </div>
       )}

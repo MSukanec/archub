@@ -19,14 +19,15 @@ export interface CommitmentItem {
 interface ClientsFieldsProps {
   selectedClients: CommitmentItem[]
   onClientsChange: (commitments: CommitmentItem[]) => void
+  projectId?: string
 }
 
 export const ClientsFields: React.FC<ClientsFieldsProps> = ({
   selectedClients,
-  onClientsChange
+  onClientsChange,
+  projectId
 }) => {
   const { data: userData } = useCurrentUser()
-  const projectId = userData?.preferences?.last_project_id
   const organizationId = userData?.organization?.id
 
   const { data: projectClients = [], isLoading: clientsLoading } = useProjectClients(

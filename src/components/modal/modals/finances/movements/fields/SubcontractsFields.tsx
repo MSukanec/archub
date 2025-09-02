@@ -14,11 +14,13 @@ export interface SubcontractItem {
 interface SubcontractsFieldsProps {
   selectedSubcontracts: SubcontractItem[]
   onSubcontractsChange: (subcontractsList: SubcontractItem[]) => void
+  projectId?: string
 }
 
 export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
   selectedSubcontracts,
-  onSubcontractsChange
+  onSubcontractsChange,
+  projectId
 }) => {
   // Single subcontract state for simplified interface
   const [subcontractId, setSubcontractId] = useState(
@@ -27,7 +29,6 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
   
   // Get current user data to access project info
   const { data: userData } = useCurrentUser()
-  const projectId = userData?.preferences?.last_project_id
 
   // Get project subcontracts
   const { data: projectSubcontracts = [], isLoading } = useProjectSubcontracts(projectId)

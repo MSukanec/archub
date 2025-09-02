@@ -14,11 +14,13 @@ export interface PersonnelItem {
 interface PersonnelFieldsProps {
   selectedPersonnel: PersonnelItem[]
   onPersonnelChange: (personnelList: PersonnelItem[]) => void
+  projectId?: string
 }
 
 export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
   selectedPersonnel,
-  onPersonnelChange
+  onPersonnelChange,
+  projectId
 }) => {
   // Single personnel state for simplified interface
   const [personnelId, setPersonnelId] = useState(
@@ -27,7 +29,6 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
   
   // Get current user data to access project info
   const { data: userData } = useCurrentUser()
-  const projectId = userData?.preferences?.last_project_id
 
   // Get project personnel
   const { data: projectPersonnel = [], isLoading } = useProjectPersonnel(projectId)
