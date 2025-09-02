@@ -205,10 +205,22 @@ export function useMovements(organizationId: string | undefined, projectId: stri
 
       console.log('Transformed movements:', transformedData.length);
       
-      // Debug: Log movements with indirect data
+      // Debug: Log raw data before transformation
+      const rawIndirectMovements = data.filter(m => m.category_name === 'Indirectos');
+      if (rawIndirectMovements.length > 0) {
+        console.log('🔍 RAW Indirect movements from DB:', rawIndirectMovements.map(m => ({
+          id: m.id,
+          description: m.description,
+          category_name: m.category_name,
+          indirect_id: m.indirect_id,
+          indirect: m.indirect
+        })));
+      }
+      
+      // Debug: Log movements with indirect data AFTER transformation
       const indirectMovements = transformedData.filter(m => m.category_name === 'Indirectos');
       if (indirectMovements.length > 0) {
-        console.log('🔍 Indirect movements debug:', indirectMovements.map(m => ({
+        console.log('🔍 TRANSFORMED Indirect movements debug:', indirectMovements.map(m => ({
           id: m.id,
           description: m.description,
           category_name: m.category_name,
