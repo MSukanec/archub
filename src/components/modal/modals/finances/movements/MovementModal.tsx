@@ -743,6 +743,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       loadMovementPersonnel(editingMovement.id)
       loadMovementSubcontracts(editingMovement.id)
       loadMovementProjectClients(editingMovement.id)
+      loadMovementIndirects(editingMovement.id)
     }
 
     // Finalizar carga inicial después de un delay
@@ -888,7 +889,39 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [])
 
+  // Función para cargar costos indirectos asignados al movimiento
+  const loadMovementIndirects = React.useCallback(async (movementId: string) => {
+    try {
+      const { data: indirectAssignments, error } = await supabase
+        .from('movement_indirects')
+        .select(`
+          indirect_id,
+          project_id,
+          indirect_costs:indirect_id (
+            id,
+            name
+          )
+        `)
+        .eq('movement_id', movementId)
 
+      if (error) throw error
+
+      if (indirectAssignments && indirectAssignments.length > 0) {
+        const formattedIndirects = indirectAssignments.map((assignment: any) => {
+          const indirectName = assignment.indirect_costs?.name || 'Sin nombre'
+
+          return {
+            indirect_id: assignment.indirect_id,
+            indirect_name: indirectName
+          }
+        })
+
+        setSelectedIndirects(formattedIndirects)
+      }
+    } catch (error) {
+      console.error('Error loading indirect cost assignments:', error)
+    }
+  }, [])
 
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
@@ -956,6 +989,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .eq('movement_id', editingMovement.id)
 
         if (deleteProjectClientsError) throw deleteProjectClientsError
+
+        // Actualizar costos indirectos asignados - eliminar existentes y crear nuevos
+        const { error: deleteIndirectsError } = await supabase
+          .from('movement_indirects')
+          .delete()
+          .eq('movement_id', editingMovement.id)
+
+        if (deleteIndirectsError) throw deleteIndirectsError
 
         // Actualizar partners (retiros y aportes) - usar hook unificado
         const allPartners = [
@@ -1077,6 +1118,30 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (projectClientsError) throw projectClientsError
       }
 
+      // Si hay costos indirectos seleccionados, guardar las asignaciones en movement_indirects
+      if (selectedIndirects && selectedIndirects.length > 0) {
+        // Primero eliminar registros existentes si es edición
+        if (editingMovement?.id) {
+          const { error: deleteError } = await supabase
+            .from('movement_indirects')
+            .delete()
+            .eq('movement_id', editingMovement.id)
+
+          if (deleteError) throw deleteError
+        }
+        
+        const indirectsData = selectedIndirects.map(indirect => ({
+          movement_id: result.id,
+          indirect_id: indirect.indirect_id,
+          project_id: data.project_id || null // CRÍTICO: Usar el project_id del formulario
+        }))
+
+        const { error: indirectsError } = await supabase
+          .from('movement_indirects')
+          .insert(indirectsData)
+
+        if (indirectsError) throw indirectsError
+      }
 
       return result
     },
