@@ -37,6 +37,8 @@ interface Movement {
   client?: string
   member?: string
   member_avatar?: string
+  indirect_id?: string
+  indirect?: string
   movement_data?: {
     type?: {
       id: string
@@ -116,7 +118,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           subcontract,
           client,
           member,
-          member_avatar
+          member_avatar,
+          indirect_id,
+          indirect
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
@@ -193,7 +197,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           project_color: movement.project_color,
           partner: movement.partner,
           subcontract: movement.subcontract,
-          client: movement.client
+          client: movement.client,
+          indirect_id: movement.indirect_id,
+          indirect: movement.indirect
         }
       });
 
