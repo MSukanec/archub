@@ -1074,64 +1074,70 @@ export default function Movements() {
     {
       key: "type",
       label: "Tipo",
-      width: "5%",
+      width: "8%",
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <span className="text-xs font-medium">
-              Conversión
-            </span>
-          );
-        }
-        
-        if ('is_transfer_group' in item) {
-          return (
-            <span className="text-xs font-medium">
-              Transferencia
-            </span>
-          );
-        }
-        
-        return (
-          <span className="text-xs font-medium">
-            {item.movement_data?.type?.name || "Sin tipo"}
-          </span>
-        );
-      },
-    },
-    {
-      key: "category",
-      label: "Categoría",
-      width: "15%", // Aumentado de 10% a 15% (1.5x)
-      sortable: true,
-      sortType: "string" as const,
-      render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group' in item) {
-          return (
-            <div className="text-xs">
-              <span className="font-bold">Conversión</span> - {item.from_currency} → {item.to_currency}
+            <div className="space-y-0.5">
+              <div className="text-xs font-bold text-gray-900">
+                Conversión
+              </div>
+              <div className="text-xs text-gray-600">
+                {item.from_currency} → {item.to_currency}
+              </div>
             </div>
           );
         }
         
         if ('is_transfer_group' in item) {
           return (
-            <div className="text-xs">
-              <span className="font-bold">Transferencia</span>
+            <div className="space-y-0.5">
+              <div className="text-xs font-bold text-gray-900">
+                Transferencia
+              </div>
             </div>
           );
         }
         
-        const categoryName = item.movement_data?.category?.name || "Sin categoría";
-        const subcategoryName = item.movement_data?.subcategory?.name;
+        const movement = item as Movement;
+        const typeName = movement.movement_data?.type?.name || "Sin tipo";
+        const categoryName = movement.movement_data?.category?.name || "";
+        
+        // Determinar el valor seleccionado basado en la categoría específica
+        let selectedValue = "";
+        const categoryId = movement.category_id || movement.subcategory_id;
+        
+        // Solo mostrar datos específicos según UUIDs exactos
+        if (categoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && movement.client && movement.client.trim() !== "") {
+          // Aportes de Clientes
+          selectedValue = movement.client;
+        } else if (categoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && movement.subcontract && movement.subcontract.trim() !== "") {
+          // Subcontratos
+          selectedValue = movement.subcontract;
+        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.member && movement.member.trim() !== "") {
+          // Mano de Obra (Personal)
+          selectedValue = movement.member;
+        } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
+          // Aportes Propios o Retiros Propios
+          selectedValue = movement.partner;
+        }
         
         return (
-          <div className="space-y-1">
-            <div className="text-xs font-bold">{categoryName}</div>
-            {subcategoryName && (
-              <div className="text-xs text-muted-foreground">{subcategoryName}</div>
+          <div className="space-y-0.5">
+            <div className="text-xs font-bold text-gray-900">
+              {typeName}
+            </div>
+            {categoryName && (
+              <div className="text-xs text-gray-600">
+                {categoryName}
+              </div>
+            )}
+            {selectedValue && (
+              <div className="text-xs text-gray-500 truncate max-w-[120px]" title={selectedValue}>
+                {selectedValue}
+              </div>
             )}
           </div>
         );

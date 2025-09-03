@@ -924,7 +924,7 @@ export default function MovementsList() {
         if ('is_conversion_group' in item) {
           return (
             <div className="space-y-0.5">
-              <div className="text-xs font-medium text-gray-900">
+              <div className="text-xs font-bold text-gray-900">
                 Conversión
               </div>
               <div className="text-xs text-gray-600">
@@ -937,7 +937,7 @@ export default function MovementsList() {
         if ('is_transfer_group' in item) {
           return (
             <div className="space-y-0.5">
-              <div className="text-xs font-medium text-gray-900">
+              <div className="text-xs font-bold text-gray-900">
                 Transferencia
               </div>
             </div>
@@ -969,7 +969,7 @@ export default function MovementsList() {
         
         return (
           <div className="space-y-0.5">
-            <div className="text-xs font-medium text-gray-900">
+            <div className="text-xs font-bold text-gray-900">
               {typeName}
             </div>
             {categoryName && (
