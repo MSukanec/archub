@@ -5,13 +5,14 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import AdminMaterialProducts from './AdminMaterialProducts';
-import AdminMaterialMaterials from './AdminMaterialMaterials';
-import AdminMaterialBrands from './AdminMaterialBrands';
-import AdminMaterialCategories from './AdminMaterialCategories';
-import AdminMaterialPrices from './AdminMaterialPrices';
+import AdminCostProducts from './AdminCostProducts';
+import AdminCostMaterials from './AdminCostMaterials';
+import AdminCostBrands from './AdminCostBrands';
+import AdminCostCategories from './AdminCostCategories';
+import AdminCostPrices from './AdminCostPrices';
+import AdminCostLabor from './AdminCostLabor';
 
-const AdminMaterials = () => {
+const AdminCosts = () => {
   const [activeTab, setActiveTab] = useState('productos');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
@@ -48,7 +49,8 @@ const AdminMaterials = () => {
     { id: 'materiales', label: 'Materiales', isActive: activeTab === 'materiales' },
     { id: 'marcas', label: 'Marcas', isActive: activeTab === 'marcas' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
-    { id: 'precios', label: 'Precios', isActive: activeTab === 'precios' }
+    { id: 'precios', label: 'Precios', isActive: activeTab === 'precios' },
+    { id: 'labor', label: 'Mano de Obra', isActive: activeTab === 'labor' }
   ];
 
   const getActionButton = () => {
@@ -93,13 +95,19 @@ const AdminMaterials = () => {
             console.log('Crear nuevo precio');
           }
         };
+      case 'labor':
+        return {
+          label: "Nuevo Tipo de Mano de Obra",
+          icon: Plus,
+          onClick: () => openModal('labor-type-form', { editingLaborType: null })
+        };
       default:
         return undefined;
     }
   };
 
   const headerProps = {
-    title: "Materiales",
+    title: "Costos",
     icon: Package,
     showSearch: false,
     showFilters: false,
@@ -111,17 +119,19 @@ const AdminMaterials = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'productos':
-        return <AdminMaterialProducts />;
+        return <AdminCostProducts />;
       case 'materiales':
-        return <AdminMaterialMaterials />;
+        return <AdminCostMaterials />;
       case 'marcas':
-        return <AdminMaterialBrands />;
+        return <AdminCostBrands />;
       case 'categorias':
-        return <AdminMaterialCategories />;
+        return <AdminCostCategories />;
       case 'precios':
-        return <AdminMaterialPrices />;
+        return <AdminCostPrices />;
+      case 'labor':
+        return <AdminCostLabor />;
       default:
-        return <AdminMaterialProducts />;
+        return <AdminCostProducts />;
     }
   };
 
@@ -132,4 +142,4 @@ const AdminMaterials = () => {
   );
 };
 
-export default AdminMaterials;
+export default AdminCosts;

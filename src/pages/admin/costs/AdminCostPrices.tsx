@@ -17,7 +17,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 
 import { Plus, Edit, Trash2, Package, DollarSign } from 'lucide-react'
 
-const AdminMaterialPrices = () => {
+const AdminCostPrices = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('updated_at')
   const [filterByMaterial, setFilterByMaterial] = useState('')
@@ -243,4 +243,4 @@ const AdminMaterialPrices = () => {
   )
 }
 
-export default AdminMaterialPrices;
+export default AdminCostPrices;

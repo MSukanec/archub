@@ -15,7 +15,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 
 import { Plus, Edit, Trash2, Tag } from 'lucide-react'
 
-const AdminMaterialBrands = () => {
+const AdminCostBrands = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   
@@ -154,4 +154,4 @@ const AdminMaterialBrands = () => {
   )
 }
 
-export default AdminMaterialBrands
+export default AdminCostBrands

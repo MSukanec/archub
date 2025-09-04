@@ -9,7 +9,7 @@ import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/Hierar
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/hooks/use-material-categories';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
-const AdminMaterialCategories = () => {
+const AdminCostCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
@@ -219,4 +219,4 @@ const AdminMaterialCategories = () => {
   );
 };
 
-export default AdminMaterialCategories;
+export default AdminCostCategories;

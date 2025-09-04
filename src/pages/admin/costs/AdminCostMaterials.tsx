@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 
 import { Plus, Edit, Trash2, Package, Crown, Copy, Wrench } from 'lucide-react'
 
-const AdminMaterialMateriales = () => {
+const AdminCostMaterials = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -376,4 +376,4 @@ const AdminMaterialMateriales = () => {
   )
 }
 
-export default AdminMaterialMateriales
+export default AdminCostMaterials

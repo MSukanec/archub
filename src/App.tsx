@@ -64,7 +64,7 @@ import AdminCommunity from "@/pages/admin/community/AdminCommunity";
 
 
 
-import AdminMaterials from "@/pages/admin/materials/AdminMaterials";
+import AdminCosts from "@/pages/admin/costs/AdminCosts";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 
@@ -201,7 +201,7 @@ function Router() {
 
         <Route path="/admin/materials">
           <AuthAdmin>
-            <AdminMaterials />
+            <AdminCosts />
           </AuthAdmin>
         </Route>
 

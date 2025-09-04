@@ -506,7 +506,7 @@ export function SecondarySidebar() {
     admin: [
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
-      { icon: Database, label: 'Materiales', href: '/admin/materials' },
+      { icon: Database, label: 'Costos', href: '/admin/materials' },
       { icon: Settings, label: 'General', href: '/admin/general' },
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
