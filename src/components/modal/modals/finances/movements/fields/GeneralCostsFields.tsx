@@ -7,7 +7,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 // General cost item interface
 export interface GeneralCostItem {
   general_cost_id: string
-  general_cost_name: string
 }
 
 // Props interface
@@ -32,7 +31,7 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
   const organizationId = userData?.organization?.id
 
   // Get general costs for this organization
-  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId)
+  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null)
 
   // Transform general costs data for ComboBox  
   const generalCostsOptions = generalCosts.map((generalCost: any) => {
@@ -44,18 +43,10 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
 
   const handleGeneralCostChange = (value: string) => {
     setGeneralCostId(value)
-    
-    const selectedGeneralCost = generalCosts.find(g => g.id === value)
-    let generalCostName = 'Sin nombre'
-    
-    if (selectedGeneralCost) {
-      generalCostName = selectedGeneralCost.name || 'Sin nombre'
-    }
 
     if (value) {
       onGeneralCostsChange([{
-        general_cost_id: value,
-        general_cost_name: generalCostName
+        general_cost_id: value
       }])
     } else {
       onGeneralCostsChange([])

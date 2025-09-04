@@ -375,8 +375,34 @@ VISTA MOVEMENTS_VIEW:
   {
     "column_name": "indirect",
     "data_type": "text"
+  },
+  {
+    "column_name": "general_cost_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "general_cost",
+    "data_type": "text"
   }
 ]
 
 TABLE MOVEMENT_GENERAL_COSTS:
 
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "movement_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "general_cost_id",
+    "data_type": "uuid"
+  }
+]

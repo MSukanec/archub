@@ -353,9 +353,7 @@ export const movement_general_costs = pgTable("movement_general_costs", {
   id: uuid("id").primaryKey().defaultRandom(),
   movement_id: uuid("movement_id").notNull(),
   general_cost_id: uuid("general_cost_id").notNull(),
-  general_cost_name: text("general_cost_name").notNull(),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
 });
 
 // Project Installments Table
@@ -411,7 +409,6 @@ export const insertMovementClientSchema = createInsertSchema(movement_clients).o
 export const insertMovementGeneralCostSchema = createInsertSchema(movement_general_costs).omit({
   id: true,
   created_at: true,
-  updated_at: true,
 });
 
 export const insertProjectInstallmentSchema = createInsertSchema(project_installments).omit({

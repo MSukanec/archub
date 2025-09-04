@@ -211,18 +211,6 @@ export default function MovementRow({
   // Obtener la información específica de la tercera línea
   const specificThirdLine = getSpecificThirdLine(movement);
   
-  // Debug específico para el movimiento que vemos en las imágenes
-  if (movement.description?.includes("MSYA") || movement.description?.includes("renders")) {
-    console.log('🔍 Debug movimiento MSYA:', {
-      id: movement.id,
-      description: movement.description,
-      category_name: movement.movement_data?.category?.name,
-      indirect: movement.indirect,
-      indirect_id: (movement as any).indirect_id,
-      specificThirdLine,
-      renderingThirdLine: !!specificThirdLine
-    });
-  }
 
   // Contenido interno del card
   const cardContent = (
