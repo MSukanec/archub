@@ -70,7 +70,7 @@ export default function Finances() {
   };
 
   const headerProps = {
-    icon: <DollarSign className="w-5 h-5" />,
+    icon: DollarSign,
     title: "Finanzas",
     tabs,
     onTabChange: setActiveTab,
