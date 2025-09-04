@@ -362,11 +362,11 @@ export function PageLayout({
                         : onTabChange?.(tab.id)
                     }
                     disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-3 ${
+                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 h-8 ${
                       tab.isDisabled || tab.isRestricted
                         ? "text-muted-foreground opacity-60 cursor-not-allowed"
                         : tab.isActive
-                          ? "text-foreground font-medium border-b-2 border-[var(--accent)] -mb-px"
+                          ? "text-foreground font-medium border-b-2 border-[var(--accent)] -mb-[2px]"
                           : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
