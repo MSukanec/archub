@@ -52,7 +52,7 @@ export default function Media() {
   };
 
   const headerProps = {
-    icon: FileText,
+    icon: <FileText className="w-5 h-5" />,
     title: "Media",
     tabs,
     onTabChange: setActiveTab,

@@ -280,7 +280,7 @@ export default function Logs() {
   ]
 
   const headerProps = {
-    icon: FileText,
+    icon: <FileText className="w-5 h-5" />,
     title: "Bitácora",
     tabs: headerTabs,
     onTabChange: setActiveTab,

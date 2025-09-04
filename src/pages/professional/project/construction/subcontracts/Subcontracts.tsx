@@ -141,7 +141,7 @@ export default function Subcontracts() {
   // Props del header que cambian según la tab activa
   const getHeaderProps = () => {
     const baseProps = {
-      icon: Handshake,
+      icon: <Handshake className="w-5 h-5" />,
       pageTitle: "Subcontratos",
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
@@ -161,7 +161,7 @@ export default function Subcontracts() {
         currencyView: currencyView,
         onCurrencyViewChange: setCurrencyView,
         actionButton: {
-          icon: Plus,
+          icon: <Plus className="w-4 h-4" />,
           label: "Nuevo Subcontrato",
           onClick: handleCreateSubcontract
         }

@@ -333,7 +333,7 @@ export default function Tasks() {
 
   const headerProps = {
     title: "Listado de Tareas",
-    icon: CheckSquare,
+    icon: <CheckSquare className="w-5 h-5" />,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "tasks" ? {
