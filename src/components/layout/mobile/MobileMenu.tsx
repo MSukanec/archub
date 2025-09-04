@@ -648,20 +648,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         </div>
 
         {/* Footer con selector de proyecto y avatar */}
-        <div className="border-t border-[var(--menues-border)] p-4 bg-[var(--card-bg)]">
+        <div className="p-4">
           <div className="flex items-center gap-3">
             {/* Selector de proyecto - lado izquierdo */}
             <div className="flex-1 relative">
               <button
                 onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                className="w-full p-2 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center"
+                className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
               >
-                <FolderOpen className="h-4 w-4 mr-2" />
+                <FolderOpen className="h-5 w-5 mr-3" />
                 <span className="flex-1 truncate text-sm">
                   {currentProjectName}
                 </span>
                 <ChevronDown className={cn(
-                  "h-4 w-4 transition-transform duration-200",
+                  "h-5 w-5 transition-transform duration-200",
                   expandedProjectSelector && "rotate-180"
                 )} />
               </button>
@@ -674,7 +674,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       key={project.id}
                       onClick={() => handleProjectSelect(project.id)}
                       className={cn(
-                        "w-full p-2 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--menues-fg)]",
+                        "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--menues-fg)]",
                         project.id === effectiveCurrentProject && "bg-[hsl(76,100%,40%)] text-white"
                       )}
                     >
@@ -687,14 +687,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
             {/* Avatar del usuario - lado derecho */}
             <Avatar 
-              className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity"
+              className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
                 navigate('/profile');
                 handleCloseMenu();
               }}
             >
               <AvatarImage src={userData?.user?.avatar_url} />
-              <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
+              <AvatarFallback className="bg-[var(--accent)] text-white text-sm">
                 {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
