@@ -86,8 +86,8 @@ export function PrimarySidebar() {
       }}
     >
       {/* Navigation Items */}
-      <div className="flex-1">
-        <div className="flex flex-col h-full">
+      <div className="flex-1 p-1">
+        <div className="flex flex-col gap-[2px] h-full">
         {primarySections.map((section) => (
           <SidebarButton
             key={section.id}
