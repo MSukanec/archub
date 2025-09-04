@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Sidebar } from "./Sidebar";
+import { SecondarySidebar } from "./SecondarySidebar";
 import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
@@ -106,7 +106,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Secondary Sidebar - hidden on mobile */}
       <div className="hidden md:block">
-        <Sidebar />
+        <SecondarySidebar />
         {/* <SidebarSubmenu /> */}{" "}
         {/* Commented out - using accordion sidebar instead */}
       </div>
@@ -134,10 +134,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // Calculate top padding based on new single-row header (h-12)
               "md:pt-12" // h-12 header
             } ${
-              // Calculate margin based on primary sidebar (64px) + secondary sidebar
+              // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered
-                ? "md:ml-[328px]" // 64px primary + 264px secondary when expanded
-                : "md:ml-[104px]" // 64px primary + 40px secondary when collapsed
+                ? "md:ml-[304px]" // 40px primary + 264px secondary when expanded
+                : "md:ml-[80px]" // 40px primary + 40px secondary when collapsed
             } ml-0 pt-12 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (

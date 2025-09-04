@@ -74,11 +74,16 @@ export function PrimarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-12 h-[calc(100vh-3rem)] z-50 bg-[var(--layout-bg)] border-r border-[var(--menues-border)]",
-        "w-16 flex flex-col items-center py-4"
+        "fixed left-0 top-12 h-[calc(100vh-3rem)] z-50 bg-[var(--layout-bg)] border-r border-[var(--menues-border)] transition-all duration-300",
+        "w-[40px] flex flex-col"
       )}
+      style={{
+        overflow: 'hidden'
+      }}
     >
-      <div className="flex flex-col gap-2 w-full px-2">
+      {/* Navigation Items */}
+      <div className="flex-1 p-1">
+        <div className="flex flex-col gap-[2px] h-full">
         {primarySections.map((section) => (
           <SidebarButton
             key={section.id}
@@ -90,6 +95,7 @@ export function PrimarySidebar() {
             variant="main"
           />
         ))}
+        </div>
       </div>
     </aside>
   );
