@@ -709,42 +709,6 @@ export function SecondarySidebar() {
           </div>
         </div>
       </div>
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="p-1">
-        <div className="flex flex-col gap-[2px]">
-          {/* Divisor */}
-          <div className="h-px bg-white/20 mb-2"></div>
-          
-          {/* Theme Toggle */}
-          <SidebarButton
-            icon={theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-            label={theme === 'dark' ? "Modo Claro" : "Modo Oscuro"}
-            isExpanded={isExpanded}
-            onClick={handleThemeToggle}
-            variant="secondary"
-          />
-          
-          {/* Sidebar Pin/Unpin */}
-          <SidebarButton
-            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-            label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-            isExpanded={isExpanded}
-            onClick={handleDockToggle}
-            variant="secondary"
-          />
-          
-          {/* User Avatar */}
-          <SidebarButton
-            avatarUrl={userData?.user?.avatar_url}
-            userFullName={userData?.user?.full_name}
-            label={userData?.user?.full_name || 'Usuario'}
-            isExpanded={isExpanded}
-            onClick={() => navigate('/profile')}
-            variant="secondary"
-          />
-          
-        </div>
-      </div>
     </aside>
   );
 }
