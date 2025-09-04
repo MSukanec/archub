@@ -237,8 +237,78 @@ export function SecondarySidebar() {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  
+  // Theme state
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  // Initialize theme from user preferences
+  useEffect(() => {
+    const currentTheme = (userData?.preferences?.theme as 'light' | 'dark') || 'light';
+    setTheme(currentTheme);
+    
+    // Apply theme to document
+    const rootElement = document.documentElement;
+    if (currentTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+  }, [userData?.preferences?.theme]);
+
+  // Save preferences mutation
+  const savePreferencesMutation = useMutation({
+    mutationFn: async (preferences: { sidebar_docked?: boolean; theme?: 'light' | 'dark' }) => {
+      if (!userData?.user?.id) throw new Error('User not found');
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .update(preferences)
+        .eq('user_id', userData.user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
+
+  // Handle dock toggle
+  const handleDockToggle = () => {
+    const newDocked = !isDocked;
+    setDocked(newDocked);
+    setSecondarySidebarDocked(newDocked);
+    savePreferencesMutation.mutate({ sidebar_docked: newDocked });
+    
+    toast({
+      title: newDocked ? "Sidebar anclado" : "Sidebar desanclado",
+      description: newDocked ? "El sidebar permanecerá visible" : "El sidebar se ocultará automáticamente"
+    });
+  };
+
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    
+    // Apply theme to document
+    const rootElement = document.documentElement;
+    if (newTheme === 'dark') {
+      rootElement.classList.add('dark');
+    } else {
+      rootElement.classList.remove('dark');
+    }
+    
+    // Save theme preference
+    savePreferencesMutation.mutate({ theme: newTheme });
+    
+    toast({
+      title: `Modo ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`,
+      description: `La interfaz ahora está en modo ${newTheme === 'dark' ? 'oscuro' : 'claro'}`
+    });
+  };
   
   // Define if the main sidebar should be expanded (docked or hovered)
   const isExpanded = isDocked || isHovered;
@@ -646,6 +716,33 @@ export function SecondarySidebar() {
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
           
+          {/* Theme Toggle */}
+          <SidebarButton
+            icon={theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            label={theme === 'dark' ? "Modo Claro" : "Modo Oscuro"}
+            isExpanded={isExpanded}
+            onClick={handleThemeToggle}
+            variant="secondary"
+          />
+          
+          {/* Sidebar Pin/Unpin */}
+          <SidebarButton
+            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+            label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+            isExpanded={isExpanded}
+            onClick={handleDockToggle}
+            variant="secondary"
+          />
+          
+          {/* User Avatar */}
+          <SidebarButton
+            avatarUrl={userData?.user?.avatar_url}
+            userFullName={userData?.user?.full_name}
+            label={userData?.user?.full_name || 'Usuario'}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/profile')}
+            variant="secondary"
+          />
           
         </div>
       </div>

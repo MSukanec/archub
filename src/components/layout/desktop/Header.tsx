@@ -271,26 +271,6 @@ export function Header({}: HeaderProps = {}) {
 
         {/* Right: User Actions */}
         <div className="flex items-center gap-1">
-          {/* Theme Toggle */}
-          <button
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
-            title={isDark ? "Modo Claro" : "Modo Oscuro"}
-            onClick={handleThemeToggle}
-            style={{color: 'var(--main-sidebar-fg)'}}
-          >
-            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-          </button>
-
-          {/* Sidebar Pin/Unpin */}
-          <button
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
-            title={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-            onClick={handleDockToggle}
-            style={{color: 'var(--main-sidebar-fg)'}}
-          >
-            {isDocked ? <PanelLeftClose className="h-[18px] w-[18px]" /> : <PanelLeftOpen className="h-[18px] w-[18px]" />}
-          </button>
-
           {/* Notificaciones */}
           <button
             className="h-8 w-8 flex items-center justify-center rounded hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200"
@@ -335,47 +315,6 @@ export function Header({}: HeaderProps = {}) {
               <Crown className="w-[18px] h-[18px]" />
             </button>
           )}
-
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-[var(--main-sidebar-button-hover-bg)] transition-all duration-200">
-                <Avatar className="h-7 w-7">
-                  <AvatarImage 
-                    src={userData?.user?.avatar_url || ''} 
-                    alt={userData?.user?.full_name || 'Usuario'} 
-                  />
-                  <AvatarFallback className="text-xs">
-                    {userData?.user?.full_name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-[var(--popover-bg)] border-[var(--menues-border)]">
-              <div className="px-2 py-1.5 text-sm">
-                <div className="font-medium">{userData?.user?.full_name || 'Usuario'}</div>
-                <div className="text-xs text-muted-foreground">{userData?.user?.email}</div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
-                <Settings className="h-4 w-4 mr-2" />
-                Mi Perfil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/profile/organizations')}>
-                <Building className="h-4 w-4 mr-2" />
-                Organizaciones
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
-                <Settings className="h-4 w-4 mr-2" />
-                Configuración
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                Cerrar Sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </div>
