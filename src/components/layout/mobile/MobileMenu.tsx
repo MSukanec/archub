@@ -647,29 +647,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
           {renderCurrentContent()}
         </div>
 
-        {/* Footer con selector de organización y proyecto */}
+        {/* Footer con selector de proyecto y avatar */}
         <div className="border-t border-[var(--menues-border)] p-4 bg-[var(--card-bg)]">
-          {/* Selector de organización */}
-          <div className="mb-3">
-            <label className="block text-xs font-medium text-[var(--menues-fg)] mb-1">Organización:</label>
-            <div className="relative">
-              <button
-                onClick={() => setExpandedProjectSelector(false)}
-                className="w-full p-2 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center"
-              >
-                <Building className="h-4 w-4 mr-2" />
-                <span className="flex-1 truncate text-sm">
-                  {currentOrganization?.name || 'Sin organización'}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Selector de proyecto */}
-          <div className="mb-3">
-            <label className="block text-xs font-medium text-[var(--menues-fg)] mb-1">Proyecto:</label>
-            <div className="relative">
+          <div className="flex items-center gap-3">
+            {/* Selector de proyecto - lado izquierdo */}
+            <div className="flex-1 relative">
               <button
                 onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
                 className="w-full p-2 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center"
@@ -702,24 +684,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Información del usuario */}
-          <div className="flex items-center gap-2 pt-2 border-t border-[var(--menues-border)]">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={userData?.user?.avatar_url} />
-              <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
-                {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-[var(--menues-fg)] truncate">
-                {userData?.user?.full_name || userData?.user?.email}
-              </p>
-              <p className="text-xs text-[var(--menues-fg)] opacity-60 truncate">
-                {userData?.user?.email}
-              </p>
-            </div>
+            {/* Avatar del usuario - lado derecho */}
             <Button
               variant="ghost"
               size="sm"
@@ -727,9 +693,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 navigate('/profile');
                 handleCloseMenu();
               }}
-              className="text-[var(--menues-fg)] p-1"
+              className="p-1 hover:bg-[var(--card-hover-bg)] rounded-lg"
             >
-              <UserCircle className="h-4 w-4" />
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={userData?.user?.avatar_url} />
+                <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
+                  {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </div>
         </div>
