@@ -320,7 +320,6 @@ export function SecondarySidebar() {
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
-  const queryClient = useQueryClient();
   
   // Auto-detect and set correct sidebarLevel based on current location
   // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
