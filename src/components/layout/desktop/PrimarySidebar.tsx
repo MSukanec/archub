@@ -87,11 +87,11 @@ export function PrimarySidebar() {
     >
       {/* Navigation Items */}
       <div className="flex-1">
-        <div className="flex flex-col gap-[2px] h-full p-1">
+        <div className="flex flex-col gap-[2px] h-full py-1">
         {primarySections.map((section) => (
           <SidebarButton
             key={section.id}
-            icon={<section.icon className="w-5 h-5" />}
+            icon={<section.icon className="w-4 h-4" />}
             label={section.label}
             isActive={isActive(section.level)}
             isExpanded={false}
