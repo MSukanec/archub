@@ -320,26 +320,6 @@ export function SecondarySidebar() {
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
-
-  // Función para obtener el nombre de la sección actual
-  const getSectionName = () => {
-    switch (sidebarLevel) {
-      case 'organization':
-        return 'Organización';
-      case 'project':
-        return 'Proyecto';
-      case 'construction':
-        return 'Construcción';
-      case 'library':
-        return 'Biblioteca';
-      case 'provider':
-        return 'Proveedor';
-      case 'admin':
-        return 'Administración';
-      default:
-        return 'Organización';
-    }
-  };
   
   // Auto-detect and set correct sidebarLevel based on current location
   // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
@@ -602,15 +582,6 @@ export function SecondarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Título de la sección - Alineado con las tabs del header */}
-      <div className="h-12 flex items-center justify-center border-b border-[var(--secondary-sidebar-border)]">
-        {isExpanded && (
-          <div className="text-sm font-medium text-[var(--secondary-sidebar-fg)] px-4">
-            {getSectionName()}
-          </div>
-        )}
-      </div>
-      
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
