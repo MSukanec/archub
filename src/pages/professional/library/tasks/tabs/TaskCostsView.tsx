@@ -379,7 +379,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 </div>
                 <div></div>
                 <div></div>
-                <div className="text-right font-medium">
+                <div className="text-left font-medium">
                   {formatCurrency(groupTotal)}
                 </div>
                 <div></div>
