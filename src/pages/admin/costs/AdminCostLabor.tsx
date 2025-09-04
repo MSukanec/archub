@@ -123,29 +123,13 @@ const AdminCostLabor = () => {
   }
 
   const handleDelete = (laborType: LaborType) => {
-    // Crear lista de tipos de mano de obra disponibles para reemplazo (excluyendo el actual)
-    const replacementOptions = laborTypes
-      .filter(lt => lt.id !== laborType.id)
-      .map(lt => ({
-        value: lt.id,
-        label: lt.name
-      }))
-
     openModal('delete-confirmation', {
-      mode: 'replace',
+      mode: 'dangerous',
       title: 'Eliminar Tipo de Mano de Obra',
       description: `¿Estás seguro que deseas eliminar el tipo de mano de obra "${laborType.name}"? Esta acción no se puede deshacer.`,
       itemName: laborType.name,
-      destructiveActionText: 'Eliminar Tipo de Mano de Obra',
-      onDelete: () => deleteLaborTypeMutation.mutate(laborType.id),
-      onReplace: (newLaborTypeId: string) => {
-        // Aquí puedes implementar la lógica de reemplazo si es necesaria
-        console.log('Reemplazar tipo de mano de obra', laborType.id, 'por', newLaborTypeId)
-        // Por ahora solo eliminamos el tipo actual
-        deleteLaborTypeMutation.mutate(laborType.id)
-      },
-      replacementOptions,
-      currentCategoryId: laborType.id,
+      destructiveActionText: 'Eliminar',
+      onConfirm: () => deleteLaborTypeMutation.mutate(laborType.id),
       isLoading: deleteLaborTypeMutation.isPending
     })
   }
@@ -207,26 +191,6 @@ const AdminCostLabor = () => {
       )
     },
     {
-      key: 'origin',
-      label: 'Origen',
-      sortable: false,
-      render: (laborType: LaborType) => (
-        <Badge variant={laborType.is_system ? "secondary" : "default"}>
-          {laborType.is_system ? 'Sistema' : 'Organización'}
-        </Badge>
-      )
-    },
-    {
-      key: 'created_at',
-      label: 'Fecha de creación',
-      sortable: true,
-      render: (laborType: LaborType) => (
-        <div className="text-sm text-muted-foreground">
-          {format(new Date(laborType.created_at), 'dd/MM/yyyy', { locale: es })}
-        </div>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
       sortable: false,
@@ -248,16 +212,14 @@ const AdminCostLabor = () => {
           >
             <Copy className="h-4 w-4" />
           </Button>
-          {!laborType.is_system && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(laborType)}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(laborType)}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       )
     }
@@ -291,14 +253,6 @@ const AdminCostLabor = () => {
               {laborType.description && (
                 <p className="text-sm text-muted-foreground mb-2">{laborType.description}</p>
               )}
-              <div className="flex items-center gap-2">
-                <Badge variant={laborType.is_system ? "secondary" : "default"}>
-                  {laborType.is_system ? 'Sistema' : 'Organización'}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {format(new Date(laborType.created_at), 'dd/MM/yyyy', { locale: es })}
-                </span>
-              </div>
             </div>
             <div className="flex gap-1">
               <Button
@@ -317,16 +271,14 @@ const AdminCostLabor = () => {
               >
                 <Copy className="h-4 w-4" />
               </Button>
-              {!laborType.is_system && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(laborType)}
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(laborType)}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
