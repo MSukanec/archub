@@ -219,14 +219,15 @@ export default function MovementRow({
     <>
       {/* Columna de contenido (medio) */}
       <div className="flex-1 min-w-0">
+        {/* Línea 1: Tipo */}
         <div className="font-semibold text-sm truncate">
+          {movement.movement_data?.type?.name || 'Sin tipo'}
+        </div>
+        {/* Línea 2: Categoría */}
+        <div className="text-muted-foreground text-sm truncate">
           {movement.movement_data?.category?.name || 'Sin categoría'}
         </div>
-        {movement.movement_data?.subcategory?.name && (
-          <div className="text-muted-foreground text-sm truncate">
-            {movement.movement_data?.subcategory?.name}
-          </div>
-        )}
+        {/* Línea 3: Detalle específico */}
         {specificThirdLine && (
           <div className="text-muted-foreground text-sm truncate">
             {specificThirdLine}
