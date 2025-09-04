@@ -258,7 +258,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {form.watch('subcategory_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
+      {form.watch('category_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
         <div className="col-span-2">
           <PartnerWithdrawalsFields 
             selectedPartnerWithdrawals={selectedPartnerWithdrawals}
@@ -267,7 +267,7 @@ export function DefaultMovementFields({
         </div>
       )}
 
-      {form.watch('subcategory_id') === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' && onPartnerContributionsChange && (
+      {form.watch('category_id') === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' && onPartnerContributionsChange && (
         <div className="col-span-2">
           <PartnerContributionsFields 
             selectedPartnerContributions={selectedPartnerContributions}
