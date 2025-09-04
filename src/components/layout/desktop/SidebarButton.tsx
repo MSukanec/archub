@@ -17,6 +17,7 @@ interface SidebarButtonProps {
   variant?: 'main' | 'secondary';
   isHeaderButton?: boolean;
   projectColor?: string;
+  disableHover?: boolean;
 }
 
 export default function SidebarButton({ 
@@ -32,7 +33,8 @@ export default function SidebarButton({
   isChild = false,
   variant = 'main',
   isHeaderButton = false,
-  projectColor
+  projectColor,
+  disableHover = false
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -69,7 +71,7 @@ export default function SidebarButton({
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
-          if (!isActive) {
+          if (!isActive && !disableHover) {
             e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-hover-bg)`; // Usar siempre main
             e.currentTarget.style.color = `var(--main-sidebar-button-hover-fg)`; // Usar siempre main
           }
@@ -88,7 +90,7 @@ export default function SidebarButton({
         '--hover-fg': `var(--main-sidebar-button-hover-fg)` // Usar siempre las variables main para consistencia
       } as React.CSSProperties}
       onMouseLeave={(e) => {
-        if (!isActive) {
+        if (!isActive && !disableHover) {
           e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-bg)`; // Usar siempre main
           e.currentTarget.style.color = `var(--main-sidebar-button-fg)`; // Usar siempre main
         }

@@ -10,7 +10,8 @@ import {
   Sun,
   Moon,
   PanelLeftOpen,
-  PanelLeftClose
+  PanelLeftClose,
+  Bell
 } from "lucide-react";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -199,6 +200,15 @@ export function PrimarySidebar() {
             variant="main"
           />
           
+          {/* Notifications */}
+          <SidebarButton
+            icon={<Bell className="w-[18px] h-[18px]" />}
+            label="Notificaciones"
+            isExpanded={false}
+            onClick={() => console.log('Notificaciones clicked')}
+            variant="main"
+          />
+          
           {/* User Avatar */}
           <SidebarButton
             avatarUrl={userData?.user?.avatar_url}
@@ -207,6 +217,7 @@ export function PrimarySidebar() {
             isExpanded={false}
             onClick={() => navigate('/profile')}
             variant="main"
+            disableHover={true}
           />
           
         </div>

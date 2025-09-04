@@ -10,27 +10,27 @@
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 
-  /* Main Sidebar */
-  --main-sidebar-bg: hsl(0, 0%, 15%);
-  --main-sidebar-fg: hsl(0, 0%, 50%);
+  /* Main Sidebar - INVERTIDO */
+  --main-sidebar-bg: hsl(0, 0%, 95%);
+  --main-sidebar-fg: hsl(0, 0%, 45%);
   --main-sidebar-border: transparent;
   --main-sidebar-button-bg: transparent;
-  --main-sidebar-button-fg: hsl(0, 0%, 40%);
+  --main-sidebar-button-fg: hsl(0, 0%, 60%);
   --main-sidebar-button-active-bg: transparent;
   --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
-  --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
-  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-hover-bg: hsl(0, 0%, 85%);
+  --main-sidebar-button-hover-fg: hsl(0, 0%, 15%);
 
-  /* Secondary Sidebar */
-  --secondary-sidebar-bg: hsl(0, 0%, 25%);
-  --secondary-sidebar-fg: hsl(0, 0%, 40%);
+  /* Secondary Sidebar - INVERTIDO */
+  --secondary-sidebar-bg: hsl(0, 0%, 85%);
+  --secondary-sidebar-fg: hsl(0, 0%, 60%);
   --secondary-sidebar-border: hsl(0, 0%, 85%);
   --secondary-sidebar-button-bg: transparent;
-  --secondary-sidebar-button-fg: hsl(0, 0%, 40%);
-  --secondary-sidebar-button-active-bg: hsl(0, 0%, 25%);
-  --secondary-sidebar-button-active-fg: hsl(0, 0%, 100%);
-  --secondary-sidebar-button-hover-bg: hsl(0, 0%, 25%);
-  --secondary-sidebar-button-hover-fg: hsl(0, 0%, 100%);
+  --secondary-sidebar-button-fg: hsl(0, 0%, 60%);
+  --secondary-sidebar-button-active-bg: hsl(0, 0%, 75%);
+  --secondary-sidebar-button-active-fg: hsl(0, 0%, 15%);
+  --secondary-sidebar-button-hover-bg: hsl(0, 0%, 75%);
+  --secondary-sidebar-button-hover-fg: hsl(0, 0%, 15%);
 
   /* Legacy support (will be removed) */
   --menues-bg: hsl(60, 8%, 92%);
