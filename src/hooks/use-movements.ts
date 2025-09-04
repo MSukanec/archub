@@ -122,7 +122,9 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           member,
           member_avatar,
           indirect_id,
-          indirect
+          indirect,
+          general_cost_id,
+          general_cost
         `)
         
       query = query.eq('organization_id', organizationId)

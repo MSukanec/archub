@@ -273,21 +273,6 @@ export function DefaultMovementFields({
         </div>
       )}
       
-      {/* Debug adicional para depurar */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="col-span-2 text-xs text-blue-500">
-          Debug: onGeneralCostsChange = {onGeneralCostsChange ? 'YES' : 'NO'}
-          <br />
-          Condition: {selectedCategoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad' && onGeneralCostsChange ? 'TRUE' : 'FALSE'}
-        </div>
-      )}
-
-      {/* Debug para ver selectedCategoryId */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="col-span-2 text-xs text-gray-500">
-          Debug: selectedCategoryId = {selectedCategoryId}
-        </div>
-      )}
 
       {form.watch('category_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
         <div className="col-span-2">
