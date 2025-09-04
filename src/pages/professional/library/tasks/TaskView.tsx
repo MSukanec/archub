@@ -5,6 +5,7 @@ import { CheckSquare, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { TaskCostsView } from './tabs/TaskCostsView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function TaskView() {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +13,7 @@ export default function TaskView() {
   const [activeTab, setActiveTab] = useState('Costos');
   
   const { data: task, isLoading } = useGeneratedTask(id || '');
+  const { openModal } = useGlobalModalStore();
 
   const headerTabs = [
     {
@@ -39,8 +41,7 @@ export default function TaskView() {
       icon: Plus,
       label: "Agregar Costo",
       onClick: () => {
-        // TODO: Implementar modal de agregar material
-        console.log('Agregar material a tarea:', task?.id);
+        openModal('cost-modal', { task });
       }
     }
   };

@@ -67,6 +67,7 @@ import { AdminProductModal } from '../modals/admin/materials/AdminProductModal';
 import { IndirectModal } from '../modals/construction/IndirectModal';
 import { GeneralCostsModal } from '../modals/organizations/GeneralCostsModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
+import { CostModal } from '../modals/admin/CostModal';
 
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
@@ -226,6 +227,8 @@ export function ModalFactory() {
       return <GeneralCostsModal modalData={data || {}} onClose={closeModal} />;
     case 'labor-type-form':
       return <AdminLaborModal modalData={data || {}} onClose={closeModal} />;
+    case 'cost-modal':
+      return <CostModal modalData={data || {}} onClose={closeModal} />;
     default:
       return null;
   }

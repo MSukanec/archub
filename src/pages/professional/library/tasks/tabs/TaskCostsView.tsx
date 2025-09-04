@@ -99,8 +99,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   // Función para abrir modal de agregar costo
   const handleAddCost = () => {
-    // TODO: Implementar modal de agregar costo
-    console.log('Agregar costo a tarea:', task?.id);
+    openModal('cost-modal', { task });
   };
 
   // Función para editar costo
