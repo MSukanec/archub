@@ -6,6 +6,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 // Importar los componentes separados
 import IndirectList from './IndirectList';
@@ -15,10 +16,16 @@ export default function Indirects() {
   const [activeTab, setActiveTab] = useState('lista')
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const { setSidebarContext } = useNavigationStore();
 
   // Estados específicos para controles de header en tab Lista
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [setSidebarContext])
 
   // Mobile action bar
   const { 
@@ -56,18 +63,18 @@ export default function Indirects() {
         home: { 
           id: 'home', 
           label: 'Inicio', 
-          icon: <Home className="h-6 w-6" />,
+          icon: Home,
           onClick: () => {} 
         },
         search: { 
           id: 'search', 
           label: 'Buscar', 
-          icon: <Search className="h-6 w-6" />,
+          icon: Search,
           onClick: () => {} 
         },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nuevo Costo Indirecto',
           onClick: handleCreateIndirect,
           variant: 'primary'
@@ -75,13 +82,13 @@ export default function Indirects() {
         filter: { 
           id: 'filter', 
           label: 'Filtros', 
-          icon: <Filter className="h-6 w-6" />,
+          icon: Filter,
           onClick: () => {}
         },
         notifications: { 
           id: 'notifications', 
           label: 'Notificaciones', 
-          icon: <Bell className="h-6 w-6" />,
+          icon: Bell,
           onClick: () => {} 
         },
       })
@@ -139,7 +146,7 @@ export default function Indirects() {
   const getHeaderProps = () => {
     const baseProps = {
       icon: TrendingUp,
-      pageTitle: "Costos Indirectos",
+      title: "Costos Indirectos",
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
         { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos' }
