@@ -60,11 +60,11 @@ export default function SidebarButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center justify-center transition-all duration-300',
-          // En sidebar principal sin expandir: ancho completo pero icono centrado
-          variant === 'main' && !isExpanded ? 'w-full h-8' : 'w-8 h-8',
-          // Cuando expandido, el botón se extiende al full width con justify-start
-          isExpanded && 'w-full justify-start'
+          'relative flex items-center justify-center transition-all duration-300 h-8',
+          // En sidebar principal: siempre ancho completo con icono centrado
+          variant === 'main' ? 'w-full' : 'w-8',
+          // Cuando expandido, justify-start para alinear contenido a la izquierda
+          isExpanded && 'justify-start'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
