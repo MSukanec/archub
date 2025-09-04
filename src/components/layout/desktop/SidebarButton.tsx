@@ -64,7 +64,9 @@ export default function SidebarButton({
           // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
           'w-8 h-8',
           // Cuando expandido, el botón se extiende al full width SIN PADDING
-          isExpanded && 'w-full'
+          isExpanded && 'w-full',
+          // Spacing para botones del main sidebar
+          variant === 'main' && 'm-1'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -88,12 +90,16 @@ export default function SidebarButton({
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
         // Extend active main buttons to overlap the border, también para headers
         ...(variant === 'main' && (isActive || isHeaderButton) && {
-          width: 'calc(100% + 1px)',
-          marginRight: '-1px',
+          width: isActive ? 'calc(100% + 4px)' : '100%', // Activo se extiende más
           zIndex: 10,
-          borderRight: isActive && !isExpanded 
-            ? `1px solid var(--main-sidebar-bg)` // Borde del color del sidebar secundario
-            : `1px solid var(--main-sidebar-button-active-bg)` // Usar main para headers
+          // Para botones activos del main sidebar, extenderse hasta el borde
+          ...(isActive && variant === 'main' && {
+            position: 'relative' as const,
+            marginRight: '-4px', // Anular margin del m-1
+            marginLeft: '4px', // Mantener margin izquierdo
+            borderTopRightRadius: '0',
+            borderBottomRightRadius: '0'
+          })
         })
       } as React.CSSProperties}
       onMouseLeave={(e) => {
