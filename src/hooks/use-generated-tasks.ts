@@ -311,7 +311,12 @@ export function useTaskMaterials(taskId: string | null) {
             id,
             name,
             unit_of_computation,
-            computed_unit_price
+            computed_unit_price,
+            category_id,
+            material_categories:category_id (
+              id,
+              name
+            )
           )
         `)
         .eq('task_id', taskId);
