@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
-import { Package, Plus } from 'lucide-react'
+import { Package2, Plus } from 'lucide-react'
 import MaterialList from './MaterialList'
 
 export default function Materials() {
@@ -31,7 +31,7 @@ export default function Materials() {
   // Header configuration
   const headerProps = {
     title: "Materiales",
-    icon: Package,
+    icon: Package2,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

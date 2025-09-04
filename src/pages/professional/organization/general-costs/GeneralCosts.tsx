@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { Receipt, Plus } from 'lucide-react'
+import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsList from './GeneralCostsList'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -36,7 +36,7 @@ export default function GeneralCosts() {
   // Header configuration
   const headerProps = {
     title: "Gastos Generales",
-    icon: Receipt,
+    icon: CreditCard,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

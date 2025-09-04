@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { TrendingUp } from 'lucide-react'
+import { DollarSign } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -322,7 +322,7 @@ export default function FinancesCapitalMovements() {
 
   const headerProps = {
     title: "Movimientos de Capital",
-    icon: TrendingUp,
+    icon: DollarSign,
     tabs: headerTabs,
     onTabChange: setActiveTab
   }
@@ -342,7 +342,7 @@ export default function FinancesCapitalMovements() {
       {/* Conditional Content - EmptyState or Tabs */}
       {movements.length === 0 ? (
         <EmptyState
-          icon={<TrendingUp className="h-8 w-8" />}
+          icon={<DollarSign className="h-8 w-8" />}
           title="Aún no hay movimientos de capital registrados"
           description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
         />

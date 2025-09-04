@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Coins } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
@@ -223,7 +223,7 @@ export default function Preferences() {
       wide={false}
       headerProps={{
         title: "Preferencias",
-        icon: Coins,
+        icon: Settings,
         breadcrumb: [
           { name: "Finanzas", href: "/finances/dashboard" },
           { name: "Preferencias", href: "/finances/preferences" }

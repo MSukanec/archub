@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { TableIcon, Plus } from 'lucide-react'
+import { CheckSquare, Plus } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import TaskList from './TaskList'
 
@@ -31,7 +31,7 @@ export default function Tasks() {
   // Header configuration
   const headerProps = {
     title: "Análisis de Tareas",
-    icon: TableIcon,
+    icon: CheckSquare,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

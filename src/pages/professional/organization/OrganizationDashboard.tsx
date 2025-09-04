@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban } from "lucide-react";
+import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban, Home } from "lucide-react";
 import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -51,8 +51,13 @@ export default function OrganizationDashboard() {
     );
   }
 
+  const headerProps = {
+    icon: Home,
+    title: "Dashboard"
+  };
+
   return (
-    <Layout wide={true}>
+    <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
         {/* Welcome Card - Full Width */}
         <Card className="relative overflow-hidden">

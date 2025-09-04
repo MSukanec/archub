@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { DollarSign, Plus } from 'lucide-react'
+import { TrendingUp, Plus } from 'lucide-react'
 import IndirectList from './IndirectList'
 
 export default function Indirects() {
@@ -30,7 +30,7 @@ export default function Indirects() {
   // Header configuration
   const headerProps = {
     title: "Análisis de Costos Indirectos",
-    icon: DollarSign,
+    icon: TrendingUp,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
