@@ -60,11 +60,11 @@ export default function SidebarButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center transition-all duration-300',
-          // Botón SIEMPRE 32x32px (w-8 h-8), centrado cuando colapsado
+          'relative flex items-center justify-center transition-all duration-300',
+          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
           'w-8 h-8',
           // Cuando expandido, el botón se extiende al full width SIN PADDING
-          isExpanded && 'w-full'
+          isExpanded && 'w-full justify-start'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -85,17 +85,7 @@ export default function SidebarButton({
           ? `var(--main-sidebar-button-active-fg)` // Header buttons también usan active fg
           : `var(--main-sidebar-button-fg)`,
         '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
-        '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
-        // Extend active main buttons to overlap the border, también para headers
-        ...(variant === 'main' && (isActive || isHeaderButton) && {
-          width: 'calc(100% + 5px)', // Más extensión para cubrir completamente el gap
-          marginRight: '-5px',
-          marginLeft: '-4px', // También extender hacia la izquierda
-          zIndex: 10,
-          borderRight: isActive && !isExpanded 
-            ? `1px solid var(--main-sidebar-bg)` // Borde del color del sidebar secundario
-            : `1px solid var(--main-sidebar-button-active-bg)` // Usar main para headers
-        })
+        '--hover-fg': `var(--main-sidebar-button-hover-fg)` // Usar siempre las variables main para consistencia
       } as React.CSSProperties}
       onMouseLeave={(e) => {
         if (!isActive) {
