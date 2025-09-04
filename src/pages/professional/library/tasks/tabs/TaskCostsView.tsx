@@ -359,18 +359,33 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           data={filteredCosts}
           columns={groupBy === 'tipo' ? columns.filter(col => col.key !== 'type') : columns}
           groupBy={groupBy === 'tipo' ? 'type' : undefined}
-          renderGroupHeader={(groupKey: string, groupRows: any[]) => (
-            <tr className="bg-muted/30">
-              <td colSpan={groupBy === 'tipo' ? columns.length - 1 : columns.length} className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="font-semibold text-sm">{groupKey}</div>
-                  <Badge variant="secondary" className="text-xs">
-                    {groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'}
-                  </Badge>
+          renderGroupHeader={(groupKey: string, groupRows: any[]) => {
+            // Calcular total del grupo
+            const groupTotal = groupRows.reduce((sum, cost) => sum + (cost.total_price || 0), 0);
+            
+            const formatCurrency = (amount: number) => {
+              return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(amount);
+            };
+
+            return (
+              <>
+                <div className="truncate text-sm font-medium">
+                  {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'})
                 </div>
-              </td>
-            </tr>
-          )}
+                <div></div>
+                <div></div>
+                <div className="text-right font-medium">
+                  {formatCurrency(groupTotal)}
+                </div>
+                <div></div>
+              </>
+            );
+          }}
           topBar={{
             showSearch: true,
             onSearchChange: setSearchQuery,
