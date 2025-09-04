@@ -177,15 +177,10 @@ const AdminCostLabor = () => {
       label: 'Nombre',
       sortable: true,
       render: (laborType: LaborType) => (
-        <div className="flex items-center gap-2">
-          <div>
-            <div className="font-medium">{laborType.name}</div>
-            {laborType.description && (
-              <div className="text-xs text-muted-foreground">{laborType.description}</div>
-            )}
-          </div>
-          {laborType.is_system && (
-            <Crown className="h-4 w-4 text-amber-500" />
+        <div>
+          <div className="font-medium">{laborType.name}</div>
+          {laborType.description && (
+            <div className="text-xs text-muted-foreground">{laborType.description}</div>
           )}
         </div>
       )
@@ -244,12 +239,7 @@ const AdminCostLabor = () => {
         <div key={laborType.id} className="p-4 border rounded-lg bg-card">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-medium">{laborType.name}</h3>
-                {laborType.is_system && (
-                  <Crown className="h-4 w-4 text-amber-500" />
-                )}
-              </div>
+              <h3 className="font-medium mb-2">{laborType.name}</h3>
               {laborType.description && (
                 <p className="text-sm text-muted-foreground mb-2">{laborType.description}</p>
               )}
