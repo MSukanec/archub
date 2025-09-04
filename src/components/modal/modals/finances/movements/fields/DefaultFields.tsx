@@ -273,6 +273,13 @@ export function DefaultMovementFields({
         </div>
       )}
 
+      {/* Debug para ver selectedCategoryId */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="col-span-2 text-xs text-gray-500">
+          Debug: selectedCategoryId = {selectedCategoryId}
+        </div>
+      )}
+
       {form.watch('category_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
         <div className="col-span-2">
           <PartnerWithdrawalsFields 
