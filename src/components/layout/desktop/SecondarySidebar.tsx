@@ -583,13 +583,13 @@ export function SecondarySidebar() {
       {/* Espacio superior con nombre de sección - misma altura que PageHeader */}
       <div className="h-12 flex-shrink-0 flex items-center px-4">
         {isExpanded && (
-          <span className="text-sm font-medium text-[var(--secondary-sidebar-fg)] capitalize">
-            {sidebarLevel === 'organization' && 'Organización'}
-            {sidebarLevel === 'project' && 'Proyecto'}
-            {sidebarLevel === 'construction' && 'Construcción'}
-            {sidebarLevel === 'library' && 'Biblioteca'}
-            {sidebarLevel === 'provider' && 'Proveedor'}
-            {sidebarLevel === 'admin' && 'Administración'}
+          <span className="text-sm font-black text-black uppercase">
+            {sidebarLevel === 'organization' && 'ORGANIZACIÓN'}
+            {sidebarLevel === 'project' && 'PROYECTO'}
+            {sidebarLevel === 'construction' && 'CONSTRUCCIÓN'}
+            {sidebarLevel === 'library' && 'BIBLIOTECA'}
+            {sidebarLevel === 'provider' && 'PROVEEDOR'}
+            {sidebarLevel === 'admin' && 'ADMINISTRACIÓN'}
           </span>
         )}
       </div>

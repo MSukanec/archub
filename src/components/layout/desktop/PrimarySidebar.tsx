@@ -159,8 +159,12 @@ export function PrimarySidebar() {
         overflow: 'hidden'
       }}
     >
-      {/* Espacio vacío superior - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0"></div>
+      {/* Logo Archub - misma altura que PageHeader */}
+      <div className="h-12 flex-shrink-0 flex items-center justify-center">
+        <span className="text-xl font-black text-white">
+          A
+        </span>
+      </div>
       
       {/* Navigation Items */}
       <div className="flex-1 p-1">
