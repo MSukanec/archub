@@ -88,8 +88,9 @@ export default function SidebarButton({
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
         // Extend active main buttons to overlap the border, también para headers
         ...(variant === 'main' && (isActive || isHeaderButton) && {
-          width: 'calc(100% + 1px)',
-          marginRight: '-1px',
+          width: 'calc(100% + 5px)', // Más extensión para cubrir completamente el gap
+          marginRight: '-5px',
+          marginLeft: '-4px', // También extender hacia la izquierda
           zIndex: 10,
           borderRight: isActive && !isExpanded 
             ? `1px solid var(--main-sidebar-bg)` // Borde del color del sidebar secundario

@@ -513,7 +513,7 @@ export function SecondarySidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Navigation Items */}
-      <div className="flex-1">
+      <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             
