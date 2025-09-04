@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { 
-  Home,
   Building2, 
   FolderOpen,
   HardHat,
@@ -18,14 +17,6 @@ export function PrimarySidebar() {
   const isAdmin = useIsAdmin();
 
   const primarySections = [
-    {
-      id: 'main',
-      label: 'Dashboard',
-      icon: Home,
-      href: '/organization',
-      level: 'organization' as const,
-      navigateTo: true
-    },
     {
       id: 'organization',
       label: 'Organización', 
@@ -65,10 +56,6 @@ export function PrimarySidebar() {
 
   const handleSectionClick = (section: typeof primarySections[0]) => {
     setSidebarLevel(section.level);
-    // Solo navegar si es el botón de Dashboard
-    if (section.navigateTo && section.href) {
-      navigate(section.href);
-    }
   };
 
   const isActive = (level: string) => {
