@@ -22,7 +22,7 @@ export default function TaskView() {
   ];
 
   const headerProps = {
-    icon: <CheckSquare className="w-5 h-5" />,
+    icon: CheckSquare,
     title: task?.custom_name || task?.name_rendered || "Tarea",
     showBackButton: true,
     onBackClick: () => navigate('/library/tasks'),
