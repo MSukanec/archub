@@ -53,6 +53,25 @@ export function useGeneratedTasks() {
   });
 }
 
+export function useGeneratedTask(taskId: string) {
+  return useQuery({
+    queryKey: ['task-view', taskId],
+    queryFn: async () => {
+      if (!supabase || !taskId) throw new Error('Supabase not initialized or no task ID');
+      
+      const { data, error } = await supabase
+        .from('tasks_view')
+        .select(`*`)
+        .eq('id', taskId)
+        .single();
+      
+      if (error) throw error;
+      return data as GeneratedTask;
+    },
+    enabled: !!taskId
+  });
+}
+
 // Hook para obtener el conteo de uso de tareas en construction_tasks
 export function useTaskUsageCount() {
   return useQuery({

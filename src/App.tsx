@@ -73,6 +73,7 @@ import Products from "@/pages/providers/products/Products";
 
 // Library Pages
 import Tasks from "@/pages/professional/library/tasks/Tasks";
+import TaskView from "@/pages/professional/library/tasks/TaskView";
 import Materials from "@/pages/professional/library/materials/Materials";
 import Labor from "@/pages/professional/library/labor/Labor";
 import Indirects from "@/pages/professional/library/indirects/Indirects";
@@ -152,6 +153,7 @@ function Router() {
         <Route path="/construction/budgets" component={ConstructionBudgets} />
         <Route path="/construction/materials" component={ConstructionMaterials} />
         <Route path="/library/tasks" component={Tasks} />
+        <Route path="/library/tasks/:id" component={TaskView} />
         <Route path="/library/materials" component={Materials} />
         <Route path="/library/labor" component={Labor} />
         <Route path="/library/indirects" component={Indirects} />

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell, Grid3X3, List } from 'lucide-react'
+import { TableIcon, Edit, Trash2, Copy, Search, Filter, Plus, Home, Bell, Grid3X3, List, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -12,12 +12,14 @@ import { AnalysisTaskRow } from '@/components/ui/data-row/rows'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
+import { useLocation } from 'wouter'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
   const deleteTaskMutation = useDeleteGeneratedTask()
   const { data: userData } = useCurrentUser()
+  const [, setLocation] = useLocation()
   
   
   // Mobile action bar
@@ -183,6 +185,14 @@ export default function TaskList() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => handleView(task.id)}
+              className="h-7 w-7 p-0"
+            >
+              <Eye className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleEdit(task)}
               className="h-7 w-7 p-0"
             >
@@ -242,6 +252,10 @@ export default function TaskList() {
     }
     openModal('task', { task: duplicateTask, isDuplicating: true })
   }
+
+  const handleView = (id: string) => {
+    setLocation(`/library/tasks/${id}`);
+  };
 
   const handleDelete = (task: any) => {
     openModal('delete-confirmation', {
