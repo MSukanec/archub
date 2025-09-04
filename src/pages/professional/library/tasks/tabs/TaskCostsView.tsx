@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
-import { useTaskMaterials } from '@/hooks/use-generated-tasks';
+import { useTaskCosts } from '@/hooks/use-task-costs';
 
 interface TaskCostsViewProps {
   task: any;
@@ -33,29 +33,9 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
   const [groupBy, setGroupBy] = useState<string | undefined>('tipo');
 
-  // Obtener datos reales de materiales usando el hook existente
+  // Obtener datos reales de costos usando el hook unificado (materiales + mano de obra)
   const taskId = task?.task_id || task?.id;
-  const { data: rawMaterials = [], isLoading } = useTaskMaterials(taskId);
-
-  // Transformar datos para la tabla
-  const costs = rawMaterials.map((material: any) => {
-    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
-    const unitPrice = materialView?.computed_unit_price || 0;
-    const quantity = material.amount || 0;
-    const totalPrice = quantity * unitPrice;
-
-    return {
-      id: material.id,
-      type: 'Material', // Por ahora solo materiales
-      name: materialView?.name || 'Material sin nombre',
-      unit: materialView?.unit_of_computation || 'Unidad',
-      quantity: quantity,
-      unit_price: unitPrice,
-      total_price: totalPrice,
-      category: materialView?.category_name || 'Sin categoría',
-      material_id: material.material_id
-    };
-  });
+  const { data: costs = [], isLoading } = useTaskCosts(taskId);
 
   // Cálculos para KPIs de costos
   const kpiData = useMemo(() => {

@@ -92,6 +92,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] })
       toast({
         title: "Material agregado",
         description: "El material ha sido agregado a la tarea correctamente.",
@@ -124,6 +125,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task-labor'] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] })
       toast({
         title: "Mano de obra agregada",
         description: "La mano de obra ha sido agregada a la tarea correctamente.",
