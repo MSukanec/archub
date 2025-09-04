@@ -28,7 +28,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   // Estados para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
-  const [groupBy, setGroupBy] = useState<'tipo' | null>('tipo');
+  const [groupBy, setGroupBy] = useState<string | undefined>('tipo');
 
   // Obtener datos reales de materiales usando el hook existente
   const taskId = task?.task_id || task?.id;
@@ -361,9 +361,9 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           groupBy={groupBy}
           groupByOptions={[
             { value: 'tipo', label: 'Tipo' },
-            { value: null, label: 'Sin agrupar' }
+            { value: undefined, label: 'Sin agrupar' }
           ]}
-          onGroupByChange={(value) => setGroupBy(value as 'tipo' | null)}
+          onGroupByChange={(value: string | undefined) => setGroupBy(value)}
         />
       ) : (
         <EmptyState
