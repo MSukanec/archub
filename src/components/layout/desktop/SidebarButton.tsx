@@ -89,17 +89,16 @@ export default function SidebarButton({
         '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
         '--hover-fg': `var(--main-sidebar-button-hover-fg)`, // Usar siempre las variables main para consistencia
         // Extend active main buttons to overlap the border, también para headers
-        ...(variant === 'main' && (isActive || isHeaderButton) && {
-          width: isActive ? 'calc(100% + 4px)' : '100%', // Activo se extiende más
+        ...(variant === 'main' && isActive && {
+          position: 'absolute' as const,
+          left: '0',
+          right: '0', 
+          width: 'auto',
+          margin: '0',
           zIndex: 10,
-          // Para botones activos del main sidebar, extenderse hasta el borde
-          ...(isActive && variant === 'main' && {
-            position: 'relative' as const,
-            marginRight: '-4px', // Anular margin del m-1
-            marginLeft: '4px', // Mantener margin izquierdo
-            borderTopRightRadius: '0',
-            borderBottomRightRadius: '0'
-          })
+          borderTopRightRadius: '0',
+          borderBottomRightRadius: '0',
+          borderRight: 'none'
         })
       } as React.CSSProperties}
       onMouseLeave={(e) => {
