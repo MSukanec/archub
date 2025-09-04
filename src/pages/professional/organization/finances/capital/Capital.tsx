@@ -322,7 +322,7 @@ export default function FinancesCapitalMovements() {
 
   const headerProps = {
     title: "Movimientos de Capital",
-    icon: DollarSign,
+    icon: <DollarSign className="w-5 h-5" />,
     tabs: headerTabs,
     onTabChange: setActiveTab
   }

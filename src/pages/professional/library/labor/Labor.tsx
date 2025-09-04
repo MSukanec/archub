@@ -30,7 +30,7 @@ export default function Labor() {
   // Header configuration
   const headerProps = {
     title: "Análisis de Mano de Obra",
-    icon: Users,
+    icon: <Users className="w-5 h-5" />,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

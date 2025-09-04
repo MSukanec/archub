@@ -30,7 +30,7 @@ export default function Indirects() {
   // Header configuration
   const headerProps = {
     title: "Análisis de Costos Indirectos",
-    icon: TrendingUp,
+    icon: <TrendingUp className="w-5 h-5" />,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

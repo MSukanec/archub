@@ -223,7 +223,7 @@ export default function Preferences() {
       wide={false}
       headerProps={{
         title: "Preferencias",
-        icon: Settings,
+        icon: <Settings className="w-5 h-5" />,
         breadcrumb: [
           { name: "Finanzas", href: "/finances/dashboard" },
           { name: "Preferencias", href: "/finances/preferences" }

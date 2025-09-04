@@ -22,7 +22,7 @@ export default function Movements() {
   ];
 
   const headerProps = {
-    icon: () => <TrendingUp className="w-5 h-5" />,
+    icon: <TrendingUp className="w-5 h-5" />,
     title: "Movimientos",
     tabs,
     onTabChange: setActiveTab,

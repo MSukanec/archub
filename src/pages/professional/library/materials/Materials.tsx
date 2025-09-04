@@ -31,7 +31,7 @@ export default function Materials() {
   // Header configuration
   const headerProps = {
     title: "Materiales",
-    icon: Package2,
+    icon: <Package2 className="w-5 h-5" />,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
