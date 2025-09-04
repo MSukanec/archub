@@ -117,9 +117,9 @@ export function PageLayout({
     <div className="flex flex-col h-full">
       {/* Page Header */}
       <div className="bg-[var(--layout-bg)] border-b border-[var(--menues-border)]">
-        {/* Única fila: Tabs a la izquierda + Botones de acción a la derecha */}
+        {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
         <div className="h-12 px-6 flex items-center justify-between">
-          {/* Left: Tabs */}
+          {/* Left: Page Title */}
           <div className="flex items-center gap-4">
             {showBackButton && (
               <Button
@@ -132,47 +132,10 @@ export function PageLayout({
                 {backButtonText}
               </Button>
             )}
-            {hasTabs && (
-              <div className="flex items-center space-x-6">
-                {tabs.map((tab) => {
-                  const tabContent = (
-                    <button
-                      key={tab.id}
-                      onClick={() =>
-                        tab.isDisabled || tab.isRestricted
-                          ? undefined
-                          : onTabChange?.(tab.id)
-                      }
-                      disabled={tab.isDisabled}
-                      className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
-                        tab.isDisabled || tab.isRestricted
-                          ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                          : tab.isActive
-                            ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
-                            : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {tab.label}
-                      {tab.badge && (
-                        <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                          {tab.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-
-                  // Si la tab está restringida, envolverla con PlanRestricted
-                  if (tab.isRestricted && tab.restrictionReason) {
-                    return (
-                      <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
-                        {tabContent}
-                      </PlanRestricted>
-                    );
-                  }
-
-                  return tabContent;
-                })}
-              </div>
+            {title && (
+              <h1 className="text-lg font-semibold text-[var(--foreground)]">
+                {title}
+              </h1>
             )}
           </div>
 
@@ -375,6 +338,52 @@ export function PageLayout({
             )}
           </div>
         </div>
+
+        {/* FILA INFERIOR: Tabs a la izquierda */}
+        {hasTabs && (
+          <div className="h-12 px-6 flex items-center">
+            <div className="flex items-center space-x-6">
+              {tabs.map((tab) => {
+                const tabContent = (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      tab.isDisabled || tab.isRestricted
+                        ? undefined
+                        : onTabChange?.(tab.id)
+                    }
+                    disabled={tab.isDisabled}
+                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 py-2 ${
+                      tab.isDisabled || tab.isRestricted
+                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                        : tab.isActive
+                          ? "text-foreground font-medium border-b-2 border-[var(--accent)]"
+                          : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.badge && (
+                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+
+                // Si la tab está restringida, envolverla con PlanRestricted
+                if (tab.isRestricted && tab.restrictionReason) {
+                  return (
+                    <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
+                      {tabContent}
+                    </PlanRestricted>
+                  );
+                }
+
+                return tabContent;
+              })}
+            </div>
+          </div>
+        )}
 
       </div>
 
