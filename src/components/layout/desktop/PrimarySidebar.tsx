@@ -23,48 +23,52 @@ export function PrimarySidebar() {
       label: 'Dashboard',
       icon: Home,
       href: '/organization',
-      level: 'organization' as const
+      level: 'organization' as const,
+      navigateTo: true
     },
     {
       id: 'organization',
       label: 'Organización', 
       icon: Building2,
-      href: '/organization',
-      level: 'organization' as const
+      level: 'organization' as const,
+      navigateTo: false
     },
     {
       id: 'project',
       label: 'Proyecto',
       icon: FolderOpen,
-      href: '/general',
-      level: 'project' as const
+      level: 'project' as const,
+      navigateTo: false
     },
     {
       id: 'construction',
       label: 'Construcción',
       icon: HardHat,
-      href: '/construction',
-      level: 'construction' as const
+      level: 'construction' as const,
+      navigateTo: false
     },
     {
       id: 'library',
       label: 'Biblioteca',
       icon: Library,
-      href: '/library/tasks',
-      level: 'library' as const
+      level: 'library' as const,
+      navigateTo: false
     },
     ...(isAdmin ? [{
       id: 'admin',
       label: 'Admin',
       icon: Shield,
-      href: '/admin',
-      level: 'admin' as const
+      level: 'admin' as const,
+      navigateTo: false
     }] : [])
   ];
 
   const handleSectionClick = (section: typeof primarySections[0]) => {
     setSidebarLevel(section.level);
-    navigate(section.href);
+    // Solo navegar si es el botón de Dashboard
+    if (section.navigateTo && section.href) {
+      navigate(section.href);
+    }
   };
 
   const isActive = (level: string) => {
