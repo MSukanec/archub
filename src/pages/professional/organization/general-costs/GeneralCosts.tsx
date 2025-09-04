@@ -36,7 +36,7 @@ export default function GeneralCosts() {
   // Header configuration
   const headerProps = {
     title: "Gastos Generales",
-    icon: <CreditCard className="w-5 h-5" />,
+    icon: CreditCard,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

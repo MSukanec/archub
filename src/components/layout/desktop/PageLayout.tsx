@@ -136,13 +136,13 @@ export function PageLayout({
               <div className="flex items-center gap-3">
                 {icon && (
                   <span className="text-[var(--accent)] flex-shrink-0">
-                    {React.isValidElement(icon) ? 
-                      React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" }) :
-                      typeof icon === 'function' ? 
-                        React.createElement(icon as React.ComponentType<{ className?: string }>, { 
-                          className: "w-5 h-5" 
-                        }) : 
-                        icon
+                    {typeof icon === 'function' ? 
+                      React.createElement(icon as React.ComponentType<{ className?: string }>, { 
+                        className: "w-5 h-5" 
+                      }) : 
+                      React.isValidElement(icon) ? 
+                        React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" }) :
+                        null
                     }
                   </span>
                 )}

@@ -31,7 +31,7 @@ export default function Tasks() {
   // Header configuration
   const headerProps = {
     title: "Análisis de Tareas",
-    icon: <CheckSquare className="w-5 h-5" />,
+    icon: CheckSquare,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

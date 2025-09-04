@@ -56,18 +56,18 @@ export default function Subcontracts() {
         home: { 
           id: 'home', 
           label: 'Inicio', 
-          icon: <Home className="h-6 w-6" />,
+          icon: Home,
           onClick: () => {} 
         },
         search: { 
           id: 'search', 
           label: 'Buscar', 
-          icon: <Search className="h-6 w-6" />,
+          icon: Search,
           onClick: () => {} 
         },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nuevo Subcontrato',
           onClick: handleCreateSubcontract,
           variant: 'primary'
@@ -75,13 +75,13 @@ export default function Subcontracts() {
         filter: { 
           id: 'filter', 
           label: 'Filtros', 
-          icon: <Filter className="h-6 w-6" />,
+          icon: Filter,
           onClick: () => {}
         },
         notifications: { 
           id: 'notifications', 
           label: 'Notificaciones', 
-          icon: <Bell className="h-6 w-6" />,
+          icon: Bell,
           onClick: () => {} 
         },
       })
@@ -141,7 +141,7 @@ export default function Subcontracts() {
   // Props del header que cambian según la tab activa
   const getHeaderProps = () => {
     const baseProps = {
-      icon: <Handshake className="w-5 h-5" />,
+      icon: Handshake,
       pageTitle: "Subcontratos",
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
@@ -161,7 +161,7 @@ export default function Subcontracts() {
         currencyView: currencyView,
         onCurrencyViewChange: setCurrencyView,
         actionButton: {
-          icon: <Plus className="w-4 h-4" />,
+          icon: Plus,
           label: "Nuevo Subcontrato",
           onClick: handleCreateSubcontract
         }

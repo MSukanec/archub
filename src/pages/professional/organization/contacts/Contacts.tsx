@@ -421,7 +421,7 @@ export default function Contacts() {
     return (
       <Layout
         headerProps={{
-          icon: <Contact className="w-5 h-5" />,
+          icon: Contact,
           title: "Contactos",
           tabs: headerTabs,
           onTabChange: (tabId: string) => {
@@ -466,7 +466,7 @@ export default function Contacts() {
     <Layout
       wide={true}
       headerProps={{
-        icon: <Contact className="w-5 h-5" />,
+        icon: Contact,
         title: "Contactos",
         pageTitle: "Contactos",
         breadcrumb: [
