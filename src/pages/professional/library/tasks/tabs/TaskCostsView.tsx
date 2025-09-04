@@ -25,6 +25,9 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const isMobile = useMobile();
   const [, navigate] = useLocation();
   
+  // Verificar si la tarea es del sistema
+  const isSystemTask = task?.is_system === true;
+  
   // Estados para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
@@ -165,7 +168,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         </div>
       )
     },
-    {
+    // Solo mostrar acciones si la tarea NO es del sistema
+    ...(isSystemTask ? [] : [{
       key: 'actions',
       label: 'Acciones',
       sortable: false,
@@ -189,7 +193,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           </Button>
         </div>
       )
-    }
+    }])
   ];
 
   return (
@@ -382,7 +386,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 <div className="text-left font-medium">
                   {formatCurrency(groupTotal)}
                 </div>
-                <div></div>
+                {/* Solo mostrar div vacío para acciones si la tarea NO es del sistema */}
+                {!isSystemTask && <div></div>}
               </>
             );
           }}
@@ -405,10 +410,13 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           title="Sin costos configurados"
           description="Los costos asociados a esta tarea aparecerán aquí."
           action={
-            <Button variant="default" size="sm" onClick={handleAddCost}>
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Costo
-            </Button>
+            // Solo mostrar botón si la tarea NO es del sistema
+            !isSystemTask ? (
+              <Button variant="default" size="sm" onClick={handleAddCost}>
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Costo
+              </Button>
+            ) : undefined
           }
         />
       )}
