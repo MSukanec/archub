@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, FileSignature } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 import { Layout } from '@/components/layout/desktop/Layout';
@@ -78,6 +78,7 @@ export default function SubcontractView() {
   ];
 
   const headerProps = {
+    icon: FileSignature,
     title: subcontract?.title || "Subcontrato",
     showBackButton: true,
     onBackClick: () => navigate('/construction/subcontracts'),

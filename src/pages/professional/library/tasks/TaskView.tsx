@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
+import { CheckSquare } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { TaskMaterialsView } from './tabs/TaskMaterialsView';
@@ -21,6 +22,7 @@ export default function TaskView() {
   ];
 
   const headerProps = {
+    icon: CheckSquare,
     title: task?.custom_name || task?.name_rendered || "Tarea",
     showBackButton: true,
     onBackClick: () => navigate('/library/tasks'),
