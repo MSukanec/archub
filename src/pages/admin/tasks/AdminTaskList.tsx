@@ -267,16 +267,6 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'name_rendered', 
-      label: 'Nombre Paramétrico', 
-      width: 'minmax(0, 1fr)',
-      render: (task: GeneratedTask) => (
-        <div className="font-medium">
-          {task.name_rendered || 'Sin nombre paramétrico'}
-        </div>
-      )
-    },
-    { 
       key: 'unit', 
       label: 'Unidad', 
       width: '8%',
@@ -294,8 +284,8 @@ const AdminTaskList = () => {
     },
     { 
       key: 'labor_cost', 
-      label: 'M.O.', 
-      width: '8%',
+      label: 'Costo Unitario', 
+      width: '12%',
       render: (task: GeneratedTask) => (
         <div className="text-center">
           <TaskLaborCost task={task} />
