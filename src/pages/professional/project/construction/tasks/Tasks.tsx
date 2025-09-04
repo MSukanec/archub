@@ -220,7 +220,7 @@ export default function Tasks() {
     const actions = {
       search: {
         id: 'search',
-        icon: <Search className="h-5 w-5" />,
+        icon: Search,
         label: 'Buscar',
         onClick: () => {
           // Popover is handled in MobileActionBar
@@ -228,7 +228,7 @@ export default function Tasks() {
       },
       create: {
         id: 'create',
-        icon: <Plus className="h-6 w-6" />,
+        icon: Plus,
         label: activeTab === 'tasks' ? 'Nueva Tarea' : activeTab === 'phases' ? 'Nueva Fase' : 'Crear',
         onClick: () => {
           if (activeTab === 'tasks') {
@@ -241,7 +241,7 @@ export default function Tasks() {
       },
       filter: {
         id: 'filter',
-        icon: <Filter className="h-5 w-5" />,
+        icon: Filter,
         label: 'Filtros',
         onClick: () => {
           // Popover is handled in MobileActionBar
@@ -249,7 +249,7 @@ export default function Tasks() {
       },
       notifications: {
         id: 'notifications',
-        icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+        icon: Bell,
         label: 'Notificaciones',
         onClick: () => {
           // Popover is handled in MobileActionBar
@@ -333,7 +333,7 @@ export default function Tasks() {
 
   const headerProps = {
     title: "Listado de Tareas",
-    icon: <CheckSquare className="w-5 h-5" />,
+    icon: CheckSquare,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "tasks" ? {
