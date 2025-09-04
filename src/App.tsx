@@ -77,6 +77,7 @@ import TaskView from "@/pages/professional/library/tasks/TaskView";
 import Materials from "@/pages/professional/library/materials/Materials";
 import Labor from "@/pages/professional/library/labor/Labor";
 import Indirects from "@/pages/professional/library/indirects/Indirects";
+import GeneralCosts from "@/pages/professional/organization/general-costs/GeneralCosts";
 
 
 
@@ -116,6 +117,7 @@ function Router() {
         <Route path="/organization/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
         <Route path="/organization/members" component={Members} />
+        <Route path="/organization/general-costs" component={GeneralCosts} />
         
         <Route path="/organization" component={OrganizationDashboard} />
 
