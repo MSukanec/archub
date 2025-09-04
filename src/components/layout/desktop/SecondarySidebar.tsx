@@ -658,7 +658,7 @@ export function SecondarySidebar() {
                     }
                   }}
                   href={'href' in item ? item.href : undefined}
-                  variant="main"
+                  variant="secondary"
                   rightIcon={
                     isExpanded ? (
                       needsChevronRight ? <ChevronRight className="w-3 h-3" /> :
