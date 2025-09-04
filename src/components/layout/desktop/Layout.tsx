@@ -60,6 +60,11 @@ interface LayoutProps {
     onCurrencyViewChange?: (
       view: "discriminado" | "pesificado" | "dolarizado",
     ) => void;
+    // Back button props for view pages
+    showBackButton?: boolean;
+    onBackClick?: () => void;
+    backButtonText?: string;
+    isViewMode?: boolean;
   };
 }
 
@@ -156,6 +161,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 currencyView={headerProps.currencyView}
                 onCurrencyViewChange={headerProps.onCurrencyViewChange}
                 actionButton={headerProps.actionButton}
+                showBackButton={headerProps.showBackButton}
+                onBackClick={headerProps.onBackClick}
+                backButtonText={headerProps.backButtonText}
+                isViewMode={headerProps.isViewMode}
               >
                 <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} p-6 pb-32 h-full overflow-auto`}>
                   {children}
