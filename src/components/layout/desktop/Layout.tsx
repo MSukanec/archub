@@ -122,23 +122,23 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         <>
-          <HeaderMobile {...headerProps} />
+          {/* <HeaderMobile {...headerProps} /> */}
           
           {/* Header Desktop - Hidden on mobile */}
-          <div className="hidden md:block">
+          {/* <div className="hidden md:block">
             <Header {...headerProps} />
-          </div>
+          </div> */}
 
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
               // Calculate top padding based on new single-row header (h-12)
-              "md:pt-12" // h-12 header
+              "md:pt-0" // Sin header ahora
             } ${
               // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered
                 ? "md:ml-[304px]" // 40px primary + 264px secondary when expanded
                 : "md:ml-[80px]" // 40px primary + 40px secondary when collapsed
-            } ml-0 pt-12 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+            } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
               <PageLayout

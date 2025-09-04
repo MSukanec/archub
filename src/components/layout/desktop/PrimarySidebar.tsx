@@ -152,7 +152,7 @@ export function PrimarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-12 h-[calc(100vh-3rem)] z-50 bg-[var(--layout-bg)] border-r border-[var(--menues-border)] transition-all duration-300",
+        "fixed left-0 top-0 h-screen z-50 bg-[var(--layout-bg)] border-r border-[var(--menues-border)] transition-all duration-300",
         "w-[40px] flex flex-col"
       )}
       style={{
