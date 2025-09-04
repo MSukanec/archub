@@ -122,8 +122,8 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       sortable: true,
       render: (material: any) => (
         <div>
-          <div className="font-medium">{material.name}</div>
-          <div className="text-sm text-muted-foreground">{material.category}</div>
+          <div className="text-sm text-muted-foreground">{material.name}</div>
+          <div className="font-medium">{material.category}</div>
         </div>
       )
     },
@@ -133,8 +133,8 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       sortable: true,
       render: (material: any) => (
         <div>
-          <div className="font-medium">{material.quantity}</div>
-          <div className="text-sm text-muted-foreground">{material.unit}</div>
+          <div className="text-sm text-muted-foreground">{material.quantity}</div>
+          <div className="font-medium">{material.unit}</div>
         </div>
       )
     },
