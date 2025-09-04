@@ -208,6 +208,18 @@ export default function MovementRow({
     return 'A';
   };
 
+  // DEBUG TEMPORAL: Verificar datos para gasto general específico
+  if (movement.description?.includes("Ale Palamara")) {
+    console.log('🔍 DEBUG Ale Palamara movement:', {
+      id: movement.id,
+      description: movement.description,
+      category_name: movement.movement_data?.category?.name,
+      general_cost_id: (movement as any).general_cost_id,
+      general_cost: (movement as any).general_cost,
+      movement_raw: movement
+    });
+  }
+
   // Obtener la información específica de la tercera línea
   const specificThirdLine = getSpecificThirdLine(movement);
   
