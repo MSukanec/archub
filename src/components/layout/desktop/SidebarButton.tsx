@@ -76,7 +76,9 @@ export default function SidebarButton({
         }}
         style={{ 
         borderRadius: '4px', // All buttons have 4px rounded corners
-        backgroundColor: (isActive || isHeaderButton)
+        backgroundColor: isActive && !isExpanded
+          ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
+          : (isActive || isHeaderButton)
           ? `var(--main-sidebar-button-active-bg)` // Header buttons también usan active bg
           : `var(--main-sidebar-button-bg)`,
         color: (isActive || isHeaderButton)
@@ -89,7 +91,9 @@ export default function SidebarButton({
           width: 'calc(100% + 1px)',
           marginRight: '-1px',
           zIndex: 10,
-          borderRight: `1px solid var(--main-sidebar-button-active-bg)` // Usar siempre main
+          borderRight: isActive && !isExpanded 
+            ? `1px solid var(--main-sidebar-bg)` // Borde del color del sidebar secundario
+            : `1px solid var(--main-sidebar-button-active-bg)` // Usar main para headers
         })
       } as React.CSSProperties}
       onMouseLeave={(e) => {
