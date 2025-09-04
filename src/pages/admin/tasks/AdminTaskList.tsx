@@ -17,11 +17,12 @@ import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type Gene
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
-import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown } from 'lucide-react'
+import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye } from 'lucide-react'
 import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
+import { useLocation } from 'wouter'
 
 const AdminTaskList = () => {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
@@ -34,6 +35,7 @@ const AdminTaskList = () => {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const isMobile = useMobile()
+  const [, navigate] = useLocation()
 
   // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
@@ -76,6 +78,10 @@ const AdminTaskList = () => {
     console.log('📝 Editando tarea:', generatedTask);
     const modalData = { task: generatedTask, isEditing: true };
     openModal('parametric-task', modalData)
+  }
+
+  const handleView = (task: GeneratedTask) => {
+    navigate(`/library/tasks/${task.id}`)
   }
 
   const handleDelete = (task: GeneratedTask) => {
@@ -332,6 +338,15 @@ const AdminTaskList = () => {
       width: '120px',
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleView(task)}
+            className="h-8 w-8 p-0"
+            title="Ver detalles"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
