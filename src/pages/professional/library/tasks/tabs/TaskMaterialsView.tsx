@@ -47,7 +47,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       quantity: quantity,
       unit_price: unitPrice,
       total_price: totalPrice,
-      category: materialView?.material_categories?.name || 'Sin categoría',
+      category: materialView?.category_name || 'Sin categoría',
       material_id: material.material_id
     };
   });
