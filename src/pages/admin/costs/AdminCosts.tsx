@@ -9,7 +9,6 @@ import AdminCostProducts from './AdminCostProducts';
 import AdminCostMaterials from './AdminCostMaterials';
 import AdminCostBrands from './AdminCostBrands';
 import AdminCostCategories from './AdminCostCategories';
-import AdminCostPrices from './AdminCostPrices';
 import AdminCostLabor from './AdminCostLabor';
 
 const AdminCosts = () => {
@@ -49,7 +48,6 @@ const AdminCosts = () => {
     { id: 'materiales', label: 'Materiales', isActive: activeTab === 'materiales' },
     { id: 'marcas', label: 'Marcas', isActive: activeTab === 'marcas' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
-    { id: 'precios', label: 'Precios', isActive: activeTab === 'precios' },
     { id: 'labor', label: 'Mano de Obra', isActive: activeTab === 'labor' }
   ];
 
@@ -86,15 +84,6 @@ const AdminCosts = () => {
           icon: Plus,
           onClick: () => openModal('material-category-form', { editingMaterialCategory: null })
         };
-      case 'precios':
-        return {
-          label: "Nuevo Precio",
-          icon: Plus,
-          onClick: () => {
-            // TODO: Crear modal de creación de precios
-            console.log('Crear nuevo precio');
-          }
-        };
       case 'labor':
         return {
           label: "Nuevo Tipo de Mano de Obra",
@@ -126,8 +115,6 @@ const AdminCosts = () => {
         return <AdminCostBrands />;
       case 'categorias':
         return <AdminCostCategories />;
-      case 'precios':
-        return <AdminCostPrices />;
       case 'labor':
         return <AdminCostLabor />;
       default:

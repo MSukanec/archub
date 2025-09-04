@@ -201,7 +201,7 @@ const AdminCostLabor = () => {
             )}
           </div>
           {laborType.is_system && (
-            <Crown className="h-4 w-4 text-amber-500" title="Tipo del sistema" />
+            <Crown className="h-4 w-4 text-amber-500" />
           )}
         </div>
       )
@@ -285,7 +285,7 @@ const AdminCostLabor = () => {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-medium">{laborType.name}</h3>
                 {laborType.is_system && (
-                  <Crown className="h-4 w-4 text-amber-500" title="Tipo del sistema" />
+                  <Crown className="h-4 w-4 text-amber-500" />
                 )}
               </div>
               {laborType.description && (
