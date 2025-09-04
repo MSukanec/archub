@@ -136,6 +136,7 @@ export function PageLayout({
               <div className="flex items-center gap-3">
                 {icon && (
                   <span className="text-[var(--accent)] flex-shrink-0">
+                    {console.log('🔍 PageLayout Icon Debug:', { icon, type: typeof icon, isFunction: typeof icon === 'function' })}
                     {typeof icon === 'function' ? 
                       React.createElement(icon as React.ComponentType<{ className?: string }>, { 
                         className: "w-5 h-5" 
