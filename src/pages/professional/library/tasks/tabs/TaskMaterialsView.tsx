@@ -120,6 +120,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       key: 'name',
       label: 'Material',
       sortable: true,
+      width: '40%',
       render: (material: any) => (
         <div>
           <div className="text-sm text-muted-foreground">{material.name}</div>
@@ -132,15 +133,14 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       label: 'Cantidad',
       sortable: true,
       render: (material: any) => (
-        <div>
-          <div className="text-sm text-muted-foreground">{material.quantity}</div>
-          <div className="font-medium">{material.unit}</div>
+        <div className="font-medium">
+          {material.quantity} {material.unit}
         </div>
       )
     },
     {
       key: 'unit_price',
-      label: 'Precio Unitario',
+      label: 'Precio Unitario Promedio',
       sortable: true,
       render: (material: any) => (
         <div className="text-right">
@@ -150,7 +150,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     },
     {
       key: 'total_price',
-      label: 'Total',
+      label: 'Subtotal',
       sortable: true,
       render: (material: any) => (
         <div className="text-right font-medium">
