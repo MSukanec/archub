@@ -83,13 +83,13 @@ export default function SidebarButton({
         backgroundColor: isActive && !isExpanded
           ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
           : (isActive || isHeaderButton)
-          ? `var(--main-sidebar-button-active-bg)` // Header buttons también usan active bg
-          : `var(--main-sidebar-button-bg)`,
+          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
+          : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
         color: (isActive || isHeaderButton)
-          ? `var(--main-sidebar-button-active-fg)` // Header buttons también usan active fg
-          : `var(--main-sidebar-button-fg)`,
-        '--hover-bg': `var(--main-sidebar-button-hover-bg)`, // Usar siempre las variables main para consistencia
-        '--hover-fg': `var(--main-sidebar-button-hover-fg)` // Usar siempre las variables main para consistencia
+          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
+          : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
+        '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
+        '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
       } as React.CSSProperties}
       onMouseLeave={(e) => {
         if (!isActive && !disableHover) {
