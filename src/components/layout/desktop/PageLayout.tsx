@@ -136,7 +136,13 @@ export function PageLayout({
               <div className="flex items-center gap-3">
                 {icon && (
                   <div className="text-[var(--accent)] flex-shrink-0">
-                    {typeof icon === 'function' ? <icon className="w-5 h-5" /> : icon}
+                    {React.isValidElement(icon) ? (
+                      React.cloneElement(icon, { className: "w-5 h-5" })
+                    ) : typeof icon === 'function' ? (
+                      React.createElement(icon, { className: "w-5 h-5" })
+                    ) : (
+                      icon
+                    )}
                   </div>
                 )}
                 <h1 className="text-lg font-semibold text-[var(--foreground)]">
