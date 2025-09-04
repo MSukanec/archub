@@ -580,8 +580,17 @@ export function SecondarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Espacio vacío superior - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0"></div>
+      {/* Espacio superior con nombre de sección - misma altura que PageHeader */}
+      <div className="h-12 flex-shrink-0 flex items-center justify-center">
+        <span className="text-sm font-medium text-[var(--secondary-sidebar-fg)] capitalize">
+          {sidebarLevel === 'organization' && 'Organización'}
+          {sidebarLevel === 'project' && 'Proyecto'}
+          {sidebarLevel === 'construction' && 'Construcción'}
+          {sidebarLevel === 'library' && 'Biblioteca'}
+          {sidebarLevel === 'provider' && 'Proveedor'}
+          {sidebarLevel === 'admin' && 'Administración'}
+        </span>
+      </div>
       
       {/* Navigation Items */}
       <div className="flex-1 p-1">
