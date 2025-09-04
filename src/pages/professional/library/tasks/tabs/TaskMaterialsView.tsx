@@ -134,7 +134,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
   const columns = [
     {
       key: 'name',
-      title: 'Material',
+      label: 'Material',
       sortable: true,
       render: (material: any) => (
         <div>
@@ -145,7 +145,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     },
     {
       key: 'quantity',
-      title: 'Cantidad',
+      label: 'Cantidad',
       sortable: true,
       render: (material: any) => (
         <div>
@@ -156,7 +156,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     },
     {
       key: 'unit_price',
-      title: 'Precio Unitario',
+      label: 'Precio Unitario',
       sortable: true,
       render: (material: any) => (
         <div className="text-right">
@@ -166,7 +166,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     },
     {
       key: 'total_price',
-      title: 'Total',
+      label: 'Total',
       sortable: true,
       render: (material: any) => (
         <div className="text-right font-medium">
@@ -176,7 +176,8 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     },
     {
       key: 'actions',
-      title: 'Acciones',
+      label: 'Acciones',
+      sortable: false,
       render: (material: any) => (
         <div className="flex items-center gap-1">
           <Button
