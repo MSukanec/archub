@@ -74,7 +74,7 @@ export function PrimarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-12 h-[calc(100vh-3rem)] z-40 bg-[var(--primary)] border-r border-[var(--menues-border)]",
+        "fixed left-0 top-12 h-[calc(100vh-3rem)] z-50 bg-[var(--layout-bg)] border-r border-[var(--menues-border)]",
         "w-16 flex flex-col items-center py-4"
       )}
     >
@@ -88,7 +88,6 @@ export function PrimarySidebar() {
             isExpanded={false}
             onClick={() => handleSectionClick(section)}
             variant="main"
-            className="w-12 h-12 p-0 justify-center"
           />
         ))}
       </div>
