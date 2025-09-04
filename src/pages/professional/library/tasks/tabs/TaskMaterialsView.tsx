@@ -47,7 +47,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       quantity: quantity,
       unit_price: unitPrice,
       total_price: totalPrice,
-      category: 'Material', // Agregar categoría si está disponible en el futuro
+      category: materialView?.category || 'Sin categoría',
       material_id: material.material_id
     };
   });
@@ -122,8 +122,8 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       sortable: true,
       render: (material: any) => (
         <div>
-          <div className="font-medium">{material.name}</div>
-          <div className="text-sm text-muted-foreground">{material.category}</div>
+          <div className="text-base font-medium">{material.name}</div>
+          <div className="text-xs text-muted-foreground">{material.category}</div>
         </div>
       )
     },
@@ -133,8 +133,8 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       sortable: true,
       render: (material: any) => (
         <div>
-          <div className="font-medium">{material.quantity}</div>
-          <div className="text-sm text-muted-foreground">{material.unit}</div>
+          <div className="text-base font-medium">{material.quantity}</div>
+          <div className="text-xs text-muted-foreground">{material.unit}</div>
         </div>
       )
     },
