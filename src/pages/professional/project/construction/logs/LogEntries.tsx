@@ -90,7 +90,7 @@ export default function LogEntries({
       setActions({
         home: {
           id: 'home',
-          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          icon: Home,
           label: 'Inicio',
           onClick: () => {
             navigate('/dashboard');
@@ -98,26 +98,26 @@ export default function LogEntries({
         },
         search: {
           id: 'search',
-          icon: <Search className="h-5 w-5" />,
+          icon: Search,
           label: 'Buscar',
           onClick: () => {}
         },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nueva Bitácora',
           onClick: () => openModal('site-log'),
           variant: 'primary'
         },
         filter: {
           id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
+          icon: Filter,
           label: 'Filtros',
           onClick: () => {}
         },
         notifications: {
           id: 'notifications',
-          icon: <Bell className="h-5 w-5" />,
+          icon: Bell,
           label: 'Notificaciones',
           onClick: () => {}
         }
