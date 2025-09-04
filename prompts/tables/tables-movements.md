@@ -377,3 +377,5 @@ VISTA MOVEMENTS_VIEW:
     "data_type": "text"
   }
 ]
+
+TABLE MOVEE
