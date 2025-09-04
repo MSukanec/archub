@@ -21,8 +21,8 @@
   --main-sidebar-button-hover-bg: hsl(0, 0%, 85%);
   --main-sidebar-button-hover-fg: hsl(0, 0%, 15%);
 
-  /* Secondary Sidebar - MISMO COLOR QUE PRINCIPAL */
-  --secondary-sidebar-bg: hsl(0, 0%, 95%);
+  /* Secondary Sidebar - MISMO COLOR QUE CARDS */
+  --secondary-sidebar-bg: hsl(60, 8%, 95%);
   --secondary-sidebar-fg: hsl(0, 0%, 45%);
   --secondary-sidebar-border: hsl(0, 0%, 85%);
   --secondary-sidebar-button-bg: transparent;
