@@ -25,14 +25,14 @@ interface DefaultFieldsProps {
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
   selectedIndirects?: Array<{indirect_id: string, indirect_name: string}>
-  selectedGeneralCosts?: Array<{general_cost_id: string, general_cost_name: string}>
+  selectedGeneralCosts?: Array<{general_cost_id: string}>
   selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string}>
   selectedPartnerContributions?: Array<{partner_id: string, partner_name: string}>
   onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string}>) => void
   onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
   onIndirectsChange?: (indirectsList: Array<{indirect_id: string, indirect_name: string}>) => void
-  onGeneralCostsChange?: (generalCostsList: Array<{general_cost_id: string, general_cost_name: string}>) => void
+  onGeneralCostsChange?: (generalCostsList: Array<{general_cost_id: string}>) => void
   onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
   onPartnerContributionsChange?: (partnerContributionsList: Array<{partner_id: string, partner_name: string}>) => void
   // Props para el selector de proyecto

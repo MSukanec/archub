@@ -185,7 +185,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
   const [selectedIndirects, setSelectedIndirects] = React.useState<Array<{indirect_id: string, indirect_name: string}>>([])
-  const [selectedGeneralCosts, setSelectedGeneralCosts] = React.useState<Array<{general_cost_id: string, general_cost_name: string}>>([])
+  const [selectedGeneralCosts, setSelectedGeneralCosts] = React.useState<Array<{general_cost_id: string}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
@@ -311,8 +311,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   React.useEffect(() => {
     if (isEditing && existingGeneralCosts && existingGeneralCosts.length > 0) {
       const transformedGeneralCosts = existingGeneralCosts.map((generalCost: any) => ({
-        general_cost_id: generalCost.general_cost_id,
-        general_cost_name: generalCost.general_cost_name
+        general_cost_id: generalCost.general_cost_id
       }));
       setSelectedGeneralCosts(transformedGeneralCosts);
     }
@@ -1204,8 +1203,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         
         const generalCostsData = selectedGeneralCosts.map(generalCost => ({
           movement_id: result.id,
-          general_cost_id: generalCost.general_cost_id,
-          general_cost_name: generalCost.general_cost_name
+          general_cost_id: generalCost.general_cost_id
         }))
 
         const { error: generalCostsError } = await supabase
