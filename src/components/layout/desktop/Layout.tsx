@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Sidebar } from "./Sidebar";
+import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
@@ -98,7 +99,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       className="min-h-screen"
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
-      {/* Sidebar - hidden on mobile */}
+      {/* Primary Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <PrimarySidebar />
+      </div>
+
+      {/* Secondary Sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
         {/* <SidebarSubmenu /> */}{" "}
@@ -128,10 +134,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // Calculate top padding based on new single-row header (h-12)
               "md:pt-12" // h-12 header
             } ${
-              // Calculate margin based on main sidebar only (since we're using accordion sidebar now)
+              // Calculate margin based on primary sidebar (64px) + secondary sidebar
               isMainDocked || isMainHovered
-                ? "md:ml-[264px]" // 264px main sidebar when expanded
-                : "md:ml-[40px]" // 40px main sidebar when collapsed
+                ? "md:ml-[328px]" // 64px primary + 264px secondary when expanded
+                : "md:ml-[104px]" // 64px primary + 40px secondary when collapsed
             } ml-0 pt-12 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
