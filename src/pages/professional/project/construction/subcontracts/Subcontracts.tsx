@@ -6,6 +6,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
+import { useNavigationStore } from '@/stores/navigationStore';
 
 // Importar los componentes separados
 import SubcontractList from './SubcontractList';
@@ -15,10 +16,16 @@ export default function Subcontracts() {
   const [activeTab, setActiveTab] = useState('lista')
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const { setSidebarContext } = useNavigationStore();
 
   // Estados específicos para controles de header en tab Lista
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+
+  // Set sidebar context on mount
+  useEffect(() => {
+    setSidebarContext('construction')
+  }, [setSidebarContext])
 
   // Mobile action bar
   const { 
@@ -142,7 +149,7 @@ export default function Subcontracts() {
   const getHeaderProps = () => {
     const baseProps = {
       icon: Handshake,
-      pageTitle: "Subcontratos",
+      title: "Subcontratos",
       tabs: [
         { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
         { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos' }
