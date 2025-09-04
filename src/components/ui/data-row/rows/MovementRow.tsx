@@ -209,21 +209,6 @@ export default function MovementRow({
   };
 
 
-  // DEBUG TEMPORAL: Ver datos exactos del movimiento Ale Palamara
-  if (movement.description?.includes("Ale Palamara")) {
-    console.log('🔍 DATOS EXACTOS Ale Palamara:', {
-      id: movement.id,
-      description: movement.description,
-      category_name: movement.movement_data?.category?.name,
-      general_cost_id: movement.general_cost_id,
-      general_cost: movement.general_cost,
-      indirect: movement.indirect,
-      partner: movement.partner,
-      subcontract: movement.subcontract,
-      client: movement.client,
-      member: movement.member
-    });
-  }
 
   // Obtener la información específica de la tercera línea
   const specificThirdLine = getSpecificThirdLine(movement);

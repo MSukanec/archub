@@ -95,6 +95,8 @@ interface Movement {
   client?: string;
   member?: string;
   member_avatar?: string;
+  indirect?: string;
+  general_cost?: string;
   movement_data?: {
     type?: {
       id: string;
@@ -968,6 +970,9 @@ export default function MovementsList() {
         } else if (categoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0' && movement.indirect && movement.indirect.trim() !== "") {
           // Indirectos
           selectedValue = movement.indirect;
+        } else if (categoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad' && movement.general_cost && movement.general_cost.trim() !== "") {
+          // Gastos Generales
+          selectedValue = movement.general_cost;
         }
         
         return (
