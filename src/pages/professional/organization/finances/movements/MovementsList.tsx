@@ -965,6 +965,9 @@ export default function MovementsList() {
         } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
           // Aportes Propios o Retiros Propios
           selectedValue = movement.partner;
+        } else if (categoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0' && movement.indirect && movement.indirect.trim() !== "") {
+          // Indirectos
+          selectedValue = movement.indirect;
         }
         
         return (

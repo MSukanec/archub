@@ -228,8 +228,8 @@ export default function MovementRow({
           </div>
         )}
         {specificThirdLine && (
-          <div className="text-red-600 text-sm font-bold border-2 border-red-500 bg-yellow-200 p-1 rounded">
-            🔍 TERCERA LÍNEA: {specificThirdLine}
+          <div className="text-muted-foreground text-sm truncate">
+            {specificThirdLine}
           </div>
         )}
       </div>
