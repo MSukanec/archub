@@ -221,6 +221,12 @@ function Router() {
             <Products />
           </AuthAdmin>
         </Route>
+        
+        <Route path="/providers/products">
+          <AuthAdmin>
+            <Products />
+          </AuthAdmin>
+        </Route>
 
 
 
