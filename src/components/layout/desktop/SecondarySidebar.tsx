@@ -507,7 +507,8 @@ export function SecondarySidebar() {
       { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
       { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
       { icon: Database, label: 'Materiales', href: '/admin/materials' },
-      { icon: Settings, label: 'General', href: '/admin/general' }
+      { icon: Settings, label: 'General', href: '/admin/general' },
+      { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
   // Función para obtener el contenido actual del sidebar según la sección activa del header
