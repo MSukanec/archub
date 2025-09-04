@@ -112,7 +112,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
-      {isMobile && headerProps?.tabs && headerProps.tabs.length > 1 ? (
+      {isMobile ? (
         <HeaderMobile {...headerProps}>
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
@@ -122,8 +122,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         <>
-          {/* <HeaderMobile {...headerProps} /> */}
-          
           {/* Header Desktop - Hidden on mobile */}
           {/* <div className="hidden md:block">
             <Header {...headerProps} />
