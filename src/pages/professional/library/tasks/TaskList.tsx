@@ -42,17 +42,17 @@ export default function TaskList() {
   useEffect(() => {
     if (isMobile) {
       setActions({
-        home: { id: 'home', label: 'Inicio', icon: <Home className="h-6 w-6" />, onClick: () => {} },
-        search: { id: 'search', label: 'Buscar', icon: <Search className="h-6 w-6" />, onClick: () => {} },
+        home: { id: 'home', label: 'Inicio', icon: Home, onClick: () => {} },
+        search: { id: 'search', label: 'Buscar', icon: Search, onClick: () => {} },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nueva Tarea',
           onClick: () => openModal('task'),
           variant: 'primary'
         },
-        filter: { id: 'filter', label: 'Filtros', icon: <Filter className="h-6 w-6" />, onClick: () => {} },
-        notifications: { id: 'notifications', label: 'Notificaciones', icon: <Bell className="h-6 w-6" />, onClick: () => {} },
+        filter: { id: 'filter', label: 'Filtros', icon: Filter, onClick: () => {} },
+        notifications: { id: 'notifications', label: 'Notificaciones', icon: Bell, onClick: () => {} },
       })
       setShowActionBar(true)
     }
