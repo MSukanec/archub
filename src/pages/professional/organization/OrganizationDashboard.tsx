@@ -52,7 +52,7 @@ export default function OrganizationDashboard() {
   }
 
   const headerProps = {
-    icon: Home,
+    icon: <Home className="w-5 h-5" />,
     title: "Dashboard"
   };
 

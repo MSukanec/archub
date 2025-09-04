@@ -31,7 +31,7 @@ export default function Members() {
   ];
 
   const headerProps = {
-    icon: Users,
+    icon: <Users className="w-5 h-5" />,
     title: 'Miembros',
     subtitle: `Gestión de miembros y clientes de ${organization?.name || 'la organización'}`,
     tabs: headerTabs,

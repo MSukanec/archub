@@ -319,7 +319,7 @@ export default function Projects() {
 
   const headerProps = {
     title: "Gestión de Proyectos",
-    icon: Folder,
+    icon: <Folder className="w-5 h-5" />,
     breadcrumb: [
       { name: "Perfil", href: "/profile/data" },
       { name: "Gestión de Proyectos", href: "/organization/projects" }

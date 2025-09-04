@@ -26,7 +26,7 @@ export default function OrganizationData() {
   ];
 
   const headerProps = {
-    icon: Database,
+    icon: <Database className="w-5 h-5" />,
     title: 'Datos de la Organización',
     subtitle: 'Gestiona la información básica de tu organización',
     tabs: headerTabs,
