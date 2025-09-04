@@ -357,13 +357,32 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       ) : filteredCosts.length > 0 ? (
         <Table
           data={filteredCosts}
-          columns={columns}
-          groupBy={groupBy}
-          groupByOptions={[
-            { value: 'tipo', label: 'Tipo' },
-            { value: undefined, label: 'Sin agrupar' }
-          ]}
-          onGroupByChange={(value: string | undefined) => setGroupBy(value)}
+          columns={groupBy === 'tipo' ? columns.filter(col => col.key !== 'type') : columns}
+          groupBy={groupBy === 'tipo' ? 'type' : undefined}
+          renderGroupHeader={(groupKey: string, groupRows: any[]) => (
+            <tr className="bg-muted/30">
+              <td colSpan={groupBy === 'tipo' ? columns.length - 1 : columns.length} className="px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="font-semibold text-sm">{groupKey}</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'}
+                  </Badge>
+                </div>
+              </td>
+            </tr>
+          )}
+          topBar={{
+            showSearch: true,
+            onSearchChange: setSearchQuery,
+            searchValue: searchQuery,
+            groupingOptions: [
+              { value: 'tipo', label: 'Tipo' },
+              { value: '', label: 'Sin agrupar' }
+            ],
+            currentGrouping: groupBy || '',
+            onGroupingChange: (value: string) => setGroupBy(value || undefined),
+            isGroupingActive: !!groupBy
+          }}
         />
       ) : (
         <EmptyState
