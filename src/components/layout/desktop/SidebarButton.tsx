@@ -61,9 +61,9 @@ export default function SidebarButton({
         ref={buttonRef}
         className={cn(
           'relative flex items-center justify-center transition-all duration-300',
-          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
-          'w-8 h-8',
-          // Cuando expandido, el botón se extiende al full width SIN PADDING
+          // En sidebar principal sin expandir: ancho completo pero icono centrado
+          variant === 'main' && !isExpanded ? 'w-full h-8' : 'w-8 h-8',
+          // Cuando expandido, el botón se extiende al full width con justify-start
           isExpanded && 'w-full justify-start'
         )}
         onClick={handleClick}
