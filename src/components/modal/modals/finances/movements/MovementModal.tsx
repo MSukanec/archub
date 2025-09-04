@@ -35,6 +35,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/hooks/use-movement-subcontracts'
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
 import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartners } from '@/hooks/use-movement-partners'
+import { useMovementGeneralCosts, useCreateMovementGeneralCosts, useUpdateMovementGeneralCosts } from '@/hooks/use-movement-general-costs'
 
 // Función para crear schema dinámico basado en contexto
 const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
@@ -155,6 +156,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const createMovementPartnersMutation = useCreateMovementPartners()
   const updateMovementPartnersMutation = useUpdateMovementPartners()
 
+  // Mutaciones para gastos generales
+  const createMovementGeneralCostsMutation = useCreateMovementGeneralCosts()
+  const updateMovementGeneralCostsMutation = useUpdateMovementGeneralCosts()
+
   // Query para cargar clientes existentes en modo edición
   const { data: existingProjectClients } = useMovementProjectClients(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
@@ -162,6 +167,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Query para cargar partners existentes en modo edición
   const { data: existingPartners } = useMovementPartners(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
+
+  // Query para cargar gastos generales existentes en modo edición
+  const { data: existingGeneralCosts } = useMovementGeneralCosts(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
@@ -299,17 +309,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Load existing general costs when editing
   React.useEffect(() => {
-    if (isEditing && movementData?.general_cost_id && movementData?.general_cost) {
-      console.log('🔧 Loading existing general cost:', {
-        general_cost_id: movementData.general_cost_id,
-        general_cost_name: movementData.general_cost
-      });
-      setSelectedGeneralCosts([{
-        general_cost_id: movementData.general_cost_id,
-        general_cost_name: movementData.general_cost
-      }]);
+    if (isEditing && existingGeneralCosts && existingGeneralCosts.length > 0) {
+      const transformedGeneralCosts = existingGeneralCosts.map((generalCost: any) => ({
+        general_cost_id: generalCost.general_cost_id,
+        general_cost_name: generalCost.general_cost_name
+      }));
+      setSelectedGeneralCosts(transformedGeneralCosts);
     }
-  }, [isEditing, movementData?.general_cost_id, movementData?.general_cost]);
+  }, [isEditing, existingGeneralCosts]);
 
   // Load existing project clients when editing
   React.useEffect(() => {
@@ -1031,6 +1038,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (deleteIndirectsError) throw deleteIndirectsError
 
+        // Actualizar gastos generales asignados - eliminar existentes y crear nuevos
+        const { error: deleteGeneralCostsError } = await supabase
+          .from('movement_general_costs')
+          .delete()
+          .eq('movement_id', editingMovement.id)
+
+        if (deleteGeneralCostsError) throw deleteGeneralCostsError
+
         // Actualizar partners (retiros y aportes) - usar hook unificado
         const allPartners = [
           ...(selectedPartnerWithdrawals || []),
@@ -1175,6 +1190,31 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (indirectsError) throw indirectsError
       }
 
+      // Si hay gastos generales seleccionados, guardar las asignaciones en movement_general_costs
+      if (selectedGeneralCosts && selectedGeneralCosts.length > 0) {
+        // Primero eliminar registros existentes si es edición
+        if (editingMovement?.id) {
+          const { error: deleteError } = await supabase
+            .from('movement_general_costs')
+            .delete()
+            .eq('movement_id', editingMovement.id)
+
+          if (deleteError) throw deleteError
+        }
+        
+        const generalCostsData = selectedGeneralCosts.map(generalCost => ({
+          movement_id: result.id,
+          general_cost_id: generalCost.general_cost_id,
+          general_cost_name: generalCost.general_cost_name
+        }))
+
+        const { error: generalCostsError } = await supabase
+          .from('movement_general_costs')
+          .insert(generalCostsData)
+
+        if (generalCostsError) throw generalCostsError
+      }
+
       return result
     },
     onSuccess: async (result) => {
@@ -1204,6 +1244,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         })
         queryClient.invalidateQueries({ 
           queryKey: ['all-movement-partners'] 
+        })
+        queryClient.invalidateQueries({ 
+          queryKey: ['movement-general-costs', result.id] 
         })
       }
       
