@@ -114,7 +114,14 @@ const getConceptFullName = (movement: Movement): string => {
 
 // Helper para obtener el texto de la tercera línea específica
 const getSpecificThirdLine = (movement: Movement): string | null => {
-  // Prioridad: partner -> subcontract -> client -> member -> indirect
+  // Para categoría "Indirectos", priorizar el tipo de indirecto sobre el miembro
+  const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
+  
+  if (categoryName.includes('indirecto') && movement.indirect) {
+    return movement.indirect;
+  }
+  
+  // Prioridad normal: partner -> subcontract -> client -> indirect -> member
   if (movement.partner) {
     return movement.partner;
   }
@@ -127,12 +134,12 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
     return movement.client;
   }
   
-  if (movement.member) {
-    return movement.member;
-  }
-  
   if (movement.indirect) {
     return movement.indirect;
+  }
+  
+  if (movement.member) {
+    return movement.member;
   }
   
   return null;
