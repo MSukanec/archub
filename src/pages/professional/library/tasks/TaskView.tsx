@@ -3,21 +3,21 @@ import { useParams, useLocation } from "wouter";
 import { CheckSquare, Plus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { TaskMaterialsView } from './tabs/TaskMaterialsView';
+import { TaskCostsView } from './tabs/TaskCostsView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";
 
 export default function TaskView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('Materiales');
+  const [activeTab, setActiveTab] = useState('Costos');
   
   const { data: task, isLoading } = useGeneratedTask(id || '');
 
   const headerTabs = [
     {
-      id: 'Materiales',
-      label: 'Materiales',
-      isActive: activeTab === 'Materiales'
+      id: 'Costos',
+      label: 'Costos',
+      isActive: activeTab === 'Costos'
     }
   ];
 
@@ -37,7 +37,7 @@ export default function TaskView() {
     onTabChange: setActiveTab,
     actionButton: {
       icon: Plus,
-      label: "Agregar Material",
+      label: "Agregar Costo",
       onClick: () => {
         // TODO: Implementar modal de agregar material
         console.log('Agregar material a tarea:', task?.id);
@@ -72,9 +72,9 @@ export default function TaskView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Materiales':
+      case 'Costos':
         return (
-          <TaskMaterialsView
+          <TaskCostsView
             task={task}
           />
         );

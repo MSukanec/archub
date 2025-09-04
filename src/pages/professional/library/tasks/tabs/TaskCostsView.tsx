@@ -15,11 +15,11 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useMobile } from '@/hooks/use-mobile';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 
-interface TaskMaterialsViewProps {
+interface TaskCostsViewProps {
   task: any;
 }
 
-export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
+export function TaskCostsView({ task }: TaskCostsViewProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
@@ -28,13 +28,14 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
   // Estados para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+  const [groupBy, setGroupBy] = useState<'tipo' | null>('tipo');
 
   // Obtener datos reales de materiales usando el hook existente
   const taskId = task?.task_id || task?.id;
   const { data: rawMaterials = [], isLoading } = useTaskMaterials(taskId);
 
   // Transformar datos para la tabla
-  const materials = rawMaterials.map((material: any) => {
+  const costs = rawMaterials.map((material: any) => {
     const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
     const unitPrice = materialView?.computed_unit_price || 0;
     const quantity = material.amount || 0;
@@ -42,6 +43,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
 
     return {
       id: material.id,
+      type: 'Material', // Por ahora solo materiales
       name: materialView?.name || 'Material sin nombre',
       unit: materialView?.unit_of_computation || 'Unidad',
       quantity: quantity,
@@ -52,26 +54,26 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     };
   });
 
-  // Cálculos para KPIs de materiales
+  // Cálculos para KPIs de costos
   const kpiData = useMemo(() => {
-    if (materials.length === 0) return null;
+    if (costs.length === 0) return null;
 
-    const totalMaterials = materials.length;
-    const totalValue = materials.reduce((sum, m) => sum + m.total_price, 0);
-    const averagePrice = totalValue / totalMaterials;
+    const totalItems = costs.length;
+    const totalValue = costs.reduce((sum, c) => sum + c.total_price, 0);
+    const averagePrice = totalValue / totalItems;
     
     // Simulación de completitud (en futuro será real)
-    const completedMaterials = Math.floor(totalMaterials * 0.75);
-    const completionPercentage = (completedMaterials / totalMaterials) * 100;
+    const completedItems = Math.floor(totalItems * 0.75);
+    const completionPercentage = (completedItems / totalItems) * 100;
 
     return {
-      totalMaterials,
-      completedMaterials,
+      totalItems,
+      completedItems,
       totalValue,
       averagePrice,
       completionPercentage
     };
-  }, [materials]);
+  }, [costs]);
 
   // Función para formatear montos
   const formatCurrency = (amount: number) => {
@@ -83,48 +85,53 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
     }).format(amount);
   };
 
-  // Filtrar materiales por búsqueda
-  const filteredMaterials = materials.filter(material => {
+  // Filtrar costos por búsqueda
+  const filteredCosts = costs.filter(cost => {
     const searchLower = searchQuery.toLowerCase();
-    const nameMatch = material.name?.toLowerCase().includes(searchLower);
-    const categoryMatch = material.category?.toLowerCase().includes(searchLower);
-    return !searchQuery || nameMatch || categoryMatch;
+    const nameMatch = cost.name?.toLowerCase().includes(searchLower);
+    const categoryMatch = cost.category?.toLowerCase().includes(searchLower);
+    const typeMatch = cost.type?.toLowerCase().includes(searchLower);
+    return !searchQuery || nameMatch || categoryMatch || typeMatch;
   });
 
-  // Función para abrir modal de agregar material
-  const handleAddMaterial = () => {
-    // TODO: Implementar modal de agregar material
-    console.log('Agregar material a tarea:', task?.id);
+  // Función para abrir modal de agregar costo
+  const handleAddCost = () => {
+    // TODO: Implementar modal de agregar costo
+    console.log('Agregar costo a tarea:', task?.id);
   };
 
-  // Función para editar material
-  const handleEditMaterial = (material: any) => {
-    // TODO: Implementar modal de editar material
-    console.log('Editar material:', material.id);
+  // Función para editar costo
+  const handleEditCost = (cost: any) => {
+    // TODO: Implementar modal de editar costo
+    console.log('Editar costo:', cost.id);
   };
 
-  // Función para eliminar material
-  const handleDeleteMaterial = (material: any) => {
+  // Función para eliminar costo
+  const handleDeleteCost = (cost: any) => {
     // TODO: Implementar eliminación
-    console.log('Eliminar material:', material.id);
-  };
-
-  // Función para ver detalles del material
-  const handleViewMaterial = (material: any) => {
-    navigate(`/library/materials/${material.id}`);
+    console.log('Eliminar costo:', cost.id);
   };
 
   // Definir columnas de la tabla
   const columns = [
     {
-      key: 'name',
-      label: 'Material',
+      key: 'type',
+      label: 'Tipo',
       sortable: true,
-      width: '40%',
-      render: (material: any) => (
+      width: '15%',
+      render: (cost: any) => (
+        <div className="font-medium">{cost.type}</div>
+      )
+    },
+    {
+      key: 'name',
+      label: 'Concepto',
+      sortable: true,
+      width: '35%',
+      render: (cost: any) => (
         <div>
-          <div className="text-sm text-muted-foreground">{material.name}</div>
-          <div className="font-medium">{material.category}</div>
+          <div className="text-sm text-muted-foreground">{cost.name}</div>
+          <div className="font-medium">{cost.category}</div>
         </div>
       )
     },
@@ -132,9 +139,9 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       key: 'quantity',
       label: 'Cantidad',
       sortable: true,
-      render: (material: any) => (
+      render: (cost: any) => (
         <div className="font-medium">
-          {material.quantity} {material.unit}
+          {cost.quantity} {cost.unit}
         </div>
       )
     },
@@ -142,9 +149,9 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       key: 'unit_price',
       label: 'Precio Unitario Promedio',
       sortable: true,
-      render: (material: any) => (
+      render: (cost: any) => (
         <div className="text-right">
-          {formatCurrency(material.unit_price)}
+          {formatCurrency(cost.unit_price)}
         </div>
       )
     },
@@ -152,9 +159,9 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       key: 'total_price',
       label: 'Subtotal',
       sortable: true,
-      render: (material: any) => (
+      render: (cost: any) => (
         <div className="text-right font-medium">
-          {formatCurrency(material.total_price)}
+          {formatCurrency(cost.total_price)}
         </div>
       )
     },
@@ -162,20 +169,12 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       key: 'actions',
       label: 'Acciones',
       sortable: false,
-      render: (material: any) => (
+      render: (cost: any) => (
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => handleViewMaterial(material)}
-            className="h-8 w-8 p-0"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleEditMaterial(material)}
+            onClick={() => handleEditCost(cost)}
             className="h-8 w-8 p-0"
           >
             <Edit className="h-4 w-4" />
@@ -183,7 +182,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => handleDeleteMaterial(material)}
+            onClick={() => handleDeleteCost(cost)}
             className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
@@ -198,13 +197,13 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       {/* KPI Cards */}
       {kpiData && (
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
-          {/* Total Materiales */}
+          {/* Total Costos */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Materiales' : 'Total Materiales'}
+                    {isMobile ? 'Costos' : 'Total Costos'}
                   </p>
                   <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
@@ -218,16 +217,16 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
                       style={{
                         backgroundColor: 'var(--accent)',
                         height: `${Math.max(30, Math.random() * 100)}%`,
-                        opacity: i < kpiData.totalMaterials ? 1 : 0.3
+                        opacity: i < kpiData.totalItems ? 1 : 0.3
                       }}
                     />
                   ))}
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalMaterials}</p>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalItems}</p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.completedMaterials} configurados
+                    {kpiData.completedItems} configurados
                   </p>
                 </div>
               </div>
@@ -347,7 +346,7 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
         </div>
       )}
 
-      {/* Tabla de Materiales */}
+      {/* Tabla de Costos */}
       {isLoading ? (
         // Estado de carga
         <div className="space-y-4">
@@ -355,20 +354,26 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
             <div key={i} className="h-16 bg-muted/20 rounded-lg animate-pulse" />
           ))}
         </div>
-      ) : filteredMaterials.length > 0 ? (
+      ) : filteredCosts.length > 0 ? (
         <Table
-          data={filteredMaterials}
+          data={filteredCosts}
           columns={columns}
+          groupBy={groupBy}
+          groupByOptions={[
+            { value: 'tipo', label: 'Tipo' },
+            { value: null, label: 'Sin agrupar' }
+          ]}
+          onGroupByChange={(value) => setGroupBy(value as 'tipo' | null)}
         />
       ) : (
         <EmptyState
           icon={<Package className="h-16 w-16" />}
-          title="Sin materiales configurados"
-          description="Los materiales asociados a esta tarea aparecerán aquí."
+          title="Sin costos configurados"
+          description="Los costos asociados a esta tarea aparecerán aquí."
           action={
-            <Button variant="default" size="sm" onClick={handleAddMaterial}>
+            <Button variant="default" size="sm" onClick={handleAddCost}>
               <Plus className="h-4 w-4 mr-2" />
-              Agregar Material
+              Agregar Costo
             </Button>
           }
         />
