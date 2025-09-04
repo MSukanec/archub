@@ -64,6 +64,9 @@ interface LayoutProps {
 }
 
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
+  // Debug: Check what's coming in headerProps
+  console.log('🔍 Layout received headerProps:', headerProps);
+  
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
   const { isDocked: isMainDocked, isHovered: isMainHovered } =
