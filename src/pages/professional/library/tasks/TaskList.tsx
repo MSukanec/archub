@@ -169,16 +169,8 @@ export default function TaskList() {
       label: 'Acciones',
       width: '11%',
       render: (task: any) => {
-        // Solo mostrar acciones para tareas que pertenecen a la organización (no del sistema)
+        // Todas las tareas pueden ser visualizadas, solo las de la organización pueden ser editadas
         const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
-        
-        if (!canEdit) {
-          return (
-            <div className="flex items-center justify-center h-7">
-              <span className="text-xs text-muted-foreground">-</span>
-            </div>
-          );
-        }
         
         return (
           <div className="flex items-center gap-1">
@@ -190,30 +182,34 @@ export default function TaskList() {
             >
               <Eye className="h-3 w-3" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEdit(task)}
-              className="h-7 w-7 p-0"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDuplicate(task)}
-              className="h-7 w-7 p-0"
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(task)}
-              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            {canEdit && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(task)}
+                  className="h-7 w-7 p-0"
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDuplicate(task)}
+                  className="h-7 w-7 p-0"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(task)}
+                  className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </>
+            )}
           </div>
         );
       }
