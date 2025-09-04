@@ -83,14 +83,11 @@ export function useTaskCosts(taskId: string | null) {
           };
         }),
         ...(labor || []).map(laborItem => {
-          const laborType = laborItem.labor_types;
-          const unit = laborType?.units;
-          
           return {
             id: laborItem.id,
             type: 'Mano de Obra',
-            name: laborType?.name || 'Mano de obra sin nombre',
-            unit: unit?.name || 'Unidad',
+            name: laborItem.labor_types?.name || 'Mano de obra sin nombre',
+            unit: laborItem.labor_types?.units?.name || 'Unidad',
             quantity: laborItem.quantity || 0,
             unit_price: 0, // TODO: Implementar precios para mano de obra
             total_price: 0, // TODO: Calcular precio total

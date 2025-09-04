@@ -191,8 +191,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
         await createTaskLaborMutation.mutateAsync({
           task_id: task.id,
           labor_type_id: data.item_id,
-          quantity: data.quantity,
-          unit_id: data.unit_id
+          quantity: data.quantity
         })
       }
       
