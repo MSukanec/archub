@@ -282,6 +282,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [isEditing, existingSubcontracts])
 
+  // Load existing indirects when editing
+  React.useEffect(() => {
+    if (isEditing && movementData?.indirect_id && movementData?.indirect) {
+      console.log('🔧 Loading existing indirect:', {
+        indirect_id: movementData.indirect_id,
+        indirect_name: movementData.indirect
+      });
+      setSelectedIndirects([{
+        indirect_id: movementData.indirect_id,
+        indirect_name: movementData.indirect
+      }]);
+    }
+  }, [isEditing, movementData?.indirect_id, movementData?.indirect]);
+
   // Load existing project clients when editing
   React.useEffect(() => {
     if (isEditing && existingProjectClients && existingProjectClients.length > 0) {
