@@ -580,6 +580,9 @@ export function SecondarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Espacio vacío superior - misma altura que PageHeader */}
+      <div className="h-12 flex-shrink-0"></div>
+      
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
