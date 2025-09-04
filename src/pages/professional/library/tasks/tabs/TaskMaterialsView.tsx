@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
+import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 
 interface TaskMaterialsViewProps {
   task: any;
@@ -28,39 +29,28 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
 
-  // Datos mock de materiales (en el futuro será un hook)
-  const materials = [
-    {
-      id: '1',
-      name: 'Cemento Portland',
-      unit: 'Bolsa 50kg',
-      quantity: 15,
-      unit_price: 8500,
-      total_price: 127500,
-      category: 'Materiales básicos',
-      supplier: 'Corralón Central'
-    },
-    {
-      id: '2', 
-      name: 'Arena gruesa',
-      unit: 'm³',
-      quantity: 2.5,
-      unit_price: 12000,
-      total_price: 30000,
-      category: 'Áridos',
-      supplier: 'Arenera del Norte'
-    },
-    {
-      id: '3',
-      name: 'Ladrillos comunes',
-      unit: 'Millar',
-      quantity: 5,
-      unit_price: 45000,
-      total_price: 225000,
-      category: 'Mampostería',
-      supplier: 'Ladrillera San José'
-    }
-  ];
+  // Obtener datos reales de materiales usando el hook existente
+  const taskId = task?.task_id || task?.id;
+  const { data: rawMaterials = [], isLoading } = useTaskMaterials(taskId);
+
+  // Transformar datos para la tabla
+  const materials = rawMaterials.map((material: any) => {
+    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
+    const unitPrice = materialView?.computed_unit_price || 0;
+    const quantity = material.amount || 0;
+    const totalPrice = quantity * unitPrice;
+
+    return {
+      id: material.id,
+      name: materialView?.name || 'Material sin nombre',
+      unit: materialView?.unit_of_computation || 'Unidad',
+      quantity: quantity,
+      unit_price: unitPrice,
+      total_price: totalPrice,
+      category: 'Material', // Agregar categoría si está disponible en el futuro
+      material_id: material.material_id
+    };
+  });
 
   // Cálculos para KPIs de materiales
   const kpiData = useMemo(() => {
@@ -103,20 +93,14 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
 
   // Función para abrir modal de agregar material
   const handleAddMaterial = () => {
-    openModal('task-material', {
-      taskId: task?.id,
-      isEditing: false
-    });
+    // TODO: Implementar modal de agregar material
+    console.log('Agregar material a tarea:', task?.id);
   };
 
   // Función para editar material
   const handleEditMaterial = (material: any) => {
-    openModal('task-material', {
-      taskId: task?.id,
-      materialId: material.id,
-      material: material,
-      isEditing: true
-    });
+    // TODO: Implementar modal de editar material
+    console.log('Editar material:', material.id);
   };
 
   // Función para eliminar material
@@ -364,18 +348,17 @@ export function TaskMaterialsView({ task }: TaskMaterialsViewProps) {
       )}
 
       {/* Tabla de Materiales */}
-      {filteredMaterials.length > 0 ? (
+      {isLoading ? (
+        // Estado de carga
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 bg-muted/20 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : filteredMaterials.length > 0 ? (
         <Table
           data={filteredMaterials}
           columns={columns}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          showTopBar={true}
-          showSearch={true}
-          searchPlaceholder="Buscar materiales..."
-          showCurrencySelector={false}
-          showActionButtons={false}
-          title="Material"
         />
       ) : (
         <EmptyState
