@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Plus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { TaskMaterialsView } from './tabs/TaskMaterialsView';
@@ -21,14 +21,28 @@ export default function TaskView() {
     }
   ];
 
+  // Función para truncar título largo
+  const truncateTitle = (title: string, maxLength: number = 60) => {
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength) + "...";
+  };
+
   const headerProps = {
     icon: CheckSquare,
-    title: task?.custom_name || task?.name_rendered || "Tarea",
+    title: truncateTitle(task?.custom_name || task?.name_rendered || "Tarea"),
     showBackButton: true,
     onBackClick: () => navigate('/library/tasks'),
     isViewMode: true,
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actionButton: {
+      icon: Plus,
+      label: "Agregar Material",
+      onClick: () => {
+        // TODO: Implementar modal de agregar material
+        console.log('Agregar material a tarea:', task?.id);
+      }
+    }
   };
 
   if (isLoading) {
