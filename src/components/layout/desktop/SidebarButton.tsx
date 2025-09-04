@@ -72,8 +72,10 @@ export default function SidebarButton({
         onMouseEnter={(e) => {
           handleMouseEnter();
           if (!isActive && !disableHover) {
-            e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-hover-bg)`; // Usar siempre main
-            e.currentTarget.style.color = `var(--main-sidebar-button-hover-fg)`; // Usar siempre main
+            const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
+            const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
+            e.currentTarget.style.backgroundColor = hoverBgVar;
+            e.currentTarget.style.color = hoverFgVar;
           }
         }}
         style={{ 
@@ -91,8 +93,10 @@ export default function SidebarButton({
       } as React.CSSProperties}
       onMouseLeave={(e) => {
         if (!isActive && !disableHover) {
-          e.currentTarget.style.backgroundColor = `var(--main-sidebar-button-bg)`; // Usar siempre main
-          e.currentTarget.style.color = `var(--main-sidebar-button-fg)`; // Usar siempre main
+          const normalBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
+          const normalFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-fg)' : 'var(--main-sidebar-button-fg)';
+          e.currentTarget.style.backgroundColor = normalBgVar;
+          e.currentTarget.style.color = normalFgVar;
         }
       }}
     >
