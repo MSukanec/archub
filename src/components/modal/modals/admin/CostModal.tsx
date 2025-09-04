@@ -109,7 +109,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
 
   // Mutation para crear task_labor
   const createTaskLaborMutation = useMutation({
-    mutationFn: async (data: { task_id: string; labor_type_id: string; quantity: number; unit_id: string }) => {
+    mutationFn: async (data: { task_id: string; labor_type_id: string; quantity: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
       const { error } = await supabase
@@ -117,9 +117,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
         .insert({
           task_id: data.task_id,
           labor_type_id: data.labor_type_id,
-          quantity: data.quantity,
-          unit_id: data.unit_id,
-          organization_id: userData?.organization?.id
+          quantity: data.quantity
         })
       
       if (error) throw error
