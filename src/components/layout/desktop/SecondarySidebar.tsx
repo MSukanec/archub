@@ -484,10 +484,8 @@ export function SecondarySidebar() {
       { icon: FileText, label: 'Media', href: '/general/media' }
     ],
     construction: [
-      { type: 'section', label: 'Planificación' },
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
       { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
-      { type: 'section', label: 'Proceso' },
       { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
