@@ -686,22 +686,18 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </div>
 
             {/* Avatar del usuario - lado derecho */}
-            <Button
-              variant="ghost"
-              size="sm"
+            <Avatar 
+              className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
                 navigate('/profile');
                 handleCloseMenu();
               }}
-              className="p-1 hover:bg-[var(--card-hover-bg)] rounded-lg"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={userData?.user?.avatar_url} />
-                <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
-                  {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+              <AvatarImage src={userData?.user?.avatar_url} />
+              <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
+                {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
           </div>
         </div>
       </div>
