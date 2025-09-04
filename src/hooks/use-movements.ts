@@ -39,6 +39,8 @@ interface Movement {
   member_avatar?: string
   indirect_id?: string
   indirect?: string
+  general_cost_id?: string
+  general_cost?: string
   movement_data?: {
     type?: {
       id: string

@@ -45,6 +45,7 @@ interface Movement {
   client?: string;
   member?: string;
   indirect?: string;
+  general_cost?: string;
   
   // Proyecto expandido
   project?: {
@@ -121,7 +122,12 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
     return movement.indirect;
   }
   
-  // Prioridad normal: partner -> subcontract -> client -> indirect -> member
+  // Para categoría "Gastos Generales", priorizar el gasto general
+  if (categoryName.includes('general') && movement.general_cost) {
+    return movement.general_cost;
+  }
+  
+  // Prioridad normal: partner -> subcontract -> client -> indirect -> general_cost -> member
   if (movement.partner) {
     return movement.partner;
   }
@@ -136,6 +142,10 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
   
   if (movement.indirect) {
     return movement.indirect;
+  }
+  
+  if (movement.general_cost) {
+    return movement.general_cost;
   }
   
   if (movement.member) {
@@ -208,7 +218,7 @@ export default function MovementRow({
       description: movement.description,
       category_name: movement.movement_data?.category?.name,
       indirect: movement.indirect,
-      indirect_id: movement.indirect_id,
+      indirect_id: (movement as any).indirect_id,
       specificThirdLine,
       renderingThirdLine: !!specificThirdLine
     });

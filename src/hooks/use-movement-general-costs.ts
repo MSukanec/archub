@@ -1,23 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
-
-// Tipo para el gasto general de movimiento
-export interface MovementGeneralCost {
-  id: string
-  movement_id: string
-  general_cost_id: string
-  general_cost_name: string
-  created_at: string
-  updated_at: string | null
-}
-
-// Tipo para insertar un gasto general de movimiento
-export interface InsertMovementGeneralCost {
-  movement_id: string
-  general_cost_id: string
-  general_cost_name: string
-}
+import type { MovementGeneralCost, InsertMovementGeneralCost } from '@shared/schema'
 
 // Hook para obtener gastos generales de un movimiento
 export function useMovementGeneralCosts(movementId: string | undefined) {
