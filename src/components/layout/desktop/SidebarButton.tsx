@@ -105,8 +105,16 @@ export default function SidebarButton({
             />
           ) : userFullName ? (
             <div 
-              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium text-white"
-              style={{ backgroundColor: projectColor || 'hsl(var(--accent))' }}
+              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border"
+              style={{ 
+                backgroundColor: 'transparent',
+                borderColor: (isActive || isHeaderButton)
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-fg)`,
+                color: (isActive || isHeaderButton)
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-fg)`
+              }}
             >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
             </div>
