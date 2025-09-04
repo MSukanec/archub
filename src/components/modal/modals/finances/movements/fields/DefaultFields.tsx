@@ -10,6 +10,7 @@ import { PersonnelFields } from './PersonnelFields'
 import { SubcontractsFields } from './SubcontractsFields'
 import { ClientsFields } from './ClientsFields'
 import { IndirectFields } from './IndirectFields'
+import { GeneralCostsFields } from './GeneralCostsFields'
 import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
 import { PartnerContributionsFields } from './PartnerContributionsFields'
 import { CommitmentItem } from './ClientsFields'
@@ -24,12 +25,14 @@ interface DefaultFieldsProps {
   selectedSubcontracts?: Array<{subcontract_id: string, contact_name: string}>
   selectedClients?: CommitmentItem[]
   selectedIndirects?: Array<{indirect_id: string, indirect_name: string}>
+  selectedGeneralCosts?: Array<{general_cost_id: string, general_cost_name: string}>
   selectedPartnerWithdrawals?: Array<{partner_id: string, partner_name: string}>
   selectedPartnerContributions?: Array<{partner_id: string, partner_name: string}>
   onPersonnelChange?: (personnelList: Array<{personnel_id: string, contact_name: string}>) => void
   onSubcontractsChange?: (subcontractsList: Array<{subcontract_id: string, contact_name: string}>) => void
   onClientsChange?: (clientsList: CommitmentItem[]) => void
   onIndirectsChange?: (indirectsList: Array<{indirect_id: string, indirect_name: string}>) => void
+  onGeneralCostsChange?: (generalCostsList: Array<{general_cost_id: string, general_cost_name: string}>) => void
   onPartnerWithdrawalsChange?: (partnerWithdrawalsList: Array<{partner_id: string, partner_name: string}>) => void
   onPartnerContributionsChange?: (partnerContributionsList: Array<{partner_id: string, partner_name: string}>) => void
   // Props para el selector de proyecto
@@ -56,12 +59,14 @@ export function DefaultMovementFields({
   selectedSubcontracts = [],
   selectedClients = [],
   selectedIndirects = [],
+  selectedGeneralCosts = [],
   selectedPartnerWithdrawals = [],
   selectedPartnerContributions = [],
   onPersonnelChange,
   onSubcontractsChange,
   onClientsChange,
   onIndirectsChange,
+  onGeneralCostsChange,
   onPartnerWithdrawalsChange,
   onPartnerContributionsChange,
   projects = [],
@@ -253,6 +258,16 @@ export function DefaultMovementFields({
           <IndirectFields 
             selectedIndirects={selectedIndirects}
             onIndirectsChange={onIndirectsChange}
+            projectId={form.watch('project_id')}
+          />
+        </div>
+      )}
+
+      {selectedCategoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad' && onGeneralCostsChange && (
+        <div className="col-span-2">
+          <GeneralCostsFields 
+            selectedGeneralCosts={selectedGeneralCosts}
+            onGeneralCostsChange={onGeneralCostsChange}
             projectId={form.watch('project_id')}
           />
         </div>

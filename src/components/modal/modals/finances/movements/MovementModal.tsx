@@ -175,6 +175,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
   const [selectedIndirects, setSelectedIndirects] = React.useState<Array<{indirect_id: string, indirect_name: string}>>([])
+  const [selectedGeneralCosts, setSelectedGeneralCosts] = React.useState<Array<{general_cost_id: string, general_cost_name: string}>>([])
   const [selectedClients, setSelectedClients] = React.useState<CommitmentItem[]>([])
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
@@ -295,6 +296,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }]);
     }
   }, [isEditing, movementData?.indirect_id, movementData?.indirect]);
+
+  // Load existing general costs when editing
+  React.useEffect(() => {
+    if (isEditing && movementData?.general_cost_id && movementData?.general_cost) {
+      console.log('🔧 Loading existing general cost:', {
+        general_cost_id: movementData.general_cost_id,
+        general_cost_name: movementData.general_cost
+      });
+      setSelectedGeneralCosts([{
+        general_cost_id: movementData.general_cost_id,
+        general_cost_name: movementData.general_cost
+      }]);
+    }
+  }, [isEditing, movementData?.general_cost_id, movementData?.general_cost]);
 
   // Load existing project clients when editing
   React.useEffect(() => {
@@ -2024,12 +2039,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             selectedSubcontracts={selectedSubcontracts}
             selectedClients={selectedClients}
             selectedIndirects={selectedIndirects}
+            selectedGeneralCosts={selectedGeneralCosts}
             selectedPartnerWithdrawals={selectedPartnerWithdrawals as any}
             selectedPartnerContributions={selectedPartnerContributions}
             onPersonnelChange={setSelectedPersonnel}
             onSubcontractsChange={setSelectedSubcontracts}
             onClientsChange={setSelectedClients}
             onIndirectsChange={setSelectedIndirects}
+            onGeneralCostsChange={setSelectedGeneralCosts}
             onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
             onPartnerContributionsChange={setSelectedPartnerContributions}
           />
