@@ -115,7 +115,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                             </div>
                             <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
                               <span>{quantity} {unitName}</span>
-                              <span>•</span>
+                              <span>x</span>
                               <span className="font-mono">
                                 {unitPrice > 0 ? `$${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
                               </span>
