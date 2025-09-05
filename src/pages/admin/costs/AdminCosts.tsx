@@ -20,18 +20,27 @@ const AdminCosts = () => {
   // Mutation para refrescar vistas materializadas
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
-      // Refrescar primera vista materializada (precios promedio de productos)
-      const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
-      if (productAvgError) {
-        console.error('Error refreshing product_avg_prices:', productAvgError);
-        throw productAvgError;
-      }
+      try {
+        console.log('Refrescando vista product_avg_prices...');
+        // Refrescar primera vista materializada (precios promedio de productos)
+        const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
+        if (productAvgError) {
+          console.error('Error refreshing product_avg_prices:', productAvgError);
+          throw new Error(`Error al refrescar precios de productos: ${productAvgError.message}`);
+        }
+        console.log('Vista product_avg_prices refrescada exitosamente');
 
-      // Refrescar segunda vista materializada (precios promedio de materiales)
-      const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
-      if (materialAvgError) {
-        console.error('Error refreshing material_avg_prices:', materialAvgError);
-        throw materialAvgError;
+        console.log('Refrescando vista material_avg_prices...');
+        // Refrescar segunda vista materializada (precios promedio de materiales)
+        const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
+        if (materialAvgError) {
+          console.error('Error refreshing material_avg_prices:', materialAvgError);
+          throw new Error(`Error al refrescar precios de materiales: ${materialAvgError.message}`);
+        }
+        console.log('Vista material_avg_prices refrescada exitosamente');
+      } catch (error: any) {
+        console.error('Error general al refrescar vistas:', error);
+        throw error;
       }
     },
     onSuccess: () => {

@@ -89,7 +89,7 @@ export function useProducts() {
       // Obtener los precios promedio de la vista materializada
       const { data: avgPrices, error: avgError } = await supabase
         .from('product_avg_prices')
-        .select('product_id, avg_price, providers_count')
+        .select('product_id, avg_price, provider_count')
 
       if (avgError) {
         console.error('Error fetching average prices:', avgError)
@@ -103,7 +103,7 @@ export function useProducts() {
         return {
           ...product,
           avg_price: avgPriceData?.avg_price || null,
-          providers_count: avgPriceData?.providers_count || 0
+          providers_count: avgPriceData?.provider_count || 0
         }
       }) || []
 
