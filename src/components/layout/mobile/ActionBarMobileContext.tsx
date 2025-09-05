@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
+import { LucideIcon } from 'lucide-react'
 
 interface ActionBarAction {
   id: string
-  icon: ReactNode
+  icon: LucideIcon
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary'
