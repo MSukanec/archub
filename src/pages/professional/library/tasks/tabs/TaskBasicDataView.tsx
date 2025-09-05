@@ -213,16 +213,6 @@ export function TaskBasicDataView({
               disabled={true}
             />
 
-            <FormSubsectionButton
-              icon={<Ruler className="h-4 w-4" />}
-              title="Ver dependencias"
-              description="Parámetros y relaciones de la tarea"
-              onClick={() => {
-                // TODO: Implementar vista de dependencias
-                console.log('Task dependencies functionality to be implemented');
-              }}
-              disabled={true}
-            />
           </CardContent>
         </Card>
       </div>

@@ -53,13 +53,13 @@ export default function TaskView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actionButton: {
+    actionButton: activeTab === 'Costos' ? {
       icon: Plus,
       label: "Agregar Costo",
       onClick: () => {
         openModal('cost-modal', { task });
       }
-    }
+    } : undefined
   };
 
   if (isLoading) {

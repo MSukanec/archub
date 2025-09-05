@@ -41,20 +41,25 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const kpiData = useMemo(() => {
     if (costs.length === 0) return null;
 
-    const totalItems = costs.length;
-    const totalValue = costs.reduce((sum, c) => sum + c.total_price, 0);
-    const averagePrice = totalValue / totalItems;
+    // Separar materiales y mano de obra
+    const materialCosts = costs.filter(c => c.type === 'Materiales');
+    const laborCosts = costs.filter(c => c.type === 'Mano de Obra');
     
-    // Simulación de completitud (en futuro será real)
-    const completedItems = Math.floor(totalItems * 0.75);
-    const completionPercentage = (completedItems / totalItems) * 100;
+    const materialTotal = materialCosts.reduce((sum, c) => sum + c.total_price, 0);
+    const laborTotal = laborCosts.reduce((sum, c) => sum + c.total_price, 0);
+    const grandTotal = materialTotal + laborTotal;
+    
+    // Encontrar la fecha de última actualización
+    const lastUpdate = costs.reduce((latest, cost) => {
+      const costDate = new Date(cost.updated_at || cost.created_at || new Date());
+      return costDate > latest ? costDate : latest;
+    }, new Date(0));
 
     return {
-      totalItems,
-      completedItems,
-      totalValue,
-      averagePrice,
-      completionPercentage
+      materialTotal,
+      laborTotal,
+      grandTotal,
+      lastUpdate
     };
   }, [costs]);
 
@@ -180,18 +185,18 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       {/* KPI Cards */}
       {kpiData && (
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
-          {/* Total Costos */}
+          {/* Costo de Materiales */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Costos' : 'Total Costos'}
+                    Costo de Materiales
                   </p>
                   <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Mini gráfico de barras */}
+                {/* Gráfico representativo de materiales */}
                 <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
@@ -199,35 +204,37 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                       className="rounded-sm flex-1"
                       style={{
                         backgroundColor: 'var(--accent)',
-                        height: `${Math.max(30, Math.random() * 100)}%`,
-                        opacity: i < kpiData.totalItems ? 1 : 0.3
+                        height: `${Math.max(20, (kpiData.materialTotal / kpiData.grandTotal) * 100 * Math.random() * 0.8 + 40)}%`,
+                        opacity: kpiData.materialTotal > 0 ? 0.8 + (i * 0.05) : 0.3
                       }}
                     />
                   ))}
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalItems}</p>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
+                    {formatCurrency(kpiData.materialTotal)}
+                  </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.completedItems} configurados
+                    {kpiData.grandTotal > 0 ? `${Math.round((kpiData.materialTotal / kpiData.grandTotal) * 100)}% del total` : 'Sin datos'}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Valor Total */}
+          {/* Costo de Mano de Obra */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Valor Total' : 'Valor Total'}
+                    Costo de Mano de Obra
                   </p>
-                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Gráfico de línea de tendencia */}
+                {/* Gráfico representativo de mano de obra */}
                 <div className={`flex items-center gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div
@@ -235,7 +242,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                       className="w-1 rounded-full"
                       style={{
                         backgroundColor: 'var(--accent)',
-                        height: `${20 + Math.sin(i * 0.5) * 30 + Math.random() * 20}%`
+                        height: `${kpiData.laborTotal > 0 ? 30 + Math.sin(i * 0.4) * 30 : 20}%`,
+                        opacity: kpiData.laborTotal > 0 ? 0.6 + (i * 0.05) : 0.3
                       }}
                     />
                   ))}
@@ -243,72 +251,81 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 
                 <div>
                   <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {formatCurrency(kpiData.totalValue)}
+                    {formatCurrency(kpiData.laborTotal)}
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    Costo estimado
+                    {kpiData.grandTotal > 0 ? `${Math.round((kpiData.laborTotal / kpiData.grandTotal) * 100)}% del total` : 'Sin datos'}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Precio Promedio */}
+          {/* Costo Total */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Precio Promedio' : 'Precio Promedio'}
+                    Costo Total
                   </p>
-                  <Calculator className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Barra de progreso horizontal */}
+                {/* Barra de progreso total */}
                 <div className={`${isMobile ? 'h-6' : 'h-8'} bg-muted rounded-full overflow-hidden flex`}>
                   <div 
-                    className="rounded-full transition-all duration-300"
+                    className="rounded-l-full transition-all duration-300"
                     style={{
                       backgroundColor: 'var(--accent)',
-                      width: '65%'
+                      width: kpiData.grandTotal > 0 ? `${(kpiData.materialTotal / kpiData.grandTotal) * 100}%` : '0%',
+                      opacity: 0.8
+                    }}
+                  />
+                  <div 
+                    className="rounded-r-full transition-all duration-300"
+                    style={{
+                      backgroundColor: 'var(--accent)',
+                      width: kpiData.grandTotal > 0 ? `${(kpiData.laborTotal / kpiData.grandTotal) * 100}%` : '0%',
+                      opacity: 0.6
                     }}
                   />
                 </div>
                 
                 <div>
                   <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {formatCurrency(kpiData.averagePrice)}
+                    {formatCurrency(kpiData.grandTotal)}
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    Por material
+                    Materiales + Mano de Obra
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Estado General */}
+          {/* Última Actualización */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Estado General' : 'Estado General'}
+                    Última Actualización
                   </p>
-                  <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <Calendar className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Gráfico de progreso circular simulado */}
+                {/* Indicador temporal */}
                 <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
-                  <div className="flex items-end gap-0.5">
-                    {Array.from({ length: 10 }).map((_, i) => (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className="w-1 rounded-full"
+                        className="w-2 h-2 rounded-full"
                         style={{
                           backgroundColor: 'var(--accent)',
-                          height: `${Math.sin((i / 10) * Math.PI) * 100}%`,
-                          opacity: i < (kpiData.completionPercentage / 10) ? 1 : 0.3
+                          opacity: i < 3 ? 1 : 0.3,
+                          animation: i < 3 ? `pulse 2s infinite ${i * 0.5}s` : 'none'
                         }}
                       />
                     ))}
@@ -316,11 +333,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {Math.round(kpiData.completionPercentage)}%
+                  <p className={`${isMobile ? 'text-sm' : 'text-lg'} font-bold`}>
+                    {format(kpiData.lastUpdate, 'dd/MM/yyyy', { locale: es })}
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    Completitud
+                    {format(kpiData.lastUpdate, 'HH:mm', { locale: es })}
                   </p>
                 </div>
               </div>
