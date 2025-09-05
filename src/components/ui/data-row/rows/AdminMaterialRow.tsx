@@ -2,31 +2,30 @@ import React from 'react';
 import DataRowCard from '../DataRowCard';
 import { Badge } from '@/components/ui/badge';
 
-// Interface para el material (usando la estructura real de la app)
+// Interface para el material usando la estructura actual de materials_view
 interface Material {
   id: string;
   name: string;
+  category_name?: string;
   unit_id: string;
-  category_id: string;
+  unit_of_computation?: string;
+  unit_description?: string;
   default_unit_presentation_id?: string;
-  base_price_override?: number;
-  is_completed?: boolean;
-  provider?: string;
-  organization_id?: string;
+  default_unit_presentation?: string;
+  unit_equivalence?: number;
   is_system: boolean;
+  is_completed?: boolean;
   created_at: string;
+  updated_at?: string;
+  min_price?: number;
+  max_price?: number;
+  avg_price?: number;
+  product_count?: number;
+  provider_product_count?: number;
+  price_count?: number;
+  // Legacy fields for backward compatibility
   unit?: { name: string };
   category?: { name: string };
-  default_unit_presentation?: { name: string };
-  organization_material_prices?: Array<{
-    id: string;
-    unit_price: number;
-    currency_id: string;
-    currency: {
-      symbol: string;
-      name: string;
-    };
-  }>;
 }
 
 interface AdminMaterialRowProps {
@@ -46,11 +45,10 @@ const getMaterialInitials = (material: Material): string => {
   return material.name.slice(0, 2).toUpperCase();
 };
 
-// Helper para obtener el primer precio disponible
+// Helper para obtener el precio promedio
 const getMaterialPrice = (material: Material): string => {
-  if (material.organization_material_prices && material.organization_material_prices.length > 0) {
-    const price = material.organization_material_prices[0];
-    return `${price.currency.symbol} ${price.unit_price.toFixed(2)}`;
+  if (material.avg_price !== null && material.avg_price !== undefined) {
+    return `ARS ${material.avg_price.toFixed(2)}`;
   }
   return 'Sin precio';
 };
@@ -102,14 +100,14 @@ export default function AdminMaterialRow({
           {material.name}
         </div>
 
-        {/* Segunda fila - Proveedor - Unidad */}
+        {/* Segunda fila - Unidad de Cómputo */}
         <div className="text-xs text-muted-foreground truncate">
-          {material.provider ? `${material.provider} - ${material.unit?.name || 'Sin unidad'}` : material.unit?.name || 'Sin unidad'}
+          {material.unit_of_computation || material.unit?.name || 'Sin unidad'}
         </div>
 
         {/* Tercera fila - Categoría */}
         <div className="text-xs text-muted-foreground truncate">
-          {material.category?.name || 'Sin categoría'}
+          {material.category_name || material.category?.name || 'Sin categoría'}
         </div>
       </div>
 

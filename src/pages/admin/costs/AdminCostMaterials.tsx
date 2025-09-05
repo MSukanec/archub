@@ -238,16 +238,6 @@ const AdminCostMaterials = () => {
       )
     }] : []),
     {
-      key: 'provider',
-      label: 'Proveedor',
-      width: '10%',
-      render: (material: Material) => (
-        <span className="text-xs text-muted-foreground">
-          {material.provider || '–'}
-        </span>
-      )
-    },
-    {
       key: 'unit_id',
       label: 'Unidad',
       width: '8%',
@@ -264,13 +254,23 @@ const AdminCostMaterials = () => {
       )
     },
     {
-      key: 'base_price_override',
-      label: 'Precio',
-      width: '8%',
+      key: 'avg_price',
+      label: 'Precio Promedio',
+      width: '15%',
       render: (material: Material) => (
-        <span className="text-xs font-medium">
-          {material.base_price_override ? `$${material.base_price_override.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-        </span>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium">
+            {material.avg_price !== null && material.avg_price !== undefined ? 
+              `ARS ${material.avg_price.toFixed(2)}` : 
+              '–'
+            }
+          </span>
+          {material.provider_product_count && material.provider_product_count > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {material.provider_product_count} proveedor{material.provider_product_count > 1 ? 'es' : ''}
+            </span>
+          )}
+        </div>
       )
     },
 
