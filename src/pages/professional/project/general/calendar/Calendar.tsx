@@ -157,7 +157,7 @@ function CalendarContent() {
 
   // Header configuration
   const headerProps = {
-    icon: <CheckSquare className="w-5 h-5" />,
+    icon: CheckSquare,
     title: "Tablero",
     actionButton: currentBoardId ? {
       label: 'Nueva Lista',
@@ -179,7 +179,7 @@ function CalendarContent() {
   // Loading state
   if (boardsLoading) {
     const loadingHeaderProps = {
-      icon: <CheckSquare className="w-5 h-5" />,
+      icon: CheckSquare,
       title: "Tablero"
     };
 
