@@ -3,44 +3,28 @@ import DataRowCard from '../DataRowCard';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
-// Interface para el producto (usando la estructura real de la app)
+// Interface para el producto usando la estructura actual de products_view
 interface Product {
   id: string;
-  material_id: string;
-  brand_id?: string;
-  unit_id?: string;
   name: string;
   description?: string;
-  image_url?: string;
   url?: string;
-  default_price?: number;
-  default_provider?: string;
-  is_system?: boolean;
+  image_url?: string;
   created_at: string;
+  material_id: string;
+  unit_id: string;
+  brand_id?: string;
+  default_provider?: string;
+  default_price?: number;
+  material: string;       // Nombre del material (desde products_view)
+  brand?: string;         // Nombre de la marca (desde products_view)
+  unit: string;           // Nombre de la unidad (desde products_view)
+  is_system: boolean;
   categoryHierarchy?: string;
-  material?: {
-    id: string;
-    name: string;
-    category_id: string;
-    category?: {
-      id: string;
-      name: string;
-      parent_id: string | null;
-    };
-  };
-  brand?: {
-    id: string;
-    name: string;
-  };
-  unit_presentation?: {
-    id: string;
-    name: string;
-    equivalence: number;
-    unit?: {
-      id: string;
-      name: string;
-    };
-  };
+  category_hierarchy: string;
+  // Campos de precio promedio
+  avg_price?: number;
+  providers_count?: number;
 }
 
 interface AdminProductRowProps {

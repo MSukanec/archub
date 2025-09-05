@@ -49,7 +49,7 @@ export interface Product {
   category_hierarchy: string;
   // Campos de precio promedio
   avg_price?: number;     // Precio promedio del día
-  providers_count?: number; // Cantidad de proveedores
+  providers_count?: number; // Cantidad de proveedores (mapeado desde provider_count)
 }
 
 export interface NewProductData {
