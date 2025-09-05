@@ -17,11 +17,24 @@ const AdminCosts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Mutation para refrescar precios promedio
+  // Mutation para refrescar precios promedio y conteo de proveedores
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc('refresh_product_avg_prices');
-      if (error) throw error;
+      // Refrescar ambas vistas materializadas
+      const { error: avgPricesError } = await supabase.rpc('refresh_product_avg_prices');
+      if (avgPricesError) {
+        console.error('Error refreshing material_avg_prices:', avgPricesError);
+        throw new Error('Error al refrescar precios promedio');
+      }
+
+      // Refrescar la segunda vista materializada
+      const { error: productCountError } = await supabase.rpc('refresh_materialized_view', { 
+        view_name: 'provider_product_count' 
+      });
+      if (productCountError) {
+        console.error('Error refreshing provider_product_count:', productCountError);
+        throw new Error('Error al refrescar conteo de productos por proveedor');
+      }
     },
     onSuccess: () => {
       // Invalidar todas las queries de productos para actualizar las tablas
@@ -29,15 +42,15 @@ const AdminCosts = () => {
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
       
       toast({
-        title: "Precios actualizados",
-        description: "Los precios promedio han sido actualizados correctamente.",
+        title: "Datos actualizados",
+        description: "Los precios promedio y conteo de proveedores han sido actualizados correctamente.",
       });
     },
     onError: (error) => {
       console.error('Error refreshing prices:', error);
       toast({
-        title: "Error al actualizar precios",
-        description: "No se pudieron actualizar los precios promedio.",
+        title: "Error al actualizar datos",
+        description: "No se pudieron actualizar los datos de las vistas materializadas.",
         variant: "destructive",
       });
     }
