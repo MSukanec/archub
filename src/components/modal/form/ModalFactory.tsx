@@ -41,7 +41,7 @@ import { TaskParameterFormModal } from '../modals/admin/TaskParameterFormModal';
 import { TaskParameterOptionFormModal } from '../modals/admin/TaskParameterOptionFormModal';
 import { TaskTemplateFormModal } from '../modals/admin/TaskTemplateFormModal';
 
-import { AdminTaskModal } from '../modals/admin/tasks/AdminTaskModal';
+import { AdminTaskModal } from '../modals/admin/AdminTaskModal';
 import { TaskModal } from '../modals/analysis/TaskModal';
 import { UserFormModal } from '../modals/admin/UserFormModal';
 import { OrganizationFormModal } from '../modals/admin/OrganizationFormModal';
