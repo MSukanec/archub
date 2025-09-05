@@ -1,10 +1,12 @@
-import { Calendar, User, Hash, Ruler, Building, Tag, FileText, Zap } from "lucide-react";
+import { Calendar, User, Ruler, Building, FileText, Zap, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 
 interface TaskBasicDataViewProps {
   task: any;
@@ -15,6 +17,36 @@ export function TaskBasicDataView({
   task,
   onTabChange 
 }: TaskBasicDataViewProps) {
+  const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
+  const [taskRubro, setTaskRubro] = useState(task.division || '');
+  const [taskUnit, setTaskUnit] = useState(task.unit || '');
+  const [taskDate, setTaskDate] = useState(task.created_at ? format(new Date(task.created_at), 'yyyy-MM-dd') : '');
+  
+  const isSystemTask = task.is_system;
+  
+  // Mock options - TODO: Conectar con datos reales
+  const rubroOptions = [
+    { value: 'Mamposterías', label: 'Mamposterías' },
+    { value: 'Aberturas', label: 'Aberturas' },
+    { value: 'Cielorrasos', label: 'Cielorrasos' },
+    { value: 'Contrapisos y Carpetas', label: 'Contrapisos y Carpetas' },
+    { value: 'Equipamiento', label: 'Equipamiento' },
+    { value: 'Pinturas', label: 'Pinturas' },
+    { value: 'Pisos', label: 'Pisos' },
+    { value: 'Revestimientos', label: 'Revestimientos' },
+    { value: 'Revoques', label: 'Revoques' }
+  ];
+  
+  const unitOptions = [
+    { value: 'm²', label: 'm²' },
+    { value: 'm', label: 'm' },
+    { value: 'ml', label: 'ml' },
+    { value: 'un', label: 'un' },
+    { value: 'kg', label: 'kg' },
+    { value: 'm³', label: 'm³' },
+    { value: 'gl', label: 'gl' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Cards principales */}
@@ -26,67 +58,68 @@ export function TaskBasicDataView({
             title="Ficha de la Tarea"
             description="Información general y detalles de la tarea"
           />
-          <CardContent className="flex-1 space-y-3 pt-4">
-            <div className="grid grid-cols-1 gap-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Hash className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Código</p>
-                  <p className="text-sm text-muted-foreground">{task.code || 'Sin código'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Building className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">División</p>
-                  <p className="text-sm text-muted-foreground">{task.division || 'Sin división'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Categoría</p>
-                  <p className="text-sm text-muted-foreground">{task.category || 'Sin categoría'}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Ruler className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Unidad</p>
-                  <p className="text-sm text-muted-foreground">{task.unit || 'Sin unidad'}</p>
-                </div>
-              </div>
-
+          <CardContent className="flex-1 space-y-4 pt-4">
+            <div className="grid grid-cols-1 gap-4">
+              {/* Creador - Primer lugar */}
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Creador</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted-foreground">
-                      {task.is_system ? 'Sistema' : 'Usuario personalizado'}
-                    </p>
-                    <Badge variant={task.is_system ? "default" : "secondary"} className="h-4 text-xs">
-                      {task.is_system ? 'SISTEMA' : 'USUARIO'}
-                    </Badge>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {isSystemTask ? 'Sistema' : 'Usuario personalizado'}
+                  </p>
                 </div>
               </div>
 
-              {task.created_at && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Fecha de Creación</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Nombre de la Tarea - Editable */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nombre de la Tarea</label>
+                <Input
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
+                  placeholder="Nombre de la tarea"
+                  disabled={isSystemTask}
+                />
+              </div>
 
+              {/* Rubro - Editable con ComboBox */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Rubro</label>
+                <ComboBox
+                  value={taskRubro}
+                  onValueChange={setTaskRubro}
+                  options={rubroOptions}
+                  placeholder="Seleccionar rubro"
+                  disabled={isSystemTask}
+                  allowCreate={!isSystemTask}
+                />
+              </div>
+
+              {/* Unidad de Cómputo - Editable con ComboBox */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Unidad de Cómputo</label>
+                <ComboBox
+                  value={taskUnit}
+                  onValueChange={setTaskUnit}
+                  options={unitOptions}
+                  placeholder="Seleccionar unidad"
+                  disabled={isSystemTask}
+                  allowCreate={!isSystemTask}
+                />
+              </div>
+
+              {/* Fecha de la Tarea - Editable */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Fecha de la Tarea</label>
+                <Input
+                  type="date"
+                  value={taskDate}
+                  onChange={(e) => setTaskDate(e.target.value)}
+                  disabled={isSystemTask}
+                />
+              </div>
+
+              {/* Descripción - Si existe */}
               {task.description && (
                 <div className="p-3 rounded-lg bg-muted/30">
                   <p className="text-sm font-medium mb-2">Descripción</p>
@@ -114,17 +147,17 @@ export function TaskBasicDataView({
 
             <FormSubsectionButton
               icon={<Building className="h-4 w-4" />}
-              title="Editar información"
-              description="Modificar datos básicos de la tarea"
+              title="Guardar cambios"
+              description="Aplicar modificaciones realizadas"
               onClick={() => {
-                // TODO: Implementar modal de edición
-                console.log('Editar tarea functionality to be implemented');
+                // TODO: Implementar guardado de cambios
+                console.log('Guardar cambios:', { taskName, taskRubro, taskUnit, taskDate });
               }}
-              disabled={task.is_system}
+              disabled={isSystemTask}
             />
 
             <FormSubsectionButton
-              icon={<Hash className="h-4 w-4" />}
+              icon={<Ruler className="h-4 w-4" />}
               title="Ver dependencias"
               description="Parámetros y relaciones de la tarea"
               onClick={() => {
@@ -136,46 +169,6 @@ export function TaskBasicDataView({
           </CardContent>
         </Card>
       </div>
-
-      {/* Card inferior - Información técnica */}
-      <Card className="h-full flex flex-col">
-        <CardHeader 
-          icon={Ruler}
-          title="Información Técnica"
-          description="Especificaciones y parámetros técnicos de la tarea"
-        />
-        <CardContent className="flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-3 rounded-lg bg-muted/30">
-              <p className="text-sm font-medium mb-1">Tipo de Tarea</p>
-              <p className="text-sm text-muted-foreground">
-                {task.is_system ? 'Paramétrica del Sistema' : 'Personalizada'}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-muted/30">
-              <p className="text-sm font-medium mb-1">ID de Tarea</p>
-              <p className="text-sm text-muted-foreground font-mono text-xs">{task.id}</p>
-            </div>
-
-            {task.updated_at && (
-              <div className="p-3 rounded-lg bg-muted/30">
-                <p className="text-sm font-medium mb-1">Última Modificación</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(task.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                </p>
-              </div>
-            )}
-
-            {task.unit_symbol && (
-              <div className="p-3 rounded-lg bg-muted/30">
-                <p className="text-sm font-medium mb-1">Símbolo de Unidad</p>
-                <p className="text-sm text-muted-foreground">{task.unit_symbol}</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
