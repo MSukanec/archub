@@ -65,7 +65,7 @@ export default function GroupSubtotal({ tasks }: GroupSubtotalProps) {
   }
 
   return (
-    <span className="text-xs font-semibold text-foreground">
+    <span className="text-xs font-semibold text-white">
       {formatCost(totalSubtotal)}
     </span>
   )

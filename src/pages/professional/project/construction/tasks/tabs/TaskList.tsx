@@ -418,11 +418,11 @@ export function TaskList({
           
           return (
             <>
-              <div className="col-span-1 truncate">
+              <div className="col-span-1 truncate text-white">
                 {rubroName} - {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'fase' : 'fases'})
               </div>
-              <div className="col-span-1">{unitSymbol}</div>
-              <div className="col-span-1">{totalQuantity.toFixed(2)}</div>
+              <div className="col-span-1 text-white">{unitSymbol}</div>
+              <div className="col-span-1 text-white">{totalQuantity.toFixed(2)}</div>
             </>
           );
         } else if (groupingType === 'rubros-phases') {
@@ -438,7 +438,7 @@ export function TaskList({
           
           return (
             <>
-              <div className="truncate text-sm font-medium">
+              <div className="truncate text-sm font-medium text-white">
                 {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
               </div>
               <div></div>
@@ -453,7 +453,7 @@ export function TaskList({
         } else {
           return (
             <>
-              <div className="col-span-full text-sm font-medium">
+              <div className="col-span-full text-sm font-medium text-white">
                 {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
               </div>
             </>
