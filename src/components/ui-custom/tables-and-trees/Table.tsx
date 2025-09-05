@@ -925,12 +925,12 @@ export function Table<T = any>({
                     mode === "budget" && "border-b border-[var(--table-row-border)]",
                     mode === "construction" && "border-b border-[var(--table-row-border)]",
                     mode === "default" && "border-b border-[var(--table-header-border)]",
-                    "text-xs font-medium [&>*]:text-xs [&>*]:font-medium"
+                    "text-xs font-medium [&>*]:text-xs [&>*]:font-medium [&>*]:!text-white"
                   )}
                   style={{ 
                     gridTemplateColumns: getGridTemplateColumns(),
                     backgroundColor: "var(--table-group-header-bg)",
-                    color: "var(--table-group-header-fg)"
+                    color: "white"
                   }}
                   >
                     {renderGroupHeader(groupKey, groupRows)}
