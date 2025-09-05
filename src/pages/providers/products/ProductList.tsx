@@ -284,7 +284,7 @@ export default function ProductList() {
           <div className="flex items-center gap-1">
             <span className="text-xs font-mono">
               {displayPrice !== null && displayPrice !== undefined ? 
-                `${displayCurrency}${displayPrice.toFixed(0)}` : 
+                `${displayCurrency}${displayPrice.toFixed(2)}` : 
                 '-'
               }
             </span>
