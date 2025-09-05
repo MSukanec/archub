@@ -40,7 +40,7 @@ export default function AnalysisTaskRow({
   const { data: costs = [], isLoading } = useTaskCosts(taskId);
   
   // Calcular costos de materiales y mano de obra
-  const materialCosts = costs.filter(c => c.type === 'Materiales');
+  const materialCosts = costs.filter(c => c.type === 'Material');
   const laborCosts = costs.filter(c => c.type === 'Mano de Obra');
   
   const materialTotal = materialCosts.reduce((sum, c) => sum + c.total_price, 0);

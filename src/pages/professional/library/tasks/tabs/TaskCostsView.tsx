@@ -42,12 +42,18 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     if (costs.length === 0) return null;
 
     // Separar materiales y mano de obra
-    const materialCosts = costs.filter(c => c.type === 'Materiales');
+    const materialCosts = costs.filter(c => c.type === 'Material');
     const laborCosts = costs.filter(c => c.type === 'Mano de Obra');
     
-    const materialTotal = materialCosts.reduce((sum, c) => sum + c.total_price, 0);
-    const laborTotal = laborCosts.reduce((sum, c) => sum + c.total_price, 0);
+    // Debug: log para ver valores detallados
+    console.log('🔍 All costs:', costs);
+    console.log('🔍 Material costs with values:', materialCosts.map(c => ({ name: c.name, total: c.total_price })));
+    
+    const materialTotal = materialCosts.reduce((sum, c) => sum + (c.total_price || 0), 0);
+    const laborTotal = laborCosts.reduce((sum, c) => sum + (c.total_price || 0), 0);
     const grandTotal = materialTotal + laborTotal;
+    
+    console.log('🔍 Calculated totals:', { materialTotal, laborTotal, grandTotal });
     
     // Encontrar la fecha de última actualización (usar fecha actual como fallback)
     const lastUpdate = new Date();
