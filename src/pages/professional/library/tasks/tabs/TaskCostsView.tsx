@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Calculator } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Calculator, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
@@ -49,11 +49,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     const laborTotal = laborCosts.reduce((sum, c) => sum + c.total_price, 0);
     const grandTotal = materialTotal + laborTotal;
     
-    // Encontrar la fecha de última actualización
-    const lastUpdate = costs.reduce((latest, cost) => {
-      const costDate = new Date(cost.updated_at || cost.created_at || new Date());
-      return costDate > latest ? costDate : latest;
-    }, new Date(0));
+    // Encontrar la fecha de última actualización (usar fecha actual como fallback)
+    const lastUpdate = new Date();
 
     return {
       materialTotal,

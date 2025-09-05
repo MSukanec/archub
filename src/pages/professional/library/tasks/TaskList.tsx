@@ -13,6 +13,7 @@ import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
+import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -133,7 +134,7 @@ export default function TaskList() {
     {
       key: 'name_rendered',
       label: 'Tarea',
-      width: '52%',
+      width: '40%',
       render: (task: any) => (
         <span className="text-sm font-medium">{task.custom_name || 'Sin nombre'}</span>
       )
@@ -149,9 +150,19 @@ export default function TaskList() {
       )
     },
     {
+      key: 'cost',
+      label: 'Costo',
+      width: '12%',
+      render: (task: any) => (
+        <div className="flex items-center gap-2">
+          <TaskCostPopover task={task} showCost={true} />
+        </div>
+      )
+    },
+    {
       key: 'is_system',
       label: 'Tipo',
-      width: '10%',
+      width: '8%',
       render: (task: any) => (
         <Badge 
           variant={task.is_system ? "default" : "secondary"}
@@ -167,7 +178,7 @@ export default function TaskList() {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '11%',
+      width: '9%',
       render: (task: any) => {
         // Todas las tareas pueden ser visualizadas, solo las de la organización pueden ser editadas
         const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
