@@ -106,7 +106,7 @@ export function TaskSingleModal({
     resolver: zodResolver(singleTaskSchema),
     defaultValues: {
       task_id: '',
-      quantity: 1,
+      quantity: undefined,
       project_phase_id: ''
     }
   });
@@ -120,7 +120,7 @@ export function TaskSingleModal({
       
       form.reset({
         task_id: modalData.editingTask.task_id || '',
-        quantity: modalData.editingTask.quantity || 1,
+        quantity: modalData.editingTask.quantity || undefined,
         project_phase_id: modalData.editingTask.phase_instance_id || ''
       });
     }
@@ -267,8 +267,8 @@ export function TaskSingleModal({
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Filtros de búsqueda - Orden solicitado: Filtrar por Rubro - Búsqueda de Texto */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Filtros de búsqueda - Filtrar por Rubro arriba, Búsqueda de Texto abajo */}
+      <div className="space-y-4">
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none text-muted-foreground">
             Filtrar por Rubro
@@ -416,7 +416,7 @@ export function TaskSingleModal({
               type="number"
               step="0.01"
               min="0.01"
-              placeholder={selectedTaskUnit ? `1 ${selectedTaskUnit}` : "1"}
+              placeholder={selectedTaskUnit ? `Cantidad en ${selectedTaskUnit}` : "Cantidad"}
               value={form.watch('quantity') || ''}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
