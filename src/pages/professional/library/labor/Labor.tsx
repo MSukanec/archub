@@ -10,7 +10,7 @@ export default function Labor() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('library')
+    setSidebarContext('recursos')
   }, [setSidebarContext])
 
   // Header tabs configuration
