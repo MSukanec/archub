@@ -51,16 +51,45 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
     // Extraer número limpio del string formateado
     const parseFormattedNumber = (str: string): number | undefined => {
       if (!str) return undefined
-      // Remover todo excepto números y la última coma (decimales)
-      const lastComma = str.lastIndexOf(',')
-      let cleanStr = str.replace(/[^0-9,]/g, '')
       
-      if (lastComma !== -1 && lastComma === cleanStr.lastIndexOf(',')) {
-        // Hay decimales, convertir la coma final a punto
-        cleanStr = cleanStr.replace(/,/g, '').slice(0, -2) + '.' + cleanStr.slice(-2)
-      } else {
-        // Sin decimales, remover todas las comas
-        cleanStr = cleanStr.replace(/,/g, '')
+      // Limpiar el string y manejar tanto comas como puntos como decimales
+      let cleanStr = str.replace(/[^0-9.,]/g, '')
+      
+      // Si contiene tanto puntos como comas, asumir formato europeo: 1.234,56
+      if (cleanStr.includes('.') && cleanStr.includes(',')) {
+        // Encontrar la última coma o punto (será el separador decimal)
+        const lastCommaIndex = cleanStr.lastIndexOf(',')
+        const lastDotIndex = cleanStr.lastIndexOf('.')
+        
+        if (lastCommaIndex > lastDotIndex) {
+          // La coma es el separador decimal: 1.234,56 -> 1234.56
+          cleanStr = cleanStr.slice(0, lastCommaIndex).replace(/[.,]/g, '') + '.' + cleanStr.slice(lastCommaIndex + 1)
+        } else {
+          // El punto es el separador decimal: 1,234.56 -> 1234.56
+          cleanStr = cleanStr.slice(0, lastDotIndex).replace(/[.,]/g, '') + '.' + cleanStr.slice(lastDotIndex + 1)
+        }
+      } else if (cleanStr.includes(',')) {
+        // Solo comas: puede ser separador de miles (1,234) o decimal (25570,3)
+        const commaIndex = cleanStr.lastIndexOf(',')
+        const afterComma = cleanStr.slice(commaIndex + 1)
+        
+        // Si después de la coma hay 1 o 2 dígitos, es decimal
+        if (afterComma.length <= 2 && afterComma.length > 0) {
+          cleanStr = cleanStr.replace(/,/g, '.')
+        } else {
+          // Es separador de miles, remover comas
+          cleanStr = cleanStr.replace(/,/g, '')
+        }
+      } else if (cleanStr.includes('.')) {
+        // Solo puntos: puede ser separador de miles (1.234) o decimal (25570.3)
+        const dotIndex = cleanStr.lastIndexOf('.')
+        const afterDot = cleanStr.slice(dotIndex + 1)
+        
+        // Si después del punto hay más de 2 dígitos, probablemente sea separador de miles
+        if (afterDot.length > 2) {
+          cleanStr = cleanStr.replace(/\./g, '')
+        }
+        // Si hay 1-2 dígitos después del punto, mantener como decimal
       }
       
       const num = parseFloat(cleanStr)
