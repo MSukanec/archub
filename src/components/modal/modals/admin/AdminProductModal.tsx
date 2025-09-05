@@ -28,8 +28,6 @@ const productSchema = z.object({
   description: z.string().optional(),
   image_url: z.string().optional(),
   url: z.string().optional(),
-  default_price: z.coerce.number().optional(),
-  default_provider: z.string().optional(),
 })
 
 interface AdminProductModalProps {
@@ -72,8 +70,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       description: '',
       image_url: '',
       url: '',
-      default_price: undefined,
-      default_provider: '',
     },
   })
 
@@ -95,8 +91,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
         description: editingProduct.description || '',
         image_url: editingProduct.image_url || '',
         url: editingProduct.url || '',
-        default_price: editingProduct.default_price,
-        default_provider: editingProduct.default_provider || '',
       }
       
       console.log('Loading form data:', formData)
@@ -110,8 +104,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
         description: '',
         image_url: '',
         url: '',
-        default_price: undefined,
-        default_provider: '',
       })
     }
   }, [isEditing, isDuplicating, editingProduct, form])
@@ -128,8 +120,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
         description: data.description || undefined,
         image_url: data.image_url || undefined,
         url: data.url || undefined,
-        default_price: data.default_price,
-        default_provider: data.default_provider || undefined,
       }
 
       if (isEditing && editingProduct) {
@@ -298,7 +288,7 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Imagen</FormLabel>
+              <FormLabel>Link de Imagen</FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://ejemplo.com/imagen.jpg"
@@ -310,52 +300,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
           )}
         />
 
-        {/* Provider and Price in two columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Default Provider */}
-          <FormField
-            control={form.control}
-            name="default_provider"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Proveedor (Opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Nombre del proveedor principal"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Default Price */}
-          <FormField
-            control={form.control}
-            name="default_price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Precio</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="pl-6"
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                    />
-                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">$</span>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
       </form>
     </Form>
   )

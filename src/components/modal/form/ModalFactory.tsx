@@ -63,7 +63,7 @@ import { PartnerModal } from '../modals/organizations/members/PartnerModal';
 import { PDFExporterModal } from '../modals/PDFExporterModal';
 import { ProviderProductModal } from '../modals/providers/ProviderProductModal';
 import { ProductModal } from '../modals/analysis/ProductModal';
-import { AdminProductModal } from '../modals/admin/materials/AdminProductModal';
+import { AdminProductModal } from '../modals/admin/AdminProductModal';
 import { IndirectModal } from '../modals/construction/IndirectModal';
 import { GeneralCostsModal } from '../modals/organizations/GeneralCostsModal';
 import { AdminLaborModal } from '../modals/admin/AdminLaborModal';
