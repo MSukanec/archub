@@ -16,7 +16,6 @@ import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectFi
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData } from '@/hooks/use-materials'
 import { useMaterialCategories, MaterialCategory } from '@/hooks/use-material-categories'
 import { useUnits } from '@/hooks/use-units'
-import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Package } from 'lucide-react'
@@ -25,7 +24,6 @@ const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
-  default_unit_presentation_id: z.string().optional(),
   is_completed: z.boolean().optional(),
 })
 
@@ -81,7 +79,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   const { data: userData } = useCurrentUser()
   const { data: categories = [] } = useMaterialCategories()
   const { data: units = [] } = useUnits()
-  const { data: unitPresentations = [] } = useUnitPresentations()
   const { setPanel } = useModalPanelStore()
   
   // Convert categories to cascading format - memoize to prevent recreation
@@ -106,7 +103,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       name: '',
       category_id: '',
       unit_id: '',
-      default_unit_presentation_id: '',
       is_completed: false,
     },
   })
@@ -129,7 +125,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
         category_id: categoryId,
         unit_id: editingMaterial.unit_id,
-        default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
         is_completed: editingMaterial.is_completed || false,
       })
       
@@ -141,7 +136,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         name: '',
         category_id: '',
         unit_id: '',
-        default_unit_presentation_id: '',
         is_completed: false,
       })
       setSelectedCategoryPath([])
@@ -161,7 +155,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             name: values.name,
             unit_id: values.unit_id,
             category_id: values.category_id,
-            default_unit_presentation_id: values.default_unit_presentation_id || undefined,
             is_completed: values.is_completed,
           },
         })
@@ -171,7 +164,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           name: values.name,
           category_id: values.category_id,
           unit_id: values.unit_id,
-          default_unit_presentation_id: values.default_unit_presentation_id || undefined,
           is_completed: values.is_completed,
           organization_id: userData?.organization?.id,
           is_system: false,
@@ -267,32 +259,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           )}
         />
 
-        {/* Unit Presentation */}
-        <FormField
-          control={form.control}
-          name="default_unit_presentation_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad de Venta por Defecto</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar unidad de venta (opcional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="">Sin unidad de venta</SelectItem>
-                  {unitPresentations.map((presentation) => (
-                    <SelectItem key={presentation.id} value={presentation.id}>
-                      {presentation.name} ({presentation.unit?.name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
 
         {/* Is Completed */}

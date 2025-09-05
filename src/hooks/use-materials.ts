@@ -42,7 +42,6 @@ export interface NewMaterialData {
   name: string
   unit_id: string
   category_id: string
-  default_unit_presentation_id?: string
   is_completed?: boolean
   organization_id?: string
   is_system?: boolean
