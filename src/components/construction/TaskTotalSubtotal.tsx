@@ -9,7 +9,8 @@ export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
 
   // Calcular subtotal de materiales
   const materialCostPerUnit = materials.reduce((sum, material) => {
-    const unitPrice = material.material_view?.computed_unit_price || 0;
+    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+    const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)

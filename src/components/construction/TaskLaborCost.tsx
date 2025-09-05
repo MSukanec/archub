@@ -9,9 +9,10 @@ export default function TaskLaborCost({ task }: TaskLaborCostProps) {
   const taskId = task.id || task.task_id
   const { data: materials = [], isLoading } = useTaskMaterials(taskId)
 
-  // Calcular total por unidad usando material_view.computed_unit_price (mismo cálculo que el popover)
+  // Calcular total por unidad usando materials_view.avg_price (mismo cálculo que el popover)
   const totalPerUnit = materials.reduce((sum, material) => {
-    const unitPrice = material.material_view?.computed_unit_price || 0;
+    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+    const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)

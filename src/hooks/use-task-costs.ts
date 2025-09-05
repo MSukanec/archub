@@ -20,11 +20,11 @@ export function useTaskCosts(taskId: string | null) {
           task_id,
           material_id,
           amount,
-          material_view (
+          materials_view (
             id,
             name,
             unit_of_computation,
-            computed_unit_price,
+            avg_price,
             category_name
           )
         `)
@@ -65,8 +65,8 @@ export function useTaskCosts(taskId: string | null) {
       // Combinar ambos tipos de costos
       const combinedCosts = [
         ...(materials || []).map(material => {
-          const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
-          const unitPrice = materialView?.computed_unit_price || 0;
+          const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+          const unitPrice = materialView?.avg_price || 0;
           const quantity = material.amount || 0;
           const totalPrice = quantity * unitPrice;
           

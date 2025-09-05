@@ -35,7 +35,8 @@ export default function GroupSubtotal({ tasks }: GroupSubtotalProps) {
     
     // Calcular costo por unidad para esta tarea (igual que TaskTotalSubtotal)
     const materialCostPerUnit = materials.reduce((matSum, material) => {
-      const unitPrice = material.material_view?.computed_unit_price || 0;
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
       const quantity = material.amount || 0;
       return matSum + (quantity * unitPrice);
     }, 0);
