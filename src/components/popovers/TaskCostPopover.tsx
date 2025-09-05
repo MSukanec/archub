@@ -17,8 +17,8 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
 
   // Calcular total por unidad usando los datos reales de task_materials
   const totalPerUnit = materials.reduce((sum, material) => {
-    const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
-    const unitPrice = materialView?.computed_unit_price || 0;
+    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+    const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
@@ -100,8 +100,8 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                   <div className="space-y-1">
                     {materials.map((material) => {
                       const quantity = material.amount || 0;
-                      const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
-                      const unitPrice = materialView?.computed_unit_price || 0;
+                      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+                      const unitPrice = materialView?.avg_price || 0;
                       const subtotal = quantity * unitPrice;
                       const unitName = materialView?.unit_of_computation || 'UD';
                       const itemName = materialView?.name || 'Material sin nombre';

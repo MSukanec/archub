@@ -307,11 +307,11 @@ export function useTaskMaterials(taskId: string | null) {
           task_id,
           material_id,
           amount,
-          material_view (
+          materials_view (
             id,
             name,
             unit_of_computation,
-            computed_unit_price,
+            avg_price,
             category_name
           )
         `)
