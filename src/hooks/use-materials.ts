@@ -7,18 +7,26 @@ import { InsertOrganizationMaterialPrice } from '../../shared/schema'
 export interface Material {
   id: string
   name: string
+  category_name?: string
   unit_id: string
-  category_id: string
+  unit_of_computation?: string
+  unit_description?: string
   default_unit_presentation_id?: string
-  base_price_override?: number
-  is_completed?: boolean
-  provider?: string
-  organization_id?: string
+  default_unit_presentation?: string
+  unit_equivalence?: number
   is_system: boolean
+  is_completed?: boolean
   created_at: string
+  updated_at?: string
+  min_price?: number
+  max_price?: number
+  avg_price?: number
+  product_count?: number
+  provider_product_count?: number
+  price_count?: number
+  // Legacy fields for backward compatibility
   unit?: { name: string }
   category?: { name: string }
-  default_unit_presentation?: { name: string }
   organization_material_prices?: Array<{
     id: string
     unit_price: number
@@ -55,20 +63,8 @@ export function useMaterials() {
       }
 
       const { data, error } = await supabase
-        .from('materials')
-        .select(`
-          *,
-          unit:units(name),
-          category:material_categories(name),
-          default_unit_presentation:unit_presentations(name),
-          organization_material_prices(
-            id,
-            unit_price,
-            currency_id,
-            organization_id,
-            currency:currencies(symbol, name)
-          )
-        `)
+        .from('materials_view')
+        .select('*')
         .order('name')
 
       if (error) {
@@ -78,19 +74,12 @@ export function useMaterials() {
 
       console.log('🔧 Raw materials data sample:', data?.slice(0, 3)?.map(m => ({ 
         name: m.name, 
-        category_id: m.category_id, 
-        category: m.category 
+        category_name: m.category_name,
+        avg_price: m.avg_price,
+        provider_product_count: m.provider_product_count
       })))
 
-      // Filtrar precios solo de la organización actual
-      const materialsWithFilteredPrices = data?.map(material => ({
-        ...material,
-        organization_material_prices: material.organization_material_prices?.filter(
-          (price: any) => price.organization_id === userData?.organization?.id
-        ) || []
-      })) || []
-
-      return materialsWithFilteredPrices
+      return data || []
     },
     enabled: !!supabase
   })
