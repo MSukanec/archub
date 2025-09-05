@@ -14,6 +14,11 @@ export default function TaskView() {
   
   const { data: task, isLoading } = useGeneratedTask(id || '');
   const { openModal } = useGlobalModalStore();
+  
+  // Detectar si venimos del admin basado en el referrer o localStorage
+  const isFromAdmin = typeof window !== 'undefined' && 
+    (document.referrer.includes('/admin/tasks') || 
+     localStorage.getItem('taskViewSource') === 'admin');
 
   const headerTabs = [
     {
@@ -33,7 +38,12 @@ export default function TaskView() {
     icon: CheckSquare,
     title: truncateTitle(task?.custom_name || task?.name_rendered || "Tarea"),
     showBackButton: true,
-    onBackClick: () => navigate('/library/tasks'),
+    onBackClick: () => {
+      // Limpiar localStorage al salir
+      localStorage.removeItem('taskViewSource');
+      // Navegar según el origen
+      navigate(isFromAdmin ? '/admin/tasks' : '/library/tasks');
+    },
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
