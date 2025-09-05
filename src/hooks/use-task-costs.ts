@@ -83,11 +83,14 @@ export function useTaskCosts(taskId: string | null) {
           };
         }),
         ...(labor || []).map(laborItem => {
+          const laborType = Array.isArray(laborItem.labor_types) ? laborItem.labor_types[0] : laborItem.labor_types;
+          const unit = Array.isArray(laborType?.units) ? laborType.units[0] : laborType?.units;
+          
           return {
             id: laborItem.id,
             type: 'Mano de Obra',
-            name: laborItem.labor_types?.name || 'Mano de obra sin nombre',
-            unit: laborItem.labor_types?.units?.name || 'Unidad',
+            name: laborType?.name || 'Mano de obra sin nombre',
+            unit: unit?.name || 'Unidad',
             quantity: laborItem.quantity || 0,
             unit_price: 0, // TODO: Implementar precios para mano de obra
             total_price: 0, // TODO: Calcular precio total
