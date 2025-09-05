@@ -43,9 +43,7 @@ export interface NewMaterialData {
   unit_id: string
   category_id: string
   default_unit_presentation_id?: string
-  base_price_override?: number
   is_completed?: boolean
-  provider?: string
   organization_id?: string
   is_system?: boolean
 }

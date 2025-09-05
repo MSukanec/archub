@@ -238,14 +238,14 @@ const AdminCostMaterials = () => {
       )
     }] : []),
     {
-      key: 'unit_id',
-      label: 'Unidad',
-      width: '8%',
+      key: 'unit_of_computation',
+      label: 'Unidad de Cómputo',
+      width: '12%',
       render: (material: Material) => (
         <div>
-          {material.unit?.name ? (
+          {material.unit_of_computation ? (
             <Badge variant="secondary" className="text-xs">
-              {material.unit.name}
+              {material.unit_of_computation}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-xs">Sin unidad</span>

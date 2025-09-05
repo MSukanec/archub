@@ -26,9 +26,7 @@ const materialSchema = z.object({
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   default_unit_presentation_id: z.string().optional(),
-  base_price_override: z.union([z.string(), z.number()]).optional(),
   is_completed: z.boolean().optional(),
-  provider: z.string().optional(),
 })
 
 // Helper function to convert MaterialCategory[] to CascadingSelect format
@@ -109,9 +107,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       category_id: '',
       unit_id: '',
       default_unit_presentation_id: '',
-      base_price_override: '',
       is_completed: false,
-      provider: '',
     },
   })
 
@@ -126,18 +122,19 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     })
     
     if ((isEditing || isDuplicating) && editingMaterial && categories.length > 0) {
+      // For materials from materials_view, we need to find category_id from the legacy fields or use a fallback
+      const categoryId = (editingMaterial as any).category_id || (editingMaterial.category as any)?.id || ''
+      
       form.reset({
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
-        category_id: editingMaterial.category_id,
+        category_id: categoryId,
         unit_id: editingMaterial.unit_id,
         default_unit_presentation_id: editingMaterial.default_unit_presentation_id || '',
-        base_price_override: editingMaterial.base_price_override?.toString() || '',
         is_completed: editingMaterial.is_completed || false,
-        provider: editingMaterial.provider || '',
       })
       
       // Set the category path for CascadingSelect
-      const path = findCategoryPath(categories, editingMaterial.category_id)
+      const path = findCategoryPath(categories, categoryId)
       setSelectedCategoryPath(path)
     } else if (!isEditing && !isDuplicating) {
       form.reset({
@@ -145,9 +142,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         category_id: '',
         unit_id: '',
         default_unit_presentation_id: '',
-        base_price_override: '',
         is_completed: false,
-        provider: '',
       })
       setSelectedCategoryPath([])
     }
@@ -167,9 +162,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             unit_id: values.unit_id,
             category_id: values.category_id,
             default_unit_presentation_id: values.default_unit_presentation_id || undefined,
-            base_price_override: values.base_price_override ? Number(values.base_price_override) : undefined,
             is_completed: values.is_completed,
-            provider: values.provider || undefined,
           },
         })
       } else {
@@ -179,9 +172,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           category_id: values.category_id,
           unit_id: values.unit_id,
           default_unit_presentation_id: values.default_unit_presentation_id || undefined,
-          base_price_override: values.base_price_override ? Number(values.base_price_override) : undefined,
           is_completed: values.is_completed,
-          provider: values.provider || undefined,
           organization_id: userData?.organization?.id,
           is_system: false,
         }
@@ -303,44 +294,6 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           )}
         />
 
-        {/* Provider */}
-        <FormField
-          control={form.control}
-          name="provider"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proveedor</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: CEMEX, Ferreterías ABC"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Base Price Override */}
-        <FormField
-          control={form.control}
-          name="base_price_override"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Precio por Defecto</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Ej: 1500.00"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Is Completed */}
         <FormField
