@@ -25,7 +25,7 @@ export default function ProjectInfo() {
   // Header configuration
   const headerProps = {
     title: "Información del Proyecto",
-    icon: <Info className="w-5 h-5" />,
+    icon: Info,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)

@@ -5,8 +5,14 @@ import { useState } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
+import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
+import { useMutation } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface TaskBasicDataViewProps {
   task: any;
@@ -20,9 +26,58 @@ export function TaskBasicDataView({
   const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
   const [taskRubro, setTaskRubro] = useState(task.division || '');
   const [taskUnit, setTaskUnit] = useState(task.unit || '');
-  const [taskDate, setTaskDate] = useState(task.created_at ? format(new Date(task.created_at), 'yyyy-MM-dd') : '');
   
   const isSystemTask = task.is_system;
+  
+  // Auto-save mutation for task data
+  const saveTaskMutation = useMutation({
+    mutationFn: async (dataToSave: any) => {
+      if (!task.id || !supabase || isSystemTask) return;
+
+      // Update task in tasks table
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          custom_name: dataToSave.taskName,
+          division: dataToSave.taskRubro,
+          unit: dataToSave.taskUnit
+        })
+        .eq('id', task.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
+    },
+    onError: (error: any) => {
+      console.error('Error saving task data:', error);
+      toast({
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios de la tarea",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Auto-save hook
+  const { isSaving } = useDebouncedAutoSave({
+    data: {
+      taskName,
+      taskRubro,
+      taskUnit
+    },
+    saveFn: async (data) => {
+      await saveTaskMutation.mutateAsync(data);
+      
+      toast({
+        title: "Cambios guardados",
+        description: "Los cambios se han guardado automáticamente"
+      });
+    },
+    delay: 1000,
+    enabled: !isSystemTask
+  });
   
   // Mock options - TODO: Conectar con datos reales
   const rubroOptions = [
@@ -60,25 +115,40 @@ export function TaskBasicDataView({
           />
           <CardContent className="flex-1 space-y-4 pt-4">
             <div className="grid grid-cols-1 gap-4">
-              {/* Creador - Primer lugar */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Creador</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isSystemTask ? 'Sistema' : 'Usuario personalizado'}
-                  </p>
+              {/* Creador y Fecha de Creación - Inline */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Creador</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isSystemTask ? 'Sistema' : 'Usuario personalizado'}
+                    </p>
+                  </div>
                 </div>
+                
+                {task.created_at && (
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Fecha de Creación</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(task.created_at), 'dd/MM/yyyy', { locale: es })}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Nombre de la Tarea - Editable */}
+              {/* Nombre de la Tarea - Textarea */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nombre de la Tarea</label>
-                <Input
+                <Textarea
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="Nombre de la tarea"
                   disabled={isSystemTask}
+                  className="min-h-[80px] resize-none"
                 />
               </div>
 
@@ -108,16 +178,6 @@ export function TaskBasicDataView({
                 />
               </div>
 
-              {/* Fecha de la Tarea - Editable */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Fecha de la Tarea</label>
-                <Input
-                  type="date"
-                  value={taskDate}
-                  onChange={(e) => setTaskDate(e.target.value)}
-                  disabled={isSystemTask}
-                />
-              </div>
 
               {/* Descripción - Si existe */}
               {task.description && (
@@ -147,13 +207,10 @@ export function TaskBasicDataView({
 
             <FormSubsectionButton
               icon={<Building className="h-4 w-4" />}
-              title="Guardar cambios"
-              description="Aplicar modificaciones realizadas"
-              onClick={() => {
-                // TODO: Implementar guardado de cambios
-                console.log('Guardar cambios:', { taskName, taskRubro, taskUnit, taskDate });
-              }}
-              disabled={isSystemTask}
+              title={isSaving ? "Guardando..." : "Auto-guardado activo"}
+              description={isSystemTask ? "Tareas del sistema no se pueden editar" : "Los cambios se guardan automáticamente"}
+              onClick={() => {}}
+              disabled={true}
             />
 
             <FormSubsectionButton
