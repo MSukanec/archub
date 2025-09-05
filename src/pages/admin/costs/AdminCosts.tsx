@@ -20,23 +20,18 @@ const AdminCosts = () => {
   // Mutation para refrescar vistas materializadas
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
-      // Refrescar vista de precios promedio
-      const { error: avgPricesError } = await supabase.rpc('refresh_product_avg_prices');
-      if (avgPricesError) {
-        console.error('Error refreshing material_avg_prices:', avgPricesError);
-        throw avgPricesError;
+      // Refrescar primera vista materializada (precios promedio de productos)
+      const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
+      if (productAvgError) {
+        console.error('Error refreshing product_avg_prices:', productAvgError);
+        throw productAvgError;
       }
 
-      // Intentar refrescar la segunda vista materializada si existe la función
-      try {
-        const { error: productCountError } = await supabase.rpc('refresh_provider_product_count');
-        if (productCountError) {
-          console.warn('Function refresh_provider_product_count not found, skipping...', productCountError);
-          // No lanzar error, solo advertencia
-        }
-      } catch (error) {
-        console.warn('Function refresh_provider_product_count not available yet', error);
-        // Continuar sin error
+      // Refrescar segunda vista materializada (precios promedio de materiales)
+      const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
+      if (materialAvgError) {
+        console.error('Error refreshing material_avg_prices:', materialAvgError);
+        throw materialAvgError;
       }
     },
     onSuccess: () => {
@@ -46,7 +41,7 @@ const AdminCosts = () => {
       
       toast({
         title: "Datos actualizados",
-        description: "Los precios promedio y conteo de proveedores han sido actualizados correctamente.",
+        description: "Los precios promedio de productos y materiales han sido actualizados correctamente.",
       });
     },
     onError: (error) => {
