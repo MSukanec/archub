@@ -34,17 +34,12 @@ interface ProviderProductModalProps {
     product?: {
       id: string;
       name: string;
-      material?: {
-        name: string;
-      };
-      brand?: {
-        name: string;
-      };
-      unit_presentation?: {
-        name: string;
-      };
+      material?: string;
+      brand?: string;
+      unit?: string;
       default_price?: number;
       categoryHierarchy?: string;
+      category_hierarchy?: string;
     };
   };
   onClose: () => void;
@@ -154,19 +149,19 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
           
           <div className="space-y-2 text-sm">
             <div>
-              <span className="font-medium">Categoría:</span> {product.categoryHierarchy?.split(' > ')[0] || 'Sin categoría'}
+              <span className="font-medium">Categoría:</span> {product.category_hierarchy?.split(' > ')[0] || product.categoryHierarchy?.split(' > ')[0] || 'Sin categoría'}
             </div>
             <div>
-              <span className="font-medium">Material:</span> {product.material?.name || 'No especificado'}
+              <span className="font-medium">Material:</span> {product.material || 'No especificado'}
             </div>
             <div>
-              <span className="font-medium">Marca:</span> {product.brand?.name || 'No especificada'}
+              <span className="font-medium">Marca:</span> {product.brand || 'No especificada'}
             </div>
             <div>
               <span className="font-medium">Modelo:</span> {product.name}
             </div>
             <div>
-              <span className="font-medium">Unidad:</span> {product.unit_presentation?.name || 'No especificada'}
+              <span className="font-medium">Unidad:</span> {product.unit || 'No especificada'}
             </div>
           </div>
         </div>
