@@ -23,7 +23,7 @@ const AdminCosts = () => {
       try {
         // Refrescar primera vista materializada (precios promedio de productos)
         console.log('Refrescando vista product_avg_prices...');
-        const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
+        const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices_non_concurrent');
         if (productAvgError) {
           console.error('Error refreshing product_avg_prices:', productAvgError);
           throw new Error(`Error al refrescar precios de productos: ${productAvgError.message}`);
@@ -32,7 +32,7 @@ const AdminCosts = () => {
 
         // Refrescar segunda vista materializada (precios promedio de materiales)
         console.log('Refrescando vista material_avg_prices...');
-        const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
+        const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices_non_concurrent');
         if (materialAvgError) {
           console.error('Error refreshing material_avg_prices:', materialAvgError);
           throw new Error(`Error al refrescar precios de materiales: ${materialAvgError.message}`);
