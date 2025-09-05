@@ -4,13 +4,14 @@ import { CheckSquare, Plus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { TaskCostsView } from './tabs/TaskCostsView';
+import { TaskBasicDataView } from './tabs/TaskBasicDataView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 export default function TaskView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('Costos');
+  const [activeTab, setActiveTab] = useState('Datos Básicos');
   
   const { data: task, isLoading } = useGeneratedTask(id || '');
   const { openModal } = useGlobalModalStore();
@@ -21,6 +22,11 @@ export default function TaskView() {
      localStorage.getItem('taskViewSource') === 'admin');
 
   const headerTabs = [
+    {
+      id: 'Datos Básicos',
+      label: 'Datos Básicos',
+      isActive: activeTab === 'Datos Básicos'
+    },
     {
       id: 'Costos',
       label: 'Costos',
@@ -83,6 +89,13 @@ export default function TaskView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'Datos Básicos':
+        return (
+          <TaskBasicDataView
+            task={task}
+            onTabChange={setActiveTab}
+          />
+        );
       case 'Costos':
         return (
           <TaskCostsView
