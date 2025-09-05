@@ -7,7 +7,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import ConstructionTaskCard from '@/components/ui/cards/ConstructionTaskCard'
-import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
+import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal'
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost'
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
@@ -209,7 +209,7 @@ export function TaskList({
       render: (task: any) => (
         <div className="flex items-center justify-center gap-2">
           <TaskMaterialsUnitCost task={task} />
-          <TaskMaterialDetailPopover task={task} showCost={false} />
+          <TaskCostPopover task={task} showCost={false} />
         </div>
       ),
       width: '10%',

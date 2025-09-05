@@ -20,7 +20,7 @@ import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye } from 'lucide-react'
 import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
-import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover'
+import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import { useLocation } from 'wouter'
 
@@ -301,7 +301,7 @@ const AdminTaskList = () => {
       width: '8%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-2">
-          <TaskMaterialDetailPopover task={task} showCost={false} />
+          <TaskCostPopover task={task} showCost={false} />
         </div>
       ),
       sortable: false

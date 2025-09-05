@@ -3,19 +3,19 @@ import { Eye, Package, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 
-export interface TaskMaterialDetailPopoverProps {
+export interface TaskCostPopoverProps {
   task: any
   showCost?: boolean
 }
 
-export const TaskMaterialDetailPopover = ({ task, showCost = false }: TaskMaterialDetailPopoverProps) => {
+export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
   const taskId = task.task_id || task.id
   const { data: materials = [], isLoading } = useTaskMaterials(taskId)
 
-  // Calcular total por unidad usando material_view.computed_unit_price
+  // Calcular total por unidad usando los datos reales de task_materials
   const totalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.material_view) ? material.material_view[0] : material.material_view;
     const unitPrice = materialView?.computed_unit_price || 0;
@@ -72,7 +72,7 @@ export const TaskMaterialDetailPopover = ({ task, showCost = false }: TaskMateri
                 <div className="flex items-center gap-2 flex-1">
                   <Package className="h-3 w-3" style={{ color: 'var(--accent)' }} />
                   <h2 className="text-xs font-semibold" style={{ color: 'var(--menues-fg)' }}>
-                    Materiales por unidad
+                    Costos por unidad
                   </h2>
                 </div>
                 <Button
@@ -93,7 +93,7 @@ export const TaskMaterialDetailPopover = ({ task, showCost = false }: TaskMateri
                 ) : materials.length === 0 ? (
                   <div className="text-center py-3">
                     <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>
-                      No hay materiales definidos para esta tarea
+                      No hay costos definidos para esta tarea
                     </div>
                   </div>
                 ) : (
@@ -104,13 +104,14 @@ export const TaskMaterialDetailPopover = ({ task, showCost = false }: TaskMateri
                       const unitPrice = materialView?.computed_unit_price || 0;
                       const subtotal = quantity * unitPrice;
                       const unitName = materialView?.unit_of_computation || 'UD';
+                      const itemName = materialView?.name || 'Material sin nombre';
                       
                       return (
                         <div key={material.id} className="flex items-start justify-between py-1 border-b last:border-b-0" style={{ borderColor: 'var(--menues-border)' }}>
-                          {/* Información del material */}
+                          {/* Información del item */}
                           <div className="flex-1 min-w-0 pr-4">
                             <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
-                              {materialView?.name || 'Material sin nombre'}
+                              {itemName}
                             </div>
                             <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
                               <span>{quantity} {unitName}</span>

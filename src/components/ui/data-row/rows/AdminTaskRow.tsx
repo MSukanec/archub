@@ -1,5 +1,5 @@
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
-import { TaskMaterialDetailPopover } from '@/components/popovers/TaskMaterialDetailPopover';
+import { TaskCostPopover } from '@/components/popovers/TaskCostPopover';
 import TaskLaborCost from '@/components/construction/TaskLaborCost';
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
@@ -76,7 +76,7 @@ export default function AdminTaskRow({
             </div>
           </div>
           <div className="flex flex-col items-center justify-center">
-            <TaskMaterialDetailPopover task={task} showCost={false} />
+            <TaskCostPopover task={task} showCost={false} />
           </div>
         </div>
       </div>
