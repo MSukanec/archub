@@ -143,7 +143,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       return insertedData
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['labor-types'] })
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] })
       toast({
         title: "Tipo de mano de obra creado",
         description: "El tipo de mano de obra ha sido creado correctamente.",
@@ -170,7 +170,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['labor-types'] })
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] })
       toast({
         title: "Tipo de mano de obra actualizado",
         description: "El tipo de mano de obra ha sido actualizado correctamente.",
@@ -285,6 +285,10 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
           // Create new price
           await createLaborPriceMutation.mutateAsync(priceData)
         }
+        
+        // Invalidate labor view queries after price changes
+        queryClient.invalidateQueries({ queryKey: ['labor-view'] })
+        queryClient.invalidateQueries({ queryKey: ['labor-price'] })
       }
       
       onClose()

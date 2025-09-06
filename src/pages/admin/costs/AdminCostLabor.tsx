@@ -103,7 +103,7 @@ const AdminCostLabor = () => {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['labor-types'] })
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] })
       toast({
         title: "Tipo de mano de obra eliminado",
         description: "El tipo de mano de obra ha sido eliminado correctamente.",

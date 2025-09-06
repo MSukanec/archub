@@ -56,7 +56,7 @@ const AdminCosts = () => {
       // Invalidar todas las queries de productos, materiales y mano de obra para actualizar las tablas
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
-      queryClient.invalidateQueries({ queryKey: ['labor-types'] });
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] }); // Actualizado para usar labor-view
       queryClient.invalidateQueries({ queryKey: ['labor-price'] });
       
       toast({
