@@ -174,7 +174,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           </Button>
         </div>
       )
-    }])
+    }] : [])
   ];
 
   return (
