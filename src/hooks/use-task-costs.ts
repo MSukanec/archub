@@ -35,24 +35,15 @@ export function useTaskCosts(taskId: string | null) {
         throw materialsError;
       }
 
-      // Obtener mano de obra con precios promedio
-      const { data: labor, error: laborError } = await supabase
+      // Obtener mano de obra básico
+      const { data: laborBasic, error: laborError } = await supabase
         .from("task_labor")
         .select(`
           id,
           task_id,
           labor_type_id,
           quantity,
-          organization_id,
-          labor_view!labor_types_labor_view(
-            labor_id,
-            labor_name,
-            labor_description,
-            unit_name,
-            avg_price,
-            current_price,
-            current_currency_symbol
-          )
+          organization_id
         `)
         .eq("task_id", taskId);
 
@@ -60,6 +51,24 @@ export function useTaskCosts(taskId: string | null) {
         console.error("Error fetching task labor:", laborError);
         throw laborError;
       }
+      
+      // Para cada item de mano de obra, obtener los datos desde labor_view
+      const labor = await Promise.all(
+        (laborBasic || []).map(async (laborItem) => {
+          const { data: laborView, error: laborViewError } = await supabase
+            .from('labor_view')
+            .select('*')
+            .eq('labor_id', laborItem.labor_type_id)
+            .single()
+            
+          if (laborViewError) {
+            console.warn('Error fetching labor view:', laborViewError)
+            return { ...laborItem, labor_view: null }
+          }
+          
+          return { ...laborItem, labor_view: laborView }
+        })
+      )
 
       // Combinar ambos tipos de costos
       const combinedCosts = [

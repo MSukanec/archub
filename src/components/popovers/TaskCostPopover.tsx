@@ -29,7 +29,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
 
   // Calcular total de mano de obra por unidad
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
-    const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+    const laborView = laborItem.labor_view;
     const unitPrice = laborView?.avg_price || 0;
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
@@ -175,7 +175,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                         <div className="space-y-1">
                           {labor.map((laborItem) => {
                             const quantity = laborItem.quantity || 0;
-                            const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+                            const laborView = laborItem.labor_view;
                             const unitPrice = laborView?.avg_price || 0;
                             const subtotal = quantity * unitPrice;
                             const unitName = laborView?.unit_name || 'UD';

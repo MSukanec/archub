@@ -23,7 +23,7 @@ export default function TaskCostPerUnit({ task }: TaskCostPerUnitProps) {
 
   // Calcular total de mano de obra por unidad
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
-    const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+    const laborView = laborItem.labor_view;
     const unitPrice = laborView?.avg_price || 0;
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);

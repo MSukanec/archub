@@ -14,18 +14,31 @@ export const useTaskLabor = (taskId: string | null) => {
           task_id,
           labor_type_id,
           quantity,
-          organization_id,
-          labor_view!labor_types_labor_view(
-            labor_id,
-            labor_name,
-            labor_description,
-            unit_name,
-            avg_price,
-            current_price,
-            current_currency_symbol
-          )
+          organization_id
         `)
         .eq('task_id', taskId)
+        
+      if (error) throw error
+      
+      // Para cada item de mano de obra, obtener los datos desde labor_view
+      const laborWithPrices = await Promise.all(
+        (data || []).map(async (laborItem) => {
+          const { data: laborView, error: laborError } = await supabase
+            .from('labor_view')
+            .select('*')
+            .eq('labor_id', laborItem.labor_type_id)
+            .single()
+            
+          if (laborError) {
+            console.warn('Error fetching labor view:', laborError)
+            return { ...laborItem, labor_view: null }
+          }
+          
+          return { ...laborItem, labor_view: laborView }
+        })
+      )
+      
+      return laborWithPrices
       
       if (error) throw error
       return data || []
