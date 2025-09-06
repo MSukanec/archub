@@ -44,7 +44,7 @@ export function useTaskCosts(taskId: string | null) {
           labor_type_id,
           quantity,
           organization_id,
-          labor_view:labor_type_id (
+          labor_view!labor_types_labor_view(
             labor_id,
             labor_name,
             labor_description,

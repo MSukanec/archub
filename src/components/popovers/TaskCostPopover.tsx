@@ -115,9 +115,8 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                     {/* Sección de Materiales */}
                     {materials.length > 0 && (
                       <div>
-                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: '#2d3748', color: 'white' }}>
+                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                           <div className="flex items-center gap-2">
-                            <Package className="h-3 w-3" />
                             <span className="text-xs font-semibold">Material ({materials.length} items)</span>
                           </div>
                           <span className="text-xs font-semibold">
@@ -165,9 +164,8 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                     {/* Sección de Mano de Obra */}
                     {labor.length > 0 && (
                       <div>
-                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: '#2d3748', color: 'white' }}>
+                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                           <div className="flex items-center gap-2">
-                            <Wrench className="h-3 w-3" />
                             <span className="text-xs font-semibold">Mano de Obra ({labor.length} items)</span>
                           </div>
                           <span className="text-xs font-semibold">
