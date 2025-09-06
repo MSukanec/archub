@@ -139,10 +139,10 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                               <div key={material.id} className="flex items-start justify-between py-1">
                                 {/* Información del item */}
                                 <div className="flex-1 min-w-0 pr-4">
-                                  <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
+                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--menues-fg)' }}>
                                     {itemName}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">{categoryName}</div>
+                                  <div className="text-xs text-muted-foreground text-left">{categoryName}</div>
                                   <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
                                     <span>{quantity} {unitName}</span>
                                     <span>x</span>
@@ -187,10 +187,10 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                               <div key={laborItem.id} className="flex items-start justify-between py-1">
                                 {/* Información del item */}
                                 <div className="flex-1 min-w-0 pr-4">
-                                  <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
+                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--menues-fg)' }}>
                                     {itemName}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">Mano de Obra</div>
+                                  <div className="text-xs text-muted-foreground text-left">Mano de Obra</div>
                                   <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
                                     <span>{quantity} {unitName}</span>
                                     <span>x</span>
