@@ -345,7 +345,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
                   <SelectContent>
                     {units.map((unit) => (
                       <SelectItem key={unit.id} value={unit.id}>
-                        {unit.symbol} ({unit.name})
+                        {unit.name} ({unit.symbol})
                       </SelectItem>
                     ))}
                   </SelectContent>
