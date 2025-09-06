@@ -110,19 +110,36 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       console.log('🔍 Fetching labor types...')
       const { data, error } = await supabase
         .from('labor_types')
-        .select(`
-          *,
-          units(name, symbol)
-        `)
+        .select('*')
         .order('name')
       
       if (error) {
         console.error('❌ Error fetching labor types:', error)
         throw error
       }
-      console.log('✅ Labor types fetched:', data?.length, 'items')
-      console.log('📋 First few items:', data?.slice(0, 3))
-      return data || []
+
+      // Fetch units separately for each labor type
+      const laborTypesWithUnits = []
+      for (const laborType of data || []) {
+        let unitData = null
+        if (laborType.unit_id) {
+          const { data: unit } = await supabase
+            .from('units')
+            .select('name, symbol')
+            .eq('id', laborType.unit_id)
+            .single()
+          unitData = unit
+        }
+        
+        laborTypesWithUnits.push({
+          ...laborType,
+          units: unitData
+        })
+      }
+      
+      console.log('✅ Labor types fetched:', laborTypesWithUnits.length, 'items')
+      console.log('📋 First few items:', laborTypesWithUnits.slice(0, 3))
+      return laborTypesWithUnits
     }
   })
 

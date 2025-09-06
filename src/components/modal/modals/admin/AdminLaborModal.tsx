@@ -257,7 +257,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       
       // Handle labor price if provided
       console.log('💰 Price data:', { unit_price: data.unit_price, currency_id: data.currency_id, org: userData?.organization?.id })
-      if (data.unit_price && data.currency_id && userData?.organization?.id) {
+      if (data.unit_price && data.currency_id && data.currency_id !== '' && userData?.organization?.id) {
         const priceData: LaborPriceData = {
           labor_id: laborTypeId,
           organization_id: userData.organization.id,
@@ -369,11 +369,17 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
                 <FormLabel>Costo</FormLabel>
                 <FormControl>
                   <CurrencyAmountField
-                    value={field.value}
-                    currency={form.watch('currency_id')}
+                    value={field.value || 0}
+                    currency={form.watch('currency_id') || ''}
                     currencies={currencyOptions}
-                    onValueChange={field.onChange}
-                    onCurrencyChange={(currency) => form.setValue('currency_id', currency)}
+                    onValueChange={(value) => {
+                      console.log('💰 Value changed to:', value)
+                      field.onChange(value)
+                    }}
+                    onCurrencyChange={(currency) => {
+                      console.log('💱 Currency changed to:', currency)
+                      form.setValue('currency_id', currency)
+                    }}
                     placeholder="0.00"
                   />
                 </FormControl>
