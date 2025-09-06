@@ -1,9 +1,10 @@
-drop view if exists public.material_view;
+drop view if exists public.materials_view;
 
-create view public.materials_view as
+create or replace view public.materials_view as
 select
   m.id,
   m.name,
+  m.category_id,
   mc.name as category_name,
   m.unit_id,
   u.name as unit_of_computation,     -- símbolo (KG, M2, etc.)
