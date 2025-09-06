@@ -149,7 +149,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     defaultValues: {
       type: undefined,
       item_id: '',
-      quantity: 1,
+      quantity: undefined,
     },
   })
 
@@ -288,7 +288,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                   type="number"
                   step="0.001"
                   min="0"
-                  placeholder="Ingresa la cantidad"
+                  placeholder="1.75"
                   {...field}
                 />
               </FormControl>
