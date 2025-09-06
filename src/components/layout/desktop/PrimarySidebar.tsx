@@ -17,6 +17,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useToast } from "@/hooks/use-toast";
+import { useProjectContext } from "@/stores/projectContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { supabase } from "@/lib/supabase";
@@ -29,6 +30,7 @@ export function PrimarySidebar() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isGlobalView } = useProjectContext();
   
   // Sidebar state
   const { isDocked, setDocked } = useSidebarStore();
@@ -111,20 +113,23 @@ export function PrimarySidebar() {
       level: 'organization' as const,
       navigateTo: false
     },
-    {
-      id: 'project',
-      label: 'Proyecto',
-      icon: FolderOpen,
-      level: 'project' as const,
-      navigateTo: false
-    },
-    {
-      id: 'construction',
-      label: 'Construcción',
-      icon: HardHat,
-      level: 'construction' as const,
-      navigateTo: false
-    },
+    // Solo mostrar secciones de Proyecto y Construcción si hay un proyecto activo
+    ...(!isGlobalView ? [
+      {
+        id: 'project',
+        label: 'Proyecto',
+        icon: FolderOpen,
+        level: 'project' as const,
+        navigateTo: false
+      },
+      {
+        id: 'construction',
+        label: 'Construcción',
+        icon: HardHat,
+        level: 'construction' as const,
+        navigateTo: false
+      }
+    ] : []),
     {
       id: 'library',
       label: 'Biblioteca',
