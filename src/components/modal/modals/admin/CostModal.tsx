@@ -288,7 +288,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                   type="number"
                   step="0.001"
                   min="0"
-                  placeholder="1.75"
+                  placeholder="Cantidad"
                   {...field}
                 />
               </FormControl>
