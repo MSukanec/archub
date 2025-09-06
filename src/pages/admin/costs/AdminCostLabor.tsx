@@ -19,17 +19,22 @@ import { cn } from '@/lib/utils'
 import { Plus, Edit, Trash2, Users, Crown, Copy, Wrench } from 'lucide-react'
 
 interface LaborType {
-  id: string
-  name: string
-  description: string | null
+  labor_id: string
+  labor_name: string
+  labor_description: string | null
   unit_id: string | null
+  unit_name: string | null
+  unit_description: string | null
   is_system: boolean
-  created_at: string
-  updated_at: string | null
-  units?: {
-    name: string
-    symbol: string
-  } | null
+  organization_id: string | null
+  current_price: number | null
+  current_currency_symbol: string | null
+  avg_price: number | null
+  price_count: number | null
+  min_price: number | null
+  max_price: number | null
+  created_at?: string
+  updated_at?: string | null
 }
 
 interface LaborPrice {
@@ -40,35 +45,10 @@ interface LaborPrice {
   }
 }
 
-// Component to display labor cost
-function LaborCost({ laborType }: { laborType: LaborType }) {
-  const { data: userData } = useCurrentUser()
-  
-  const { data: laborPrice, isLoading } = useQuery({
-    queryKey: ['labor-price', laborType.id, userData?.organization?.id],
-    queryFn: async () => {
-      if (!userData?.organization?.id) return null
-      
-      const { data, error } = await supabase
-        .from('labor_prices')
-        .select(`
-          id,
-          unit_price,
-          currency:currencies!inner(symbol)
-        `)
-        .eq('labor_id', laborType.id)
-        .eq('organization_id', userData.organization.id)
-        .order('valid_from', { ascending: false })
-        .limit(1)
-        .single()
-      
-      if (error && error.code !== 'PGRST116') throw error
-      return data
-    },
-    enabled: !!laborType.id && !!userData?.organization?.id
-  })
-
-  const formatCost = (amount: number, currencySymbol: string = '$') => {
+// Component to display average labor cost
+function AverageLaborCost({ laborType }: { laborType: LaborType }) {
+  const formatCost = (amount: number | null, currencySymbol: string = '$') => {
+    if (!amount) return 'Sin datos'
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -76,17 +56,13 @@ function LaborCost({ laborType }: { laborType: LaborType }) {
     }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
   }
 
-  if (isLoading) {
-    return <span className="text-xs text-muted-foreground">...</span>
-  }
-
-  if (!laborPrice) {
-    return <span className="text-xs text-muted-foreground">Sin precio</span>
+  if (!laborType.avg_price) {
+    return <span className="text-xs text-muted-foreground">Sin datos</span>
   }
 
   return (
     <span className="text-xs font-medium">
-      {formatCost(laborPrice.unit_price, laborPrice.currency?.symbol || '$')}
+      {formatCost(laborType.avg_price, '$')}
     </span>
   )
 }
@@ -99,39 +75,20 @@ const AdminCostLabor = () => {
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
 
-  // Fetch labor types with unit information
+  // Fetch labor types from LABOR_VIEW
   const { data: laborTypes = [], isLoading } = useQuery({
-    queryKey: ['labor-types'],
+    queryKey: ['labor-view'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('labor_types')
+        .from('labor_view')
         .select('*')
-        .order('name')
+        .order('labor_name')
       
       if (error) {
         throw error
       }
 
-      // Fetch units separately for each labor type
-      const laborTypesWithUnits = []
-      for (const laborType of data || []) {
-        let unitData = null
-        if (laborType.unit_id) {
-          const { data: unit } = await supabase
-            .from('units')
-            .select('name, symbol')
-            .eq('id', laborType.unit_id)
-            .single()
-          unitData = unit
-        }
-        
-        laborTypesWithUnits.push({
-          ...laborType,
-          units: unitData
-        })
-      }
-      
-      return laborTypesWithUnits
+      return data || []
     }
   })
 
@@ -164,16 +121,16 @@ const AdminCostLabor = () => {
 
   // Apply client-side filtering
   const filteredLaborTypes = laborTypes.filter(laborType => {
-    const matchesSearch = searchValue === '' || laborType.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesSearch = searchValue === '' || laborType.labor_name.toLowerCase().includes(searchValue.toLowerCase())
     return matchesSearch
   })
 
   // Apply client-side sorting
   const sortedLaborTypes = [...filteredLaborTypes].sort((a, b) => {
     if (sortBy === 'name') {
-      return a.name.localeCompare(b.name)
+      return a.labor_name.localeCompare(b.labor_name)
     } else {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime()
     }
   })
 
@@ -194,7 +151,13 @@ const AdminCostLabor = () => {
   }, [sortedLaborTypes, groupingType])
 
   const handleEdit = (laborType: LaborType) => {
-    openModal('labor-type-form', { editingLaborType: laborType })
+    openModal('labor-type-form', { editingLaborType: { 
+      id: laborType.labor_id,
+      name: laborType.labor_name,
+      description: laborType.labor_description,
+      unit_id: laborType.unit_id,
+      is_system: laborType.is_system
+    }})
   }
 
   const handleCreate = () => {
@@ -203,7 +166,13 @@ const AdminCostLabor = () => {
 
   const handleDuplicate = (laborType: LaborType) => {
     openModal('labor-type-form', { 
-      editingLaborType: laborType,
+      editingLaborType: {
+        id: laborType.labor_id,
+        name: laborType.labor_name,
+        description: laborType.labor_description,
+        unit_id: laborType.unit_id,
+        is_system: laborType.is_system
+      },
       isDuplicating: true 
     })
   }
@@ -212,10 +181,10 @@ const AdminCostLabor = () => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
       title: 'Eliminar Tipo de Mano de Obra',
-      description: `¿Estás seguro que deseas eliminar el tipo de mano de obra "${laborType.name}"? Esta acción no se puede deshacer.`,
-      itemName: laborType.name,
+      description: `¿Estás seguro que deseas eliminar el tipo de mano de obra "${laborType.labor_name}"? Esta acción no se puede deshacer.`,
+      itemName: laborType.labor_name,
       destructiveActionText: 'Eliminar',
-      onConfirm: () => deleteLaborTypeMutation.mutate(laborType.id),
+      onConfirm: () => deleteLaborTypeMutation.mutate(laborType.labor_id),
       isLoading: deleteLaborTypeMutation.isPending
     })
   }
@@ -264,9 +233,9 @@ const AdminCostLabor = () => {
       sortable: true,
       render: (laborType: LaborType) => (
         <div>
-          <div className="font-medium">{laborType.name}</div>
-          {laborType.description && (
-            <div className="text-xs text-muted-foreground">{laborType.description}</div>
+          <div className="font-medium">{laborType.labor_name}</div>
+          {laborType.labor_description && (
+            <div className="text-xs text-muted-foreground">{laborType.labor_description}</div>
           )}
         </div>
       )
@@ -277,9 +246,9 @@ const AdminCostLabor = () => {
       width: '8%',
       render: (laborType: LaborType) => (
         <div>
-          {laborType.units ? (
+          {laborType.unit_name ? (
             <Badge variant="secondary" className="text-xs">
-              {laborType.units.symbol} ({laborType.units.name})
+              {laborType.unit_name}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin unidad</span>
@@ -288,12 +257,12 @@ const AdminCostLabor = () => {
       )
     },
     { 
-      key: 'labor_cost', 
-      label: 'Costo', 
+      key: 'avg_cost', 
+      label: 'Costo Promedio', 
       width: '12%',
       render: (laborType: LaborType) => (
         <div className="text-center">
-          <LaborCost laborType={laborType} />
+          <AverageLaborCost laborType={laborType} />
         </div>
       ),
       sortable: false
@@ -367,11 +336,11 @@ const AdminCostLabor = () => {
         onClearFilters: clearFilters
       }}
       renderCard={(laborType: LaborType) => (
-        <div key={laborType.id} className="p-4 border rounded-lg bg-card">
+        <div key={laborType.labor_id} className="p-4 border rounded-lg bg-card">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-medium">{laborType.name}</h3>
+                <h3 className="font-medium">{laborType.labor_name}</h3>
                 <Badge 
                   variant={laborType.is_system ? "default" : "secondary"}
                   className={`text-xs ${laborType.is_system 
@@ -382,23 +351,23 @@ const AdminCostLabor = () => {
                   {laborType.is_system ? 'Sistema' : 'Organización'}
                 </Badge>
               </div>
-              {laborType.description && (
-                <p className="text-sm text-muted-foreground mb-2">{laborType.description}</p>
+              {laborType.labor_description && (
+                <p className="text-sm text-muted-foreground mb-2">{laborType.labor_description}</p>
               )}
               <div className="flex items-center gap-4 text-sm">
-                {laborType.units ? (
+                {laborType.unit_name ? (
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground">Unidad:</span>
                     <Badge variant="secondary" className="text-xs">
-                      {laborType.units.symbol} ({laborType.units.name})
+                      {laborType.unit_name}
                     </Badge>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">Sin unidad</span>
                 )}
                 <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Costo:</span>
-                  <LaborCost laborType={laborType} />
+                  <span className="text-muted-foreground">Costo Promedio:</span>
+                  <AverageLaborCost laborType={laborType} />
                 </div>
               </div>
             </div>

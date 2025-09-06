@@ -19,17 +19,22 @@ import { cn } from '@/lib/utils'
 import { Plus, Edit, Trash2, Users, Crown, Copy, Wrench } from 'lucide-react'
 
 interface LaborType {
-  id: string
-  name: string
-  description: string | null
+  labor_id: string
+  labor_name: string
+  labor_description: string | null
   unit_id: string | null
+  unit_name: string | null
+  unit_description: string | null
   is_system: boolean
-  created_at: string
-  updated_at: string | null
-  units?: {
-    name: string
-    symbol: string
-  } | null
+  organization_id: string | null
+  current_price: number | null
+  current_currency_symbol: string | null
+  avg_price: number | null
+  price_count: number | null
+  min_price: number | null
+  max_price: number | null
+  created_at?: string
+  updated_at?: string | null
 }
 
 interface LaborPrice {
@@ -40,35 +45,10 @@ interface LaborPrice {
   }
 }
 
-// Component to display labor cost
-function LaborCost({ laborType }: { laborType: LaborType }) {
-  const { data: userData } = useCurrentUser()
-  
-  const { data: laborPrice, isLoading } = useQuery({
-    queryKey: ['labor-price', laborType.id, userData?.organization?.id],
-    queryFn: async () => {
-      if (!userData?.organization?.id) return null
-      
-      const { data, error } = await supabase
-        .from('labor_prices')
-        .select(`
-          id,
-          unit_price,
-          currency:currencies!inner(symbol)
-        `)
-        .eq('labor_id', laborType.id)
-        .eq('organization_id', userData.organization.id)
-        .order('valid_from', { ascending: false })
-        .limit(1)
-        .single()
-      
-      if (error && error.code !== 'PGRST116') throw error
-      return data
-    },
-    enabled: !!laborType.id && !!userData?.organization?.id
-  })
-
-  const formatCost = (amount: number, currencySymbol: string = '$') => {
+// Component to display own labor cost
+function OwnLaborCost({ laborType }: { laborType: LaborType }) {
+  const formatCost = (amount: number | null, currencySymbol: string = '$') => {
+    if (!amount) return 'Sin precio'
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
@@ -76,17 +56,35 @@ function LaborCost({ laborType }: { laborType: LaborType }) {
     }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
   }
 
-  if (isLoading) {
-    return <span className="text-xs text-muted-foreground">...</span>
-  }
-
-  if (!laborPrice) {
+  if (!laborType.current_price) {
     return <span className="text-xs text-muted-foreground">Sin precio</span>
   }
 
   return (
     <span className="text-xs font-medium">
-      {formatCost(laborPrice.unit_price, laborPrice.currency?.symbol || '$')}
+      {formatCost(laborType.current_price, laborType.current_currency_symbol || '$')}
+    </span>
+  )
+}
+
+// Component to display average labor cost
+function AverageLaborCost({ laborType }: { laborType: LaborType }) {
+  const formatCost = (amount: number | null, currencySymbol: string = '$') => {
+    if (!amount) return 'Sin datos'
+    return new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
+  }
+
+  if (!laborType.avg_price) {
+    return <span className="text-xs text-muted-foreground">Sin datos</span>
+  }
+
+  return (
+    <span className="text-xs font-medium">
+      {formatCost(laborType.avg_price, '$')}
     </span>
   )
 }
@@ -103,43 +101,20 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
 
-  // Fetch labor types with unit information
+  // Fetch labor types from LABOR_VIEW
   const { data: laborTypes = [], isLoading } = useQuery({
-    queryKey: ['labor-types'],
+    queryKey: ['labor-view'],
     queryFn: async () => {
-      console.log('🔍 Fetching labor types...')
       const { data, error } = await supabase
-        .from('labor_types')
+        .from('labor_view')
         .select('*')
-        .order('name')
+        .order('labor_name')
       
       if (error) {
-        console.error('❌ Error fetching labor types:', error)
         throw error
       }
 
-      // Fetch units separately for each labor type
-      const laborTypesWithUnits = []
-      for (const laborType of data || []) {
-        let unitData = null
-        if (laborType.unit_id) {
-          const { data: unit } = await supabase
-            .from('units')
-            .select('name, symbol')
-            .eq('id', laborType.unit_id)
-            .single()
-          unitData = unit
-        }
-        
-        laborTypesWithUnits.push({
-          ...laborType,
-          units: unitData
-        })
-      }
-      
-      console.log('✅ Labor types fetched:', laborTypesWithUnits.length, 'items')
-      console.log('📋 First few items:', laborTypesWithUnits.slice(0, 3))
-      return laborTypesWithUnits
+      return data || []
     }
   })
 
@@ -172,7 +147,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
 
   // Apply client-side filtering
   const filteredLaborTypes = laborTypes.filter(laborType => {
-    const matchesSearch = searchValue === '' || laborType.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesSearch = searchValue === '' || laborType.labor_name.toLowerCase().includes(searchValue.toLowerCase())
     return matchesSearch
   })
 
