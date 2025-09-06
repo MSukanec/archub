@@ -302,11 +302,11 @@ const AdminTaskList = () => {
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
-            <Badge variant="default" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            <Badge className="text-xs text-white" style={{ backgroundColor: 'var(--accent)' }}>
               SISTEMA
             </Badge>
           ) : (
-            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            <Badge variant="secondary" className="text-xs">
               USUARIO
             </Badge>
           )}
