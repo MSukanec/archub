@@ -31,17 +31,6 @@ export default function TaskCostPerUnit({ task }: TaskCostPerUnitProps) {
 
   const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit
 
-  // Debug: Log para entender qué está pasando
-  console.log('TaskCostPerUnit Debug:', {
-    taskId,
-    materials: materials.length,
-    labor: labor.length,
-    materialsTotalPerUnit,
-    laborTotalPerUnit,
-    totalPerUnit,
-    task: task.custom_name || task.name
-  })
-
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -55,8 +44,16 @@ export default function TaskCostPerUnit({ task }: TaskCostPerUnitProps) {
     return <span className="text-xs text-muted-foreground">–</span>
   }
 
-  if (totalPerUnit === 0) {
+  // Solo mostrar guión si NO hay materiales NI mano de obra
+  if (materials.length === 0 && labor.length === 0) {
     return <span className="text-xs text-muted-foreground">–</span>
+  }
+  
+  // Si hay materiales o mano de obra pero el total es 0, mostrar $0
+  if (totalPerUnit === 0) {
+    return <span className="text-xs font-medium text-muted-foreground">
+      {formatCost(0)}
+    </span>
   }
 
   return (
