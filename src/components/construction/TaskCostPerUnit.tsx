@@ -31,6 +31,17 @@ export default function TaskCostPerUnit({ task }: TaskCostPerUnitProps) {
 
   const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit
 
+  // Debug: Log para entender qué está pasando
+  console.log('TaskCostPerUnit Debug:', {
+    taskId,
+    materials: materials.length,
+    labor: labor.length,
+    materialsTotalPerUnit,
+    laborTotalPerUnit,
+    totalPerUnit,
+    task: task.custom_name || task.name
+  })
+
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',

@@ -38,10 +38,14 @@ export const useTaskLabor = (taskId: string | null) => {
         })
       )
       
-      return laborWithPrices
+      console.log('TaskLabor Debug:', {
+        taskId,
+        basicItems: data?.length || 0,
+        withPrices: laborWithPrices.length,
+        sampleItem: laborWithPrices[0]
+      })
       
-      if (error) throw error
-      return data || []
+      return laborWithPrices
     },
     enabled: !!taskId
   })
