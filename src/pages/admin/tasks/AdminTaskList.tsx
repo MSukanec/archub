@@ -285,12 +285,12 @@ const AdminTaskList = () => {
       )
     },
     { 
-      key: 'labor_cost', 
+      key: 'total_cost', 
       label: 'Costo Unitario', 
       width: '12%',
       render: (task: GeneratedTask) => (
         <div className="text-center">
-          <TaskLaborCost task={task} />
+          <TaskCostPopover task={task} showCost={true} />
         </div>
       ),
       sortable: false
@@ -313,11 +313,11 @@ const AdminTaskList = () => {
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
-            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+            <Badge variant="default" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
               SISTEMA
             </Badge>
           ) : (
-            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
+            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
               USUARIO
             </Badge>
           )}
