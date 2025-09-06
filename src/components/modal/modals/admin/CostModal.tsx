@@ -15,7 +15,6 @@ import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useMaterials } from '@/hooks/use-materials'
-import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { toast } from '@/hooks/use-toast'
 
@@ -24,7 +23,6 @@ import { DollarSign } from 'lucide-react'
 const costSchema = z.object({
   type: z.enum(['material', 'labor'], { required_error: 'Selecciona un tipo de costo' }),
   item_id: z.string().min(1, 'Selecciona un material o mano de obra'),
-  unit_id: z.string().min(1, 'Selecciona una unidad'),
   quantity: z.coerce.number().min(0.001, 'La cantidad debe ser mayor a 0'),
 })
 
@@ -56,7 +54,6 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
   const { data: materials = [] } = useMaterials()
-  const { data: units = [] } = useUnits()
 
   // Hook para obtener tipos de mano de obra (usando la misma query que AdminCostLabor)
   const { data: laborTypes = [] } = useQuery({
@@ -76,7 +73,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
 
   // Mutation para crear task_material
   const createTaskMaterialMutation = useMutation({
-    mutationFn: async (data: { task_id: string; material_id: string; amount: number; unit_id: string }) => {
+    mutationFn: async (data: { task_id: string; material_id: string; amount: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
       
       const { error } = await supabase
@@ -152,7 +149,6 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     defaultValues: {
       type: undefined,
       item_id: '',
-      unit_id: '',
       quantity: 1,
     },
   })
@@ -163,7 +159,6 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     if (watchedType !== costType) {
       setCostType(watchedType)
       form.setValue('item_id', '')
-      form.setValue('unit_id', '')
     }
   }, [watchedType, costType, form])
 
@@ -184,8 +179,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
         await createTaskMaterialMutation.mutateAsync({
           task_id: task.id,
           material_id: data.item_id,
-          amount: data.quantity,
-          unit_id: data.unit_id
+          amount: data.quantity
         })
       } else if (data.type === 'labor') {
         await createTaskLaborMutation.mutateAsync({
@@ -281,31 +275,6 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           )}
         />
 
-        {/* Unit */}
-        <FormField
-          control={form.control}
-          name="unit_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una unidad" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Quantity */}
         <FormField
