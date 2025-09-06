@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +26,69 @@ interface LaborType {
   is_system: boolean
   created_at: string
   updated_at: string | null
+  units?: {
+    name: string
+    symbol: string
+  } | null
+}
+
+interface LaborPrice {
+  id: string
+  unit_price: number
+  currency: {
+    symbol: string
+  }
+}
+
+// Component to display labor cost
+function LaborCost({ laborType }: { laborType: LaborType }) {
+  const { data: userData } = useCurrentUser()
+  
+  const { data: laborPrice, isLoading } = useQuery({
+    queryKey: ['labor-price', laborType.id, userData?.organization?.id],
+    queryFn: async () => {
+      if (!userData?.organization?.id) return null
+      
+      const { data, error } = await supabase
+        .from('labor_prices')
+        .select(`
+          id,
+          unit_price,
+          currency:currencies!inner(symbol)
+        `)
+        .eq('labor_id', laborType.id)
+        .eq('organization_id', userData.organization.id)
+        .order('valid_from', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (error && error.code !== 'PGRST116') throw error
+      return data
+    },
+    enabled: !!laborType.id && !!userData?.organization?.id
+  })
+
+  const formatCost = (amount: number, currencySymbol: string = '$') => {
+    return new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
+  }
+
+  if (isLoading) {
+    return <span className="text-xs text-muted-foreground">...</span>
+  }
+
+  if (!laborPrice) {
+    return <span className="text-xs text-muted-foreground">Sin precio</span>
+  }
+
+  return (
+    <span className="text-xs font-medium">
+      {formatCost(laborPrice.unit_price, laborPrice.currency?.symbol || '$')}
+    </span>
+  )
 }
 
 const AdminCostLabor = () => {
@@ -35,17 +99,43 @@ const AdminCostLabor = () => {
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
 
-  // Fetch labor types
+  // Fetch labor types with unit information
   const { data: laborTypes = [], isLoading } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
+      console.log('🔍 Fetching labor types...')
       const { data, error } = await supabase
         .from('labor_types')
         .select('*')
         .order('name')
       
-      if (error) throw error
-      return data || []
+      if (error) {
+        console.error('❌ Error fetching labor types:', error)
+        throw error
+      }
+
+      // Fetch units separately for each labor type
+      const laborTypesWithUnits = []
+      for (const laborType of data || []) {
+        let unitData = null
+        if (laborType.unit_id) {
+          const { data: unit } = await supabase
+            .from('units')
+            .select('name, symbol')
+            .eq('id', laborType.unit_id)
+            .single()
+          unitData = unit
+        }
+        
+        laborTypesWithUnits.push({
+          ...laborType,
+          units: unitData
+        })
+      }
+      
+      console.log('✅ Labor types fetched:', laborTypesWithUnits.length, 'items')
+      console.log('📋 First few items:', laborTypesWithUnits.slice(0, 3))
+      return laborTypesWithUnits
     }
   })
 
@@ -185,6 +275,49 @@ const AdminCostLabor = () => {
         </div>
       )
     },
+    { 
+      key: 'unit', 
+      label: 'Unidad', 
+      width: '8%',
+      render: (laborType: LaborType) => (
+        <div>
+          {laborType.units ? (
+            <Badge variant="secondary" className="text-xs">
+              {laborType.units.symbol} ({laborType.units.name})
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">Sin unidad</span>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'labor_cost', 
+      label: 'Costo', 
+      width: '12%',
+      render: (laborType: LaborType) => (
+        <div className="text-center">
+          <LaborCost laborType={laborType} />
+        </div>
+      ),
+      sortable: false
+    },
+    { 
+      key: 'is_system', 
+      label: 'Tipo', 
+      width: '100px',
+      render: (laborType: LaborType) => (
+        <Badge 
+          variant={laborType.is_system ? "default" : "secondary"}
+          className={`text-xs ${laborType.is_system 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+          }`}
+        >
+          {laborType.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
+      )
+    },
     {
       key: 'actions',
       label: 'Acciones',
@@ -207,14 +340,16 @@ const AdminCostLabor = () => {
           >
             <Copy className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(laborType)}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {!laborType.is_system && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(laborType)}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )
     }
@@ -239,10 +374,37 @@ const AdminCostLabor = () => {
         <div key={laborType.id} className="p-4 border rounded-lg bg-card">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="font-medium mb-2">{laborType.name}</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-medium">{laborType.name}</h3>
+                <Badge 
+                  variant={laborType.is_system ? "default" : "secondary"}
+                  className={`text-xs ${laborType.is_system 
+                    ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+                  }`}
+                >
+                  {laborType.is_system ? 'Sistema' : 'Organización'}
+                </Badge>
+              </div>
               {laborType.description && (
                 <p className="text-sm text-muted-foreground mb-2">{laborType.description}</p>
               )}
+              <div className="flex items-center gap-4 text-sm">
+                {laborType.units ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Unidad:</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {laborType.units.symbol} ({laborType.units.name})
+                    </Badge>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">Sin unidad</span>
+                )}
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Costo:</span>
+                  <LaborCost laborType={laborType} />
+                </div>
+              </div>
             </div>
             <div className="flex gap-1">
               <Button
@@ -261,14 +423,16 @@ const AdminCostLabor = () => {
               >
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDelete(laborType)}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {!laborType.is_system && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(laborType)}
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
