@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -199,9 +199,17 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       description: '',
       unit_id: '',
       unit_price: undefined,
-      currency_id: '',
+      currency_id: currencyOptions.length > 0 ? currencyOptions[0].id : '',
     },
   })
+
+  // Set default currency when currencies are loaded
+  React.useEffect(() => {
+    if (currencyOptions.length > 0 && !form.getValues('currency_id')) {
+      console.log('💱 Setting default currency:', currencyOptions[0])
+      form.setValue('currency_id', currencyOptions[0].id)
+    }
+  }, [currencyOptions, form])
 
   // Load editing data
   useEffect(() => {
