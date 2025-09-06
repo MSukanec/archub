@@ -70,7 +70,6 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   
   const { editingLaborType, isDuplicating } = modalData
   const isEditing = !!editingLaborType && !isDuplicating
-  const isSystemLabor = editingLaborType?.is_system || false
   
   // Hooks
   const queryClient = useQueryClient()
@@ -78,6 +77,15 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const { data: units = [] } = useUnits()
   const { data: userData } = useCurrentUser()
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
+  
+  // Check if user is admin to allow editing system labor types (use useMemo to ensure proper timing)
+  const isAdmin = React.useMemo(() => {
+    return userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin'
+  }, [userData?.role?.name])
+  
+  const isSystemLabor = React.useMemo(() => {
+    return (editingLaborType?.is_system || false) && !isAdmin
+  }, [editingLaborType?.is_system, isAdmin])
   
   // Map currencies for CurrencyAmountField
   const currencyOptions = organizationCurrencies.map(oc => ({
@@ -239,7 +247,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       let laborTypeId: string
       
       if (isEditing && editingLaborType) {
-        // Update labor type (only if not system type)
+        // Update labor type (admins can edit system types, others cannot)
         if (!isSystemLabor) {
           await updateMutation.mutateAsync({
             id: editingLaborType.id,
