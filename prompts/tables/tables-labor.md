@@ -111,3 +111,83 @@ TABLA LABOR_PRICES:
   }
 ]
 
+VISTA LABOR_VIEW:
+
+[
+  {
+    "column_name": "labor_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "labor_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "labor_description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "unit_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit_description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "is_system",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "current_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "current_currency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "current_currency_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "current_currency_symbol",
+    "data_type": "text"
+  },
+  {
+    "column_name": "valid_from",
+    "data_type": "date"
+  },
+  {
+    "column_name": "valid_to",
+    "data_type": "date"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "avg_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "price_count",
+    "data_type": "bigint"
+  },
+  {
+    "column_name": "min_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "max_price",
+    "data_type": "numeric"
+  }
+]
