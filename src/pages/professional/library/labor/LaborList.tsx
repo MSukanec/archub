@@ -311,17 +311,15 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       label: 'Tipo', 
       width: '100px',
       render: (laborType: LaborType) => (
-        <div className="flex justify-center">
-          {laborType.is_system ? (
-            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-              SISTEMA
-            </Badge>
-          ) : (
-            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
-              USUARIO
-            </Badge>
-          )}
-        </div>
+        <Badge 
+          variant={laborType.is_system ? "default" : "secondary"}
+          className={`text-xs ${laborType.is_system 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+          }`}
+        >
+          {laborType.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
       )
     },
     {
