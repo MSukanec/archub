@@ -149,7 +149,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     defaultValues: {
       type: undefined,
       item_id: '',
-      quantity: undefined,
+      quantity: 0,
     },
   })
 

@@ -25,8 +25,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const isMobile = useMobile();
   const [, navigate] = useLocation();
   
-  // Verificar si la tarea es del sistema
-  const isSystemTask = task?.is_system === true;
+  // Verificar si el usuario es administrador
+  const isAdmin = userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin';
   
   // Estados para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
@@ -149,8 +149,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         </div>
       )
     },
-    // Solo mostrar acciones si la tarea NO es del sistema
-    ...(isSystemTask ? [] : [{
+    // Solo mostrar acciones si el usuario es administrador
+    ...(isAdmin ? [{
       key: 'actions',
       label: 'Acciones',
       sortable: false,
@@ -379,8 +379,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 <div className="text-left font-medium">
                   {formatCurrency(groupTotal)}
                 </div>
-                {/* Solo mostrar div vacío para acciones si la tarea NO es del sistema */}
-                {!isSystemTask && <div></div>}
+                {/* Solo mostrar div vacío para acciones si el usuario es administrador */}
+                {isAdmin && <div></div>}
               </>
             );
           }}
@@ -403,8 +403,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           title="Sin costos configurados"
           description="Los costos asociados a esta tarea aparecerán aquí."
           action={
-            // Solo mostrar botón si la tarea NO es del sistema
-            !isSystemTask ? (
+            // Solo mostrar botón si el usuario es administrador
+            isAdmin ? (
               <Button variant="default" size="sm" onClick={handleAddCost}>
                 <Plus className="h-4 w-4 mr-2" />
                 Agregar Costo
