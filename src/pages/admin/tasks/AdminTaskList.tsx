@@ -296,17 +296,6 @@ const AdminTaskList = () => {
       sortable: false
     },
     { 
-      key: 'material_details', 
-      label: '', 
-      width: '8%',
-      render: (task: GeneratedTask) => (
-        <div className="flex items-center justify-center gap-2">
-          <TaskCostPopover task={task} showCost={false} />
-        </div>
-      ),
-      sortable: false
-    },
-    { 
       key: 'is_system', 
       label: 'Sistema', 
       width: '100px',
