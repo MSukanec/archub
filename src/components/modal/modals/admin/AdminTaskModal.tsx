@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks } from '@/hooks/use-generated-tasks'
-import { useMaterials } from '@/hooks/use-materials'
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useGeneratedTasks } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useTaskCategories } from '@/hooks/use-task-categories'
@@ -16,13 +15,10 @@ import { ParametricTaskBuilder } from '@/components/ui-custom/admin/tasks/Parame
 import { TemplateParametersSelector } from '@/components/ui-custom/admin/tasks/TemplateParametersSelector'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 
-import { Zap, Plus, Trash2, FileText, Settings, Package, Edit2 } from 'lucide-react'
+import { Zap, Plus, Trash2, FileText, Settings } from 'lucide-react'
 
 interface AdminTaskModalProps {
   modalData?: {
@@ -43,104 +39,6 @@ interface ParameterSelection {
   optionLabel: string
 }
 
-interface MaterialEditRowProps {
-  material: any
-  index: number
-  onEdit: (material: any) => void
-  onRemove: () => void
-  disabled: boolean
-}
-
-function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: MaterialEditRowProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editAmount, setEditAmount] = useState(material.amount.toString())
-
-  const handleSaveEdit = () => {
-    const newAmount = parseFloat(editAmount)
-    if (newAmount > 0) {
-      onEdit({ ...material, amount: newAmount })
-      setIsEditing(false)
-    }
-  }
-
-  const handleCancelEdit = () => {
-    setEditAmount(material.amount.toString())
-    setIsEditing(false)
-  }
-
-  return (
-    <div className="py-2">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="font-medium text-sm leading-tight">
-            {material.material_name}
-          </p>
-          {!isEditing && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {material.amount} {material.unit_name}
-            </p>
-          )}
-          {isEditing && (
-            <div className="flex items-center gap-2 mt-1">
-              <Input
-                type="number"
-                value={editAmount}
-                onChange={(e) => setEditAmount(e.target.value)}
-                className="h-7 text-xs w-20"
-                step="0.01"
-                min="0"
-                autoFocus
-              />
-              <span className="text-xs text-muted-foreground">{material.unit_name}</span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSaveEdit}
-                  className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
-                  disabled={disabled}
-                >
-                  ✓
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancelEdit}
-                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                  disabled={disabled}
-                >
-                  ✕
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          {!isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-              disabled={disabled}
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-            disabled={disabled}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const { task, isEditing, taskData, taskId } = modalData || {}
@@ -167,16 +65,12 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [parameterOrder, setParameterOrder] = useState<string[]>([])
   const [savedTaskId, setSavedTaskId] = useState<string | null>(null)
-  const [taskMaterials, setTaskMaterials] = useState<Array<{id?: string, material_id: string, amount: number, material_name?: string, unit_name?: string}>>([])
-  const [selectedMaterialId, setSelectedMaterialId] = useState<string>('')
-  const [materialAmount, setMaterialAmount] = useState<string>('')
   const [customName, setCustomName] = useState<string>('')
   const [taskTemplateId, setTaskTemplateId] = useState<string>('')
   const [categoryId, setCategoryId] = useState<string>('')
   const [taskDivisionId, setTaskDivisionId] = useState<string>('')
   const [unitId, setUnitId] = useState<string>('')
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
-  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null)
   
   // Parse existing param_values if editing
   const existingParamValues = React.useMemo(() => {
@@ -241,8 +135,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Mutations
   const createTaskMutation = useCreateGeneratedTask()
   const updateTaskMutation = useUpdateGeneratedTask()
-  const createTaskMaterialMutation = useCreateTaskMaterial()
-  const deleteTaskMaterialMutation = useDeleteTaskMaterial()
   
   // Current user data
   const { data: userData } = useCurrentUser()
@@ -250,9 +142,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Query client for cache invalidation
   const queryClient = useQueryClient()
   
-  // Materials data
-  const { data: materials = [] } = useMaterials()
-  const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
   
   // Task templates data
   const { data: taskTemplates = [] } = useTaskTemplates()
@@ -353,51 +242,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
     }
   }, [isEditingMode, actualTask?.id])
 
-  React.useEffect(() => {
-    if (existingTaskMaterials.length > 0) {
-      setTaskMaterials(existingTaskMaterials.map(tm => ({
-        id: tm.id,
-        material_id: tm.material_id,
-        amount: tm.amount,
-        material_name: (tm as any).material_view?.name || 'Material sin nombre',
-        unit_name: (tm as any).material_view?.unit_of_computation || 'Sin unidad'
-      })))
-    }
-  }, [existingTaskMaterials])
 
-  // Add material to local state
-  // Handle edit material function
-  const handleEditMaterial = (index: number, updatedMaterial: any) => {
-    setTaskMaterials(prev => prev.map((material, i) => 
-      i === index ? { ...material, amount: updatedMaterial.amount } : material
-    ));
-    setEditingMaterialIndex(null);
-  };
 
-  const handleAddMaterial = () => {
-    if (!selectedMaterialId || !materialAmount) {
-      toast({
-        title: "Error",
-        description: "Debes seleccionar un material y especificar la cantidad.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
-    const newMaterial = {
-      material_id: selectedMaterialId,
-      amount: parseFloat(materialAmount),
-      material_name: selectedMaterial?.name,
-      unit_name: selectedMaterial?.unit?.name
-    }
-    
-    setTaskMaterials(prev => [...prev, newMaterial])
-
-    // Clear form
-    setSelectedMaterialId('')
-    setMaterialAmount('')
-  }
 
   // Complete and save task with materials
   const handleSubmit = async () => {
@@ -498,33 +344,13 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         console.log('✅ Task created successfully with ID:', taskId)
       }
 
-      // Save materials if any
-      if (taskMaterials.length > 0 && taskId && userData?.organization?.id) {
-        for (const material of taskMaterials) {
-          if (!material.id) {
-            const materialData = {
-              task_id: taskId,
-              material_id: material.material_id,
-              amount: material.amount,
-              organization_id: userData.organization.id
-            };
-            
-            try {
-              await createTaskMaterialMutation.mutateAsync(materialData);
-            } catch (materialError: any) {
-              console.error('❌ Error saving material:', materialError);
-              throw materialError;
-            }
-          }
-        }
-      }
       
       // Invalidate queries to refresh the task list
       queryClient.invalidateQueries({ queryKey: ['task-view'] })
       
       toast({
         title: isEditingMode ? "Tarea actualizada" : "Tarea creada",
-        description: `Tarea ${isEditingMode ? 'actualizada' : 'creada'} exitosamente: "${customName}" con ${taskMaterials.length} materiales.`,
+        description: `Tarea ${isEditingMode ? 'actualizada' : 'creada'} exitosamente: "${customName}".`,
       })
       
       onClose()
@@ -540,15 +366,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
     }
   }
 
-  // Get material options for ComboBox
-  const materialOptions = materials.map(material => ({
-    value: material.id,
-    label: material.name
-  }))
-
-  // Get selected material unit
-  const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
-  const selectedMaterialUnit = selectedMaterial?.unit?.name || ''
 
   // ViewPanel - null for creation modal
   const viewPanel = null;
@@ -623,81 +440,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
 
 
 
-      {/* Materials Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-accent" />
-          <h3 className="text-sm font-medium">Materiales</h3>
-        </div>
-        
-        <div className="pl-6 space-y-4">
-          {/* Add Material Form */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="material-select">Material</Label>
-              <ComboBox
-                options={materialOptions}
-                value={selectedMaterialId}
-                onValueChange={setSelectedMaterialId}
-                placeholder="Buscar material..."
-              />
-            </div>
-            
-            <div className="col-span-1">
-              <Label htmlFor="material-amount">Cantidad</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="material-amount"
-                  type="number"
-                  value={materialAmount}
-                  onChange={(e) => setMaterialAmount(e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                />
-                {selectedMaterialUnit && (
-                  <Badge variant="outline" className="text-xs">
-                    {selectedMaterialUnit}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-center">
-            <Button 
-              onClick={handleAddMaterial}
-              disabled={!selectedMaterialId || !materialAmount || isLoading}
-              variant="default"
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Material
-            </Button>
-          </div>
-          
-          {/* Materials List */}
-          {taskMaterials.length > 0 && (
-            <div className="divide-y divide-border">
-              {taskMaterials.map((material, index) => (
-                <MaterialEditRow
-                  key={index}
-                  material={material}
-                  index={index}
-                  onEdit={(updatedMaterial) => handleEditMaterial(index, updatedMaterial)}
-                  onRemove={() => {
-                    if (material.id) {
-                      deleteTaskMaterialMutation.mutateAsync(material.id).catch(console.error);
-                    }
-                    setTaskMaterials(prev => prev.filter((_, i) => i !== index));
-                  }}
-                  disabled={isLoading}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
       
 
     </div>
