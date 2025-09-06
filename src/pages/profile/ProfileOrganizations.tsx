@@ -133,7 +133,6 @@ function OrganizationCard({ organization, isSelected, onSelect, onView, onEdit, 
 // Componente principal de lista de organizaciones
 export function OrganizationList() {
   const { data: userData } = useCurrentUser()
-  const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null)
   const [, navigate] = useLocation()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -141,17 +140,23 @@ export function OrganizationList() {
   const { setCurrentProject } = useNavigationStore()
 
   const organizations = userData?.organizations || []
+  const currentOrganizationId = userData?.organization?.id
 
   // Mutation para cambiar organización activa
   const switchOrganization = useMutation({
     mutationFn: async (organizationId: string) => {
+      console.log('🔄 Switching to organization:', organizationId)
       const { data, error } = await supabase
         .from('user_preferences')
         .update({ last_organization_id: organizationId })
         .eq('user_id', userData?.user?.id)
         .select()
       
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error switching organization:', error)
+        throw error
+      }
+      console.log('✅ Organization switch successful:', data)
       return data
     },
     onSuccess: () => {
@@ -163,9 +168,11 @@ export function OrganizationList() {
         title: "Organización cambiada",
         description: "La organización se ha cambiado exitosamente."
       })
+      // Navigate to organization dashboard after switch
       navigate('/organization')
     },
     onError: (error: any) => {
+      console.error('❌ Organization switch error:', error)
       toast({
         title: "Error",
         description: error.message || "No se pudo cambiar la organización.",
@@ -175,6 +182,13 @@ export function OrganizationList() {
   })
 
   const handleSelect = (organizationId: string) => {
+    // No hacer nada si ya está seleccionada la misma organización
+    if (organizationId === currentOrganizationId) {
+      console.log('🔄 Organization already selected:', organizationId)
+      return
+    }
+    
+    console.log('🔄 Selecting organization:', organizationId, 'Current:', currentOrganizationId)
     switchOrganization.mutate(organizationId)
   }
 
@@ -206,14 +220,14 @@ export function OrganizationList() {
               key={organization.id}
               organization={organization}
               onClick={() => handleSelect(organization.id)}
-              selected={selectedOrganization === organization.id}
+              selected={currentOrganizationId === organization.id}
               density="normal"
             />
           ) : (
             <OrganizationCard
               key={organization.id}
               organization={organization}
-              isSelected={selectedOrganization === organization.id}
+              isSelected={currentOrganizationId === organization.id}
               onSelect={handleSelect}
               onView={handleView}
               onEdit={handleEdit}
