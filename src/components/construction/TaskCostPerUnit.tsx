@@ -1,39 +1,35 @@
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
 
-interface TaskTotalSubtotalProps {
+interface TaskCostPerUnitProps {
   task: any
 }
 
-export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
-  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(task.task_id)
-  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id)
+export default function TaskCostPerUnit({ task }: TaskCostPerUnitProps) {
+  // Use task.id if available (for GeneratedTask), otherwise fallback to task.task_id (for construction tasks)
+  const taskId = task.id || task.task_id
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId)
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId)
 
   const isLoading = materialsLoading || laborLoading
 
-  // Calcular subtotal de materiales
-  const materialCostPerUnit = materials.reduce((sum, material) => {
+  // Calcular total de materiales por unidad
+  const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
     const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
 
-  const taskQuantity = task.quantity || 0;
-  const materialSubtotal = materialCostPerUnit * taskQuantity;
-
-  // Calcular subtotal de mano de obra
-  const laborCostPerUnit = labor.reduce((sum, laborItem) => {
+  // Calcular total de mano de obra por unidad
+  const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
     const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
     const unitPrice = laborView?.avg_price || 0;
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0)
 
-  const laborSubtotal = laborCostPerUnit * taskQuantity;
-
-  // Total = materiales + mano de obra
-  const totalSubtotal = materialSubtotal + laborSubtotal;
+  const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -45,16 +41,16 @@ export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
   }
 
   if (isLoading) {
-    return <span className="text-xs text-muted-foreground">...</span>
+    return <span className="text-xs text-muted-foreground">–</span>
   }
 
-  if (totalSubtotal === 0) {
+  if (totalPerUnit === 0) {
     return <span className="text-xs text-muted-foreground">–</span>
   }
 
   return (
-    <span className="text-xs font-semibold text-foreground">
-      {formatCost(totalSubtotal)}
+    <span className="text-xs font-medium text-foreground">
+      {formatCost(totalPerUnit)}
     </span>
   )
 }

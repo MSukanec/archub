@@ -1,6 +1,6 @@
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
 import { TaskCostPopover } from '@/components/popovers/TaskCostPopover';
-import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
+import TaskCostPerUnit from '@/components/construction/TaskCostPerUnit';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
 // Interface para la tarea de construcción
@@ -63,7 +63,7 @@ export default function TaskRow({
               Costo Unitario
             </span>
             <div className="text-xs text-[var(--text-secondary)]">
-              <TaskMaterialsSubtotal task={task} />
+              <TaskCostPerUnit task={task} />
             </div>
           </div>
           <div className="flex flex-col text-center">

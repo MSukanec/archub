@@ -35,7 +35,7 @@ export function useTaskCosts(taskId: string | null) {
         throw materialsError;
       }
 
-      // Obtener mano de obra
+      // Obtener mano de obra con precios promedio
       const { data: labor, error: laborError } = await supabase
         .from("task_labor")
         .select(`
@@ -44,15 +44,14 @@ export function useTaskCosts(taskId: string | null) {
           labor_type_id,
           quantity,
           organization_id,
-          labor_types:labor_type_id (
-            id,
-            name,
-            description,
-            unit_id,
-            units:unit_id (
-              id,
-              name
-            )
+          labor_view:labor_type_id (
+            labor_id,
+            labor_name,
+            labor_description,
+            unit_name,
+            avg_price,
+            current_price,
+            current_currency_symbol
           )
         `)
         .eq("task_id", taskId);
@@ -83,17 +82,19 @@ export function useTaskCosts(taskId: string | null) {
           };
         }),
         ...(labor || []).map(laborItem => {
-          const laborType = Array.isArray(laborItem.labor_types) ? laborItem.labor_types[0] : laborItem.labor_types;
-          const unit = Array.isArray(laborType?.units) ? laborType.units[0] : laborType?.units;
+          const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+          const unitPrice = laborView?.avg_price || 0;
+          const quantity = laborItem.quantity || 0;
+          const totalPrice = quantity * unitPrice;
           
           return {
             id: laborItem.id,
             type: 'Mano de Obra',
-            name: laborType?.name || 'Mano de obra sin nombre',
-            unit: unit?.name || 'Unidad',
-            quantity: laborItem.quantity || 0,
-            unit_price: 0, // TODO: Implementar precios para mano de obra
-            total_price: 0, // TODO: Calcular precio total
+            name: laborView?.labor_name || 'Mano de obra sin nombre',
+            unit: laborView?.unit_name || 'Unidad',
+            quantity: quantity,
+            unit_price: unitPrice,
+            total_price: totalPrice,
             category: 'Mano de Obra',
             labor_type_id: laborItem.labor_type_id
           };

@@ -1,4 +1,4 @@
-import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+import { useTaskLabor } from '@/hooks/use-task-labor'
 
 interface TaskLaborCostProps {
   task: any
@@ -7,13 +7,13 @@ interface TaskLaborCostProps {
 export default function TaskLaborCost({ task }: TaskLaborCostProps) {
   // Use task.id if available (for GeneratedTask), otherwise fallback to task.task_id (for construction tasks)
   const taskId = task.id || task.task_id
-  const { data: materials = [], isLoading } = useTaskMaterials(taskId)
+  const { data: labor = [], isLoading } = useTaskLabor(taskId)
 
-  // Calcular total por unidad usando materials_view.avg_price (mismo cálculo que el popover)
-  const totalPerUnit = materials.reduce((sum, material) => {
-    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-    const unitPrice = materialView?.avg_price || 0;
-    const quantity = material.amount || 0;
+  // Calcular total de mano de obra por unidad usando labor_view.avg_price
+  const totalPerUnit = labor.reduce((sum, laborItem) => {
+    const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+    const unitPrice = laborView?.avg_price || 0;
+    const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0)
 

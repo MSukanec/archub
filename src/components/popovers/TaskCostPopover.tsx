@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Eye, Package, X } from 'lucide-react'
+import { Eye, Package, X, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+import { useTaskLabor } from '@/hooks/use-task-labor'
 
 export interface TaskCostPopoverProps {
   task: any
@@ -13,15 +14,28 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
 
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
   const taskId = task.task_id || task.id
-  const { data: materials = [], isLoading } = useTaskMaterials(taskId)
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId)
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId)
 
-  // Calcular total por unidad usando los datos reales de task_materials
-  const totalPerUnit = materials.reduce((sum, material) => {
+  const isLoading = materialsLoading || laborLoading
+
+  // Calcular total de materiales por unidad
+  const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
     const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
+  // Calcular total de mano de obra por unidad
+  const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
+    const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+    const unitPrice = laborView?.avg_price || 0;
+    const quantity = laborItem.quantity || 0;
+    return sum + (quantity * unitPrice);
+  }, 0)
+
+  const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit
 
   // Formatear el costo total
   const formatCost = (amount: number) => {
@@ -88,59 +102,126 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
               <div className="p-4" style={{ maxHeight: 'calc(70vh - 120px)', overflow: 'auto' }}>
                 {isLoading ? (
                   <div className="text-center py-3">
-                    <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>Cargando materiales...</div>
+                    <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>Cargando costos...</div>
                   </div>
-                ) : materials.length === 0 ? (
+                ) : materials.length === 0 && labor.length === 0 ? (
                   <div className="text-center py-3">
                     <div className="text-xs" style={{ color: 'var(--muted-fg)' }}>
                       No hay costos definidos para esta tarea
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-1">
-                    {materials.map((material) => {
-                      const quantity = material.amount || 0;
-                      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-                      const unitPrice = materialView?.avg_price || 0;
-                      const subtotal = quantity * unitPrice;
-                      const unitName = materialView?.unit_of_computation || 'UD';
-                      const itemName = materialView?.name || 'Material sin nombre';
-                      
-                      return (
-                        <div key={material.id} className="flex items-start justify-between py-1 border-b last:border-b-0" style={{ borderColor: 'var(--menues-border)' }}>
-                          {/* Información del item */}
-                          <div className="flex-1 min-w-0 pr-4">
-                            <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
-                              {itemName}
-                            </div>
-                            <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
-                              <span>{quantity} {unitName}</span>
-                              <span>x</span>
-                              <span className="font-mono">
-                                {unitPrice > 0 ? `$${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-                              </span>
-                            </div>
+                  <div className="space-y-3">
+                    {/* Sección de Materiales */}
+                    {materials.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: '#2d3748', color: 'white' }}>
+                          <div className="flex items-center gap-2">
+                            <Package className="h-3 w-3" />
+                            <span className="text-xs font-semibold">Material ({materials.length} items)</span>
                           </div>
-                          
-                          {/* Precio total */}
-                          <div className="text-xs flex-shrink-0 text-right" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
-                            {subtotal > 0 ? `$${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '–'}
-                          </div>
+                          <span className="text-xs font-semibold">
+                            $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          </span>
                         </div>
-                      );
-                    })}
+                        <div className="space-y-1">
+                          {materials.map((material) => {
+                            const quantity = material.amount || 0;
+                            const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+                            const unitPrice = materialView?.avg_price || 0;
+                            const subtotal = quantity * unitPrice;
+                            const unitName = materialView?.unit_of_computation || 'UD';
+                            const itemName = materialView?.name || 'Material sin nombre';
+                            const categoryName = materialView?.category_name || 'Sin categoría';
+                            
+                            return (
+                              <div key={material.id} className="flex items-start justify-between py-1">
+                                {/* Información del item */}
+                                <div className="flex-1 min-w-0 pr-4">
+                                  <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
+                                    {itemName}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">{categoryName}</div>
+                                  <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
+                                    <span>{quantity} {unitName}</span>
+                                    <span>x</span>
+                                    <span className="font-mono">
+                                      {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                {/* Precio total */}
+                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                                  $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Sección de Mano de Obra */}
+                    {labor.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: '#2d3748', color: 'white' }}>
+                          <div className="flex items-center gap-2">
+                            <Wrench className="h-3 w-3" />
+                            <span className="text-xs font-semibold">Mano de Obra ({labor.length} items)</span>
+                          </div>
+                          <span className="text-xs font-semibold">
+                            $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          {labor.map((laborItem) => {
+                            const quantity = laborItem.quantity || 0;
+                            const laborView = Array.isArray(laborItem.labor_view) ? laborItem.labor_view[0] : laborItem.labor_view;
+                            const unitPrice = laborView?.avg_price || 0;
+                            const subtotal = quantity * unitPrice;
+                            const unitName = laborView?.unit_name || 'UD';
+                            const itemName = laborView?.labor_name || 'Mano de obra sin nombre';
+                            
+                            return (
+                              <div key={laborItem.id} className="flex items-start justify-between py-1">
+                                {/* Información del item */}
+                                <div className="flex-1 min-w-0 pr-4">
+                                  <div className="text-xs font-semibold leading-tight" style={{ color: 'var(--menues-fg)' }}>
+                                    {itemName}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">Mano de Obra</div>
+                                  <div className="flex items-center gap-2 text-xs mt-0.5" style={{ color: 'var(--muted-fg)' }}>
+                                    <span>{quantity} {unitName}</span>
+                                    <span>x</span>
+                                    <span className="font-mono">
+                                      {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                {/* Precio total */}
+                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                                  $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Footer - Solo se muestra si hay materiales */}
-              {!isLoading && materials.length > 0 && (
+              {/* Footer - Solo se muestra si hay materiales o mano de obra */}
+              {!isLoading && (materials.length > 0 || labor.length > 0) && (
                 <div className="px-3 py-3 flex items-center justify-between border-t" style={{ borderColor: 'var(--menues-border)' }}>
                   <div className="flex items-center gap-2 flex-1">
                     <span className="text-xs font-semibold uppercase" style={{ color: 'var(--menues-fg)' }}>TOTAL POR UNIDAD:</span>
                   </div>
                   <div className="text-xs font-semibold text-right" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
-                    ${totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                    $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </div>
                 </div>
               )}
