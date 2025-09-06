@@ -113,11 +113,15 @@ export default function SidebarButton({
             <div 
               className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border"
               style={{ 
-                backgroundColor: 'transparent',
-                borderColor: (isActive || isHeaderButton)
+                backgroundColor: projectColor || 'transparent',
+                borderColor: projectColor 
+                  ? 'transparent' 
+                  : (isActive || isHeaderButton)
                   ? `var(--main-sidebar-button-active-fg)`
                   : `var(--main-sidebar-button-fg)`,
-                color: (isActive || isHeaderButton)
+                color: projectColor 
+                  ? 'white' 
+                  : (isActive || isHeaderButton)
                   ? `var(--main-sidebar-button-active-fg)`
                   : `var(--main-sidebar-button-fg)`
               }}

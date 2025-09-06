@@ -21,6 +21,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { supabase } from "@/lib/supabase";
+import { useProjects } from "@/hooks/use-projects";
 import SidebarButton from "./SidebarButton";
 
 export function PrimarySidebar() {
@@ -30,7 +31,18 @@ export function PrimarySidebar() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isGlobalView } = useProjectContext();
+  const { isGlobalView, selectedProjectId } = useProjectContext();
+  
+  // Get projects data to find current project info
+  const { data: projects = [] } = useProjects(userData?.organization?.id);
+  
+  // Find current project
+  const currentProject = selectedProjectId ? projects.find(p => p.id === selectedProjectId) : null;
+  
+  // Helper function to get project initials
+  const getProjectInitials = (name: string) => {
+    return name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+  };
   
   // Sidebar state
   const { isDocked, setDocked } = useSidebarStore();
@@ -191,6 +203,20 @@ export function PrimarySidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
+          {/* Project Avatar - only show if there's a selected project */}
+          {currentProject && (
+            <SidebarButton
+              icon={null}
+              label={currentProject.name || 'Proyecto'}
+              isActive={false}
+              isExpanded={false}
+              onClick={() => navigate('/project')}
+              variant="main"
+              userFullName={getProjectInitials(currentProject.name || 'P')}
+              projectColor={currentProject.color}
+            />
+          )}
+          
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
           
@@ -198,6 +224,7 @@ export function PrimarySidebar() {
           <SidebarButton
             icon={theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             label={theme === 'dark' ? "Modo Claro" : "Modo Oscuro"}
+            isActive={false}
             isExpanded={false}
             onClick={handleThemeToggle}
             variant="main"
@@ -207,6 +234,7 @@ export function PrimarySidebar() {
           <SidebarButton
             icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
             label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+            isActive={false}
             isExpanded={false}
             onClick={handleDockToggle}
             variant="main"
@@ -216,6 +244,7 @@ export function PrimarySidebar() {
           <SidebarButton
             icon={<Bell className="w-[18px] h-[18px]" />}
             label="Notificaciones"
+            isActive={false}
             isExpanded={false}
             onClick={() => console.log('Notificaciones clicked')}
             variant="main"
@@ -223,9 +252,11 @@ export function PrimarySidebar() {
           
           {/* User Avatar */}
           <SidebarButton
+            icon={null}
             avatarUrl={userData?.user?.avatar_url}
             userFullName={userData?.user?.full_name}
             label={userData?.user?.full_name || 'Usuario'}
+            isActive={false}
             isExpanded={false}
             onClick={() => navigate('/profile')}
             variant="main"
