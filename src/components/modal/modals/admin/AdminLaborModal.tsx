@@ -11,10 +11,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useUnits } from '@/hooks/use-units'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { toast } from '@/hooks/use-toast'
 
 import { Users } from 'lucide-react'
@@ -23,6 +26,8 @@ const laborTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   unit_id: z.string().optional(),
+  unit_price: z.number().optional(),
+  currency_id: z.string().optional(),
 })
 
 interface LaborType {
@@ -43,6 +48,15 @@ interface NewLaborTypeData {
   is_system?: boolean
 }
 
+interface LaborPriceData {
+  labor_id: string
+  organization_id: string
+  currency_id: string
+  unit_price: number
+  valid_from: string
+  valid_to: string | null
+}
+
 interface AdminLaborModalProps {
   modalData: {
     editingLaborType?: LaborType | null
@@ -61,15 +75,71 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
   const { data: units = [] } = useUnits()
+  const { data: userData } = useCurrentUser()
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.selectedOrganization?.id)
+  
+  // Map currencies for CurrencyAmountField
+  const currencyOptions = organizationCurrencies.map(oc => ({
+    id: oc.currency.id,
+    name: oc.currency.name,
+    symbol: oc.currency.symbol
+  }))
+
+  // Get existing labor price
+  const { data: existingLaborPrice } = useQuery({
+    queryKey: ['labor-price', editingLaborType?.id],
+    queryFn: async () => {
+      if (!editingLaborType?.id || !userData?.selectedOrganization?.id) return null
+      
+      const { data, error } = await supabase
+        .from('labor_prices')
+        .select('*')
+        .eq('labor_id', editingLaborType.id)
+        .eq('organization_id', userData.selectedOrganization.id)
+        .order('valid_from', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (error && error.code !== 'PGRST116') throw error // PGRST116 is "not found"
+      return data
+    },
+    enabled: !!editingLaborType?.id && !!userData?.selectedOrganization?.id
+  })
+
+  // Create labor price mutation
+  const createLaborPriceMutation = useMutation({
+    mutationFn: async (data: LaborPriceData) => {
+      const { error } = await supabase
+        .from('labor_prices')
+        .insert(data)
+      
+      if (error) throw error
+    }
+  })
+
+  // Update labor price mutation
+  const updateLaborPriceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<LaborPriceData> }) => {
+      const { error } = await supabase
+        .from('labor_prices')
+        .update(data)
+        .eq('id', id)
+      
+      if (error) throw error
+    }
+  })
 
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: NewLaborTypeData) => {
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('labor_types')
         .insert(data)
+        .select()
+        .single()
       
       if (error) throw error
+      return insertedData
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['labor-types'] })
@@ -127,6 +197,8 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       name: '',
       description: '',
       unit_id: '',
+      unit_price: undefined,
+      currency_id: '',
     },
   })
 
@@ -137,21 +209,28 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
         name: isDuplicating ? `${editingLaborType.name} (Copia)` : editingLaborType.name,
         description: editingLaborType.description || '',
         unit_id: editingLaborType.unit_id || '',
+        unit_price: existingLaborPrice?.unit_price || undefined,
+        currency_id: existingLaborPrice?.currency_id || '',
       })
     } else {
       form.reset({
         name: '',
         description: '',
         unit_id: '',
+        unit_price: undefined,
+        currency_id: '',
       })
     }
-  }, [editingLaborType, isDuplicating, form])
+  }, [editingLaborType, isDuplicating, form, existingLaborPrice])
 
   const onSubmit = async (data: z.infer<typeof laborTypeSchema>) => {
     setIsLoading(true)
     
     try {
+      let laborTypeId: string
+      
       if (isEditing && editingLaborType) {
+        // Update labor type
         await updateMutation.mutateAsync({
           id: editingLaborType.id,
           data: {
@@ -160,15 +239,40 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
             unit_id: data.unit_id || undefined,
           }
         })
+        laborTypeId = editingLaborType.id
       } else {
-        // Creating or duplicating
-        await createMutation.mutateAsync({
+        // Create new labor type
+        const newLaborType = await createMutation.mutateAsync({
           name: data.name,
           description: data.description || undefined,
           unit_id: data.unit_id || undefined,
-          organization_id: null, // Como especificaste
-          is_system: true, // Como especificaste
+          organization_id: null,
+          is_system: true,
         })
+        laborTypeId = newLaborType.id
+      }
+      
+      // Handle labor price if provided
+      if (data.unit_price && data.currency_id && userData?.selectedOrganization?.id) {
+        const priceData: LaborPriceData = {
+          labor_id: laborTypeId,
+          organization_id: userData.selectedOrganization.id,
+          currency_id: data.currency_id,
+          unit_price: data.unit_price,
+          valid_from: new Date().toISOString().split('T')[0],
+          valid_to: null
+        }
+        
+        if (existingLaborPrice) {
+          // Update existing price
+          await updateLaborPriceMutation.mutateAsync({
+            id: existingLaborPrice.id,
+            data: priceData
+          })
+        } else {
+          // Create new price
+          await createLaborPriceMutation.mutateAsync(priceData)
+        }
       }
       
       onClose()
@@ -249,6 +353,32 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
             </FormItem>
           )}
         />
+
+        {/* Cost */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="unit_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Costo</FormLabel>
+                  <FormControl>
+                    <CurrencyAmountField
+                      value={field.value}
+                      currency={form.watch('currency_id')}
+                      currencies={currencyOptions}
+                      onValueChange={field.onChange}
+                      onCurrencyChange={(currency) => form.setValue('currency_id', currency)}
+                      placeholder="0.00"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
       </form>
     </Form>
   )
