@@ -35,7 +35,7 @@ interface LaborType {
 interface LaborPrice {
   id: string
   unit_price: number
-  currency?: {
+  currency: {
     symbol: string
   }
 }
@@ -54,7 +54,7 @@ function LaborCost({ laborType }: { laborType: LaborType }) {
         .select(`
           id,
           unit_price,
-          currency:currencies(symbol)
+          currency:currencies!inner(symbol)
         `)
         .eq('labor_id', laborType.id)
         .eq('organization_id', userData.organization.id)
