@@ -7,6 +7,7 @@ import { InsertOrganizationMaterialPrice } from '../../shared/schema'
 export interface Material {
   id: string
   name: string
+  category_id?: string
   category_name?: string
   unit_id: string
   unit_of_computation?: string

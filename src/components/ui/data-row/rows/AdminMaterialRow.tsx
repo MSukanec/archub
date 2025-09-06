@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 interface Material {
   id: string;
   name: string;
+  category_id?: string;
   category_name?: string;
   unit_id: string;
   unit_of_computation?: string;

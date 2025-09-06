@@ -137,8 +137,10 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     })
     
     if ((isEditing || isDuplicating) && editingMaterial && categories.length > 0) {
-      // For materials from materials_view, we need to find category_id from the legacy fields or use a fallback
-      const categoryId = (editingMaterial as any).category_id || (editingMaterial.category as any)?.id || ''
+      // For materials from materials_view, use category_id directly (now included in the view)
+      const categoryId = (editingMaterial as any).category_id || 
+                        findCategoryIdByName(categories, (editingMaterial as any).category_name) || 
+                        ''
       
       form.reset({
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,

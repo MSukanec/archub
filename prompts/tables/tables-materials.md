@@ -57,6 +57,10 @@ VISTA MATERIALS_VIEW:
     "data_type": "text"
   },
   {
+    "column_name": "category_id",
+    "data_type": "uuid"
+  },
+  {
     "column_name": "category_name",
     "data_type": "text"
   },
