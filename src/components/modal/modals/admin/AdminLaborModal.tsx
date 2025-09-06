@@ -256,6 +256,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       }
       
       // Handle labor price if provided
+      console.log('💰 Price data:', { unit_price: data.unit_price, currency_id: data.currency_id, org: userData?.organization?.id })
       if (data.unit_price && data.currency_id && userData?.organization?.id) {
         const priceData: LaborPriceData = {
           labor_id: laborTypeId,

@@ -29,7 +29,7 @@ interface LaborType {
   unit?: {
     name: string
     symbol: string
-  }
+  } | null
 }
 
 interface LaborPrice {
@@ -265,7 +265,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       width: '8%',
       render: (laborType: LaborType) => (
         <div>
-          {laborType.unit ? (
+          {laborType.unit?.symbol ? (
             <Badge variant="secondary" className="text-xs">
               {laborType.unit.symbol}
             </Badge>
@@ -294,11 +294,11 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
         <div className="flex justify-center">
           {laborType.is_system ? (
             <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-              Sistema
+              SISTEMA
             </Badge>
           ) : (
             <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
-              Usuario
+              USUARIO
             </Badge>
           )}
         </div>
