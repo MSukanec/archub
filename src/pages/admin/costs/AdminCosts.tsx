@@ -58,6 +58,7 @@ const AdminCosts = () => {
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
       queryClient.invalidateQueries({ queryKey: ['labor-view'] }); // Actualizado para usar labor-view
       queryClient.invalidateQueries({ queryKey: ['labor-price'] });
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] }); // Invalidar cache de task-labor para que se actualicen los precios en popovers
       
       toast({
         title: "Datos actualizados",

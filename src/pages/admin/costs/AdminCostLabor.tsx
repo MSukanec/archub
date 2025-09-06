@@ -74,6 +74,10 @@ const AdminCostLabor = () => {
   
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
+  const { data: userData } = useCurrentUser()
+  
+  // Check if user is admin
+  const isAdmin = userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin'
 
   // Fetch labor types from LABOR_VIEW
   const { data: laborTypes = [], isLoading } = useQuery({
@@ -288,34 +292,38 @@ const AdminCostLabor = () => {
       label: 'Acciones',
       sortable: false,
       render: (laborType: LaborType) => (
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(laborType)}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicate(laborType)}
-            className="h-8 w-8 p-0"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          {!laborType.is_system && (
+        isAdmin ? (
+          <div className="flex gap-1">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(laborType)}
-              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              onClick={() => handleEdit(laborType)}
+              className="h-8 w-8 p-0"
             >
-              <Trash2 className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
-          )}
-        </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDuplicate(laborType)}
+              className="h-8 w-8 p-0"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            {!laborType.is_system && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(laborType)}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">Solo admins</div>
+        )
       )
     }
   ];
@@ -371,34 +379,38 @@ const AdminCostLabor = () => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEdit(laborType)}
-                className="h-8 w-8 p-0"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDuplicate(laborType)}
-                className="h-8 w-8 p-0"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              {!laborType.is_system && (
+            {isAdmin ? (
+              <div className="flex gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(laborType)}
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  onClick={() => handleEdit(laborType)}
+                  className="h-8 w-8 p-0"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </Button>
-              )}
-            </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDuplicate(laborType)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                {!laborType.is_system && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(laborType)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">Solo admins</div>
+            )}
           </div>
         </div>
       )}

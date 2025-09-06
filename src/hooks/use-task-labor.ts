@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 
 export const useTaskLabor = (taskId: string | null) => {
   return useQuery({
-    queryKey: ['task-labor', taskId],
+    queryKey: ['task-labor', taskId, 'labor-view'],
     queryFn: async () => {
       if (!taskId) return []
       
