@@ -70,6 +70,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   
   const { editingLaborType, isDuplicating } = modalData
   const isEditing = !!editingLaborType && !isDuplicating
+  const isSystemLabor = editingLaborType?.is_system || false
   
   // Hooks
   const queryClient = useQueryClient()
@@ -230,15 +231,17 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       let laborTypeId: string
       
       if (isEditing && editingLaborType) {
-        // Update labor type
-        await updateMutation.mutateAsync({
-          id: editingLaborType.id,
-          data: {
-            name: data.name,
-            description: data.description || undefined,
-            unit_id: data.unit_id || undefined,
-          }
-        })
+        // Update labor type (only if not system type)
+        if (!isSystemLabor) {
+          await updateMutation.mutateAsync({
+            id: editingLaborType.id,
+            data: {
+              name: data.name,
+              description: data.description || undefined,
+              unit_id: data.unit_id || undefined,
+            }
+          })
+        }
         laborTypeId = editingLaborType.id
       } else {
         // Create new labor type
@@ -301,6 +304,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
               <FormControl>
                 <Input
                   placeholder="Ej: Albañil, Electricista, Plomero..."
+                  disabled={isSystemLabor}
                   {...field}
                 />
               </FormControl>
@@ -320,6 +324,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
                 <Textarea
                   placeholder="Descripción del tipo de mano de obra..."
                   className="min-h-[80px]"
+                  disabled={isSystemLabor}
                   {...field}
                 />
               </FormControl>
@@ -336,7 +341,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unidad</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={isSystemLabor}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una unidad" />
