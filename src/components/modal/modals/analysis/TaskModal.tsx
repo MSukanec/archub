@@ -554,131 +554,47 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // EditPanel - all form content
   const editPanel = (
     <div className="space-y-6">
-      {/* Tarea Section */}
+      {/* Task Form Fields */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-accent" />
-          <h3 className="text-sm font-medium">Información de la Tarea</h3>
-        </div>
-        <div className="space-y-4 pl-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="task-division">Rubro</Label>
-              <ComboBox
-                value={taskDivisionId}
-                onValueChange={setTaskDivisionId}
-                options={taskDivisions.map(division => ({
-                  value: division.id,
-                  label: division.name
-                }))}
-                placeholder="Seleccionar rubro..."
-                searchPlaceholder="Buscar rubro..."
-                emptyMessage="No se encontraron rubros"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="unit-select">Unidad</Label>
-              <ComboBox
-                value={unitId}
-                onValueChange={setUnitId}
-                options={units.map(unit => ({
-                  value: unit.id,
-                  label: unit.name
-                }))}
-                placeholder="Seleccionar unidad..."
-                searchPlaceholder="Buscar unidad..."
-                emptyMessage="No se encontraron unidades"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="custom-name">Nombre Personalizado</Label>
-            <Textarea
-              id="custom-name"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder="Nombre personalizado para la tarea..."
-              rows={3}
-            />
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* Materials Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-accent" />
-          <h3 className="text-sm font-medium">Materiales</h3>
+        <div>
+          <Label htmlFor="task-division">Rubro</Label>
+          <ComboBox
+            value={taskDivisionId}
+            onValueChange={setTaskDivisionId}
+            options={taskDivisions.map(division => ({
+              value: division.id,
+              label: division.name
+            }))}
+            placeholder="Seleccionar rubro..."
+            searchPlaceholder="Buscar rubro..."
+            emptyMessage="No se encontraron rubros"
+          />
         </div>
         
-        <div className="pl-6 space-y-4">
-          {/* Add Material Form */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="material-select">Material</Label>
-              <ComboBox
-                options={materialOptions}
-                value={selectedMaterialId}
-                onValueChange={setSelectedMaterialId}
-                placeholder="Buscar material..."
-              />
-            </div>
-            
-            <div className="col-span-1">
-              <Label htmlFor="material-amount">Cantidad</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="material-amount"
-                  type="number"
-                  value={materialAmount}
-                  onChange={(e) => setMaterialAmount(e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                />
-                {selectedMaterialUnit && (
-                  <Badge variant="outline" className="text-xs">
-                    {selectedMaterialUnit}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <Button
-            type="button"
-            onClick={handleAddMaterial}
-            disabled={!selectedMaterialId || !materialAmount || isLoading}
-            className="w-full h-9"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Material
-          </Button>
-          
-          {/* Materials List */}
-          {taskMaterials.length > 0 && (
-            <div className="space-y-2">
-              <Label>Materiales Agregados</Label>
-              <div className="border rounded-lg divide-y">
-                {taskMaterials.map((material, index) => (
-                  <MaterialEditRow
-                    key={`${material.material_id}-${index}`}
-                    material={material}
-                    index={index}
-                    onEdit={(updatedMaterial) => handleEditMaterial(index, updatedMaterial)}
-                    onRemove={() => {
-                      setTaskMaterials(prev => prev.filter((_, i) => i !== index))
-                    }}
-                    disabled={isLoading}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        <div>
+          <Label htmlFor="unit-select">Unidad</Label>
+          <ComboBox
+            value={unitId}
+            onValueChange={setUnitId}
+            options={units.map(unit => ({
+              value: unit.id,
+              label: unit.name
+            }))}
+            placeholder="Seleccionar unidad..."
+            searchPlaceholder="Buscar unidad..."
+            emptyMessage="No se encontraron unidades"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="custom-name">Nombre Personalizado</Label>
+          <Textarea
+            id="custom-name"
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            placeholder="Nombre personalizado para la tarea..."
+            rows={3}
+          />
         </div>
       </div>
     </div>
