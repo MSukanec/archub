@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +26,69 @@ interface LaborType {
   is_system: boolean
   created_at: string
   updated_at: string | null
+  unit?: {
+    name: string
+    symbol: string
+  }
+}
+
+interface LaborPrice {
+  id: string
+  unit_price: number
+  currency?: {
+    symbol: string
+  }
+}
+
+// Component to display labor cost
+function LaborCost({ laborType }: { laborType: LaborType }) {
+  const { data: userData } = useCurrentUser()
+  
+  const { data: laborPrice, isLoading } = useQuery({
+    queryKey: ['labor-price', laborType.id, userData?.organization?.id],
+    queryFn: async () => {
+      if (!userData?.organization?.id) return null
+      
+      const { data, error } = await supabase
+        .from('labor_prices')
+        .select(`
+          id,
+          unit_price,
+          currency:currencies(symbol)
+        `)
+        .eq('labor_id', laborType.id)
+        .eq('organization_id', userData.organization.id)
+        .order('valid_from', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (error && error.code !== 'PGRST116') throw error
+      return data
+    },
+    enabled: !!laborType.id && !!userData?.organization?.id
+  })
+
+  const formatCost = (amount: number, currencySymbol: string = '$') => {
+    return new Intl.NumberFormat('es-AR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
+  }
+
+  if (isLoading) {
+    return <span className="text-xs text-muted-foreground">...</span>
+  }
+
+  if (!laborPrice) {
+    return <span className="text-xs text-muted-foreground">Sin precio</span>
+  }
+
+  return (
+    <span className="text-xs font-medium">
+      {formatCost(laborPrice.unit_price, laborPrice.currency?.symbol || '$')}
+    </span>
+  )
 }
 
 interface LaborListProps {
@@ -39,13 +103,19 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
 
-  // Fetch labor types
+  // Fetch labor types with unit information
   const { data: laborTypes = [], isLoading } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('labor_types')
-        .select('*')
+        .select(`
+          *,
+          unit:units(
+            name,
+            symbol
+          )
+        `)
         .order('name')
       
       if (error) throw error
@@ -185,6 +255,51 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
           <div className="font-medium">{laborType.name}</div>
           {laborType.description && (
             <div className="text-xs text-muted-foreground">{laborType.description}</div>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'unit', 
+      label: 'Unidad', 
+      width: '8%',
+      render: (laborType: LaborType) => (
+        <div>
+          {laborType.unit ? (
+            <Badge variant="secondary" className="text-xs">
+              {laborType.unit.symbol}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">Sin unidad</span>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'labor_cost', 
+      label: 'Costo', 
+      width: '12%',
+      render: (laborType: LaborType) => (
+        <div className="text-center">
+          <LaborCost laborType={laborType} />
+        </div>
+      ),
+      sortable: false
+    },
+    { 
+      key: 'is_system', 
+      label: 'Tipo', 
+      width: '100px',
+      render: (laborType: LaborType) => (
+        <div className="flex justify-center">
+          {laborType.is_system ? (
+            <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+              Sistema
+            </Badge>
+          ) : (
+            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
+              Usuario
+            </Badge>
           )}
         </div>
       )
