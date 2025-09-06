@@ -76,7 +76,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const { setPanel } = useModalPanelStore()
   const { data: units = [] } = useUnits()
   const { data: userData } = useCurrentUser()
-  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.selectedOrganization?.id)
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
   
   // Map currencies for CurrencyAmountField
   const currencyOptions = organizationCurrencies.map(oc => ({
@@ -89,13 +89,13 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const { data: existingLaborPrice } = useQuery({
     queryKey: ['labor-price', editingLaborType?.id],
     queryFn: async () => {
-      if (!editingLaborType?.id || !userData?.selectedOrganization?.id) return null
+      if (!editingLaborType?.id || !userData?.organization?.id) return null
       
       const { data, error } = await supabase
         .from('labor_prices')
         .select('*')
         .eq('labor_id', editingLaborType.id)
-        .eq('organization_id', userData.selectedOrganization.id)
+        .eq('organization_id', userData.organization.id)
         .order('valid_from', { ascending: false })
         .limit(1)
         .single()
@@ -103,7 +103,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       if (error && error.code !== 'PGRST116') throw error // PGRST116 is "not found"
       return data
     },
-    enabled: !!editingLaborType?.id && !!userData?.selectedOrganization?.id
+    enabled: !!editingLaborType?.id && !!userData?.organization?.id
   })
 
   // Create labor price mutation
@@ -253,10 +253,10 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       }
       
       // Handle labor price if provided
-      if (data.unit_price && data.currency_id && userData?.selectedOrganization?.id) {
+      if (data.unit_price && data.currency_id && userData?.organization?.id) {
         const priceData: LaborPriceData = {
           labor_id: laborTypeId,
-          organization_id: userData.selectedOrganization.id,
+          organization_id: userData.organization.id,
           currency_id: data.currency_id,
           unit_price: data.unit_price,
           valid_from: new Date().toISOString().split('T')[0],
@@ -328,56 +328,53 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
           )}
         />
 
-        {/* Unit */}
-        <FormField
-          control={form.control}
-          name="unit_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidad</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una unidad" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Cost */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
-            <FormField
-              control={form.control}
-              name="unit_price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Costo</FormLabel>
+        {/* Unit and Cost - Desktop inline layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="unit_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unidad</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <CurrencyAmountField
-                      value={field.value}
-                      currency={form.watch('currency_id')}
-                      currencies={currencyOptions}
-                      onValueChange={field.onChange}
-                      onCurrencyChange={(currency) => form.setValue('currency_id', currency)}
-                      placeholder="0.00"
-                    />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una unidad" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.symbol} ({unit.name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="unit_price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Costo</FormLabel>
+                <FormControl>
+                  <CurrencyAmountField
+                    value={field.value}
+                    currency={form.watch('currency_id')}
+                    currencies={currencyOptions}
+                    onValueChange={field.onChange}
+                    onCurrencyChange={(currency) => form.setValue('currency_id', currency)}
+                    placeholder="0.00"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </form>
     </Form>
