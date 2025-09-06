@@ -129,7 +129,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['labor-types'] })
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] })
       toast({
         title: "Tipo de mano de obra eliminado",
         description: "El tipo de mano de obra ha sido eliminado correctamente.",
@@ -154,9 +154,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
   // Apply client-side sorting
   const sortedLaborTypes = [...filteredLaborTypes].sort((a, b) => {
     if (sortBy === 'name') {
-      return a.name.localeCompare(b.name)
+      return a.labor_name.localeCompare(b.labor_name)
     } else {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime()
     }
   })
 
@@ -177,7 +177,13 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
   }, [sortedLaborTypes, groupingType])
 
   const handleEdit = (laborType: LaborType) => {
-    openModal('labor-type-form', { editingLaborType: laborType })
+    openModal('labor-type-form', { editingLaborType: {
+      id: laborType.labor_id,
+      name: laborType.labor_name,
+      description: laborType.labor_description,
+      unit_id: laborType.unit_id,
+      is_system: laborType.is_system
+    }})
   }
 
   const handleCreate = () => {
@@ -186,7 +192,13 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
 
   const handleDuplicate = (laborType: LaborType) => {
     openModal('labor-type-form', { 
-      editingLaborType: laborType,
+      editingLaborType: {
+        id: laborType.labor_id,
+        name: laborType.labor_name,
+        description: laborType.labor_description,
+        unit_id: laborType.unit_id,
+        is_system: laborType.is_system
+      },
       isDuplicating: true 
     })
   }
@@ -195,10 +207,10 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
     openModal('delete-confirmation', {
       mode: 'dangerous',
       title: 'Eliminar Tipo de Mano de Obra',
-      description: `¿Estás seguro que deseas eliminar el tipo de mano de obra "${laborType.name}"? Esta acción no se puede deshacer.`,
-      itemName: laborType.name,
+      description: `¿Estás seguro que deseas eliminar el tipo de mano de obra "${laborType.labor_name}"? Esta acción no se puede deshacer.`,
+      itemName: laborType.labor_name,
       destructiveActionText: 'Eliminar',
-      onConfirm: () => deleteLaborTypeMutation.mutate(laborType.id),
+      onConfirm: () => deleteLaborTypeMutation.mutate(laborType.labor_id),
       isLoading: deleteLaborTypeMutation.isPending
     })
   }
@@ -247,9 +259,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       sortable: true,
       render: (laborType: LaborType) => (
         <div>
-          <div className="font-medium">{laborType.name}</div>
-          {laborType.description && (
-            <div className="text-xs text-muted-foreground">{laborType.description}</div>
+          <div className="font-medium">{laborType.labor_name}</div>
+          {laborType.labor_description && (
+            <div className="text-xs text-muted-foreground">{laborType.labor_description}</div>
           )}
         </div>
       )
@@ -260,9 +272,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       width: '8%',
       render: (laborType: LaborType) => (
         <div>
-          {laborType.units ? (
+          {laborType.unit_name ? (
             <Badge variant="secondary" className="text-xs">
-              {laborType.units.symbol} ({laborType.units.name})
+              {laborType.unit_name}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin unidad</span>
@@ -271,12 +283,23 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       )
     },
     { 
-      key: 'labor_cost', 
-      label: 'Costo', 
+      key: 'own_cost', 
+      label: 'Costo Propio', 
       width: '12%',
       render: (laborType: LaborType) => (
         <div className="text-center">
-          <LaborCost laborType={laborType} />
+          <OwnLaborCost laborType={laborType} />
+        </div>
+      ),
+      sortable: false
+    },
+    { 
+      key: 'avg_cost', 
+      label: 'Costo Promedio', 
+      width: '12%',
+      render: (laborType: LaborType) => (
+        <div className="text-center">
+          <AverageLaborCost laborType={laborType} />
         </div>
       ),
       sortable: false
@@ -350,13 +373,44 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
         onClearFilters: clearFilters
       }}
       renderCard={(laborType: LaborType) => (
-        <div key={laborType.id} className="p-4 border rounded-lg bg-card">
+        <div key={laborType.labor_id} className="p-4 border rounded-lg bg-card">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="font-medium mb-2">{laborType.name}</h3>
-              {laborType.description && (
-                <p className="text-sm text-muted-foreground mb-2">{laborType.description}</p>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="font-medium">{laborType.labor_name}</h3>
+                <Badge 
+                  variant={laborType.is_system ? "default" : "secondary"}
+                  className={`text-xs ${laborType.is_system 
+                    ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
+                  }`}
+                >
+                  {laborType.is_system ? 'Sistema' : 'Organización'}
+                </Badge>
+              </div>
+              {laborType.labor_description && (
+                <p className="text-sm text-muted-foreground mb-2">{laborType.labor_description}</p>
               )}
+              <div className="flex items-center gap-4 text-sm">
+                {laborType.unit_name ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Unidad:</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {laborType.unit_name}
+                    </Badge>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">Sin unidad</span>
+                )}
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Costo Propio:</span>
+                  <OwnLaborCost laborType={laborType} />
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Costo Promedio:</span>
+                  <AverageLaborCost laborType={laborType} />
+                </div>
+              </div>
             </div>
             <div className="flex gap-1">
               <Button
