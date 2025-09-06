@@ -26,7 +26,7 @@ interface LaborType {
   is_system: boolean
   created_at: string
   updated_at: string | null
-  unit?: {
+  units?: {
     name: string
     symbol: string
   } | null
@@ -112,10 +112,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
         .from('labor_types')
         .select(`
           *,
-          unit:units(
-            name,
-            symbol
-          )
+          units(name, symbol)
         `)
         .order('name')
       
@@ -271,9 +268,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       width: '8%',
       render: (laborType: LaborType) => (
         <div>
-          {laborType.unit?.symbol ? (
+          {laborType.units ? (
             <Badge variant="secondary" className="text-xs">
-              {laborType.unit.symbol}
+              {laborType.units.symbol} ({laborType.units.name})
             </Badge>
           ) : (
             <span className="text-muted-foreground text-sm">Sin unidad</span>
