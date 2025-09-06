@@ -107,6 +107,7 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
   const { data: laborTypes = [], isLoading } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
+      console.log('🔍 Fetching labor types...')
       const { data, error } = await supabase
         .from('labor_types')
         .select(`
@@ -118,7 +119,12 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
         `)
         .order('name')
       
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching labor types:', error)
+        throw error
+      }
+      console.log('✅ Labor types fetched:', data?.length, 'items')
+      console.log('📋 First few items:', data?.slice(0, 3))
       return data || []
     }
   })
