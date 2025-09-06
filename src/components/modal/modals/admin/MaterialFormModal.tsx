@@ -59,6 +59,25 @@ function findCategoryPath(categories: MaterialCategory[], targetId: string): str
   return search(categories) || [];
 }
 
+// Helper function to find category ID by name
+function findCategoryIdByName(categories: MaterialCategory[], targetName: string): string | null {
+  function search(cats: MaterialCategory[]): string | null {
+    for (const cat of cats) {
+      if (cat.name === targetName) {
+        return cat.id;
+      }
+      
+      if (cat.children && cat.children.length > 0) {
+        const result = search(cat.children);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+  
+  return search(categories);
+}
+
 interface MaterialFormModalProps {
   modalData: {
     editingMaterial?: Material | null

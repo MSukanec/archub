@@ -80,7 +80,7 @@ const AdminCostMaterials = () => {
   // Apply client-side filtering
   const filteredMaterials = materials.filter(material => {
     const matchesSearch = searchValue === '' || material.name.toLowerCase().includes(searchValue.toLowerCase())
-    const matchesCategory = categoryFilter === 'all' || material.category?.name?.toLowerCase() === categoryFilter
+    const matchesCategory = categoryFilter === 'all' || material.category_name?.toLowerCase() === categoryFilter
     return matchesSearch && matchesCategory
   })
 
@@ -89,7 +89,7 @@ const AdminCostMaterials = () => {
     if (sortBy === 'name') {
       return a.name.localeCompare(b.name)
     } else if (sortBy === 'category') {
-      return (a.category?.name || '').localeCompare(b.category?.name || '')
+      return (a.category_name || '').localeCompare(b.category_name || '')
     } else {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
@@ -104,7 +104,7 @@ const AdminCostMaterials = () => {
     if (groupingType === 'categories') {
       return sortedMaterials.map(material => ({
         ...material,
-        groupKey: material.category?.id ? findTopLevelCategory(material.category.id) : 'Sin categoría'
+        groupKey: material.category_name || 'Sin categoría'
       }));
     }
     
@@ -227,9 +227,9 @@ const AdminCostMaterials = () => {
       width: '12%',
       render: (material: Material) => (
         <div>
-          {material.category?.name ? (
+          {material.category_name ? (
             <Badge variant="outline" className="text-xs">
-              {material.category.name}
+              {material.category_name}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-xs">Sin categoría</span>
