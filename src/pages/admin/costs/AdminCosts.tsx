@@ -38,19 +38,30 @@ const AdminCosts = () => {
           throw new Error(`Error al refrescar precios de materiales: ${materialAvgError.message}`);
         }
         console.log('Vista material_avg_prices refrescada exitosamente');
+
+        console.log('Refrescando vista labor_avg_prices...');
+        // Refrescar tercera vista materializada (precios promedio de mano de obra)
+        const { error: laborAvgError } = await supabase.rpc('refresh_labor_avg_prices');
+        if (laborAvgError) {
+          console.error('Error refreshing labor_avg_prices:', laborAvgError);
+          throw new Error(`Error al refrescar precios de mano de obra: ${laborAvgError.message}`);
+        }
+        console.log('Vista labor_avg_prices refrescada exitosamente');
       } catch (error: any) {
         console.error('Error general al refrescar vistas:', error);
         throw error;
       }
     },
     onSuccess: () => {
-      // Invalidar todas las queries de productos para actualizar las tablas
+      // Invalidar todas las queries de productos, materiales y mano de obra para actualizar las tablas
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
+      queryClient.invalidateQueries({ queryKey: ['labor-types'] });
+      queryClient.invalidateQueries({ queryKey: ['labor-price'] });
       
       toast({
         title: "Datos actualizados",
-        description: "Los precios promedio de productos y materiales han sido actualizados correctamente.",
+        description: "Los precios promedio de productos, materiales y mano de obra han sido actualizados correctamente.",
       });
     },
     onError: (error) => {
@@ -108,7 +119,14 @@ const AdminCosts = () => {
         return {
           label: "Nuevo Tipo de Mano de Obra",
           icon: Plus,
-          onClick: () => openModal('labor-type-form', { editingLaborType: null })
+          onClick: () => openModal('labor-type-form', { editingLaborType: null }),
+          additionalButton: {
+            label: "Refrescar",
+            icon: RefreshCw,
+            onClick: () => refreshPricesMutation.mutate(),
+            variant: "ghost",
+            isLoading: refreshPricesMutation.isPending
+          }
         };
       default:
         return undefined;

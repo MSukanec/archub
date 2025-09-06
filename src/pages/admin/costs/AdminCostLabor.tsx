@@ -103,14 +103,12 @@ const AdminCostLabor = () => {
   const { data: laborTypes = [], isLoading } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
-      console.log('🔍 Fetching labor types...')
       const { data, error } = await supabase
         .from('labor_types')
         .select('*')
         .order('name')
       
       if (error) {
-        console.error('❌ Error fetching labor types:', error)
         throw error
       }
 
@@ -133,8 +131,6 @@ const AdminCostLabor = () => {
         })
       }
       
-      console.log('✅ Labor types fetched:', laborTypesWithUnits.length, 'items')
-      console.log('📋 First few items:', laborTypesWithUnits.slice(0, 3))
       return laborTypesWithUnits
     }
   })
