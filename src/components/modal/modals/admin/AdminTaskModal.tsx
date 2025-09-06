@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 
-import { Zap, Plus, Trash2, FileText, Settings } from 'lucide-react'
+import { Zap, Plus, Trash2, Settings } from 'lucide-react'
 
 interface AdminTaskModalProps {
   modalData?: {
@@ -375,41 +375,35 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
     <div className="space-y-6">
       {/* Tarea Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-accent" />
-          <h3 className="text-sm font-medium">Información de la Tarea</h3>
-        </div>
-        <div className="space-y-4 pl-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="task-division">Rubro</Label>
-              <ComboBox
-                value={taskDivisionId}
-                onValueChange={setTaskDivisionId}
-                options={taskDivisions.map(division => ({
-                  value: division.id,
-                  label: division.name
-                }))}
-                placeholder="Seleccionar rubro..."
-                searchPlaceholder="Buscar rubro..."
-                emptyMessage="No se encontraron rubros"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="unit-select">Unidad</Label>
-              <ComboBox
-                value={unitId}
-                onValueChange={setUnitId}
-                options={units.map(unit => ({
-                  value: unit.id,
-                  label: unit.name
-                }))}
-                placeholder="Seleccionar unidad..."
-                searchPlaceholder="Buscar unidad..."
-                emptyMessage="No se encontraron unidades"
-              />
-            </div>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="task-division">Rubro</Label>
+            <ComboBox
+              value={taskDivisionId}
+              onValueChange={setTaskDivisionId}
+              options={taskDivisions.map(division => ({
+                value: division.id,
+                label: division.name
+              }))}
+              placeholder="Seleccionar rubro..."
+              searchPlaceholder="Buscar rubro..."
+              emptyMessage="No se encontraron rubros"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="unit-select">Unidad</Label>
+            <ComboBox
+              value={unitId}
+              onValueChange={setUnitId}
+              options={units.map(unit => ({
+                value: unit.id,
+                label: unit.name
+              }))}
+              placeholder="Seleccionar unidad..."
+              searchPlaceholder="Buscar unidad..."
+              emptyMessage="No se encontraron unidades"
+            />
           </div>
           
           <div>
@@ -423,7 +417,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
             />
           </div>
           
-          {/* Task Completion Status - moved here before materials */}
+          {/* Task Completion Status */}
           <div className="flex items-center justify-between">
             <div>
               <Label htmlFor="is-completed">Tarea Completada</Label>
