@@ -49,20 +49,22 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
 
   return (
     <>
-      {showCost && totalPerUnit > 0 && (
-        <span className="text-xs font-medium text-muted-foreground">
-          {formatCost(totalPerUnit)}
-        </span>
-      )}
-      
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-        onClick={() => setIsOpen(true)}
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-2">
+        {showCost && totalPerUnit > 0 && (
+          <span className="text-xs font-medium text-muted-foreground">
+            {formatCost(totalPerUnit)}
+          </span>
+        )}
+        
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          onClick={() => setIsOpen(true)}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      </div>
 
       {/* Mobile popover with backdrop - same pattern as ActionBarMobile filter */}
       {isOpen && (
