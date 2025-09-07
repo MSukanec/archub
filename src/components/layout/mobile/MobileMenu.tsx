@@ -257,29 +257,31 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     projectMutation.mutate(projectId);
   };
 
-  // Definir contenido para cada nivel del menú móvil
+  // Definir contenido para cada nivel del menú móvil - sincronizado con PrimarySidebar
   const mobileMenuContent = {
-    // NIVEL 1: General
+    // NIVEL 1: General - igual que PrimarySidebar
     main: [
-      {
-        id: 'dashboard',
-        icon: Home,
-        label: 'Dashboard',
-        href: '/organization/dashboard',
-        action: 'navigate'
-      },
       {
         id: 'organization',
         icon: Building,
         label: 'Organización',
         action: 'section'
       },
-      {
-        id: 'project',
-        icon: FolderOpen,
-        label: 'Proyecto',
-        action: 'section'
-      },
+      // Solo mostrar Proyecto y Construcción si hay un proyecto activo
+      ...(!isGlobalView ? [
+        {
+          id: 'project',
+          icon: FolderOpen,
+          label: 'Proyecto',
+          action: 'section'
+        },
+        {
+          id: 'construction',
+          icon: HardHat,
+          label: 'Construcción',
+          action: 'section'
+        }
+      ] : []),
       {
         id: 'library',
         icon: Library,
@@ -287,20 +289,14 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         action: 'section'
       },
       ...(isAdmin ? [{
-        id: 'provider',
-        icon: Package,
-        label: 'Proveedor',
-        action: 'section'
-      }] : []),
-      ...(isAdmin ? [{
         id: 'admin',
         icon: Crown,
-        label: 'Administración',
+        label: 'Admin',
         action: 'section'
       }] : [])
     ],
     
-    // NIVEL 2: Específico de sección
+    // NIVEL 2: Específico de sección - rutas actualizadas
     sections: {
       organization: [
         { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
@@ -312,6 +308,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
         { icon: Activity, label: 'Actividad', href: '/organization/activity' },
         { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
+      ],
+      construction: [
+        { icon: Home, label: 'Resumen', href: '/construction/dashboard' },
+        { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
+        { icon: Users, label: 'Personal', href: '/construction/personnel' },
+        { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
+        { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+        { icon: Package2, label: 'Materiales', href: '/construction/materials' },
+        { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
       ],
       project: [
         {
@@ -348,18 +353,15 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { type: 'divider' }
       ],
       library: [
-        { icon: CheckSquare, label: 'Tareas', href: '/professional/library/tasks' },
-        { icon: Package2, label: 'Materiales', href: '/professional/library/materials' },
-        { icon: Users, label: 'Mano de Obra', href: '/professional/library/labor' },
-        { icon: TrendingUp, label: 'Costos Indirectos', href: '/professional/library/indirects' }
-      ],
-      provider: [
-        { icon: Package, label: 'Productos', href: '/proveedor/productos' }
+        { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
+        { icon: Package2, label: 'Materiales', href: '/library/materials' },
+        { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
+        { icon: TrendingUp, label: 'Costos Indirectos', href: '/library/indirects' }
       ],
       admin: [
         { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
         { icon: ListTodo, label: 'Tareas', href: '/admin/tasks' },
-        { icon: Database, label: 'Costos', href: '/admin/materials' },
+        { icon: Database, label: 'Costos', href: '/admin/costs' },
         { icon: Settings, label: 'General', href: '/admin/general' }
       ]
     },
@@ -404,8 +406,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       const titleMap = {
         'organization': 'Organización',
         'project': 'Proyecto',
-        'library': 'Biblioteca', 
-        'provider': 'Proveedor',
+        'construction': 'Construcción',
+        'library': 'Biblioteca',
         'admin': 'Administración'
       };
       return titleMap[selectedSection as keyof typeof titleMap] || 'Menú';
@@ -434,6 +436,19 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       setCurrentLevel('section');
       setSelectedSection(item.id);
       setSelectedSubsection(null);
+      
+      // Actualizar navegación store igual que desktop
+      if (item.id === 'organization') {
+        setSidebarContext('organization');
+      } else if (item.id === 'project') {
+        setSidebarContext('project');
+      } else if (item.id === 'construction') {
+        setSidebarContext('construction');
+      } else if (item.id === 'library') {
+        setSidebarContext('library');
+      } else if (item.id === 'admin') {
+        setSidebarContext('admin');
+      }
     }
   };
   
@@ -619,6 +634,33 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-2 overflow-y-auto">
+          {/* Botón del proyecto - solo si hay proyecto seleccionado */}
+          {currentProject && (
+            <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
+              <button
+                onClick={() => {
+                  navigate('/project');
+                  handleCloseMenu();
+                }}
+                className="w-full p-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center gap-3 shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+              >
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0"
+                  style={{ 
+                    backgroundColor: currentProject.color || 'var(--accent)',
+                    color: 'white'
+                  }}
+                >
+                  {currentProject.name?.split(' ').map((word: string) => word[0]).join('').substring(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-sm">{currentProject.name}</div>
+                  <div className="text-xs text-[var(--muted-foreground)]">Proyecto actual</div>
+                </div>
+              </button>
+            </div>
+          )}
+          
           {/* Título de la sección actual con botón volver */}
           <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
             {currentLevel !== 'main' ? (
