@@ -159,20 +159,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     
-    console.log('🔧 AuthStore: Ultra-fast logout process');
+    console.log('🔧 AuthStore: Fast logout with session clear');
     
     try {
-      // IMMEDIATE hard reload - most aggressive redirect possible
+      // Clear user state immediately - no waiting
+      set({ user: null, loading: false, initialized: true });
+      
+      // Sign out from Supabase synchronously - no await to avoid delay
+      supabase.auth.signOut({ scope: 'global' }).catch(() => {}); // Fire and forget
+      
+      // Clear essential storage synchronously  
+      try {
+        localStorage.removeItem('sb-wtatvsgeivymcppowrfy-auth-token');
+        sessionStorage.clear();
+      } catch (e) {}
+      
+      // IMMEDIATE redirect after quick cleanup
       window.location.replace('/');
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
-      // Multiple fallback redirects
-      try {
-        window.location.replace('/');
-      } catch (e) {
-        window.location.href = '/';
-      }
+      // Force redirect even on error
+      set({ user: null, loading: false, initialized: true });
+      window.location.replace('/');
     }
   },
 
