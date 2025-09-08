@@ -127,7 +127,12 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
     return movement.general_cost;
   }
   
-  // Prioridad normal: partner -> subcontract -> client -> indirect -> general_cost -> member
+  // Prioridad normal: personnel -> partner -> subcontract -> client -> indirect -> general_cost
+  // IMPORTANTE: NUNCA mostrar movement.member (nombre del creador)
+  if (movement.personnel) {
+    return movement.personnel;
+  }
+  
   if (movement.partner) {
     return movement.partner;
   }
@@ -148,9 +153,7 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
     return movement.general_cost;
   }
   
-  if (movement.member) {
-    return movement.member;
-  }
+  // NO mostrar movement.member (nombre del creador) - eliminado completamente
   
   return null;
 };

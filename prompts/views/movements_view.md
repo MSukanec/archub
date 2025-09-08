@@ -1,8 +1,6 @@
--- 1) Borrar vista vieja
 drop view if exists public.movements_view;
 
--- 2) Crear nueva con indirects incluidos
-create view public.movements_view as
+create or replace view public.movements_view as
 select
   m.id,
   m.description,
@@ -53,7 +51,15 @@ select
 
   -- Indirectos
   mi.indirect_id,
-  ic.name as indirect
+  ic.name as indirect,
+
+  -- Personnel
+  mpers.id as movement_personnel_id,
+  coalesce(cp.full_name, concat_ws(' ', cp.first_name, cp.last_name)) as personnel,
+
+  -- General Costs
+  mgc.general_cost_id,
+  gc.name as general_cost
 
 from public.movements m
 left join public.projects p
@@ -103,4 +109,18 @@ left join public.users u
 left join public.movement_indirects mi
   on mi.movement_id = m.id
 left join public.indirect_costs ic
-  on ic.id = mi.indirect_id;
+  on ic.id = mi.indirect_id
+
+-- personnel
+left join public.movement_personnel mpers
+  on mpers.movement_id = m.id
+left join public.project_personnel pp
+  on pp.id = mpers.personnel_id
+left join public.contacts cp
+  on cp.id = pp.contact_id
+
+-- general costs
+left join public.movement_general_costs mgc
+  on mgc.movement_id = m.id
+left join public.general_costs gc
+  on gc.id = mgc.general_cost_id;

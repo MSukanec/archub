@@ -377,6 +377,14 @@ VISTA MOVEMENTS_VIEW:
     "data_type": "text"
   },
   {
+    "column_name": "movement_personnel_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "personnel",
+    "data_type": "text"
+  },
+  {
     "column_name": "general_cost_id",
     "data_type": "uuid"
   },
