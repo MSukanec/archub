@@ -8,6 +8,7 @@ import { Folder, Plus, Home, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { ToastAction } from '@/components/ui/toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -31,6 +32,10 @@ export default function Projects() {
   const { limit } = usePlanFeatures()
   const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
+  
+  // Calculate if we've reached the project limit
+  const maxProjects = limit('max_projects')
+  const isProjectLimitReached = maxProjects !== Infinity && projects.length >= maxProjects
 
   // Filter states
   const [filterByProjectType, setFilterByProjectType] = useState('all')
@@ -237,16 +242,16 @@ export default function Projects() {
           label: 'Nuevo Proyecto',
           onClick: () => {
             // Check plan restrictions before opening modal
-            const maxProjects = limit('max_projects');
-            if (maxProjects !== Infinity && projects.length >= maxProjects) {
+            if (isProjectLimitReached) {
               toast({
                 title: "Límite alcanzado",
                 description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
                 variant: "destructive",
-                action: {
-                  label: "Actualizar plan",
-                  onClick: () => navigate('/billing')
-                }
+                action: (
+                  <ToastAction altText="Ir a planes" onClick={() => navigate('/billing')}>
+                    Actualizar plan
+                  </ToastAction>
+                )
               });
               return;
             }
@@ -356,16 +361,16 @@ export default function Projects() {
       icon: Plus,
       onClick: () => {
         // Check plan restrictions before opening modal
-        const maxProjects = limit('max_projects');
-        if (maxProjects !== Infinity && projects.length >= maxProjects) {
+        if (isProjectLimitReached) {
           toast({
             title: "Límite alcanzado",
             description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
             variant: "destructive",
-            action: {
-              label: "Actualizar plan",
-              onClick: () => navigate('/billing')
-            }
+            action: (
+              <ToastAction altText="Ir a planes" onClick={() => navigate('/billing')}>
+                Actualizar plan
+              </ToastAction>
+            )
           });
           return;
         }
@@ -427,19 +432,29 @@ export default function Projects() {
                 title="No hay proyectos creados"
                 description="Comienza creando tu primer proyecto para gestionar tu trabajo"
                 action={
-                  <PlanRestricted 
-                    feature="max_projects" 
-                    current={projects.length}
-                    functionName="Crear Proyecto"
+                  <Button
+                    onClick={() => {
+                      if (isProjectLimitReached) {
+                        toast({
+                          title: "Límite alcanzado",
+                          description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
+                          variant: "destructive",
+                          action: (
+                            <ToastAction altText="Ir a planes" onClick={() => navigate('/billing')}>
+                              Actualizar plan
+                            </ToastAction>
+                          )
+                        });
+                        return;
+                      }
+                      openModal('project', {});
+                    }}
+                    className="mt-4"
+                    disabled={isProjectLimitReached}
                   >
-                    <Button
-                      onClick={() => openModal('project', {})}
-                      className="mt-4"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nuevo Proyecto
-                    </Button>
-                  </PlanRestricted>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuevo Proyecto
+                  </Button>
                 }
               />
             )}
