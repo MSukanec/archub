@@ -37,8 +37,6 @@ export function TaskBasicDataView({
   // Actualizar estados cuando cambian los datos de la tarea
   useEffect(() => {
     setTaskName(task.custom_name || task.name_rendered || '');
-    setTaskRubro(task.division || task.category || '');
-    setTaskUnit(task.unit || '');
   }, [task]);
   
   const isSystemTask = task.is_system;
@@ -182,6 +180,22 @@ export function TaskBasicDataView({
       return data?.map(u => ({ value: u.name, label: u.name })) || [];
     }
   });
+
+  // Actualizar rubro cuando cambien los datos de la tarea o las divisiones estén cargadas
+  useEffect(() => {
+    if (divisions.length > 0) {
+      const rubroValue = task.division || task.category || '';
+      setTaskRubro(rubroValue);
+    }
+  }, [task.division, task.category, divisions.length]);
+
+  // Actualizar unidad cuando cambien los datos de la tarea o las unidades estén cargadas
+  useEffect(() => {
+    if (units.length > 0) {
+      const unitValue = task.unit || '';
+      setTaskUnit(unitValue);
+    }
+  }, [task.unit, units.length]);
 
   return (
     <div className="space-y-6">
