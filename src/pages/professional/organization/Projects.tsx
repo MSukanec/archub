@@ -12,10 +12,12 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import ProjectRow from '@/components/ui/data-row/rows/ProjectRow'
 import ProjectItem from '@/components/ui-custom/general/ProjectItem'
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
 import { useMobile } from '@/hooks/use-mobile'
+import { usePlanFeatures } from '@/hooks/usePlanFeatures'
 
 export default function Projects() {
   const { openModal } = useGlobalModalStore()
@@ -26,6 +28,7 @@ export default function Projects() {
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { limit } = usePlanFeatures()
   const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
 
@@ -232,7 +235,23 @@ export default function Projects() {
           id: 'create',
           icon: Plus,
           label: 'Nuevo Proyecto',
-          onClick: () => openModal('project', {}),
+          onClick: () => {
+            // Check plan restrictions before opening modal
+            const maxProjects = limit('max_projects');
+            if (maxProjects !== Infinity && projects.length >= maxProjects) {
+              toast({
+                title: "Límite alcanzado",
+                description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
+                variant: "destructive",
+                action: {
+                  label: "Actualizar plan",
+                  onClick: () => navigate('/billing')
+                }
+              });
+              return;
+            }
+            openModal('project', {});
+          },
           variant: 'primary'
         },
         filter: { 
@@ -335,7 +354,23 @@ export default function Projects() {
     actionButton: {
       label: "Nuevo Proyecto",
       icon: Plus,
-      onClick: () => openModal('project', {})
+      onClick: () => {
+        // Check plan restrictions before opening modal
+        const maxProjects = limit('max_projects');
+        if (maxProjects !== Infinity && projects.length >= maxProjects) {
+          toast({
+            title: "Límite alcanzado",
+            description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
+            variant: "destructive",
+            action: {
+              label: "Actualizar plan",
+              onClick: () => navigate('/billing')
+            }
+          });
+          return;
+        }
+        openModal('project', {});
+      }
     }
   }
 
@@ -392,13 +427,19 @@ export default function Projects() {
                 title="No hay proyectos creados"
                 description="Comienza creando tu primer proyecto para gestionar tu trabajo"
                 action={
-                  <Button
-                    onClick={() => openModal('project', {})}
-                    className="mt-4"
+                  <PlanRestricted 
+                    feature="max_projects" 
+                    current={projects.length}
+                    functionName="Crear Proyecto"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuevo Proyecto
-                  </Button>
+                    <Button
+                      onClick={() => openModal('project', {})}
+                      className="mt-4"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nuevo Proyecto
+                    </Button>
+                  </PlanRestricted>
                 }
               />
             )}
