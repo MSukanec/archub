@@ -635,33 +635,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-2 overflow-y-auto">
-          {/* Botón del proyecto - solo si hay proyecto seleccionado */}
-          {currentProject && (
-            <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
-              <button
-                onClick={() => {
-                  navigate('/project');
-                  handleCloseMenu();
-                }}
-                className="w-full p-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center gap-3 shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
-              >
-                <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0"
-                  style={{ 
-                    backgroundColor: currentProject.color || 'var(--accent)',
-                    color: 'white'
-                  }}
-                >
-                  {currentProject.name?.split(' ').map((word: string) => word[0]).join('').substring(0, 2).toUpperCase()}
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="font-medium text-sm">{currentProject.name}</div>
-                  <div className="text-xs text-[var(--muted-foreground)]">Proyecto actual</div>
-                </div>
-              </button>
-            </div>
-          )}
-          
           {/* Título de la sección actual con botón volver */}
           <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
             {currentLevel !== 'main' ? (
