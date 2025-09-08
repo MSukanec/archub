@@ -52,12 +52,12 @@ export function ComboBox({
   // Filter options based on search
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
-    : searchValue 
-      ? options.filter(option =>
+    : !searchValue
+      ? options // Si NO hay búsqueda, mostrar TODAS las opciones
+      : options.filter(option =>
           option && option.label && typeof option.label === 'string' && 
           option.label.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      : options; // Si no hay búsqueda, mostrar todas las opciones
+        ); // Solo filtra cuando SÍ hay búsqueda
 
 
 
