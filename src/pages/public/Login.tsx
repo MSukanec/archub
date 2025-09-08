@@ -112,7 +112,7 @@ export default function Login() {
                 <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 bg-white text-gray-500">O continúa con</span>
+                <span className="px-2 text-gray-500">O continúa con</span>
               </div>
             </div>
 
@@ -168,7 +168,8 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#92c900] hover:bg-[#7ba600] text-white"
+                variant="default"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (
