@@ -53,7 +53,8 @@ export function ComboBox({
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
     : options.filter(option =>
-        (option.label || '').toLowerCase().includes((searchValue || '').toLowerCase())
+        option && option.label && typeof option.label === 'string' && 
+        option.label.toLowerCase().includes((searchValue || '').toLowerCase())
       );
 
 
@@ -132,9 +133,9 @@ export function ComboBox({
             )}
             
             <CommandGroup>
-              {filteredOptions.map((option) => (
+              {filteredOptions.map((option, index) => (
                 <CommandItem
-                  key={option.value}
+                  key={`${option.value}-${index}`}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
                   className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center"
