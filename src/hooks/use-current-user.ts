@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
 
-interface UserData {
+export interface UserData {
   user: {
     id: string
     auth_id: string

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomButton } from "@/components/ui-custom/CustomButton";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import type { UserData } from "@/hooks/use-current-user";
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { format } from "date-fns";
@@ -20,7 +21,7 @@ export default function OrganizationDashboard() {
   const isMobile = useMobile();
   
   // Usar la organización actual del usuario
-  const organization = userData?.organization;
+  const organization = (userData as UserData | undefined)?.organization ?? null;
   const currentTime = new Date();
 
 
