@@ -43,10 +43,15 @@ export function TaskBasicDataView({
   
   const isSystemTask = task.is_system;
   
+  // Determinar si el usuario puede editar esta tarea
+  // ADMIN: puede editar todo (sistema y organización)
+  // Usuario normal: solo puede editar tareas de su organización (no sistema)
+  const canEdit = userData?.role?.name === 'Administrador' || !isSystemTask;
+  
   // Auto-save mutation for task data
   const saveTaskMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
-      if (!task.id || !supabase || isSystemTask) return;
+      if (!task.id || !supabase || !canEdit) return;
 
       // Solo actualizar custom_name por ahora
       // Las otras propiedades (rubro, unidad) se actualizan por separado
@@ -86,7 +91,7 @@ export function TaskBasicDataView({
       await saveTaskMutation.mutateAsync(data);
     },
     delay: 1000,
-    enabled: !isSystemTask
+    enabled: canEdit
   });
 
   // Función para eliminar tarea
@@ -223,7 +228,7 @@ export function TaskBasicDataView({
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   placeholder="Nombre de la tarea"
-                  disabled={isSystemTask}
+                  disabled={!canEdit}
                   className="min-h-[80px] resize-none"
                 />
               </div>
@@ -236,8 +241,8 @@ export function TaskBasicDataView({
                   onValueChange={setTaskRubro}
                   options={divisions}
                   placeholder="Seleccionar rubro"
-                  disabled={isSystemTask}
-                  allowCreate={!isSystemTask}
+                  disabled={!canEdit}
+                  allowCreate={canEdit}
                 />
               </div>
 
@@ -249,8 +254,8 @@ export function TaskBasicDataView({
                   onValueChange={setTaskUnit}
                   options={units}
                   placeholder="Seleccionar unidad"
-                  disabled={isSystemTask}
-                  allowCreate={!isSystemTask}
+                  disabled={!canEdit}
+                  allowCreate={canEdit}
                 />
               </div>
 
@@ -290,7 +295,7 @@ export function TaskBasicDataView({
               onClick={handleDeleteTask}
               variant="destructive"
               showPlusIcon={false}
-              disabled={isSystemTask}
+              disabled={!canEdit}
             />
 
           </CardContent>
