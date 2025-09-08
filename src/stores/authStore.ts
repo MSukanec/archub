@@ -159,38 +159,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     
-    console.log('🔧 AuthStore: Starting logout process');
+    console.log('🔧 AuthStore: Starting fast logout process');
     
     try {
-      // Get current state and unsubscribe from auth changes
-      const state = get();
-      if (state.authSubscription) {
-        state.authSubscription.unsubscribe();
-      }
+      // Immediate redirect to avoid blank screen
+      window.location.href = '/';
       
-      // Clear user state immediately
-      set({ user: null, loading: false, initialized: true });
-      
-      // Clear all React Query cache first
-      queryClient.clear();
-      console.log('🔧 AuthStore: Cleared React Query cache');
-      
-      // Clear all storage
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Sign out from Supabase
-      await supabase.auth.signOut({ scope: 'global' });
-      console.log('🔧 AuthStore: Logout completed successfully');
-      
-      // Force hard page reload to clear all state
-      window.location.replace('/');
+      // Clean up in background (non-blocking)
+      setTimeout(async () => {
+        const state = get();
+        if (state.authSubscription) {
+          state.authSubscription.unsubscribe();
+        }
+        
+        set({ user: null, loading: false, initialized: true });
+        queryClient.clear();
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        await supabase.auth.signOut({ scope: 'global' });
+        console.log('🔧 AuthStore: Background cleanup completed');
+      }, 100);
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
-      // Even if logout fails, force redirect
-      set({ user: null, loading: false, initialized: true });
-      window.location.replace('/');
+      // Force immediate redirect even on error
+      window.location.href = '/';
     }
   },
 
