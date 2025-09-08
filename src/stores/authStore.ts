@@ -192,14 +192,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         console.error('🔧 AuthStore: Error clearing storage:', e);
       }
       
-      // IMMEDIATE redirect after quick cleanup - use window.location.href for landing
-      window.location.href = '/';
+      // IMMEDIATE redirect after quick cleanup - use navigate for faster transition
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/') {
+        window.history.pushState({}, '', '/');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
       // Force redirect even on error
       set({ user: null, loading: false, initialized: true });
-      window.location.href = '/';
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/') {
+        window.history.pushState({}, '', '/');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
     }
   },
 
