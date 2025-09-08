@@ -46,11 +46,14 @@ export function FormSubsectionButton({
         disabled={disabled}
         className={cn(
           "w-full flex items-center gap-3 p-3 rounded-lg border transition-all duration-200",
-          "text-left bg-transparent hover:bg-accent/5",
-          "border-solid border-foreground/20 hover:border-accent",
-          "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
+          "text-left bg-transparent",
+          variant === 'destructive' ? "hover:bg-destructive/5" : "hover:bg-accent/5",
+          "border-solid border-foreground/20",
+          variant === 'destructive' ? "hover:border-destructive" : "hover:border-accent",
+          "focus:outline-none focus:ring-2 focus:ring-offset-2",
+          variant === 'destructive' ? "focus:ring-destructive" : "focus:ring-accent",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-foreground/20",
-          isHovered && !disabled && "border-accent shadow-sm"
+          isHovered && !disabled && (variant === 'destructive' ? "border-destructive shadow-sm" : "border-accent shadow-sm")
         )}
       >
         {/* Icon */}

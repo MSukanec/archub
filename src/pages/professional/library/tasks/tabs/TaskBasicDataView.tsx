@@ -48,13 +48,12 @@ export function TaskBasicDataView({
     mutationFn: async (dataToSave: any) => {
       if (!task.id || !supabase || isSystemTask) return;
 
-      // Update task in tasks table
+      // Solo actualizar custom_name por ahora
+      // Las otras propiedades (rubro, unidad) se actualizan por separado
       const { error } = await supabase
         .from('tasks')
         .update({
-          custom_name: dataToSave.taskName,
-          division: dataToSave.taskRubro,
-          unit: dataToSave.taskUnit
+          custom_name: dataToSave.taskName
         })
         .eq('id', task.id);
 
@@ -74,12 +73,10 @@ export function TaskBasicDataView({
     }
   });
   
-  // Auto-save hook
+  // Auto-save hook solo para el nombre
   const { isSaving } = useDebouncedAutoSave({
     data: {
-      taskName,
-      taskRubro,
-      taskUnit
+      taskName
     },
     saveFn: async (data) => {
       await saveTaskMutation.mutateAsync(data);
