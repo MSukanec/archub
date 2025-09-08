@@ -133,7 +133,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const handleDeleteCost = (cost: any) => {
     const costTypeName = cost.type === 'Material' ? 'material' : 'mano de obra';
     
-    openModal('delete-confirmation-modal', {
+    openModal('delete-confirmation', {
       mode: 'simple',
       title: `Eliminar ${costTypeName}`,
       description: `¿Estás seguro que querés eliminar "${cost.name}" de esta tarea?`,
