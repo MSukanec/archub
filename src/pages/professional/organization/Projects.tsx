@@ -219,18 +219,18 @@ export default function Projects() {
         home: { 
           id: 'home', 
           label: 'Inicio', 
-          icon: <Home className="h-6 w-6" />,
+          icon: Home,
           onClick: () => {} 
         },
         search: { 
           id: 'search', 
           label: 'Buscar', 
-          icon: <Search className="h-6 w-6" />,
+          icon: Search,
           onClick: () => {} 
         },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nuevo Proyecto',
           onClick: () => openModal('project', {}),
           variant: 'primary'
@@ -238,13 +238,13 @@ export default function Projects() {
         filter: { 
           id: 'filter', 
           label: 'Filtros', 
-          icon: <Filter className="h-6 w-6" />,
+          icon: Filter,
           onClick: () => {}
         },
         notifications: { 
           id: 'notifications', 
           label: 'Notificaciones', 
-          icon: <Bell className="h-6 w-6" />,
+          icon: Bell,
           onClick: () => {} 
         },
       })

@@ -266,7 +266,7 @@ export function ActionBarMobile() {
               className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
               style={{ backgroundColor: 'var(--accent)' }}
             >
-              <actions.create.icon className="h-6 w-6" />
+              {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
             </button>
           )}
 
