@@ -14,6 +14,10 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
 import { useTaskCosts } from '@/hooks/use-task-costs';
+import { useDeleteTaskMaterial } from '@/hooks/use-generated-tasks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
 
 interface TaskCostsViewProps {
   task: any;
@@ -36,6 +40,38 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   // Obtener datos reales de costos usando el hook unificado (materiales + mano de obra)
   const taskId = task?.task_id || task?.id;
   const { data: costs = [], isLoading } = useTaskCosts(taskId);
+
+  // Mutaciones para eliminar costos
+  const queryClient = useQueryClient();
+  const deleteMaterialMutation = useDeleteTaskMaterial();
+  
+  const deleteLaborMutation = useMutation({
+    mutationFn: async (laborId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('task_labor')
+        .delete()
+        .eq('id', laborId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-costs', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] });
+      toast({
+        title: "Mano de obra eliminada",
+        description: "La mano de obra se ha eliminado de la tarea"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar la mano de obra",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Cálculos para KPIs de costos
   const kpiData = useMemo(() => {
@@ -86,14 +122,38 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   // Función para editar costo
   const handleEditCost = (cost: any) => {
-    // TODO: Implementar modal de editar costo
-    console.log('Editar costo:', cost.id);
+    openModal('cost-modal', { 
+      task, 
+      isEditing: true,
+      costData: cost
+    });
   };
 
   // Función para eliminar costo
   const handleDeleteCost = (cost: any) => {
-    // TODO: Implementar eliminación
-    console.log('Eliminar costo:', cost.id);
+    const costTypeName = cost.type === 'Material' ? 'material' : 'mano de obra';
+    
+    openModal('delete-confirmation-modal', {
+      mode: 'simple',
+      title: `Eliminar ${costTypeName}`,
+      description: `¿Estás seguro que querés eliminar "${cost.name}" de esta tarea?`,
+      itemName: cost.name,
+      itemType: costTypeName,
+      destructiveActionText: `Eliminar ${costTypeName}`,
+      onConfirm: async () => {
+        try {
+          if (cost.type === 'Material') {
+            // Eliminar material de tarea usando la mutación correspondiente
+            await deleteMaterialMutation.mutateAsync(cost.id);
+          } else if (cost.type === 'Mano de Obra') {
+            // Eliminar mano de obra de tarea usando la mutación correspondiente  
+            await deleteLaborMutation.mutateAsync(cost.id);
+          }
+        } catch (error) {
+          console.error('Error eliminando costo:', error);
+        }
+      }
+    });
   };
 
   // Definir columnas de la tabla
