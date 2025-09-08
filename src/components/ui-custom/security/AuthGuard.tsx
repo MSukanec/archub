@@ -72,58 +72,62 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // CASE 2: User exists - Handle authenticated state
     setShowAuthModal(false);
 
-    // CASE 3: Check onboarding status FIRST (before any redirects)
-    if (userData) {
-      const onboardingCompleted = userData.preferences?.onboarding_completed;
-      const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
-      
-      // Check bypass flag
-      const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
-      const bypassUserId = localStorage.getItem('onboarding_bypass_user_id');
-      
-      // Handle bypass logic
-      if (onboardingBypass) {
-        // Clear bypass if it's from a different user or if user hasn't completed onboarding
-        if (!onboardingCompleted || bypassUserId !== userData.user?.id) {
-          console.log('AuthGuard: Clearing bypass for incomplete onboarding or different user');
-          localStorage.removeItem('onboarding_bypass');
-          localStorage.removeItem('onboarding_bypass_user_id');
-        } else {
-          // Bypass active for completed users - skip all onboarding checks
-          console.log('AuthGuard: Bypass active, skipping onboarding checks');
-          
-          // Reset completing flag if we're on dashboard with completed onboarding
-          if (onboardingCompleted && completingOnboarding && (location.includes('/dashboard') || location.includes('/organization'))) {
-            console.log('AuthGuard: Resetting completingOnboarding flag');
-            setCompletingOnboarding(false);
-          }
-          
-          lastNavigationRef.current = null;
-          return;
-        }
-      }
+    // WAIT for userData to load before making any routing decisions
+    if (!userData) {
+      console.log('AuthGuard: Waiting for userData to load...');
+      return;
+    }
 
-      // Don't interfere during onboarding completion process
-      if (completingOnboarding) {
-        console.log('AuthGuard: Onboarding completion in progress, not redirecting');
+    // CASE 3: Check onboarding status FIRST (before any redirects)
+    const onboardingCompleted = userData.preferences?.onboarding_completed;
+    const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
+    
+    // Check bypass flag
+    const onboardingBypass = localStorage.getItem('onboarding_bypass') === 'true';
+    const bypassUserId = localStorage.getItem('onboarding_bypass_user_id');
+    
+    // Handle bypass logic
+    if (onboardingBypass) {
+      // Clear bypass if it's from a different user or if user hasn't completed onboarding
+      if (!onboardingCompleted || bypassUserId !== userData.user?.id) {
+        console.log('AuthGuard: Clearing bypass for incomplete onboarding or different user');
+        localStorage.removeItem('onboarding_bypass');
+        localStorage.removeItem('onboarding_bypass_user_id');
+      } else {
+        // Bypass active for completed users - skip all onboarding checks
+        console.log('AuthGuard: Bypass active, skipping onboarding checks');
+        
+        // Reset completing flag if we're on dashboard with completed onboarding
+        if (onboardingCompleted && completingOnboarding && (location.includes('/dashboard') || location.includes('/organization'))) {
+          console.log('AuthGuard: Resetting completingOnboarding flag');
+          setCompletingOnboarding(false);
+        }
+        
+        lastNavigationRef.current = null;
         return;
       }
+    }
 
-      // Check if user needs onboarding
-      const needsOnboarding = !onboardingCompleted || !hasPersonalData;
-      const allowedRoute = isOnboardingRoute || isProtectedDuringOnboarding;
-      
-      if (needsOnboarding && !allowedRoute) {
-        // Redirect to onboarding
-        if (lastNavigationRef.current !== '/onboarding') {
-          console.log('AuthGuard: User needs onboarding, redirecting');
-          lastNavigationRef.current = '/onboarding';
-          navigate('/onboarding');
-        }
-      } else {
-        // User is in valid state, reset tracking
-        lastNavigationRef.current = null;
+    // Don't interfere during onboarding completion process
+    if (completingOnboarding) {
+      console.log('AuthGuard: Onboarding completion in progress, not redirecting');
+      return;
+    }
+
+    // Check if user needs onboarding
+    const needsOnboarding = !onboardingCompleted || !hasPersonalData;
+    const allowedRoute = isOnboardingRoute || isProtectedDuringOnboarding;
+    
+    if (needsOnboarding && !allowedRoute) {
+      // Redirect to onboarding
+      if (lastNavigationRef.current !== '/onboarding') {
+        console.log('AuthGuard: User needs onboarding, redirecting');
+        lastNavigationRef.current = '/onboarding';
+        navigate('/onboarding');
       }
+    } else {
+      // User is in valid state, reset tracking
+      lastNavigationRef.current = null;
     }
 
     // CASE 4: Redirect authenticated users away from public routes (after onboarding check)
