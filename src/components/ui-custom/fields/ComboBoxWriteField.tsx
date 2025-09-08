@@ -140,15 +140,19 @@ export function ComboBox({
                   key={`${option.value}-${index}`}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center"
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center min-h-[32px]"
+                  style={{ color: 'var(--foreground)', backgroundColor: 'transparent' }}
                 >
                   {value === option.value && (
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
                   )}
-                  <span className={cn(
-                    "text-foreground truncate",
-                    value !== option.value && "ml-5" // Add left margin when check is not visible
-                  )}>
+                  <span 
+                    className={cn(
+                      "text-foreground truncate flex-1",
+                      value !== option.value && "ml-5" // Add left margin when check is not visible
+                    )}
+                    style={{ color: 'var(--foreground)' }}
+                  >
                     {(option.label || '').includes(' - ') ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
