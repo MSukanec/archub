@@ -17,7 +17,6 @@ export function useAdminPermissions() {
         .from('admin_users')
         .select('auth_id')
         .eq('auth_id', userData.user.auth_id)
-        .single()
 
       if (error) {
         console.error('Error checking admin permissions:', error)
@@ -25,7 +24,7 @@ export function useAdminPermissions() {
       }
 
       return { 
-        isAdmin: !!data, 
+        isAdmin: !!(data && data.length > 0), 
         loading: false 
       }
     },
