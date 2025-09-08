@@ -159,32 +159,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return;
     }
     
-    console.log('🔧 AuthStore: Starting fast logout process');
+    console.log('🔧 AuthStore: Ultra-fast logout process');
     
     try {
-      // Immediate redirect to avoid blank screen
-      window.location.href = '/';
-      
-      // Clean up in background (non-blocking)
-      setTimeout(async () => {
-        const state = get();
-        if (state.authSubscription) {
-          state.authSubscription.unsubscribe();
-        }
-        
-        set({ user: null, loading: false, initialized: true });
-        queryClient.clear();
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        await supabase.auth.signOut({ scope: 'global' });
-        console.log('🔧 AuthStore: Background cleanup completed');
-      }, 100);
+      // IMMEDIATE hard reload - most aggressive redirect possible
+      window.location.replace('/');
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
-      // Force immediate redirect even on error
-      window.location.href = '/';
+      // Multiple fallback redirects
+      try {
+        window.location.replace('/');
+      } catch (e) {
+        window.location.href = '/';
+      }
     }
   },
 
