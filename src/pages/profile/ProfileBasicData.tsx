@@ -13,6 +13,7 @@ import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
+import { useAuthStore } from '@/stores/authStore'
 
 interface Country {
   id: string;
@@ -28,6 +29,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
   const { data: userData, isLoading } = useCurrentUser()
   const { toast } = useToast()
   const [, navigate] = useLocation()
+  const { logout } = useAuthStore()
   
   // Function to get user mode info
   const getUserModeInfo = (userType: string | null) => {
@@ -156,32 +158,19 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
     }
   }, [userData])
 
-  // Sign out mutation
-  const signOutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/user/signout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-    },
-    onSuccess: () => {
-      window.location.href = '/'
-    },
-    onError: (error) => {
-      console.error('Sign out error:', error)
+  // Handle logout using authStore
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout error:', error)
       toast({
         title: "Error",
         description: "No se pudo cerrar la sesión. Inténtalo de nuevo.",
         variant: "destructive",
       })
-    },
-  })
+    }
+  }
 
   const getInitials = () => {
     if (firstName && lastName) {
@@ -440,10 +429,9 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction 
-                      onClick={() => signOutMutation.mutate()}
-                      disabled={signOutMutation.isPending}
+                      onClick={handleLogout}
                     >
-                      {signOutMutation.isPending ? 'Cerrando sesión...' : 'Cerrar sesión'}
+                      Cerrar sesión
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
