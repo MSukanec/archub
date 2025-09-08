@@ -148,7 +148,7 @@ export function TaskBasicDataView({
                   <div>
                     <p className="text-sm font-medium">Creador</p>
                     <p className="text-sm text-muted-foreground">
-                      {isSystemTask ? 'Sistema' : userData?.organization?.name || 'Organización'}
+                      {isSystemTask ? 'Sistema' : (userData?.organization?.name || 'Organización')}
                     </p>
                   </div>
                 </div>
