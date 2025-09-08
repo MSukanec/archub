@@ -106,13 +106,13 @@ export default function SelectMode() {
       setCompletingOnboarding(true);
       
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
+      await queryClient.cancelQueries({ queryKey: ['current-user'] });
 
       // Snapshot previous value
-      const previousUserData = queryClient.getQueryData(['/api/current-user']);
+      const previousUserData = queryClient.getQueryData(['current-user']);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(['/api/current-user'], (oldData: any) => {
+      queryClient.setQueryData(['current-user'], (oldData: any) => {
         if (!oldData) return oldData;
         console.log('SelectMode: Setting optimistic onboarding_completed = true');
         return {
@@ -131,26 +131,11 @@ export default function SelectMode() {
       console.log('SelectMode: SUCCESS - Forcing RPC refresh to get updated onboarding status');
       
       // Clear any potentially stale cache first
-      await queryClient.cancelQueries({ queryKey: ['/api/current-user'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+      await queryClient.cancelQueries({ queryKey: ['current-user'] });
+      await queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
-      // Force refetch with refresh parameter to ensure RPC returns fresh data  
-      // Get the current Supabase session to get the correct token
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      
-      if (token) {
-        await queryClient.fetchQuery({ 
-          queryKey: ['/api/current-user'], 
-          queryFn: () => fetch('/api/current-user?refresh=true', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }).then(res => res.json())
-        });
-      } else {
-        console.warn('SelectMode: No valid session token found, skipping refresh');
-      }
+      // Force immediate refetch to ensure fresh data is loaded
+      await queryClient.refetchQueries({ queryKey: ['current-user'] });
       
       // Small delay to ensure all state is synchronized
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -175,7 +160,7 @@ export default function SelectMode() {
       
       // Rollback on error
       if (context?.previousUserData) {
-        queryClient.setQueryData(['/api/current-user'], context.previousUserData);
+        queryClient.setQueryData(['current-user'], context.previousUserData);
       }
       console.error('Error updating user type:', err);
       toast({
