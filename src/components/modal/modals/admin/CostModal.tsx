@@ -39,6 +39,8 @@ interface LaborType {
 interface CostModalProps {
   modalData: {
     task?: any
+    isEditing?: boolean
+    costData?: any
   }
   onClose: () => void
 }
@@ -47,7 +49,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [costType, setCostType] = useState<'material' | 'labor' | ''>('')
   
-  const { task } = modalData
+  const { task, isEditing = false, costData } = modalData
   
   // Hooks
   const queryClient = useQueryClient()
@@ -153,14 +155,34 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     },
   })
 
+  // Precargar datos en modo edición
+  useEffect(() => {
+    if (isEditing && costData) {
+      const type = costData.type === 'Material' ? 'material' : 'labor';
+      const itemId = costData.type === 'Material' ? costData.material_id : costData.labor_type_id;
+      
+      form.setValue('type', type);
+      form.setValue('quantity', costData.quantity || 0);
+      setCostType(type);
+      
+      // Establecer item_id después de que el tipo esté establecido
+      setTimeout(() => {
+        form.setValue('item_id', itemId || '');
+      }, 100);
+    }
+  }, [isEditing, costData, form]);
+
   // Watch for type changes to reset item selection
   const watchedType = form.watch('type')
   useEffect(() => {
     if (watchedType !== costType) {
       setCostType(watchedType)
-      form.setValue('item_id', '')
+      // Solo limpiar item_id si no estamos en modo edición inicial
+      if (!isEditing || costType !== '') {
+        form.setValue('item_id', '')
+      }
     }
-  }, [watchedType, costType, form])
+  }, [watchedType, costType, form, isEditing])
 
   const onSubmit = async (data: z.infer<typeof costSchema>) => {
     if (!task?.id) {
@@ -302,7 +324,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
 
   const headerContent = (
     <FormModalHeader 
-      title="Agregar Costo a Tarea"
+      title={isEditing ? "Editar Costo de Tarea" : "Agregar Costo a Tarea"}
       icon={DollarSign}
     />
   )
@@ -311,7 +333,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Agregar"
+      rightLabel={isEditing ? "Guardar" : "Agregar"}
       onRightClick={form.handleSubmit(onSubmit)}
     />
   )

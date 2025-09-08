@@ -387,9 +387,10 @@ export function useDeleteTaskMaterial() {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['task-materials'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] });
       toast({
         title: "Material Eliminado",
         description: "El material se ha eliminado de la tarea"
