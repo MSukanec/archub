@@ -146,15 +146,15 @@ export function ComboBox({
                     "text-foreground truncate",
                     value !== option.value && "ml-5" // Add left margin when check is not visible
                   )}>
-                    {option.label.includes(' - ') ? (
+                    {(option.label || '').includes(' - ') ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
-                          {option.label.split(' - ')[0]}
+                          {(option.label || '').split(' - ')[0]}
                         </span>
-                        {option.label.split(' - ')[1]}
+                        {(option.label || '').split(' - ')[1]}
                       </div>
                     ) : (
-                      option.label
+                      option.label || ''
                     )}
                   </span>
                 </CommandItem>
