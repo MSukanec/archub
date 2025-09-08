@@ -956,17 +956,6 @@ export default function MovementsList() {
         const typeName = movement.movement_data?.type?.name || "Sin tipo";
         const categoryName = movement.movement_data?.category?.name || movement.category_name || "";
         
-        // DEBUG: Log personnel data for Mano de Obra movements
-        if (categoryName?.toLowerCase().includes('mano de obra') || movement.category_id === 'd376d404-734a-47a9-b851-d112d64147db') {
-          console.log('🔧 MANO DE OBRA MOVEMENT:', { 
-            id: movement.id,
-            categoryId: movement.category_id,
-            categoryName: categoryName,
-            personnel: movement.personnel,
-            member: movement.member,
-            hasPersonnel: !!movement.personnel
-          });
-        }
         
         // Determinar el valor seleccionado basado en la categoría específica (solo si corresponde)
         let selectedValue = "";
@@ -981,12 +970,6 @@ export default function MovementsList() {
           selectedValue = movement.subcontract;
         } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.personnel && movement.personnel.trim() !== "") {
           // Mano de Obra (Personal) - usar PERSONNEL en lugar de member (creador)
-          console.log('🔧 PERSONNEL DEBUG:', { 
-            categoryId, 
-            personnel: movement.personnel, 
-            movementId: movement.id,
-            categoryName: movement.movement_data?.category?.name
-          });
           selectedValue = movement.personnel;
         } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
           // Aportes Propios o Retiros Propios

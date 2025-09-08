@@ -163,7 +163,6 @@ export function useMovements(organizationId: string | undefined, projectId: stri
         })
         console.log('Expected organization_id:', organizationId)
         console.log('Expected project_id:', projectId)
-        
       }
 
       // All data now comes from the view, no need for additional queries
