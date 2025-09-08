@@ -24,23 +24,12 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
-      
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error de autenticación",
-          description: error.message === "Invalid login credentials"
-            ? "Credenciales incorrectas. Verifica tu email y contraseña."
-            : error.message
-        });
-      } else {
-        toast({
-          title: "¡Bienvenido!",
-          description: "Has iniciado sesión correctamente."
-        });
-        navigate("/organization/dashboard");
-      }
+      await signIn(formData.email, formData.password);
+      toast({
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión correctamente."
+      });
+      navigate("/organization/dashboard");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -72,16 +61,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+        <Card className="bg-white border-gray-200">
           <CardHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center space-x-2">
               <Building className="h-8 w-8 text-[var(--accent)]" />
-              <span className="text-2xl font-bold" style={{ color: 'var(--text-default)' }}>Archub</span>
+              <span className="text-2xl font-bold text-gray-900">Archub</span>
             </div>
-            <CardTitle className="text-xl" style={{ color: 'var(--text-default)' }}>Iniciar Sesión</CardTitle>
-            <CardDescription style={{ color: 'var(--text-muted)' }}>
+            <CardTitle className="text-xl text-gray-900">Iniciar Sesión</CardTitle>
+            <CardDescription className="text-gray-600">
               Ingresa tus credenciales para acceder a tu cuenta
             </CardDescription>
           </CardHeader>
@@ -89,7 +78,7 @@ export default function Login() {
             {/* Google Sign In */}
             <Button
               variant="outline"
-              className="w-full h-10"
+              className="w-full h-10 rounded-xl border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
@@ -120,16 +109,16 @@ export default function Login() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" style={{ borderColor: 'var(--card-border)' }} />
+                <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-muted)' }}>O continúa con</span>
+                <span className="px-2 bg-white text-gray-500">O continúa con</span>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-900">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -142,7 +131,7 @@ export default function Login() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password" className="text-gray-900">Contraseña</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -171,7 +160,7 @@ export default function Login() {
 
               <div className="flex justify-end">
                 <Link href="/forgot-password">
-                  <Button variant="link" className="px-0 text-[var(--accent)] hover:text-[var(--accent)]/80">
+                  <Button variant="link" className="px-0 text-[#92c900] hover:text-[#7ba600]">
                     ¿Olvidaste tu contraseña?
                   </Button>
                 </Link>
@@ -179,7 +168,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground"
+                className="w-full bg-[#92c900] hover:bg-[#7ba600] text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -194,9 +183,9 @@ export default function Login() {
             </form>
 
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">¿No tienes una cuenta? </span>
+              <span className="text-gray-600">¿No tienes una cuenta? </span>
               <Link href="/register">
-                <Button variant="link" className="px-0 text-[var(--accent)] hover:text-[var(--accent)]/80">
+                <Button variant="link" className="px-0 text-[#92c900] hover:text-[#7ba600]">
                   Regístrate aquí
                 </Button>
               </Link>
