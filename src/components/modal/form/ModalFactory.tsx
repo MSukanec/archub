@@ -8,7 +8,7 @@ import { CardFormModal } from '../modals/organizations/CardFormModal';
 import { ListFormModal } from '../modals/organizations/ListFormModal';
 import ContactModal from '../modals/resources/contacts/ContactModal'
 import { ContactModalView } from '../modals/resources/contacts/ContactModalView'
-import { ProjectFormModal } from '../modals/organizations/ProjectFormModal';
+import { ProjectModal } from '../modals/organizations/ProjectModal';
 import ClientObligationModal from '../modals/general/clients/ClientObligationModal';
 import { DocumentUploadFormModal } from '../modals/project/DocumentUploadFormModal';
 import { DocumentFolderFormModal } from '../modals/project/DocumentFolderFormModal';
@@ -95,7 +95,7 @@ export function ModalFactory() {
       // En cualquier otro caso (crear/editar), mostrar ContactModal
       return <ContactModal modalData={data || undefined} onClose={closeModal} />;
     case 'project':
-      return <ProjectFormModal modalData={data || undefined} onClose={closeModal} />;
+      return <ProjectModal modalData={data || undefined} onClose={closeModal} />;
     case 'project-client':
       return <ClientObligationModal modalData={data || undefined} onClose={closeModal} />;
     case 'document-upload':
