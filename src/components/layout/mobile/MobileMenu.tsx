@@ -69,6 +69,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { currentSidebarContext, setSidebarContext, setActiveSidebarSection } = useNavigationStore();
+  const { isGlobalView } = useProjectContext();
 
   const [expandedProjectSelector, setExpandedProjectSelector] = useState(false);
 
