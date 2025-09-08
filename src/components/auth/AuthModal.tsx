@@ -182,9 +182,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </div>
         
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login" className="text-sm">Iniciar Sesión</TabsTrigger>
-                  <TabsTrigger value="register" className="text-sm">Registrarse</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 text-gray-900">
+                  <TabsTrigger value="login" className="text-sm data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-600">Iniciar Sesión</TabsTrigger>
+                  <TabsTrigger value="register" className="text-sm data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-600">Registrarse</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="login" className="space-y-4">
