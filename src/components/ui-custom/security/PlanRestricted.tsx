@@ -116,7 +116,11 @@ export function PlanRestricted({
     
     return (
       <div className="relative">
-        {children}
+        {React.cloneElement(children as React.ReactElement, {
+          onClick: () => {
+            // Do nothing when restricted - just the visual cue is enough
+          }
+        })}
         <div 
           className="absolute -top-1 -right-1 rounded-full p-1 shadow-sm border border-white"
           style={{ backgroundColor: dynamicRestriction.backgroundColor || "hsl(213, 100%, 30%)" }}
