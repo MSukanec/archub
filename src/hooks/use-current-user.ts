@@ -106,6 +106,8 @@ export function useCurrentUser(forceRefresh?: boolean) {
       if (!authUser) {
         throw new Error('User not authenticated')
       }
+      
+      console.log('🔧 useCurrentUser: Starting query for user:', authUser.id);
 
       // Get the session token to send to the server
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
@@ -152,11 +154,9 @@ export function useCurrentUser(forceRefresh?: boolean) {
 
       // Log other errors for debugging
       if (!response.ok) {
-        console.error('🔧 useCurrentUser: API error:', response.status, response.statusText);
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text();
+        console.error('🔧 useCurrentUser: API error:', response.status, response.statusText, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
       }
 
       const userData = await response.json()

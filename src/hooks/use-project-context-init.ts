@@ -15,7 +15,12 @@ export function useProjectContextInit() {
     // Si cambia la organización del usuario y es diferente a la actual en el contexto
     if (userOrganizationId && userOrganizationId !== currentOrganizationId) {
       console.log("🔧 ProjectContextInit: Initializing organization context", userOrganizationId);
-      setCurrentOrganization(userOrganizationId);
+      try {
+        setCurrentOrganization(userOrganizationId);
+        console.log("🔧 ProjectContextInit: Successfully set organization");
+      } catch (error) {
+        console.error("🔧 ProjectContextInit: Error setting organization:", error);
+      }
     }
   }, [userData?.organization?.id, currentOrganizationId, setCurrentOrganization]);
 }
