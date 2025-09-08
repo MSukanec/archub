@@ -11,7 +11,9 @@ import {
   Moon,
   PanelLeftOpen,
   PanelLeftClose,
-  Bell
+  Bell,
+  Folder,
+  ChevronDown
 } from "lucide-react";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -23,6 +25,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
 import SidebarButton from "./SidebarButton";
+import { SelectorPopover } from "@/components/popovers/SelectorPopover";
 
 export function PrimarySidebar() {
   const [location, navigate] = useLocation();
@@ -42,6 +45,38 @@ export function PrimarySidebar() {
   // Helper function to get project initials
   const getProjectInitials = (name: string) => {
     return name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+  };
+  
+  // Mutation para cambiar proyecto
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!userData?.user?.id || !userData?.organization?.id) {
+        throw new Error('Usuario u organización no disponibles');
+      }
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+  
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate(projectId);
   };
   
   // Sidebar state
@@ -203,17 +238,34 @@ export function PrimarySidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="p-1">
         <div className="flex flex-col gap-[2px]">
-          {/* Project Avatar - only show if there's a selected project */}
+          {/* Project Selector - only show if there's a selected project */}
           {currentProject && (
-            <SidebarButton
-              icon={null}
-              label={currentProject.name || 'Proyecto'}
-              isActive={false}
-              isExpanded={false}
-              onClick={() => navigate('/project')}
-              variant="main"
-              userFullName={getProjectInitials(currentProject.name || 'P')}
-              projectColor={currentProject.color}
+            <SelectorPopover
+              trigger={
+                <div>
+                  <SidebarButton
+                    icon={<Folder className="w-[18px] h-[18px]" />}
+                    label={currentProject.name || 'Proyecto'}
+                    isActive={false}
+                    isExpanded={false}
+                    variant="main"
+                    userFullName={getProjectInitials(currentProject.name || 'P')}
+                    projectColor={currentProject.color}
+                    rightIcon={<ChevronDown className="w-3 h-3" />}
+                  />
+                </div>
+              }
+              items={projects.map((project) => ({
+                id: project.id,
+                name: project.name,
+                logo_url: project.logo_url,
+                type: "Proyecto" as const,
+                color: project.color
+              }))}
+              selectedId={selectedProjectId}
+              onSelect={handleProjectSelect}
+              emptyMessage="No hay proyectos disponibles"
+              getInitials={getProjectInitials}
             />
           )}
           
