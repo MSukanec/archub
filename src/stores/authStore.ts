@@ -168,9 +168,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Sign out from Supabase synchronously - no await to avoid delay
       supabase.auth.signOut({ scope: 'global' }).catch(() => {}); // Fire and forget
       
-      // Clear essential storage synchronously  
+      // Clear ALL Supabase tokens synchronously  
       try {
+        // Clear all possible Supabase localStorage keys
         localStorage.removeItem('sb-wtatvsgeivymcppowrfy-auth-token');
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('supabase-auth-token');
+        
+        // Clear all localStorage keys starting with 'sb-'
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
         sessionStorage.clear();
       } catch (e) {}
       
