@@ -150,6 +150,11 @@ export function useCurrentUser(forceRefresh?: boolean) {
         throw new Error('User not found in database - session invalidated')
       }
 
+      // Log other errors for debugging
+      if (!response.ok) {
+        console.error('🔧 useCurrentUser: API error:', response.status, response.statusText);
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -163,6 +168,8 @@ export function useCurrentUser(forceRefresh?: boolean) {
       return userData as UserData
     },
     enabled: !!authUser && !authLoading,
+    // Add small delay after login to let session stabilize
+    refetchInterval: false,
     retry: (failureCount, error) => {
       // Don't retry if user is logging out, not authenticated, or was deleted
       if (authLoading || !authUser || error.message.includes('logging out') || error.message.includes('session invalidated')) {

@@ -42,10 +42,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       await signIn(loginEmail, loginPassword)
       onOpenChange(false)
-      toast({
-        title: "Éxito",
-        description: "Has iniciado sesión correctamente",
-      })
+      // Show success toast with a slight delay to avoid conflicts
+      setTimeout(() => {
+        toast({
+          title: "Éxito",
+          description: "Has iniciado sesión correctamente",
+        })
+      }, 100)
     } catch (error: any) {
       toast({
         title: "Error",
