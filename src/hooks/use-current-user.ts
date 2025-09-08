@@ -107,7 +107,6 @@ export function useCurrentUser(forceRefresh?: boolean) {
         throw new Error('User not authenticated')
       }
       
-      console.log('🔧 useCurrentUser: Starting query for user:', authUser.id);
 
       // Get the session token to send to the server
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
@@ -152,10 +151,8 @@ export function useCurrentUser(forceRefresh?: boolean) {
         throw new Error('User not found in database - session invalidated')
       }
 
-      // Log other errors for debugging
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🔧 useCurrentUser: API error:', response.status, response.statusText, errorText);
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
       }
 
@@ -171,17 +168,11 @@ export function useCurrentUser(forceRefresh?: boolean) {
     // Add small delay after login to let session stabilize
     refetchInterval: false,
     retry: (failureCount, error) => {
-      // Log all errors for debugging
-      console.error('🔧 useCurrentUser: Query error:', error.message, 'failureCount:', failureCount);
-      
       // Don't retry if user is logging out, not authenticated, or was deleted
       if (authLoading || !authUser || error.message.includes('logging out') || error.message.includes('session invalidated')) {
         return false
       }
       return failureCount < 2
-    },
-    onError: (error) => {
-      console.error('🔧 useCurrentUser: Final error after retries:', error.message);
     },
     staleTime: forceRefresh ? 0 : 5 * 60 * 1000, // No cache when force refresh
   })

@@ -1,4 +1,4 @@
-import { QueryClient, QueryFunction, QueryCache, MutationCache } from "@tanstack/react-query";
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -54,23 +54,4 @@ export const queryClient = new QueryClient({
       retry: false,
     },
   },
-  // Global error handling to catch ALL React Query errors
-  queryCache: new QueryCache({
-    onError: (error, query) => {
-      console.error('🔧 GLOBAL Query Error:', {
-        error: error.message,
-        queryKey: query.queryKey,
-        meta: query.meta
-      });
-    },
-  }),
-  mutationCache: new MutationCache({
-    onError: (error, variables, context, mutation) => {
-      console.error('🔧 GLOBAL Mutation Error:', {
-        error: error.message,
-        variables,
-        mutationKey: mutation.options.mutationKey
-      });
-    },
-  }),
 });
