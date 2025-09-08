@@ -8,9 +8,9 @@ import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from '@/hooks/use-mobile'
 import { Search, Filter, X, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/hooks/use-projects'
-import { usePlanFeatures } from '@/hooks/usePlanFeatures'
 
 export function ActionBarMobile() {
   const [, navigate] = useLocation()
@@ -34,11 +34,6 @@ export function ActionBarMobile() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const { data: projects = [] } = useProjects(organizationId || undefined)
-  const { limit } = usePlanFeatures()
-  
-  // Calculate if we've reached the project limit
-  const maxProjects = limit('max_projects')
-  const isProjectLimitReached = maxProjects !== Infinity && projects.length >= maxProjects
   
   // Focus search input when popover opens - always run this hook
   useEffect(() => {
@@ -274,27 +269,20 @@ export function ActionBarMobile() {
 
           {/* Slot 3: Create (Central, only if exists) */}
           {actions.create && (
-            <div className="relative">
+            <PlanRestricted 
+              feature="max_projects" 
+              current={projects.length}
+              functionName="Crear Proyecto"
+              badgeOnly={true}
+            >
               <button
-                onClick={() => {
-                  if (isProjectLimitReached) {
-                    // Just do nothing if restricted, the visual cue is enough
-                    return;
-                  }
-                  actions.create.onClick();
-                }}
+                onClick={actions.create.onClick}
                 className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
                 style={{ backgroundColor: 'var(--accent)' }}
               >
                 {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
               </button>
-              {/* Small lock badge when restricted */}
-              {isProjectLimitReached && (
-                <div className="absolute -top-1 -right-1 bg-orange-500 rounded-full p-1 shadow-sm border border-white">
-                  <Lock className="h-3 w-3 text-white" />
-                </div>
-              )}
-            </div>
+            </PlanRestricted>
           )}
 
           {/* Slot 4: Filter */}

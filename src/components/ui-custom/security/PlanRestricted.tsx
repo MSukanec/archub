@@ -18,6 +18,7 @@ interface PlanRestrictedProps {
   current?: number;
   reason?: "coming_soon" | "general_mode" | string;
   functionName?: string;
+  badgeOnly?: boolean; // New prop for mobile badge mode
   children: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export function PlanRestricted({
   current,
   reason,
   functionName,
+  badgeOnly = false,
   children,
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
@@ -85,6 +87,44 @@ export function PlanRestricted({
   // Si no está restringido, renderizar directamente los children
   if (!isRestricted) {
     return <>{children}</>;
+  }
+  
+  // Si está restringido pero es badge-only mode, mostrar solo el badge
+  if (badgeOnly) {
+    // Lógica dinámica para determinar el plan objetivo (igual que abajo)
+    let dynamicRestriction = getRestrictionMessage(restrictionKey);
+    
+    if (restrictionKey === "max_projects") {
+      const organizationId = userData?.preferences?.last_organization_id;
+      const currentOrganization = userData?.organizations?.find(
+        (org) => org.id === organizationId,
+      );
+      const currentPlan = currentOrganization?.plan?.name;
+
+      if (currentPlan === "Free") {
+        dynamicRestriction = {
+          ...dynamicRestriction,
+          backgroundColor: "hsl(213, 100%, 30%)", // Blue for Pro
+        };
+      } else if (currentPlan === "Pro") {
+        dynamicRestriction = {
+          ...dynamicRestriction,
+          backgroundColor: "hsl(271, 76%, 53%)", // Purple for Teams
+        };
+      }
+    }
+    
+    return (
+      <div className="relative">
+        {children}
+        <div 
+          className="absolute -top-1 -right-1 rounded-full p-1 shadow-sm border border-white"
+          style={{ backgroundColor: dynamicRestriction.backgroundColor || "hsl(213, 100%, 30%)" }}
+        >
+          <Lock className="h-3 w-3 text-white" />
+        </div>
+      </div>
+    );
   }
 
   // Plan restrictions (max_members, max_projects, etc.) apply to admins too
