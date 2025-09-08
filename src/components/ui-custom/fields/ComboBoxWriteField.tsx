@@ -52,19 +52,18 @@ export function ComboBox({
   // Filter options based on search
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
-    : !searchValue
-      ? options // Si NO hay búsqueda, mostrar TODAS las opciones
-      : options.filter(option =>
-          option && option.label && typeof option.label === 'string' && 
-          option.label.toLowerCase().includes(searchValue.toLowerCase())
-        ); // Solo filtra cuando SÍ hay búsqueda
+    : options.filter(option =>
+        option && option.label && 
+        option.label.toLowerCase().includes((searchValue || '').toLowerCase())
+      );
 
 
 
   // Check if search value would create a new option
   const searchValueToCheck = onSearchChange ? (searchQuery || '') : (searchValue || '');
   const canCreateNew = allowCreate && searchValueToCheck.trim() && 
-    !options.some(option => (option.label || '').toLowerCase() === searchValueToCheck.toLowerCase().trim());
+    !options.some(option => option && option.label && 
+      option.label.toLowerCase() === searchValueToCheck.toLowerCase().trim());
 
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
@@ -137,28 +136,24 @@ export function ComboBox({
             <CommandGroup>
               {filteredOptions.map((option, index) => (
                 <CommandItem
-                  key={`${option.value}-${index}`}
+                  key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center min-h-[32px]"
-                  style={{ color: 'var(--foreground)', backgroundColor: 'transparent' }}
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center"
                 >
                   {value === option.value && (
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
                   )}
-                  <span 
-                    className={cn(
-                      "text-foreground truncate flex-1",
-                      value !== option.value && "ml-5" // Add left margin when check is not visible
-                    )}
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {(option.label || '').includes(' - ') ? (
+                  <span className={cn(
+                    "text-foreground truncate",
+                    value !== option.value && "ml-5" // Add left margin when check is not visible
+                  )}>
+                    {option.label && option.label.includes(' - ') ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
-                          {(option.label || '').split(' - ')[0]}
+                          {option.label.split(' - ')[0]}
                         </span>
-                        {(option.label || '').split(' - ')[1]}
+                        {option.label.split(' - ')[1]}
                       </div>
                     ) : (
                       option.label || ''
