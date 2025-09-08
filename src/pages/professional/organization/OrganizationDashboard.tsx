@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CustomButton } from "@/components/ui-custom/CustomButton";
+import { CustomButton } from "@/components/ui-custom/fields/CustomButton";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import type { UserData } from "@/hooks/use-current-user";
@@ -120,24 +120,28 @@ export default function OrganizationDashboard() {
                 title="Crear un nuevo proyecto"
                 description="Inicia un nuevo proyecto de construcción"
                 onClick={() => setLocation('/profile/projects')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={Users}
                 title="Crear un nuevo contacto"
                 description="Agrega un nuevo cliente o proveedor"
                 onClick={() => setLocation('/organization/contacts')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={DollarSign}
                 title="Crear un nuevo movimiento"
                 description="Registra un ingreso o egreso financiero"
                 onClick={() => setLocation('/general/finances')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={Kanban}
                 title="Gestionar tablero de organización"
                 description="Administra las tareas del tablero organizacional"
                 onClick={() => setLocation('/recursos/board')}
+                showPlusIcon={true}
               />
             </CardContent>
           </Card>
@@ -156,24 +160,28 @@ export default function OrganizationDashboard() {
                 title="Gestionar cronograma"
                 description="Administra tareas y cronograma del proyecto"
                 onClick={() => setLocation('/construction/schedule')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={FileText}
                 title="Gestionar bitácoras"
                 description="Registra el progreso y eventos del proyecto"
                 onClick={() => setLocation('/construction/logs')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={HardHat}
                 title="Gestionar subcontratos"
                 description="Administra subcontratistas y sus tareas"
                 onClick={() => setLocation('/construction/subcontracts')}
+                showPlusIcon={true}
               />
               <CustomButton
                 icon={Receipt}
                 title="Gestionar presupuestos"
                 description="Administra costos y presupuestos del proyecto"
                 onClick={() => setLocation('/construction/budgets')}
+                showPlusIcon={true}
               />
             </CardContent>
           </Card>

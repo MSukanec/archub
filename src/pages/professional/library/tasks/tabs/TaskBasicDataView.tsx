@@ -62,6 +62,10 @@ export function TaskBasicDataView({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
       queryClient.invalidateQueries({ queryKey: ['task-library'] });
+      toast({
+        title: "Cambios guardados",
+        description: "Los cambios se han guardado automáticamente"
+      });
     },
     onError: (error: any) => {
       console.error('Error saving task data:', error);
@@ -80,11 +84,6 @@ export function TaskBasicDataView({
     },
     saveFn: async (data) => {
       await saveTaskMutation.mutateAsync(data);
-      
-      toast({
-        title: "Cambios guardados",
-        description: "Los cambios se han guardado automáticamente"
-      });
     },
     delay: 1000,
     enabled: !isSystemTask
@@ -280,6 +279,8 @@ export function TaskBasicDataView({
               title="Ver costos"
               description="Materiales y mano de obra asociada"
               onClick={() => onTabChange?.('Costos')}
+              variant="default"
+              showPlusIcon={false}
             />
 
             <FormSubsectionButton
@@ -288,6 +289,7 @@ export function TaskBasicDataView({
               description="Eliminar permanentemente esta tarea"
               onClick={handleDeleteTask}
               variant="destructive"
+              showPlusIcon={false}
               disabled={isSystemTask}
             />
 
