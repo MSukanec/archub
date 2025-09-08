@@ -161,6 +161,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 currencyView={headerProps.currencyView}
                 onCurrencyViewChange={headerProps.onCurrencyViewChange}
                 actionButton={headerProps.actionButton}
+                actions={headerProps.actions}
                 showBackButton={headerProps.showBackButton}
                 onBackClick={headerProps.onBackClick}
                 backButtonText={headerProps.backButtonText}

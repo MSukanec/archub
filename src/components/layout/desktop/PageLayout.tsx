@@ -64,6 +64,9 @@ interface PageLayoutProps {
     };
   };
   
+  // Acciones personalizadas (para PlanRestricted y otros)
+  actions?: React.ReactNode[];
+  
   // Botón "Volver" para páginas de vista/detalle
   showBackButton?: boolean;
   onBackClick?: () => void;
@@ -93,6 +96,7 @@ export function PageLayout({
   showHeaderClearFilters = false,
   onHeaderClearFilters,
   actionButton,
+  actions = [],
   showBackButton = false,
   onBackClick,
   backButtonText = "Volver",
@@ -285,7 +289,7 @@ export function PageLayout({
             )}
 
             {/* Separator if there are header actions and main action buttons */}
-            {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton) && (
+            {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton || actions.length > 0) && (
               <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
             )}
 
@@ -303,6 +307,13 @@ export function PageLayout({
                 {actionButton.additionalButton.label}
               </Button>
             )}
+
+            {/* Custom Actions (like PlanRestricted) */}
+            {actions.map((action, index) => (
+              <div key={index}>
+                {action}
+              </div>
+            ))}
 
             {/* Main Action Button */}
             {actionButton && (
