@@ -1,4 +1,4 @@
-import { Calendar, User, Ruler, Building, FileText, Zap, Hash } from "lucide-react";
+import { Calendar, User, Ruler, Building, FileText, Zap, Hash, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
@@ -14,6 +14,8 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useLocation } from 'wouter';
 
 interface TaskBasicDataViewProps {
   task: any;
@@ -25,6 +27,8 @@ export function TaskBasicDataView({
   onTabChange 
 }: TaskBasicDataViewProps) {
   const { data: userData } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
+  const [, navigate] = useLocation();
   
   const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
   const [taskRubro, setTaskRubro] = useState(task.division || task.category || '');
@@ -88,6 +92,56 @@ export function TaskBasicDataView({
     delay: 1000,
     enabled: !isSystemTask
   });
+
+  // Función para eliminar tarea
+  const handleDeleteTask = () => {
+    const taskName = task.custom_name || task.name_rendered || 'esta tarea';
+    
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: "Eliminar tarea",
+      description: `¿Estás seguro que querés eliminar "${taskName}"? Esta acción no se puede deshacer.`,
+      itemName: taskName,
+      itemType: "tarea",
+      destructiveActionText: "Eliminar tarea",
+      onConfirm: async () => {
+        try {
+          if (!supabase) throw new Error('Supabase not initialized');
+          
+          const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', task.id);
+          
+          if (error) throw error;
+          
+          toast({
+            title: "Tarea eliminada",
+            description: "La tarea se ha eliminado correctamente"
+          });
+          
+          // Invalidar queries y navegar de vuelta
+          queryClient.invalidateQueries({ queryKey: ['task-library'] });
+          queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+          
+          // Determinar dónde navegar según el origen
+          const isFromAdmin = typeof window !== 'undefined' && 
+            (document.referrer.includes('/admin/tasks') || 
+             localStorage.getItem('taskViewSource') === 'admin');
+          localStorage.removeItem('taskViewSource');
+          navigate(isFromAdmin ? '/admin/tasks' : '/library/tasks');
+          
+        } catch (error: any) {
+          console.error('Error deleting task:', error);
+          toast({
+            title: "Error",
+            description: error.message || "Error al eliminar la tarea",
+            variant: "destructive"
+          });
+        }
+      }
+    });
+  };
   
   // Cargar opciones dinámicamente desde la base de datos
   const { data: divisions = [] } = useQuery({
@@ -229,6 +283,15 @@ export function TaskBasicDataView({
               title="Ver costos"
               description="Materiales y mano de obra asociada"
               onClick={() => onTabChange?.('Costos')}
+            />
+
+            <FormSubsectionButton
+              icon={<Trash2 className="h-4 w-4" />}
+              title="Eliminar tarea"
+              description="Eliminar permanentemente esta tarea"
+              onClick={handleDeleteTask}
+              variant="destructive"
+              disabled={isSystemTask}
             />
 
             <FormSubsectionButton
