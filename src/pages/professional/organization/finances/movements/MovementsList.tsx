@@ -95,6 +95,7 @@ interface Movement {
   client?: string;
   member?: string;
   member_avatar?: string;
+  personnel?: string;  // Nuevo campo agregado a la vista
   indirect?: string;
   general_cost?: string;
   movement_data?: {
@@ -123,6 +124,11 @@ interface Movement {
   };
   creator?: {
     full_name?: string;
+    avatar_url?: string;
+  } | {
+    id: string;
+    full_name?: string;
+    email: string;
     avatar_url?: string;
   };
 }
