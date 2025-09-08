@@ -120,22 +120,22 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       <DialogContent className="max-w-5xl w-full h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col md:flex-row h-full">
           {/* Columna izquierda - Branding (oculta en mobile) */}
-          <div className="hidden md:flex flex-1 bg-gradient-to-br from-slate-900 to-slate-800 p-12 flex-col justify-center relative overflow-hidden">
+          <div className="hidden md:flex flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-12 flex-col justify-center relative overflow-hidden">
             {/* Logo */}
             <div className="absolute top-8 left-8">
               <div className="flex items-center space-x-2">
-                <Building className="w-8 h-8 text-emerald-400" />
-                <span className="text-2xl font-bold text-white">Archub</span>
+                <Building className="w-8 h-8 text-emerald-600" />
+                <span className="text-2xl font-bold text-gray-900">Archub</span>
               </div>
             </div>
 
             {/* Contenido principal */}
             <div className="space-y-8 relative z-10">
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold text-white leading-tight">
+                <h1 className="text-4xl font-bold text-gray-900 leading-tight">
                   Gestiona tus proyectos de construcción con inteligencia
                 </h1>
-                <p className="text-lg text-slate-300 leading-relaxed">
+                <p className="text-lg text-gray-600 leading-relaxed">
                   Optimiza cada etapa de tu construcción con herramientas avanzadas de planificación, presupuestos y seguimiento en tiempo real.
                 </p>
               </div>
@@ -144,15 +144,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-slate-200">Gestión integral de proyectos</span>
+                  <span className="text-gray-700">Gestión integral de proyectos</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-slate-200">Control financiero avanzado</span>
+                  <span className="text-gray-700">Control financiero avanzado</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  <span className="text-slate-200">Colaboración en tiempo real</span>
+                  <span className="text-gray-700">Colaboración en tiempo real</span>
                 </div>
               </div>
             </div>
