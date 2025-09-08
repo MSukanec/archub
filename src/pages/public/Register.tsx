@@ -86,7 +86,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
       <div className="w-full max-w-md">
         <Card className="bg-white border-gray-200">
           <CardHeader className="space-y-4 text-center">
@@ -102,8 +102,8 @@ export default function Register() {
           <CardContent className="space-y-4">
             {/* Google Sign Up */}
             <Button
-              variant="outline"
-              className="w-full h-10 rounded-xl border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
+              variant="default"
+              className="w-full h-10 rounded-xl"
               onClick={handleGoogleSignUp}
               disabled={loading}
             >
