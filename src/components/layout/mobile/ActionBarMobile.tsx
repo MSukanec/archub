@@ -8,6 +8,9 @@ import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileCo
 import { useMobile } from '@/hooks/use-mobile'
 import { Search, Filter, X, Home, Bell } from 'lucide-react'
 import { useLocation } from 'wouter'
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjects } from '@/hooks/use-projects'
 
 export function ActionBarMobile() {
   const [, navigate] = useLocation()
@@ -26,6 +29,11 @@ export function ActionBarMobile() {
   } = useActionBarMobile()
   const isMobile = useMobile()
   const searchInputRef = useRef<HTMLInputElement>(null)
+  
+  // Get projects data for plan restrictions
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
+  const { data: projects = [] } = useProjects(organizationId || undefined)
   
   // Focus search input when popover opens - always run this hook
   useEffect(() => {
@@ -261,13 +269,19 @@ export function ActionBarMobile() {
 
           {/* Slot 3: Create (Central, only if exists) */}
           {actions.create && (
-            <button
-              onClick={actions.create.onClick}
-              className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
-              style={{ backgroundColor: 'var(--accent)' }}
+            <PlanRestricted 
+              feature="max_projects" 
+              current={projects.length}
+              functionName="Crear Proyecto"
             >
-              {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
-            </button>
+              <button
+                onClick={actions.create.onClick}
+                className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
+                style={{ backgroundColor: 'var(--accent)' }}
+              >
+                {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
+              </button>
+            </PlanRestricted>
           )}
 
           {/* Slot 4: Filter */}
