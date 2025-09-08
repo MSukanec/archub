@@ -318,7 +318,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Nombre del Proyecto */}
           <FormField
             control={form.control}
@@ -478,6 +478,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       editPanel={editPanel}
       footerContent={footerContent}
       onClose={handleClose}
+      columns={1}
     />
   );
 }
