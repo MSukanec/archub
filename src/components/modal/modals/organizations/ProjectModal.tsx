@@ -86,7 +86,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     }
   });
 
-  // Reset form when editing project changes
+  // Reset form when editing project changes - ALWAYS in edit mode
   useEffect(() => {
     if (editingProject) {
       form.reset({
@@ -96,7 +96,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         status: editingProject.status as "active" | "inactive" | "completed" | "paused",
         color: editingProject.color || "#84cc16",
       });
-      setPanel('edit');
     } else {
       form.reset({
         name: "",
@@ -105,8 +104,9 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
         status: "active",
         color: "#84cc16",
       });
-      setPanel('edit');
     }
+    // Siempre establecer en modo edit
+    setPanel('edit');
   }, [editingProject, form, setPanel]);
 
   const createProjectMutation = useMutation({
@@ -440,17 +440,6 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
     <FormModalHeader
       title={isEditing ? "Editar Proyecto" : "Nuevo Proyecto"}
       icon={FolderPlus}
-      leftActions={
-        currentPanel === 'edit' && isEditing ? (
-          <button
-            type="button"
-            onClick={() => setPanel('view')}
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Volver
-          </button>
-        ) : undefined
-      }
     />
   );
 
@@ -459,13 +448,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={isEditing ? "Actualizar Proyecto" : "Crear Proyecto"}
-      onRightClick={() => {
-        if (currentPanel === 'view' && isEditing) {
-          setPanel('edit');
-        } else {
-          form.handleSubmit(onSubmit)();
-        }
-      }}
+      onRightClick={() => form.handleSubmit(onSubmit)()}
       submitDisabled={createProjectMutation.isPending}
       showLoadingSpinner={createProjectMutation.isPending}
     />
@@ -474,11 +457,13 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   return (
     <FormModalLayout
       headerContent={headerContent}
-      viewPanel={viewPanel}
+      viewPanel={null}
       editPanel={editPanel}
       footerContent={footerContent}
       onClose={handleClose}
       columns={1}
+      isEditing={true}
+      className="w-full"
     />
   );
 }
