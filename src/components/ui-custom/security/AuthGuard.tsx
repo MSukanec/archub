@@ -61,10 +61,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
       // Show auth modal for protected routes
       setShowAuthModal(true);
       
-      // Redirect to login if not already there (but don't override landing page redirect)
-      if (!isPublicRoute && lastNavigationRef.current !== '/login' && location !== '/') {
-        lastNavigationRef.current = '/login';
-        navigate('/login');
+      // Redirect to landing page when logged out
+      if (!isPublicRoute && lastNavigationRef.current !== '/') {
+        lastNavigationRef.current = '/';
+        navigate('/');
       }
       return;
     }
