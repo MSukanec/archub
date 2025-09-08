@@ -41,8 +41,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Main routing and auth logic
   useEffect(() => {
-    // Wait for all data to be loaded
-    if (!initialized || loading || userDataLoading) {
+    // Wait for initialization, but allow processing when user is null (logged out)
+    if (!initialized || (loading && user !== null) || userDataLoading) {
       return;
     }
 

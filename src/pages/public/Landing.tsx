@@ -48,11 +48,12 @@ const stats = [
 export default function Landing() {
   const { user, loading, initialized, initialize, logout } = useAuthStore();
 
+  // Don't re-initialize auth on landing after logout
   useEffect(() => {
-    if (!initialized) {
+    if (!initialized && !loading) {
       initialize();
     }
-  }, [initialize, initialized]);
+  }, [initialize, initialized, loading]);
 
   const getUserInitials = (user: any) => {
     if (!user) return "U";
