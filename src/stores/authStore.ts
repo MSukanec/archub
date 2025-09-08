@@ -197,6 +197,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (currentPath !== '/') {
         window.history.pushState({}, '', '/');
         window.dispatchEvent(new PopStateEvent('popstate'));
+        // Scroll to top of landing page
+        setTimeout(() => window.scrollTo(0, 0), 0);
       }
       
     } catch (error) {
@@ -207,6 +209,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (currentPath !== '/') {
         window.history.pushState({}, '', '/');
         window.dispatchEvent(new PopStateEvent('popstate'));
+        // Scroll to top of landing page
+        setTimeout(() => window.scrollTo(0, 0), 0);
       }
     }
   },
