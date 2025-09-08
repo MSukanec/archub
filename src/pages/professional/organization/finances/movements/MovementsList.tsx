@@ -961,9 +961,9 @@ export default function MovementsList() {
         } else if (categoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && movement.subcontract && movement.subcontract.trim() !== "") {
           // Subcontratos
           selectedValue = movement.subcontract;
-        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.member && movement.member.trim() !== "") {
-          // Mano de Obra (Personal)
-          selectedValue = movement.member;
+        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.personnel && movement.personnel.trim() !== "") {
+          // Mano de Obra (Personal) - usar PERSONNEL en lugar de member (creador)
+          selectedValue = movement.personnel;
         } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
           // Aportes Propios o Retiros Propios
           selectedValue = movement.partner;
