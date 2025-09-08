@@ -121,6 +121,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           client,
           member,
           member_avatar,
+          movement_personnel_id,
+          personnel,
           indirect_id,
           indirect,
           general_cost_id,
