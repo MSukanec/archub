@@ -60,6 +60,14 @@ const AdminCosts = () => {
       queryClient.invalidateQueries({ queryKey: ['labor-price'] });
       queryClient.invalidateQueries({ queryKey: ['task-labor'] }); // Invalidar cache de task-labor para que se actualicen los precios en popovers
       
+      // CRITICAL: Invalidar queries de tareas para que reflejen los nuevos precios
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] }); // Para TaskCostsView y popovers
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] }); // Para materiales de tareas
+      queryClient.invalidateQueries({ queryKey: ['materials'] }); // Query general de materiales
+      queryClient.invalidateQueries({ queryKey: ['material-view'] }); // Vista de materiales
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] }); // Lista de tareas generadas
+      queryClient.invalidateQueries({ queryKey: ['task-library'] }); // Biblioteca de tareas
+      
       toast({
         title: "Datos actualizados",
         description: "Los precios promedio de productos, materiales y mano de obra han sido actualizados correctamente.",
