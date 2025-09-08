@@ -163,22 +163,22 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           </div>
 
           {/* Columna derecha - Formulario */}
-          <div className="flex-1 bg-[var(--card-bg)] p-6 md:p-12 flex flex-col justify-center w-full md:max-w-lg">
+          <div className="flex-1 bg-white p-6 md:p-12 flex flex-col justify-center w-full md:max-w-lg">
             <div className="w-full max-w-sm mx-auto">
               {/* Mobile Header con logo */}
               <div className="md:hidden text-center mb-8">
                 <div className="flex items-center justify-center space-x-2 mb-4">
                   <Building className="w-8 h-8 text-emerald-600" />
-                  <span className="text-2xl font-bold text-[var(--card-fg)]">Archub</span>
+                  <span className="text-2xl font-bold text-gray-900">Archub</span>
                 </div>
-                <h2 className="text-xl font-bold text-[var(--card-fg)] mb-2">Bienvenido de vuelta</h2>
-                <p className="text-[var(--muted-foreground)]">Inicia sesión en tu cuenta</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
+                <p className="text-gray-600">Inicia sesión en tu cuenta</p>
               </div>
               
               {/* Desktop Header */}
               <div className="hidden md:block text-center mb-8">
-                <h2 className="text-2xl font-bold text-[var(--card-fg)] mb-2">Bienvenido de vuelta</h2>
-                <p className="text-[var(--muted-foreground)]">Inicia sesión en tu cuenta</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
+                <p className="text-gray-600">Inicia sesión en tu cuenta</p>
               </div>
         
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -191,7 +191,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Login */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-lg"
+                    className="w-full h-11 border-gray-300 bg-white text-gray-900 hover:bg-gray-50 rounded-xl"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -218,10 +218,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[var(--input-border)]" />
+                      <div className="w-full border-t border-gray-300" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-[var(--card-bg)] px-2 text-[var(--muted-foreground)]">
+                      <span className="bg-white px-2 text-gray-500">
                         O CONTINÚA CON
                       </span>
                     </div>
@@ -230,12 +230,12 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Email Login Form */}
                   <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm font-medium text-[var(--card-fg)]">Email</Label>
+                      <Label htmlFor="login-email" className="text-sm font-medium text-gray-900">Email</Label>
                       <Input
                         id="login-email"
                         type="email"
                         placeholder="tu@ejemplo.com"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         required
@@ -243,8 +243,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="login-password" className="text-sm font-medium text-[var(--card-fg)]">Contraseña</Label>
-                        <span className="text-sm text-[var(--muted-foreground)] hover:text-[var(--accent)] cursor-pointer">
+                        <Label htmlFor="login-password" className="text-sm font-medium text-gray-900">Contraseña</Label>
+                        <span className="text-sm text-gray-500 hover:text-[#92c900] cursor-pointer">
                           ¿Olvidaste tu contraseña?
                         </span>
                       </div>
@@ -252,23 +252,23 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="login-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full h-11 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-foreground)]" disabled={loading}>
+                    <Button type="submit" className="w-full h-11 bg-[#92c900] hover:bg-[#7ba600] text-white" disabled={loading}>
                       {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                     </Button>
                   </form>
 
-                  <p className="text-center text-sm text-[var(--muted-foreground)]">
+                  <p className="text-center text-sm text-gray-600">
                     ¿No tienes una cuenta?{' '}
                     <button
                       type="button"
                       onClick={() => setActiveTab('register')}
-                      className="text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
+                      className="text-[#92c900] hover:text-[#7ba600] font-medium"
                     >
                       Regístrate aquí
                     </button>
@@ -279,7 +279,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Register */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-lg"
+                    className="w-full h-11 border-gray-300 bg-white text-gray-900 hover:bg-gray-50 rounded-xl"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -306,10 +306,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[var(--input-border)]" />
+                      <div className="w-full border-t border-gray-300" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-[var(--card-bg)] px-2 text-[var(--muted-foreground)]">
+                      <span className="bg-white px-2 text-gray-500">
                         O CONTINÚA CON
                       </span>
                     </div>
@@ -318,64 +318,64 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Email Register Form */}
                   <form onSubmit={handleEmailRegister} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-name" className="text-sm font-medium text-[var(--card-fg)]">Nombre completo</Label>
+                      <Label htmlFor="register-name" className="text-sm font-medium text-gray-900">Nombre completo</Label>
                       <Input
                         id="register-name"
                         type="text"
                         placeholder="Tu nombre completo"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-email" className="text-sm font-medium text-[var(--card-fg)]">Email</Label>
+                      <Label htmlFor="register-email" className="text-sm font-medium text-gray-900">Email</Label>
                       <Input
                         id="register-email"
                         type="email"
                         placeholder="tu@ejemplo.com"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={registerEmail}
                         onChange={(e) => setRegisterEmail(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-password" className="text-sm font-medium text-[var(--card-fg)]">Contraseña</Label>
+                      <Label htmlFor="register-password" className="text-sm font-medium text-gray-900">Contraseña</Label>
                       <Input
                         id="register-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-sm font-medium text-[var(--card-fg)]">Confirmar Contraseña</Label>
+                      <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-900">Confirmar Contraseña</Label>
                       <Input
                         id="confirm-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
+                        className="h-11 border-gray-300 bg-white text-gray-900"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full h-11 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-foreground)]" disabled={loading}>
+                    <Button type="submit" className="w-full h-11 bg-[#92c900] hover:bg-[#7ba600] text-white" disabled={loading}>
                       {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
                     </Button>
                   </form>
 
-                  <p className="text-center text-sm text-[var(--muted-foreground)]">
+                  <p className="text-center text-sm text-gray-600">
                     ¿Ya tienes una cuenta?{' '}
                     <button
                       type="button"
                       onClick={() => setActiveTab('login')}
-                      className="text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
+                      className="text-[#92c900] hover:text-[#7ba600] font-medium"
                     >
                       Inicia sesión aquí
                     </button>
