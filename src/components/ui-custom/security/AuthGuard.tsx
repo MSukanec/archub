@@ -72,14 +72,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     // CASE 2: User exists - Handle authenticated state
     setShowAuthModal(false);
 
-    // Redirect authenticated users away from public routes
-    if (isPublicRoute) {
-      console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
-      navigate('/organization/dashboard');
-      return;
-    }
-
-    // CASE 3: Check onboarding status
+    // CASE 3: Check onboarding status FIRST (before any redirects)
     if (userData) {
       const onboardingCompleted = userData.preferences?.onboarding_completed;
       const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
@@ -131,6 +124,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
         // User is in valid state, reset tracking
         lastNavigationRef.current = null;
       }
+    }
+
+    // CASE 4: Redirect authenticated users away from public routes (after onboarding check)
+    if (isPublicRoute) {
+      console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
+      navigate('/organization/dashboard');
+      return;
     }
   }, [
     user, 
