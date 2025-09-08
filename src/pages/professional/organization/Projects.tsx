@@ -356,27 +356,22 @@ export default function Projects() {
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actionButton: {
-      label: "Nuevo Proyecto",
-      icon: Plus,
-      onClick: () => {
-        // Check plan restrictions before opening modal
-        if (isProjectLimitReached) {
-          toast({
-            title: "Límite alcanzado",
-            description: `Has alcanzado el límite de ${maxProjects} proyectos de tu plan. Actualiza para crear más proyectos.`,
-            variant: "destructive",
-            action: (
-              <ToastAction altText="Ir a planes" onClick={() => navigate('/billing')}>
-                Actualizar plan
-              </ToastAction>
-            )
-          });
-          return;
-        }
-        openModal('project', {});
-      }
-    }
+    actions: [
+      <PlanRestricted 
+        key="create-project"
+        feature="max_projects" 
+        current={projects.length}
+        functionName="Crear Proyecto"
+      >
+        <Button
+          onClick={() => openModal('project', {})}
+          className="h-8 px-3 text-xs"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Nuevo Proyecto
+        </Button>
+      </PlanRestricted>
+    ]
   }
 
   if (isLoading || projectsLoading) {
