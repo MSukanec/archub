@@ -112,7 +112,7 @@ export function ListFormModal({ modalData, onClose }: ListFormModalProps) {
 
       handleClose();
     } catch (error) {
-      console.error('Error saving list:', error);
+      console.error('🚨 LIST FORM ERROR - This might be the red toast:', error);
       toast({
         title: "Error",
         description: isEditing ? "No se pudo actualizar la lista" : "No se pudo crear la lista",

@@ -106,7 +106,7 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
 
       handleClose();
     } catch (error) {
-      console.error('Error saving board:', error);
+      console.error('🚨 BOARD FORM ERROR - This might be the red toast:', error);
       toast({
         title: "Error",
         description: isEditing ? "No se pudo actualizar el tablero" : "No se pudo crear el tablero",
