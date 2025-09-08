@@ -193,13 +193,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       
       // IMMEDIATE redirect after quick cleanup - use window.location.href for landing
-      window.location.href = '/';
+      window.location.href = '/login';
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
       // Force redirect even on error
       set({ user: null, loading: false, initialized: true });
-      window.location.href = '/';
+      window.location.href = '/login';
     }
   },
 

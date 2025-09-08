@@ -42,13 +42,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       await signIn(loginEmail, loginPassword)
       onOpenChange(false)
-      // Show success toast with a slight delay to avoid conflicts
-      setTimeout(() => {
-        toast({
-          title: "Éxito",
-          description: "Has iniciado sesión correctamente",
-        })
-      }, 100)
+      // Success handled by redirect - no toast needed
     } catch (error: any) {
       toast({
         title: "Error",
@@ -197,7 +191,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Login */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-md"
+                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-lg"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -224,11 +218,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300" />
+                      <div className="w-full border-t border-[var(--input-border)]" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-2 text-gray-500">
-                        o
+                      <span className="bg-[var(--card-bg)] px-2 text-[var(--muted-foreground)]">
+                        O CONTINÚA CON
                       </span>
                     </div>
                   </div>
@@ -250,7 +244,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="login-password" className="text-sm font-medium text-[var(--card-fg)]">Contraseña</Label>
-                        <span className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">
+                        <span className="text-sm text-[var(--muted-foreground)] hover:text-[var(--accent)] cursor-pointer">
                           ¿Olvidaste tu contraseña?
                         </span>
                       </div>
@@ -269,14 +263,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </Button>
                   </form>
 
-                  <p className="text-center text-sm text-gray-600">
+                  <p className="text-center text-sm text-[var(--muted-foreground)]">
                     ¿No tienes una cuenta?{' '}
                     <button
                       type="button"
                       onClick={() => setActiveTab('register')}
-                      className="text-emerald-600 hover:text-emerald-700 font-medium"
+                      className="text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
                     >
-                      Regístrate ahora
+                      Regístrate aquí
                     </button>
                   </p>
                 </TabsContent>
@@ -285,7 +279,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Register */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-md"
+                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-lg"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -312,11 +306,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300" />
+                      <div className="w-full border-t border-[var(--input-border)]" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-2 text-gray-500">
-                        o
+                      <span className="bg-[var(--card-bg)] px-2 text-[var(--muted-foreground)]">
+                        O CONTINÚA CON
                       </span>
                     </div>
                   </div>
@@ -324,7 +318,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Email Register Form */}
                   <form onSubmit={handleEmailRegister} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-name" className="text-sm font-medium text-gray-900">Nombre completo</Label>
+                      <Label htmlFor="register-name" className="text-sm font-medium text-[var(--card-fg)]">Nombre completo</Label>
                       <Input
                         id="register-name"
                         type="text"
@@ -336,7 +330,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-email" className="text-sm font-medium text-gray-900">Email</Label>
+                      <Label htmlFor="register-email" className="text-sm font-medium text-[var(--card-fg)]">Email</Label>
                       <Input
                         id="register-email"
                         type="email"
@@ -348,7 +342,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-password" className="text-sm font-medium text-gray-900">Contraseña</Label>
+                      <Label htmlFor="register-password" className="text-sm font-medium text-[var(--card-fg)]">Contraseña</Label>
                       <Input
                         id="register-password"
                         type="password"
@@ -360,7 +354,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-900">Confirmar Contraseña</Label>
+                      <Label htmlFor="confirm-password" className="text-sm font-medium text-[var(--card-fg)]">Confirmar Contraseña</Label>
                       <Input
                         id="confirm-password"
                         type="password"
@@ -376,14 +370,14 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </Button>
                   </form>
 
-                  <p className="text-center text-sm text-gray-600">
+                  <p className="text-center text-sm text-[var(--muted-foreground)]">
                     ¿Ya tienes una cuenta?{' '}
                     <button
                       type="button"
                       onClick={() => setActiveTab('login')}
-                      className="text-emerald-600 hover:text-emerald-700 font-medium"
+                      className="text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
                     >
-                      Inicia sesión
+                      Inicia sesión aquí
                     </button>
                   </p>
                 </TabsContent>

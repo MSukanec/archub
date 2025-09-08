@@ -143,7 +143,7 @@ export default function Onboarding() {
       resetOnboarding();
     },
     onError: (error) => {
-      console.error('🚨 ONBOARDING ERROR - This might be the red toast:', error);
+      console.error('Error saving onboarding data:', error);
       toast({
         variant: "destructive",
         title: "Error",
