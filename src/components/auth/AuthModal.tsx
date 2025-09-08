@@ -166,22 +166,22 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           </div>
 
           {/* Columna derecha - Formulario */}
-          <div className="flex-1 bg-white p-6 md:p-12 flex flex-col justify-center w-full md:max-w-lg">
+          <div className="flex-1 bg-[var(--card-bg)] p-6 md:p-12 flex flex-col justify-center w-full md:max-w-lg">
             <div className="w-full max-w-sm mx-auto">
               {/* Mobile Header con logo */}
               <div className="md:hidden text-center mb-8">
                 <div className="flex items-center justify-center space-x-2 mb-4">
                   <Building className="w-8 h-8 text-emerald-600" />
-                  <span className="text-2xl font-bold text-gray-900">Archub</span>
+                  <span className="text-2xl font-bold text-[var(--card-fg)]">Archub</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
-                <p className="text-gray-600">Inicia sesión en tu cuenta</p>
+                <h2 className="text-xl font-bold text-[var(--card-fg)] mb-2">Bienvenido de vuelta</h2>
+                <p className="text-[var(--muted-foreground)]">Inicia sesión en tu cuenta</p>
               </div>
               
               {/* Desktop Header */}
               <div className="hidden md:block text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Bienvenido de vuelta</h2>
-                <p className="text-gray-600">Inicia sesión en tu cuenta</p>
+                <h2 className="text-2xl font-bold text-[var(--card-fg)] mb-2">Bienvenido de vuelta</h2>
+                <p className="text-[var(--muted-foreground)]">Inicia sesión en tu cuenta</p>
               </div>
         
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -194,7 +194,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Login */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-gray-300 bg-black text-white hover:bg-gray-800"
+                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-md"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -233,12 +233,12 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Email Login Form */}
                   <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm font-medium text-gray-900">Email</Label>
+                      <Label htmlFor="login-email" className="text-sm font-medium text-[var(--card-fg)]">Email</Label>
                       <Input
                         id="login-email"
                         type="email"
                         placeholder="tu@ejemplo.com"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         required
@@ -246,22 +246,22 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="login-password" className="text-sm font-medium text-gray-900">Contraseña</Label>
-                        <button type="button" className="text-sm text-gray-500 hover:text-gray-700">
+                        <Label htmlFor="login-password" className="text-sm font-medium text-[var(--card-fg)]">Contraseña</Label>
+                        <span className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">
                           ¿Olvidaste tu contraseña?
-                        </button>
+                        </span>
                       </div>
                       <Input
                         id="login-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white" disabled={loading}>
+                    <Button type="submit" className="w-full h-11 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-foreground)]" disabled={loading}>
                       {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                     </Button>
                   </form>
@@ -282,7 +282,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                   {/* Google Register */}
                   <Button 
                     variant="outline" 
-                    className="w-full h-11 border-gray-300 bg-black text-white hover:bg-gray-800"
+                    className="w-full h-11 border-[var(--input-border)] bg-[var(--card-bg)] text-[var(--card-fg)] hover:bg-[var(--card-hover-bg)] rounded-md"
                     onClick={handleGoogleAuth}
                     disabled={loading}
                   >
@@ -326,7 +326,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="register-name"
                         type="text"
                         placeholder="Tu nombre completo"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required
@@ -338,7 +338,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="register-email"
                         type="email"
                         placeholder="tu@ejemplo.com"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={registerEmail}
                         onChange={(e) => setRegisterEmail(e.target.value)}
                         required
@@ -350,7 +350,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="register-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
                         required
@@ -362,13 +362,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         id="confirm-password"
                         type="password"
                         placeholder="••••••••"
-                        className="h-11 border-gray-300"
+                        className="h-11 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-fg)]"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white" disabled={loading}>
+                    <Button type="submit" className="w-full h-11 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-foreground)]" disabled={loading}>
                       {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
                     </Button>
                   </form>
