@@ -294,14 +294,6 @@ export function TaskBasicDataView({
               disabled={isSystemTask}
             />
 
-            <FormSubsectionButton
-              icon={<Building className="h-4 w-4" />}
-              title={isSaving ? "Guardando..." : "Auto-guardado activo"}
-              description={isSystemTask ? "Tareas del sistema no se pueden editar" : "Los cambios se guardan automáticamente"}
-              onClick={() => {}}
-              disabled={true}
-            />
-
           </CardContent>
         </Card>
       </div>

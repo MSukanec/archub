@@ -10,6 +10,8 @@ interface FormSubsectionButtonProps {
   onClick: () => void;
   className?: string;
   disabled?: boolean;
+  variant?: 'default' | 'destructive';
+  showPlusIcon?: boolean;
 }
 
 export function FormSubsectionButton({
@@ -18,7 +20,9 @@ export function FormSubsectionButton({
   description,
   onClick,
   className,
-  disabled = false
+  disabled = false,
+  variant = 'default',
+  showPlusIcon = false
 }: FormSubsectionButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -50,8 +54,14 @@ export function FormSubsectionButton({
         )}
       >
         {/* Icon */}
-        <div className="flex-shrink-0 w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-          <div className="w-4 h-4 text-accent [&>svg]:w-4 [&>svg]:h-4">
+        <div className={cn(
+          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center",
+          variant === 'destructive' ? "bg-destructive/10" : "bg-accent/10"
+        )}>
+          <div className={cn(
+            "w-4 h-4 [&>svg]:w-4 [&>svg]:h-4",
+            variant === 'destructive' ? "text-destructive" : "text-accent"
+          )}>
             {icon}
           </div>  
         </div>
@@ -60,8 +70,8 @@ export function FormSubsectionButton({
         <div className="flex-1 min-w-0">
           <div className={cn(
             "font-medium text-sm transition-colors duration-200",
-            "text-foreground",
-            isHovered && !disabled && "text-accent"
+            variant === 'destructive' ? "text-destructive" : "text-foreground",
+            isHovered && !disabled && (variant === 'destructive' ? "text-destructive/80" : "text-accent")
           )}>
             {title}
           </div>
@@ -70,13 +80,15 @@ export function FormSubsectionButton({
           </div>
         </div>
 
-        {/* Always Visible Add Icon */}
-        <div className="flex-shrink-0">
-          <Plus className={cn(
-            "h-4 w-4 text-muted-foreground transition-colors duration-200",
-            isHovered && !disabled && "text-accent"
-          )} />
-        </div>
+        {/* Conditional Plus Icon */}
+        {showPlusIcon && (
+          <div className="flex-shrink-0">
+            <Plus className={cn(
+              "h-4 w-4 text-muted-foreground transition-colors duration-200",
+              isHovered && !disabled && "text-accent"
+            )} />
+          </div>
+        )}
       </button>
     </div>
   );
