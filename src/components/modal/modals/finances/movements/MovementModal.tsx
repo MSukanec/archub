@@ -36,6 +36,7 @@ import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMoveme
 import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
 import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartners } from '@/hooks/use-movement-partners'
 import { useMovementGeneralCosts, useCreateMovementGeneralCosts, useUpdateMovementGeneralCosts } from '@/hooks/use-movement-general-costs'
+import { useMovementPersonnel } from '@/hooks/use-movement-personnel'
 
 // Función para crear schema dinámico basado en contexto
 const createBasicMovementSchema = (isOrganizationalContext: boolean) => z.object({
@@ -172,6 +173,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Query para cargar gastos generales existentes en modo edición
   const { data: existingGeneralCosts } = useMovementGeneralCosts(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
+
+  // Query para cargar personal existente en modo edición
+  const { data: existingPersonnel } = useMovementPersonnel(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
@@ -316,6 +322,30 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       setSelectedGeneralCosts(transformedGeneralCosts);
     }
   }, [isEditing, existingGeneralCosts]);
+
+  // Load existing personnel when editing
+  React.useEffect(() => {
+    if (isEditing && existingPersonnel && existingPersonnel.length > 0) {
+      const transformedPersonnel = existingPersonnel.map((personnel: any) => {
+        // Get personnel display name
+        let contactName = 'Sin nombre'
+        if (personnel.project_personnel?.contact) {
+          const contact = personnel.project_personnel.contact
+          const fullName = contact.full_name || 
+            `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+          if (fullName) {
+            contactName = fullName
+          }
+        }
+
+        return {
+          personnel_id: personnel.personnel_id,
+          contact_name: contactName
+        }
+      })
+      setSelectedPersonnel(transformedPersonnel)
+    }
+  }, [isEditing, existingPersonnel]);
 
   // Load existing project clients when editing
   React.useEffect(() => {
