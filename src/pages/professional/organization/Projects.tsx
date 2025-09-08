@@ -7,8 +7,6 @@ import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-pr
 import { Folder, Plus, Home, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { ToastAction } from '@/components/ui/toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
@@ -27,15 +25,9 @@ export default function Projects() {
   const { data: userData, isLoading } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
-  const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { limit } = usePlanFeatures()
   const { setSelectedProject } = useProjectContext()
   const [, navigate] = useLocation()
-  
-  // Calculate if we've reached the project limit
-  const maxProjects = limit('max_projects')
-  const isProjectLimitReached = maxProjects !== Infinity && projects.length >= maxProjects
 
   // Filter states
   const [filterByProjectType, setFilterByProjectType] = useState('all')
