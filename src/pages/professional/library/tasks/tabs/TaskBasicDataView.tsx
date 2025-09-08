@@ -13,6 +13,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 interface TaskBasicDataViewProps {
   task: any;
@@ -23,6 +24,7 @@ export function TaskBasicDataView({
   task,
   onTabChange 
 }: TaskBasicDataViewProps) {
+  const { data: userData } = useCurrentUser();
   
   const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
   const [taskRubro, setTaskRubro] = useState(task.division || task.category || '');
@@ -146,7 +148,7 @@ export function TaskBasicDataView({
                   <div>
                     <p className="text-sm font-medium">Creador</p>
                     <p className="text-sm text-muted-foreground">
-                      {isSystemTask ? 'Sistema' : 'Usuario personalizado'}
+                      {isSystemTask ? 'Sistema' : userData?.organization?.name || 'Organización'}
                     </p>
                   </div>
                 </div>
