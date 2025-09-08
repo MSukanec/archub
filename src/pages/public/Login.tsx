@@ -112,7 +112,7 @@ export default function Login() {
                 <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 text-gray-500">O continúa con</span>
+                <span className="px-2 bg-white text-gray-500">O continúa con</span>
               </div>
             </div>
 
@@ -145,8 +145,8 @@ export default function Login() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
