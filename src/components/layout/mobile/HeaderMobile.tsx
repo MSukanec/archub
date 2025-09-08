@@ -90,7 +90,7 @@ export function HeaderMobile({
               <div className="flex-shrink-0">
                 {icon ? (
                   <div className="text-[var(--accent)]">
-                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType)}
+                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType, { className: "w-5 h-5" })}
                   </div>
                 ) : (
                   getBreadcrumbIcon()
