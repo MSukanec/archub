@@ -140,7 +140,7 @@ export function PageLayout({
               <div className="flex items-center gap-3">
                 {icon && (
                   <span className="text-[var(--accent)] flex-shrink-0">
-                    {React.createElement(icon as React.ComponentType<{ className?: string }>, { 
+                    {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<{ className?: string }>, { 
                       className: "w-5 h-5" 
                     })}
                   </span>
