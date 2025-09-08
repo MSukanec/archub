@@ -170,29 +170,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       // Clear ALL Supabase tokens synchronously  
       try {
-        // Clear all possible Supabase localStorage keys
-        localStorage.removeItem('sb-wtatvsgeivymcppowrfy-auth-token');
+        // Get all localStorage keys first (safer iteration)
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-')) {
+            keysToRemove.push(key);
+          }
+        }
+        
+        // Remove all Supabase keys
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Also clear specific known keys
         localStorage.removeItem('supabase.auth.token');
         localStorage.removeItem('supabase-auth-token');
         
-        // Clear all localStorage keys starting with 'sb-'
-        Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('sb-')) {
-            localStorage.removeItem(key);
-          }
-        });
-        
         sessionStorage.clear();
-      } catch (e) {}
+        console.log('🔧 AuthStore: Cleared', keysToRemove.length, 'Supabase tokens');
+      } catch (e) {
+        console.error('🔧 AuthStore: Error clearing storage:', e);
+      }
       
-      // IMMEDIATE redirect after quick cleanup
-      window.location.replace('/');
+      // IMMEDIATE redirect after quick cleanup - use window.location.href for landing
+      window.location.href = '/';
       
     } catch (error) {
       console.error('🔧 AuthStore: Error during logout:', error);
       // Force redirect even on error
       set({ user: null, loading: false, initialized: true });
-      window.location.replace('/');
+      window.location.href = '/';
     }
   },
 
