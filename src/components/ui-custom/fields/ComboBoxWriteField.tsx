@@ -53,15 +53,15 @@ export function ComboBox({
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
     : options.filter(option =>
-        option.label.toLowerCase().includes(searchValue.toLowerCase())
+        (option.label || '').toLowerCase().includes((searchValue || '').toLowerCase())
       );
 
 
 
   // Check if search value would create a new option
-  const searchValueToCheck = onSearchChange ? searchQuery : searchValue;
+  const searchValueToCheck = onSearchChange ? (searchQuery || '') : (searchValue || '');
   const canCreateNew = allowCreate && searchValueToCheck.trim() && 
-    !options.some(option => option.label.toLowerCase() === searchValueToCheck.toLowerCase().trim());
+    !options.some(option => (option.label || '').toLowerCase() === searchValueToCheck.toLowerCase().trim());
 
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
