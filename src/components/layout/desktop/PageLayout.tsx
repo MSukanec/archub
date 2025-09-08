@@ -52,6 +52,8 @@ interface PageLayoutProps {
     label: string;
     icon?: React.ComponentType<any>;
     onClick: () => void;
+    isRestricted?: boolean;
+    restrictionBadge?: string;
     dropdown?: Array<{
       label: string;
       onClick: () => void;
@@ -331,17 +333,24 @@ export function PageLayout({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={actionButton.onClick}
-                    className="h-8 px-3 text-xs font-normal"
-                  >
-                    {actionButton.icon && (
-                      <actionButton.icon className="w-4 h-4 mr-1" />
+                  <div className="relative">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={actionButton.onClick}
+                      className="h-8 px-3 text-xs font-normal"
+                    >
+                      {actionButton.icon && (
+                        <actionButton.icon className="w-4 h-4 mr-1" />
+                      )}
+                      {actionButton.label}
+                    </Button>
+                    {actionButton.isRestricted && actionButton.restrictionBadge && (
+                      <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium shadow-sm border border-white">
+                        {actionButton.restrictionBadge}
+                      </div>
                     )}
-                    {actionButton.label}
-                  </Button>
+                  </div>
                 )}
               </>
             )}
