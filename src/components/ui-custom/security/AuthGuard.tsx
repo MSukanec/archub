@@ -128,13 +128,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     } else {
       // User is in valid state, reset tracking
       lastNavigationRef.current = null;
-    }
-
-    // CASE 4: Redirect authenticated users away from public routes (after onboarding check)
-    if (isPublicRoute) {
-      console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
-      navigate('/organization/dashboard');
-      return;
+      
+      // CASE 4: Redirect authenticated users away from public routes (only after onboarding check passes)
+      if (isPublicRoute) {
+        console.log('AuthGuard: Authenticated user on public route, redirecting to dashboard');
+        navigate('/organization/dashboard');
+        return;
+      }
     }
   }, [
     user, 
