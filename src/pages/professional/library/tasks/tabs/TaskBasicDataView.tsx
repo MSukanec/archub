@@ -1,7 +1,7 @@
 import { Calendar, User, Ruler, Building, FileText, Zap, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormSubsectionButton } from '@/components/modal/form/FormSubsectionButton';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
@@ -23,9 +23,17 @@ export function TaskBasicDataView({
   task,
   onTabChange 
 }: TaskBasicDataViewProps) {
+  
   const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
-  const [taskRubro, setTaskRubro] = useState(task.division || '');
+  const [taskRubro, setTaskRubro] = useState(task.division || task.category || '');
   const [taskUnit, setTaskUnit] = useState(task.unit || '');
+  
+  // Actualizar estados cuando cambian los datos de la tarea
+  useEffect(() => {
+    setTaskName(task.custom_name || task.name_rendered || '');
+    setTaskRubro(task.division || task.category || '');
+    setTaskUnit(task.unit || '');
+  }, [task]);
   
   const isSystemTask = task.is_system;
   
@@ -79,28 +87,44 @@ export function TaskBasicDataView({
     enabled: !isSystemTask
   });
   
-  // Mock options - TODO: Conectar con datos reales
-  const rubroOptions = [
-    { value: 'Mamposterías', label: 'Mamposterías' },
-    { value: 'Aberturas', label: 'Aberturas' },
-    { value: 'Cielorrasos', label: 'Cielorrasos' },
-    { value: 'Contrapisos y Carpetas', label: 'Contrapisos y Carpetas' },
-    { value: 'Equipamiento', label: 'Equipamiento' },
-    { value: 'Pinturas', label: 'Pinturas' },
-    { value: 'Pisos', label: 'Pisos' },
-    { value: 'Revestimientos', label: 'Revestimientos' },
-    { value: 'Revoques', label: 'Revoques' }
-  ];
+  // Cargar opciones dinámicamente desde la base de datos
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['task-divisions'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('task_divisions')
+        .select('name')
+        .order('name');
+      
+      if (error) {
+        console.error('Error loading divisions:', error);
+        return [];
+      }
+      
+      return data?.map(d => ({ value: d.name, label: d.name })) || [];
+    }
+  });
   
-  const unitOptions = [
-    { value: 'm²', label: 'm²' },
-    { value: 'm', label: 'm' },
-    { value: 'ml', label: 'ml' },
-    { value: 'un', label: 'un' },
-    { value: 'kg', label: 'kg' },
-    { value: 'm³', label: 'm³' },
-    { value: 'gl', label: 'gl' }
-  ];
+  const { data: units = [] } = useQuery({
+    queryKey: ['units'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('units')
+        .select('name')
+        .order('name');
+      
+      if (error) {
+        console.error('Error loading units:', error);
+        return [];
+      }
+      
+      return data?.map(u => ({ value: u.name, label: u.name })) || [];
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -158,7 +182,7 @@ export function TaskBasicDataView({
                 <ComboBox
                   value={taskRubro}
                   onValueChange={setTaskRubro}
-                  options={rubroOptions}
+                  options={divisions}
                   placeholder="Seleccionar rubro"
                   disabled={isSystemTask}
                   allowCreate={!isSystemTask}
@@ -171,7 +195,7 @@ export function TaskBasicDataView({
                 <ComboBox
                   value={taskUnit}
                   onValueChange={setTaskUnit}
-                  options={unitOptions}
+                  options={units}
                   placeholder="Seleccionar unidad"
                   disabled={isSystemTask}
                   allowCreate={!isSystemTask}
