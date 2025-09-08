@@ -50,11 +50,12 @@ export default function Register() {
 
     try {
       await signUp(formData.email, formData.password, formData.fullName);
+      // Don't navigate manually - let AuthGuard handle the flow
+      // In development, email confirmation is disabled so user gets logged in automatically
       toast({
-        title: "¡Cuenta creada!",
-        description: "Revisa tu email para confirmar tu cuenta."
+        title: "¡Registro exitoso!",
+        description: "Configurando tu cuenta..."
       });
-      navigate("/login");
     } catch (error) {
       toast({
         variant: "destructive",

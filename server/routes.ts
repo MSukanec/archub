@@ -68,6 +68,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (error) {
         console.error("Error fetching current user:", error);
+        
+        // Special handling for newly registered users who might not have complete data yet
+        if (error.message && error.message.includes('organization')) {
+          console.log("User appears to be newly registered without complete organization data");
+          return res.status(404).json({ error: "User not found" });
+        }
+        
         return res.status(500).json({ error: "Failed to fetch user data", details: error });
       }
       
