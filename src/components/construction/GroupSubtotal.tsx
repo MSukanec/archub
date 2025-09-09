@@ -1,4 +1,5 @@
-import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+import { useQueries } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 interface GroupSubtotalProps {
   tasks: any[]
@@ -6,8 +7,36 @@ interface GroupSubtotalProps {
 
 // Hook para obtener materiales de múltiples tareas
 function useGroupTaskMaterials(taskIds: string[]) {
-  // Para cada task_id, obtener sus materiales usando el hook existente
-  const results = taskIds.map(taskId => useTaskMaterials(taskId))
+  // Usar useQueries para manejar múltiples queries de forma segura
+  const results = useQueries({
+    queries: taskIds.map(taskId => ({
+      queryKey: ['task-materials', taskId],
+      queryFn: async () => {
+        if (!supabase || !taskId) return []
+        
+        const { data, error } = await supabase
+          .from('task_materials')
+          .select(`
+            id,
+            task_id,
+            material_id,
+            amount,
+            materials_view (
+              id,
+              name,
+              unit_of_computation,
+              avg_price,
+              category_name
+            )
+          `)
+          .eq('task_id', taskId)
+        
+        if (error) throw error
+        return data || []
+      },
+      enabled: !!taskId
+    }))
+  })
   
   // Combinar todos los resultados
   const isLoading = results.some(result => result.isLoading)
