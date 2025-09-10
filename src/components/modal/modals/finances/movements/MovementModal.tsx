@@ -430,22 +430,30 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Update form defaults when better data becomes available (non-blocking)
   React.useEffect(() => {
-    if (userData?.user?.id && currentMember?.id && currencies.length > 0 && wallets.length > 0) {
-      const updatedDefaults = {
-        created_by: editingMovement?.created_by || currentMember.id,
-        currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id,
-        wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id
-      }
-      
-      // Only update if values have changed
-      const currentValues = form.getValues()
-      if (currentValues.created_by !== updatedDefaults.created_by ||
-          currentValues.currency_id !== updatedDefaults.currency_id ||
-          currentValues.wallet_id !== updatedDefaults.wallet_id) {
-        form.reset({ ...currentValues, ...updatedDefaults })
-      }
+    // Add guards to prevent repetitive calls
+    if (hasLoadedInitialData || isInitialLoading) return
+    if (!userData?.user?.id || !currentMember?.id || currencies.length === 0 || wallets.length === 0) return
+    
+    const updatedDefaults = {
+      created_by: editingMovement?.created_by || currentMember.id,
+      currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id,
+      wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id
     }
-  }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet])
+    
+    // Only update if values have changed significantly
+    const currentValues = form.getValues()
+    const hasSignificantChanges = (
+      currentValues.created_by !== updatedDefaults.created_by ||
+      currentValues.currency_id !== updatedDefaults.currency_id ||
+      currentValues.wallet_id !== updatedDefaults.wallet_id
+    )
+    
+    if (hasSignificantChanges) {
+      // Avoid triggering validation/dirty flags during reset
+      const resetOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+      form.reset({ ...currentValues, ...updatedDefaults }, resetOptions)
+    }
+  }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, hasLoadedInitialData, isInitialLoading, editingMovement?.created_by, editingMovement?.currency_id, editingMovement?.wallet_id, form])
 
   // Synchronous conversion form initialization
   const conversionForm = useForm<ConversionForm>({
@@ -485,7 +493,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const handleTypeChange = React.useCallback((newTypeId: string) => {
     if (!newTypeId || !movementConcepts) return
     
-    setSelectedTypeId(newTypeId)
+    // EARLY RETURN: Idempotent check - no action needed if values are already correct
+    if (newTypeId === selectedTypeId) {
+      const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
+      const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+      const expectedMovementType = viewMode.includes("conversion") ? 'conversion' : 
+                                  viewMode.includes("transfer") ? 'transfer' : 'normal'
+      
+      if (expectedMovementType === movementType) {
+        // Already in correct state - no action needed
+        return
+      }
+    }
     
     // Detectar tipo de movimiento por view_mode 
     const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
@@ -494,6 +513,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     console.log('🔧 HandleTypeChange - selectedConcept:', selectedConcept)
     console.log('🔧 HandleTypeChange - viewMode (trimmed):', `"${viewMode}"`)
     console.log('🔧 HandleTypeChange - current movementType:', movementType)
+    
+    // Update selectedTypeId only if different
+    if (newTypeId !== selectedTypeId) {
+      setSelectedTypeId(newTypeId)
+    }
     
     // Obtener valores actuales de campos comunes del formulario activo
     const getCurrentCommonValues = () => {
@@ -519,37 +543,45 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
     
     const commonValues = getCurrentCommonValues()
+    const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
     
     // Sincronizar campos comunes en todos los formularios ANTES de cambiar el tipo
-    form.setValue('type_id', newTypeId)
-    form.setValue('movement_date', commonValues.movement_date)
-    form.setValue('description', commonValues.description)
-    form.setValue('created_by', commonValues.created_by)
+    form.setValue('type_id', newTypeId, formOptions)
+    form.setValue('movement_date', commonValues.movement_date, formOptions)
+    form.setValue('description', commonValues.description, formOptions)
+    form.setValue('created_by', commonValues.created_by, formOptions)
     
-    conversionForm.setValue('type_id', newTypeId)
-    conversionForm.setValue('movement_date', commonValues.movement_date)
-    conversionForm.setValue('description', commonValues.description)
-    conversionForm.setValue('created_by', commonValues.created_by)
-    conversionForm.setValue('project_id', form.getValues('project_id'))
+    conversionForm.setValue('type_id', newTypeId, formOptions)
+    conversionForm.setValue('movement_date', commonValues.movement_date, formOptions)
+    conversionForm.setValue('description', commonValues.description, formOptions)
+    conversionForm.setValue('created_by', commonValues.created_by, formOptions)
+    conversionForm.setValue('project_id', form.getValues('project_id'), formOptions)
     
-    transferForm.setValue('type_id', newTypeId)
-    transferForm.setValue('movement_date', commonValues.movement_date)
-    transferForm.setValue('description', commonValues.description)
-    transferForm.setValue('created_by', commonValues.created_by)
+    transferForm.setValue('type_id', newTypeId, formOptions)
+    transferForm.setValue('movement_date', commonValues.movement_date, formOptions)
+    transferForm.setValue('description', commonValues.description, formOptions)
+    transferForm.setValue('created_by', commonValues.created_by, formOptions)
     
     // Cambiar tipo de movimiento DESPUÉS de sincronizar - con comparación más robusta
     const newMovementType = viewMode.includes("conversion") ? 'conversion' : 
                            viewMode.includes("transfer") ? 'transfer' : 'normal'
     
     console.log('🔧 HandleTypeChange - setting movementType to:', newMovementType)
-    setMovementType(newMovementType)
+    if (newMovementType !== movementType) {
+      setMovementType(newMovementType)
+    }
     
-    // Reset categorías
-    setSelectedCategoryId('')
-    setSelectedSubcategoryId('')
-    form.setValue('category_id', '')
-    form.setValue('subcategory_id', '')
-  }, [movementConcepts, form, conversionForm, transferForm, movementType])
+    // Reset categorías solo si necesario
+    const currentCategoryId = selectedCategoryId
+    const currentSubcategoryId = selectedSubcategoryId
+    
+    if (currentCategoryId !== '' || currentSubcategoryId !== '') {
+      setSelectedCategoryId('')
+      setSelectedSubcategoryId('')
+      form.setValue('category_id', '', formOptions)
+      form.setValue('subcategory_id', '', formOptions)
+    }
+  }, [movementConcepts, form, conversionForm, transferForm, movementType, selectedTypeId, selectedCategoryId, selectedSubcategoryId])
 
   // Effect adicional para sincronización cuando cambia movementType (solo durante carga inicial)
   React.useEffect(() => {
@@ -563,21 +595,26 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       type_id: form.getValues('type_id')
     }
     
+    const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+    
     if (movementType === 'conversion') {
-      conversionForm.setValue('movement_date', commonValues.movement_date)
-      conversionForm.setValue('description', commonValues.description)
-      conversionForm.setValue('created_by', commonValues.created_by)
-      conversionForm.setValue('type_id', selectedTypeId || commonValues.type_id)
-      conversionForm.setValue('project_id', form.getValues('project_id'))
+      conversionForm.setValue('movement_date', commonValues.movement_date, formOptions)
+      conversionForm.setValue('description', commonValues.description, formOptions)
+      conversionForm.setValue('created_by', commonValues.created_by, formOptions)
+      conversionForm.setValue('type_id', selectedTypeId || commonValues.type_id, formOptions)
+      conversionForm.setValue('project_id', form.getValues('project_id'), formOptions)
 
     } else if (movementType === 'transfer') {
-      transferForm.setValue('movement_date', commonValues.movement_date)
-      transferForm.setValue('description', commonValues.description)
-      transferForm.setValue('created_by', commonValues.created_by)
-      transferForm.setValue('type_id', commonValues.type_id)
+      transferForm.setValue('movement_date', commonValues.movement_date, formOptions)
+      transferForm.setValue('description', commonValues.description, formOptions)
+      transferForm.setValue('created_by', commonValues.created_by, formOptions)
+      transferForm.setValue('type_id', commonValues.type_id, formOptions)
 
     }
-  }, [movementType, form, conversionForm, transferForm, hasLoadedInitialData])
+    
+    // Mark as complete after first successful synchronization
+    setHasLoadedInitialData(true)
+  }, [movementType, form, conversionForm, transferForm, hasLoadedInitialData, selectedTypeId])
 
   // Función para cargar datos específicos de conversión
   const loadConversionData = async (movement: any) => {
@@ -1913,65 +1950,48 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               options={transformConceptsToOptions(movementConcepts || [])}
               value={React.useMemo(() => [selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean), [selectedTypeId, selectedCategoryId, selectedSubcategoryId])}
               onValueChange={(values) => {
-                console.log('🎯 CascadingSelect values:', values)
-                console.log('🎯 Starting CORRECT onValueChange callback...')
-                
                 const typeId = values[0] || ''
                 const categoryId = values[1] || ''
                 const subcategoryId = values[2] || ''
                 
-                console.log('🎯 typeId extracted:', typeId)
+                // IDEMPOTENT CHECK: Early return if values haven't changed
+                const hasChanges = (
+                  typeId !== selectedTypeId ||
+                  categoryId !== selectedCategoryId ||
+                  subcategoryId !== selectedSubcategoryId
+                )
                 
-                // Actualizar estados
+                if (!hasChanges) {
+                  // No changes needed - prevent redundant processing
+                  return
+                }
+                
+                console.log('🎯 CascadingSelect processing changes:', { typeId, categoryId, subcategoryId })
+                
+                // Update hierarchical selection states  
                 setSelectedTypeId(typeId)
                 setSelectedCategoryId(categoryId)
                 setSelectedSubcategoryId(subcategoryId)
                 
-                console.log('🎯 States updated')
+                const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
                 
-                // Actualizar formularios según el tipo activo
+                // Update form values with proper options to prevent validation triggers
                 if (movementType === 'conversion') {
-                  conversionForm.setValue('type_id', typeId)
-                  // Los formularios de conversión no tienen category_id/subcategory_id
+                  conversionForm.setValue('type_id', typeId, formOptions)
+                  // Conversion forms don't have category_id/subcategory_id
                 } else if (movementType === 'transfer') {
-                  transferForm.setValue('type_id', typeId)
-                  // Los formularios de transferencia no tienen category_id/subcategory_id
+                  transferForm.setValue('type_id', typeId, formOptions)
+                  // Transfer forms don't have category_id/subcategory_id
                 } else {
-                  form.setValue('type_id', typeId)
-                  form.setValue('category_id', categoryId)
-                  form.setValue('subcategory_id', subcategoryId)
+                  form.setValue('type_id', typeId, formOptions)
+                  form.setValue('category_id', categoryId, formOptions)
+                  form.setValue('subcategory_id', subcategoryId, formOptions)
                 }
                 
-                console.log('🎯 Forms updated')
-                
-                // CAMBIO CLAVE: SIEMPRE aplicar detección de tipo, sin condición hasLoadedInitialData
-                if (typeId && movementConcepts) {
-                  const selectedConcept = movementConcepts.find((concept: any) => concept.id === typeId)
-                  console.log('🎯 Found concept:', selectedConcept?.name, 'view_mode:', selectedConcept?.view_mode)
-                  
-                  if (selectedConcept?.view_mode) {
-                    const viewMode = selectedConcept.view_mode.trim()
-                    console.log('🎯 Processing view_mode:', viewMode)
-                    
-                    if (viewMode.includes("conversion")) {
-                      console.log('🎯 Setting movement type to CONVERSION')
-                      setMovementType('conversion')
-                    } else if (viewMode.includes("transfer")) {
-                      console.log('🎯 Setting movement type to TRANSFER')
-                      setMovementType('transfer')
-                    } else {
-                      console.log('🎯 Setting movement type to NORMAL')
-                      setMovementType('normal')
-                    }
-                  } else {
-                    console.log('🎯 No view_mode, setting to NORMAL')
-                    setMovementType('normal')
-                  }
-                } else {
-                  console.log('🎯 No typeId or movementConcepts')
+                // Delegate movement type detection to handleTypeChange to avoid duplication
+                if (typeId) {
+                  handleTypeChange(typeId)
                 }
-                
-                console.log('🎯 Callback completed successfully')
               }}
               placeholder="Seleccionar tipo de movimiento..."
             />
