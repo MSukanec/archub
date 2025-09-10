@@ -10,7 +10,7 @@ import { Search, Filter, X, Home, Bell, Lock } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjectsLite } from '@/hooks/use-projects-lite'
 
 export function ActionBarMobile() {
   const [, navigate] = useLocation()
@@ -33,7 +33,7 @@ export function ActionBarMobile() {
   // Get projects data for plan restrictions
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const { data: projects = [] } = useProjects(organizationId || undefined)
+  const { data: projects = [] } = useProjectsLite(organizationId || undefined)
   
   // Focus search input when popover opens - always run this hook
   useEffect(() => {

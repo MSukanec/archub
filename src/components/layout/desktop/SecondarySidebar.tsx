@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -64,12 +65,49 @@ import {
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { SelectorPopover } from "@/components/popovers/SelectorPopover";
 import { Input } from "@/components/ui/input";
-import { useProjects } from "@/hooks/use-projects";
+import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useCurrenciesLite } from "@/hooks/use-currencies-lite";
+import { useWalletsLite } from "@/hooks/use-wallets-lite";
+import { useMovementConceptsLite } from "@/hooks/use-movement-concepts-lite";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import SidebarButton from "./SidebarButton";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
+
+// Define types for sidebar items
+interface SidebarItem {
+  icon: any;
+  label: string;
+  href: string;
+}
+
+interface SidebarItemWithSubmenu {
+  id: string;
+  icon: any;
+  label: string;
+  defaultRoute: string;
+  submenu?: SidebarSubItem[];
+  generalModeRestricted?: boolean;
+}
+
+interface SidebarSubItem {
+  icon: any;
+  label: string;
+  href: string;
+  generalModeRestricted?: boolean;
+}
+
+interface SidebarDivider {
+  type: 'divider';
+}
+
+interface SidebarSection {
+  type: 'section';
+  label: string;
+}
+
+type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | SidebarSection;
 // Función auxiliar para generar iniciales de organizaciones
 function getOrganizationInitials(name: string): string {
   return name
@@ -85,7 +123,7 @@ function getProjectInitials(name: string): string {
 // Componente selector de proyectos para el header (con avatar)
 function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.organization?.id);
+  const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();
   
@@ -129,9 +167,8 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const selectorItems = projects.map((project: any) => ({
     id: project.id,
     name: project.name,
-    logo_url: project.logo_url,
     type: "Proyecto" as const,
-    color: project.color
+    color: project.color ?? undefined
   }));
 
   return (
@@ -145,15 +182,15 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
             isExpanded={isExpanded}
             variant="main"
             isHeaderButton={true}
-            avatarUrl={currentProject?.logo_url || undefined}
+            avatarUrl={undefined}
             userFullName={currentProject ? getProjectInitials(currentProject.name) : undefined}
-            projectColor={currentProject?.color || undefined}
+            projectColor={currentProject?.color ?? undefined}
             rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
           />
         </div>
       }
       items={selectorItems}
-      selectedId={selectedProjectId}
+      selectedId={selectedProjectId || undefined}
       onSelect={handleProjectSelect}
       emptyMessage="No hay proyectos disponibles"
       getInitials={getProjectInitials}
@@ -195,8 +232,81 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     }
   });
   
-  const handleOrganizationSelect = (organizationId: string) => {
+  const handleOrganizationSelect = async (organizationId: string) => {
     if (currentOrganization?.id === organizationId) return;
+    
+    // Prefetch critical data before switching organization to eliminate delays
+    try {
+      await Promise.all([
+        // Prefetch projects for the new organization
+        queryClient.prefetchQuery({
+          queryKey: ['projects-lite', organizationId],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('projects')
+              .select('id, name, color, status')
+              .eq('organization_id', organizationId)
+              .eq('is_active', true)
+              .order('name')
+            
+            if (error) throw error
+            return data || []
+          },
+          staleTime: 30 * 60 * 1000, // 30 minutes
+        }),
+        
+        // Prefetch movement concepts for the new organization
+        queryClient.prefetchQuery({
+          queryKey: ['movement-concepts-lite', organizationId],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('movement_concepts')
+              .select('id, name, view_mode, type')
+              .or(`and(is_system.eq.true,organization_id.is.null),organization_id.eq.${organizationId}`)
+              .order('name')
+
+            if (error) throw error
+            return data || []
+          },
+          staleTime: 30 * 60 * 1000, // 30 minutes
+        }),
+        
+        // Prefetch currencies (global data, but cache it anyway)
+        queryClient.prefetchQuery({
+          queryKey: ['currencies-lite'],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('currencies')
+              .select('id, name, symbol, code')
+              .order('name')
+            
+            if (error) throw error
+            return data || []
+          },
+          staleTime: 30 * 60 * 1000, // 30 minutes
+        }),
+        
+        // Prefetch wallets (global data, but cache it anyway)
+        queryClient.prefetchQuery({
+          queryKey: ['wallets-lite'],
+          queryFn: async () => {
+            const { data, error } = await supabase
+              .from('wallets')
+              .select('id, name, is_default')
+              .eq('is_active', true)
+              .order('name')
+            
+            if (error) throw error
+            return data || []
+          },
+          staleTime: 30 * 60 * 1000, // 30 minutes
+        })
+      ]);
+    } catch (error) {
+      console.warn('Prefetch failed, but proceeding with organization switch:', error);
+    }
+    
+    // Now switch organization with data already cached
     updateOrganizationMutation.mutate(organizationId);
   };
   
@@ -603,6 +713,11 @@ export function SecondarySidebar() {
             
             {/* Renderizar contenido según el nivel actual */}
             {getCurrentSidebarItems().map((item, index) => {
+              // Type guard to ensure we're working with a proper item
+              if (!item || typeof item !== 'object') {
+                return null;
+              }
+
               // Si es un divisor, renderizar línea divisoria
               if ('type' in item && item.type === 'divider') {
                 return (
@@ -622,102 +737,38 @@ export function SecondarySidebar() {
                   </div>
                 );
               }
-              const itemKey = 'id' in item ? item.id : ('label' in item ? item.label : `item-${index}`);
-              const isActive = 'isActive' in item ? item.isActive : ('href' in item && location === item.href);
-              const hasRestriction = 'generalModeRestricted' in item && item.generalModeRestricted;
-              const isDashboard = 'id' in item && item.id === 'dashboard';
-              const hasSubmenu = 'submenu' in item && item.submenu;
+
+              // For basic sidebar items (our current structure)
+              const sidebarItem = item as SidebarItem;
               
               // Verificar que tengamos icon y label antes de renderizar
-              if (!('icon' in item) || !('label' in item) || !item.icon || !item.label) {
+              if (!sidebarItem.icon || !sidebarItem.label) {
                 return null;
               }
               
-              // Determinar el tipo de chevron que necesita este botón
-              const isAccordionExpanded = hasSubmenu && expandedAccordion === ('id' in item ? item.id : null);
-              const navigatesToOtherSection = ('defaultRoute' in item && 'id' in item && !hasSubmenu && !isDashboard); // Solo secciones principales que no son acordeón ni dashboard
-              const needsChevronRight = navigatesToOtherSection;
-              const needsAccordionChevron = hasSubmenu;
+              const itemKey = sidebarItem.label || `item-${index}`;
+              const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
               const buttonElement = (
                 <SidebarButton
-                  icon={<item.icon className="w-[18px] h-[18px]" />}
-                  label={item.label}
-                  isActive={isActive || false}
+                  icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
+                  label={sidebarItem.label}
+                  isActive={isActive}
                   isExpanded={isExpanded}
                   onClick={() => {
-                    if ('defaultRoute' in item && 'id' in item) {
-                      if (hasSubmenu) {
-                        if (item.id) {
-                          handleSubSectionClick(item.id, item.defaultRoute);
-                        }
-                      } else {
-                        if (item.id) {
-                          handleMainSectionClick(item.id, item.defaultRoute);
-                        }
-                      }
-                    } else if ('href' in item) {
-                      navigate(item.href);
+                    if (sidebarItem.href) {
+                      navigate(sidebarItem.href);
                     }
                   }}
-                  href={'href' in item ? item.href : undefined}
+                  href={sidebarItem.href}
                   variant="secondary"
-                  rightIcon={
-                    isExpanded ? (
-                      needsChevronRight ? <ChevronRight className="w-3 h-3" /> :
-                      needsAccordionChevron ? (
-                        isAccordionExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                      ) : undefined
-                    ) : undefined
-                  }
                 />
               );
+              
               return (
                 <div key={`${itemKey}-${index}`}>
                   <div className="mb-[2px]">
-                    {hasRestriction ? (
-                      <PlanRestricted reason="general_mode" functionName={item.label}>
-                        {buttonElement}
-                      </PlanRestricted>
-                    ) : (
-                      buttonElement
-                    )}
+                    {buttonElement}
                   </div>
-                  
-                  {/* Mostrar submenu si está expandido */}
-                  {hasSubmenu && isExpanded && expandedAccordion === ('id' in item ? item.id : null) && (
-                    <div className="ml-4 mt-[2px] space-y-[1px]">
-                      {item.submenu.map((subItem, subIndex) => (
-                        <div key={subIndex}>
-                          {('generalModeRestricted' in subItem && subItem.generalModeRestricted) ? (
-                            <PlanRestricted reason="general_mode" functionName={subItem.label}>
-                              <SidebarButton
-                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                                label={subItem.label}
-                                href={subItem.href}
-                                isActive={location === subItem.href}
-                                isExpanded={isExpanded}
-                                variant="secondary"
-                              />
-                            </PlanRestricted>
-                          ) : (
-                            <SidebarButton
-                              icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                              label={subItem.label}
-                              href={subItem.href}
-                              isActive={location === subItem.href}
-                              isExpanded={isExpanded}
-                              variant="secondary"
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Línea divisoria después de Dashboard */}
-                  {isDashboard && sidebarLevel === 'main' && (
-                    <div className="h-px bg-white/20 my-2"></div>
-                  )}
                 </div>
               );
             })}

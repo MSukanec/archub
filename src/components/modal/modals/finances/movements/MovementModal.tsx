@@ -22,7 +22,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjectsLite } from '@/hooks/use-projects-lite'
 import { useLocation } from 'wouter'
 import { DefaultMovementFields } from './fields/DefaultFields'
 import { ConversionFields } from './fields/ConversionFields'
@@ -126,13 +126,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const movementData = editingMovement || viewingMovement
   const isEditing = propIsEditing || !!editingMovement
 
-  // Hooks
+  // Hooks - Use placeholderData to prevent loading states
   const { data: userData } = useCurrentUser()
-  const { data: currencies } = useOrganizationCurrencies(userData?.organization?.id)
-  const { data: wallets } = useWallets(userData?.organization?.id)
-  const { data: movementConcepts } = useOrganizationMovementConcepts(userData?.organization?.id)
-  const { data: members } = useOrganizationMembers(userData?.organization?.id)
-  const { data: projects } = useProjects(userData?.organization?.id)
+  const { data: currencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
+  const { data: wallets = [] } = useWallets(userData?.organization?.id)
+  const { data: movementConcepts = [] } = useOrganizationMovementConcepts(userData?.organization?.id)
+  const { data: members = [] } = useOrganizationMembers(userData?.organization?.id)
+  const { data: projects = [] } = useProjectsLite(userData?.organization?.id)
   const [location] = useLocation()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -143,11 +143,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Mutaciones para subcontratos
   const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
   const updateMovementSubcontractsMutation = useUpdateMovementSubcontracts()
-
-  // Query para cargar subcontratos existentes en modo edición
-  const { data: existingSubcontracts } = useMovementSubcontracts(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
 
   // Mutaciones para clientes de proyecto
   const createMovementProjectClientsMutation = useCreateMovementProjectClients()
@@ -161,33 +156,47 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const createMovementGeneralCostsMutation = useCreateMovementGeneralCosts()
   const updateMovementGeneralCostsMutation = useUpdateMovementGeneralCosts()
 
-  // Query para cargar clientes existentes en modo edición
-  const { data: existingProjectClients } = useMovementProjectClients(
+  // Lazy-loaded queries for associations - only enabled when needed
+  const { data: existingSubcontracts, refetch: refetchSubcontracts } = useMovementSubcontracts(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Query para cargar partners existentes en modo edición
-  const { data: existingPartners } = useMovementPartners(
+  const { data: existingProjectClients, refetch: refetchProjectClients } = useMovementProjectClients(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Query para cargar gastos generales existentes en modo edición
-  const { data: existingGeneralCosts } = useMovementGeneralCosts(
+  const { data: existingPartners, refetch: refetchPartners } = useMovementPartners(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // Query para cargar personal existente en modo edición
-  const { data: existingPersonnel } = useMovementPersonnel(
+  const { data: existingGeneralCosts, refetch: refetchGeneralCosts } = useMovementGeneralCosts(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  // States for hierarchical selection like the original modal
-  const [selectedTypeId, setSelectedTypeId] = React.useState('')
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState('')
-  const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('')
+  const { data: existingPersonnel, refetch: refetchPersonnel } = useMovementPersonnel(
+    isEditing && editingMovement?.id ? editingMovement.id : undefined
+  )
+
+  // States for hierarchical selection are now defined above with synchronous initialization
   
-  // State para detectar tipo de movimiento
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>('normal')
+  // Infer movementType synchronously from editing data or default to 'normal'
+  const inferMovementType = React.useMemo(() => {
+    if (editingMovement?.view_mode) {
+      const viewMode = editingMovement.view_mode.trim()
+      if (viewMode.includes('conversion')) return 'conversion'
+      if (viewMode.includes('transfer')) return 'transfer'
+    }
+    // Fallback: try to infer from type_id if movementConcepts is available
+    if (editingMovement?.type_id && movementConcepts.length > 0) {
+      const selectedConcept = movementConcepts.find((concept: any) => concept.id === editingMovement.type_id)
+      const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
+      if (viewMode === "conversion") return 'conversion'
+      if (viewMode === "transfer") return 'transfer'
+    }
+    return 'normal'
+  }, [editingMovement?.view_mode, editingMovement?.type_id, movementConcepts])
+  
+  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>(inferMovementType)
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
   const [selectedIndirects, setSelectedIndirects] = React.useState<Array<{indirect_id: string, indirect_name: string}>>([])
@@ -196,54 +205,49 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   
-  // Flags para controlar efectos problemáticos
-  const [isInitialLoading, setIsInitialLoading] = React.useState(false)
+  // Simplified flags for association data loading
+  const [hasLoadedAssociations, setHasLoadedAssociations] = React.useState(false)
   const [hasLoadedInitialData, setHasLoadedInitialData] = React.useState(false)
+  const [isInitialLoading, setIsInitialLoading] = React.useState(false)
 
-  // Initialize values when editing or viewing - AFTER all hooks are declared
-  React.useEffect(() => {
-    if (movementData && !hasLoadedInitialData) {
-      console.log('🔧 MovementModal: Initializing movement data', movementData)
-      
-      // Set hierarchical selection states
-      if (movementData.type_id) {
-        setSelectedTypeId(movementData.type_id)
-      }
-      
-      // Migration logic: if category_id is null but subcategory_id exists, use subcategory_id as category_id
-      if (movementData.category_id) {
-        setSelectedCategoryId(movementData.category_id)
-      } else if (movementData.subcategory_id) {
-        // Migration: subcategory_id becomes category_id
-        setSelectedCategoryId(movementData.subcategory_id)
-      }
-      
-      // Clear subcategory since they no longer exist
-      setSelectedSubcategoryId('')
-      
-      // Determine movement type based on the type_id
-      if (movementData.type_id && movementConcepts) {
-        const selectedConcept = movementConcepts.find((concept: any) => concept.id === movementData.type_id)
-        const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-        
-        if (viewMode === "conversion") {
-          setMovementType('conversion')
-        } else if (viewMode === "transfer") {
-          setMovementType('transfer')
-        } else {
-          setMovementType('normal')
-        }
-      }
-      
-      setHasLoadedInitialData(true)
+  // Synchronous initialization of hierarchical selection states
+  const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState(() => {
+    // Migration logic: if category_id is null but subcategory_id exists, use subcategory_id as category_id
+    if (editingMovement?.category_id) {
+      return editingMovement.category_id
+    } else if (editingMovement?.subcategory_id) {
+      return editingMovement.subcategory_id
     }
-  }, [movementData, movementConcepts, hasLoadedInitialData])
+    return ''
+  })
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('') // Clear subcategory since they no longer exist
 
-  // Load existing partners when editing (unificado)
+  // Lazy load association data when needed
+  const loadAssociationData = React.useCallback(async () => {
+    if (!isEditing || !editingMovement?.id || hasLoadedAssociations) return
+    
+    // Load all associations in parallel
+    const promises = [
+      refetchPartners(),
+      refetchSubcontracts(), 
+      refetchProjectClients(),
+      refetchGeneralCosts(),
+      refetchPersonnel()
+    ]
+    
+    try {
+      await Promise.all(promises)
+      setHasLoadedAssociations(true)
+    } catch (error) {
+      console.error('Error loading association data:', error)
+    }
+  }, [isEditing, editingMovement?.id, hasLoadedAssociations, refetchPartners, refetchSubcontracts, refetchProjectClients, refetchGeneralCosts, refetchPersonnel])
+  
+  // Process association data when loaded
   React.useEffect(() => {
     if (isEditing && existingPartners && existingPartners.length > 0) {
       const transformedPartners = existingPartners.map((partner: any) => {
-        // Get partner display name
         let partnerName = 'Socio sin nombre'
         if (partner.partners?.contacts) {
           const { contacts } = partner.partners
@@ -258,111 +262,83 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             }
           }
         }
-
-        return {
-          partner_id: partner.partner_id,
-          partner_name: partnerName
-        }
+        return { partner_id: partner.partner_id, partner_name: partnerName }
       })
       
-      // Determinar si es aporte o retiro basado en el subcategory_id del movimiento actual
+      // Determine if contributions or withdrawals based on subcategory_id
       if (editingMovement?.subcategory_id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb') {
-        // Es aporte de socios
         setSelectedPartnerContributions(transformedPartners)
       } else if (editingMovement?.subcategory_id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') {
-        // Es retiro de socios
         setSelectedPartnerWithdrawals(transformedPartners)
       }
     }
-  }, [isEditing, existingPartners, editingMovement?.subcategory_id])
+  }, [existingPartners, editingMovement?.subcategory_id])
 
-  // Load existing subcontracts when editing
+  // Process subcontracts when loaded
   React.useEffect(() => {
-    if (isEditing && existingSubcontracts && existingSubcontracts.length > 0) {
+    if (existingSubcontracts && existingSubcontracts.length > 0) {
       const transformedSubcontracts = existingSubcontracts.map((subcontract: any) => {
-        // Get subcontract display name
         let contactName = 'Sin nombre'
         if (subcontract.subcontracts?.contact) {
           const contact = subcontract.subcontracts.contact
           const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          if (fullName) {
-            contactName = fullName
-          }
+          if (fullName) contactName = fullName
         }
-
-        return {
-          subcontract_id: subcontract.subcontract_id,
-          contact_name: contactName
-        }
+        return { subcontract_id: subcontract.subcontract_id, contact_name: contactName }
       })
       setSelectedSubcontracts(transformedSubcontracts)
     }
-  }, [isEditing, existingSubcontracts])
+  }, [existingSubcontracts])
 
-  // Load existing indirects when editing
+  // Process indirects synchronously from movementData
   React.useEffect(() => {
-    if (isEditing && movementData?.indirect_id && movementData?.indirect) {
-      console.log('🔧 Loading existing indirect:', {
-        indirect_id: movementData.indirect_id,
-        indirect_name: movementData.indirect
-      });
+    if (editingMovement?.indirect_id && editingMovement?.indirect) {
       setSelectedIndirects([{
-        indirect_id: movementData.indirect_id,
-        indirect_name: movementData.indirect
-      }]);
+        indirect_id: editingMovement.indirect_id,
+        indirect_name: editingMovement.indirect
+      }])
     }
-  }, [isEditing, movementData?.indirect_id, movementData?.indirect]);
+  }, [editingMovement?.indirect_id, editingMovement?.indirect])
 
-  // Load existing general costs when editing
+  // Process general costs when loaded
   React.useEffect(() => {
-    if (isEditing && existingGeneralCosts && existingGeneralCosts.length > 0) {
+    if (existingGeneralCosts && existingGeneralCosts.length > 0) {
       const transformedGeneralCosts = existingGeneralCosts.map((generalCost: any) => ({
         general_cost_id: generalCost.general_cost_id
-      }));
-      setSelectedGeneralCosts(transformedGeneralCosts);
+      }))
+      setSelectedGeneralCosts(transformedGeneralCosts)
     }
-  }, [isEditing, existingGeneralCosts]);
+  }, [existingGeneralCosts])
 
-  // Load existing personnel when editing
+  // Process personnel when loaded
   React.useEffect(() => {
-    if (isEditing && existingPersonnel && existingPersonnel.length > 0) {
+    if (existingPersonnel && existingPersonnel.length > 0) {
       const transformedPersonnel = existingPersonnel.map((personnel: any) => {
-        // Get personnel display name
         let contactName = 'Sin nombre'
         if (personnel.project_personnel?.contact) {
           const contact = personnel.project_personnel.contact
           const fullName = contact.full_name || 
             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          if (fullName) {
-            contactName = fullName
-          }
+          if (fullName) contactName = fullName
         }
-
-        return {
-          personnel_id: personnel.personnel_id,
-          contact_name: contactName
-        }
+        return { personnel_id: personnel.personnel_id, contact_name: contactName }
       })
       setSelectedPersonnel(transformedPersonnel)
     }
-  }, [isEditing, existingPersonnel]);
+  }, [existingPersonnel])
 
-  // Load existing project clients when editing
+  // Process project clients when loaded
   React.useEffect(() => {
-    if (isEditing && existingProjectClients && existingProjectClients.length > 0) {
+    if (existingProjectClients && existingProjectClients.length > 0) {
       const transformedClients = existingProjectClients.map((client: any) => {
-        // Get client display name
         let clientName = 'Sin nombre'
         if (client.project_clients?.contact) {
           const contact = client.project_clients.contact
           const fullName = contact.full_name || 
             `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          if (fullName) {
-            clientName = fullName
-          }
+          if (fullName) clientName = fullName
         }
 
-        // Get installment display
         const installmentNumber = client.project_installments?.number
         const installmentDisplay = installmentNumber ? 
           `Cuota ${installmentNumber.toString().padStart(2, '0')}` : 
@@ -378,15 +354,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       })
       setSelectedClients(transformedClients)
     }
-  }, [isEditing, existingProjectClients])
+  }, [existingProjectClients])
 
-  // Extract default values like the original modal
-  const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies?.[0]?.currency?.id
-  const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets?.[0]?.id
+  // Extract default values with fallbacks to prevent blocking
+  const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies[0]?.currency?.id || ''
+  const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets[0]?.id || ''
   
-  // Find current member like the original modal
+  // Find current member with fallback
   const currentMember = React.useMemo(() => {
-    return members?.find(m => m.user_id === userData?.user?.id)
+    return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
 
   // Calculate categories and subcategories like the original modal
@@ -434,75 +410,54 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return new Date(dateString)
   }
 
-  // Form setup with proper fallbacks like the original modal
+  // Synchronous form initialization - no waiting for async data
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(createBasicMovementSchema(isOrganizationalContext)),
     defaultValues: {
-      movement_date: new Date(),
-      created_by: '',
-      type_id: '',
-      category_id: '',
-      subcategory_id: '',
-      description: '',
-      currency_id: '',
-      wallet_id: '',
-      amount: 0,
-      exchange_rate: undefined,
-      project_id: ''
+      movement_date: editingMovement ? parseMovementDate(editingMovement.movement_date) : new Date(),
+      created_by: editingMovement?.created_by || currentMember?.id || '',
+      type_id: editingMovement?.type_id || '',
+      category_id: editingMovement?.category_id || '',
+      subcategory_id: editingMovement?.subcategory_id || '',
+      description: editingMovement?.description || '',
+      currency_id: editingMovement?.currency_id || defaultCurrency,
+      wallet_id: editingMovement?.wallet_id || defaultWallet,
+      amount: editingMovement?.amount || 0,
+      exchange_rate: editingMovement?.exchange_rate || undefined,
+      project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null))
     }
   })
 
-  // Efecto para re-inicializar el formulario cuando los datos asíncronos estén disponibles
+  // Update form defaults when better data becomes available (non-blocking)
   React.useEffect(() => {
-    // Solo proceder cuando tengamos los datos mínimos necesarios
-    if (!userData?.user?.id || !currentMember?.id) return
-    if (!currencies?.length || !wallets?.length) return
-    
-    // Re-inicializar valores del formulario con datos disponibles
-    if (!isEditing) {
-      // Para nuevos movimientos, usar valores por defecto
-      form.reset({
-        movement_date: new Date(),
-        created_by: currentMember.id,
-        type_id: '',
-        category_id: '',
-        subcategory_id: '',
-        description: '',
-        currency_id: defaultCurrency || currencies[0]?.currency?.id || '',
-        wallet_id: defaultWallet || wallets[0]?.id || '',
-        amount: 0,
-        exchange_rate: undefined,
-        project_id: isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null)
-      })
-    } else {
-      // Para edición, usar datos del movimiento
-      form.reset({
-        movement_date: parseMovementDate(editingMovement?.movement_date),
+    if (userData?.user?.id && currentMember?.id && currencies.length > 0 && wallets.length > 0) {
+      const updatedDefaults = {
         created_by: editingMovement?.created_by || currentMember.id,
-        type_id: editingMovement?.type_id || '',
-        category_id: editingMovement?.category_id || '',
-        subcategory_id: editingMovement?.subcategory_id || '',
-        description: editingMovement?.description || '',
-        currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id || '',
-        wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id || '',
-        amount: editingMovement?.amount || 0,
-        exchange_rate: editingMovement?.exchange_rate || undefined,
-        project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null))
-      })
+        currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id,
+        wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id
+      }
+      
+      // Only update if values have changed
+      const currentValues = form.getValues()
+      if (currentValues.created_by !== updatedDefaults.created_by ||
+          currentValues.currency_id !== updatedDefaults.currency_id ||
+          currentValues.wallet_id !== updatedDefaults.wallet_id) {
+        form.reset({ ...currentValues, ...updatedDefaults })
+      }
     }
-  }, [userData, currentMember, currencies, wallets, defaultCurrency, defaultWallet, isEditing, editingMovement, form])
+  }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet])
 
-  // Conversion form (como en el modal original)
+  // Synchronous conversion form initialization
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
     defaultValues: {
-      movement_date: parseMovementDate(editingMovement?.movement_date),
+      movement_date: editingMovement ? parseMovementDate(editingMovement.movement_date) : new Date(),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
       project_id: editingMovement?.project_id || (isOrganizationalContext ? null : (userData?.preferences?.last_project_id || null)),
-      currency_id_from: editingMovement?.currency_id_from || defaultCurrency || '',
-      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet || '',
+      currency_id_from: editingMovement?.currency_id_from || defaultCurrency,
+      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet,
       amount_from: editingMovement?.amount_from || 0,
       currency_id_to: editingMovement?.currency_id_to || '',
       wallet_id_to: editingMovement?.wallet_id_to || '',
@@ -511,16 +466,16 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   })
 
-  // Transfer form
+  // Synchronous transfer form initialization
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
     defaultValues: {
-      movement_date: parseMovementDate(editingMovement?.movement_date),
+      movement_date: editingMovement ? parseMovementDate(editingMovement.movement_date) : new Date(),
       created_by: editingMovement?.created_by || currentMember?.id || '',
       description: editingMovement?.description || '',
       type_id: editingMovement?.type_id || '',
-      currency_id: editingMovement?.currency_id || defaultCurrency || '',
-      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet || '',
+      currency_id: editingMovement?.currency_id || defaultCurrency,
+      wallet_id_from: editingMovement?.wallet_id_from || defaultWallet,
       wallet_id_to: editingMovement?.wallet_id_to || '',
       amount: editingMovement?.amount || 0
     }
@@ -2082,10 +2037,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         {movementType === 'conversion' && (
           <ConversionFields
             form={conversionForm}
-            currencies={currencies || []}
-            wallets={wallets || []}
-            members={members || []}
-            concepts={movementConcepts || []}
+            currencies={currencies}
+            wallets={wallets}
+            members={members}
+            concepts={movementConcepts}
             movement={undefined}
           />
         )}
@@ -2093,18 +2048,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         {movementType === 'transfer' && (
           <TransferFields
             form={transferForm}
-            currencies={currencies || []}
-            wallets={wallets || []}
-            members={members || []}
-            concepts={movementConcepts || []}
+            currencies={currencies}
+            wallets={wallets}
+            members={members}
+            concepts={movementConcepts}
           />
         )}
 
         {movementType === 'normal' && (
           <DefaultMovementFields
             form={form}
-            currencies={currencies || []}
-            wallets={wallets || []}
+            currencies={currencies}
+            wallets={wallets}
             selectedCategoryId={selectedCategoryId}
             selectedPersonnel={selectedPersonnel}
             selectedSubcontracts={selectedSubcontracts}

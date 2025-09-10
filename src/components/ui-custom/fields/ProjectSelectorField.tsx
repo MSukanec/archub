@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 interface Project {
   id: string;
   name: string;
-  color?: string;
+  color?: string | null;
   project_data?: {
     project_image_url?: string;
   };
