@@ -755,12 +755,12 @@ export function Table<T = any>({
   // Function to get sort icon for column header
   const getSortIcon = (key: string) => {
     if (sortKey !== key)
-      return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+      return <ArrowUpDown className="ml-1 h-3 w-3 text-accent" />;
     if (sortDirection === "asc")
       return <ChevronUp className="ml-1 h-3 w-3 text-accent" />;
     if (sortDirection === "desc")
       return <ChevronDown className="ml-1 h-3 w-3 text-accent" />;
-    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+    return <ArrowUpDown className="ml-1 h-3 w-3 text-accent" />;
   };
 
   // Handle the special case for numbers with thousands formatting (accounting for TypeScript strict mode)
@@ -878,23 +878,27 @@ export function Table<T = any>({
               />
             </div>
           )}
-          {columns.map((column) => (
-            <button
-              key={String(column.key)}
-              className={cn(
-                "flex items-center justify-start text-left transition-colors hover:text-accent",
-                column.sortable !== false && "cursor-pointer",
-              )}
-              onClick={() =>
-                column.sortable !== false &&
-                handleSort(String(column.key), column.sortType)
-              }
-              disabled={column.sortable === false}
-            >
-              {column.label}
-              {column.sortable !== false && getSortIcon(String(column.key))}
-            </button>
-          ))}
+          {columns.map((column) => {
+            const isNumericColumn = column.sortType === "number";
+            return (
+              <button
+                key={String(column.key)}
+                className={cn(
+                  "flex items-center text-left transition-colors hover:text-accent",
+                  isNumericColumn ? "justify-end" : "justify-start",
+                  column.sortable !== false && "cursor-pointer",
+                )}
+                onClick={() =>
+                  column.sortable !== false &&
+                  handleSort(String(column.key), column.sortType)
+                }
+                disabled={column.sortable === false}
+              >
+                {column.label}
+                {column.sortable !== false && getSortIcon(String(column.key))}
+              </button>
+            );
+          })}
         </div>
 
         {/* Table Rows con agrupamiento */}
@@ -960,20 +964,24 @@ export function Table<T = any>({
                         />
                       </div>
                     )}
-                    {columns.map((column) => (
-                      <div
-                        key={String(column.key)}
-                        className={cn(
-                          "text-xs flex items-center justify-start",
-                          mode === "budget" && "text-[var(--table-row-fg)]",
-                          mode === "construction" && "text-[var(--table-row-fg)]"
-                        )}
-                      >
-                        {column.render
-                          ? column.render(item)
-                          : String(item[column.key as keyof T] || "-")}
-                      </div>
-                    ))}
+                    {columns.map((column) => {
+                      const isNumericColumn = column.sortType === "number";
+                      return (
+                        <div
+                          key={String(column.key)}
+                          className={cn(
+                            "text-xs flex items-center",
+                            isNumericColumn ? "justify-end" : "justify-start",
+                            mode === "budget" && "text-[var(--table-row-fg)]",
+                            mode === "construction" && "text-[var(--table-row-fg)]"
+                          )}
+                        >
+                          {column.render
+                            ? column.render(item)
+                            : String(item[column.key as keyof T] || "-")}
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
               </Fragment>
@@ -1004,16 +1012,22 @@ export function Table<T = any>({
                     />
                   </div>
                 )}
-                {columns.map((column) => (
-                  <div
-                    key={String(column.key)}
-                    className="text-xs flex items-center justify-start"
-                  >
-                    {column.render
-                      ? column.render(item)
-                      : String(item[column.key as keyof T] || "-")}
-                  </div>
-                ))}
+                {columns.map((column) => {
+                  const isNumericColumn = column.sortType === "number";
+                  return (
+                    <div
+                      key={String(column.key)}
+                      className={cn(
+                        "text-xs flex items-center",
+                        isNumericColumn ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      {column.render
+                        ? column.render(item)
+                        : String(item[column.key as keyof T] || "-")}
+                    </div>
+                  );
+                })}
               </div>
             ))
           ) : null}
