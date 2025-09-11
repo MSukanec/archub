@@ -295,7 +295,7 @@ export function Sidebar() {
                         {currentProject.name}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {currentProject.project_data?.project_type || currentProject.project_data?.modality || 'Proyecto'}
+                        {currentProject.project_data?.project_type?.name || currentProject.project_data?.modality?.name || 'Proyecto'}
                       </div>
                     </div>
                     <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-[var(--secondary-sidebar-text)] transition-colors" />
