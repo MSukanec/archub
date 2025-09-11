@@ -137,31 +137,27 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - siempre presente pero con opacity/transform para animaciones smooth */}
-      <div 
-        className={cn(
-          "flex items-center justify-between w-full transition-all duration-200 ease-out",
+      {/* Texto - solo cuando expandido (SIN animaciones complicadas) */}
+      {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
+        <div className={cn(
+          "flex items-center justify-between w-full",
           isChild ? "ml-2" : 
           (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
-          "ml-10", // Más margen para separar del icono
-          // Smooth transitions basadas en estado
-          (isExpanded || (isHeaderButton && (isHovered || isActive)))
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 translate-x-4 pointer-events-none"
-        )}
-      >
-        <span className={cn(
-          "text-sm whitespace-nowrap text-left transition-all duration-200 ease-out",
-          isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+          "ml-10" // Más margen para separar del icono
         )}>
-          {label}
-        </span>
-        {rightIcon && (
-          <div className="flex-shrink-0 ml-2">
-            {rightIcon}
-          </div>
-        )}
-      </div>
+          <span className={cn(
+            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+          )}>
+            {label}
+          </span>
+          {rightIcon && (
+            <div className="flex-shrink-0 ml-2 mr-2">
+              {rightIcon}
+            </div>
+          )}
+        </div>
+      )}
       </button>
       
 
