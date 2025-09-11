@@ -438,10 +438,12 @@ export function SecondarySidebar() {
     if (sidebarLevel === 'main') {
       if (location.startsWith('/organization/')) {
         setSidebarLevel('organization');
-      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/')) {
+      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/') || location.startsWith('/construction/')) {
         setSidebarLevel('project');
-      } else if (location.startsWith('/construction/')) {
-        setSidebarLevel('construction');
+        // Auto-expand construcción accordion when on construction routes
+        if (location.startsWith('/construction/')) {
+          setExpandedAccordion('construction');
+        }
       } else if (location.startsWith('/library/')) {
         setSidebarLevel('library');
       } else if (location.startsWith('/proveedor/')) {
@@ -627,7 +629,23 @@ export function SecondarySidebar() {
     
     // Si estamos en una subsección (project, organization), usar el sidebarLevel actual
     if (sidebarLevel === 'project') {
-      return sidebarContent.project || [];
+      // Para proyecto, devolver estructura con acordeones
+      return [
+        {
+          type: 'accordion',
+          id: 'general',
+          label: 'General',
+          icon: FolderOpen,
+          items: sidebarContent.project || []
+        },
+        {
+          type: 'accordion', 
+          id: 'construction',
+          label: 'Construcción',
+          icon: HardHat,
+          items: sidebarContent.construction || []
+        }
+      ];
     }
     if (sidebarLevel === 'organization') {
       return sidebarContent.organization || [];
@@ -732,6 +750,59 @@ export function SecondarySidebar() {
                     {isExpanded && (
                       <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">
                         {item.label}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Si es un acordeón, renderizar acordeón con elementos expandibles
+              if ('type' in item && item.type === 'accordion') {
+                const accordionItem = item as any;
+                const isExpanded = expandedAccordion === accordionItem.id;
+                
+                return (
+                  <div key={`accordion-${accordionItem.id}`} className="mb-1">
+                    {/* Botón del acordeón */}
+                    <SidebarButton
+                      icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
+                      label={accordionItem.label}
+                      isActive={false}
+                      isExpanded={isExpanded}
+                      onClick={() => toggleAccordion(accordionItem.id)}
+                      variant="secondary"
+                      rightIcon={
+                        <div className="transition-transform duration-200">
+                          {isExpanded ? 
+                            <ChevronUp className="w-3 h-3" /> : 
+                            <ChevronDown className="w-3 h-3" />
+                          }
+                        </div>
+                      }
+                    />
+                    
+                    {/* Elementos del acordeón expandidos */}
+                    {isExpanded && (
+                      <div className="ml-2 mt-1 space-y-[2px]">
+                        {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
+                          const isSubItemActive = Boolean(subItem.href && location === subItem.href);
+                          return (
+                            <SidebarButton
+                              key={`${accordionItem.id}-${subIndex}`}
+                              icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                              label={subItem.label}
+                              isActive={isSubItemActive}
+                              isExpanded={isExpanded}
+                              onClick={() => {
+                                if (subItem.href) {
+                                  navigate(subItem.href);
+                                }
+                              }}
+                              href={subItem.href}
+                              variant="secondary"
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </div>
