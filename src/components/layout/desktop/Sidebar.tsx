@@ -328,8 +328,8 @@ export function Sidebar() {
       </div>
       
       {/* Navigation Items */}
-      <div className="flex-1 flex flex-col items-center py-1">
-        <div className="flex flex-col gap-[2px] h-full w-full">
+      <div className="flex-1 flex flex-col items-center">
+        <div className="flex flex-col gap-[2px] h-full items-center">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             
             {/* Renderizar contenido */}
@@ -455,41 +455,8 @@ export function Sidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons - IDÉNTICO al PrimarySidebar */}
-      <div className="p-1">
-        <div className="flex flex-col gap-[2px]">
-          {/* Project Selector - only show if there's a selected project */}
-          {currentProject && (
-            <SelectorPopover
-              trigger={
-                <div>
-                  <SidebarButton
-                    icon={<Folder className="w-[18px] h-[18px]" />}
-                    label={currentProject.name || 'Proyecto'}
-                    isActive={false}
-                    isExpanded={false}
-                    variant="main"
-                    userFullName={getProjectInitials(currentProject.name || 'P')}
-                    projectColor={currentProject.color}
-                    rightIcon={<ChevronDown className="w-3 h-3" />}
-                  />
-                </div>
-              }
-              items={projects.map((project) => ({
-                id: project.id,
-                name: project.name,
-                logo_url: project.project_data?.project_image_url,
-                type: "Proyecto" as const,
-                color: project.color
-              }))}
-              selectedId={selectedProjectId || undefined}
-              onSelect={handleProjectSelect}
-              emptyMessage="No hay proyectos disponibles"
-              getInitials={getProjectInitials}
-            />
-          )}
-          
-          {/* Divisor */}
-          <div className="h-px bg-white/20 mb-2"></div>
+      <div className="flex flex-col items-center">
+        <div className="flex flex-col gap-[2px] items-center">
           
           {/* Theme Toggle */}
           <SidebarButton
