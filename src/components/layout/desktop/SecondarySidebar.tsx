@@ -590,7 +590,7 @@ export function SecondarySidebar() {
     finances: [
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
-      { icon: CreditCard, label: 'Gastos Generales', href: '/organization/general-costs' }
+      { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
     project: [
       { icon: Info, label: 'Información', href: '/general/info' },
