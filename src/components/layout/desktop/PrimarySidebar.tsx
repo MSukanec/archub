@@ -13,7 +13,8 @@ import {
   PanelLeftClose,
   Bell,
   Folder,
-  ChevronDown
+  ChevronDown,
+  TrendingUp
 } from "lucide-react";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -170,6 +171,13 @@ export function PrimarySidebar() {
         navigateTo: false
       }
     ] : []),
+    {
+      id: 'finances',
+      label: 'Finanzas',
+      icon: TrendingUp,
+      level: 'finances' as const,
+      navigateTo: false
+    },
     {
       id: 'library',
       label: 'Biblioteca',

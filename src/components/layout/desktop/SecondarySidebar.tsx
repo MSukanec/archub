@@ -581,14 +581,16 @@ export function SecondarySidebar() {
     organization: [
       { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-      { icon: TrendingUp, label: 'Movimientos', href: '/organization/finances/movements' },
-      { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' },
-      { icon: CreditCard, label: 'Gastos Generales', href: '/organization/general-costs' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
+    ],
+    finances: [
+      { icon: TrendingUp, label: 'Movimientos', href: '/organization/finances/movements' },
+      { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' },
+      { icon: CreditCard, label: 'Gastos Generales', href: '/organization/general-costs' }
     ],
     project: [
       { icon: Info, label: 'Información', href: '/general/info' },
@@ -649,6 +651,9 @@ export function SecondarySidebar() {
     }
     if (sidebarLevel === 'organization') {
       return sidebarContent.organization || [];
+    }
+    if (sidebarLevel === 'finances') {
+      return sidebarContent.finances || [];
     }
     if (sidebarLevel === 'library') {
       return sidebarContent.library || [];
@@ -717,6 +722,7 @@ export function SecondarySidebar() {
             {sidebarLevel === 'organization' && 'ORGANIZACIÓN'}
             {sidebarLevel === 'project' && 'PROYECTO'}
             {sidebarLevel === 'construction' && 'CONSTRUCCIÓN'}
+            {sidebarLevel === 'finances' && 'FINANZAS'}
             {sidebarLevel === 'library' && 'BIBLIOTECA'}
             {sidebarLevel === 'provider' && 'PROVEEDOR'}
             {sidebarLevel === 'admin' && 'ADMINISTRACIÓN'}
