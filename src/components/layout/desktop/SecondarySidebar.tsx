@@ -588,13 +588,13 @@ export function SecondarySidebar() {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     finances: [
+      { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
       { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
     project: [
       { icon: Info, label: 'Información', href: '/general/info' },
-      { icon: DollarSign, label: 'Finanzas', href: '/finances/dashboard' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
       { icon: FileText, label: 'Media', href: '/general/media' }
     ],
