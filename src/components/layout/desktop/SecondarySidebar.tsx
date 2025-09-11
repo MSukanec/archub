@@ -789,26 +789,36 @@ export function SecondarySidebar() {
                     
                     {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
                     {isExpanded && isAccordionExpanded && (
-                      <div className="ml-2 mt-1 space-y-[2px]">
-                        {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
-                          const isSubItemActive = Boolean(subItem.href && location === subItem.href);
-                          return (
-                            <SidebarButton
-                              key={`${accordionItem.id}-${subIndex}`}
-                              icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                              label={subItem.label}
-                              isActive={isSubItemActive}
-                              isExpanded={isExpanded}
-                              onClick={() => {
-                                if (subItem.href) {
-                                  navigate(subItem.href);
-                                }
-                              }}
-                              href={subItem.href}
-                              variant="secondary"
-                            />
-                          );
-                        })}
+                      <div className="relative">
+                        {/* Línea vertical que conecta los elementos hijos */}
+                        <div 
+                          className="absolute left-[20px] top-2 bottom-2 w-[1px] bg-border/40"
+                          style={{
+                            background: 'var(--border)'
+                          }}
+                        />
+                        
+                        <div className="ml-2 mt-1 space-y-[2px]">
+                          {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
+                            const isSubItemActive = Boolean(subItem.href && location === subItem.href);
+                            return (
+                              <SidebarButton
+                                key={`${accordionItem.id}-${subIndex}`}
+                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                                label={subItem.label}
+                                isActive={isSubItemActive}
+                                isExpanded={isExpanded}
+                                onClick={() => {
+                                  if (subItem.href) {
+                                    navigate(subItem.href);
+                                  }
+                                }}
+                                href={subItem.href}
+                                variant="secondary"
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
