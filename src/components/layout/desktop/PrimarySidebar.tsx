@@ -160,20 +160,13 @@ export function PrimarySidebar() {
       level: 'organization' as const,
       navigateTo: false
     },
-    // Solo mostrar secciones de Proyecto y Construcción si hay un proyecto activo
+    // Solo mostrar sección de Proyecto si hay un proyecto activo
     ...(!isGlobalView ? [
       {
         id: 'project',
         label: 'Proyecto',
         icon: FolderOpen,
         level: 'project' as const,
-        navigateTo: false
-      },
-      {
-        id: 'construction',
-        label: 'Construcción',
-        icon: HardHat,
-        level: 'construction' as const,
         navigateTo: false
       }
     ] : []),
