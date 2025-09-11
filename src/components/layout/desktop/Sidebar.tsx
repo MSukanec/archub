@@ -255,32 +255,8 @@ export function Sidebar() {
       ]
     }] : []),
     
-    // Sección inferior con botones fijos
-    { type: 'divider' },
-    ...(currentProject ? [{
-      type: 'project-selector'
-    }] : []),
-    { 
-      icon: theme === 'dark' ? Sun : Moon, 
-      label: theme === 'dark' ? "Modo Claro" : "Modo Oscuro", 
-      href: '#', 
-      onClick: handleThemeToggle 
-    },
-    { 
-      icon: isDocked ? PanelLeftClose : PanelLeftOpen, 
-      label: isDocked ? "Desanclar Sidebar" : "Anclar Sidebar", 
-      href: '#', 
-      onClick: handleDockToggle 
-    },
-    { 
-      icon: Bell, 
-      label: "Notificaciones", 
-      href: '#', 
-      onClick: () => console.log('Notificaciones clicked') 
-    },
-    {
-      type: 'user-avatar'
-    }
+    // Sección inferior IDÉNTICA al PrimarySidebar
+    { type: 'bottom-section-start' }
   ];
 
   return (
@@ -318,63 +294,12 @@ export function Sidebar() {
                 return null;
               }
 
-              // Si es un divisor, renderizar línea divisoria
-              if ('type' in item && item.type === 'divider') {
+              // Si llegamos al inicio de la sección inferior, renderizar IDÉNTICO al PrimarySidebar
+              if ('type' in item && item.type === 'bottom-section-start') {
                 return (
-                  <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
-                );
-              }
-
-              // Si es el selector de proyectos
-              if ('type' in item && item.type === 'project-selector') {
-                return currentProject ? (
-                  <div key={`project-selector-${index}`} className="mb-[2px]">
-                    <SelectorPopover
-                      trigger={
-                        <div>
-                          <SidebarButton
-                            icon={<Folder className="w-[18px] h-[18px]" />}
-                            label={currentProject.name || 'Proyecto'}
-                            isActive={false}
-                            isExpanded={isExpanded}
-                            variant="secondary"
-                            userFullName={getProjectInitials(currentProject.name || 'P')}
-                            projectColor={currentProject.color}
-                            rightIcon={<ChevronDown className="w-3 h-3" />}
-                          />
-                        </div>
-                      }
-                      items={projects.map((project) => ({
-                        id: project.id,
-                        name: project.name,
-                        logo_url: project.project_data?.project_image_url,
-                        type: "Proyecto" as const,
-                        color: project.color
-                      }))}
-                      selectedId={selectedProjectId || undefined}
-                      onSelect={handleProjectSelect}
-                      emptyMessage="No hay proyectos disponibles"
-                      getInitials={getProjectInitials}
-                    />
-                  </div>
-                ) : null;
-              }
-
-              // Si es el avatar del usuario
-              if ('type' in item && item.type === 'user-avatar') {
-                return (
-                  <div key={`user-avatar-${index}`} className="mb-[2px]">
-                    <SidebarButton
-                      icon={null}
-                      avatarUrl={userData?.user?.avatar_url}
-                      userFullName={userData?.user?.full_name}
-                      label={userData?.user?.full_name || 'Usuario'}
-                      isActive={false}
-                      isExpanded={isExpanded}
-                      onClick={() => navigate('/profile')}
-                      variant="secondary"
-                      disableHover={true}
-                    />
+                  <div key={`bottom-section-${index}`}>
+                    {/* Spacer para empujar la sección inferior hacia abajo */}
+                    <div className="flex-1"></div>
                   </div>
                 );
               }
@@ -481,6 +406,89 @@ export function Sidebar() {
               );
             })}
           </div>
+        </div>
+      </div>
+      
+      {/* Bottom Section - Fixed Buttons - IDÉNTICO al PrimarySidebar */}
+      <div className="p-1">
+        <div className="flex flex-col gap-[2px]">
+          {/* Project Selector - only show if there's a selected project */}
+          {currentProject && (
+            <SelectorPopover
+              trigger={
+                <div>
+                  <SidebarButton
+                    icon={<Folder className="w-[18px] h-[18px]" />}
+                    label={currentProject.name || 'Proyecto'}
+                    isActive={false}
+                    isExpanded={false}
+                    variant="main"
+                    userFullName={getProjectInitials(currentProject.name || 'P')}
+                    projectColor={currentProject.color}
+                    rightIcon={<ChevronDown className="w-3 h-3" />}
+                  />
+                </div>
+              }
+              items={projects.map((project) => ({
+                id: project.id,
+                name: project.name,
+                logo_url: project.project_data?.project_image_url,
+                type: "Proyecto" as const,
+                color: project.color
+              }))}
+              selectedId={selectedProjectId || undefined}
+              onSelect={handleProjectSelect}
+              emptyMessage="No hay proyectos disponibles"
+              getInitials={getProjectInitials}
+            />
+          )}
+          
+          {/* Divisor */}
+          <div className="h-px bg-white/20 mb-2"></div>
+          
+          {/* Theme Toggle */}
+          <SidebarButton
+            icon={theme === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            label={theme === 'dark' ? "Modo Claro" : "Modo Oscuro"}
+            isActive={false}
+            isExpanded={false}
+            onClick={handleThemeToggle}
+            variant="main"
+          />
+          
+          {/* Sidebar Pin/Unpin */}
+          <SidebarButton
+            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+            label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+            isActive={false}
+            isExpanded={false}
+            onClick={handleDockToggle}
+            variant="main"
+          />
+          
+          {/* Notifications */}
+          <SidebarButton
+            icon={<Bell className="w-[18px] h-[18px]" />}
+            label="Notificaciones"
+            isActive={false}
+            isExpanded={false}
+            onClick={() => console.log('Notificaciones clicked')}
+            variant="main"
+          />
+          
+          {/* User Avatar */}
+          <SidebarButton
+            icon={null}
+            avatarUrl={userData?.user?.avatar_url}
+            userFullName={userData?.user?.full_name}
+            label={userData?.user?.full_name || 'Usuario'}
+            isActive={false}
+            isExpanded={false}
+            onClick={() => navigate('/profile')}
+            variant="main"
+            disableHover={true}
+          />
+          
         </div>
       </div>
     </aside>
