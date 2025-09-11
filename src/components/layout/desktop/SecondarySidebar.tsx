@@ -792,9 +792,10 @@ export function SecondarySidebar() {
                       <div className="relative">
                         {/* Línea vertical que conecta los elementos hijos */}
                         <div 
-                          className="absolute left-[20px] top-2 bottom-2 w-[1px] bg-border/40"
+                          className="absolute left-[16px] top-1 bottom-1 w-[1px]"
                           style={{
-                            background: 'var(--border)'
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            zIndex: 1
                           }}
                         />
                         
