@@ -128,14 +128,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       ) : (
         <>
           {/* Header Desktop - Hidden on mobile */}
-          {/* <div className="hidden md:block">
+          <div className="hidden md:block">
             <Header {...headerProps} />
-          </div> */}
+          </div>
 
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
               // Calculate top padding based on new single-row header (h-12)
-              "md:pt-0" // Sin header ahora
+              "md:pt-12" // Con header ahora (h-12)
             } ${
               // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered
