@@ -14,7 +14,7 @@ import {
   Bell,
   Folder,
   ChevronDown,
-  TrendingUp
+  DollarSign
 } from "lucide-react";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -174,7 +174,7 @@ export function PrimarySidebar() {
     {
       id: 'finances',
       label: 'Finanzas',
-      icon: TrendingUp,
+      icon: DollarSign,
       level: 'finances' as const,
       navigateTo: false
     },

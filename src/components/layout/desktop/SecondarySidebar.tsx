@@ -588,8 +588,8 @@ export function SecondarySidebar() {
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     finances: [
-      { icon: TrendingUp, label: 'Movimientos', href: '/organization/finances/movements' },
-      { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' },
+      { icon: DollarSign, label: 'Movimientos', href: '/organization/finances/movements' },
+      { icon: HandCoins, label: 'Capital', href: '/organization/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/organization/general-costs' }
     ],
     project: [
