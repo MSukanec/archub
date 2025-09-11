@@ -56,11 +56,11 @@ export default function HeaderButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center justify-center overflow-hidden h-8 rounded-[4px]',
-          // Transición super smooth para width y padding
+          'relative overflow-hidden h-8 rounded-[4px]',
+          // Transición super smooth solo para width (NO para justify)
           'transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
           // Width dinámica: solo icon (w-8) o expandido (w-auto con padding)
-          showText ? 'w-auto justify-start pl-0 pr-3' : 'w-8',
+          showText ? 'w-auto pr-3' : 'w-8',
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -97,8 +97,8 @@ export default function HeaderButton({
             : 'var(--main-sidebar-button-fg)',
         } as React.CSSProperties}
       >
-        {/* Contenedor del icono - SIEMPRE visible, siempre 32x32px */}
-        <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
+        {/* Contenedor del icono - POSICIÓN ABSOLUTA FIJA - NUNCA SE MUEVE */}
+        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -129,10 +129,10 @@ export default function HeaderButton({
           )}
         </div>
         
-        {/* Texto - con animación ultra smooth de entrada/salida */}
+        {/* Texto - SOLO aparece cuando hover/active - CON MARGEN FIJO para el ícono */}
         <div 
           className={cn(
-            "flex items-center whitespace-nowrap overflow-hidden",
+            "ml-8 flex items-center whitespace-nowrap overflow-hidden", // ml-8 = espacio fijo para el ícono
             // Transiciones ultra smooth con cubic-bezier personalizado
             "transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
             showText 
@@ -142,7 +142,7 @@ export default function HeaderButton({
         >
           <span 
             className={cn(
-              "text-sm font-bold ml-2",
+              "text-sm font-bold ml-2", // ml-2 = separación entre ícono y texto
               // Transición suave para el texto también
               "transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
               showText ? "transform-none" : "scale-95"
