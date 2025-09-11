@@ -343,7 +343,7 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     />
   );
 }
-export function SecondarySidebar() {
+export function Sidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
