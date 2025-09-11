@@ -302,8 +302,8 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       organization: [
         { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
         { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-        { icon: TrendingUp, label: 'Movimientos', href: '/organization/finances/movements' },
-        { icon: DollarSign, label: 'Capital', href: '/organization/finances/capital' },
+        { icon: TrendingUp, label: 'Movimientos', href: '/finances/movements' },
+        { icon: DollarSign, label: 'Capital', href: '/finances/capital' },
         { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
         { icon: Users, label: 'Miembros', href: '/organization/members' },
         { icon: Database, label: 'Datos Básicos', href: '/organization/data' },

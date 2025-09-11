@@ -195,7 +195,7 @@ export function Header({ className }: HeaderProps) {
         navigate('/general/info');
         break;
       case 'finances':
-        navigate('/organization/finances/movements');
+        navigate('/finances/movements');
         break;
       case 'library':
         navigate('/library/tasks');
