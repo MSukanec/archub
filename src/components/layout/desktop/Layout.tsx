@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-// import { SecondarySidebar } from "./SecondarySidebar"; // COMMENTED FOR TESTING
-// import { PrimarySidebar } from "./PrimarySidebar"; // COMMENTED FOR TESTING
-import { Sidebar } from "./Sidebar";
+import { SecondarySidebar } from "./SecondarySidebar";
+import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
@@ -106,18 +105,15 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
       {/* Primary Sidebar - hidden on mobile */}
-      {/* <div className="hidden md:block">
+      <div className="hidden md:block">
         <PrimarySidebar />
-      </div> */}
+      </div>
 
       {/* Secondary Sidebar - hidden on mobile */}
-      {/* <div className="hidden md:block">
-        <SecondarySidebar />
-      </div> */}
-
-      {/* New Combined Sidebar - hidden on mobile */}
       <div className="hidden md:block">
-        <Sidebar />
+        <SecondarySidebar />
+        {/* <SidebarSubmenu /> */}{" "}
+        {/* Commented out - using accordion sidebar instead */}
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
@@ -141,10 +137,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based on new combined sidebar (expandable like secondary)
-              isSecondaryExpanded 
-                ? "md:ml-[264px]" // Combined sidebar expanded
-                : "md:ml-[52px]" // Combined sidebar collapsed
+              // Calculate margin based on primary sidebar (40px) + secondary sidebar
+              isMainDocked || isMainHovered
+                ? isSecondaryExpanded 
+                  ? "md:ml-[304px]" // 40px primary + 264px secondary when both expanded  
+                  : "md:ml-[80px]" // 40px primary + 40px secondary when secondary collapsed
+                : isSecondaryExpanded
+                  ? "md:ml-[304px]" // 40px primary + 264px secondary  
+                  : "md:ml-[80px]" // 40px primary + 40px secondary when both collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
