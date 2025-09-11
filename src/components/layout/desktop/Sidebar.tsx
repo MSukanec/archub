@@ -14,6 +14,7 @@ import {
   Bell,
   Folder,
   ChevronDown,
+  ChevronUp,
   DollarSign,
   Home,
   Users,
@@ -32,14 +33,12 @@ import {
   Handshake,
   Crown,
   ListTodo,
-  Package,
-  ChevronRight
+  Package
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useProjectContext } from "@/stores/projectContext";
 import { supabase } from "@/lib/supabase";
 import { useProjects } from "@/hooks/use-projects";
@@ -50,7 +49,6 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const isAdmin = useIsAdmin();
   const { data: userData } = useCurrentUser();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   
@@ -65,8 +63,14 @@ export function Sidebar() {
     return name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
   };
   
+  // Sidebar state - usando la misma lógica que SecondarySidebar
+  const { isDocked: isMainDocked } = useSidebarStore();
+  const { isDocked, setDocked, isHovered, setHovered } = useSecondarySidebarStore();
+  const isExpanded = isDocked || isHovered || isMainDocked;
+  
   // State for accordion expansion
-  const [expandedAccordions, setExpandedAccordions] = useState<Set<string>>(new Set());
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Mutation para cambiar proyecto
   const updateProjectMutation = useMutation({
@@ -99,9 +103,6 @@ export function Sidebar() {
     if (selectedProjectId === projectId) return;
     updateProjectMutation.mutate(projectId);
   };
-  
-  // Sidebar state
-  const { isDocked, setDocked } = useSidebarStore();
   
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -159,20 +160,15 @@ export function Sidebar() {
     savePreferencesMutation.mutate({ sidebar_docked: newDocked });
   };
 
-  // Toggle accordion
+  // Toggle accordion - misma lógica que SecondarySidebar
   const toggleAccordion = (accordionId: string) => {
-    const newExpanded = new Set(expandedAccordions);
-    if (newExpanded.has(accordionId)) {
-      newExpanded.delete(accordionId);
-    } else {
-      newExpanded.add(accordionId);
-    }
-    setExpandedAccordions(newExpanded);
+    setExpandedAccordion(prev => prev === accordionId ? null : accordionId);
   };
 
-  // Define accordion sections with their sub-items
-  const accordionSections = [
+  // Define accordion sections with their sub-items - ESTA ES LA DIFERENCIA: acordeones combinados
+  const sidebarContent = [
     {
+      type: 'accordion',
       id: 'organization',
       label: 'ORGANIZACIÓN',
       icon: Building2,
@@ -187,6 +183,7 @@ export function Sidebar() {
       ]
     },
     {
+      type: 'accordion',
       id: 'general',
       label: 'GENERAL',
       icon: FolderOpen,
@@ -197,6 +194,7 @@ export function Sidebar() {
       ]
     },
     {
+      type: 'accordion',
       id: 'construction',
       label: 'CONSTRUCCIÓN',
       icon: HardHat,
@@ -211,6 +209,7 @@ export function Sidebar() {
       ]
     },
     {
+      type: 'accordion',
       id: 'commercialization',
       label: 'COMERCIALIZACIÓN',
       icon: Handshake,
@@ -219,6 +218,7 @@ export function Sidebar() {
       ]
     },
     {
+      type: 'accordion',
       id: 'finances',
       label: 'FINANZAS',
       icon: DollarSign,
@@ -230,6 +230,7 @@ export function Sidebar() {
       ]
     },
     {
+      type: 'accordion',
       id: 'library',
       label: 'BIBLIOTECA',
       icon: Library,
@@ -241,6 +242,7 @@ export function Sidebar() {
       ]
     },
     ...(isAdmin ? [{
+      type: 'accordion',
       id: 'admin',
       label: 'ADMINISTRACIÓN',
       icon: Shield,
@@ -251,152 +253,234 @@ export function Sidebar() {
         { icon: Settings, label: 'General', href: '/admin/general' },
         { icon: Package, label: 'Productos', href: '/providers/products' }
       ]
-    }] : [])
+    }] : []),
+    
+    // Sección inferior con botones fijos
+    { type: 'divider' },
+    ...(currentProject ? [{
+      type: 'project-selector'
+    }] : []),
+    { 
+      icon: theme === 'dark' ? Sun : Moon, 
+      label: theme === 'dark' ? "Modo Claro" : "Modo Oscuro", 
+      href: '#', 
+      onClick: handleThemeToggle 
+    },
+    { 
+      icon: isDocked ? PanelLeftClose : PanelLeftOpen, 
+      label: isDocked ? "Desanclar Sidebar" : "Anclar Sidebar", 
+      href: '#', 
+      onClick: handleDockToggle 
+    },
+    { 
+      icon: Bell, 
+      label: "Notificaciones", 
+      href: '#', 
+      onClick: () => console.log('Notificaciones clicked') 
+    },
+    {
+      type: 'user-avatar'
+    }
   ];
 
   return (
     <aside 
       className={cn(
         "fixed top-0 left-0 h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
-        "w-64"
+        isExpanded ? "w-64" : "w-[40px]"
       )}
-      style={{ overflow: 'hidden' }}
+      style={{
+        overflow: 'hidden'
+      }}
+      onMouseEnter={() => {
+        setHovered(true);
+      }}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* Header - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0 flex items-center justify-between px-3 bg-[var(--main-sidebar-bg)] border-b border-[var(--main-sidebar-border)]">
-        <span className="text-xl font-black text-white">Archub</span>
+      {/* Espacio superior con nombre de sección - misma altura que PageHeader */}
+      <div className="h-12 flex-shrink-0 flex items-center px-4">
+        {isExpanded && (
+          <span className="text-sm font-black text-black uppercase">
+            MENÚ PRINCIPAL
+          </span>
+        )}
       </div>
       
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-2">
-          {/* Accordion Sections */}
-          {accordionSections.map((section) => (
-            <div key={section.id} className="mb-2">
-              {/* Accordion Header */}
-              <button
-                onClick={() => toggleAccordion(section.id)}
-                className={cn(
-                  "w-full flex items-center justify-between p-2 rounded-md text-sm font-medium transition-colors",
-                  "text-[var(--secondary-sidebar-text)] hover:bg-[var(--secondary-sidebar-hover)]"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <section.icon className="w-4 h-4" />
-                  <span>{section.label}</span>
-                </div>
-                <ChevronRight 
-                  className={cn(
-                    "w-4 h-4 transition-transform",
-                    expandedAccordions.has(section.id) && "rotate-90"
-                  )}
-                />
-              </button>
-              
-              {/* Accordion Content */}
-              {expandedAccordions.has(section.id) && (
-                <div className="ml-6 mt-1 space-y-1">
-                  {section.items.map((item) => (
-                    <button
-                      key={item.href}
-                      onClick={() => navigate(item.href)}
-                      className={cn(
-                        "w-full flex items-center gap-2 p-2 rounded-md text-sm transition-colors text-left",
-                        location === item.href 
-                          ? "bg-[var(--secondary-sidebar-active-bg)] text-[var(--secondary-sidebar-active-text)]"
-                          : "text-[var(--secondary-sidebar-text)] hover:bg-[var(--secondary-sidebar-hover)]"
-                      )}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="p-2 border-t border-[var(--secondary-sidebar-border)]">
-        <div className="space-y-1">
-          {/* Project Selector - only show if there's a selected project */}
-          {currentProject && (
-            <SelectorPopover
-              trigger={
-                <div>
-                  <SidebarButton
-                    icon={<Folder className="w-4 h-4" />}
-                    label={currentProject.name || 'Proyecto'}
-                    isActive={false}
-                    isExpanded={true}
-                    variant="secondary"
-                    userFullName={getProjectInitials(currentProject.name || 'P')}
-                    projectColor={currentProject.color}
-                    rightIcon={<ChevronDown className="w-3 h-3" />}
-                  />
-                </div>
+      {/* Navigation Items */}
+      <div className="flex-1 p-1">
+        <div className="flex flex-col gap-[2px] h-full">
+          <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+            
+            {/* Renderizar contenido */}
+            {sidebarContent.map((item, index) => {
+              // Type guard to ensure we're working with a proper item
+              if (!item || typeof item !== 'object') {
+                return null;
               }
-              items={projects.map((project) => ({
-                id: project.id,
-                name: project.name,
-                logo_url: project.project_data?.project_image_url,
-                type: "Proyecto" as const,
-                color: project.color
-              }))}
-              selectedId={selectedProjectId || undefined}
-              onSelect={handleProjectSelect}
-              emptyMessage="No hay proyectos disponibles"
-              getInitials={getProjectInitials}
-            />
-          )}
-          
-          {/* Divisor */}
-          <div className="h-px bg-[var(--secondary-sidebar-border)] my-2"></div>
-          
-          {/* Theme Toggle */}
-          <SidebarButton
-            icon={theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            label={theme === 'dark' ? "Modo Claro" : "Modo Oscuro"}
-            isActive={false}
-            isExpanded={true}
-            onClick={handleThemeToggle}
-            variant="secondary"
-          />
-          
-          {/* Sidebar Pin/Unpin */}
-          <SidebarButton
-            icon={isDocked ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-            label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-            isActive={false}
-            isExpanded={true}
-            onClick={handleDockToggle}
-            variant="secondary"
-          />
-          
-          {/* Notifications */}
-          <SidebarButton
-            icon={<Bell className="w-4 h-4" />}
-            label="Notificaciones"
-            isActive={false}
-            isExpanded={true}
-            onClick={() => console.log('Notificaciones clicked')}
-            variant="secondary"
-          />
-          
-          {/* User Avatar */}
-          <SidebarButton
-            icon={null}
-            avatarUrl={userData?.user?.avatar_url}
-            userFullName={userData?.user?.full_name}
-            label={userData?.user?.full_name || 'Usuario'}
-            isActive={false}
-            isExpanded={true}
-            onClick={() => navigate('/profile')}
-            variant="secondary"
-            disableHover={true}
-          />
+
+              // Si es un divisor, renderizar línea divisoria
+              if ('type' in item && item.type === 'divider') {
+                return (
+                  <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                );
+              }
+
+              // Si es el selector de proyectos
+              if ('type' in item && item.type === 'project-selector') {
+                return currentProject ? (
+                  <div key={`project-selector-${index}`} className="mb-[2px]">
+                    <SelectorPopover
+                      trigger={
+                        <div>
+                          <SidebarButton
+                            icon={<Folder className="w-[18px] h-[18px]" />}
+                            label={currentProject.name || 'Proyecto'}
+                            isActive={false}
+                            isExpanded={isExpanded}
+                            variant="secondary"
+                            userFullName={getProjectInitials(currentProject.name || 'P')}
+                            projectColor={currentProject.color}
+                            rightIcon={<ChevronDown className="w-3 h-3" />}
+                          />
+                        </div>
+                      }
+                      items={projects.map((project) => ({
+                        id: project.id,
+                        name: project.name,
+                        logo_url: project.project_data?.project_image_url,
+                        type: "Proyecto" as const,
+                        color: project.color
+                      }))}
+                      selectedId={selectedProjectId || undefined}
+                      onSelect={handleProjectSelect}
+                      emptyMessage="No hay proyectos disponibles"
+                      getInitials={getProjectInitials}
+                    />
+                  </div>
+                ) : null;
+              }
+
+              // Si es el avatar del usuario
+              if ('type' in item && item.type === 'user-avatar') {
+                return (
+                  <div key={`user-avatar-${index}`} className="mb-[2px]">
+                    <SidebarButton
+                      icon={null}
+                      avatarUrl={userData?.user?.avatar_url}
+                      userFullName={userData?.user?.full_name}
+                      label={userData?.user?.full_name || 'Usuario'}
+                      isActive={false}
+                      isExpanded={isExpanded}
+                      onClick={() => navigate('/profile')}
+                      variant="secondary"
+                      disableHover={true}
+                    />
+                  </div>
+                );
+              }
+
+              // Si es un acordeón, renderizar acordeón con elementos expandibles - EXACTAMENTE como SecondarySidebar
+              if ('type' in item && item.type === 'accordion') {
+                const accordionItem = item as any;
+                const isAccordionExpanded = expandedAccordion === accordionItem.id;
+                
+                return (
+                  <div key={`accordion-${accordionItem.id}`} className="mb-1">
+                    {/* Botón del acordeón */}
+                    <SidebarButton
+                      icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
+                      label={accordionItem.label}
+                      isActive={false}
+                      isExpanded={isExpanded}
+                      onClick={() => toggleAccordion(accordionItem.id)}
+                      variant="secondary"
+                      disableHover={true}
+                      rightIcon={isExpanded ? (
+                        <div className="transition-transform duration-200">
+                          {isAccordionExpanded ? 
+                            <ChevronUp className="w-3 h-3" /> : 
+                            <ChevronDown className="w-3 h-3" />
+                          }
+                        </div>
+                      ) : undefined}
+                    />
+                    
+                    {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
+                    {isExpanded && isAccordionExpanded && (
+                      <div className="relative">
+                        {/* Línea vertical que conecta los elementos hijos */}
+                        <div 
+                          className="absolute left-[16px] top-1 bottom-1 w-[1px]"
+                          style={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            zIndex: 1
+                          }}
+                        />
+                        
+                        <div className="ml-[32px] mt-1 space-y-[2px]">
+                          {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
+                            const isSubItemActive = Boolean(subItem.href && location === subItem.href);
+                            return (
+                              <SidebarButton
+                                key={`${accordionItem.id}-${subIndex}`}
+                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                                label={subItem.label}
+                                isActive={isSubItemActive}
+                                isExpanded={isExpanded}
+                                onClick={() => {
+                                  if (subItem.href) {
+                                    navigate(subItem.href);
+                                  }
+                                }}
+                                href={subItem.href}
+                                variant="secondary"
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // For basic sidebar items
+              const sidebarItem = item as any;
+              
+              // Verificar que tengamos icon y label antes de renderizar
+              if (!sidebarItem.icon || !sidebarItem.label) {
+                return null;
+              }
+              
+              const itemKey = sidebarItem.label || `item-${index}`;
+              const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
+              const buttonElement = (
+                <SidebarButton
+                  icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
+                  label={sidebarItem.label}
+                  isActive={isActive}
+                  isExpanded={isExpanded}
+                  onClick={() => {
+                    if (sidebarItem.onClick) {
+                      sidebarItem.onClick();
+                    } else if (sidebarItem.href && sidebarItem.href !== '#') {
+                      navigate(sidebarItem.href);
+                    }
+                  }}
+                  href={sidebarItem.href}
+                  variant="secondary"
+                />
+              );
+              
+              return (
+                <div key={`${itemKey}-${index}`}>
+                  <div className="mb-[2px]">
+                    {buttonElement}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </aside>

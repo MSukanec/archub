@@ -141,8 +141,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based on new combined sidebar (264px)
-              "md:ml-[264px]" // Combined sidebar fixed width
+              // Calculate margin based on new combined sidebar (expandable like secondary)
+              isSecondaryExpanded 
+                ? "md:ml-[264px]" // Combined sidebar expanded
+                : "md:ml-[40px]" // Combined sidebar collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
