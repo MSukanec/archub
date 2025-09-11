@@ -328,8 +328,8 @@ export function Sidebar() {
       </div>
       
       {/* Navigation Items */}
-      <div className="flex-1 p-1">
-        <div className="flex flex-col gap-[2px] h-full">
+      <div className="flex-1 flex flex-col items-center py-1">
+        <div className="flex flex-col gap-[2px] h-full w-full">
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             
             {/* Renderizar contenido */}
