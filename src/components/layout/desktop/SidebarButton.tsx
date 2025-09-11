@@ -63,11 +63,13 @@ export default function SidebarButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center justify-center transition-all duration-200 ease-out overflow-hidden',
-          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
-          'w-8 h-8',
-          // Cuando expandido o cuando es header button en hover, el botón se extiende
-          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full justify-start pr-2'
+          'flex items-center h-8 rounded transition-all duration-200 ease-out',
+          // Cuando colapsado: centrado con padding lateral para el sidebar más ancho (52px)
+          !isExpanded && !isHeaderButton ? 'w-[52px] justify-center px-4' : 
+          // Cuando expandido: ancho completo, align left con padding
+          'w-full justify-start px-2 gap-2',
+          // Elementos hijos tienen más indentación cuando expandido
+          isChild && isExpanded && 'pl-8'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -103,9 +105,9 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
+      {/* Icono - inline, no absolute positioning */}
       {!isChild && !(isHeaderButton && icon === null) && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className="inline-flex items-center justify-center w-5 h-5 shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -137,25 +139,20 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - solo cuando expandido (SIN animaciones complicadas) */}
+      {/* Label - solo cuando expandido */}
       {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
-        <div className={cn(
-          "flex items-center justify-between w-full",
-          isChild ? "ml-2" : 
-          (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
-          "ml-10" // Más margen para separar del icono
+        <span className={cn(
+          "text-sm truncate",
+          isHeaderButton ? "font-bold" : "font-normal"
         )}>
-          <span className={cn(
-            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
-          )}>
-            {label}
-          </span>
-          {rightIcon && (
-            <div className="flex-shrink-0 ml-2 mr-2">
-              {rightIcon}
-            </div>
-          )}
+          {label}
+        </span>
+      )}
+      
+      {/* Right Icon - solo cuando expandido */}
+      {rightIcon && (isExpanded || (isHeaderButton && (isHovered || isActive))) && (
+        <div className="ml-auto shrink-0">
+          {rightIcon}
         </div>
       )}
       </button>
