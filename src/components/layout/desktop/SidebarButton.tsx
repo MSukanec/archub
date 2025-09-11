@@ -77,21 +77,24 @@ export default function SidebarButton({
           handleMouseEnter();
           setIsHovered(true);
           if (!isActive && !disableHover) {
-            const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
-            const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
-            e.currentTarget.style.backgroundColor = hoverBgVar;
-            e.currentTarget.style.color = hoverFgVar;
+            if (isHeaderButton) {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'white';
+            } else {
+              const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
+              const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
+              e.currentTarget.style.backgroundColor = hoverBgVar;
+              e.currentTarget.style.color = hoverFgVar;
+            }
           }
         }}
         style={{ 
         borderRadius: '4px', // All buttons have 4px rounded corners
-        backgroundColor: isActive && !isExpanded
-          ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
-          : isActive
-          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
+        backgroundColor: isActive || (isHeaderButton && isHovered)
+          ? `var(--accent)`
           : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
-        color: isActive
-          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
+        color: isActive || (isHeaderButton && isHovered)
+          ? `white`
           : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
         '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
         '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
@@ -106,9 +109,9 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
+      {/* Contenedor del icono - no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -123,13 +126,13 @@ export default function SidebarButton({
                 borderColor: projectColor 
                   ? 'transparent' 
                   : isActive
-                  ? `var(--main-sidebar-button-active-fg)`
-                  : `var(--main-sidebar-button-fg)`,
+                  ? `white`
+                  : `currentColor`,
                 color: projectColor 
                   ? 'white' 
-                  : isActive
-                  ? `var(--main-sidebar-button-active-fg)`
-                  : `var(--main-sidebar-button-fg)`
+                  : isActive || (isHeaderButton && isHovered)
+                  ? `white`
+                  : `currentColor`
               }}
             >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
