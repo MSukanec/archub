@@ -786,6 +786,7 @@ export function SecondarySidebar() {
                       isExpanded={isExpanded}
                       onClick={() => toggleAccordion(accordionItem.id)}
                       variant="secondary"
+                      disableHover={true}
                       rightIcon={isExpanded ? (
                         <div className="transition-transform duration-200">
                           {isAccordionExpanded ? 
