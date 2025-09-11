@@ -144,7 +144,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // Calculate margin based on new combined sidebar (expandable like secondary)
               isSecondaryExpanded 
                 ? "md:ml-[264px]" // Combined sidebar expanded
-                : "md:ml-[40px]" // Combined sidebar collapsed
+                : "md:ml-[52px]" // Combined sidebar collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (

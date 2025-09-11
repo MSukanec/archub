@@ -263,7 +263,7 @@ export function Sidebar() {
     <aside 
       className={cn(
         "fixed top-0 left-0 h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
-        isExpanded ? "w-64" : "w-[40px]"
+        isExpanded ? "w-64" : "w-[52px]"
       )}
       style={{
         overflow: 'hidden'
@@ -274,7 +274,7 @@ export function Sidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Project Header - Expandible como en la referencia */}
-      <div className="h-12 flex-shrink-0 flex items-center px-3">
+      <div className="h-12 flex-shrink-0 flex items-center justify-center px-3">
         {currentProject ? (
           <SelectorPopover
             trigger={
