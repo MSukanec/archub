@@ -273,12 +273,57 @@ export function Sidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Espacio superior con nombre de sección - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0 flex items-center px-4">
-        {isExpanded && (
-          <span className="text-sm font-black text-black uppercase">
-            MENÚ PRINCIPAL
-          </span>
+      {/* Project Header - Expandible como en la referencia */}
+      <div className="h-12 flex-shrink-0 flex items-center px-3">
+        {currentProject ? (
+          <SelectorPopover
+            trigger={
+              <button className="w-full flex items-center gap-3 hover:bg-[var(--secondary-sidebar-hover)] rounded-md p-2 transition-colors group">
+                {/* Avatar del proyecto - siempre visible */}
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                  style={{ backgroundColor: currentProject.color || '#6366f1' }}
+                >
+                  {getProjectInitials(currentProject.name || 'P')}
+                </div>
+                
+                {/* Información expandida - solo cuando está expandido */}
+                {isExpanded && (
+                  <>
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="text-sm font-bold text-[var(--secondary-sidebar-text)] truncate">
+                        {currentProject.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {currentProject.project_data?.project_type || currentProject.project_data?.modality || 'Proyecto'}
+                      </div>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-[var(--secondary-sidebar-text)] transition-colors" />
+                  </>
+                )}
+              </button>
+            }
+            items={projects.map((project) => ({
+              id: project.id,
+              name: project.name,
+              logo_url: project.project_data?.project_image_url,
+              type: "Proyecto" as const,
+              color: project.color
+            }))}
+            selectedId={selectedProjectId || undefined}
+            onSelect={handleProjectSelect}
+            emptyMessage="No hay proyectos disponibles"
+            getInitials={getProjectInitials}
+          />
+        ) : (
+          // Fallback cuando no hay proyecto seleccionado
+          <div className="flex items-center px-2">
+            {isExpanded && (
+              <span className="text-sm font-black text-black uppercase">
+                MENÚ PRINCIPAL
+              </span>
+            )}
+          </div>
         )}
       </div>
       
