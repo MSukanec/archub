@@ -32,7 +32,7 @@ export function ProjectQuickActions() {
       icon: DollarSign,
       label: "Finanzas",
       description: "Movimientos financieros",
-      onClick: () => navigate('/general/finances'),
+      onClick: () => navigate('/finances/dashboard'),
       color: "text-purple-600"
     },
     {

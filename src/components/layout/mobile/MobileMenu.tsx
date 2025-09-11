@@ -387,7 +387,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       ],
       finanzas: [
         { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-        { icon: DollarSign, label: 'Movimientos', href: '/general/finances' },
+        { icon: DollarSign, label: 'Movimientos', href: '/finances/dashboard' },
         { icon: BarChart3, label: 'Análisis de Obra', href: '/finances/analysis', restricted: true },
         { icon: TrendingUp, label: 'Movimientos de Capital', href: '/finances/capital-movements', restricted: true }
       ],

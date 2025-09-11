@@ -133,7 +133,7 @@ export default function OrganizationDashboard() {
                 icon={DollarSign}
                 title="Crear un nuevo movimiento"
                 description="Registra un ingreso o egreso financiero"
-                onClick={() => setLocation('/general/finances')}
+                onClick={() => setLocation('/finances/dashboard')}
                 showPlusIcon={true}
               />
               <CustomButton

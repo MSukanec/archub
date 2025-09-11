@@ -594,7 +594,7 @@ export function SecondarySidebar() {
     ],
     project: [
       { icon: Info, label: 'Información', href: '/general/info' },
-      { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
+      { icon: DollarSign, label: 'Finanzas', href: '/finances/dashboard' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
       { icon: FileText, label: 'Media', href: '/general/media' }
     ],

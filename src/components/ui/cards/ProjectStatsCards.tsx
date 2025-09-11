@@ -106,7 +106,7 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       description: "transacciones",
       color: "#84cc16", // Using direct accent color for charts
       increase: "+23%",
-      route: "/general/finances",
+      route: "/finances/dashboard",
       buttonText: "Ver Movimientos"
     }
   ]
