@@ -139,8 +139,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             } ${
               // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered
-                ? "md:ml-[264px]" // 0px primary (comentado) + 264px secondary when expanded
-                : "md:ml-[40px]" // 0px primary (comentado) + 40px secondary when collapsed
+                ? "md:ml-[264px]" // 264px secondary when expanded  
+                : "md:ml-[40px]" // 40px secondary when collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (

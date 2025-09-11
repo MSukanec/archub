@@ -38,6 +38,7 @@ export default function SidebarButton({
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClick = () => {
@@ -65,12 +66,13 @@ export default function SidebarButton({
           'relative flex items-center justify-center transition-all duration-300',
           // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
           'w-8 h-8',
-          // Cuando expandido, el botón se extiende al full width SIN PADDING
-          isExpanded && 'w-full justify-start'
+          // Cuando expandido o cuando es header button en hover, el botón se extiende
+          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full justify-start'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
+          setIsHovered(true);
           if (!isActive && !disableHover) {
             const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
             const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
@@ -92,6 +94,7 @@ export default function SidebarButton({
         '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
       } as React.CSSProperties}
       onMouseLeave={(e) => {
+        setIsHovered(false);
         if (!isActive && !disableHover) {
           const normalBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
           const normalFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-fg)' : 'var(--main-sidebar-button-fg)';
@@ -134,8 +137,8 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - solo cuando expandido */}
-      {isExpanded && (
+      {/* Texto - cuando expandido o cuando es header button en hover/active */}
+      {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
         <div className={cn(
           "flex items-center justify-between w-full",
           isChild ? "ml-2" : 
