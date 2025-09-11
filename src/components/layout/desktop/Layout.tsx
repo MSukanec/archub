@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { SecondarySidebar } from "./SecondarySidebar";
+import { TertiarySidebar } from "./TertiarySidebar";
 import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
@@ -116,6 +117,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         {/* Commented out - using accordion sidebar instead */}
       </div>
 
+      {/* Tertiary Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <TertiarySidebar />
+      </div>
+
       {/* Header Mobile - Only visible on mobile */}
       {isMobile ? (
         <HeaderMobile {...headerProps}>
@@ -137,14 +143,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based on primary sidebar (40px) + secondary sidebar
+              // Calculate margin based on 3 sidebars: primary (40px) + secondary + tertiary
               isMainDocked || isMainHovered
                 ? isSecondaryExpanded 
-                  ? "md:ml-[304px]" // 40px primary + 264px secondary when both expanded  
-                  : "md:ml-[80px]" // 40px primary + 40px secondary when secondary collapsed
+                  ? "md:ml-[568px]" // 40px primary + 264px secondary + 264px tertiary when all expanded  
+                  : "md:ml-[120px]" // 40px primary + 40px secondary + 40px tertiary when secondary and tertiary collapsed
                 : isSecondaryExpanded
-                  ? "md:ml-[304px]" // 40px primary + 264px secondary  
-                  : "md:ml-[80px]" // 40px primary + 40px secondary when both collapsed
+                  ? "md:ml-[568px]" // 40px primary + 264px secondary + 264px tertiary when secondary and tertiary expanded
+                  : "md:ml-[120px]" // 40px primary + 40px secondary + 40px tertiary when all collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
