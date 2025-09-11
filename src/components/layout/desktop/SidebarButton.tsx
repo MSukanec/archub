@@ -66,8 +66,8 @@ export default function SidebarButton({
           'relative flex items-center justify-center transition-all duration-200 ease-out overflow-hidden',
           // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
           'w-8 h-8',
-          // Cuando expandido o cuando es header button en hover, el botón se extiende
-          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full justify-start pr-2'
+          // Cuando expandido o cuando es header button en hover, el botón se extiende PERO mantiene centrado
+          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full pr-2'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -137,22 +137,20 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - solo cuando expandido (SIN animaciones complicadas) */}
+      {/* Texto - solo cuando expandido, posicionado absolutamente para no afectar el icono */}
       {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
         <div className={cn(
-          "flex items-center justify-between w-full",
-          isChild ? "ml-2" : 
-          (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
-          "ml-10" // Más margen para separar del icono
+          "absolute left-8 right-2 flex items-center justify-between h-full",
+          isChild && "left-10" // Más margen para elementos hijos
         )}>
           <span className={cn(
             "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+            isHeaderButton ? "font-bold" : "font-normal"
           )}>
             {label}
           </span>
           {rightIcon && (
-            <div className="flex-shrink-0 ml-2 mr-2">
+            <div className="flex-shrink-0">
               {rightIcon}
             </div>
           )}
