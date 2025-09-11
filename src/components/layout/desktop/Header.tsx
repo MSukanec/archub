@@ -22,7 +22,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import HeaderButton from "./HeaderButton";
+import SidebarButton from "./SidebarButton";
 
 interface Tab {
   id: string;
@@ -221,12 +221,16 @@ export function Header({ className }: HeaderProps) {
       {/* Left Side - Navigation */}
       <div className="flex items-center gap-[2px]">
         {primarySections.map((section) => (
-          <HeaderButton
+          <SidebarButton
             key={section.id}
             icon={<section.icon className="w-[18px] h-[18px]" />}
             label={section.label}
             isActive={section.isActive}
+            isExpanded={false} // Start collapsed, expand on hover
+            isHeaderButton={true}
+            variant="main"
             onClick={() => handleNavigationClick(section)}
+            disableHover={false}
           />
         ))}
       </div>
@@ -234,42 +238,50 @@ export function Header({ className }: HeaderProps) {
       {/* Right Side - User Controls */}
       <div className="flex items-center gap-[2px]">
         {/* Theme Toggle */}
-        <HeaderButton
+        <SidebarButton
           icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
           label={isDark ? "Modo Claro" : "Modo Oscuro"}
           isActive={false}
+          isExpanded={false}
           onClick={handleThemeToggle}
+          variant="main"
         />
         
         {/* Dock/Undock Sidebar */}
-        <HeaderButton
+        <SidebarButton
           icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
           label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
           isActive={false}
+          isExpanded={false}
           onClick={handleDockToggle}
+          variant="main"
         />
         
         {/* Notifications */}
-        <HeaderButton
+        <SidebarButton
           icon={<Bell className="w-[18px] h-[18px]" />}
           label="Notificaciones"
           isActive={false}
+          isExpanded={false}
           onClick={() => {
             toast({
               title: "Notificaciones",
               description: "Próximamente disponible"
             });
           }}
+          variant="main"
         />
         
         {/* User Avatar */}
-        <HeaderButton
+        <SidebarButton
           icon={null}
           avatarUrl={userData?.user?.avatar_url}
           userFullName={userData?.user?.full_name}
           label={userData?.user?.full_name || 'Usuario'}
           isActive={false}
+          isExpanded={false}
           onClick={() => navigate('/profile')}
+          variant="main"
         />
       </div>
     </header>

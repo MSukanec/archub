@@ -63,45 +63,38 @@ export default function SidebarButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center transition-all duration-300',
-          // Comportamiento normal del sidebar: ancho completo
-          !isHeaderButton && 'w-full justify-start',
-          // Comportamiento header: compacto que se expande
-          isHeaderButton && [
-            'w-8 h-8 justify-center overflow-hidden transition-[width] duration-150 ease-in-out',
-            (isHovered || isActive) && 'w-auto justify-start pr-3'
-          ]
+          'relative flex items-center justify-center transition-all duration-200 ease-out overflow-hidden',
+          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
+          'w-8 h-8',
+          // Cuando expandido o cuando es header button en hover, el botón se extiende
+          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full justify-start pr-2'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
           setIsHovered(true);
           if (!isActive && !disableHover) {
-            if (isHeaderButton) {
-              e.currentTarget.style.backgroundColor = 'var(--accent)';
-              e.currentTarget.style.color = 'white';
-            } else {
-              const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
-              const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
-              e.currentTarget.style.backgroundColor = hoverBgVar;
-              e.currentTarget.style.color = hoverFgVar;
-            }
+            const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
+            const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
+            e.currentTarget.style.backgroundColor = hoverBgVar;
+            e.currentTarget.style.color = hoverFgVar;
           }
         }}
         style={{ 
-          minWidth: isHeaderButton ? '32px' : undefined,
-          borderRadius: '4px', // All buttons have 4px rounded corners
-          backgroundColor: isActive || (isHeaderButton && isHovered)
-            ? `var(--accent)`
-            : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
-          color: isActive || (isHeaderButton && isHovered)
-            ? `white`
-            : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
-          '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
-          '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
-        } as React.CSSProperties}
-        onMouseLeave={(e) => {
-          setIsHovered(false);
+        borderRadius: '4px', // All buttons have 4px rounded corners
+        backgroundColor: isActive && !isExpanded
+          ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
+          : isActive
+          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
+          : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
+        color: isActive
+          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
+          : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
+        '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
+        '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
+      } as React.CSSProperties}
+      onMouseLeave={(e) => {
+        setIsHovered(false);
         if (!isActive && !disableHover) {
           const normalBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
           const normalFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-fg)' : 'var(--main-sidebar-button-fg)';
@@ -110,12 +103,9 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - posicionamiento basado en contexto */}
+      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (
-        <div className={cn(
-          "flex items-center justify-center flex-shrink-0",
-          isHeaderButton ? "w-8 h-8" : "absolute left-0 top-0 w-8 h-8"
-        )}>
+        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -130,13 +120,13 @@ export default function SidebarButton({
                 borderColor: projectColor 
                   ? 'transparent' 
                   : isActive
-                  ? `white`
-                  : `currentColor`,
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-fg)`,
                 color: projectColor 
                   ? 'white' 
-                  : isActive || (isHeaderButton && isHovered)
-                  ? `white`
-                  : `currentColor`
+                  : isActive
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-fg)`
               }}
             >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
@@ -147,29 +137,31 @@ export default function SidebarButton({
         </div>
       )}
       
-      {/* Texto - solo cuando está expandido/hover para evitar problemas de animación */}
-      {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
-        <div 
-          className={cn(
-            "flex items-center justify-between whitespace-nowrap",
-            isChild ? "ml-2" : 
-            (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
-            "ml-2" // Menos margen para mejor ajuste
-          )}
-        >
-          <span className={cn(
-            "text-sm text-left select-none",
-            isHeaderButton ? "font-bold" : "font-normal"
-          )}>
-            {label}
-          </span>
-          {rightIcon && (
-            <div className="flex-shrink-0 ml-2">
-              {rightIcon}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Texto - siempre presente pero con opacity/transform para animaciones smooth */}
+      <div 
+        className={cn(
+          "flex items-center justify-between w-full transition-all duration-200 ease-out",
+          isChild ? "ml-2" : 
+          (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
+          "ml-10", // Más margen para separar del icono
+          // Smooth transitions basadas en estado
+          (isExpanded || (isHeaderButton && (isHovered || isActive)))
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-4 pointer-events-none"
+        )}
+      >
+        <span className={cn(
+          "text-sm whitespace-nowrap text-left transition-all duration-200 ease-out",
+          isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+        )}>
+          {label}
+        </span>
+        {rightIcon && (
+          <div className="flex-shrink-0 ml-2">
+            {rightIcon}
+          </div>
+        )}
+      </div>
       </button>
       
 
