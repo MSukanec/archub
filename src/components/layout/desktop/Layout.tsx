@@ -105,9 +105,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
       {/* Primary Sidebar - hidden on mobile */}
-      {/* <div className="hidden md:block">
+      <div className="hidden md:block">
         <PrimarySidebar />
-      </div> */}
+      </div>
 
       {/* Secondary Sidebar - hidden on mobile */}
       <div className="hidden md:block">
@@ -127,20 +127,24 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         <>
-          {/* Header Desktop - Hidden on mobile */}
-          <div className="hidden md:block">
+          {/* Header Desktop - Disabled (using primary sidebar instead) */}
+          {/* <div className="hidden md:block">
             <Header {...headerProps} />
-          </div>
+          </div> */}
 
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
-              // Calculate top padding based on new single-row header (h-12)
-              "md:pt-[40px]" // Con header ahora (h-[40px])
+              // No header padding needed now
+              "md:pt-0"
             } ${
               // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered
-                ? "md:ml-[264px]" // 264px secondary when expanded  
-                : "md:ml-[40px]" // 40px secondary when collapsed
+                ? isSecondaryExpanded 
+                  ? "md:ml-[304px]" // 40px primary + 264px secondary when both expanded  
+                  : "md:ml-[80px]" // 40px primary + 40px secondary when secondary collapsed
+                : isSecondaryExpanded
+                  ? "md:ml-[304px]" // 40px primary + 264px secondary  
+                  : "md:ml-[80px]" // 40px primary + 40px secondary when both collapsed
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
