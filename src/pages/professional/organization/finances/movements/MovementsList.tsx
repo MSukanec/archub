@@ -1111,11 +1111,12 @@ export default function MovementsList() {
       key: "amount",
       label: "Cantidad",
       width: "5%",
-      sortable: false,
+      sortable: true,
+      sortType: "number" as const,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-1 text-right">
               <div className="font-medium text-red-600">
                 -${item.from_amount?.toLocaleString() || "0"}
               </div>
@@ -1128,7 +1129,7 @@ export default function MovementsList() {
         
         if ('is_transfer_group' in item) {
           return (
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-1 text-right">
               <div className="font-medium text-red-600">
                 -${item.amount?.toLocaleString() || "0"}
               </div>
@@ -1140,7 +1141,7 @@ export default function MovementsList() {
         }
         
         return (
-          <span className="text-xs font-medium">
+          <span className="text-xs font-medium text-right block">
             ${item.amount?.toLocaleString() || "0"}
           </span>
         );
@@ -1150,17 +1151,18 @@ export default function MovementsList() {
       key: "exchange_rate",
       label: "Cotización",
       width: "5%",
-      sortable: false,
+      sortable: true,
+      sortType: "number" as const,
       render: (item: Movement | ConversionGroup) => {
         if ('is_conversion_group' in item) {
           return (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground text-right">
               -
             </div>
           );
         }
         return (
-          <span className="text-xs">
+          <span className="text-xs text-right block">
             {item.exchange_rate ? `$${item.exchange_rate?.toLocaleString()}` : "-"}
           </span>
         );
