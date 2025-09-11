@@ -759,7 +759,7 @@ export function SecondarySidebar() {
               // Si es un acordeón, renderizar acordeón con elementos expandibles
               if ('type' in item && item.type === 'accordion') {
                 const accordionItem = item as any;
-                const isExpanded = expandedAccordion === accordionItem.id;
+                const isAccordionExpanded = expandedAccordion === accordionItem.id;
                 
                 return (
                   <div key={`accordion-${accordionItem.id}`} className="mb-1">
@@ -771,18 +771,18 @@ export function SecondarySidebar() {
                       isExpanded={isExpanded}
                       onClick={() => toggleAccordion(accordionItem.id)}
                       variant="secondary"
-                      rightIcon={
+                      rightIcon={isExpanded ? (
                         <div className="transition-transform duration-200">
-                          {isExpanded ? 
+                          {isAccordionExpanded ? 
                             <ChevronUp className="w-3 h-3" /> : 
                             <ChevronDown className="w-3 h-3" />
                           }
                         </div>
-                      }
+                      ) : undefined}
                     />
                     
-                    {/* Elementos del acordeón expandidos */}
-                    {isExpanded && (
+                    {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
+                    {isExpanded && isAccordionExpanded && (
                       <div className="ml-2 mt-1 space-y-[2px]">
                         {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
                           const isSubItemActive = Boolean(subItem.href && location === subItem.href);
