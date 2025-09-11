@@ -135,7 +135,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
               // Calculate top padding based on new single-row header (h-12)
-              "md:pt-12" // Con header ahora (h-12)
+              "md:pt-[40px]" // Con header ahora (h-[40px])
             } ${
               // Calculate margin based on primary sidebar (40px) + secondary sidebar
               isMainDocked || isMainHovered

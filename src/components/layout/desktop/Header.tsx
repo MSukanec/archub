@@ -213,20 +213,20 @@ export function Header({ className }: HeaderProps) {
   return (
     <header 
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-12 bg-[var(--layout-bg)] border-b border-[var(--menues-border)]",
-        "flex items-center justify-between px-4",
+        "fixed top-0 left-0 right-0 z-50 h-[40px] bg-[var(--main-sidebar-bg)] border-b border-[var(--menues-border)]",
+        "flex items-center justify-between px-1",
         className
       )}
     >
       {/* Left Side - Navigation */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-[2px]">
         {primarySections.map((section) => (
           <SidebarButton
             key={section.id}
-            icon={<section.icon className="w-4 h-4" />}
+            icon={<section.icon className="w-[18px] h-[18px]" />}
             label={section.label}
             isActive={section.isActive}
-            isExpanded={true} // Header buttons are always expanded
+            isExpanded={false} // Start collapsed, expand on hover
             isHeaderButton={true}
             variant="main"
             onClick={() => handleNavigationClick(section)}
@@ -236,70 +236,53 @@ export function Header({ className }: HeaderProps) {
       </div>
 
       {/* Right Side - User Controls */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-[2px]">
+        {/* Theme Toggle */}
+        <SidebarButton
+          icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+          label={isDark ? "Modo Claro" : "Modo Oscuro"}
+          isActive={false}
+          isExpanded={false}
+          onClick={handleThemeToggle}
+          variant="main"
+        />
+        
+        {/* Dock/Undock Sidebar */}
+        <SidebarButton
+          icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+          label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
+          isActive={false}
+          isExpanded={false}
+          onClick={handleDockToggle}
+          variant="main"
+        />
+        
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+        <SidebarButton
+          icon={<Bell className="w-[18px] h-[18px]" />}
+          label="Notificaciones"
+          isActive={false}
+          isExpanded={false}
           onClick={() => {
-            // TODO: Implement notifications
             toast({
               title: "Notificaciones",
               description: "Próximamente disponible"
             });
           }}
-        >
-          <Bell className="w-4 h-4" />
-        </Button>
-
-        {/* Dock/Undock Sidebar */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleDockToggle}
-        >
-          {isDocked ? (
-            <PanelLeftClose className="w-4 h-4" />
-          ) : (
-            <PanelLeftOpen className="w-4 h-4" />
-          )}
-        </Button>
-
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleThemeToggle}
-        >
-          {isDark ? (
-            <Sun className="w-4 h-4" />
-          ) : (
-            <Moon className="w-4 h-4" />
-          )}
-        </Button>
-
+          variant="main"
+        />
+        
         {/* User Avatar */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 p-0"
-          onClick={() => {
-            navigate('/profile');
-          }}
-        >
-          <Avatar className="h-6 w-6">
-            <AvatarImage 
-              src={userData.user.avatar_url || ""} 
-              alt={userData.user.full_name || "User"} 
-            />
-            <AvatarFallback className="text-xs">
-              {getUserInitials()}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
+        <SidebarButton
+          icon={null}
+          avatarUrl={userData?.user?.avatar_url}
+          userFullName={userData?.user?.full_name}
+          label={userData?.user?.full_name || 'Usuario'}
+          isActive={false}
+          isExpanded={false}
+          onClick={() => navigate('/profile')}
+          variant="main"
+        />
       </div>
     </header>
   );
