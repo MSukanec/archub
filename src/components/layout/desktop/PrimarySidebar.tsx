@@ -34,7 +34,7 @@ export function PrimarySidebar() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isGlobalView, selectedProjectId } = useProjectContext();
+  const { isGlobalView, selectedProjectId, setSelectedProject } = useProjectContext();
   
   // Get projects data to find current project info
   const { data: projects = [] } = useProjects(userData?.organization?.id);
@@ -251,11 +251,11 @@ export function PrimarySidebar() {
               items={projects.map((project) => ({
                 id: project.id,
                 name: project.name,
-                logo_url: project.logo_url,
+                logo_url: project.project_data?.project_image_url,
                 type: "Proyecto" as const,
                 color: project.color
               }))}
-              selectedId={selectedProjectId}
+              selectedId={selectedProjectId || undefined}
               onSelect={handleProjectSelect}
               emptyMessage="No hay proyectos disponibles"
               getInitials={getProjectInitials}
