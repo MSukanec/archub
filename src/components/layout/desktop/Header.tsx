@@ -227,6 +227,7 @@ export function Header({ className }: HeaderProps) {
             label={section.label}
             isActive={section.isActive}
             onClick={() => handleNavigationClick(section)}
+            variant="expandable"
           />
         ))}
       </div>
@@ -238,6 +239,7 @@ export function Header({ className }: HeaderProps) {
           icon={isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
           label={isDark ? "Modo Claro" : "Modo Oscuro"}
           onClick={handleThemeToggle}
+          variant="icon-only"
         />
         
         {/* Dock/Undock Sidebar */}
@@ -245,6 +247,7 @@ export function Header({ className }: HeaderProps) {
           icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
           label={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
           onClick={handleDockToggle}
+          variant="icon-only"
         />
         
         {/* Notifications */}
@@ -257,6 +260,7 @@ export function Header({ className }: HeaderProps) {
               description: "Próximamente disponible"
             });
           }}
+          variant="icon-only"
         />
         
         {/* User Avatar */}
@@ -266,6 +270,7 @@ export function Header({ className }: HeaderProps) {
           userFullName={userData?.user?.full_name}
           label={userData?.user?.full_name || 'Usuario'}
           onClick={() => navigate('/profile')}
+          variant="avatar"
         />
       </div>
     </header>

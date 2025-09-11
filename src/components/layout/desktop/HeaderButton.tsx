@@ -13,6 +13,7 @@ interface HeaderButtonProps {
   userFullName?: string;
   projectColor?: string;
   disableHover?: boolean;
+  variant?: 'expandable' | 'icon-only' | 'avatar'; // Nuevo prop para controlar comportamiento
 }
 
 export default function HeaderButton({
@@ -25,7 +26,8 @@ export default function HeaderButton({
   avatarUrl,
   userFullName,
   projectColor,
-  disableHover = false
+  disableHover = false,
+  variant = 'expandable' // Por defecto expandible (botones izquierda)
 }: HeaderButtonProps) {
   const [, navigate] = useLocation();
   const [isHovered, setIsHovered] = useState(false);
@@ -40,7 +42,11 @@ export default function HeaderButton({
     }
   };
 
-  const showText = isHovered || isActive;
+  // Solo mostrar texto si es expandible y está hovered/active
+  const showText = variant === 'expandable' && (isHovered || isActive);
+  
+  // Determinar si debe tener efectos de hover/active
+  const hasInteractiveEffects = variant !== 'avatar';
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -64,37 +70,67 @@ export default function HeaderButton({
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
-          // Cancelar cualquier timeout de collapse pendiente
-          if (collapseTimeoutRef.current) {
-            clearTimeout(collapseTimeoutRef.current);
-            collapseTimeoutRef.current = null;
+          if (!hasInteractiveEffects || disableHover) return;
+          
+          // Solo expandibles necesitan timeout logic
+          if (variant === 'expandable') {
+            if (collapseTimeoutRef.current) {
+              clearTimeout(collapseTimeoutRef.current);
+              collapseTimeoutRef.current = null;
+            }
           }
           
           setIsHovered(true);
-          if (!isActive && !disableHover) {
-            e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-hover-bg)';
-            e.currentTarget.style.color = 'var(--main-sidebar-button-hover-fg)';
+          
+          if (!isActive) {
+            if (variant === 'icon-only') {
+              // Botones derecha: solo cambiar color del ícono a --accent
+              e.currentTarget.style.color = 'var(--accent)';
+            } else if (variant === 'expandable') {
+              // Botones izquierda: fondo y texto como antes
+              e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-hover-bg)';
+              e.currentTarget.style.color = 'var(--main-sidebar-button-hover-fg)';
+            }
           }
         }}
         onMouseLeave={(e) => {
-          // Delay el collapse para permitir movimiento natural del mouse
-          collapseTimeoutRef.current = setTimeout(() => {
-            setIsHovered(false);
-          }, 150); // 150ms delay para movimiento natural
+          if (!hasInteractiveEffects || disableHover) return;
           
-          if (!isActive && !disableHover) {
-            e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-bg)';
-            e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
+          if (variant === 'expandable') {
+            // Delay el collapse solo para expandibles
+            collapseTimeoutRef.current = setTimeout(() => {
+              setIsHovered(false);
+            }, 150);
+          } else {
+            // Inmediato para icon-only
+            setIsHovered(false);
+          }
+          
+          if (!isActive) {
+            if (variant === 'icon-only') {
+              // Botones derecha: volver a color normal
+              e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
+            } else if (variant === 'expandable') {
+              // Botones izquierda: volver a fondo normal
+              e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-bg)';
+              e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
+            }
           }
         }}
         style={{ 
           borderRadius: '4px',
-          backgroundColor: isActive
+          backgroundColor: variant === 'expandable' && isActive
             ? 'var(--main-sidebar-button-active-bg)'
-            : 'var(--main-sidebar-button-bg)',
-          color: isActive
+            : variant === 'expandable'
+            ? 'var(--main-sidebar-button-bg)'
+            : 'transparent',
+          color: variant === 'icon-only' && isActive
+            ? 'var(--accent)'  // Botones derecha activos usan --accent
+            : variant === 'expandable' && isActive
             ? 'var(--main-sidebar-button-active-fg)'
-            : 'var(--main-sidebar-button-fg)',
+            : variant !== 'avatar'
+            ? 'var(--main-sidebar-button-fg)'
+            : 'inherit',
         } as React.CSSProperties}
       >
         {/* Contenedor del icono - POSICIÓN ABSOLUTA FIJA - NUNCA SE MUEVE */}
