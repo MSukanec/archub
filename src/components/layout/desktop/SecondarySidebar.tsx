@@ -596,8 +596,10 @@ export function SecondarySidebar() {
       { icon: Info, label: 'Información', href: '/general/info' },
       { icon: DollarSign, label: 'Finanzas', href: '/general/finances' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
-      { icon: Users, label: 'Clientes', href: '/general/clients' },
       { icon: FileText, label: 'Media', href: '/general/media' }
+    ],
+    commercialization: [
+      { icon: Users, label: 'Clientes', href: '/general/clients' }
     ],
     construction: [
       { icon: CheckSquare, label: 'Tareas', href: '/construction/tasks' },
@@ -646,6 +648,13 @@ export function SecondarySidebar() {
           label: 'Construcción',
           icon: HardHat,
           items: sidebarContent.construction || []
+        },
+        {
+          type: 'accordion', 
+          id: 'commercialization',
+          label: 'Comercialización',
+          icon: Handshake,
+          items: sidebarContent.commercialization || []
         }
       ];
     }
