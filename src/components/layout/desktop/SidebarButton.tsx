@@ -82,10 +82,10 @@ export default function SidebarButton({
         borderRadius: '4px', // All buttons have 4px rounded corners
         backgroundColor: isActive && !isExpanded
           ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
-          : (isActive || isHeaderButton)
+          : isActive
           ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
           : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
-        color: (isActive || isHeaderButton)
+        color: isActive
           ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
           : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
         '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
@@ -116,12 +116,12 @@ export default function SidebarButton({
                 backgroundColor: projectColor || 'transparent',
                 borderColor: projectColor 
                   ? 'transparent' 
-                  : (isActive || isHeaderButton)
+                  : isActive
                   ? `var(--main-sidebar-button-active-fg)`
                   : `var(--main-sidebar-button-fg)`,
                 color: projectColor 
                   ? 'white' 
-                  : (isActive || isHeaderButton)
+                  : isActive
                   ? `var(--main-sidebar-button-active-fg)`
                   : `var(--main-sidebar-button-fg)`
               }}
