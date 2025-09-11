@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { SecondarySidebar } from "./SecondarySidebar";
-import { PrimarySidebar } from "./PrimarySidebar";
+// import { SecondarySidebar } from "./SecondarySidebar";
+// import { PrimarySidebar } from "./PrimarySidebar";
+import { Sidebar } from "./Sidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
@@ -105,15 +106,20 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
       {/* Primary Sidebar - hidden on mobile */}
-      <div className="hidden md:block">
+      {/* <div className="hidden md:block">
         <PrimarySidebar />
-      </div>
+      </div> */}
 
       {/* Secondary Sidebar - hidden on mobile */}
-      <div className="hidden md:block">
+      {/* <div className="hidden md:block">
         <SecondarySidebar />
-        {/* <SidebarSubmenu /> */}{" "}
-        {/* Commented out - using accordion sidebar instead */}
+        <SidebarSubmenu />
+        Commented out - using accordion sidebar instead
+      </div> */}
+      
+      {/* New Unified Sidebar */}
+      <div className="hidden md:block">
+        <Sidebar />
       </div>
 
       {/* Header Mobile - Only visible on mobile */}
