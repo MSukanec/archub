@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +30,7 @@ export default function HeaderButton({
   const [, navigate] = useLocation();
   const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClick = () => {
     if (onClick) {
@@ -40,6 +41,15 @@ export default function HeaderButton({
   };
 
   const showText = isHovered || isActive;
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (collapseTimeoutRef.current) {
+        clearTimeout(collapseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="relative group">
@@ -54,6 +64,12 @@ export default function HeaderButton({
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
+          // Cancelar cualquier timeout de collapse pendiente
+          if (collapseTimeoutRef.current) {
+            clearTimeout(collapseTimeoutRef.current);
+            collapseTimeoutRef.current = null;
+          }
+          
           setIsHovered(true);
           if (!isActive && !disableHover) {
             e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-hover-bg)';
@@ -61,7 +77,11 @@ export default function HeaderButton({
           }
         }}
         onMouseLeave={(e) => {
-          setIsHovered(false);
+          // Delay el collapse para permitir movimiento natural del mouse
+          collapseTimeoutRef.current = setTimeout(() => {
+            setIsHovered(false);
+          }, 150); // 150ms delay para movimiento natural
+          
           if (!isActive && !disableHover) {
             e.currentTarget.style.backgroundColor = 'var(--main-sidebar-button-bg)';
             e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
