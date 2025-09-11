@@ -792,14 +792,14 @@ export function SecondarySidebar() {
                       <div className="relative">
                         {/* Línea vertical que conecta los elementos hijos */}
                         <div 
-                          className="absolute left-[20px] top-1 bottom-1 w-[1px]"
+                          className="absolute left-[16px] top-1 bottom-1 w-[1px]"
                           style={{
                             backgroundColor: 'rgba(0, 0, 0, 0.2)',
                             zIndex: 1
                           }}
                         />
                         
-                        <div className="ml-[40px] mt-1 space-y-[2px]">
+                        <div className="ml-[32px] mt-1 space-y-[2px]">
                           {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
                             const isSubItemActive = Boolean(subItem.href && location === subItem.href);
                             return (
