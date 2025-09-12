@@ -735,7 +735,9 @@ export function TertiarySidebar() {
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
-        setHovered(true);
+        if (!isProjectPopoverOpen) {
+          setHovered(true);
+        }
         // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
         if (sidebarLevel === 'project') {
           if (location.startsWith('/general')) {
@@ -751,7 +753,11 @@ export function TertiarySidebar() {
           }
         }
       }}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => {
+        if (!isProjectPopoverOpen) {
+          setHovered(false);
+        }
+      }}
     >
       {/* Project Selector Header - misma altura que PageHeader */}
       <div className={cn(
@@ -978,30 +984,36 @@ export function TertiarySidebar() {
         {/* Popover */}
         <div
           className={cn(
-            "fixed bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] rounded-2xl shadow-lg z-50 flex flex-col",
+            "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
             "transition-all duration-300",
-            "w-64 max-h-[calc(100vh-32px)]"
+            "w-64"
           )}
           style={{
-            left: isExpanded ? '280px' : '76px', // A la derecha del sidebar
-            top: '8px',
-            bottom: '8px'
+            left: '280px', // Siempre a la derecha del sidebar expandido
+            top: '8px'
           }}
         >
-          {/* Header del popover */}
-          <div className="h-12 flex-shrink-0 flex items-center pl-[14px] pr-4 border-b border-[var(--secondary-sidebar-border)]">
-            <span className="text-sm font-black text-black uppercase">
-              SELECTOR DE PROYECTO
-            </span>
-          </div>
-
           {/* Contenido del popover */}
-          <div className="flex-1 py-6 pl-[14px] pr-2 overflow-y-auto">
+          <div className="py-6 pl-[14px] pr-2">
             <div className="flex flex-col gap-[2px]">
               
               {/* Organización */}
               <div 
-                className="h-8 flex items-center px-2 mb-[2px] cursor-pointer hover:bg-white/5 rounded transition-colors"
+                className={cn(
+                  "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
+                  !selectedProjectId ? "text-black" : "hover:text-black"
+                )}
+                style={{
+                  backgroundColor: !selectedProjectId ? 'transparent' : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!selectedProjectId) return;
+                  e.currentTarget.style.color = 'black';
+                }}
+                onMouseLeave={(e) => {
+                  if (!selectedProjectId) return;
+                  e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
+                }}
                 onClick={() => {
                   setSelectedProject(null); // Cambiar a vista organizacional
                   setIsProjectPopoverOpen(false);
@@ -1028,10 +1040,17 @@ export function TertiarySidebar() {
                   
                   {/* Nombre de la organización */}
                   <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium text-black truncate">
+                    <div className="text-sm font-medium truncate">
                       {userData?.organization?.name || 'Organización'}
                     </div>
                   </div>
+                  
+                  {/* Indicador de organización activa */}
+                  {!selectedProjectId && (
+                    <div className="ml-2 flex-shrink-0">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -1044,10 +1063,20 @@ export function TertiarySidebar() {
                   key={project.id}
                   className={cn(
                     "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
-                    selectedProjectId === project.id 
-                      ? "bg-white/10" 
-                      : "hover:bg-white/5"
+                    selectedProjectId === project.id ? "text-black" : "hover:text-black"
                   )}
+                  style={{
+                    color: selectedProjectId === project.id ? 'black' : 'var(--main-sidebar-button-fg)',
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedProjectId === project.id) return;
+                    e.currentTarget.style.color = 'black';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedProjectId === project.id) return;
+                    e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
+                  }}
                   onClick={() => {
                     setSelectedProject(project.id);
                     setIsProjectPopoverOpen(false);
@@ -1078,7 +1107,7 @@ export function TertiarySidebar() {
                     
                     {/* Nombre del proyecto */}
                     <div className="ml-3 flex-1 min-w-0">
-                      <div className="text-sm font-medium text-black truncate">
+                      <div className="text-sm font-medium truncate">
                         {project.name}
                       </div>
                     </div>
