@@ -777,7 +777,7 @@ export function SecondarySidebar() {
                 const isAccordionExpanded = expandedAccordion === accordionItem.id;
                 
                 return (
-                  <div key={`accordion-${accordionItem.id}`} className="mb-1">
+                  <div key={`accordion-${accordionItem.id}`}>
                     {/* Botón del acordeón */}
                     <SidebarButton
                       icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
@@ -809,7 +809,7 @@ export function SecondarySidebar() {
                           }}
                         />
                         
-                        <div className="ml-[32px] mt-1 space-y-[2px]">
+                        <div className="ml-[32px]">
                           {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
                             const isSubItemActive = Boolean(subItem.href && location === subItem.href);
                             return (
@@ -864,7 +864,7 @@ export function SecondarySidebar() {
               
               return (
                 <div key={`${itemKey}-${index}`}>
-                  <div className="mb-[2px]">
+                  <div>
                     {buttonElement}
                   </div>
                 </div>
