@@ -806,7 +806,7 @@ export function TertiarySidebar() {
     >
       {/* Project Selector Header - misma altura que PageHeader */}
       <div className={cn(
-        "h-12 flex-shrink-0 flex items-center",
+        "h-12 flex-shrink-0 flex items-center pt-3",
         "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
       )}>
         {currentProject ? (
@@ -985,7 +985,7 @@ export function TertiarySidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className="py-6 pl-[14px]">
+      <div className="pb-3 pl-[14px]">
         <div className="flex flex-col gap-[2px]">
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
