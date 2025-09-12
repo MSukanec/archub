@@ -742,10 +742,7 @@ export function SecondarySidebar() {
       {/* Navigation Items */}
       <div className="flex-1 p-1">
         <div className="flex flex-col gap-[2px] h-full">
-          <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            
-            {/* Renderizar contenido según el nivel actual */}
-            {getCurrentSidebarItems().map((item, index) => {
+          {getCurrentSidebarItems().map((item, index) => {
               // Type guard to ensure we're working with a proper item
               if (!item || typeof item !== 'object') {
                 return null;
@@ -864,13 +861,10 @@ export function SecondarySidebar() {
               
               return (
                 <div key={`${itemKey}-${index}`}>
-                  <div>
-                    {buttonElement}
-                  </div>
+                  {buttonElement}
                 </div>
               );
             })}
-          </div>
         </div>
       </div>
     </aside>
