@@ -405,6 +405,7 @@ export function TertiarySidebar() {
   const queryClient = useQueryClient();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  const { sidebarMode, setSidebarMode, goToOrganizationMode, goToProjectMode } = useNavigationStore();
   
   // Define if secondary sidebar is expanded
   const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isHovered;
@@ -799,55 +800,16 @@ export function TertiarySidebar() {
         }
       }}
     >
-      {/* Project Selector Header - misma altura que PageHeader */}
+      {/* Header condicional según el modo del sidebar */}
       <div className={cn(
         "h-12 flex-shrink-0 flex items-center pt-3",
         "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
       )}>
-        {currentProject ? (
-          <div 
-            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
-          >
-            {/* Avatar del proyecto */}
-            <div className="flex-shrink-0">
-              {currentProject.project_data?.project_image_url ? (
-                <img 
-                  src={currentProject.project_data.project_image_url} 
-                  alt="Proyecto"
-                  className="w-8 h-8 rounded-full border-2"
-                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
-                />
-              ) : (
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
-                  style={{ 
-                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
-                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
-                  }}
-                >
-                  {getProjectInitials(currentProject.name || 'P')}
-                </div>
-              )}
-            </div>
-            
-            {/* Información del proyecto - solo cuando está expandido */}
-            {isExpanded && (
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {currentProject.name}
-                </div>
-                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : isExpanded ? (
-          <span className="text-sm font-black text-black uppercase">
-            MENÚ LATERAL
-          </span>
-        ) : null}
+        {sidebarMode === 'organization' ? (
+          <OrganizationSelectorSidebarHeader isExpanded={isExpanded} />
+        ) : (
+          <ProjectSelectorSidebarHeader isExpanded={isExpanded} />
+        )}
       </div>
       
       {/* Navigation Items */}
