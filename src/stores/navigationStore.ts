@@ -57,25 +57,15 @@ export const useNavigationStore = create<NavigationState>()(
       setSidebarMode: (mode: SidebarMode) => set({ sidebarMode: mode }),
       // Persistencia de rutas
       lastOrganizationRoute: '/organization/dashboard',
-      lastProjectRoute: '/finances/dashboard',
+      lastProjectRoute: '/general/info',
       setLastOrganizationRoute: (route: string) => set({ lastOrganizationRoute: route }),
       setLastProjectRoute: (route: string) => set({ lastProjectRoute: route }),
-      // Funciones de navegación
+      // Funciones de navegación (sin side effects)
       goToOrganizationMode: () => {
-        const state = get()
         set({ sidebarMode: 'organization' })
-        // Navegar a la última ruta de organización
-        if (typeof window !== 'undefined') {
-          window.history.pushState({}, '', state.lastOrganizationRoute)
-        }
       },
       goToProjectMode: () => {
-        const state = get()
         set({ sidebarMode: 'project' })
-        // Navegar a la última ruta de proyecto
-        if (typeof window !== 'undefined') {
-          window.history.pushState({}, '', state.lastProjectRoute)
-        }
       },
     }),
     {

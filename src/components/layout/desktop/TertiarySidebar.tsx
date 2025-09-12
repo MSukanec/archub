@@ -81,7 +81,8 @@ import { useProjects } from "@/hooks/use-projects";
 interface SidebarItem {
   icon: any;
   label: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 }
 
 interface SidebarItemWithSubmenu {
@@ -405,13 +406,31 @@ export function TertiarySidebar() {
   const queryClient = useQueryClient();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
-  const { sidebarMode, setSidebarMode, goToOrganizationMode, goToProjectMode } = useNavigationStore();
+  const { 
+    sidebarMode, 
+    setSidebarMode, 
+    goToOrganizationMode, 
+    goToProjectMode,
+    lastOrganizationRoute,
+    lastProjectRoute,
+    setLastOrganizationRoute,
+    setLastProjectRoute
+  } = useNavigationStore();
   
   // Define if secondary sidebar is expanded
   const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isHovered;
   
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  // Effect to persist routes based on current location
+  useEffect(() => {
+    if (location.startsWith('/organization/') || location.startsWith('/finances/') || location === '/') {
+      setLastOrganizationRoute(location);
+    } else if (location.startsWith('/construction/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/project/') || location.startsWith('/admin/')) {
+      setLastProjectRoute(location);
+    }
+  }, [location, setLastOrganizationRoute, setLastProjectRoute]);
   
   // Initialize theme from user preferences
   useEffect(() => {
@@ -688,67 +707,86 @@ export function TertiarySidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
-  // Función para obtener el contenido fijo del tercer sidebar con 4 acordeones
+  // Función para obtener los elementos según el modo del sidebar
   const getTertiarySidebarItems = () => {
-    return [
-      {
-        type: 'section',
-        label: 'GENERAL'
-      },
-      {
-        type: 'accordion',
-        id: 'organization',
-        label: 'Organización',
-        icon: Building,
-        items: sidebarContent.organization || []
-      },
-      {
-        type: 'accordion',
-        id: 'finances',
-        label: 'Finanzas',
-        icon: DollarSign,
-        items: sidebarContent.finances || []
-      },
-      {
-        type: 'accordion',
-        id: 'library',
-        label: 'Biblioteca',
-        icon: Library,
-        items: sidebarContent.library || []
-      },
-      {
-        type: 'section',
-        label: 'PROYECTO'
-      },
-      {
-        type: 'accordion',
-        id: 'general',
-        label: 'General',
-        icon: FolderOpen,
-        items: sidebarContent.project || []
-      },
-      {
-        type: 'accordion', 
-        id: 'construction',
-        label: 'Construcción',
-        icon: HardHat,
-        items: sidebarContent.construction || []
-      },
-      {
-        type: 'accordion', 
-        id: 'commercialization',
-        label: 'Comercialización',
-        icon: Handshake,
-        items: sidebarContent.commercialization || []
-      },
-      {
-        type: 'accordion',
-        id: 'admin',
-        label: 'Administración',
-        icon: Crown,
-        items: sidebarContent.admin || []
-      }
-    ];
+    if (sidebarMode === 'organization') {
+      // Estado ORGANIZACIÓN: mostrar elementos directamente + botón ir al proyecto
+      return [
+        {
+          type: 'section',
+          label: 'ORGANIZACIÓN'
+        },
+        ...sidebarContent.organization.map(item => ({
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        })),
+        {
+          type: 'divider'
+        },
+        {
+          icon: ArrowRight,
+          label: 'Ir al proyecto',
+          href: '#',
+          onClick: () => {
+            goToProjectMode();
+            navigate(lastProjectRoute);
+          }
+        }
+      ];
+    } else {
+      // Estado PROYECTO: mostrar navegación de proyecto + botón volver
+      return [
+        {
+          icon: ArrowLeft,
+          label: 'Volver a organización',
+          href: '#',
+          onClick: () => {
+            goToOrganizationMode();
+            navigate(lastOrganizationRoute);
+          }
+        },
+        {
+          type: 'divider'
+        },
+        {
+          type: 'section',
+          label: 'FINANZAS'
+        },
+        ...sidebarContent.finances.map(item => ({
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        })),
+        {
+          type: 'section',
+          label: 'CONSTRUCCIÓN'
+        },
+        ...sidebarContent.construction.map(item => ({
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        })),
+        {
+          type: 'section',
+          label: 'DISEÑO'
+        },
+        {
+          icon: Brush,
+          label: 'Diseño',
+          href: '/design/dashboard'
+        },
+        {
+          type: 'section',
+          label: 'ADMINISTRACIÓN'
+        },
+        ...sidebarContent.admin.map(item => ({
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        }))
+      ];
+    }
   };
 
   // Función para determinar qué acordeón está activo basado en la URL
@@ -924,7 +962,9 @@ export function TertiarySidebar() {
                   isActive={isActive}
                   isExpanded={isExpanded}
                   onClick={() => {
-                    if (sidebarItem.href) {
+                    if (sidebarItem.onClick) {
+                      sidebarItem.onClick();
+                    } else if (sidebarItem.href && sidebarItem.href !== '#') {
                       navigate(sidebarItem.href);
                     }
                   }}
