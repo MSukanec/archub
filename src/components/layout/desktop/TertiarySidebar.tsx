@@ -771,7 +771,7 @@ export function TertiarySidebar() {
                           }}
                         />
                         
-                        <div className="ml-[32px] mt-1 space-y-[2px]">
+                        <div className="ml-[32px]">
                           {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
                             const isSubItemActive = Boolean(subItem.href && location === subItem.href);
                             return (

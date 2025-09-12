@@ -71,7 +71,7 @@ import { useWalletsLite } from "@/hooks/use-wallets-lite";
 import { useMovementConceptsLite } from "@/hooks/use-movement-concepts-lite";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import SidebarButton from "./SidebarButton";
+import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 
@@ -175,7 +175,7 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     <SelectorPopover
       trigger={
         <div>
-          <SidebarButton
+          <ButtonSidebar
             icon={<Folder className="w-[18px] h-[18px]" />}
             label={isExpanded ? displayName : ""}
             isActive={false}
@@ -322,7 +322,7 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     <SelectorPopover
       trigger={
         <div>
-          <SidebarButton
+          <ButtonSidebar
             icon={<Building2 className="w-[18px] h-[18px]" />}
             label={isExpanded ? displayName : ""}
             isActive={false}
@@ -779,7 +779,7 @@ export function SecondarySidebar() {
                 return (
                   <div key={`accordion-${accordionItem.id}`} className="mb-1">
                     {/* Botón del acordeón */}
-                    <SidebarButton
+                    <ButtonSidebar
                       icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
                       label={accordionItem.label}
                       isActive={false}
@@ -813,7 +813,7 @@ export function SecondarySidebar() {
                           {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
                             const isSubItemActive = Boolean(subItem.href && location === subItem.href);
                             return (
-                              <SidebarButton
+                              <ButtonSidebar
                                 key={`${accordionItem.id}-${subIndex}`}
                                 icon={<subItem.icon className="w-[16px] h-[16px]" />}
                                 label={subItem.label}
@@ -847,7 +847,7 @@ export function SecondarySidebar() {
               const itemKey = sidebarItem.label || `item-${index}`;
               const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
               const buttonElement = (
-                <SidebarButton
+                <ButtonSidebar
                   icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
                   label={sidebarItem.label}
                   isActive={isActive}
