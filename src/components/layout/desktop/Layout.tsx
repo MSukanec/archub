@@ -135,8 +135,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based only on tertiary sidebar (60px collapsed, 264px expanded)
-              "md:ml-[60px]" // Only tertiary sidebar (60px when collapsed, but we keep it simple)
+              // Calculate margin based only on tertiary sidebar (60px collapsed + 16px padding, 264px expanded + 16px padding)
+              "md:ml-[76px]" // Tertiary sidebar (60px when collapsed + 16px total padding)
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (

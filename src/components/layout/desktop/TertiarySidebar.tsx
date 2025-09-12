@@ -711,14 +711,14 @@ export function TertiarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-lg",
+        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: '2px', // 2px from left edge
-        top: '2px', // 2px from top
-        bottom: '2px', // 2px from bottom
-        height: 'calc(100vh - 4px)', // Full height minus top and bottom margins
+        left: '8px', // 8px from left edge
+        top: '8px', // 8px from top
+        bottom: '8px', // 8px from bottom
+        height: 'calc(100vh - 16px)', // Full height minus top and bottom margins
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
