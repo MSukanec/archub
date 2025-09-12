@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { SecondarySidebar } from "./SecondarySidebar";
+// import { SecondarySidebar } from "./SecondarySidebar";
 import { TertiarySidebar } from "./TertiarySidebar";
-import { PrimarySidebar } from "./PrimarySidebar";
+// import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
@@ -72,16 +72,8 @@ interface LayoutProps {
 export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
-  const { isDocked: isMainDocked, isHovered: isMainHovered } =
-    useSidebarStore();
-  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered } =
-    useSecondarySidebarStore();
-  const { activeSidebarSection } = useNavigationStore();
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
-
-  const isSecondaryExpanded =
-    isSecondaryDocked || isSecondaryHovered || isMainHovered;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -105,17 +97,17 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       className="min-h-screen"
       style={{ backgroundColor: "var(--layout-bg)" }}
     >
-      {/* Primary Sidebar - hidden on mobile */}
+      {/* Primary Sidebar - COMMENTED OUT 
       <div className="hidden md:block">
         <PrimarySidebar />
       </div>
+      */}
 
-      {/* Secondary Sidebar - hidden on mobile */}
+      {/* Secondary Sidebar - COMMENTED OUT 
       <div className="hidden md:block">
         <SecondarySidebar />
-        {/* <SidebarSubmenu /> */}{" "}
-        {/* Commented out - using accordion sidebar instead */}
       </div>
+      */}
 
       {/* Tertiary Sidebar - hidden on mobile */}
       <div className="hidden md:block">
@@ -124,7 +116,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
       {/* Header Mobile - Only visible on mobile */}
       {isMobile ? (
-        <HeaderMobile {...headerProps}>
+        <HeaderMobile {...(headerProps ?? {})}>
           <main
             className={`transition-all duration-300 ease-in-out flex-1 overflow-auto px-4 py-3 pb-12 pt-5 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
@@ -143,14 +135,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based on 3 sidebars: primary (40px) + secondary + tertiary
-              isMainDocked || isMainHovered
-                ? isSecondaryExpanded 
-                  ? "md:ml-[568px]" // 40px primary + 264px secondary + 264px tertiary when all expanded  
-                  : "md:ml-[120px]" // 40px primary + 40px secondary + 40px tertiary when secondary and tertiary collapsed
-                : isSecondaryExpanded
-                  ? "md:ml-[568px]" // 40px primary + 264px secondary + 264px tertiary when secondary and tertiary expanded
-                  : "md:ml-[120px]" // 40px primary + 40px secondary + 40px tertiary when all collapsed
+              // Calculate margin based only on tertiary sidebar (60px collapsed, 264px expanded)
+              "md:ml-[60px]" // Only tertiary sidebar (60px when collapsed, but we keep it simple)
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
