@@ -739,7 +739,7 @@ export function TertiarySidebar() {
                 const isAccordionExpanded = expandedAccordion === accordionItem.id;
                 
                 return (
-                  <div key={`accordion-${accordionItem.id}`} className="mb-1">
+                  <div key={`accordion-${accordionItem.id}`}>
                     {/* Botón del acordeón */}
                     <ButtonSidebar
                       icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
