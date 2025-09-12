@@ -123,7 +123,7 @@ export function PageLayout({
       <div className="bg-[var(--layout-bg)]">
         <div className="max-w-[1440px] mx-auto px-6">
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
-          <div className="h-[50px] flex items-center justify-between border-b border-[var(--menues-border)]">
+          <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--menues-border)]' : ''}`}>
           {/* Left: Page Title */}
           <div className="flex items-center gap-4">
             {showBackButton && (
@@ -362,7 +362,7 @@ export function PageLayout({
 
           {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
-            <div className="h-8 flex items-center">
+            <div className="h-8 flex items-center border-b border-[var(--menues-border)]">
             <div className="flex items-center space-x-6">
               {tabs.map((tab) => {
                 const tabContent = (
