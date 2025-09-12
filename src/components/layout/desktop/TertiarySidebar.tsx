@@ -8,7 +8,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useProjectContext } from '@/stores/projectContext';
-import { useUpdateUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
 import { 
   Settings, 
   UserCircle,
@@ -357,7 +356,37 @@ export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
-  const updatePreferencesMutation = useUpdateUserOrganizationPreferences();
+  // Mutación específica para cambiar proyecto (igual a la que funciona en Projects.tsx)
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async ({ organizationId, lastProjectId }: { organizationId: string, lastProjectId: string | null }) => {
+      if (!userData?.user?.id) {
+        throw new Error('Usuario no disponible');
+      }
+      
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: organizationId,
+          last_project_id: lastProjectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        })
+      
+      if (error) throw error
+      return lastProjectId;
+    },
+    onSuccess: (projectId) => {
+      // ESTO es lo crucial que me faltaba!
+      setSelectedProject(projectId, userData?.organization?.id);
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, userData?.organization?.id] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    }
+  });
   
   // Get projects for the current organization
   const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
@@ -1030,21 +1059,13 @@ export function TertiarySidebar() {
                   if (!selectedProjectId) return;
                   e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
                 }}
-                onClick={async () => {
-                  setSelectedProject(null); // Cambiar a vista organizacional
-                  
-                  // Guardar preferencia en la base de datos
+                onClick={() => {
                   if (userData?.organization?.id) {
-                    try {
-                      await updatePreferencesMutation.mutateAsync({
-                        organizationId: userData.organization.id,
-                        lastProjectId: null
-                      });
-                    } catch (error) {
-                      console.error('Error saving organization preference:', error);
-                    }
+                    updatePreferencesMutation.mutate({
+                      organizationId: userData.organization.id,
+                      lastProjectId: null
+                    });
                   }
-                  
                   setIsProjectPopoverOpen(false);
                 }}
               >
@@ -1106,21 +1127,13 @@ export function TertiarySidebar() {
                     if (selectedProjectId === project.id) return;
                     e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
                   }}
-                  onClick={async () => {
-                    setSelectedProject(project.id);
-                    
-                    // Guardar preferencia en la base de datos
+                  onClick={() => {
                     if (userData?.organization?.id) {
-                      try {
-                        await updatePreferencesMutation.mutateAsync({
-                          organizationId: userData.organization.id,
-                          lastProjectId: project.id
-                        });
-                      } catch (error) {
-                        console.error('Error saving project preference:', error);
-                      }
+                      updatePreferencesMutation.mutate({
+                        organizationId: userData.organization.id,
+                        lastProjectId: project.id
+                      });
                     }
-                    
                     setIsProjectPopoverOpen(false);
                   }}
                 >
