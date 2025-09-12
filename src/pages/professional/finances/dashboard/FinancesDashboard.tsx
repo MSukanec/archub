@@ -11,8 +11,7 @@ import { MonthlyFlowChart } from '@/components/charts/MonthlyFlowChart'
 import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBalanceTable'
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
 import { ActionBar } from '@/components/layout/desktop/ActionBar'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { formatDateShort } from '@/lib/date-utils'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { motion } from 'framer-motion'
@@ -213,7 +212,7 @@ export default function FinancesDashboard() {
                             {movement.description || 'Sin descripción'}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {movement.movement_date && format(new Date(movement.movement_date), 'dd/MM', { locale: es })}
+                            {movement.movement_date && formatDateShort(movement.movement_date)}
                           </p>
                         </div>
                       </div>
