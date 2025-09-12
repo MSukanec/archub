@@ -309,6 +309,12 @@ export function TaskList({
         icon={<CheckSquare className="h-8 w-8" />}
         title="No hay tareas en el proyecto"
         description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
+        action={
+          <Button onClick={() => openModal('construction-single-task', {})}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Tarea
+          </Button>
+        }
       />
     )
   }
