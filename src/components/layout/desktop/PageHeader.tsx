@@ -29,10 +29,11 @@ interface PageHeaderProps {
 export function PageHeader({ title, tabs = [], actions = [], className }: PageHeaderProps) {
   return (
     <div className={cn(
-      "w-full bg-[var(--layout-bg)] border-b border-[var(--menues-border)] px-4",
+      "w-full bg-[var(--layout-bg)] border-b border-[var(--menues-border)]",
       className
     )}>
-      {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
+      <div className="px-4">
+        {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
       <div className="h-12 flex items-center justify-between">
         {/* Left: Title */}
         <div className="flex items-center">
@@ -59,11 +60,11 @@ export function PageHeader({ title, tabs = [], actions = [], className }: PageHe
             </Button>
           ))}
         </div>
-      </div>
+        </div>
 
-      {/* Fila Inferior: Tabs a la izquierda */}
-      {tabs.length > 0 && (
-        <div className="h-12 flex items-center">
+        {/* Fila Inferior: Tabs a la izquierda */}
+        {tabs.length > 0 && (
+          <div className="h-12 flex items-center">
           <div className="flex items-center gap-1">
             {tabs.map((tab) => (
               <button
@@ -80,8 +81,9 @@ export function PageHeader({ title, tabs = [], actions = [], className }: PageHe
               </button>
             ))}
           </div>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

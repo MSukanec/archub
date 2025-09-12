@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useProjectContext } from '@/stores/projectContext';
+import { useUpdateUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
 import { 
   Settings, 
   UserCircle,
@@ -356,6 +357,7 @@ export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
+  const updatePreferencesMutation = useUpdateUserOrganizationPreferences();
   
   // Get projects for the current organization
   const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
@@ -1028,8 +1030,21 @@ export function TertiarySidebar() {
                   if (!selectedProjectId) return;
                   e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
                 }}
-                onClick={() => {
+                onClick={async () => {
                   setSelectedProject(null); // Cambiar a vista organizacional
+                  
+                  // Guardar preferencia en la base de datos
+                  if (userData?.organization?.id) {
+                    try {
+                      await updatePreferencesMutation.mutateAsync({
+                        organizationId: userData.organization.id,
+                        lastProjectId: null
+                      });
+                    } catch (error) {
+                      console.error('Error saving organization preference:', error);
+                    }
+                  }
+                  
                   setIsProjectPopoverOpen(false);
                 }}
               >
@@ -1091,8 +1106,21 @@ export function TertiarySidebar() {
                     if (selectedProjectId === project.id) return;
                     e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     setSelectedProject(project.id);
+                    
+                    // Guardar preferencia en la base de datos
+                    if (userData?.organization?.id) {
+                      try {
+                        await updatePreferencesMutation.mutateAsync({
+                          organizationId: userData.organization.id,
+                          lastProjectId: project.id
+                        });
+                      } catch (error) {
+                        console.error('Error saving project preference:', error);
+                      }
+                    }
+                    
                     setIsProjectPopoverOpen(false);
                   }}
                 >
