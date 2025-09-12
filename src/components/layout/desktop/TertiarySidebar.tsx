@@ -813,12 +813,12 @@ export function TertiarySidebar() {
                 );
               }
               
-              // Si es una sección, renderizar separador de texto SIN ocupar espacio vertical
+              // Si es una sección, renderizar con la misma altura que un botón
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className="relative h-0 -mb-3">
+                  <div key={`section-${index}`} className="h-8 flex items-center px-2 mb-[2px]">
                     {isExpanded && (
-                      <div className="absolute -top-6 left-2 text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">
+                      <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">
                         {item.label}
                       </div>
                     )}
