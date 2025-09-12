@@ -42,3 +42,17 @@ export function formatDateCompact(date: Date | string | number): string {
     return 'Fecha inválida'
   }
 }
+
+/**
+ * Formats time in HH:mm format: "14:30"
+ * @param date - Date to format (Date object, string, or number)
+ * @returns Formatted time string
+ */
+export function formatTime(date: Date | string | number): string {
+  try {
+    const dateObj = new Date(date)
+    return format(dateObj, 'HH:mm', { locale: es })
+  } catch (error) {
+    return '--:--'
+  }
+}

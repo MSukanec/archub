@@ -1,7 +1,6 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { formatDate } from '@/lib/date-utils'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Button } from '@/components/ui/button'
@@ -104,7 +103,7 @@ export function ClientPayments({ projectId, organizationId }: ClientPaymentsProp
         const date = new Date(item.movement_date + 'T00:00:00')
         return (
           <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
+            {formatDate(date)}
           </div>
         )
       }
