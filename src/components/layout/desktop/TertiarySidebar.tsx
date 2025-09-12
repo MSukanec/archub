@@ -916,7 +916,7 @@ export function TertiarySidebar() {
                         <div 
                           className="absolute left-[16px] top-1 bottom-1 w-[1px]"
                           style={{
-                            backgroundColor: 'var(--main-sidebar-button-hover-bg)',
+                            backgroundColor: 'var(--main-sidebar-button-fg)',
                             opacity: 0.3,
                             zIndex: 1
                           }}
