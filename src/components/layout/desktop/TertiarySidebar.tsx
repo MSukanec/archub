@@ -127,6 +127,13 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
   const { selectedProjectId, setSelectedProject } = useProjectContext();
+  
+  // Ordenar proyectos: proyecto activo primero, luego el resto
+  const sortedProjects = [...projects].sort((a, b) => {
+    if (selectedProjectId === a.id) return -1;
+    if (selectedProjectId === b.id) return 1;
+    return a.name.localeCompare(b.name);
+  });
   const queryClient = useQueryClient();
   
   // Encontrar proyecto actual
@@ -348,10 +355,17 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
 export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { selectedProjectId, currentOrganizationId } = useProjectContext();
+  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
   
   // Get projects for the current organization
   const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
+  
+  // Ordenar proyectos: proyecto activo primero, luego el resto
+  const sortedProjects = [...projects].sort((a, b) => {
+    if (selectedProjectId === a.id) return -1;
+    if (selectedProjectId === b.id) return 1;
+    return a.name.localeCompare(b.name);
+  });
   
   // Find the currently selected project
   const currentProject = projects.find(p => p.id === selectedProjectId);
@@ -1055,10 +1069,10 @@ export function TertiarySidebar() {
               </div>
               
               {/* Divisor */}
-              <div className="h-px bg-white/20 my-2"></div>
+              <div className="h-px my-2" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
               
               {/* Proyectos */}
-              {projects.map((project: any) => (
+              {sortedProjects.map((project: any) => (
                 <div 
                   key={project.id}
                   className={cn(
