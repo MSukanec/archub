@@ -768,7 +768,7 @@ export function TertiarySidebar() {
     <>
     <aside 
       className={cn(
-        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
+        "fixed border bg-[var(--main-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
@@ -1029,7 +1029,7 @@ export function TertiarySidebar() {
         {/* Popover */}
         <div
           className={cn(
-            "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
+            "fixed border bg-[var(--main-sidebar-bg)] border-[var(--secondary-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
             "transition-all duration-300",
             "w-64"
           )}
