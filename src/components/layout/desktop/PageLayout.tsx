@@ -78,6 +78,9 @@ interface PageLayoutProps {
   currencyView?: 'discriminado' | 'pesificado' | 'dolarizado';
   onCurrencyViewChange?: (view: 'discriminado' | 'pesificado' | 'dolarizado') => void;
   
+  // Control de ancho - debe coincidir con el contenido
+  wide?: boolean;
+  
   // Contenido de la página
   children: React.ReactNode;
 }
@@ -104,6 +107,7 @@ export function PageLayout({
   showCurrencySelector = false,
   currencyView = 'discriminado',
   onCurrencyViewChange,
+  wide = false,
   children,
 }: PageLayoutProps) {
   const [searchInputValue, setSearchInputValue] = useState(headerSearchValue);
@@ -121,7 +125,7 @@ export function PageLayout({
     <div className="flex flex-col h-full">
       {/* Page Header */}
       <div className="bg-[var(--layout-bg)]">
-        <div className="max-w-[1440px] mx-auto px-6">
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-6`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--menues-border)]' : ''}`}>
           {/* Left: Page Title */}

@@ -165,6 +165,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 onBackClick={headerProps.onBackClick}
                 backButtonText={headerProps.backButtonText}
                 isViewMode={headerProps.isViewMode}
+                wide={wide}
               >
                 <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} p-6 pb-32 h-full overflow-auto`}>
                   {children}
