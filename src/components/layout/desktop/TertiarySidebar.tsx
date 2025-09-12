@@ -809,36 +809,100 @@ export function TertiarySidebar() {
         "pl-[14px] pr-4"
       )}>
         {isExpanded ? (
-          <div className="bg-white/10 rounded-lg p-3 space-y-2">
+          <div className="bg-white/10 rounded-lg p-3 space-y-0.5">
             {/* Selector de Organización (arriba) */}
             <div className="bg-white rounded-lg px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
               <div className="flex items-center space-x-2 flex-1 min-w-0">
-                <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0"></div>
-                <span className="text-sm font-medium text-gray-900 truncate">
+                {userData?.organization?.logo_url ? (
+                  <img 
+                    src={userData.organization.logo_url} 
+                    alt="Organización"
+                    className="w-5 h-5 rounded-full flex-shrink-0 object-cover"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">
+                      {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+                    </span>
+                  </div>
+                )}
+                <span className="text-xs font-medium text-gray-900 truncate">
                   {userData?.organization?.name || "Sin organización"}
                 </span>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
             </div>
 
-            {/* Selector de Proyecto (abajo) */}
-            <div className="px-3 py-2 cursor-pointer hover:bg-white/10 transition-colors rounded-lg">
-              <div className="text-xs text-white/60 uppercase tracking-wide font-medium mb-1">
-                PROYECTO
+            {/* Selector de Proyecto (abajo) - IDÉNTICO al de organización */}
+            <div className="bg-white rounded-lg px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                {currentProject ? (
+                  currentProject.project_data?.project_image_url ? (
+                    <img 
+                      src={currentProject.project_data.project_image_url} 
+                      alt="Proyecto"
+                      className="w-5 h-5 rounded-full flex-shrink-0 object-cover border"
+                      style={{ borderColor: currentProject.color || 'transparent' }}
+                    />
+                  ) : (
+                    <div 
+                      className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-medium"
+                      style={{ backgroundColor: currentProject.color || '#6b7280' }}
+                    >
+                      {getProjectInitials(currentProject.name || 'P')}
+                    </div>
+                  )
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">P</span>
+                  </div>
+                )}
+                <span className="text-xs font-medium text-gray-900 truncate">
+                  {currentProject?.name || "Sin proyecto"}
+                </span>
               </div>
-              <div className="text-lg font-semibold text-white">
-                ${(Math.random() * 10000).toFixed(2)}
-              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
             </div>
           </div>
         ) : (
           /* Versión colapsada - solo avatares */
-          <div className="space-y-2">
+          <div className="space-y-0.5">
+            {/* Avatar de organización */}
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full bg-gray-300"></div>
+              {userData?.organization?.logo_url ? (
+                <img 
+                  src={userData.organization.logo_url} 
+                  alt="Organización"
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-600">
+                    {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+                  </span>
+                </div>
+              )}
             </div>
+            {/* Avatar de proyecto */}
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-              <span className="text-xs font-bold text-white">P</span>
+              {currentProject ? (
+                currentProject.project_data?.project_image_url ? (
+                  <img 
+                    src={currentProject.project_data.project_image_url} 
+                    alt="Proyecto"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <div 
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                    style={{ backgroundColor: currentProject.color || '#6b7280' }}
+                  >
+                    {getProjectInitials(currentProject.name || 'P')}
+                  </div>
+                )
+              ) : (
+                <span className="text-xs font-bold text-white">P</span>
+              )}
             </div>
           </div>
         )}
