@@ -643,6 +643,10 @@ export function TertiarySidebar() {
   const getTertiarySidebarItems = () => {
     return [
       {
+        type: 'section',
+        label: 'GENERAL'
+      },
+      {
         type: 'accordion',
         id: 'organization',
         label: 'Organización',
@@ -662,6 +666,10 @@ export function TertiarySidebar() {
         label: 'Biblioteca',
         icon: Library,
         items: sidebarContent.library || []
+      },
+      {
+        type: 'section',
+        label: 'PROYECTO'
       },
       {
         type: 'accordion',
