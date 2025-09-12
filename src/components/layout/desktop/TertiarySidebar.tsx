@@ -689,7 +689,7 @@ export function TertiarySidebar() {
     <aside 
       className={cn(
         "fixed top-0 h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col",
-        isExpanded ? "w-64" : "w-[40px]"
+        isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
         left: isSecondaryExpanded ? '304px' : '80px', // Position to the right of secondary sidebar
