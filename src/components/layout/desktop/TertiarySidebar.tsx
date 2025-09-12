@@ -630,74 +630,38 @@ export function TertiarySidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
-  // Función para obtener el contenido actual del sidebar según la sección activa del header
-  const getCurrentSidebarItems = () => {
-    const activeSection = getActiveHeaderSection();
-    
-    // Si estamos en una subsección (project, organization), usar el sidebarLevel actual
-    if (sidebarLevel === 'project') {
-      // Para proyecto, devolver estructura con acordeones
-      return [
-        {
-          type: 'accordion',
-          id: 'general',
-          label: 'General',
-          icon: FolderOpen,
-          items: sidebarContent.project || []
-        },
-        {
-          type: 'accordion', 
-          id: 'construction',
-          label: 'Construcción',
-          icon: HardHat,
-          items: sidebarContent.construction || []
-        },
-        {
-          type: 'accordion', 
-          id: 'commercialization',
-          label: 'Comercialización',
-          icon: Handshake,
-          items: sidebarContent.commercialization || []
-        }
-      ];
-    }
-    if (sidebarLevel === 'organization') {
-      return sidebarContent.organization || [];
-    }
-    if (sidebarLevel === 'finances') {
-      return sidebarContent.finances || [];
-    }
-    if (sidebarLevel === 'library') {
-      return sidebarContent.library || [];
-    }
-    if (sidebarLevel === 'provider') {
-      return sidebarContent.provider || [];
-    }
-    if (sidebarLevel === 'construction') {
-      return sidebarContent.construction || [];
-    }
-    if (sidebarLevel === 'admin') {
-      return sidebarContent.admin || [];
-    }
-    
-    // Para la sección de inicio, mostrar contenido contextual basado en header
-    switch (activeSection) {
-      case 'organizacion':
-        return sidebarContent.organization || [];
-      case 'proyecto':
-        return sidebarContent.project || [];
-      case 'construccion':
-        return sidebarContent.construction || [];
-      case 'biblioteca':
-        return sidebarContent.library || [];
-      case 'proveedor':
-        return sidebarContent.provider || [];
-      case 'administracion':
-        return sidebarContent.admin || [];
-      default:
-        // Por defecto, mostrar el contenido de organización
-        return sidebarContent.organization || [];
-    }
+  // Función para obtener el contenido fijo del tercer sidebar con 4 acordeones
+  const getTertiarySidebarItems = () => {
+    return [
+      {
+        type: 'accordion',
+        id: 'organization',
+        label: 'Organización',
+        icon: Building,
+        items: sidebarContent.organization || []
+      },
+      {
+        type: 'accordion',
+        id: 'finances',
+        label: 'Finanzas',
+        icon: DollarSign,
+        items: sidebarContent.finances || []
+      },
+      {
+        type: 'accordion',
+        id: 'library',
+        label: 'Biblioteca',
+        icon: Library,
+        items: sidebarContent.library || []
+      },
+      {
+        type: 'accordion',
+        id: 'admin',
+        label: 'Administración',
+        icon: Crown,
+        items: sidebarContent.admin || []
+      }
+    ];
   };
   return (
     <aside 
@@ -732,13 +696,7 @@ export function TertiarySidebar() {
       <div className="h-12 flex-shrink-0 flex items-center px-4">
         {isExpanded && (
           <span className="text-sm font-black text-black uppercase">
-            {sidebarLevel === 'organization' && 'ORGANIZACIÓN'}
-            {sidebarLevel === 'project' && 'PROYECTO'}
-            {sidebarLevel === 'construction' && 'CONSTRUCCIÓN'}
-            {sidebarLevel === 'finances' && 'FINANZAS'}
-            {sidebarLevel === 'library' && 'BIBLIOTECA'}
-            {sidebarLevel === 'provider' && 'PROVEEDOR'}
-            {sidebarLevel === 'admin' && 'ADMINISTRACIÓN'}
+            MENÚ LATERAL
           </span>
         )}
       </div>
@@ -749,7 +707,7 @@ export function TertiarySidebar() {
           <div className={`flex-1 transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             
             {/* Renderizar contenido según el nivel actual */}
-            {getCurrentSidebarItems().map((item, index) => {
+            {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
               if (!item || typeof item !== 'object') {
                 return null;
