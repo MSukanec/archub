@@ -28,10 +28,6 @@
   --card-border: hsl(0, 0%, 90%);
   --card-hover-bg: hsl(60, 8%, 95%);
 
-  /* Secondary Cards */
-  --secondary-card-bg: hsl(60, 8%, 92%);
-  --secondary-card-fg: hsl(0, 0%, 35%);
-  --secondary-card-border: hsl(0, 0%, 80%);
 
   /* Button Shadows */
   --button-shadow-normal: 0 4px 14px 0 rgba(0, 0, 0, 0.15);
@@ -138,6 +134,7 @@
   --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(0, 0%, 100%);
   --text-card-title: hsl(0, 0%, 0%);
+  --text-important: hsl(0, 0%, 0%);
 
 
 
@@ -231,10 +228,6 @@
   --card-border: hsl(0, 0%, 20%);
   --card-hover-bg: hsl(0, 0%, 14%);
 
-  /* Secondary Cards */
-  --secondary-card-bg: hsl(0, 0%, 14%);
-  --secondary-card-fg: hsl(0, 0%, 85%);
-  --secondary-card-border: hsl(0, 0%, 50%);
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(76, 100%, 40%);
@@ -339,6 +332,7 @@
   --text-muted: hsl(240, 5%, 65%);
   --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(240, 10%, 4%);
+  --text-important: hsl(0, 0%, 98%);
 
   /* Borders and Rings */
   --border-default: hsl(0, 0%, 16%);
@@ -465,6 +459,19 @@ label[data-required="true"]::after,
 .required-asterisk::after {
   content: " *";
   color: var(--accent);
+}
+
+/* Important text styling - for titles and important content */
+.text-important,
+h1, h2, h3, h4, h5, h6,
+.card-title,
+.page-title,
+.section-title,
+.welcome-text,
+.organization-name,
+.project-name {
+  color: var(--text-important) !important;
+  font-weight: 700 !important;
 }
 
 /* Hide scrollbars while maintaining scroll functionality */

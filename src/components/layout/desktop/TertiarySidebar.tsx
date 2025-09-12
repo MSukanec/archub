@@ -983,9 +983,6 @@ export function TertiarySidebar() {
       {/* Bottom Section - Fixed Buttons */}
       <div className="pb-3 pl-[14px]">
         <div className="flex flex-col gap-[2px]">
-          {/* Divisor */}
-          <div className="h-px bg-white/20 mb-2 mr-[14px]"></div>
-          
           {/* Notifications */}
           <ButtonSidebar
             icon={<Bell className="w-[18px] h-[18px]" />}
