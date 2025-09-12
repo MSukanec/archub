@@ -83,17 +83,6 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* Forma peculiar accent a la izquierda cuando está activo o en hover */}
-        {(isActive || isHovered) && (
-          <div 
-            className="absolute -left-0 top-1/2 transform -translate-y-1/2 w-2 h-6 transition-all duration-200"
-            style={{ 
-              backgroundColor: 'var(--accent)',
-              borderRadius: '0 8px 8px 0',
-              zIndex: 1
-            }}
-          />
-        )}
       
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (

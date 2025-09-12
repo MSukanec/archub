@@ -693,6 +693,21 @@ export function TertiarySidebar() {
       }
     ];
   };
+
+  // Función para determinar qué acordeón está activo basado en la URL
+  const getActiveAccordion = () => {
+    if (location.startsWith('/organization')) return 'organization';
+    if (location.startsWith('/general')) return 'general';  
+    if (location.startsWith('/construction')) return 'construction';
+    if (location.startsWith('/finances')) return 'finances';
+    if (location.startsWith('/library')) return 'library';
+    if (location.startsWith('/admin')) return 'admin';
+    // Agregar más rutas según sea necesario
+    return null;
+  };
+
+  const activeAccordion = getActiveAccordion();
+
   return (
     <aside 
       className={cn(
@@ -810,7 +825,7 @@ export function TertiarySidebar() {
                     <ButtonSidebar
                       icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
                       label={accordionItem.label}
-                      isActive={false}
+                      isActive={accordionItem.id === activeAccordion}
                       isExpanded={isExpanded}
                       onClick={() => toggleAccordion(accordionItem.id)}
                       variant="secondary"
