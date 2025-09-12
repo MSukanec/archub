@@ -139,7 +139,7 @@ export default function SidebarButton({
               isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
             )}
             style={{
-              color: (isActive || isHovered) ? '#000000' : 'inherit'
+              color: (isActive || isHovered) ? 'white' : 'inherit'
             }}
           >
             {label}

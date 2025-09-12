@@ -838,10 +838,10 @@ export function TertiarySidebar() {
             {/* Información del proyecto - solo cuando está expandido */}
             {isExpanded && (
               <div className="ml-3 flex-1 min-w-0">
-                <div className="text-sm font-semibold text-black truncate">
+                <div className="text-sm font-semibold text-white truncate">
                   {currentProject.name}
                 </div>
-                <div className="text-xs text-gray-500 truncate">
+                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
                   {currentProject.project_data?.project_type?.name || 'Sin tipo'}
                 </div>
               </div>
@@ -875,7 +875,7 @@ export function TertiarySidebar() {
                 return (
                   <div key={`section-${index}`} className="h-8 flex items-center px-2 mb-[2px]">
                     {isExpanded && (
-                      <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">
+                      <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
                         {item.label}
                       </div>
                     )}
@@ -988,7 +988,7 @@ export function TertiarySidebar() {
       <div className="pb-3 pl-[14px]">
         <div className="flex flex-col gap-[2px]">
           {/* Divisor */}
-          <div className="h-px bg-white/20 mb-2"></div>
+          <div className="h-px bg-white/20 mb-2 mr-[14px]"></div>
           
           {/* Notifications */}
           <ButtonSidebar
