@@ -700,7 +700,7 @@ export function TertiarySidebar() {
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: isSecondaryExpanded ? '304px' : '80px', // Position to the right of secondary sidebar
+        left: '0px', // Position at the left edge since it's the only sidebar
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
