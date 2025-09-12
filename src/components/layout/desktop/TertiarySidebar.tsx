@@ -60,7 +60,8 @@ import {
   TableIcon,
   Library,
   Building2,
-  ChevronUp
+  ChevronUp,
+  Bell
 } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { SelectorPopover } from "@/components/popovers/SelectorPopover";
@@ -848,6 +849,38 @@ export function TertiarySidebar() {
                 </div>
               );
           })}
+        </div>
+      </div>
+      
+      {/* Bottom Section - Fixed Buttons */}
+      <div className="p-1">
+        <div className="flex flex-col gap-[2px]">
+          {/* Divisor */}
+          <div className="h-px bg-white/20 mb-2"></div>
+          
+          {/* Notifications */}
+          <ButtonSidebar
+            icon={<Bell className="w-[18px] h-[18px]" />}
+            label="Notificaciones"
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => console.log('Notificaciones clicked')}
+            variant="secondary"
+          />
+          
+          {/* User Avatar */}
+          <ButtonSidebar
+            icon={null}
+            avatarUrl={userData?.user?.avatar_url}
+            userFullName={userData?.user?.full_name}
+            label={userData?.user?.full_name || 'Usuario'}
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={() => navigate('/profile')}
+            variant="secondary"
+            disableHover={true}
+          />
+          
         </div>
       </div>
     </aside>
