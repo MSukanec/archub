@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { useProjectContext } from '@/stores/projectContext';
 import { 
   Settings, 
   UserCircle,
@@ -25,6 +26,7 @@ import {
   Tag,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   Search,
   Crown,
   Package,
@@ -60,7 +62,6 @@ import {
   TableIcon,
   Library,
   Building2,
-  ChevronUp,
   Bell
 } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -74,7 +75,6 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
-import { useProjectContext } from "@/stores/projectContext";
 import { useProjects } from "@/hooks/use-projects";
 
 // Define types for sidebar items
@@ -471,6 +471,9 @@ export function TertiarySidebar() {
     const saved = localStorage.getItem('sidebar-accordion');
     return saved || null;
   });
+
+  // Estado para controlar el popover de selección de proyecto
+  const [isProjectPopoverOpen, setIsProjectPopoverOpen] = useState(false);
   // Estado para transiciones
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Función para navegación con transición hacia adelante
@@ -717,6 +720,7 @@ export function TertiarySidebar() {
   const activeAccordion = getActiveAccordion();
 
   return (
+    <>
     <aside 
       className={cn(
         "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
@@ -755,7 +759,10 @@ export function TertiarySidebar() {
         "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
       )}>
         {currentProject ? (
-          <div className="flex items-center">
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
+          >
             {/* Avatar del proyecto */}
             <div className="flex-shrink-0">
               {currentProject.project_data?.project_image_url ? (
@@ -958,5 +965,139 @@ export function TertiarySidebar() {
         </div>
       </div>
     </aside>
+
+    {/* Popover de selección de proyecto */}
+    {isProjectPopoverOpen && (
+      <>
+        {/* Overlay para cerrar al hacer click fuera */}
+        <div 
+          className="fixed inset-0 z-40"
+          onClick={() => setIsProjectPopoverOpen(false)}
+        />
+        
+        {/* Popover */}
+        <div
+          className={cn(
+            "fixed bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] rounded-2xl shadow-lg z-50 flex flex-col",
+            "transition-all duration-300",
+            "w-64 max-h-[calc(100vh-32px)]"
+          )}
+          style={{
+            left: isExpanded ? '280px' : '76px', // A la derecha del sidebar
+            top: '8px',
+            bottom: '8px'
+          }}
+        >
+          {/* Header del popover */}
+          <div className="h-12 flex-shrink-0 flex items-center pl-[14px] pr-4 border-b border-[var(--secondary-sidebar-border)]">
+            <span className="text-sm font-black text-black uppercase">
+              SELECTOR DE PROYECTO
+            </span>
+          </div>
+
+          {/* Contenido del popover */}
+          <div className="flex-1 py-6 pl-[14px] pr-2 overflow-y-auto">
+            <div className="flex flex-col gap-[2px]">
+              
+              {/* Organización */}
+              <div 
+                className="h-8 flex items-center px-2 mb-[2px] cursor-pointer hover:bg-white/5 rounded transition-colors"
+                onClick={() => {
+                  setSelectedProject(null); // Cambiar a vista organizacional
+                  setIsProjectPopoverOpen(false);
+                }}
+              >
+                <div className="flex items-center flex-1 min-w-0">
+                  {/* Logo/Avatar de la organización */}
+                  <div className="flex-shrink-0">
+                    {userData?.organization?.logo_url ? (
+                      <img 
+                        src={userData.organization.logo_url} 
+                        alt="Organización"
+                        className="w-6 h-6 rounded-full"
+                      />
+                    ) : (
+                      <div 
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: 'var(--accent)' }}
+                      >
+                        {getOrganizationInitials(userData?.organization?.name || 'O')}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Nombre de la organización */}
+                  <div className="ml-3 flex-1 min-w-0">
+                    <div className="text-sm font-medium text-black truncate">
+                      {userData?.organization?.name || 'Organización'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Divisor */}
+              <div className="h-px bg-white/20 my-2"></div>
+              
+              {/* Proyectos */}
+              {projects.map((project: any) => (
+                <div 
+                  key={project.id}
+                  className={cn(
+                    "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
+                    selectedProjectId === project.id 
+                      ? "bg-white/10" 
+                      : "hover:bg-white/5"
+                  )}
+                  onClick={() => {
+                    setSelectedProject(project.id);
+                    setIsProjectPopoverOpen(false);
+                  }}
+                >
+                  <div className="flex items-center flex-1 min-w-0">
+                    {/* Avatar del proyecto */}
+                    <div className="flex-shrink-0">
+                      {project.project_data?.project_image_url ? (
+                        <img 
+                          src={project.project_data.project_image_url} 
+                          alt="Proyecto"
+                          className="w-6 h-6 rounded-full border"
+                          style={{ borderColor: project.color || 'var(--secondary-sidebar-button-bg)' }}
+                        />
+                      ) : (
+                        <div 
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold border text-xs"
+                          style={{ 
+                            backgroundColor: project.color || 'var(--secondary-sidebar-button-bg)',
+                            borderColor: project.color || 'var(--secondary-sidebar-button-bg)'
+                          }}
+                        >
+                          {getProjectInitials(project.name || 'P')}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Nombre del proyecto */}
+                    <div className="ml-3 flex-1 min-w-0">
+                      <div className="text-sm font-medium text-black truncate">
+                        {project.name}
+                      </div>
+                    </div>
+                    
+                    {/* Indicador de proyecto activo */}
+                    {selectedProjectId === project.id && (
+                      <div className="ml-2 flex-shrink-0">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+    </>
   );
 }
