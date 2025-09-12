@@ -350,7 +350,10 @@ export function TertiarySidebar() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
-  const { setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
+  
+  // Define if secondary sidebar is expanded
+  const isSecondaryExpanded = isSecondaryDocked || isSecondaryHovered || isHovered;
   
   // Theme state
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -699,10 +702,11 @@ export function TertiarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-[40px] h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-40 flex flex-col",
+        "fixed top-0 h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col",
         isExpanded ? "w-64" : "w-[40px]"
       )}
       style={{
+        left: isSecondaryExpanded ? '304px' : '80px', // Position to the right of secondary sidebar
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
