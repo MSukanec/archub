@@ -6,20 +6,20 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(48, 19%, 95%);
+  --layout-bg: hsl(60, 8%, 92%);
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 15%);
-  --main-sidebar-fg: hsl(0, 0%, 100%);
+  --main-sidebar-fg: hsl(0, 0%, 20%);
   --main-sidebar-border: transparent;
   --main-sidebar-button-bg: transparent;
   --main-sidebar-button-fg: hsl(0, 0%, 60%);
   --main-sidebar-button-active-bg: transparent;
   --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
   --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
-  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-hover-fg: hsl(0, 0%, 20%);
 
   /* Cards */
   --card-bg: hsl(60, 8%, 95%);
