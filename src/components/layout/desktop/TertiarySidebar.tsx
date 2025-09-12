@@ -772,11 +772,10 @@ export function TertiarySidebar() {
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: '8px', // 8px from left edge  
-        top: '8px', // 8px from top
-        right: 'auto', // Let width control the right side
-        bottom: '8px', // 8px from bottom 
-        height: 'calc(100vh - 16px)', // Full height minus top and bottom margins (8px + 8px)
+        left: '8px',
+        top: '8px',
+        bottom: '8px',
+        height: 'calc(100vh - 16px)',
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
@@ -917,7 +916,8 @@ export function TertiarySidebar() {
                         <div 
                           className="absolute left-[16px] top-1 bottom-1 w-[1px]"
                           style={{
-                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            backgroundColor: 'var(--main-sidebar-button-hover-bg)',
+                            opacity: 0.3,
                             zIndex: 1
                           }}
                         />
@@ -1034,7 +1034,7 @@ export function TertiarySidebar() {
             "w-64"
           )}
           style={{
-            left: '280px', // Siempre a la derecha del sidebar expandido
+            left: '280px',
             top: '8px'
           }}
         >
@@ -1046,14 +1046,14 @@ export function TertiarySidebar() {
               <div 
                 className={cn(
                   "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
-                  !selectedProjectId ? "text-black" : "hover:text-black"
+                  !selectedProjectId ? "" : ""
                 )}
                 style={{
-                  backgroundColor: !selectedProjectId ? 'transparent' : 'transparent'
+                  backgroundColor: 'var(--main-sidebar-button-bg)'
                 }}
                 onMouseEnter={(e) => {
                   if (!selectedProjectId) return;
-                  e.currentTarget.style.color = 'black';
+                  e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
                 }}
                 onMouseLeave={(e) => {
                   if (!selectedProjectId) return;
@@ -1113,15 +1113,15 @@ export function TertiarySidebar() {
                   key={project.id}
                   className={cn(
                     "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
-                    selectedProjectId === project.id ? "text-black" : "hover:text-black"
+                    selectedProjectId === project.id ? "" : ""
                   )}
                   style={{
-                    color: selectedProjectId === project.id ? 'black' : 'var(--main-sidebar-button-fg)',
-                    backgroundColor: 'transparent'
+                    color: selectedProjectId === project.id ? 'var(--main-sidebar-button-active-fg)' : 'var(--main-sidebar-button-fg)',
+                    backgroundColor: 'var(--main-sidebar-button-bg)'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedProjectId === project.id) return;
-                    e.currentTarget.style.color = 'black';
+                    e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
                   }}
                   onMouseLeave={(e) => {
                     if (selectedProjectId === project.id) return;
