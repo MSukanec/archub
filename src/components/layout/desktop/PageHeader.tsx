@@ -29,10 +29,10 @@ interface PageHeaderProps {
 export function PageHeader({ title, tabs = [], actions = [], className }: PageHeaderProps) {
   return (
     <div className={cn(
-      "w-full bg-[var(--layout-bg)] border-b border-[var(--menues-border)]",
+      "w-full bg-[var(--layout-bg)]",
       className
     )}>
-      <div className="px-4">
+      <div className="px-6 border-b border-[var(--menues-border)]">
         {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
       <div className="h-12 flex items-center justify-between">
         {/* Left: Title */}
