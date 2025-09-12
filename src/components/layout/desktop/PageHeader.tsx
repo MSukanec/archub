@@ -32,7 +32,7 @@ export function PageHeader({ title, tabs = [], actions = [], className }: PageHe
       "w-full bg-[var(--layout-bg)]",
       className
     )}>
-      <div className="px-6 border-b border-[var(--menues-border)]">
+      <div className="px-6 border-b border-[var(--main-sidebar-border)]">
         {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
       <div className="h-12 flex items-center justify-between">
         {/* Left: Title */}

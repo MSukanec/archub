@@ -75,8 +75,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)',
+              backgroundColor: 'var(--main-sidebar-bg)',
+              borderColor: 'var(--main-sidebar-border)',
               width: 'calc(100vw - 32px)', // full width minus padding
               maxWidth: '400px',
               zIndex: 60
@@ -84,7 +84,7 @@ export function ActionBarMobile() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2">
-              <Search className="h-5 w-5" style={{ color: 'var(--menues-fg)' }} />
+              <Search className="h-5 w-5" style={{ color: 'var(--main-sidebar-fg)' }} />
               <Input
                 ref={searchInputRef}
                 placeholder="Buscar..."
@@ -92,9 +92,9 @@ export function ActionBarMobile() {
                 onChange={(e) => setSearchValue(e.target.value)}
                 className="flex-1"
                 style={{ 
-                  backgroundColor: 'var(--menues-input-bg)',
-                  borderColor: 'var(--menues-input-border)',
-                  color: 'var(--menues-input-fg)'
+                  backgroundColor: 'var(--input-bg)',
+                  borderColor: 'var(--input-border)',
+                  color: 'var(--input-text)'
                 }}
               />
               <Button
@@ -116,8 +116,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)',
+              backgroundColor: 'var(--main-sidebar-bg)',
+              borderColor: 'var(--main-sidebar-border)',
               width: 'calc(100vw - 32px)',
               maxWidth: '400px',
               zIndex: 60
@@ -126,7 +126,7 @@ export function ActionBarMobile() {
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Filtros</h3>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--main-sidebar-fg)' }}>Filtros</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -139,15 +139,15 @@ export function ActionBarMobile() {
               
               {filterConfig.filters?.map((filter: any, index: number) => (
                 <div key={filter.key || index} className="space-y-2">
-                  <Label htmlFor={filter.key} style={{ color: 'var(--menues-fg)' }}>
+                  <Label htmlFor={filter.key} style={{ color: 'var(--main-sidebar-fg)' }}>
                     {filter.label}
                   </Label>
                   <Select value={filter.value || ''} onValueChange={filter.onChange}>
                     <SelectTrigger 
                       style={{ 
-                        backgroundColor: 'var(--menues-input-bg)',
-                        borderColor: 'var(--menues-input-border)',
-                        color: 'var(--menues-input-fg)'
+                        backgroundColor: 'var(--input-bg)',
+                        borderColor: 'var(--input-border)',
+                        color: 'var(--input-text)'
                       }}
                     >
                       <SelectValue placeholder={filter.placeholder || 'Seleccionar...'} />
@@ -167,7 +167,7 @@ export function ActionBarMobile() {
               ))}
               
               {/* Botón Limpiar Filtros */}
-              <div className="pt-2 border-t" style={{ borderColor: 'var(--menues-border)' }}>
+              <div className="pt-2 border-t" style={{ borderColor: 'var(--main-sidebar-border)' }}>
                 <Button
                   variant="default"
                   onClick={() => {
@@ -193,8 +193,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)',
+              backgroundColor: 'var(--main-sidebar-bg)',
+              borderColor: 'var(--main-sidebar-border)',
               width: 'calc(100vw - 32px)',
               maxWidth: '400px',
               zIndex: 60
@@ -203,7 +203,7 @@ export function ActionBarMobile() {
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--menues-fg)' }}>Notificaciones</h3>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--main-sidebar-fg)' }}>Notificaciones</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -218,7 +218,7 @@ export function ActionBarMobile() {
               <div className="py-8 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <Bell className="h-8 w-8 text-gray-400" />
-                  <p style={{ color: 'var(--menues-fg)' }} className="text-sm">
+                  <p style={{ color: 'var(--main-sidebar-fg)' }} className="text-sm">
                     Sin notificaciones
                   </p>
                 </div>
@@ -232,8 +232,8 @@ export function ActionBarMobile() {
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
         style={{ 
-          backgroundColor: 'var(--menues-bg)',
-          borderTopColor: 'var(--menues-border)',
+          backgroundColor: 'var(--main-sidebar-bg)',
+          borderTopColor: 'var(--main-sidebar-border)',
           borderTopWidth: '1px'
         }}
       >

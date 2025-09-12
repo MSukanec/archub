@@ -213,7 +213,7 @@ export function Header({ className }: HeaderProps) {
   return (
     <header 
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 h-[40px] bg-[var(--main-sidebar-bg)] border-b border-[var(--menues-border)]",
+        "fixed top-0 left-0 right-0 z-50 h-[40px] bg-[var(--main-sidebar-bg)] border-b border-[var(--main-sidebar-border)]",
         "flex items-center justify-between px-1 overflow-hidden",
         className
       )}

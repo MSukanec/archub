@@ -80,7 +80,7 @@ export function HeaderMobile({
 
   return (
     <>
-      <div className="md:hidden sticky top-0 z-50 bg-[var(--layout-bg)] border-b border-[var(--menues-border)]">
+      <div className="md:hidden sticky top-0 z-50 bg-[var(--layout-bg)] border-b border-[var(--main-sidebar-border)]">
         {/* Main Header Row */}
         <div className="flex items-center justify-between h-14 px-4">
           {/* Left: Title */}
@@ -121,7 +121,7 @@ export function HeaderMobile({
                     px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200
                     ${tab.isActive 
                       ? 'bg-[var(--accent)] text-white' 
-                      : 'bg-[var(--card-bg)] text-[var(--menues-fg)] border border-[var(--menues-border)] hover:bg-[var(--card-hover-bg)]'
+                      : 'bg-[var(--card-bg)] text-[var(--main-sidebar-fg)] border border-[var(--main-sidebar-border)] hover:bg-[var(--card-hover-bg)]'
                     }
                   `}
                 >

@@ -32,16 +32,6 @@
   --secondary-sidebar-button-hover-bg: hsl(0, 0%, 100%);
   --secondary-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
-  /* Legacy support (will be removed) */
-  --menues-bg: hsl(60, 8%, 92%);
-  --menues-fg: hsl(0, 0%, 45%);
-  --menues-secondary-fg: hsl(0, 0%, 50%);
-  --menues-border: hsl(0, 0%, 85%);
-  --menues-hover-bg: hsl(76, 100%, 40%);
-  --menues-hover-fg: hsl(0, 0%, 100%);
-  --menues-active-bg: hsl(76, 100%, 40%);
-  --menues-active-fg: hsl(0, 0%, 100%);
-
   /* Cards */
   --card-bg: hsl(60, 8%, 95%);
   --card-fg: hsl(0, 0%, 35%);
@@ -234,16 +224,6 @@
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(0, 0%, 20%);
 
-  /* Menus/Sidebar */
-  --menues-bg: hsl(0, 0%, 20%);
-  --menues-fg: hsl(0, 0%, 70%);
-  --menues-secondary-fg: hsl(0, 0%, 60%);
-  --menues-border: hsl(0, 0%, 20%);
-  --menues-hover-bg: hsl(76, 100%, 40%);
-  --menues-hover-fg: hsl(0, 0%, 100%);
-  --menues-active-bg: hsl(76, 100%, 40%);
-  --menues-active-fg: hsl(0, 0%, 100%);
-
   /* Main Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 12%);
   --main-sidebar-fg: hsl(0, 0%, 50%);
@@ -430,7 +410,7 @@
   background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Variante secondary con efecto apretado */  
+/* Variante secondary con efecto apretado */
 .button-secondary-pressed {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
   transform: translateY(1px) !important;

@@ -505,7 +505,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
                 (item.href && isButtonActive(item.href))
                   ? "bg-[hsl(76,100%,40%)] text-white" 
-                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                  : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -536,7 +536,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 {isRestricted ? (
                   <PlanRestricted reason="general_mode" functionName={item.label}>
                     <button
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
                       disabled
                     >
                       <item.icon className="h-5 w-5" />
@@ -551,7 +551,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
                       (item.href && isButtonActive(item.href))
                         ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -578,7 +578,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 {isRestricted ? (
                   <PlanRestricted reason="general_mode" functionName={item.label}>
                     <button
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] opacity-50 shadow-button-normal"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
                       disabled
                     >
                       <item.icon className="h-5 w-5" />
@@ -592,7 +592,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
                       (item.href && isButtonActive(item.href))
                         ? "bg-[hsl(76,100%,40%)] text-white" 
-                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--menues-fg)] hover:bg-[var(--card-hover-bg)]"
+                        : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -614,20 +614,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       <div 
         className="fixed inset-0 flex flex-col overflow-hidden"
         style={{ 
-          backgroundColor: 'var(--menues-bg)'
+          backgroundColor: 'var(--main-sidebar-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header con título ARCHUB y botón de cierre */}
-        <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--menues-border)]">
-          <h1 className="text-lg font-semibold text-[var(--menues-fg)]">
+        <div className="flex justify-between items-center h-14 px-4 pr-6 border-b border-[var(--main-sidebar-border)]">
+          <h1 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
             ARCHUB
           </h1>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCloseMenu}
-            className="text-[var(--menues-fg)] p-2"
+            className="text-[var(--main-sidebar-fg)] p-2"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -636,24 +636,24 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-2 overflow-y-auto">
           {/* Título de la sección actual con botón volver */}
-          <div className="mb-4 pb-2 border-b border-[var(--menues-border)]">
+          <div className="mb-4 pb-2 border-b border-[var(--main-sidebar-border)]">
             {currentLevel !== 'main' ? (
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
+                <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
                   {getCurrentTitle()}
                 </h2>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleBack}
-                  className="text-[var(--menues-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
+                  className="text-[var(--main-sidebar-fg)] p-2 hover:bg-[var(--card-hover-bg)]"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Volver
                 </Button>
               </div>
             ) : (
-              <h2 className="text-lg font-semibold text-[var(--menues-fg)]">
+              <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
                 {getCurrentTitle()}
               </h2>
             )}
@@ -670,7 +670,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             <div className="flex-1 relative">
               <button
                 onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--menues-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
+                className="w-full p-3 text-left bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-[var(--main-sidebar-fg)] flex items-center shadow-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150"
               >
                 <FolderOpen className="h-5 w-5 mr-3" />
                 <span className="flex-1 truncate text-sm">
@@ -690,7 +690,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       key={project.id}
                       onClick={() => handleProjectSelect(project.id)}
                       className={cn(
-                        "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--menues-fg)]",
+                        "w-full p-3 text-left text-sm hover:bg-[var(--card-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
                         project.id === effectiveCurrentProject && "bg-[hsl(76,100%,40%)] text-white"
                       )}
                     >

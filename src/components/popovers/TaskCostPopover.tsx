@@ -72,8 +72,8 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg border"
             style={{ 
-              backgroundColor: 'var(--menues-bg)',
-              borderColor: 'var(--menues-border)',
+              backgroundColor: 'var(--main-sidebar-bg)',
+              borderColor: 'var(--main-sidebar-border)',
               width: 'calc(100vw - 32px)',
               maxWidth: '400px',
               maxHeight: '70vh',
@@ -84,10 +84,10 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
           >
             <div className="relative">
               {/* Header */}
-              <div className="px-3 py-2 flex items-center justify-between border-b" style={{ borderColor: 'var(--menues-border)' }}>
+              <div className="px-3 py-2 flex items-center justify-between border-b" style={{ borderColor: 'var(--main-sidebar-border)' }}>
                 <div className="flex items-center gap-2 flex-1">
                   <Package className="h-3 w-3" style={{ color: 'var(--accent)' }} />
-                  <h2 className="text-xs font-semibold" style={{ color: 'var(--menues-fg)' }}>
+                  <h2 className="text-xs font-semibold" style={{ color: 'var(--main-sidebar-fg)' }}>
                     Costos por unidad
                   </h2>
                 </div>
@@ -139,7 +139,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                               <div key={material.id} className="flex items-start justify-between py-1">
                                 {/* Información del item */}
                                 <div className="flex-1 min-w-0 pr-4">
-                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--menues-fg)' }}>
+                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--main-sidebar-fg)' }}>
                                     {itemName}
                                   </div>
                                   <div className="text-xs text-muted-foreground text-left">{categoryName}</div>
@@ -153,7 +153,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                                 </div>
                                 
                                 {/* Precio total */}
-                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--main-sidebar-fg)', minWidth: '80px' }}>
                                   $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 </div>
                               </div>
@@ -187,7 +187,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                               <div key={laborItem.id} className="flex items-start justify-between py-1">
                                 {/* Información del item */}
                                 <div className="flex-1 min-w-0 pr-4">
-                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--menues-fg)' }}>
+                                  <div className="text-xs font-semibold leading-tight text-left" style={{ color: 'var(--main-sidebar-fg)' }}>
                                     {itemName}
                                   </div>
                                   <div className="text-xs text-muted-foreground text-left">Mano de Obra</div>
@@ -201,7 +201,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                                 </div>
                                 
                                 {/* Precio total */}
-                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                                <div className="text-xs flex-shrink-0 text-right font-medium" style={{ color: 'var(--main-sidebar-fg)', minWidth: '80px' }}>
                                   $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 </div>
                               </div>
@@ -216,11 +216,11 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
 
               {/* Footer - Solo se muestra si hay materiales o mano de obra */}
               {!isLoading && (materials.length > 0 || labor.length > 0) && (
-                <div className="px-3 py-3 flex items-center justify-between border-t" style={{ borderColor: 'var(--menues-border)' }}>
+                <div className="px-3 py-3 flex items-center justify-between border-t" style={{ borderColor: 'var(--main-sidebar-border)' }}>
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--menues-fg)' }}>TOTAL POR UNIDAD:</span>
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--main-sidebar-fg)' }}>TOTAL POR UNIDAD:</span>
                   </div>
-                  <div className="text-xs font-semibold text-right" style={{ color: 'var(--menues-fg)', minWidth: '80px' }}>
+                  <div className="text-xs font-semibold text-right" style={{ color: 'var(--main-sidebar-fg)', minWidth: '80px' }}>
                     $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </div>
                 </div>
