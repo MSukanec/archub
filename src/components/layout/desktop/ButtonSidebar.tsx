@@ -73,39 +73,34 @@ export default function SidebarButton({
         onMouseEnter={(e) => {
           handleMouseEnter();
           setIsHovered(true);
-          if (!isActive && !disableHover) {
-            const hoverBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
-            const hoverFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
-            e.currentTarget.style.backgroundColor = hoverBgVar;
-            e.currentTarget.style.color = hoverFgVar;
-          }
         }}
         style={{ 
-        borderRadius: '4px', // All buttons have 4px rounded corners
-        backgroundColor: isActive && !isExpanded
-          ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
-          : isActive
-          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
-          : (variant === 'secondary' ? `var(--secondary-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
-        color: isActive
-          ? (variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
-          : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
-        '--hover-bg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
-        '--hover-fg': variant === 'secondary' ? `var(--secondary-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
-      } as React.CSSProperties}
-      onMouseLeave={(e) => {
-        setIsHovered(false);
-        if (!isActive && !disableHover) {
-          const normalBgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
-          const normalFgVar = variant === 'secondary' ? 'var(--secondary-sidebar-button-fg)' : 'var(--main-sidebar-button-fg)';
-          e.currentTarget.style.backgroundColor = normalBgVar;
-          e.currentTarget.style.color = normalFgVar;
-        }
-      }}
-    >
+          borderRadius: '4px',
+          backgroundColor: 'transparent', // Sin fondo
+          color: (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+        } as React.CSSProperties}
+        onMouseLeave={(e) => {
+          setIsHovered(false);
+        }}
+      >
+        {/* Línea accent a la izquierda cuando está activo o en hover */}
+        {(isActive || isHovered) && (
+          <div 
+            className="absolute left-0 top-0 w-1 h-full"
+            style={{ backgroundColor: 'var(--accent)' }}
+          />
+        )}
+      
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div 
+          className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+          style={{
+            color: (isActive || isHovered) 
+              ? 'var(--accent)' 
+              : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+          }}
+        >
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -119,14 +114,14 @@ export default function SidebarButton({
                 backgroundColor: projectColor || 'transparent',
                 borderColor: projectColor 
                   ? 'transparent' 
-                  : isActive
-                  ? `var(--main-sidebar-button-active-fg)`
-                  : `var(--main-sidebar-button-fg)`,
+                  : (isActive || isHovered)
+                  ? `var(--accent)`
+                  : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
                 color: projectColor 
                   ? 'white' 
-                  : isActive
-                  ? `var(--main-sidebar-button-active-fg)`
-                  : `var(--main-sidebar-button-fg)`
+                  : (isActive || isHovered)
+                  ? `var(--accent)`
+                  : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
               }}
             >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
