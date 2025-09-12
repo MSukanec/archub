@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Calculator, Calendar } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -391,10 +390,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 
                 <div>
                   <p className={`${isMobile ? 'text-sm' : 'text-lg'} font-bold`}>
-                    {format(kpiData.lastUpdate, 'dd/MM/yyyy', { locale: es })}
+                    {formatDate(kpiData.lastUpdate)}
                   </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {format(kpiData.lastUpdate, 'HH:mm', { locale: es })}
+                    {formatTime(kpiData.lastUpdate)}
                   </p>
                 </div>
               </div>
