@@ -856,7 +856,7 @@ export function TertiarySidebar() {
       </div>
       
       {/* Navigation Items */}
-      <div className="flex-1 py-6 pl-[14px] pr-2">
+      <div className="flex-1 py-12 pl-[14px] pr-2">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
@@ -985,7 +985,7 @@ export function TertiarySidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className="py-1 pl-[14px]">
+      <div className="py-6 pl-[14px]">
         <div className="flex flex-col gap-[2px]">
           {/* Divisor */}
           <div className="h-px bg-white/20 mb-2"></div>
