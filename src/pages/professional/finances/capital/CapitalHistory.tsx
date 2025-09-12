@@ -1,6 +1,5 @@
 import React from 'react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { formatDate } from '@/lib/date-utils'
 import { Edit, Trash2 } from 'lucide-react'
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -91,7 +90,7 @@ export function CapitalHistory({
         const date = new Date(item.movement_date + 'T00:00:00')
         return (
           <div className="text-sm">
-            {format(date, 'dd/MM/yyyy', { locale: es })}
+            {formatDate(date)}
           </div>
         )
       }
