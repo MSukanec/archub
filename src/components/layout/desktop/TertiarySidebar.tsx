@@ -122,7 +122,8 @@ function getProjectInitials(name: string): string {
     .charAt(0)
     .toUpperCase();
 }
-// Componente selector de proyectos para el header (con avatar)
+// COMENTADO: Componente selector de proyectos para el header (con avatar)
+/*
 function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
@@ -206,7 +207,9 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     />
   );
 }
-// Componente selector de organizaciones para el header (con avatar)
+*/
+// COMENTADO: Componente selector de organizaciones para el header (con avatar)
+/*
 function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
@@ -352,6 +355,7 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     />
   );
 }
+*/
 export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -799,55 +803,45 @@ export function TertiarySidebar() {
         }
       }}
     >
-      {/* Project Selector Header - misma altura que PageHeader */}
+      {/* NUEVO: Selector vertical de Organización y Proyecto */}
       <div className={cn(
-        "h-12 flex-shrink-0 flex items-center pt-3",
-        "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
+        "h-auto flex-shrink-0 pt-3 pb-2",
+        "pl-[14px] pr-4"
       )}>
-        {currentProject ? (
-          <div 
-            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
-          >
-            {/* Avatar del proyecto */}
-            <div className="flex-shrink-0">
-              {currentProject.project_data?.project_image_url ? (
-                <img 
-                  src={currentProject.project_data.project_image_url} 
-                  alt="Proyecto"
-                  className="w-8 h-8 rounded-full border-2"
-                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
-                />
-              ) : (
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
-                  style={{ 
-                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
-                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
-                  }}
-                >
-                  {getProjectInitials(currentProject.name || 'P')}
-                </div>
-              )}
-            </div>
-            
-            {/* Información del proyecto - solo cuando está expandido */}
-            {isExpanded && (
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {currentProject.name}
-                </div>
-                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
-                </div>
+        {isExpanded ? (
+          <div className="bg-white/10 rounded-lg p-3 space-y-2">
+            {/* Selector de Organización (arriba) */}
+            <div className="bg-white rounded-lg px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0"></div>
+                <span className="text-sm font-medium text-gray-900 truncate">
+                  {userData?.organization?.name || "Sin organización"}
+                </span>
               </div>
-            )}
+              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            </div>
+
+            {/* Selector de Proyecto (abajo) */}
+            <div className="px-3 py-2 cursor-pointer hover:bg-white/10 transition-colors rounded-lg">
+              <div className="text-xs text-white/60 uppercase tracking-wide font-medium mb-1">
+                PROYECTO
+              </div>
+              <div className="text-lg font-semibold text-white">
+                ${(Math.random() * 10000).toFixed(2)}
+              </div>
+            </div>
           </div>
-        ) : isExpanded ? (
-          <span className="text-sm font-black text-black uppercase">
-            MENÚ LATERAL
-          </span>
-        ) : null}
+        ) : (
+          /* Versión colapsada - solo avatares */
+          <div className="space-y-2">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-gray-300"></div>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+              <span className="text-xs font-bold text-white">P</span>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Navigation Items */}
