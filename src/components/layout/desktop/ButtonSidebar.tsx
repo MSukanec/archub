@@ -77,7 +77,7 @@ export default function SidebarButton({
         style={{ 
           borderRadius: '4px',
           backgroundColor: 'transparent', // Sin fondo
-          color: (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+          color: (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
         } as React.CSSProperties}
         onMouseLeave={(e) => {
           setIsHovered(false);
@@ -91,7 +91,7 @@ export default function SidebarButton({
           style={{
             color: (isActive || isHovered) 
               ? 'var(--accent)' 
-              : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+              : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
           }}
         >
           {avatarUrl ? (
@@ -109,12 +109,12 @@ export default function SidebarButton({
                   ? 'transparent' 
                   : (isActive || isHovered)
                   ? `var(--accent)`
-                  : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
+                  : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
                 color: projectColor 
                   ? 'white' 
                   : (isActive || isHovered)
                   ? `var(--accent)`
-                  : (variant === 'secondary' ? `var(--secondary-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+                  : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
               }}
             >
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}

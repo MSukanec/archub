@@ -21,17 +21,6 @@
   --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
   --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
-  /* Secondary Sidebar - MISMO COLOR QUE CARDS */
-  --secondary-sidebar-bg: hsl(60, 8%, 95%);
-  --secondary-sidebar-fg: hsl(0, 0%, 65%);
-  --secondary-sidebar-border: hsl(0, 0%, 85%);
-  --secondary-sidebar-button-bg: transparent;
-  --secondary-sidebar-button-fg: hsl(0, 0%, 60%);
-  --secondary-sidebar-button-active-bg: hsl(0, 0%, 100%);
-  --secondary-sidebar-button-active-fg: hsl(0, 0%, 100%);
-  --secondary-sidebar-button-hover-bg: hsl(0, 0%, 100%);
-  --secondary-sidebar-button-hover-fg: hsl(0, 0%, 100%);
-
   /* Cards */
   --card-bg: hsl(60, 8%, 95%);
   --card-fg: hsl(0, 0%, 35%);
@@ -234,17 +223,6 @@
   --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
   --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
   --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
-
-  /* Secondary Sidebar */
-  --secondary-sidebar-bg: hsl(0, 0%, 14%);
-  --secondary-sidebar-fg: hsl(0, 0%, 40%);
-  --secondary-sidebar-border: hsl(0, 0%, 15%);
-  --secondary-sidebar-button-bg: transparent;
-  --secondary-sidebar-button-fg: hsl(0, 0%, 40%);
-  --secondary-sidebar-button-active-bg: hsl(0, 0%, 25%);
-  --secondary-sidebar-button-active-fg: hsl(0, 0%, 100%);
-  --secondary-sidebar-button-hover-bg: hsl(0, 0%, 25%);
-  --secondary-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 16%);

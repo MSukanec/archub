@@ -768,7 +768,7 @@ export function TertiarySidebar() {
     <>
     <aside 
       className={cn(
-        "fixed border bg-[var(--main-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
+        "fixed border bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
@@ -821,14 +821,14 @@ export function TertiarySidebar() {
                   src={currentProject.project_data.project_image_url} 
                   alt="Proyecto"
                   className="w-8 h-8 rounded-full border-2"
-                  style={{ borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)' }}
+                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
                 />
               ) : (
                 <div 
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
                   style={{ 
-                    backgroundColor: currentProject.color || 'var(--secondary-sidebar-button-bg)',
-                    borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)'
+                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
+                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
                   }}
                 >
                   {getProjectInitials(currentProject.name || 'P')}
@@ -1029,7 +1029,7 @@ export function TertiarySidebar() {
         {/* Popover */}
         <div
           className={cn(
-            "fixed border bg-[var(--main-sidebar-bg)] border-[var(--secondary-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
+            "fixed border bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
             "transition-all duration-300",
             "w-64"
           )}
@@ -1145,14 +1145,14 @@ export function TertiarySidebar() {
                           src={project.project_data.project_image_url} 
                           alt="Proyecto"
                           className="w-6 h-6 rounded-full border"
-                          style={{ borderColor: project.color || 'var(--secondary-sidebar-button-bg)' }}
+                          style={{ borderColor: project.color || 'var(--main-sidebar-button-bg)' }}
                         />
                       ) : (
                         <div 
                           className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold border text-xs"
                           style={{ 
-                            backgroundColor: project.color || 'var(--secondary-sidebar-button-bg)',
-                            borderColor: project.color || 'var(--secondary-sidebar-button-bg)'
+                            backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
+                            borderColor: project.color || 'var(--main-sidebar-button-bg)'
                           }}
                         >
                           {getProjectInitials(project.name || 'P')}
