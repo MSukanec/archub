@@ -711,11 +711,14 @@ export function TertiarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed top-0 h-screen border-r bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col",
+        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-lg",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: '0px', // Position at the left edge since it's the only sidebar
+        left: '2px', // 2px from left edge
+        top: '2px', // 2px from top
+        bottom: '2px', // 2px from bottom
+        height: 'calc(100vh - 4px)', // Full height minus top and bottom margins
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
