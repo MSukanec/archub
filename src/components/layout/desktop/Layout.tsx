@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { TertiarySidebar } from "./TertiarySidebar";
+import { RightSidebar } from "./RightSidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { Header } from "./Header";
@@ -155,6 +156,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               </div>
             )}
           </main>
+
+          {/* Right Sidebar - New project switcher */}
+          <div className="flex-shrink-0">
+            <RightSidebar />
+          </div>
         </div>
       )}
 

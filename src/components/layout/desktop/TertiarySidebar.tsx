@@ -799,17 +799,16 @@ export function TertiarySidebar() {
         }
       }}
     >
-      {/* Project Selector Header - misma altura que PageHeader */}
+      {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
       <div className={cn(
         "h-12 flex-shrink-0 flex items-center pt-3",
-        "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
+        "pl-[14px] pr-4 justify-start"
       )}>
         {currentProject ? (
           <div 
             className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
           >
-            {/* Avatar del proyecto */}
             <div className="flex-shrink-0">
               {currentProject.project_data?.project_image_url ? (
                 <img 
@@ -831,7 +830,6 @@ export function TertiarySidebar() {
               )}
             </div>
             
-            {/* Información del proyecto - solo cuando está expandido */}
             {isExpanded && (
               <div className="ml-3 flex-1 min-w-0">
                 <div className="text-sm font-semibold text-white truncate">
@@ -849,6 +847,10 @@ export function TertiarySidebar() {
           </span>
         ) : null}
       </div>
+      */}
+      
+      {/* Simplified header without project selector */}
+      <div className="h-12 flex-shrink-0 flex items-center pt-3" />
       
       {/* Navigation Items */}
       <div className="flex-1 py-12 pl-[14px] pr-2">
