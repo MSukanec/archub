@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
 import { formatDate } from "@/lib/date-utils";
-import { es } from "date-fns/locale";
 
 
 import { Button } from "@/components/ui/button";
@@ -873,23 +872,7 @@ export default function MovementsList() {
           dateElement = <div className="text-xs text-muted-foreground">Sin fecha</div>;
         } else {
           try {
-            // Handle PostgreSQL date type correctly - treat as local date, not UTC
-            let date: Date;
-            
-            if (typeof displayDate === 'string' && displayDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-              // For PostgreSQL date format "YYYY-MM-DD", create local date without timezone issues
-              const [year, month, day] = displayDate.split('-').map(Number);
-              date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-            } else {
-              // Fallback for other date formats
-              date = new Date(displayDate);
-            }
-            
-            if (isNaN(date.getTime())) {
-              dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
-            } else {
-              dateElement = <div className="text-xs font-medium">{formatDate(date)}</div>;
-            }
+            dateElement = <div className="text-xs font-medium">{formatDate(displayDate)}</div>;
           } catch (error) {
             dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
           }
