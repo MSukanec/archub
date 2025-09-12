@@ -826,9 +826,7 @@ export function TertiarySidebar() {
               
               return (
                 <div key={`${itemKey}-${index}`}>
-                  <div className="mb-[2px]">
-                    {buttonElement}
-                  </div>
+                  {buttonElement}
                 </div>
               );
             })}
