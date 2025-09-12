@@ -642,6 +642,27 @@ export function TertiarySidebar() {
       },
       {
         type: 'accordion',
+        id: 'general',
+        label: 'General',
+        icon: FolderOpen,
+        items: sidebarContent.project || []
+      },
+      {
+        type: 'accordion', 
+        id: 'construction',
+        label: 'Construcción',
+        icon: HardHat,
+        items: sidebarContent.construction || []
+      },
+      {
+        type: 'accordion', 
+        id: 'commercialization',
+        label: 'Comercialización',
+        icon: Handshake,
+        items: sidebarContent.commercialization || []
+      },
+      {
+        type: 'accordion',
         id: 'finances',
         label: 'Finanzas',
         icon: DollarSign,
