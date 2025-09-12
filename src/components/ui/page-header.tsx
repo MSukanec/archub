@@ -19,7 +19,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn("bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4", className)}>
+    <div className={cn("bg-[var(--layout-bg)] border-b border-[var(--menues-border)] px-6 py-4", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {Icon && (
