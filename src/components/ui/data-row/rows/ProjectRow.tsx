@@ -1,6 +1,5 @@
 import DataRowCard, { DataRowCardProps } from '../DataRowCard';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDateCompact } from '@/lib/date-utils';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -116,7 +115,7 @@ export default function ProjectRow({
               text-muted-foreground
               ${density === 'compact' ? 'text-xs' : 'text-sm'}
             `}>
-              {format(new Date(project.created_at), 'dd/MM/yy', { locale: es })}
+              {formatDateCompact(project.created_at)}
             </p>
             
             {/* Badge activo únicamente si es el proyecto activo */}
