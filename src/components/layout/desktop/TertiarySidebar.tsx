@@ -711,7 +711,7 @@ export function TertiarySidebar() {
   return (
     <aside 
       className={cn(
-        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl",
+        "fixed border bg-[var(--secondary-sidebar-bg)] border-[var(--secondary-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
