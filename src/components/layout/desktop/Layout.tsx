@@ -95,27 +95,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
   return (
     <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--layout-bg)" }}
+      className="min-h-screen p-2"
+      style={{ backgroundColor: "var(--main-sidebar-bg)" }}
     >
-      {/* Primary Sidebar - COMMENTED OUT 
-      <div className="hidden md:block">
-        <PrimarySidebar />
-      </div>
-      */}
-
-      {/* Secondary Sidebar - COMMENTED OUT 
-      <div className="hidden md:block">
-        <SecondarySidebar />
-      </div>
-      */}
-
-      {/* Tertiary Sidebar - hidden on mobile */}
-      <div className="hidden md:block">
-        <TertiarySidebar />
-      </div>
-
-      {/* Header Mobile - Only visible on mobile */}
+      {/* Mobile View - Unchanged */}
       {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
           <main
@@ -125,22 +108,17 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </main>
         </HeaderMobile>
       ) : (
-        <>
-          {/* Header Desktop - Disabled (using primary sidebar instead) */}
-          {/* <div className="hidden md:block">
-            <Header {...headerProps} />
-          </div> */}
+        /* Desktop View - New Frame Layout */
+        <div className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg">
+          {/* Tertiary Sidebar - Now integrated in the frame */}
+          <div className="flex-shrink-0">
+            <TertiarySidebar />
+          </div>
 
-          <main
-            className={`transition-all duration-300 ease-in-out flex-1 overflow-hidden ${
-              // No header padding needed now
-              "md:pt-0"
-            } ${
-              // Calculate margin based on tertiary sidebar state (collapsed vs expanded + padding)
-              (isDocked || isHovered) 
-                ? "md:ml-[280px]" // 264px expanded + 16px total padding = 280px
-                : "md:ml-[76px]" // 60px collapsed + 16px total padding = 76px
-            } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
+          {/* Main Content Area with rounded corners and inset appearance */}
+          <main 
+            className="flex-1 flex flex-col overflow-hidden rounded-r-2xl"
+            style={{ backgroundColor: "var(--layout-bg)" }}
           >
             {headerProps ? (
               <PageLayout
@@ -172,12 +150,12 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 </div>
               </PageLayout>
             ) : (
-              <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-12 md:py-6 pb-32`}>
+              <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-12 md:py-6 pb-32 h-full overflow-auto`}>
                 {children}
               </div>
             )}
           </main>
-        </>
+        </div>
       )}
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}

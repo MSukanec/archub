@@ -768,14 +768,10 @@ export function TertiarySidebar() {
     <>
     <aside 
       className={cn(
-        "fixed border bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] transition-all duration-300 z-30 flex flex-col rounded-2xl shadow-lg",
+        "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full rounded-l-2xl",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: '8px',
-        top: '8px',
-        bottom: '8px',
-        height: 'calc(100vh - 16px)',
         overflow: 'hidden'
       }}
       onMouseEnter={() => {
