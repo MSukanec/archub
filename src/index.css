@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -133,9 +133,7 @@
   --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(0, 0%, 100%);
   --text-card-title: hsl(0, 0%, 0%);
-  --text-important: hsl(0, 0%, 0%);
-
-
+  --text-important: hsl(0, 0%, 10%);
 
   /* Plan Colors */
   --plan-free-bg: hsl(76, 100%, 40%);
@@ -430,6 +428,7 @@
     background-color: var(--layout-bg);
     color: var(--layout-text);
     font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
   }
 }
 
@@ -470,7 +469,7 @@ h1, h2, h3, h4, h5, h6,
 .organization-name,
 .project-name {
   color: var(--text-important) !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
 }
 
 /* Hide scrollbars while maintaining scroll functionality */
