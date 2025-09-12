@@ -723,7 +723,10 @@ export function TertiarySidebar() {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Project Selector Header - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0 flex items-center pl-[14px] pr-4">
+      <div className={cn(
+        "h-12 flex-shrink-0 flex items-center",
+        isExpanded ? "pl-[14px] pr-4 justify-start" : "justify-center"
+      )}>
         {currentProject ? (
           <div className="flex items-center">
             {/* Avatar del proyecto */}
@@ -732,18 +735,12 @@ export function TertiarySidebar() {
                 <img 
                   src={currentProject.project_data.project_image_url} 
                   alt="Proyecto"
-                  className={cn(
-                    "rounded-full border-2",
-                    isExpanded ? "w-8 h-8" : "w-10 h-10"
-                  )}
+                  className="w-8 h-8 rounded-full border-2"
                   style={{ borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)' }}
                 />
               ) : (
                 <div 
-                  className={cn(
-                    "rounded-full flex items-center justify-center text-white font-semibold border-2",
-                    isExpanded ? "w-8 h-8 text-sm" : "w-10 h-10 text-lg"
-                  )}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
                   style={{ 
                     backgroundColor: currentProject.color || 'var(--secondary-sidebar-button-bg)',
                     borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)'
