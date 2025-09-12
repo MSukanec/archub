@@ -651,6 +651,20 @@ export function TertiarySidebar() {
       },
       {
         type: 'accordion',
+        id: 'finances',
+        label: 'Finanzas',
+        icon: DollarSign,
+        items: sidebarContent.finances || []
+      },
+      {
+        type: 'accordion',
+        id: 'library',
+        label: 'Biblioteca',
+        icon: Library,
+        items: sidebarContent.library || []
+      },
+      {
+        type: 'accordion',
         id: 'general',
         label: 'General',
         icon: FolderOpen,
@@ -669,20 +683,6 @@ export function TertiarySidebar() {
         label: 'Comercialización',
         icon: Handshake,
         items: sidebarContent.commercialization || []
-      },
-      {
-        type: 'accordion',
-        id: 'finances',
-        label: 'Finanzas',
-        icon: DollarSign,
-        items: sidebarContent.finances || []
-      },
-      {
-        type: 'accordion',
-        id: 'library',
-        label: 'Biblioteca',
-        icon: Library,
-        items: sidebarContent.library || []
       },
       {
         type: 'accordion',
@@ -790,7 +790,7 @@ export function TertiarySidebar() {
       </div>
       
       {/* Navigation Items */}
-      <div className="flex-1 py-1 pl-[14px]">
+      <div className="flex-1 py-2 pl-[14px] pr-2">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
