@@ -75,6 +75,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjectContext } from "@/stores/projectContext";
+import { useProjects } from "@/hooks/use-projects";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -347,6 +348,13 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
 export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
+  
+  // Get projects for the current organization
+  const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
+  
+  // Find the currently selected project
+  const currentProject = projects.find(p => p.id === selectedProjectId);
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -714,13 +722,55 @@ export function TertiarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Espacio superior con nombre de sección - misma altura que PageHeader */}
-      <div className="h-12 flex-shrink-0 flex items-center px-4">
-        {isExpanded && (
+      {/* Project Selector Header - misma altura que PageHeader */}
+      <div className="h-12 flex-shrink-0 flex items-center pl-[14px] pr-4">
+        {currentProject ? (
+          <div className="flex items-center">
+            {/* Avatar del proyecto */}
+            <div className="flex-shrink-0">
+              {currentProject.project_data?.project_image_url ? (
+                <img 
+                  src={currentProject.project_data.project_image_url} 
+                  alt="Proyecto"
+                  className={cn(
+                    "rounded-full border-2",
+                    isExpanded ? "w-8 h-8" : "w-10 h-10"
+                  )}
+                  style={{ borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)' }}
+                />
+              ) : (
+                <div 
+                  className={cn(
+                    "rounded-full flex items-center justify-center text-white font-semibold border-2",
+                    isExpanded ? "w-8 h-8 text-sm" : "w-10 h-10 text-lg"
+                  )}
+                  style={{ 
+                    backgroundColor: currentProject.color || 'var(--secondary-sidebar-button-bg)',
+                    borderColor: currentProject.color || 'var(--secondary-sidebar-button-bg)'
+                  }}
+                >
+                  {getProjectInitials(currentProject.name || 'P')}
+                </div>
+              )}
+            </div>
+            
+            {/* Información del proyecto - solo cuando está expandido */}
+            {isExpanded && (
+              <div className="ml-3 flex-1 min-w-0">
+                <div className="text-sm font-semibold text-black truncate">
+                  {currentProject.name}
+                </div>
+                <div className="text-xs text-gray-500 truncate">
+                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : isExpanded ? (
           <span className="text-sm font-black text-black uppercase">
             MENÚ LATERAL
           </span>
-        )}
+        ) : null}
       </div>
       
       {/* Navigation Items */}
