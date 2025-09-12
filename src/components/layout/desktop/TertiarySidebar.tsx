@@ -122,8 +122,7 @@ function getProjectInitials(name: string): string {
     .charAt(0)
     .toUpperCase();
 }
-// COMENTADO: Componente selector de proyectos para el header (con avatar)
-/*
+// Componente selector de proyectos para el header (con avatar)
 function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
@@ -207,9 +206,7 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     />
   );
 }
-*/
-// COMENTADO: Componente selector de organizaciones para el header (con avatar)
-/*
+// Componente selector de organizaciones para el header (con avatar)
 function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
@@ -355,7 +352,6 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     />
   );
 }
-*/
 export function TertiarySidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -803,109 +799,55 @@ export function TertiarySidebar() {
         }
       }}
     >
-      {/* NUEVO: Selector vertical de Organización y Proyecto */}
+      {/* Project Selector Header - misma altura que PageHeader */}
       <div className={cn(
-        "h-auto flex-shrink-0 pt-3 pb-2",
-        "pl-[14px] pr-4"
+        "h-12 flex-shrink-0 flex items-center pt-3",
+        "pl-[14px] pr-4 justify-start" // Siempre usar pl-[14px] para mantener el avatar fijo
       )}>
-        {isExpanded ? (
-          <div className="bg-white/10 rounded-lg p-3 space-y-0.5">
-            {/* Selector de Organización (arriba) */}
-            <div className="bg-white rounded-lg px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
-                {userData?.organization?.logo_url ? (
-                  <img 
-                    src={userData.organization.logo_url} 
-                    alt="Organización"
-                    className="w-5 h-5 rounded-full flex-shrink-0 object-cover"
-                  />
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">
-                      {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
-                    </span>
-                  </div>
-                )}
-                <span className="text-xs font-medium text-gray-900 truncate">
-                  {userData?.organization?.name || "Sin organización"}
-                </span>
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            </div>
-
-            {/* Selector de Proyecto (abajo) - IDÉNTICO al de organización */}
-            <div className="bg-white rounded-lg px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
-              <div className="flex items-center space-x-2 flex-1 min-w-0">
-                {currentProject ? (
-                  currentProject.project_data?.project_image_url ? (
-                    <img 
-                      src={currentProject.project_data.project_image_url} 
-                      alt="Proyecto"
-                      className="w-5 h-5 rounded-full flex-shrink-0 object-cover border"
-                      style={{ borderColor: currentProject.color || 'transparent' }}
-                    />
-                  ) : (
-                    <div 
-                      className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-medium"
-                      style={{ backgroundColor: currentProject.color || '#6b7280' }}
-                    >
-                      {getProjectInitials(currentProject.name || 'P')}
-                    </div>
-                  )
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">P</span>
-                  </div>
-                )}
-                <span className="text-xs font-medium text-gray-900 truncate">
-                  {currentProject?.name || "Sin proyecto"}
-                </span>
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            </div>
-          </div>
-        ) : (
-          /* Versión colapsada - solo avatares */
-          <div className="space-y-0.5">
-            {/* Avatar de organización */}
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              {userData?.organization?.logo_url ? (
+        {currentProject ? (
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
+          >
+            {/* Avatar del proyecto */}
+            <div className="flex-shrink-0">
+              {currentProject.project_data?.project_image_url ? (
                 <img 
-                  src={userData.organization.logo_url} 
-                  alt="Organización"
-                  className="w-6 h-6 rounded-full object-cover"
+                  src={currentProject.project_data.project_image_url} 
+                  alt="Proyecto"
+                  className="w-8 h-8 rounded-full border-2"
+                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
-                  </span>
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
+                  style={{ 
+                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
+                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
+                  }}
+                >
+                  {getProjectInitials(currentProject.name || 'P')}
                 </div>
               )}
             </div>
-            {/* Avatar de proyecto */}
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-              {currentProject ? (
-                currentProject.project_data?.project_image_url ? (
-                  <img 
-                    src={currentProject.project_data.project_image_url} 
-                    alt="Proyecto"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                ) : (
-                  <div 
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: currentProject.color || '#6b7280' }}
-                  >
-                    {getProjectInitials(currentProject.name || 'P')}
-                  </div>
-                )
-              ) : (
-                <span className="text-xs font-bold text-white">P</span>
-              )}
-            </div>
+            
+            {/* Información del proyecto - solo cuando está expandido */}
+            {isExpanded && (
+              <div className="ml-3 flex-1 min-w-0">
+                <div className="text-sm font-semibold text-white truncate">
+                  {currentProject.name}
+                </div>
+                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
+                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        ) : isExpanded ? (
+          <span className="text-sm font-black text-black uppercase">
+            MENÚ LATERAL
+          </span>
+        ) : null}
       </div>
       
       {/* Navigation Items */}
