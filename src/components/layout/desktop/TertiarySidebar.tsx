@@ -722,6 +722,14 @@ export function TertiarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Línea accent a la izquierda del sidebar cuando hay elementos activos/hover */}
+      <div 
+        className="absolute left-0 top-0 w-1 h-full transition-opacity duration-200"
+        style={{ 
+          backgroundColor: 'var(--accent)',
+          opacity: location !== '/' ? 1 : 0  // Mostrar cuando hay navegación activa
+        }}
+      />
       {/* Project Selector Header - misma altura que PageHeader */}
       <div className={cn(
         "h-12 flex-shrink-0 flex items-center",

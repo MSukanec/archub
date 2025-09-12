@@ -83,13 +83,6 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* Línea accent a la izquierda cuando está activo o en hover */}
-        {(isActive || isHovered) && (
-          <div 
-            className="absolute left-0 top-0 w-1 h-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-          />
-        )}
       
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (
@@ -140,10 +133,15 @@ export default function SidebarButton({
           (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
           "ml-10" // Más margen para separar del icono
         )}>
-          <span className={cn(
-            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
-          )}>
+          <span 
+            className={cn(
+              "text-sm whitespace-nowrap text-left transition-all duration-200",
+              isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+            )}
+            style={{
+              color: (isActive || isHovered) ? '#000000' : 'inherit'
+            }}
+          >
             {label}
           </span>
           {rightIcon && (
