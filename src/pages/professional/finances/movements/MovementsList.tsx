@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/date-utils";
 import { es } from "date-fns/locale";
 
 
@@ -888,7 +888,7 @@ export default function MovementsList() {
             if (isNaN(date.getTime())) {
               dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
             } else {
-              dateElement = <div className="text-xs font-medium">{format(date, "dd/MM/yyyy")}</div>;
+              dateElement = <div className="text-xs font-medium">{formatDate(date)}</div>;
             }
           } catch (error) {
             dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
