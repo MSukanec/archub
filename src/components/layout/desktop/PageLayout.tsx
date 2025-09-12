@@ -120,9 +120,9 @@ export function PageLayout({
   return (
     <div className="flex flex-col h-full">
       {/* Page Header */}
-      <div className="bg-[var(--layout-bg)] border-b border-[var(--menues-border)]">
+      <div className="bg-[var(--layout-bg)]">
         {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
-        <div className="h-[50px] px-6 flex items-center justify-between">
+        <div className="h-[50px] px-6 flex items-center justify-between border-b border-[var(--menues-border)]">
           {/* Left: Page Title */}
           <div className="flex items-center gap-4">
             {showBackButton && (
