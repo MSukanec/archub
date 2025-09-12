@@ -12,10 +12,10 @@
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 15%);
-  --main-sidebar-fg: hsl(0, 0%, 50%);
+  --main-sidebar-fg: hsl(0, 0%, 100%);
   --main-sidebar-border: transparent;
   --main-sidebar-button-bg: transparent;
-  --main-sidebar-button-fg: hsl(0, 0%, 40%);
+  --main-sidebar-button-fg: hsl(0, 0%, 80%);
   --main-sidebar-button-active-bg: transparent;
   --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
   --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
