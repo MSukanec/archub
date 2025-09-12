@@ -473,6 +473,9 @@ export function TertiarySidebar() {
   });
   // Estado para transiciones
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // Estado para trackear qué botón está activo/hover para la forma accent
+  const [activeButtonIndex, setActiveButtonIndex] = useState<number | null>(null);
+  const [hoveredButtonIndex, setHoveredButtonIndex] = useState<number | null>(null);
   // Función para navegación con transición hacia adelante
   const navigateForward = (newContext: string, href: string) => {
     setIsTransitioning(true);
@@ -722,6 +725,20 @@ export function TertiarySidebar() {
       }}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Forma accent en el borde izquierdo del sidebar */}
+      {(activeButtonIndex !== null || hoveredButtonIndex !== null) && (
+        <div 
+          className="absolute left-0 transition-all duration-200 z-10"
+          style={{ 
+            backgroundColor: 'var(--accent)',
+            borderRadius: '0 6px 6px 0',
+            width: '6px',
+            height: '20px',
+            top: `${48 + ((activeButtonIndex ?? hoveredButtonIndex ?? 0) * 34) + 7}px` // 48px header + index*34px + 7px centering
+          }}
+        />
+      )}
+      
       {/* Project Selector Header - misma altura que PageHeader */}
       <div className={cn(
         "h-12 flex-shrink-0 flex items-center",
@@ -823,6 +840,18 @@ export function TertiarySidebar() {
                           }
                         </div>
                       ) : undefined}
+                      onButtonHover={(isHovered) => {
+                        if (isHovered) {
+                          setHoveredButtonIndex(index);
+                        } else {
+                          setHoveredButtonIndex(null);
+                        }
+                      }}
+                      onButtonActive={(isActive) => {
+                        if (isActive) {
+                          setActiveButtonIndex(index);
+                        }
+                      }}
                     />
                     
                     {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
@@ -854,6 +883,20 @@ export function TertiarySidebar() {
                                 }}
                                 href={subItem.href}
                                 variant="secondary"
+                                onButtonHover={(isHovered) => {
+                                  const subItemIndex = index + subIndex + 1; // Calcular índice relativo
+                                  if (isHovered) {
+                                    setHoveredButtonIndex(subItemIndex);
+                                  } else {
+                                    setHoveredButtonIndex(null);
+                                  }
+                                }}
+                                onButtonActive={(isActive) => {
+                                  if (isActive || isSubItemActive) {
+                                    const subItemIndex = index + subIndex + 1;
+                                    setActiveButtonIndex(subItemIndex);
+                                  }
+                                }}
                               />
                             );
                           })}

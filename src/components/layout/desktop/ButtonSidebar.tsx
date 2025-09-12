@@ -18,6 +18,8 @@ interface SidebarButtonProps {
   isHeaderButton?: boolean;
   projectColor?: string;
   disableHover?: boolean;
+  onButtonHover?: (isHovered: boolean) => void;
+  onButtonActive?: (isActive: boolean) => void;
 }
 
 export default function SidebarButton({ 
@@ -34,12 +36,19 @@ export default function SidebarButton({
   variant = 'main',
   isHeaderButton = false,
   projectColor,
-  disableHover = false
+  disableHover = false,
+  onButtonHover,
+  onButtonActive
 }: SidebarButtonProps) {
   const [, navigate] = useLocation();
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Llamar onButtonActive cuando el estado activo cambia
+  React.useEffect(() => {
+    onButtonActive?.(isActive);
+  }, [isActive, onButtonActive]);
 
   const handleClick = () => {
     if (onClick) {
@@ -73,6 +82,7 @@ export default function SidebarButton({
         onMouseEnter={(e) => {
           handleMouseEnter();
           setIsHovered(true);
+          onButtonHover?.(true);
         }}
         style={{ 
           borderRadius: '4px',
@@ -81,19 +91,9 @@ export default function SidebarButton({
         } as React.CSSProperties}
         onMouseLeave={(e) => {
           setIsHovered(false);
+          onButtonHover?.(false);
         }}
       >
-        {/* Forma peculiar accent a la izquierda cuando está activo o en hover */}
-        {(isActive || isHovered) && (
-          <div 
-            className="absolute -left-0 top-1/2 transform -translate-y-1/2 w-2 h-6 transition-all duration-200"
-            style={{ 
-              backgroundColor: 'var(--accent)',
-              borderRadius: '0 8px 8px 0',
-              zIndex: 1
-            }}
-          />
-        )}
       
       {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
       {!isChild && !(isHeaderButton && icon === null) && (
