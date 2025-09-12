@@ -715,10 +715,11 @@ export function TertiarySidebar() {
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
-        left: '8px', // 8px from left edge
+        left: '8px', // 8px from left edge  
         top: '8px', // 8px from top
-        bottom: '8px', // 8px from bottom
-        height: 'calc(100vh - 16px)', // Full height minus top and bottom margins
+        right: 'auto', // Let width control the right side
+        bottom: '8px', // 8px from bottom 
+        height: 'calc(100vh - 16px)', // Full height minus top and bottom margins (8px + 8px)
         overflow: 'hidden'
       }}
       onMouseEnter={() => {

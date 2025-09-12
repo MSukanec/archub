@@ -74,6 +74,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { data } = useCurrentUser();
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
+  const { isDocked, isHovered } = useSidebarStore();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -135,8 +136,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               // No header padding needed now
               "md:pt-0"
             } ${
-              // Calculate margin based only on tertiary sidebar (60px collapsed + 16px padding, 264px expanded + 16px padding)
-              "md:ml-[76px]" // Tertiary sidebar (60px when collapsed + 16px total padding)
+              // Calculate margin based on tertiary sidebar state (collapsed vs expanded + padding)
+              (isDocked || isHovered) 
+                ? "md:ml-[280px]" // 264px expanded + 16px total padding = 280px
+                : "md:ml-[76px]" // 60px collapsed + 16px total padding = 76px
             } ml-0 pt-0 ${isMobile && showActionBar ? "pb-20" : "pb-8"}`}
           >
             {headerProps ? (
