@@ -121,8 +121,9 @@ export function PageLayout({
     <div className="flex flex-col h-full">
       {/* Page Header */}
       <div className="bg-[var(--layout-bg)]">
-        {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
-        <div className="h-[50px] px-6 flex items-center justify-between border-b border-[var(--menues-border)]">
+        <div className="max-w-[1440px] mx-auto px-6">
+          {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
+          <div className="h-[50px] flex items-center justify-between border-b border-[var(--menues-border)]">
           {/* Left: Page Title */}
           <div className="flex items-center gap-4">
             {showBackButton && (
@@ -359,9 +360,9 @@ export function PageLayout({
           </div>
         </div>
 
-        {/* FILA INFERIOR: Tabs a la izquierda */}
-        {hasTabs && (
-          <div className="h-8 px-6 flex items-center">
+          {/* FILA INFERIOR: Tabs a la izquierda */}
+          {hasTabs && (
+            <div className="h-8 flex items-center">
             <div className="flex items-center space-x-6">
               {tabs.map((tab) => {
                 const tabContent = (
@@ -402,8 +403,9 @@ export function PageLayout({
                 return tabContent;
               })}
             </div>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
       </div>
 

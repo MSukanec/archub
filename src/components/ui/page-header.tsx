@@ -19,7 +19,8 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn("bg-[var(--layout-bg)] border-b border-[var(--menues-border)] px-6 py-4", className)}>
+    <div className={cn("bg-[var(--layout-bg)]", className)}>
+      <div className="max-w-[1440px] mx-auto px-6 py-4 border-b border-[var(--menues-border)]">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {Icon && (
@@ -46,11 +47,12 @@ export function PageHeader({
         )}
       </div>
       
-      {filters && (
-        <div className="mt-4">
-          {filters}
-        </div>
-      )}
+        {filters && (
+          <div className="mt-4">
+            {filters}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
