@@ -114,22 +114,22 @@ export function LeftSidebar() {
             <Plus className="w-4 h-4 text-white" />
           </div>
         </div>
+      </div>
 
-        {/* User Profile Avatar - Bottom */}
-        <div className="mt-auto pt-2">
-          <SidebarAvatarButton
-            avatarUrl={userData?.user?.avatar_url}
-            backgroundColor="var(--accent)"
-            borderColor="rgba(255, 255, 255, 0.3)"
-            letter={userData?.user?.full_name ? userData.user.full_name.charAt(0).toUpperCase() : 'U'}
-            shape="circular"
-            onClick={() => {
-              // TODO: Navigate to profile page
-              console.log('Navigate to profile');
-            }}
-            testId="user-profile-avatar"
-          />
-        </div>
+      {/* User Profile Avatar - Bottom */}
+      <div className="px-2 pb-3">
+        <SidebarAvatarButton
+          avatarUrl={userData?.user?.avatar_url}
+          backgroundColor="var(--accent)"
+          borderColor="rgba(255, 255, 255, 0.3)"
+          letter={userData?.user?.full_name ? userData.user.full_name.charAt(0).toUpperCase() : 'U'}
+          shape="circular"
+          onClick={() => {
+            // TODO: Navigate to profile page
+            console.log('Navigate to profile');
+          }}
+          testId="user-profile-avatar"
+        />
       </div>
     </aside>
   );
