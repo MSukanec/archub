@@ -17,12 +17,7 @@ function getOrganizationInitials(name: string): string {
 }
 
 function getProjectInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return (name?.trim()?.[0] || '').toUpperCase();
 }
 
 export function RightSidebar() {
@@ -135,17 +130,15 @@ export function RightSidebar() {
       </div>
 
       {/* Projects Section */}
-      <div className="flex-1 pl-[14px] pr-2">
+      <div className="flex-1 px-3 py-2 space-y-2">
         {/* Section Header - only when expanded */}
         {isExpanded && (
-          <div className="h-8 flex items-center px-2 mb-[2px]">
-            <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-              PROYECTOS
-            </div>
+          <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
+            PROYECTOS
           </div>
         )}
         
-        <div className="flex flex-col gap-[2px]">
+        <div className="space-y-2">
           {/* Project Avatars */}
           {sortedProjects.map((project: any) => {
             const isActive = selectedProjectId === project.id;
