@@ -19,7 +19,7 @@ function getProjectInitials(name: string): string {
   return (name?.trim()?.[0] || '').toUpperCase();
 }
 
-export function AvatarSidebar() {
+export function LeftSidebar() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();

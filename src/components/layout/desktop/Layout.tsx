@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { MenuSidebar } from "./MenuSidebar";
-import { AvatarSidebar } from "./AvatarSidebar";
+import { Sidebar } from "./Sidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { PageLayout } from "./PageLayout";
@@ -110,15 +109,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       ) : (
         /* Desktop View - New Frame Layout */
         <div className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg">
-          {/* Avatar Sidebar - Left sidebar with avatars/projects */}
-          <div className="flex-shrink-0">
-            <AvatarSidebar />
-          </div>
-          
-          {/* Menu Sidebar - Main navigation menu */}
-          <div className="flex-shrink-0">
-            <MenuSidebar />
-          </div>
+          <Sidebar />
 
           {/* Main Content Area with rounded corners and inset appearance */}
           <main 
