@@ -106,14 +106,12 @@ export function LeftSidebar() {
 
         {/* Create New Project Button */}
         <div
-          className="flex items-center justify-center cursor-pointer p-2"
+          className="w-9 h-9 flex items-center justify-center cursor-pointer"
           onClick={handleCreateProject}
           data-testid="create-project-button"
         >
-          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
-              <Plus className="w-4 h-4 text-white" />
-            </div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
+            <Plus className="w-4 h-4 text-white" />
           </div>
         </div>
       </div>
