@@ -696,10 +696,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       {
         type: 'dynamic_title'
       },
-      {
-        type: 'section',
-        label: 'GENERAL'
-      },
+      // 1. PRIMERO el botón "Vista General"
       {
         type: 'button',
         icon: Home,
@@ -707,13 +704,53 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
         href: '/organization/dashboard',
         isActive: location === '/organization/dashboard'
       },
+      // 2. Luego el texto "General" que ahora se llama "Organización"
       {
-        type: 'accordion',
-        id: 'organization',
-        label: 'Organización',
-        icon: Building,
-        items: sidebarContent.organization || []
+        type: 'section',
+        label: 'ORGANIZACIÓN'
       },
+      // 3. Luego los botones que estaban dentro del acordeón organización, pero sueltos
+      {
+        type: 'button',
+        icon: Folder,
+        label: 'Proyectos',
+        href: '/organization/projects',
+        isActive: location === '/organization/projects'
+      },
+      {
+        type: 'button',
+        icon: Users,
+        label: 'Miembros',
+        href: '/organization/members',
+        isActive: location === '/organization/members'
+      },
+      {
+        type: 'button',
+        icon: Database,
+        label: 'Datos Básicos',
+        href: '/organization/data',
+        isActive: location === '/organization/data'
+      },
+      {
+        type: 'button',
+        icon: Activity,
+        label: 'Actividad',
+        href: '/organization/activity',
+        isActive: location === '/organization/activity'
+      },
+      {
+        type: 'button',
+        icon: Settings,
+        label: 'Preferencias',
+        href: '/organization/preferences',
+        isActive: location === '/organization/preferences'
+      },
+      // 4. Luego el texto "General"
+      {
+        type: 'section',
+        label: 'GENERAL'
+      },
+      // 5. Luego los botones finanzas y recursos
       {
         type: 'accordion',
         id: 'finances',
