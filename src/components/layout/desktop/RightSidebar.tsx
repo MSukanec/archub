@@ -358,7 +358,7 @@ interface RightSidebarProps {
 export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {}) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
-  const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
+  const { selectedProjectId, currentOrganizationId, setSelectedProject, isViewingOrganization } = useProjectContext();
   // Mutación específica para cambiar proyecto (igual a la que funciona en Projects.tsx)
   const updatePreferencesMutation = useMutation({
     mutationFn: async ({ organizationId, lastProjectId }: { organizationId: string, lastProjectId: string | null }) => {
