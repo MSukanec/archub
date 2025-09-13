@@ -28,14 +28,14 @@ function getProjectInitials(name: string): string {
 export function RightSidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
-  const { currentProjectId, setCurrentProject } = useProjectContext();
+  const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     userData?.organization?.id || ''
   );
 
-  const selectedProjectId = currentProjectId || userData?.preferences?.last_project_id || null;
+  const selectedProjectId = contextProjectId || userData?.preferences?.last_project_id || null;
 
   // Sort projects to show active project first
   const sortedProjects = [...projects].sort((a, b) => {
@@ -64,7 +64,7 @@ export function RightSidebar() {
       return projectId;
     },
     onSuccess: (projectId) => {
-      setCurrentProject(projectId);
+      setSelectedProject(projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
     }
