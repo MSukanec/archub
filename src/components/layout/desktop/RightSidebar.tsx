@@ -6,6 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjects } from '@/hooks/use-projects';
 import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
+import { SidebarAvatarButton } from './SidebarAvatarButton';
 
 function getOrganizationInitials(name: string): string {
   return name
@@ -89,129 +90,65 @@ export function RightSidebar() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Organization Avatar - Top */}
-      <div className="h-12 flex-shrink-0 pl-[14px] pr-2 pt-3">
-        <div 
+      {/* All Buttons Section */}
+      <div className="flex-1 pl-[14px] pr-2 pt-3 space-y-2">
+        {/* Organization Button */}
+        <SidebarAvatarButton
+          avatarUrl={userData?.organization?.logo_url}
+          backgroundColor="var(--accent)"
+          borderColor="rgba(255, 255, 255, 0.3)"
+          letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+          primaryText={userData?.organization?.name || 'Organización'}
+          secondaryText="Organización"
+          isExpanded={isExpanded}
+          shape="rounded"
+        />
+        
+        {/* Project Buttons */}
+        {sortedProjects.map((project: any) => {
+          const isActive = selectedProjectId === project.id;
+          return (
+            <SidebarAvatarButton
+              key={project.id}
+              backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
+              letter={getProjectInitials(project.name)}
+              primaryText={project.name}
+              secondaryText={project.project_data?.modality?.name || project.project_data?.project_type?.name || 'Sin tipo'}
+              isExpanded={isExpanded}
+              isActive={isActive}
+              shape="circular"
+              onClick={() => handleProjectSelect(project.id)}
+              testId={`project-avatar-${project.id}`}
+            />
+          );
+        })}
+
+        {/* Create New Project Button */}
+        <div
           className={cn(
-            "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2 hover:bg-white/10",
+            "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
+            "hover:bg-white/10",
             isExpanded ? "justify-start" : "justify-center"
           )}
+          onClick={handleCreateProject}
+          data-testid="create-project-button"
         >
-          {/* Organization Avatar */}
           <div className="flex-shrink-0 flex justify-center">
-            {userData?.organization?.logo_url ? (
-              <img 
-                src={userData.organization.logo_url} 
-                alt="Organización"
-                className="w-8 h-8 rounded-lg border-2 border-white/30"
-              />
-            ) : (
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold border-2 border-white/30 text-sm"
-                style={{ backgroundColor: 'var(--accent)' }}
-              >
-                {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
-              </div>
-            )}
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
+              <Plus className="w-4 h-4 text-white" />
+            </div>
           </div>
           
-          {/* Organization Name - only when expanded */}
           {isExpanded && (
             <div className="ml-3 flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white/90 truncate">
-                {userData?.organization?.name || 'Organización'}
+              <p className="text-sm font-medium text-white truncate">
+                Nuevo Proyecto
               </p>
               <p className="text-xs text-white/60 truncate">
-                Organización
+                Crear proyecto
               </p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Projects Section */}
-      <div className="flex-1 px-3 py-2 space-y-2">
-        {/* Section Header - only when expanded */}
-        {isExpanded && (
-          <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-            PROYECTOS
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          {/* Project Avatars */}
-          {sortedProjects.map((project: any) => {
-            const isActive = selectedProjectId === project.id;
-            return (
-              <div
-                key={project.id}
-                className={cn(
-                  "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-                  "hover:bg-white/10",
-                  isExpanded ? "justify-start" : "justify-center"
-                )}
-                onClick={() => handleProjectSelect(project.id)}
-                data-testid={`project-avatar-${project.id}`}
-              >
-                {/* Project Avatar */}
-                <div className="flex-shrink-0 flex justify-center">
-                  <div 
-                    className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm transition-all",
-                      isActive ? "border-white" : "border-transparent"
-                    )}
-                    style={{ 
-                      backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
-                    }}
-                  >
-                    {getProjectInitials(project.name)}
-                  </div>
-                </div>
-                
-                {/* Project Name - only when expanded */}
-                {isExpanded && (
-                  <div className="ml-3 flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
-                      {project.name}
-                    </p>
-                    <p className="text-xs text-white/60 truncate">
-                      {project.project_data?.modality?.name || project.project_data?.project_type?.name || 'Sin tipo'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Create New Project Button */}
-          <div
-            className={cn(
-              "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-              "hover:bg-white/10",
-              isExpanded ? "justify-start" : "justify-center"
-            )}
-            onClick={handleCreateProject}
-            data-testid="create-project-button"
-          >
-            {/* Plus Icon */}
-            <div className="flex-shrink-0 flex justify-center">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
-                <Plus className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            
-            {/* Create Project Text - only when expanded */}
-            {isExpanded && (
-              <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  Nuevo Proyecto
-                </p>
-                <p className="text-xs text-white/60 truncate">
-                  Crear proyecto
-                </p>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </aside>
