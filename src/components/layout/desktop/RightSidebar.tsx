@@ -352,7 +352,11 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     />
   );
 }
-export function RightSidebar() {
+interface RightSidebarProps {
+  isHovered?: boolean;
+}
+
+export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {}) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
@@ -403,7 +407,8 @@ export function RightSidebar() {
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
+  const { isDocked, setDocked } = useSidebarStore();
+  const isHovered = isHoveredProp ?? false;
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
   // Define if secondary sidebar is expanded
@@ -776,30 +781,6 @@ export function RightSidebar() {
       )}
       style={{
         overflow: 'hidden'
-      }}
-      onMouseEnter={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(true);
-        }
-        // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
-        if (sidebarLevel === 'project') {
-          if (location.startsWith('/general')) {
-            setExpandedAccordion('general');
-          } else if (location.startsWith('/construction')) {
-            setExpandedAccordion('construccion');
-          } else if (location.startsWith('/finances')) {
-            setExpandedAccordion('finanzas');
-          } else if (location.startsWith('/design')) {
-            setExpandedAccordion('diseno');
-          } else if (location.startsWith('/project/')) {
-            setExpandedAccordion('recursos');
-          }
-        }
-      }}
-      onMouseLeave={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(false);
-        }
       }}
     >
       {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
