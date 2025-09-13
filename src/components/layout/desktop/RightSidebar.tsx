@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useProjects } from "@/hooks/use-projects-old";
 import { useProjectContext } from '@/stores/projectContext';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -24,7 +24,7 @@ function getProjectInitials(name: string): string {
 export function RightSidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
+  const { data: projects = [] } = useProjects(userData?.organization?.id);
   const { selectedProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();
 
@@ -187,7 +187,7 @@ export function RightSidebar() {
                       {project.name}
                     </p>
                     <p className="text-xs text-white/60 truncate">
-                      {project.project_data?.project_mode || project.project_data?.project_type?.name || 'Sin tipo'}
+                      {project.project_data?.modality?.name || project.project_data?.project_type?.name || 'Sin tipo'}
                     </p>
                   </div>
                 )}
