@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { TertiarySidebar } from "./TertiarySidebar";
-import { RightSidebar } from "./RightSidebar";
+import { MenuSidebar } from "./MenuSidebar";
+import { AvatarSidebar } from "./AvatarSidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
-import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -111,9 +110,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       ) : (
         /* Desktop View - New Frame Layout */
         <div className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg">
-          {/* Tertiary Sidebar - Now integrated in the frame */}
+          {/* Avatar Sidebar - Left sidebar with avatars/projects */}
           <div className="flex-shrink-0">
-            <TertiarySidebar />
+            <AvatarSidebar />
+          </div>
+          
+          {/* Menu Sidebar - Main navigation menu */}
+          <div className="flex-shrink-0">
+            <MenuSidebar />
           </div>
 
           {/* Main Content Area with rounded corners and inset appearance */}
@@ -157,10 +161,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             )}
           </main>
 
-          {/* Right Sidebar - New project switcher */}
-          <div className="flex-shrink-0">
-            <RightSidebar />
-          </div>
         </div>
       )}
 
