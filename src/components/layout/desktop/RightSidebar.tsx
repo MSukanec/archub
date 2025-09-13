@@ -31,6 +31,15 @@ export function RightSidebar() {
   // Encontrar proyecto actual
   const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
 
+  // Ordenar proyectos: activo primero, luego el resto
+  const sortedProjects = [...projects].sort((a, b) => {
+    const aIsActive = selectedProjectId === a.id;
+    const bIsActive = selectedProjectId === b.id;
+    if (aIsActive && !bIsActive) return -1;
+    if (!aIsActive && bIsActive) return 1;
+    return 0;
+  });
+
   // Mutación para cambiar proyecto
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
@@ -123,25 +132,24 @@ export function RightSidebar() {
       <div className="flex-1 py-4 pl-[14px] pr-2">
         <div className="flex flex-col gap-[6px]">
           
-          {/* Section Header - only when expanded */}
-          {isExpanded && (
-            <div className="px-2 mb-2">
+          {/* Section Header - always reserve space */}
+          <div className="px-2 mb-2 h-4">
+            {isExpanded && (
               <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
                 PROYECTOS
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Project Avatars */}
-          {projects.map((project: any) => {
+          {sortedProjects.map((project: any) => {
             const isActive = selectedProjectId === project.id;
             return (
               <div
                 key={project.id}
                 className={cn(
                   "flex items-center justify-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-                  "hover:bg-white/10",
-                  isActive && "bg-white/20"
+                  "hover:bg-white/10"
                 )}
                 onClick={() => handleProjectSelect(project.id)}
                 data-testid={`project-avatar-${project.id}`}
@@ -179,7 +187,7 @@ export function RightSidebar() {
                       {project.name}
                     </p>
                     <p className="text-xs text-white/60 truncate">
-                      {project.project_data?.project_type?.name || 'Sin tipo'}
+                      {project.project_data?.project_mode || project.project_data?.project_type?.name || 'Sin tipo'}
                     </p>
                   </div>
                 )}
