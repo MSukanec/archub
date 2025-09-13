@@ -31,7 +31,7 @@ export function SidebarAvatarButton({
 }: SidebarAvatarButtonProps) {
   return (
     <div
-      className="flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-white/10 p-2"
+      className="flex items-center justify-center cursor-pointer p-2"
       onClick={onClick}
       data-testid={testId}
     >
@@ -44,10 +44,10 @@ export function SidebarAvatarButton({
             className={cn(
               "w-8 h-8 border-2 object-cover",
               shape === 'circular' ? "rounded-full" : "rounded-lg",
-              isActive && shape === 'circular' ? "border-white" : "border-white/30"
+              isActive ? "border-white" : "border-transparent"
             )}
             style={{ 
-              borderColor: isActive && shape === 'circular' ? 'white' : borderColor,
+              borderColor: isActive ? 'white' : 'transparent',
               transform: 'translateZ(0)'
             }}
           />
@@ -56,11 +56,11 @@ export function SidebarAvatarButton({
             className={cn(
               "w-8 h-8 flex items-center justify-center text-white font-semibold border-2 text-sm leading-none",
               shape === 'circular' ? "rounded-full" : "rounded-lg",
-              isActive && shape === 'circular' ? "border-white" : "border-transparent"
+              isActive ? "border-white" : "border-transparent"
             )}
             style={{ 
               backgroundColor,
-              borderColor: isActive && shape === 'circular' ? 'white' : (shape === 'rounded' ? borderColor : 'transparent'),
+              borderColor: isActive ? 'white' : 'transparent',
               transform: 'translateZ(0)'
             }}
           >

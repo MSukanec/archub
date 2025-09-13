@@ -106,12 +106,12 @@ export function AvatarSidebar() {
 
         {/* Create New Project Button */}
         <div
-          className="flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-white/10 p-2"
+          className="flex items-center justify-center cursor-pointer p-2"
           onClick={handleCreateProject}
           data-testid="create-project-button"
         >
           <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
               <Plus className="w-4 h-4 text-white" />
             </div>
           </div>

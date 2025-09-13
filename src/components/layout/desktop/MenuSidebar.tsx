@@ -716,6 +716,9 @@ export function MenuSidebar() {
         items: sidebarContent.library || []
       },
       {
+        type: 'dynamic_title'
+      },
+      {
         type: 'section',
         label: 'PROYECTO'
       },
@@ -865,6 +868,30 @@ export function MenuSidebar() {
               if ('type' in item && item.type === 'divider') {
                 return (
                   <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                );
+              }
+              
+              // Si es un título dinámico, renderizar información del proyecto/organización
+              if ('type' in item && item.type === 'dynamic_title') {
+                if (!isExpanded) return null;
+                
+                const currentProject = projects.find(p => p.id === selectedProjectId);
+                const displayTitle = currentProject 
+                  ? currentProject.name 
+                  : userData?.organization?.name || 'Organización';
+                const displaySubtitle = currentProject 
+                  ? (currentProject.project_data?.project_type?.name || 'Proyecto')
+                  : 'Organización';
+                
+                return (
+                  <div key={`dynamic-title-${index}`} className="px-2 mb-2">
+                    <div className="text-sm font-semibold truncate" style={{ color: 'var(--main-sidebar-button-active-fg)' }}>
+                      {displayTitle}
+                    </div>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.7 }}>
+                      {displaySubtitle}
+                    </div>
+                  </div>
                 );
               }
               
