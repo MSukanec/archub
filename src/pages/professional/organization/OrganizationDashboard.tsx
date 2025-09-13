@@ -54,7 +54,7 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Vista General"
+    title: "Resumen de Organización"
   };
 
   return (

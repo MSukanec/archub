@@ -15,7 +15,7 @@ export default function DesignDashboard() {
 
 
   const headerProps = {
-    title: "Resumen de Diseño",
+    title: "Resumen de Proyecto",
     icon: Palette,
   }
 

@@ -700,11 +700,11 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       {
         type: 'spacer'
       },
-      // 1. PRIMERO el botón "Vista General" - ruta cambia según el modo
+      // 1. PRIMERO el botón de resumen - nombre y ruta cambian según el modo
       {
         type: 'button',
         icon: Home,
-        label: 'Vista General',
+        label: isViewingOrganization ? 'Resumen de Organización' : 'Resumen de Proyecto',
         href: isViewingOrganization ? '/organization/dashboard' : '/design/dashboard',
         isActive: isViewingOrganization ? location === '/organization/dashboard' : location === '/design/dashboard'
       }
