@@ -801,7 +801,7 @@ export function TertiarySidebar() {
     >
       {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
       <div className={cn(
-        "h-12 flex-shrink-0 flex items-center pt-3",
+        "h-12 flex-shrink-0 flex items-center",
         "pl-[14px] pr-4 justify-start"
       )}>
         {currentProject ? (
@@ -850,10 +850,10 @@ export function TertiarySidebar() {
       */}
       
       {/* Simplified header without project selector */}
-      <div className="h-12 flex-shrink-0 flex items-center pt-3" />
+      <div className="h-12 flex-shrink-0 flex items-center" />
       
       {/* Navigation Items */}
-      <div className="flex-1 py-12 pl-[14px] pr-2">
+      <div className="flex-1 py-2 pl-[14px] pr-2">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
