@@ -54,7 +54,7 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Dashboard"
+    title: "Vista General"
   };
 
   return (

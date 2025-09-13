@@ -300,7 +300,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     // NIVEL 2: Específico de sección - rutas actualizadas
     sections: {
       organization: [
-        { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
+        { icon: Home, label: 'Vista General', href: '/organization/dashboard' },
         { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
         { icon: TrendingUp, label: 'Movimientos', href: '/finances/movements' },
         { icon: DollarSign, label: 'Capital', href: '/finances/capital' },

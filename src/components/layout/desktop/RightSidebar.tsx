@@ -703,7 +703,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       {
         type: 'button',
         icon: Home,
-        label: 'Dashboard',
+        label: 'Vista General',
         href: '/organization/dashboard',
         isActive: location === '/organization/dashboard'
       },
@@ -765,6 +765,8 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
 
   // Función para determinar qué acordeón está activo basado en la URL
   const getActiveAccordion = () => {
+    // Dashboard no debe activar ningún acordeón
+    if (location === '/organization/dashboard') return null;
     if (location.startsWith('/organization')) return 'organization';
     if (location.startsWith('/general')) return 'general';  
     if (location.startsWith('/construction')) return 'construction';
