@@ -125,7 +125,7 @@ function getProjectInitials(name: string): string {
 function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { selectedProjectId, setSelectedProject, isViewingOrganization } = useProjectContext();
   
   // Ordenar proyectos: proyecto activo primero, luego el resto
   const sortedProjects = [...projects].sort((a, b) => {
@@ -854,12 +854,12 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
                 if (!isExpanded) return null;
                 
                 const currentProject = projects.find(p => p.id === selectedProjectId);
-                const displayTitle = currentProject 
-                  ? currentProject.name 
-                  : userData?.organization?.name || 'Organización';
-                const displaySubtitle = currentProject 
-                  ? (currentProject.project_data?.project_type?.name || 'Proyecto')
-                  : 'Organización';
+                const displayTitle = isViewingOrganization
+                  ? (userData?.organization?.name || 'Organización')
+                  : (currentProject ? currentProject.name : (userData?.organization?.name || 'Organización'));
+                const displaySubtitle = isViewingOrganization
+                  ? 'Organización'
+                  : (currentProject ? 'Proyecto' : 'Organización');
                 
                 return (
                   <div key={`dynamic-title-${index}`} className="h-12 flex flex-col justify-center px-2">

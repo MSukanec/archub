@@ -6,6 +6,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 import { SidebarAvatarButton } from './SidebarAvatarButton';
 import { useLocation } from 'wouter';
+import { useState } from 'react';
 
 function getOrganizationInitials(name: string): string {
   return name
@@ -22,7 +23,7 @@ function getProjectInitials(name: string): string {
 
 export function LeftSidebar() {
   const { data: userData } = useCurrentUser();
-  const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
+  const { selectedProjectId: contextProjectId, setSelectedProject, isViewingOrganization, setViewingOrganization } = useProjectContext();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
 
@@ -90,6 +91,10 @@ export function LeftSidebar() {
             borderColor="rgba(255, 255, 255, 0.3)"
             letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
             shape="rounded"
+            isActive={isViewingOrganization}
+            onClick={() => {
+              setViewingOrganization(!isViewingOrganization);
+            }}
           />
           
           {/* Create New Project Button */}
