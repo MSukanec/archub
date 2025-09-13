@@ -852,8 +852,6 @@ export function RightSidebar() {
       </div>
       */}
       
-      {/* Simplified header without project selector */}
-      <div className="h-12 flex-shrink-0 flex items-center" />
       
       {/* Navigation Items */}
       <div className="flex-1 py-2 pl-[14px] pr-2">
@@ -884,11 +882,11 @@ export function RightSidebar() {
                   : 'Organización';
                 
                 return (
-                  <div key={`dynamic-title-${index}`} className="px-2 mb-3">
+                  <div key={`dynamic-title-${index}`} className="h-12 flex flex-col justify-center px-2">
                     <div className="text-sm font-semibold truncate text-white">
                       {displayTitle}
                     </div>
-                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--accent)' }}>
+                    <div className="text-xs truncate" style={{ color: 'var(--accent)' }}>
                       {displaySubtitle}
                     </div>
                   </div>
