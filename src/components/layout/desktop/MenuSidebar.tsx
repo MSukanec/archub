@@ -691,6 +691,9 @@ export function MenuSidebar() {
   const getTertiarySidebarItems = () => {
     return [
       {
+        type: 'dynamic_title'
+      },
+      {
         type: 'section',
         label: 'GENERAL'
       },
@@ -714,9 +717,6 @@ export function MenuSidebar() {
         label: 'Biblioteca',
         icon: Library,
         items: sidebarContent.library || []
-      },
-      {
-        type: 'dynamic_title'
       },
       {
         type: 'section',
@@ -884,11 +884,11 @@ export function MenuSidebar() {
                   : 'Organización';
                 
                 return (
-                  <div key={`dynamic-title-${index}`} className="px-2 mb-2">
-                    <div className="text-sm font-semibold truncate" style={{ color: 'var(--main-sidebar-button-active-fg)' }}>
+                  <div key={`dynamic-title-${index}`} className="px-2 mb-3">
+                    <div className="text-sm font-semibold truncate text-white">
                       {displayTitle}
                     </div>
-                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.7 }}>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--accent)' }}>
                       {displaySubtitle}
                     </div>
                   </div>
