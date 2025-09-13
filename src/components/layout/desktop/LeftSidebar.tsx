@@ -114,8 +114,8 @@ export function LeftSidebar() {
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="h-px bg-white/30 mb-3"></div>
+        {/* Spacer - Espacio vacío para separación visual */}
+        <div className="h-9 mb-3"></div>
         
         {/* Projects Section */}
         <div className="space-y-2">
