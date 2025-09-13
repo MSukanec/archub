@@ -21,7 +21,7 @@ function getProjectInitials(name: string): string {
   return (name?.trim()?.[0] || '').toUpperCase();
 }
 
-export function RightSidebar() {
+export function AvatarSidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
   const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
