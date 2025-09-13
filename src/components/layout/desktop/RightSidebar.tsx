@@ -94,7 +94,10 @@ export function RightSidebar() {
       {/* Organization Avatar - Top */}
       <div className="h-12 flex-shrink-0 pl-[14px] pr-2 pt-3">
         <div 
-          className="flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2 hover:bg-white/10"
+          className={cn(
+            "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2 hover:bg-white/10",
+            isExpanded ? "justify-start" : "justify-center"
+          )}
         >
           {/* Organization Avatar */}
           <div className="flex-shrink-0 flex justify-center">
@@ -130,16 +133,16 @@ export function RightSidebar() {
 
       {/* Projects Section */}
       <div className="flex-1 pl-[14px] pr-2">
-        <div className="flex flex-col gap-[6px]">
-          
-          {/* Section Header - always reserve space */}
-          <div className="mb-2 h-4">
-            {isExpanded && (
-              <div className="pl-4 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-                PROYECTOS
-              </div>
-            )}
+        {/* Section Header - only when expanded */}
+        {isExpanded && (
+          <div className="px-2 mb-2">
+            <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
+              PROYECTOS
+            </div>
           </div>
+        )}
+        
+        <div className="flex flex-col gap-[6px]">
 
           {/* Project Avatars */}
           {sortedProjects.map((project: any) => {
