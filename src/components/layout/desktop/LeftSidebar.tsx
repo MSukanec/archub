@@ -68,6 +68,7 @@ export function LeftSidebar() {
 
   const handleProjectSelect = (projectId: string) => {
     if (selectedProjectId === projectId) return;
+    setViewingOrganization(false); // Al seleccionar proyecto, cambiar a modo PROYECTO
     updateProjectMutation.mutate(projectId);
   };
 
@@ -93,7 +94,7 @@ export function LeftSidebar() {
             shape="rounded"
             isActive={isViewingOrganization}
             onClick={() => {
-              setViewingOrganization(!isViewingOrganization);
+              setViewingOrganization(true); // Siempre activar modo ORGANIZACIÓN al clickear
             }}
           />
           

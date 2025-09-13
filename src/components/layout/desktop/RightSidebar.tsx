@@ -692,7 +692,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
   };
   // Función para obtener el contenido fijo del tercer sidebar con 4 acordeones
   const getTertiarySidebarItems = () => {
-    return [
+    const baseItems = [
       {
         type: 'dynamic_title'
       },
@@ -727,40 +727,48 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
         label: 'Recursos',
         icon: Library,
         items: sidebarContent.library || []
-      },
-      {
-        type: 'section',
-        label: 'PROYECTO'
-      },
-      {
-        type: 'accordion',
-        id: 'general',
-        label: 'General',
-        icon: FolderOpen,
-        items: sidebarContent.project || []
-      },
-      {
-        type: 'accordion', 
-        id: 'construction',
-        label: 'Construcción',
-        icon: HardHat,
-        items: sidebarContent.construction || []
-      },
-      {
-        type: 'accordion', 
-        id: 'commercialization',
-        label: 'Comercialización',
-        icon: Handshake,
-        items: sidebarContent.commercialization || []
-      },
-      {
-        type: 'accordion',
-        id: 'admin',
-        label: 'Administración',
-        icon: Crown,
-        items: sidebarContent.admin || []
       }
     ];
+
+    // Solo mostrar sección PROYECTO si NO estamos viendo organización
+    if (!isViewingOrganization) {
+      baseItems.push(
+        {
+          type: 'section',
+          label: 'PROYECTO'
+        },
+        {
+          type: 'accordion',
+          id: 'general',
+          label: 'General',
+          icon: FolderOpen,
+          items: sidebarContent.project || []
+        },
+        {
+          type: 'accordion', 
+          id: 'construction',
+          label: 'Construcción',
+          icon: HardHat,
+          items: sidebarContent.construction || []
+        },
+        {
+          type: 'accordion', 
+          id: 'commercialization',
+          label: 'Comercialización',
+          icon: Handshake,
+          items: sidebarContent.commercialization || []
+        },
+        {
+          type: 'accordion',
+          id: 'admin',
+          label: 'Administración',
+          icon: Crown,
+          items: sidebarContent.admin || []
+        }
+      );
+    }
+
+    return baseItems;
   };
 
   // Función para determinar qué acordeón está activo basado en la URL

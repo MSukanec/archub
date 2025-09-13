@@ -18,7 +18,7 @@ export const useProjectContext = create<ProjectContextState>()(
       selectedProjectId: null,
       isGlobalView: true,
       currentOrganizationId: null,
-      isViewingOrganization: false,
+      isViewingOrganization: true, // Por defecto estar en estado ORGANIZACIÓN
       setSelectedProject: (projectId: string | null, organizationId?: string | null) => {
         const currentOrgId = organizationId || get().currentOrganizationId;
         
