@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjects } from '@/hooks/use-projects';
@@ -22,7 +20,6 @@ function getProjectInitials(name: string): string {
 }
 
 export function AvatarSidebar() {
-  const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
   const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();
@@ -76,19 +73,9 @@ export function AvatarSidebar() {
     console.log('Create new project');
   };
 
-  const isExpanded = isHovered;
-
   return (
     <aside 
-      className={cn(
-        "bg-[var(--main-sidebar-bg)] transition-[width] duration-300 z-30 flex flex-col h-full rounded-r-2xl",
-        isExpanded ? "w-64" : "w-[60px]"
-      )}
-      style={{
-        overflow: 'hidden'
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="bg-[var(--main-sidebar-bg)] w-[60px] z-30 flex flex-col h-full rounded-r-2xl"
     >
       {/* All Buttons Section */}
       <div className="flex-1 px-3 pt-3 space-y-2">
@@ -98,9 +85,6 @@ export function AvatarSidebar() {
           backgroundColor="var(--accent)"
           borderColor="rgba(255, 255, 255, 0.3)"
           letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
-          primaryText={userData?.organization?.name || 'Organización'}
-          secondaryText="Organización"
-          isExpanded={isExpanded}
           shape="rounded"
         />
         
@@ -112,9 +96,6 @@ export function AvatarSidebar() {
               key={project.id}
               backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
               letter={getProjectInitials(project.name)}
-              primaryText={project.name}
-              secondaryText={project.project_data?.project_type?.name || 'Sin tipo'}
-              isExpanded={isExpanded}
               isActive={isActive}
               shape="circular"
               onClick={() => handleProjectSelect(project.id)}
@@ -125,11 +106,7 @@ export function AvatarSidebar() {
 
         {/* Create New Project Button */}
         <div
-          className={cn(
-            "flex items-center cursor-pointer rounded-lg transition-colors duration-200",
-            "hover:bg-white/10",
-            isExpanded ? "justify-start p-2" : "justify-center p-0"
-          )}
+          className="flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-white/10 p-2"
           onClick={handleCreateProject}
           data-testid="create-project-button"
         >
@@ -137,18 +114,6 @@ export function AvatarSidebar() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
               <Plus className="w-4 h-4 text-white" />
             </div>
-          </div>
-          
-          <div className={cn(
-            "flex-1 min-w-0 leading-tight overflow-hidden transition-[max-width,opacity,transform] duration-300",
-            isExpanded ? "ml-3 max-w-[220px] opacity-100 translate-x-0" : "ml-0 max-w-0 opacity-0 -translate-x-1"
-          )}>
-            <p className="text-sm font-medium text-white truncate leading-tight whitespace-nowrap">
-              Nuevo Proyecto
-            </p>
-            <p className="text-xs text-white/60 truncate leading-tight -mt-0.5 whitespace-nowrap">
-              Crear proyecto
-            </p>
           </div>
         </div>
       </div>
