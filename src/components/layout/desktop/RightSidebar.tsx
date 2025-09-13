@@ -83,19 +83,21 @@ export function RightSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Organization Avatar - Top */}
-      <div className="h-12 flex-shrink-0 flex items-center pt-3 pl-[14px] pr-4">
-        <div className="flex items-center">
+      <div className="h-12 flex-shrink-0 flex items-center justify-center pt-3">
+        <div 
+          className="flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2 hover:bg-white/10"
+        >
           {/* Organization Avatar */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex justify-center">
             {userData?.organization?.logo_url ? (
               <img 
                 src={userData.organization.logo_url} 
                 alt="Organización"
-                className="w-8 h-8 rounded-full border-2 border-white/30"
+                className="w-8 h-8 rounded-lg border-2 border-white/30"
               />
             ) : (
               <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 border-white/30 text-sm"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-semibold border-2 border-white/30 text-sm"
                 style={{ backgroundColor: 'var(--accent)' }}
               >
                 {userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
@@ -137,7 +139,7 @@ export function RightSidebar() {
               <div
                 key={project.id}
                 className={cn(
-                  "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
+                  "flex items-center justify-center cursor-pointer transition-all duration-200 rounded-lg p-2",
                   "hover:bg-white/10",
                   isActive && "bg-white/20"
                 )}
@@ -145,7 +147,7 @@ export function RightSidebar() {
                 data-testid={`project-avatar-${project.id}`}
               >
                 {/* Project Avatar */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 flex justify-center">
                   {project.project_data?.project_image_url ? (
                     <img 
                       src={project.project_data.project_image_url} 
@@ -188,14 +190,14 @@ export function RightSidebar() {
           {/* Create New Project Button */}
           <div
             className={cn(
-              "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-              "hover:bg-white/10 border-2 border-dashed border-white/30 hover:border-white/50"
+              "flex items-center justify-center cursor-pointer transition-all duration-200 rounded-lg p-2",
+              "hover:bg-white/10"
             )}
             onClick={handleCreateProject}
             data-testid="create-project-button"
           >
             {/* Plus Icon */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex justify-center">
               <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
                 <Plus className="w-4 h-4 text-white" />
               </div>
