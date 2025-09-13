@@ -123,8 +123,10 @@ export function LeftSidebar() {
             const isProjectSelected = selectedProjectId === project.id;
             // Solo mostrar como activo si NO estamos en modo organización Y es el proyecto seleccionado
             const isActive = !isViewingOrganization && isProjectSelected;
+            // Lógica de opacidad: si estamos viendo organización, todos los proyectos a 60%
+            const opacity = isViewingOrganization ? 0.6 : (isProjectSelected ? 1 : 0.6);
             return (
-              <div key={project.id} style={{ opacity: isProjectSelected ? 1 : 0.6 }}>
+              <div key={project.id} style={{ opacity }}>
                 <SidebarAvatarButton
                   backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
                   letter={getProjectInitials(project.name)}
