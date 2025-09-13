@@ -5,6 +5,7 @@ import { useProjects } from '@/hooks/use-projects';
 import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 import { SidebarAvatarButton } from './SidebarAvatarButton';
+import { useLocation } from 'wouter';
 
 function getOrganizationInitials(name: string): string {
   return name
@@ -23,6 +24,7 @@ export function LeftSidebar() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId: contextProjectId, setSelectedProject } = useProjectContext();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     userData?.organization?.id || ''
@@ -134,8 +136,7 @@ export function LeftSidebar() {
           letter={userData?.user?.full_name ? userData.user.full_name.charAt(0).toUpperCase() : 'U'}
           shape="circular"
           onClick={() => {
-            // TODO: Navigate to profile page
-            console.log('Navigate to profile');
+            navigate('/profile');
           }}
           testId="user-profile-avatar"
         />
