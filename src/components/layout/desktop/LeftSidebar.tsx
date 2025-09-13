@@ -78,41 +78,50 @@ export function LeftSidebar() {
       className="bg-[var(--main-sidebar-bg)] w-[60px] z-30 flex flex-col h-full rounded-r-2xl"
     >
       {/* All Buttons Section */}
-      <div className="flex-1 px-2 pt-3 space-y-2">
-        {/* Organization Button */}
-        <SidebarAvatarButton
-          avatarUrl={userData?.organization?.logo_url}
-          backgroundColor="var(--accent)"
-          borderColor="rgba(255, 255, 255, 0.3)"
-          letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
-          shape="rounded"
-        />
-        
-        {/* Project Buttons */}
-        {sortedProjects.map((project: any) => {
-          const isActive = selectedProjectId === project.id;
-          return (
-            <SidebarAvatarButton
-              key={project.id}
-              backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
-              letter={getProjectInitials(project.name)}
-              isActive={isActive}
-              shape="circular"
-              onClick={() => handleProjectSelect(project.id)}
-              testId={`project-avatar-${project.id}`}
-            />
-          );
-        })}
-
-        {/* Create New Project Button */}
-        <div
-          className="w-9 h-9 flex items-center justify-center cursor-pointer"
-          onClick={handleCreateProject}
-          data-testid="create-project-button"
-        >
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
-            <Plus className="w-4 h-4 text-white" />
+      <div className="flex-1 px-2 pt-3 flex flex-col">
+        {/* Top Section: Organization + New Project */}
+        <div className="space-y-2 mb-3">
+          {/* Organization Button */}
+          <SidebarAvatarButton
+            avatarUrl={userData?.organization?.logo_url}
+            backgroundColor="var(--accent)"
+            borderColor="rgba(255, 255, 255, 0.3)"
+            letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+            shape="rounded"
+          />
+          
+          {/* Create New Project Button */}
+          <div
+            className="w-9 h-9 flex items-center justify-center cursor-pointer"
+            onClick={handleCreateProject}
+            data-testid="create-project-button"
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
+              <Plus className="w-4 h-4 text-white" />
+            </div>
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-white/30 mb-3"></div>
+        
+        {/* Projects Section */}
+        <div className="space-y-2">
+          {sortedProjects.map((project: any) => {
+            const isActive = selectedProjectId === project.id;
+            return (
+              <div key={project.id} style={{ opacity: isActive ? 1 : 0.6 }}>
+                <SidebarAvatarButton
+                  backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
+                  letter={getProjectInitials(project.name)}
+                  isActive={isActive}
+                  shape="circular"
+                  onClick={() => handleProjectSelect(project.id)}
+                  testId={`project-avatar-${project.id}`}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
