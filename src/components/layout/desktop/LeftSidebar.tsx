@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { SidebarAvatarButton } from './SidebarAvatarButton';
 import { useLocation } from 'wouter';
 import { useState } from 'react';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 function getOrganizationInitials(name: string): string {
   return name
@@ -26,6 +27,7 @@ export function LeftSidebar() {
   const { selectedProjectId: contextProjectId, setSelectedProject, isViewingOrganization, setViewingOrganization } = useProjectContext();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
+  const { openModal } = useGlobalModalStore();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     userData?.organization?.id || ''
@@ -72,8 +74,10 @@ export function LeftSidebar() {
   };
 
   const handleCreateProject = () => {
-    // TODO: Open create project modal
-    console.log('Create new project');
+    // Open the project modal
+    openModal('project', {});
+    // Navigate to the projects page
+    navigate('/projects');
   };
 
   return (
