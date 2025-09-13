@@ -81,7 +81,7 @@ export function RightSidebar() {
   return (
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full rounded-r-2xl",
+        "bg-[var(--main-sidebar-bg)] transition-[width] duration-300 z-30 flex flex-col h-full rounded-r-2xl",
         isExpanded ? "w-64" : "w-[60px]"
       )}
       style={{
