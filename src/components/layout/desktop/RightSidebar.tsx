@@ -75,6 +75,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjects } from "@/hooks/use-projects";
+import ActiveButton from "./ActiveButton";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -914,26 +915,13 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
                 );
               }
               
-              // Si es un título dinámico, renderizar información del proyecto/organización
+              // Si es un título dinámico, renderizar botón selector activo
               if ('type' in item && item.type === 'dynamic_title') {
                 if (!isExpanded) return null;
                 
-                const currentProject = projects.find(p => p.id === selectedProjectId);
-                const displayTitle = isViewingOrganization
-                  ? (userData?.organization?.name || 'Organización')
-                  : (currentProject ? currentProject.name : (userData?.organization?.name || 'Organización'));
-                const displaySubtitle = isViewingOrganization
-                  ? 'Organización'
-                  : (currentProject ? 'Proyecto' : 'Organización');
-                
                 return (
-                  <div key={`dynamic-title-${index}`} className="h-12 flex flex-col justify-center px-2">
-                    <div className="text-sm font-semibold truncate text-white">
-                      {displayTitle}
-                    </div>
-                    <div className="text-xs truncate" style={{ color: 'var(--accent)' }}>
-                      {displaySubtitle}
-                    </div>
+                  <div key={`dynamic-title-${index}`} className="px-2">
+                    <ActiveButton />
                   </div>
                 );
               }
