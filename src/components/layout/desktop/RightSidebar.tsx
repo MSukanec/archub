@@ -92,7 +92,7 @@ export function RightSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Organization Avatar - Top */}
-      <div className="h-12 flex-shrink-0 flex items-center justify-center pt-3">
+      <div className="h-12 flex-shrink-0 pl-[14px] pr-2 pt-3">
         <div 
           className="flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2 hover:bg-white/10"
         >
@@ -129,7 +129,7 @@ export function RightSidebar() {
       </div>
 
       {/* Projects Section */}
-      <div className="flex-1 py-4 pl-[14px] pr-2">
+      <div className="flex-1 pl-[14px] pr-2">
         <div className="flex flex-col gap-[6px]">
           
           {/* Section Header - always reserve space */}
@@ -156,28 +156,17 @@ export function RightSidebar() {
               >
                 {/* Project Avatar */}
                 <div className="flex-shrink-0 flex justify-center">
-                  {project.project_data?.project_image_url ? (
-                    <img 
-                      src={project.project_data.project_image_url} 
-                      alt="Proyecto"
-                      className={cn(
-                        "w-8 h-8 rounded-full border-2 transition-all",
-                        isActive ? "border-white" : "border-transparent"
-                      )}
-                    />
-                  ) : (
-                    <div 
-                      className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm transition-all",
-                        isActive ? "border-white" : "border-transparent"
-                      )}
-                      style={{ 
-                        backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
-                      }}
-                    >
-                      {getProjectInitials(project.name)}
-                    </div>
-                  )}
+                  <div 
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm transition-all",
+                      isActive ? "border-white" : "border-transparent"
+                    )}
+                    style={{ 
+                      backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
+                    }}
+                  >
+                    {getProjectInitials(project.name)}
+                  </div>
                 </div>
                 
                 {/* Project Name - only when expanded */}
