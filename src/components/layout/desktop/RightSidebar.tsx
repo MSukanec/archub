@@ -1,46 +1,49 @@
-import { useState } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjects } from "@/hooks/use-projects-old";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjects } from '@/hooks/use-projects';
 import { useProjectContext } from '@/stores/projectContext';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { supabase } from '@/lib/supabase';
 
-// Función auxiliar para generar iniciales de organizaciones
 function getOrganizationInitials(name: string): string {
   return name
-    .charAt(0)
-    .toUpperCase();
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
-// Función auxiliar para generar iniciales de proyectos
 function getProjectInitials(name: string): string {
   return name
-    .charAt(0)
-    .toUpperCase();
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function RightSidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjects(userData?.organization?.id);
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { currentProjectId, setCurrentProject } = useProjectContext();
   const queryClient = useQueryClient();
 
-  // Encontrar proyecto actual
-  const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
+  const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
+    userData?.organization?.id || ''
+  );
 
-  // Ordenar proyectos: activo primero, luego el resto
+  const selectedProjectId = currentProjectId || userData?.preferences?.last_project_id || null;
+
+  // Sort projects to show active project first
   const sortedProjects = [...projects].sort((a, b) => {
-    const aIsActive = selectedProjectId === a.id;
-    const bIsActive = selectedProjectId === b.id;
-    if (aIsActive && !bIsActive) return -1;
-    if (!aIsActive && bIsActive) return 1;
+    if (a.id === selectedProjectId) return -1;
+    if (b.id === selectedProjectId) return 1;
     return 0;
   });
 
-  // Mutación para cambiar proyecto
   const updateProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!userData?.user?.id || !userData?.organization?.id) {
@@ -61,7 +64,7 @@ export function RightSidebar() {
       return projectId;
     },
     onSuccess: (projectId) => {
-      setSelectedProject(projectId);
+      setCurrentProject(projectId);
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
     }
@@ -135,15 +138,14 @@ export function RightSidebar() {
       <div className="flex-1 pl-[14px] pr-2">
         {/* Section Header - only when expanded */}
         {isExpanded && (
-          <div className="px-2 mb-2">
+          <div className="h-8 flex items-center px-2 mb-[2px]">
             <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
               PROYECTOS
             </div>
           </div>
         )}
         
-        <div className="flex flex-col gap-[6px]">
-
+        <div className="flex flex-col gap-[2px]">
           {/* Project Avatars */}
           {sortedProjects.map((project: any) => {
             const isActive = selectedProjectId === project.id;
