@@ -133,9 +133,9 @@ export function RightSidebar() {
         <div className="flex flex-col gap-[6px]">
           
           {/* Section Header - always reserve space */}
-          <div className="px-2 mb-2 h-4">
+          <div className="mb-2 h-4">
             {isExpanded && (
-              <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
+              <div className="pl-4 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
                 PROYECTOS
               </div>
             )}
@@ -148,8 +148,9 @@ export function RightSidebar() {
               <div
                 key={project.id}
                 className={cn(
-                  "flex items-center justify-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-                  "hover:bg-white/10"
+                  "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
+                  "hover:bg-white/10",
+                  isExpanded ? "justify-start" : "justify-center"
                 )}
                 onClick={() => handleProjectSelect(project.id)}
                 data-testid={`project-avatar-${project.id}`}
@@ -187,8 +188,9 @@ export function RightSidebar() {
           {/* Create New Project Button */}
           <div
             className={cn(
-              "flex items-center justify-center cursor-pointer transition-all duration-200 rounded-lg p-2",
-              "hover:bg-white/10"
+              "flex items-center cursor-pointer transition-all duration-200 rounded-lg p-2",
+              "hover:bg-white/10",
+              isExpanded ? "justify-start" : "justify-center"
             )}
             onClick={handleCreateProject}
             data-testid="create-project-button"
