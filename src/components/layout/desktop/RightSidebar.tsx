@@ -126,8 +126,9 @@ export function RightSidebar() {
         {/* Create New Project Button */}
         <div
           className={cn(
-            "flex items-center cursor-pointer rounded-lg p-2 justify-start",
-            "hover:bg-white/10 transition-colors duration-200"
+            "flex items-center cursor-pointer rounded-lg transition-colors duration-200",
+            "hover:bg-white/10",
+            isExpanded ? "justify-start p-2" : "justify-center p-0"
           )}
           onClick={handleCreateProject}
           data-testid="create-project-button"
@@ -139,13 +140,13 @@ export function RightSidebar() {
           </div>
           
           <div className={cn(
-            "ml-3 flex-1 min-w-0 leading-tight overflow-hidden transition-[max-width,opacity,transform] duration-300",
-            isExpanded ? "max-w-[220px] opacity-100 translate-x-0" : "max-w-0 opacity-0 -translate-x-1"
+            "flex-1 min-w-0 leading-tight overflow-hidden transition-[max-width,opacity,transform] duration-300",
+            isExpanded ? "ml-3 max-w-[220px] opacity-100 translate-x-0" : "ml-0 max-w-0 opacity-0 -translate-x-1"
           )}>
             <p className="text-sm font-medium text-white truncate leading-tight whitespace-nowrap">
               Nuevo Proyecto
             </p>
-            <p className="text-xs text-white/60 truncate leading-tight mt-0.5 whitespace-nowrap">
+            <p className="text-xs text-white/60 truncate leading-tight -mt-0.5 whitespace-nowrap">
               Crear proyecto
             </p>
           </div>
