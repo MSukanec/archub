@@ -61,8 +61,7 @@ import {
   ListTodo,
   TableIcon,
   Library,
-  Building2,
-  Bell
+  Building2
 } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { SelectorPopover } from "@/components/popovers/SelectorPopover";
@@ -985,35 +984,6 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
                 </div>
               );
           })}
-        </div>
-      </div>
-      
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="pb-3 pl-[14px]">
-        <div className="flex flex-col gap-[2px]">
-          {/* Notifications */}
-          <ButtonSidebar
-            icon={<Bell className="w-[18px] h-[18px]" />}
-            label="Notificaciones"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => console.log('Notificaciones clicked')}
-            variant="secondary"
-          />
-          
-          {/* User Avatar */}
-          <ButtonSidebar
-            icon={null}
-            avatarUrl={userData?.user?.avatar_url}
-            userFullName={userData?.user?.full_name}
-            label={userData?.user?.full_name || 'Usuario'}
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => navigate('/profile')}
-            variant="secondary"
-            disableHover={true}
-          />
-          
         </div>
       </div>
     </aside>
