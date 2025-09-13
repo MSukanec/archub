@@ -113,7 +113,7 @@ export function RightSidebar() {
               backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
               letter={getProjectInitials(project.name)}
               primaryText={project.name}
-              secondaryText={project.project_data?.modality?.name || project.project_data?.project_type?.name || 'Sin tipo'}
+              secondaryText={project.project_data?.project_type?.name || 'Sin tipo'}
               isExpanded={isExpanded}
               isActive={isActive}
               shape="circular"

@@ -80,14 +80,14 @@ export function SidebarAvatarButton({
       
       {/* Text - only when expanded */}
       {isExpanded && (primaryText || secondaryText) && (
-        <div className="ml-3 flex-1 min-w-0">
+        <div className="ml-3 flex-1 min-w-0 leading-tight">
           {primaryText && (
-            <p className="text-sm font-semibold text-white/90 truncate">
+            <p className="text-sm font-semibold text-white/90 truncate leading-tight">
               {primaryText}
             </p>
           )}
           {secondaryText && (
-            <p className="text-xs text-white/60 truncate">
+            <p className="text-xs text-white/60 truncate leading-tight -mt-0.5">
               {secondaryText}
             </p>
           )}
