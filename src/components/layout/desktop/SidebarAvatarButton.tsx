@@ -48,13 +48,13 @@ export function SidebarAvatarButton({
       data-testid={testId}
     >
       {/* Avatar */}
-      <div className="w-8 h-8 flex-shrink-0 flex justify-center">
+      <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
         {avatarUrl ? (
           <img 
             src={avatarUrl} 
             alt="Avatar"
             className={cn(
-              "w-8 h-8 border-2 text-sm block",
+              "w-8 h-8 border-2 object-cover",
               shape === 'circular' ? "rounded-full" : "rounded-lg",
               isActive && shape === 'circular' ? "border-white" : "border-white/30"
             )}
@@ -66,7 +66,7 @@ export function SidebarAvatarButton({
         ) : (
           <div 
             className={cn(
-              "w-8 h-8 flex items-center justify-center text-white font-semibold border-2 text-sm block",
+              "w-8 h-8 flex items-center justify-center text-white font-semibold border-2 text-sm leading-none",
               shape === 'circular' ? "rounded-full" : "rounded-lg",
               isActive && shape === 'circular' ? "border-white" : "border-transparent"
             )}
@@ -94,7 +94,7 @@ export function SidebarAvatarButton({
               </p>
             )}
             {secondaryText && (
-              <p className="text-xs text-white/60 truncate leading-tight -mt-0.5 whitespace-nowrap">
+              <p className="text-xs text-white/60 truncate leading-tight mt-0.5 whitespace-nowrap">
                 {secondaryText}
               </p>
             )}

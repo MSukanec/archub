@@ -91,7 +91,7 @@ export function RightSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* All Buttons Section */}
-      <div className="flex-1 pl-[14px] pr-2 pt-3 space-y-2">
+      <div className="flex-1 px-3 pt-3 space-y-2">
         {/* Organization Button */}
         <SidebarAvatarButton
           avatarUrl={userData?.organization?.logo_url}
@@ -132,7 +132,7 @@ export function RightSidebar() {
           onClick={handleCreateProject}
           data-testid="create-project-button"
         >
-          <div className="w-8 h-8 flex-shrink-0 flex justify-center">
+          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
             <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
               <Plus className="w-4 h-4 text-white" />
             </div>
@@ -145,7 +145,7 @@ export function RightSidebar() {
             <p className="text-sm font-medium text-white truncate leading-tight whitespace-nowrap">
               Nuevo Proyecto
             </p>
-            <p className="text-xs text-white/60 truncate leading-tight -mt-0.5 whitespace-nowrap">
+            <p className="text-xs text-white/60 truncate leading-tight mt-0.5 whitespace-nowrap">
               Crear proyecto
             </p>
           </div>
