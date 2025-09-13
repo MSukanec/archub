@@ -643,9 +643,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     organization: [
-      { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -675,6 +673,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
     ],
     library: [
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
       { icon: Package2, label: 'Materiales', href: '/library/materials' },
       { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
@@ -702,6 +701,13 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
         label: 'GENERAL'
       },
       {
+        type: 'button',
+        icon: Home,
+        label: 'Dashboard',
+        href: '/organization/dashboard',
+        isActive: location === '/organization/dashboard'
+      },
+      {
         type: 'accordion',
         id: 'organization',
         label: 'Organización',
@@ -718,7 +724,7 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       {
         type: 'accordion',
         id: 'library',
-        label: 'Biblioteca',
+        label: 'Recursos',
         icon: Library,
         items: sidebarContent.library || []
       },
@@ -883,6 +889,27 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
                       </div>
                     )}
                   </div>
+                );
+              }
+
+              // Si es un botón individual, renderizar como botón simple
+              if ('type' in item && item.type === 'button') {
+                const buttonItem = item as any;
+                return (
+                  <ButtonSidebar
+                    key={`button-${index}`}
+                    icon={<buttonItem.icon className="w-[18px] h-[18px]" />}
+                    label={buttonItem.label}
+                    isActive={buttonItem.isActive || (buttonItem.href && location === buttonItem.href)}
+                    isExpanded={isExpanded}
+                    onClick={() => {
+                      if (buttonItem.href) {
+                        navigate(buttonItem.href);
+                      }
+                    }}
+                    href={buttonItem.href}
+                    variant="secondary"
+                  />
                 );
               }
 
