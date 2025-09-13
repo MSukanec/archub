@@ -696,6 +696,10 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
       {
         type: 'dynamic_title'
       },
+      // Espacio vacío para dar aire
+      {
+        type: 'spacer'
+      },
       // 1. PRIMERO el botón "Vista General"
       {
         type: 'button',
@@ -926,6 +930,15 @@ export function RightSidebar({ isHovered: isHoveredProp }: RightSidebarProps = {
                 );
               }
               
+              // Si es un espaciador, renderizar espacio vacío con la altura de un botón
+              if ('type' in item && item.type === 'spacer') {
+                return (
+                  <div key={`spacer-${index}`} className="h-8 mb-[2px]">
+                    {/* Espacio vacío para dar aire al diseño */}
+                  </div>
+                );
+              }
+
               // Si es una sección, renderizar con la misma altura que un botón
               if ('type' in item && item.type === 'section') {
                 return (
