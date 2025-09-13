@@ -67,9 +67,13 @@ export function LeftSidebar() {
   });
 
   const handleProjectSelect = (projectId: string) => {
-    if (selectedProjectId === projectId) return;
-    setViewingOrganization(false); // Al seleccionar proyecto, cambiar a modo PROYECTO
-    updateProjectMutation.mutate(projectId);
+    // Siempre cambiar a modo PROYECTO, incluso si el proyecto ya está seleccionado
+    setViewingOrganization(false);
+    
+    // Solo actualizar la BD si realmente cambió el proyecto seleccionado
+    if (selectedProjectId !== projectId) {
+      updateProjectMutation.mutate(projectId);
+    }
   };
 
   const handleCreateProject = () => {
@@ -116,9 +120,11 @@ export function LeftSidebar() {
         {/* Projects Section */}
         <div className="space-y-2">
           {sortedProjects.map((project: any) => {
-            const isActive = selectedProjectId === project.id;
+            const isProjectSelected = selectedProjectId === project.id;
+            // Solo mostrar como activo si NO estamos en modo organización Y es el proyecto seleccionado
+            const isActive = !isViewingOrganization && isProjectSelected;
             return (
-              <div key={project.id} style={{ opacity: isActive ? 1 : 0.6 }}>
+              <div key={project.id} style={{ opacity: isProjectSelected ? 1 : 0.6 }}>
                 <SidebarAvatarButton
                   backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
                   letter={getProjectInitials(project.name)}
