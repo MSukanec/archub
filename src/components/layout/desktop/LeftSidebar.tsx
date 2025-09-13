@@ -78,7 +78,7 @@ export function LeftSidebar() {
       className="bg-[var(--main-sidebar-bg)] w-[60px] z-30 flex flex-col h-full rounded-r-2xl"
     >
       {/* All Buttons Section */}
-      <div className="flex-1 px-3 pt-3 space-y-2">
+      <div className="flex-1 px-2 pt-3 space-y-2">
         {/* Organization Button */}
         <SidebarAvatarButton
           avatarUrl={userData?.organization?.logo_url}

@@ -31,12 +31,12 @@ export function SidebarAvatarButton({
 }: SidebarAvatarButtonProps) {
   return (
     <div
-      className="flex items-center justify-center cursor-pointer p-2"
+      className="w-9 h-9 flex items-center justify-center cursor-pointer"
       onClick={onClick}
       data-testid={testId}
     >
       {/* Avatar - Static, no expansion */}
-      <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
+      <div className="flex-shrink-0 flex items-center justify-center">
         {avatarUrl ? (
           <img 
             src={avatarUrl} 
