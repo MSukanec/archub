@@ -89,13 +89,13 @@ export default function ActiveButton({ className }: ActiveButtonProps) {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost" 
           className={cn(
-            "h-12 px-3 justify-start gap-3 hover:bg-accent/5 transition-colors",
-            "border border-border/50 rounded-lg bg-card/50",
+            "h-12 px-2 justify-start gap-3 hover:bg-accent/5 transition-colors",
+            "border border-muted-foreground/20 rounded-lg bg-card/50",
             className
           )}
           data-testid="active-button"
@@ -120,7 +120,7 @@ export default function ActiveButton({ className }: ActiveButtonProps) {
             <div className="font-medium text-sm truncate">
               {displayText}
             </div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wide">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
               {displaySubtext}
             </div>
           </div>

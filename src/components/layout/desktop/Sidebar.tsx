@@ -1,4 +1,4 @@
-import { LeftSidebar } from "./LeftSidebar";
+//import { LeftSidebar } from "./LeftSidebar";
 import { RightSidebar } from "./RightSidebar";
 import { useSidebarStore } from "@/stores/sidebarStore";
 
@@ -19,7 +19,7 @@ export function Sidebar() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <LeftSidebar />
+      {/* <LeftSidebar /> */}
       <RightSidebar isHovered={isHovered} />
     </div>
   );
