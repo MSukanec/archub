@@ -43,7 +43,7 @@ export function SidebarAvatarButton({
       className={cn(
         "flex items-center cursor-pointer rounded-lg transition-colors duration-200",
         "hover:bg-white/10",
-        isExpanded ? "justify-start px-2 py-2" : "justify-center px-0 py-2"
+        isExpanded ? "justify-start px-2 py-2" : "justify-center px-2 py-2"
       )}
       onClick={onClick}
       data-testid={testId}

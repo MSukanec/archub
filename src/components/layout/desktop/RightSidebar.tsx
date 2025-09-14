@@ -99,7 +99,7 @@ export function RightSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* All Buttons Section */}
-      <div className={cn("flex-1 pt-3 space-y-2", isExpanded ? "px-3" : "px-2")}>
+      <div className="flex-1 pt-3 space-y-2 px-2">
         {/* Organization Button */}
         <SidebarAvatarButton
           avatarUrl={userData?.organization?.logo_url}
@@ -119,7 +119,7 @@ export function RightSidebar() {
           className={cn(
             "flex items-center cursor-pointer rounded-lg transition-colors duration-200",
             "hover:bg-white/10",
-            isExpanded ? "justify-start p-2" : "justify-center p-0"
+            isExpanded ? "justify-start px-2 py-2" : "justify-center px-0 py-2"
           )}
           onClick={handleCreateProject}
           data-testid="create-project-button"
