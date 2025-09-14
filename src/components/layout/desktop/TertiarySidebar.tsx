@@ -651,9 +651,7 @@ export function TertiarySidebar() {
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
-    project: [
-      { icon: Info, label: 'Información', href: '/project/dashboard' }
-    ],
+    project: [],
     commercialization: [
       { icon: Users, label: 'Clientes', href: '/general/clients' }
     ],
@@ -703,13 +701,6 @@ export function TertiarySidebar() {
         {
           type: 'section',
           label: 'PROYECTO'
-        },
-        {
-          type: 'accordion',
-          id: 'general',
-          label: 'General',
-          icon: FolderOpen,
-          items: sidebarContent.project || []
         },
         {
           type: 'accordion', 
