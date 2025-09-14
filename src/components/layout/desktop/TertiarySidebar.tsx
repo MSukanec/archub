@@ -701,13 +701,6 @@ export function TertiarySidebar() {
           href: '/design/dashboard'
         },
         {
-          type: 'accordion',
-          id: 'library',
-          label: 'Recursos',
-          icon: Library,
-          items: sidebarContent.library || []
-        },
-        {
           type: 'section',
           label: 'PROYECTO'
         },
@@ -731,6 +724,17 @@ export function TertiarySidebar() {
           label: 'Comercialización',
           icon: Handshake,
           items: sidebarContent.commercialization || []
+        },
+        {
+          type: 'section',
+          label: 'GENERAL'
+        },
+        {
+          type: 'accordion',
+          id: 'library',
+          label: 'Recursos',
+          icon: Library,
+          items: sidebarContent.library || []
         }
       ];
     } else {
@@ -742,6 +746,10 @@ export function TertiarySidebar() {
           icon: Home,
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
+        },
+        {
+          type: 'section',
+          label: 'ORGANIZACIÓN'
         },
         {
           type: 'accordion',
@@ -756,6 +764,10 @@ export function TertiarySidebar() {
           label: 'Finanzas',
           icon: DollarSign,
           items: sidebarContent.finances || []
+        },
+        {
+          type: 'section',
+          label: 'GENERAL'
         },
         {
           type: 'accordion',
