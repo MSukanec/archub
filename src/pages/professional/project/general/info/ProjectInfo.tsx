@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Info } from 'lucide-react'
+import ProjectDashboard from './ProjectDashboard'
 import ProjectInfoBasicData from './ProjectInfoBasicData'
 
 export default function ProjectInfo() {
   const { setSidebarContext } = useNavigationStore()
-  const [activeTab, setActiveTab] = useState("basic-data")
+  const [activeTab, setActiveTab] = useState("dashboard")
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -15,6 +16,11 @@ export default function ProjectInfo() {
 
   // Header tabs configuration
   const headerTabs = [
+    {
+      id: "dashboard",
+      label: "Resumen de Proyecto", 
+      isActive: activeTab === "dashboard"
+    },
     {
       id: "basic-data",
       label: "Datos Básicos", 
@@ -34,6 +40,7 @@ export default function ProjectInfo() {
 
   return (
     <Layout headerProps={headerProps} wide>
+      {activeTab === "dashboard" && <ProjectDashboard />}
       {activeTab === "basic-data" && <ProjectInfoBasicData />}
     </Layout>
   )

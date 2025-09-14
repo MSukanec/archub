@@ -44,7 +44,6 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
-import DesignDashboard from "@/pages/professional/project/design/DesignDashboard";
 import Media from "@/pages/professional/project/general/media/Media";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
 import Calendar from "@/pages/professional/project/general/calendar/Calendar";
@@ -135,8 +134,6 @@ function Router() {
 
 
 
-        {/* Design Routes */}
-        <Route path="/design/dashboard" component={DesignDashboard} />
 
 
 
