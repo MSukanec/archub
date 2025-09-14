@@ -804,7 +804,7 @@ export function TertiarySidebar() {
     <aside 
       className={cn(
         "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full rounded-l-2xl",
-        isExpanded ? "w-64" : "w-[60px]"
+        isExpanded ? "w-64" : "w-16"
       )}
       style={{
         overflow: 'hidden'
@@ -885,7 +885,7 @@ export function TertiarySidebar() {
       */}
       
       {/* Navigation Items */}
-      <div className={cn("flex-1 pb-2", isExpanded ? "pl-[14px] pr-2" : "pl-2 pr-2")}>
+      <div className={cn("flex-1 pb-2", isExpanded ? "pl-[14px] pr-2" : "px-1")}>
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
