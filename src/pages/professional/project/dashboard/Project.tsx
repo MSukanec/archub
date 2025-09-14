@@ -18,7 +18,7 @@ export default function Project() {
   const headerTabs = [
     {
       id: "dashboard",
-      label: "Resumen de Proyecto", 
+      label: "Resumen", 
       isActive: activeTab === "dashboard"
     },
     {
@@ -30,7 +30,7 @@ export default function Project() {
 
   // Header configuration
   const headerProps = {
-    title: "Información del Proyecto",
+    title: "Resumen de Proyecto",
     icon: Info,
     tabs: headerTabs,
     onTabChange: (tabId: string) => {
