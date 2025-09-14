@@ -99,7 +99,7 @@ export function RightSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* All Buttons Section */}
-      <div className="flex-1 px-3 pt-3 space-y-2">
+      <div className={cn("flex-1 pt-3 space-y-2", isExpanded ? "px-3" : "px-2")}>
         {/* Organization Button */}
         <SidebarAvatarButton
           avatarUrl={userData?.organization?.logo_url}
