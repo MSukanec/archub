@@ -613,7 +613,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       <div 
         className="fixed inset-0 flex flex-col overflow-hidden"
         style={{ 
-          backgroundColor: 'var(--main-sidebar-bg)'
+          backgroundColor: 'var(--card-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
