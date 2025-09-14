@@ -445,7 +445,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       } else if (item.id === 'construction') {
         setSidebarContext('construction');
       } else if (item.id === 'library') {
-        setSidebarContext('library');
+        setSidebarContext('recursos');
       } else if (item.id === 'admin') {
         setSidebarContext('admin');
       }
@@ -502,12 +502,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               onClick={() => handleMainLevelClick(item)}
               className={cn(
                 "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                (item.href && isButtonActive(item.href))
+                ('href' in item && typeof item.href === 'string' && isButtonActive(item.href))
                   ? "bg-[hsl(76,100%,40%)] text-white" 
                   : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              {item.icon && <item.icon className="h-5 w-5" />}
               {item.label}
               {item.action === 'section' && <ChevronRight className="h-4 w-4 ml-auto" />}
             </button>
@@ -538,7 +538,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
                       disabled
                     >
-                      <item.icon className="h-5 w-5" />
+                      {item.icon && <item.icon className="h-5 w-5" />}
                       {item.label}
                       {('action' in item && item.action === 'subsection') && <ChevronRight className="h-4 w-4 ml-auto" />}
                     </button>
@@ -548,12 +548,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     onClick={() => handleSectionLevelClick(item)}
                     className={cn(
                       "flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl transition-all duration-150 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
-                      (item.href && isButtonActive(item.href))
+                      ('href' in item && typeof item.href === 'string' && isButtonActive(item.href))
                         ? "bg-[hsl(76,100%,40%)] text-white" 
                         : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
                     )}
                   >
-                    <item.icon className="h-5 w-5" />
+                    {item.icon && <item.icon className="h-5 w-5" />}
                     {item.label}
                     {('action' in item && item.action === 'subsection') && <ChevronRight className="h-4 w-4 ml-auto" />}
                   </button>
@@ -580,7 +580,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base font-medium rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] opacity-50 shadow-button-normal"
                       disabled
                     >
-                      <item.icon className="h-5 w-5" />
+                      {item.icon && <item.icon className="h-5 w-5" />}
                       {item.label}
                     </button>
                   </PlanRestricted>
@@ -594,7 +594,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                         : "bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--main-sidebar-fg)] hover:bg-[var(--card-hover-bg)]"
                     )}
                   >
-                    <item.icon className="h-5 w-5" />
+                    {item.icon && <item.icon className="h-5 w-5" />}
                     {item.label}
                   </button>
                 )}

@@ -686,67 +686,86 @@ export function TertiarySidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
-  // Función para obtener el contenido fijo del tercer sidebar con 4 acordeones
+  // Función para obtener el contenido del sidebar basado en el contexto (organización vs proyecto)
   const getTertiarySidebarItems = () => {
-    return [
-      {
-        type: 'section',
-        label: 'GENERAL'
-      },
-      {
-        type: 'accordion',
-        id: 'organization',
-        label: 'Organización',
-        icon: Building,
-        items: sidebarContent.organization || []
-      },
-      {
-        type: 'accordion',
-        id: 'finances',
-        label: 'Finanzas',
-        icon: DollarSign,
-        items: sidebarContent.finances || []
-      },
-      {
-        type: 'accordion',
-        id: 'library',
-        label: 'Biblioteca',
-        icon: Library,
-        items: sidebarContent.library || []
-      },
-      {
-        type: 'section',
-        label: 'PROYECTO'
-      },
-      {
-        type: 'accordion',
-        id: 'general',
-        label: 'General',
-        icon: FolderOpen,
-        items: sidebarContent.project || []
-      },
-      {
-        type: 'accordion', 
-        id: 'construction',
-        label: 'Construcción',
-        icon: HardHat,
-        items: sidebarContent.construction || []
-      },
-      {
-        type: 'accordion', 
-        id: 'commercialization',
-        label: 'Comercialización',
-        icon: Handshake,
-        items: sidebarContent.commercialization || []
-      },
-      {
-        type: 'accordion',
-        id: 'admin',
-        label: 'Administración',
-        icon: Crown,
-        items: sidebarContent.admin || []
-      }
-    ];
+    const isProjectView = !!selectedProjectId;
+    
+    if (isProjectView) {
+      // Vista PROYECTO: cuando hay un proyecto seleccionado
+      return [
+        {
+          type: 'button',
+          id: 'project-summary',
+          icon: Home,
+          label: 'Resumen de Proyecto',
+          href: '/design/dashboard'
+        },
+        {
+          type: 'accordion',
+          id: 'library',
+          label: 'Biblioteca',
+          icon: Library,
+          items: sidebarContent.library || []
+        },
+        {
+          type: 'section',
+          label: 'PROYECTO'
+        },
+        {
+          type: 'accordion',
+          id: 'general',
+          label: 'General',
+          icon: FolderOpen,
+          items: sidebarContent.project || []
+        },
+        {
+          type: 'accordion', 
+          id: 'construction',
+          label: 'Construcción',
+          icon: HardHat,
+          items: sidebarContent.construction || []
+        },
+        {
+          type: 'accordion', 
+          id: 'commercialization',
+          label: 'Comercialización',
+          icon: Handshake,
+          items: sidebarContent.commercialization || []
+        }
+      ];
+    } else {
+      // Vista ORGANIZACIÓN: cuando no hay proyecto seleccionado
+      return [
+        {
+          type: 'button',
+          id: 'organization-summary',
+          icon: Home,
+          label: 'Resumen de Organización',
+          href: '/organization/dashboard'
+        },
+        {
+          type: 'accordion',
+          id: 'administration',
+          label: 'Administración',
+          icon: Building,
+          items: sidebarContent.organization || []
+        },
+        {
+          type: 'accordion',
+          id: 'finances',
+          label: 'Finanzas',
+          icon: DollarSign,
+          items: sidebarContent.finances || []
+        },
+        {
+          type: 'accordion',
+          id: 'library',
+          label: 'Biblioteca',
+          icon: Library,
+          items: sidebarContent.library || []
+        }
+      ];
+    }
   };
 
   // Función para determinar qué acordeón está activo basado en la URL
@@ -874,6 +893,21 @@ export function TertiarySidebar() {
                       </div>
                     )}
                   </div>
+                );
+              }
+
+              // Si es un botón simple, renderizar ButtonSidebar directo
+              if ('type' in item && item.type === 'button') {
+                return (
+                  <ButtonSidebar
+                    key={`button-${item.id}`}
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    label={item.label}
+                    isActive={location === item.href}
+                    isExpanded={isExpanded}
+                    onClick={() => navigate(item.href)}
+                    variant="secondary"
+                  />
                 );
               }
 
