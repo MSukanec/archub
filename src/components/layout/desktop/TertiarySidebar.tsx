@@ -1030,7 +1030,7 @@ export function TertiarySidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className="pb-3 pl-[14px]">
+      <div className={cn("pb-3", isExpanded ? "pl-[14px]" : "pl-2")}>
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
