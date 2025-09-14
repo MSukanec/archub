@@ -96,7 +96,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div
       className="min-h-screen p-2"
-      style={{ backgroundColor: "var(--main-sidebar-bg)" }}
+      style={{ backgroundColor: isMobile ? "var(--layout-mobile-bg)" : "var(--layout-bg)" }}
     >
       {/* Mobile View - Unchanged */}
       {isMobile ? (
