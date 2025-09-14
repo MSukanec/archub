@@ -29,7 +29,7 @@ import Finances from "@/pages/professional/finances/dashboard/Finances";
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
 import OrganizationMovements from "@/pages/professional/finances/movements/Movements";
 import { Clients } from "@/pages/professional/project/general/clients/Clients";
-import ProjectInfo from "@/pages/professional/project/general/info/ProjectInfo";
+import Project from "@/pages/professional/project/dashboard/Project";
 
 
 import Preferences from "@/pages/professional/organization/Preferences";
@@ -127,7 +127,7 @@ function Router() {
         <Route path="/projects" component={Projects} />
 
         {/* General Routes */}
-        <Route path="/general/info" component={ProjectInfo} />
+        <Route path="/project/dashboard" component={Project} />
         <Route path="/general/clients" component={Clients} />
         <Route path="/general/media" component={Media} />
         
@@ -164,7 +164,7 @@ function Router() {
         <Route path="/finances/movements" component={OrganizationMovements} />
         
         {/* Duplicate General Routes for compatibility */}
-        <Route path="/general/info" component={ProjectInfo} />
+        <Route path="/project/dashboard" component={Project} />
         <Route path="/general/clients" component={Clients} />
 
 

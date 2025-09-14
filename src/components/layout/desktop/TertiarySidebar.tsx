@@ -652,7 +652,7 @@ export function TertiarySidebar() {
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
     project: [
-      { icon: Info, label: 'Información', href: '/general/info' }
+      { icon: Info, label: 'Información', href: '/project/dashboard' }
     ],
     commercialization: [
       { icon: Users, label: 'Clientes', href: '/general/clients' }
@@ -698,7 +698,7 @@ export function TertiarySidebar() {
           id: 'project-summary',
           icon: Home,
           label: 'Resumen de Proyecto',
-          href: '/design/dashboard'
+          href: '/project/dashboard'
         },
         {
           type: 'section',
