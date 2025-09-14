@@ -63,11 +63,11 @@ export default function SidebarButton({
       <button
         ref={buttonRef}
         className={cn(
-          'relative flex items-center justify-center transition-all duration-200 ease-out overflow-hidden',
-          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
-          'w-8 h-8',
-          // Cuando expandido o cuando es header button en hover, el botón se extiende
-          (isExpanded || (isHeaderButton && (isHovered || isActive))) && 'w-full justify-start pr-2'
+          'relative flex items-center transition-all duration-200 ease-out overflow-hidden',
+          // Botón SIEMPRE del ancho completo disponible, altura fija 32px
+          'w-full h-8',
+          // Siempre alineado al inicio para que el icono esté en posición fija
+          'justify-start pr-2'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
