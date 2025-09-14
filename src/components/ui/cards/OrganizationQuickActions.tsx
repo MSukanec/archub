@@ -22,7 +22,7 @@ export function OrganizationQuickActions() {
       icon: Building,
       color: "text-accent-foreground",
       bgColor: "bg-accent",
-      onClick: () => navigate('/profile/projects')
+      onClick: () => navigate('/organization/projects')
     },
     {
       title: "Agregar Contacto",

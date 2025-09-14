@@ -133,7 +133,7 @@ export function OrganizationRecentProjects() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/profile/projects')}
+            onClick={() => navigate('/organization/projects')}
             className="text-sm"
           >
             <ExternalLink className="h-4 w-4 mr-1" />
@@ -149,7 +149,7 @@ export function OrganizationRecentProjects() {
             <p className="text-sm text-muted-foreground mb-4">
               Crea tu primer proyecto para comenzar
             </p>
-            <Button onClick={() => navigate('/profile/projects')}>
+            <Button onClick={() => navigate('/organization/projects')}>
               <Plus className="h-4 w-4 mr-2" />
               Crear Proyecto
             </Button>
