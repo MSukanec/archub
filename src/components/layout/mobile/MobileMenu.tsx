@@ -356,8 +356,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       library: [
         { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
         { icon: Package2, label: 'Materiales', href: '/library/materials' },
-        { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
-        { icon: TrendingUp, label: 'Costos Indirectos', href: '/library/indirects' }
+        { icon: Users, label: 'Mano de Obra', href: '/library/labor' }
       ],
       admin: [
         { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },

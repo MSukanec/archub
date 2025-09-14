@@ -673,8 +673,7 @@ export function TertiarySidebar() {
     library: [
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
       { icon: Package2, label: 'Materiales', href: '/library/materials' },
-      { icon: Users, label: 'Mano de Obra', href: '/library/labor' },
-      { icon: TrendingUp, label: 'Costos Indirectos', href: '/library/indirects' }
+      { icon: Users, label: 'Mano de Obra', href: '/library/labor' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
