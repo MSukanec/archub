@@ -94,8 +94,8 @@ export default function ActiveButton({ className }: ActiveButtonProps) {
         <Button
           variant="ghost" 
           className={cn(
-            "h-12 px-2 justify-start gap-3 hover:bg-accent/5 transition-colors",
-            "border border-muted-foreground/20 rounded-lg bg-card/50",
+            "h-12 px-3 justify-start gap-3 hover:bg-accent/5 transition-colors mr-2",
+            "border border-white/30 rounded-lg bg-card/50",
             className
           )}
           data-testid="active-button"
@@ -117,10 +117,10 @@ export default function ActiveButton({ className }: ActiveButtonProps) {
           
           {/* Texto en el medio */}
           <div className="flex-1 text-left min-w-0">
-            <div className="font-medium text-sm truncate">
+            <div className="font-medium text-sm truncate text-white">
               {displayText}
             </div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+            <div className="text-[9px] text-muted-foreground uppercase tracking-wide font-medium">
               {displaySubtext}
             </div>
           </div>
