@@ -286,7 +286,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
       {
         id: 'library',
         icon: Library,
-        label: 'Recursos',
+        label: 'Biblioteca',
         action: 'section'
       },
       ...(isAdmin ? [{
@@ -300,10 +300,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     // NIVEL 2: Específico de sección - rutas actualizadas
     sections: {
       organization: [
-        { icon: Home, label: 'Vista General', href: '/organization/dashboard' },
+        { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
         { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
         { icon: TrendingUp, label: 'Movimientos', href: '/finances/movements' },
         { icon: DollarSign, label: 'Capital', href: '/finances/capital' },
+        { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
         { icon: Users, label: 'Miembros', href: '/organization/members' },
         { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
         { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -353,7 +354,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { type: 'divider' }
       ],
       library: [
-        { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
         { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
         { icon: Package2, label: 'Materiales', href: '/library/materials' },
         { icon: Users, label: 'Mano de Obra', href: '/library/labor' },

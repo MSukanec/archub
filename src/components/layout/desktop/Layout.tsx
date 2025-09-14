@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { Sidebar } from "./Sidebar";
+import { TertiarySidebar } from "./TertiarySidebar";
+import { RightSidebar } from "./RightSidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
+import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -109,7 +111,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       ) : (
         /* Desktop View - New Frame Layout */
         <div className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg">
-          <Sidebar />
+          {/* Tertiary Sidebar - Now integrated in the frame */}
+          <div className="flex-shrink-0">
+            <TertiarySidebar />
+          </div>
 
           {/* Main Content Area with rounded corners and inset appearance */}
           <main 
@@ -152,6 +157,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             )}
           </main>
 
+          {/* Right Sidebar - New project switcher */}
+          <div className="flex-shrink-0">
+            <RightSidebar />
+          </div>
         </div>
       )}
 

@@ -6,10 +6,8 @@ interface ProjectContextState {
   selectedProjectId: string | null
   isGlobalView: boolean
   currentOrganizationId: string | null
-  isViewingOrganization: boolean
   setSelectedProject: (projectId: string | null, organizationId?: string | null) => void
   setCurrentOrganization: (organizationId: string | null) => void
-  setViewingOrganization: (viewing: boolean) => void
 }
 
 export const useProjectContext = create<ProjectContextState>()(
@@ -18,7 +16,6 @@ export const useProjectContext = create<ProjectContextState>()(
       selectedProjectId: null,
       isGlobalView: true,
       currentOrganizationId: null,
-      isViewingOrganization: true, // Por defecto estar en estado ORGANIZACIÓN
       setSelectedProject: (projectId: string | null, organizationId?: string | null) => {
         const currentOrgId = organizationId || get().currentOrganizationId;
         
@@ -27,12 +24,8 @@ export const useProjectContext = create<ProjectContextState>()(
         set({ 
           selectedProjectId: projectId,
           isGlobalView: projectId === null,
-          currentOrganizationId: currentOrgId,
-          isViewingOrganization: false // Al seleccionar proyecto, salimos del modo organización
+          currentOrganizationId: currentOrgId
         });
-      },
-      setViewingOrganization: (viewing: boolean) => {
-        set({ isViewingOrganization: viewing });
       },
       setCurrentOrganization: (organizationId: string | null) => {
         console.log("🔧 ProjectContext: Setting organization to", organizationId);
@@ -42,8 +35,7 @@ export const useProjectContext = create<ProjectContextState>()(
         set({ 
           currentOrganizationId: organizationId,
           selectedProjectId: null,  // Reseteamos el proyecto temporalmente
-          isGlobalView: true,
-          isViewingOrganization: false
+          isGlobalView: true
         });
       },
     }),
@@ -52,8 +44,7 @@ export const useProjectContext = create<ProjectContextState>()(
       partialize: (state) => ({ 
         selectedProjectId: state.selectedProjectId,
         isGlobalView: state.isGlobalView,
-        currentOrganizationId: state.currentOrganizationId,
-        isViewingOrganization: state.isViewingOrganization
+        currentOrganizationId: state.currentOrganizationId
       }),
     }
   )
