@@ -4,7 +4,6 @@ import { TertiarySidebar } from "./TertiarySidebar";
 import { RightSidebar } from "./RightSidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
-import { Header } from "./Header";
 import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
