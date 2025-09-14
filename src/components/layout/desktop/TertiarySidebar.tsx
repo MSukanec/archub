@@ -735,6 +735,13 @@ export function TertiarySidebar() {
           label: 'Recursos',
           icon: Library,
           items: sidebarContent.library || []
+        },
+        {
+          type: 'accordion',
+          id: 'admin',
+          label: 'Administración',
+          icon: Crown,
+          items: sidebarContent.admin || []
         }
       ];
     } else {
@@ -775,6 +782,13 @@ export function TertiarySidebar() {
           label: 'Recursos',
           icon: Library,
           items: sidebarContent.library || []
+        },
+        {
+          type: 'accordion',
+          id: 'admin',
+          label: 'Administración',
+          icon: Crown,
+          items: sidebarContent.admin || []
         }
       ];
     }
