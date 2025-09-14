@@ -41,7 +41,7 @@ export function RightSidebar() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
+    mutationFn: async (projectId: string | null) => {
       if (!userData?.user?.id || !userData?.organization?.id) {
         throw new Error('Usuario u organización no disponibles');
       }
@@ -69,6 +69,14 @@ export function RightSidebar() {
   const handleProjectSelect = (projectId: string) => {
     if (selectedProjectId === projectId) return;
     updateProjectMutation.mutate(projectId);
+  };
+
+  const handleOrganizationSelect = () => {
+    // Clear project selection to show organization view
+    if (selectedProjectId === null) return; // Already in organization view
+    setSelectedProject(null);
+    // Update database to clear last_project_id
+    updateProjectMutation.mutate(null);
   };
 
   const handleCreateProject = () => {
@@ -101,27 +109,10 @@ export function RightSidebar() {
           primaryText={userData?.organization?.name || 'Organización'}
           secondaryText="Organización"
           isExpanded={isExpanded}
+          isActive={selectedProjectId === null}
           shape="rounded"
+          onClick={handleOrganizationSelect}
         />
-        
-        {/* Project Buttons */}
-        {sortedProjects.map((project: any) => {
-          const isActive = selectedProjectId === project.id;
-          return (
-            <SidebarAvatarButton
-              key={project.id}
-              backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
-              letter={getProjectInitials(project.name)}
-              primaryText={project.name}
-              secondaryText={project.project_data?.project_type?.name || 'Sin tipo'}
-              isExpanded={isExpanded}
-              isActive={isActive}
-              shape="circular"
-              onClick={() => handleProjectSelect(project.id)}
-              testId={`project-avatar-${project.id}`}
-            />
-          );
-        })}
 
         {/* Create New Project Button */}
         <div
@@ -151,6 +142,30 @@ export function RightSidebar() {
             </p>
           </div>
         </div>
+
+        {/* Separator */}
+        {sortedProjects.length > 0 && (
+          <div className="h-px bg-white/20 mx-2 my-3"></div>
+        )}
+        
+        {/* Project Buttons */}
+        {sortedProjects.map((project: any) => {
+          const isActive = selectedProjectId === project.id;
+          return (
+            <SidebarAvatarButton
+              key={project.id}
+              backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
+              letter={getProjectInitials(project.name)}
+              primaryText={project.name}
+              secondaryText={project.project_data?.project_type?.name || 'Sin tipo'}
+              isExpanded={isExpanded}
+              isActive={isActive}
+              shape="circular"
+              onClick={() => handleProjectSelect(project.id)}
+              testId={`project-avatar-${project.id}`}
+            />
+          );
+        })}
       </div>
     </aside>
   );
