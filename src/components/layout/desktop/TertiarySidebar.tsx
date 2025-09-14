@@ -577,7 +577,7 @@ export function TertiarySidebar() {
   const getActiveSectionFromLocation = () => {
     if (location.startsWith('/organization')) return 'organizacion';
     if (location.startsWith('/design')) return 'diseno';
-    if (location.startsWith('/construction')) return 'construccion';
+    if (location.startsWith('/construction')) return 'construction';
     if (location.startsWith('/finances')) return 'finanzas';
     if (location.startsWith('/library')) return 'biblioteca';
     if (location.startsWith('/proveedor')) return 'proveedor';
@@ -618,7 +618,7 @@ export function TertiarySidebar() {
   // Función para manejar acordeón en subniveles
   const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
     // Si es una sección con submenu, toggle acordeón
-    if (['construccion', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
+    if (['construction', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
       setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
     } else {
       // Si no tiene submenu, navegar directamente
@@ -627,7 +627,7 @@ export function TertiarySidebar() {
   };
   // Función para determinar qué sección está activa en el header
   const getActiveHeaderSection = () => {
-    if (location.includes('/construction')) return 'construccion';
+    if (location.includes('/construction')) return 'construction';
     if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
     if (location.includes('/project')) return 'proyecto';
     if (location.includes('/library')) return 'biblioteca';
@@ -745,7 +745,7 @@ export function TertiarySidebar() {
         },
         {
           type: 'accordion',
-          id: 'administration',
+          id: 'organization',
           label: 'Administración',
           icon: Building,
           items: sidebarContent.organization || []
@@ -801,7 +801,7 @@ export function TertiarySidebar() {
           if (location.startsWith('/general')) {
             setExpandedAccordion('general');
           } else if (location.startsWith('/construction')) {
-            setExpandedAccordion('construccion');
+            setExpandedAccordion('construction');
           } else if (location.startsWith('/finances')) {
             setExpandedAccordion('finanzas');
           } else if (location.startsWith('/design')) {
