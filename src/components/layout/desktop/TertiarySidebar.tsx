@@ -641,7 +641,6 @@ export function TertiarySidebar() {
     organization: [
       { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -649,14 +648,11 @@ export function TertiarySidebar() {
     ],
     finances: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
     project: [
-      { icon: Info, label: 'Información', href: '/general/info' },
-      { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
-      { icon: FileText, label: 'Media', href: '/general/media' }
+      { icon: Info, label: 'Información', href: '/general/info' }
     ],
     commercialization: [
       { icon: Users, label: 'Clientes', href: '/general/clients' }
@@ -671,6 +667,10 @@ export function TertiarySidebar() {
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
     ],
     library: [
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
+      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
+      { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
+      { icon: FileText, label: 'Media', href: '/general/media' },
       { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
       { icon: Package2, label: 'Materiales', href: '/library/materials' },
       { icon: Users, label: 'Mano de Obra', href: '/library/labor' }
@@ -703,7 +703,7 @@ export function TertiarySidebar() {
         {
           type: 'accordion',
           id: 'library',
-          label: 'Biblioteca',
+          label: 'Recursos',
           icon: Library,
           items: sidebarContent.library || []
         },
@@ -760,7 +760,7 @@ export function TertiarySidebar() {
         {
           type: 'accordion',
           id: 'library',
-          label: 'Biblioteca',
+          label: 'Recursos',
           icon: Library,
           items: sidebarContent.library || []
         }
