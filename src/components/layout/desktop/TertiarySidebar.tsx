@@ -885,7 +885,7 @@ export function TertiarySidebar() {
       */}
       
       {/* Navigation Items */}
-      <div className="flex-1 pb-2 pl-[14px] pr-2">
+      <div className={cn("flex-1 pb-2", isExpanded ? "pl-[14px] pr-2" : "pl-2 pr-2")}>
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
