@@ -48,6 +48,8 @@ interface DefaultFieldsProps {
   onOpenPersonSubform?: () => void
   onOpenTasksSubform?: () => void
   onOpenSubcontractSubform?: () => void
+  // Exchange rate visibility configuration
+  showExchangeRate?: boolean
 }
 
 export function DefaultMovementFields({
@@ -79,7 +81,8 @@ export function DefaultMovementFields({
   selectedSubcontractId = null,
   onOpenPersonSubform,
   onOpenTasksSubform,
-  onOpenSubcontractSubform
+  onOpenSubcontractSubform,
+  showExchangeRate = true
 }: DefaultFieldsProps) {
   return (
     <>
@@ -162,29 +165,31 @@ export function DefaultMovementFields({
         </FormItem>
       </div>
 
-      {/* Fila: Cotización (ancho completo) */}
-      <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name="exchange_rate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cotización (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.0001"
-                  min="0"
-                  placeholder="Ej: 1.0000"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {/* Fila: Cotización (ancho completo) - Solo mostrar si showExchangeRate es true */}
+      {showExchangeRate && (
+        <div className="col-span-2">
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    min="0"
+                    placeholder="Ej: 1.0000"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
 
       {/* Botón para Selección de Persona - Solo si showPersonButton es true */}
       {showPersonButton && onOpenPersonSubform && (

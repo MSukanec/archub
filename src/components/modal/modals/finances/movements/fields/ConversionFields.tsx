@@ -30,9 +30,10 @@ interface Props {
   members: any[]
   concepts: any[]
   movement?: any
+  showExchangeRate?: boolean
 }
 
-export function ConversionFields({ form, currencies, wallets, members, concepts, movement }: Props) {
+export function ConversionFields({ form, currencies, wallets, members, concepts, movement, showExchangeRate = true }: Props) {
   return (
     <div className="space-y-4">
 
@@ -201,27 +202,29 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             </div>
           </div>
 
-          {/* Cotización */}
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    min="0"
-                    placeholder="Ej: 1.25"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Cotización - Solo mostrar si showExchangeRate es true */}
+          {showExchangeRate && (
+            <FormField
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cotización (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      placeholder="Ej: 1.25"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
 

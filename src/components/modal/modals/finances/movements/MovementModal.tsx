@@ -137,6 +137,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const { toast } = useToast()
   const queryClient = useQueryClient()
   
+  // Get exchange rate visibility configuration from organization preferences
+  const showExchangeRate = userData?.organization?.organization_preferences?.use_currency_exchange || false
+  
   // Detectar si estamos en contexto organizacional (mostrar selector de proyecto)
   const isOrganizationalContext = location.includes('/organization/')
 
@@ -1729,6 +1732,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           form={conversionForm}
           currencies={currencies || []}
           wallets={wallets || []}
+          showExchangeRate={showExchangeRate}
           members={members || []}
           concepts={movementConcepts || []}
           movement={undefined}
@@ -1890,6 +1894,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           onIndirectsChange={setSelectedIndirects}
           onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
           onPartnerContributionsChange={setSelectedPartnerContributions}
+          showExchangeRate={showExchangeRate}
         />
       </form>
     </Form>
@@ -2062,6 +2067,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             members={members}
             concepts={movementConcepts}
             movement={undefined}
+            showExchangeRate={showExchangeRate}
           />
         )}
 
@@ -2095,6 +2101,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             onGeneralCostsChange={setSelectedGeneralCosts}
             onPartnerWithdrawalsChange={setSelectedPartnerWithdrawals}
             onPartnerContributionsChange={setSelectedPartnerContributions}
+            showExchangeRate={showExchangeRate}
           />
         )}
       </form>
