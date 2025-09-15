@@ -121,7 +121,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           {/* Main Content Area with rounded corners and inset appearance */}
           <main 
             className="flex-1 flex flex-col overflow-hidden rounded-2xl"
-            style={{ backgroundColor: "var(--layout-bg)" }}
+            style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
           >
             {headerProps ? (
               <PageLayout
