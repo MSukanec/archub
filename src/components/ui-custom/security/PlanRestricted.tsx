@@ -379,22 +379,15 @@ export function PlanRestricted({
                   ? "var(--accent-bg)"
                   : dynamicRestriction.planType === "teams"
                     ? "rgba(255, 255, 255, 0.2)"
-                    : "hsl(var(--accent), 0.2)",
+                    : "rgba(255, 255, 255, 0.2)",
               }}
             >
               <BadgeIcon
-                className="h-3 w-3"
-                style={{
-                  color: isGeneralMode
-                    ? iconColor
-                    : dynamicRestriction.planType === "teams"
-                      ? "white"
-                      : "hsl(var(--accent))",
-                }}
+                className="h-3 w-3 text-white"
               />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-sm" style={{ color: textColor }}>
+              <h4 className="font-medium text-sm text-white">
                 {isGeneralMode
                   ? functionName
                     ? `${functionName} - Requiere Proyecto`
@@ -413,10 +406,10 @@ export function PlanRestricted({
                 dynamicRestriction.actionUrl && (
                   <button
                     onClick={handleActionClick}
-                    className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-white/10"
+                    className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors hover:bg-white/10"
                     style={{
                       color: "white",
-                      borderColor: "rgba(255, 255, 255, 0.3)",
+                      border: "1px solid rgba(255, 255, 255, 0.4)",
                       backgroundColor: "transparent",
                     }}
                   >
