@@ -60,6 +60,10 @@ export default function Preferences() {
         setDefaultWallet(defaultWal.wallet_id);
       }
       setSecondaryWallets(secondaryWals.map(w => w.wallet_id));
+    } else if (organizationWallets && organizationWallets.length === 0) {
+      // Reset states when no organization wallets exist
+      setDefaultWallet('');
+      setSecondaryWallets([]);
     }
   }, [organizationWallets]);
 
@@ -107,34 +111,58 @@ export default function Preferences() {
 
   const saveDefaultWalletMutation = useMutation({
     mutationFn: async (walletId: string) => {
-      const { error } = await supabase
+      console.log('🔧 SaveDefaultWallet: Starting mutation', { 
+        walletId, 
+        organizationId: userData?.organization?.id,
+        currentOrganizationWallets: organizationWallets?.length || 0
+      });
+
+      if (!userData?.organization?.id) {
+        throw new Error('No se encontró la organización');
+      }
+
+      if (!walletId) {
+        throw new Error('Se debe seleccionar una billetera válida');
+      }
+
+      // First, reset all existing organization wallets to not default
+      const { error: resetError, count } = await supabase
         .from('organization_wallets')
         .update({ is_default: false })
-        .eq('organization_id', userData?.organization?.id);
+        .eq('organization_id', userData.organization.id);
       
-      if (error) throw error;
+      console.log('🔧 Reset existing default wallets:', { count, resetError });
+      if (resetError) throw resetError;
 
-      const { error: error2 } = await supabase
+      // Then upsert the new default wallet
+      const { error: upsertError, data: upsertData } = await supabase
         .from('organization_wallets')
         .upsert({
-          organization_id: userData?.organization?.id!,
+          organization_id: userData.organization.id,
           wallet_id: walletId,
           is_default: true,
           is_active: true
         }, {
           onConflict: 'organization_id,wallet_id'
-        });
+        })
+        .select();
 
-      if (error2) throw error2;
+      console.log('🔧 Upsert new default wallet:', { upsertData, upsertError });
+      if (upsertError) throw upsertError;
+
+      console.log('🔧 SaveDefaultWallet: Mutation completed successfully');
     },
     onSuccess: () => {
+      console.log('🔧 SaveDefaultWallet: Success callback triggered');
       toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
       queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
     },
     onError: (error) => {
+      console.error('🔧 SaveDefaultWallet: Error occurred:', error);
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo actualizar la billetera por defecto.';
       toast({ 
-        title: 'Error', 
-        description: 'No se pudo actualizar la billetera por defecto.',
+        title: 'Error al actualizar billetera', 
+        description: errorMessage,
         variant: 'destructive'
       });
     }
