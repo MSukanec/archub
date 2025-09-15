@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Settings, Coins } from 'lucide-react';
+import { Settings, Coins, Wallet, TrendingUp } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 
@@ -31,6 +32,7 @@ export default function Preferences() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
+  const [useCurrencyExchange, setUseCurrencyExchange] = useState<boolean>(false);
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -61,6 +63,12 @@ export default function Preferences() {
       setSecondaryWallets(secondaryWals.map(w => w.wallet_id));
     }
   }, [organizationWallets]);
+
+  useEffect(() => {
+    if (userData?.organization_preferences) {
+      setUseCurrencyExchange(userData.organization_preferences.use_currency_exchange || false);
+    }
+  }, [userData?.organization_preferences]);
 
   // Mutations for saving preferences
   const saveDefaultCurrencyMutation = useMutation({
@@ -189,6 +197,31 @@ export default function Preferences() {
     }
   });
 
+  const updateCurrencyExchangeMutation = useMutation({
+    mutationFn: async (useExchange: boolean) => {
+      const { error } = await supabase
+        .from('organization_preferences')
+        .update({ use_currency_exchange: useExchange })
+        .eq('organization_id', userData?.organization?.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ 
+        title: 'Configuración actualizada', 
+        description: 'La configuración de cotización se ha guardado exitosamente.' 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    },
+    onError: (error) => {
+      toast({ 
+        title: 'Error', 
+        description: 'No se pudo actualizar la configuración de cotización.',
+        variant: 'destructive'
+      });
+    }
+  });
+
   // Handlers
   const handleDefaultCurrencyChange = (currencyId: string) => {
     setDefaultCurrency(currencyId);
@@ -214,6 +247,11 @@ export default function Preferences() {
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
 
+  const handleCurrencyExchangeChange = (useExchange: boolean) => {
+    setUseCurrencyExchange(useExchange);
+    updateCurrencyExchangeMutation.mutate(useExchange);
+  };
+
   // Get available currencies and wallets (excluding defaults from secondary options)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
@@ -230,92 +268,143 @@ export default function Preferences() {
         ]
       }}
     >
-      <div className="space-y-6">
-
-
+      <div className="space-y-12">
+        
+        {/* Sección 1: Monedas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left Column - Titles and Descriptions */}
-          <div className="space-y-12">
-            {/* Monedas y Billeteras Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Coins className="h-5 w-5 text-[var(--accent)]" />
-                <h2 className="text-lg font-semibold">Monedas y Billeteras</h2>
-                <HelpPopover 
-                  title="Monedas y Billeteras"
-                  description="Estas configuraciones determinan qué monedas y billeteras tendrás disponibles al crear movimientos financieros. Tu selección por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales."
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Configura las monedas y billeteras que utilizas frecuentemente en tu organización
-              </p>
+          {/* Left Column - Título y Descripción */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Monedas</h2>
+              <HelpPopover 
+                title="Configuración de Monedas"
+                description="Configura las monedas que utilizas en tu organización. La moneda por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales."
+              />
             </div>
+            <p className="text-sm text-muted-foreground">
+              Gestiona las monedas disponibles para tus movimientos financieros
+            </p>
           </div>
 
-          {/* Right Column - Form Fields */}
-          <div className="space-y-8">
-            {/* Monedas y Billeteras */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="default-currency">Moneda por Defecto</Label>
-                <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
-                  <SelectTrigger id="default-currency">
-                    <SelectValue placeholder="Selecciona una moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allCurrencies?.map((currency) => (
-                      <SelectItem key={currency.id} value={currency.id}>
-                        {currency.name} ({currency.symbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Right Column - Campos */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="default-currency">Moneda por Defecto</Label>
+              <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
+                <SelectTrigger id="default-currency">
+                  <SelectValue placeholder="Selecciona una moneda" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCurrencies?.map((currency) => (
+                    <SelectItem key={currency.id} value={currency.id}>
+                      {currency.name} ({currency.symbol})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-                <ComboBoxMultiSelectField
-                  options={availableSecondaryCurrencies.map(currency => ({
-                    value: currency.id,
-                    label: `${currency.name} (${currency.symbol})`
-                  }))}
-                  value={secondaryCurrencies}
-                  onChange={handleSecondaryCurrenciesChange}
-                  placeholder="Selecciona una moneda secundaria"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="default-wallet">Billetera por Defecto</Label>
-                <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
-                  <SelectTrigger id="default-wallet">
-                    <SelectValue placeholder="Selecciona una billetera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allWallets?.map((wallet) => (
-                      <SelectItem key={wallet.id} value={wallet.id}>
-                        {wallet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-                <ComboBoxMultiSelectField
-                  options={availableSecondaryWallets.map(wallet => ({
-                    value: wallet.id,
-                    label: wallet.name
-                  }))}
-                  value={secondaryWallets}
-                  onChange={handleSecondaryWalletsChange}
-                  placeholder="Selecciona una billetera secundaria"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
+              <ComboBoxMultiSelectField
+                options={availableSecondaryCurrencies.map(currency => ({
+                  value: currency.id,
+                  label: `${currency.name} (${currency.symbol})`
+                }))}
+                value={secondaryCurrencies}
+                onChange={handleSecondaryCurrenciesChange}
+                placeholder="Selecciona monedas secundarias"
+              />
             </div>
           </div>
         </div>
+
+        {/* Sección 2: Billeteras */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Título y Descripción */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Billeteras</h2>
+              <HelpPopover 
+                title="Configuración de Billeteras"
+                description="Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones."
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Configura las billeteras para organizar tus fondos y transacciones
+            </p>
+          </div>
+
+          {/* Right Column - Campos */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="default-wallet">Billetera por Defecto</Label>
+              <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
+                <SelectTrigger id="default-wallet">
+                  <SelectValue placeholder="Selecciona una billetera" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allWallets?.map((wallet) => (
+                    <SelectItem key={wallet.id} value={wallet.id}>
+                      {wallet.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
+              <ComboBoxMultiSelectField
+                options={availableSecondaryWallets.map(wallet => ({
+                  value: wallet.id,
+                  label: wallet.name
+                }))}
+                value={secondaryWallets}
+                onChange={handleSecondaryWalletsChange}
+                placeholder="Selecciona billeteras secundarias"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sección 3: Cotización */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Título y Descripción */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Cotización</h2>
+              <HelpPopover 
+                title="Configuración de Cotización"
+                description="Controla si deseas ver y utilizar campos de cotización de moneda en los diferentes formularios y páginas de la aplicación. Cuando está activado, podrás definir tasas de cambio personalizadas."
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Activa o desactiva la funcionalidad de cotización de monedas
+            </p>
+          </div>
+
+          {/* Right Column - Toggle */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="currency-exchange-toggle">Usar Cotización de Monedas</Label>
+                <p className="text-xs text-muted-foreground">
+                  Mostrar campos de cotización en formularios
+                </p>
+              </div>
+              <Switch
+                id="currency-exchange-toggle"
+                checked={useCurrencyExchange}
+                onCheckedChange={handleCurrencyExchangeChange}
+              />
+            </div>
+          </div>
+        </div>
+
       </div>
     </Layout>
   );
