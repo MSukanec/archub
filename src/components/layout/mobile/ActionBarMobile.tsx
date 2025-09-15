@@ -75,8 +75,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--main-sidebar-bg)',
-              borderColor: 'var(--main-sidebar-border)',
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)',
               width: 'calc(100vw - 32px)', // full width minus padding
               maxWidth: '400px',
               zIndex: 60
@@ -116,8 +116,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--main-sidebar-bg)',
-              borderColor: 'var(--main-sidebar-border)',
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)',
               width: 'calc(100vw - 32px)',
               maxWidth: '400px',
               zIndex: 60
@@ -193,8 +193,8 @@ export function ActionBarMobile() {
           <div 
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-4 border"
             style={{ 
-              backgroundColor: 'var(--main-sidebar-bg)',
-              borderColor: 'var(--main-sidebar-border)',
+              backgroundColor: 'var(--card-bg)',
+              borderColor: 'var(--card-border)',
               width: 'calc(100vw - 32px)',
               maxWidth: '400px',
               zIndex: 60
@@ -232,8 +232,8 @@ export function ActionBarMobile() {
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
         style={{ 
-          backgroundColor: 'var(--main-sidebar-bg)',
-          borderTopColor: 'var(--main-sidebar-border)',
+          backgroundColor: 'var(--card-bg)',
+          borderTopColor: 'var(--card-border)',
           borderTopWidth: '1px'
         }}
       >

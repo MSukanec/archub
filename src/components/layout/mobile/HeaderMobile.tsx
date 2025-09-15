@@ -80,7 +80,7 @@ export function HeaderMobile({
 
   return (
     <>
-      <div className="md:hidden sticky top-0 z-50 bg-[var(--layout-bg)] border-b border-[var(--main-sidebar-border)]">
+      <div className="md:hidden sticky top-0 z-50 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
         {/* Main Header Row */}
         <div className="flex items-center justify-between h-14 px-4">
           {/* Left: Title */}
