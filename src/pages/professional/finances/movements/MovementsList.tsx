@@ -1124,30 +1124,16 @@ export default function MovementsList() {
         }
         
         return (
-          <span className="text-xs font-medium text-right block">
-            ${item.amount?.toLocaleString() || "0"}
-          </span>
-        );
-      },
-    },
-    {
-      key: "exchange_rate",
-      label: "Cotización",
-      width: "5%",
-      sortable: true,
-      sortType: "number" as const,
-      render: (item: Movement | ConversionGroup) => {
-        if ('is_conversion_group' in item) {
-          return (
-            <div className="text-xs text-muted-foreground text-right">
-              -
+          <div className="text-right">
+            <div className="text-xs font-medium">
+              ${item.amount?.toLocaleString() || "0"}
             </div>
-          );
-        }
-        return (
-          <span className="text-xs text-right block">
-            {item.exchange_rate ? `$${item.exchange_rate?.toLocaleString()}` : "-"}
-          </span>
+            {item.exchange_rate && (
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                (Cot. ${item.exchange_rate?.toLocaleString()})
+              </div>
+            )}
+          </div>
         );
       },
     },
