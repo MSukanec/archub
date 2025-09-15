@@ -96,7 +96,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   return (
     <div
       className="min-h-screen p-2"
-      style={{ backgroundColor: isMobile ? "var(--layout-mobile-bg)" : "var(--layout-bg)" }}
+      style={{
+        backgroundColor: isMobile
+          ? "var(--layout-mobile-bg)"
+          : "var(--layout-bg)",
+      }}
     >
       {/* Mobile View - Unchanged */}
       {isMobile ? (
@@ -109,7 +113,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - New Frame Layout */
-        <div 
+        <div
           className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg border-2"
           style={{ borderColor: "var(--main-sidebar-bg)" }}
         >
@@ -119,7 +123,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </div>
 
           {/* Main Content Area with rounded corners and inset appearance */}
-          <main 
+          <main
             className="flex-1 flex flex-col overflow-hidden rounded-2xl"
             style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
           >
@@ -127,11 +131,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               <PageLayout
                 icon={headerProps.icon}
                 title={headerProps.title}
-                tabs={headerProps.tabs?.map(tab => ({
+                tabs={headerProps.tabs?.map((tab) => ({
                   id: tab.id,
                   label: tab.label,
                   isActive: tab.isActive,
-                  onClick: () => headerProps.onTabChange?.(tab.id)
+                  onClick: () => headerProps.onTabChange?.(tab.id),
                 }))}
                 onTabChange={headerProps.onTabChange}
                 showHeaderSearch={headerProps.showHeaderSearch}
@@ -148,12 +152,16 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 isViewMode={headerProps.isViewMode}
                 wide={wide}
               >
-                <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} p-6 pb-32 h-full overflow-auto`}>
+                <div
+                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-36 py-6 pb-32 h-full overflow-auto`}
+                >
                   {children}
                 </div>
               </PageLayout>
             ) : (
-              <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-12 md:py-6 pb-32 h-full overflow-auto`}>
+              <div
+                className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-36 md:py-6 pb-32 h-full overflow-auto`}
+              >
                 {children}
               </div>
             )}
