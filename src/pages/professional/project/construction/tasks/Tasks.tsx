@@ -339,13 +339,7 @@ export default function Tasks() {
     actionButton: activeTab === "tasks" ? {
       label: "Agregar Tarea",
       icon: Plus,
-      onClick: handleAddSingleTask,
-      additionalButton: {
-        label: "Agregar en Masa",
-        icon: Plus,
-        onClick: handleAddTask,
-        variant: "ghost"
-      }
+      onClick: handleAddSingleTask
     } : activeTab === "phases" ? {
       label: "Crear Fase",
       icon: Plus,
