@@ -135,7 +135,8 @@ export function PlanRestricted({
   const isPlanRestriction =
     feature &&
     (feature.startsWith("max_") ||
-      ["max_members", "max_projects", "max_organizations"].includes(feature));
+      feature.startsWith("allow_") ||
+      ["max_members", "max_projects", "max_organizations", "allow_exchange_rate", "allow_secondary_currencies"].includes(feature));
 
   // Si es administrador, permitir acceso EXCEPTO para restricciones de plan y "general_mode"
   // Las restricciones de plan se aplican incluso a administradores
