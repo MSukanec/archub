@@ -138,7 +138,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const queryClient = useQueryClient()
   
   // Get exchange rate visibility configuration from organization preferences
-  const showExchangeRate = userData?.organization?.organization_preferences?.use_currency_exchange || false
+  const showExchangeRate = userData?.organization_preferences?.use_currency_exchange || false
+  
   
   // Detectar si estamos en contexto organizacional (mostrar selector de proyecto)
   const isOrganizationalContext = location.includes('/organization/')
