@@ -7,6 +7,8 @@ import { MemberPartners } from './MemberPartners';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 
 export default function Members() {
   const [activeTab, setActiveTab] = useState('Lista');
@@ -16,6 +18,9 @@ export default function Members() {
   
   // Usar la organización actual del usuario
   const organization = userData?.organization;
+  
+  // Obtener miembros actuales para restricciones de plan
+  const { data: members = [] } = useOrganizationMembers(organization?.id);
 
   const headerTabs = [
     {
@@ -42,7 +47,12 @@ export default function Members() {
       actionButton: {
         label: 'Invitar Miembro',
         icon: UserPlus,
-        onClick: () => openModal('member')
+        onClick: () => openModal('member'),
+        renderWrapper: (button: React.ReactNode) => (
+          <PlanRestricted feature="max_members" current={members.length}>
+            {button}
+          </PlanRestricted>
+        )
       }
     }),
     ...(activeTab === 'Socios' && {
