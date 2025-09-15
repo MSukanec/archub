@@ -1030,7 +1030,7 @@ export function MainSidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className="pb-3 pl-[14px]">
+      <div className="pb-3 px-2">
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
