@@ -387,7 +387,7 @@ export function PlanRestricted({
               />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-sm text-white">
+              <h4 className="font-medium text-sm" style={{ color: "white !important" }}>
                 {isGeneralMode
                   ? functionName
                     ? `${functionName} - Requiere Proyecto`
@@ -409,7 +409,8 @@ export function PlanRestricted({
                     className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors hover:bg-white/10"
                     style={{
                       color: "white",
-                      border: "1px solid rgba(255, 255, 255, 0.4)",
+                      border: "none",
+                      outline: "1px solid rgba(255, 255, 255, 0.4)",
                       backgroundColor: "transparent",
                     }}
                   >
