@@ -23,6 +23,16 @@ export function usePlanFeatures(): PlanFeatures {
     // Verificar si la feature existe en el plan actual
     const featureValue = planFeatures[feature];
     
+    // Debug temporal para las nuevas features
+    if (feature === 'allow_exchange_rate' || feature === 'allow_secondary_currencies') {
+      console.log('🔍 Plan Features Debug:', {
+        feature,
+        featureValue,
+        planFeatures,
+        planName: currentPlan?.name
+      });
+    }
+    
     // Si es un booleano, devolver directamente
     if (typeof featureValue === 'boolean') {
       return featureValue;

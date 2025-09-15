@@ -6,7 +6,6 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
-import { HelpPopover } from '@/components/ui-custom/HelpPopover';
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -277,13 +276,12 @@ export default function Preferences() {
             <div className="flex items-center gap-2">
               <Coins className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Monedas</h2>
-              <HelpPopover 
-                title="Configuración de Monedas"
-                description="Configura las monedas que utilizas en tu organización. La moneda por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales."
-              />
             </div>
             <p className="text-sm text-muted-foreground">
               Gestiona las monedas disponibles para tus movimientos financieros
+            </p>
+            <p className="text-xs text-muted-foreground/80">
+              Configura las monedas que utilizas en tu organización. La moneda por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales.
             </p>
           </div>
 
@@ -329,13 +327,12 @@ export default function Preferences() {
             <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Billeteras</h2>
-              <HelpPopover 
-                title="Configuración de Billeteras"
-                description="Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones."
-              />
             </div>
             <p className="text-sm text-muted-foreground">
               Configura las billeteras para organizar tus fondos y transacciones
+            </p>
+            <p className="text-xs text-muted-foreground/80">
+              Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones.
             </p>
           </div>
 
@@ -379,13 +376,12 @@ export default function Preferences() {
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-[var(--accent)]" />
               <h2 className="text-lg font-semibold">Cotización</h2>
-              <HelpPopover 
-                title="Configuración de Cotización"
-                description="Controla si deseas ver y utilizar campos de cotización de moneda en los diferentes formularios y páginas de la aplicación. Cuando está activado, podrás definir tasas de cambio personalizadas."
-              />
             </div>
             <p className="text-sm text-muted-foreground">
               Activa o desactiva la funcionalidad de cotización de monedas
+            </p>
+            <p className="text-xs text-muted-foreground/80">
+              Controla si deseas ver y utilizar campos de cotización de moneda en los diferentes formularios y páginas de la aplicación. Cuando está activado, podrás definir tasas de cambio personalizadas.
             </p>
           </div>
 
@@ -393,9 +389,6 @@ export default function Preferences() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Mostrar campos de cotización en formularios
-              </p>
               <PlanRestricted feature="allow_exchange_rate">
                 <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
                   <SelectTrigger id="currency-exchange-select">
