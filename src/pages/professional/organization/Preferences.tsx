@@ -269,20 +269,20 @@ export default function Preferences() {
     >
       <div className="space-y-12">
         
-        {/* Sección 1: Monedas */}
+        {/* Sección 1: Moneda por Defecto */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Título y Descripción */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Coins className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Monedas</h2>
+              <h2 className="text-lg font-semibold">Moneda por Defecto</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Configura las monedas que utilizas en tu organización. La moneda por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales.
+              Selecciona la moneda principal que se usará automáticamente en todos los movimientos financieros de tu organización.
             </p>
           </div>
 
-          {/* Right Column - Campos */}
+          {/* Right Column - Campo */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="default-currency">Moneda por Defecto</Label>
@@ -299,7 +299,27 @@ export default function Preferences() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </div>
 
+        {/* Sección 2: Monedas Secundarias y Cotización */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Título y Descripción */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
+              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
+                PRO
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Configura monedas adicionales y habilita la funcionalidad de cotización para gestionar tasas de cambio personalizadas.
+            </p>
+          </div>
+
+          {/* Right Column - Campos */}
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
               <PlanRestricted feature="allow_secondary_currencies">
@@ -314,10 +334,25 @@ export default function Preferences() {
                 />
               </PlanRestricted>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
+              <PlanRestricted feature="allow_exchange_rate">
+                <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
+                  <SelectTrigger id="currency-exchange-select">
+                    <SelectValue placeholder="Selecciona una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">No usar cotización</SelectItem>
+                    <SelectItem value="si">Usar cotización</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PlanRestricted>
+            </div>
           </div>
         </div>
 
-        {/* Sección 2: Billeteras */}
+        {/* Sección 3: Billeteras */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Column - Título y Descripción */}
           <div className="space-y-2">
@@ -359,38 +394,6 @@ export default function Preferences() {
                 onChange={handleSecondaryWalletsChange}
                 placeholder="Selecciona billeteras secundarias"
               />
-            </div>
-          </div>
-        </div>
-
-        {/* Sección 3: Cotización */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left Column - Título y Descripción */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Cotización</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Controla si deseas ver y utilizar campos de cotización de moneda en los diferentes formularios y páginas de la aplicación. Cuando está activado, podrás definir tasas de cambio personalizadas.
-            </p>
-          </div>
-
-          {/* Right Column - Select */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
-              <PlanRestricted feature="allow_exchange_rate">
-                <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
-                  <SelectTrigger id="currency-exchange-select">
-                    <SelectValue placeholder="Selecciona una opción" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no">No usar cotización</SelectItem>
-                    <SelectItem value="si">Usar cotización</SelectItem>
-                  </SelectContent>
-                </Select>
-              </PlanRestricted>
             </div>
           </div>
         </div>
