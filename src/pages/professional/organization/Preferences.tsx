@@ -211,7 +211,19 @@ export default function Preferences() {
       }
     },
     onSuccess: () => {
+      toast({ 
+        title: 'Monedas secundarias actualizadas', 
+        description: 'La configuración de monedas se ha guardado exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['organizationCurrencies'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
+    },
+    onError: (error) => {
+      toast({ 
+        title: 'Error al actualizar monedas', 
+        description: 'No se pudieron actualizar las monedas secundarias.',
+        variant: 'destructive'
+      });
     }
   });
 
@@ -239,7 +251,19 @@ export default function Preferences() {
       }
     },
     onSuccess: () => {
+      toast({ 
+        title: 'Billeteras secundarias actualizadas', 
+        description: 'La configuración de billeteras se ha guardado exitosamente.' 
+      });
       queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
+    },
+    onError: (error) => {
+      toast({ 
+        title: 'Error al actualizar billeteras', 
+        description: 'No se pudieron actualizar las billeteras secundarias.',
+        variant: 'destructive'
+      });
     }
   });
 

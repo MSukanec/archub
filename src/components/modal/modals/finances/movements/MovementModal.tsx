@@ -591,7 +591,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
     
     const commonValues = getCurrentCommonValues()
-    const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+    const formOptions = {}
     
     // Sincronizar campos comunes en todos los formularios ANTES de cambiar el tipo
     form.setValue('type_id', newTypeId, formOptions)
@@ -643,7 +643,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       type_id: form.getValues('type_id')
     }
     
-    const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+    const formOptions = {}
     
     if (movementType === 'conversion') {
       conversionForm.setValue('movement_date', commonValues.movement_date, formOptions)
@@ -2023,7 +2023,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                 setSelectedCategoryId(categoryId)
                 setSelectedSubcategoryId(subcategoryId)
                 
-                const formOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+                const formOptions = {}
                 
                 // Update form values with proper options to prevent validation triggers
                 if (movementType === 'conversion') {
