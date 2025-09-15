@@ -140,6 +140,50 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   // Get exchange rate visibility configuration from organization preferences
   const showExchangeRate = userData?.organization_preferences?.use_currency_exchange || false
   
+  // Filter movement concepts based on available currencies and wallets
+  const filteredMovementConcepts = React.useMemo(() => {
+    if (!movementConcepts || !currencies || !wallets) return []
+    
+    const hasManycurrencies = currencies.length > 1
+    const hasManyWallets = wallets.length > 1
+    
+    // Debug log
+    console.log('🔧 Filtering movement concepts:', {
+      totalConcepts: movementConcepts.length,
+      currencies: currencies.length,
+      wallets: wallets.length,
+      hasManycurrencies,
+      hasManyWallets
+    })
+    
+    const filtered = movementConcepts.filter(concept => {
+      const viewMode = concept.view_mode?.trim()
+      
+      // Only show "Conversión" if there are multiple currencies
+      if (viewMode?.includes('conversion')) {
+        console.log('🔧 Conversion concept filtered:', { name: concept.name, show: hasManycurrencies })
+        return hasManycurrencies
+      }
+      
+      // Only show "Transferencia Interna" if there are multiple wallets  
+      if (viewMode?.includes('transfer')) {
+        console.log('🔧 Transfer concept filtered:', { name: concept.name, show: hasManyWallets })
+        return hasManyWallets
+      }
+      
+      // Show all other concepts normally
+      return true
+    })
+    
+    console.log('🔧 Filtered concepts result:', {
+      original: movementConcepts.length,
+      filtered: filtered.length,
+      filteredNames: filtered.map(c => c.name)
+    })
+    
+    return filtered
+  }, [movementConcepts, currencies, wallets])
+  
   
   // Detectar si estamos en contexto organizacional (mostrar selector de proyecto)
   const isOrganizationalContext = location.includes('/organization/')
@@ -1698,7 +1742,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {movementConcepts?.map((concept) => (
+                  {filteredMovementConcepts?.map((concept) => (
                     <SelectItem key={concept.id} value={concept.id}>
                       {concept.name}
                     </SelectItem>
@@ -1785,7 +1829,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {movementConcepts?.map((concept) => (
+                  {filteredMovementConcepts?.map((concept) => (
                     <SelectItem key={concept.id} value={concept.id}>
                       {concept.name}
                     </SelectItem>
@@ -1953,7 +1997,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           <FormLabel>Tipo de Movimiento *</FormLabel>
           <FormControl>
             <CascadingSelect
-              options={transformConceptsToOptions(movementConcepts || [])}
+              options={transformConceptsToOptions(filteredMovementConcepts || [])}
               value={React.useMemo(() => [selectedTypeId, selectedCategoryId, selectedSubcategoryId].filter(Boolean), [selectedTypeId, selectedCategoryId, selectedSubcategoryId])}
               onValueChange={(values) => {
                 const typeId = values[0] || ''
