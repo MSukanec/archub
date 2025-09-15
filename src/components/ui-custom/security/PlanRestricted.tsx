@@ -387,7 +387,7 @@ export function PlanRestricted({
               />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-sm" style={{ color: "white !important" }}>
+              <h4 className="font-medium text-sm plan-restricted-title">
                 {isGeneralMode
                   ? functionName
                     ? `${functionName} - Requiere Proyecto`

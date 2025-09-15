@@ -431,6 +431,11 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
   }
+
+  /* Force white color for plan restricted popover title */
+  .plan-restricted-title {
+    color: white !important;
+  }
 }
 
 @layer utilities {
