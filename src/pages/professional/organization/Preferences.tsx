@@ -278,9 +278,6 @@ export default function Preferences() {
               <h2 className="text-lg font-semibold">Monedas</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Gestiona las monedas disponibles para tus movimientos financieros
-            </p>
-            <p className="text-xs text-muted-foreground/80">
               Configura las monedas que utilizas en tu organización. La moneda por defecto se usará automáticamente en nuevos movimientos, mientras que las secundarias aparecerán como opciones adicionales.
             </p>
           </div>
@@ -329,9 +326,6 @@ export default function Preferences() {
               <h2 className="text-lg font-semibold">Billeteras</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Configura las billeteras para organizar tus fondos y transacciones
-            </p>
-            <p className="text-xs text-muted-foreground/80">
               Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones.
             </p>
           </div>
@@ -378,9 +372,6 @@ export default function Preferences() {
               <h2 className="text-lg font-semibold">Cotización</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Activa o desactiva la funcionalidad de cotización de monedas
-            </p>
-            <p className="text-xs text-muted-foreground/80">
               Controla si deseas ver y utilizar campos de cotización de moneda en los diferentes formularios y páginas de la aplicación. Cuando está activado, podrás definir tasas de cambio personalizadas.
             </p>
           </div>
