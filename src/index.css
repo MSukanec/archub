@@ -6,7 +6,7 @@
 
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 15%); /* Desktop - mismo color que sidebars */
+  --layout-bg: hsl(0, 0%, 97%); /* Desktop - fondo claro */
   --layout-mobile-bg: hsl(0, 0%, 97%); /* Mobile - fondo claro */
   --layout-text: hsl(0, 0%, 45%);
   --layout-border: hsl(0, 0%, 45%);
