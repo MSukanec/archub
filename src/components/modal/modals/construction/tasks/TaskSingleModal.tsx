@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Calendar } from "lucide-react";
+import { Plus, Calendar } from "lucide-react";
+import { SearchField } from "@/components/ui-custom/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
@@ -288,20 +289,12 @@ export function TaskSingleModal({
           </Select>
         </div>
         
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none text-muted-foreground">
-            Búsqueda de Texto
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar tarea..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+        <SearchField
+          label="Búsqueda de Texto"
+          placeholder="Buscar tarea..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
       </div>
       
       {/* Lista de tareas optimizada como tabla */}
