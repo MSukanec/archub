@@ -834,6 +834,7 @@ export default function MovementsList() {
     // Lógica condicional para mostrar columnas
     const hasMultipleCurrencies = organizationCurrencies.length > 1
     const hasMultipleWallets = organizationWallets.length > 1
+    const isTeamsPlan = userData?.plan?.name === "Teams"
     
     return [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
@@ -864,7 +865,7 @@ export default function MovementsList() {
     }] : []),
     {
       key: "date_creator",
-      label: "Fecha / Creador",
+      label: isTeamsPlan ? "Fecha / Creador" : "Fecha",
       width: "10%",
       sortable: true,
       sortType: "date" as const,
@@ -883,8 +884,8 @@ export default function MovementsList() {
           }
         }
 
-        // Formatear creador con avatar y nombre
-        const creatorElement = (
+        // Solo mostrar creador en planes TEAMS
+        const creatorElement = isTeamsPlan ? (
           <div className="flex items-center gap-2 mt-1">
             <Avatar className="h-5 w-5">
               <AvatarImage src={item.creator?.avatar_url} />
@@ -900,7 +901,7 @@ export default function MovementsList() {
                "Usuario"}
             </span>
           </div>
-        );
+        ) : null;
 
         return (
           <div className="py-1">
@@ -1258,7 +1259,7 @@ export default function MovementsList() {
       },
     },
   ];
-}, [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete, organizationCurrencies, organizationWallets]);
+}, [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete, organizationCurrencies, organizationWallets, userData?.plan?.name]);
 
 
 
