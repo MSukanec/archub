@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { TertiarySidebar } from "./TertiarySidebar";
+import { MainSidebar } from "./MainSidebar";
 import { RightSidebar } from "./RightSidebar";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -115,7 +115,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         >
           {/* Tertiary Sidebar - Now integrated in the frame */}
           <div className="flex-shrink-0">
-            <TertiarySidebar />
+            <MainSidebar />
           </div>
 
           {/* Main Content Area with rounded corners and inset appearance */}

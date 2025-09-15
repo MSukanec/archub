@@ -124,7 +124,7 @@ export function PageLayout({
   return (
     <div className="flex flex-col h-full">
       {/* Page Header */}
-      <div className="bg-[var(--layout-bg)]">
+      <div style={{ backgroundColor: "hsl(0, 0%, 95%)" }}>
         <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-6`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
