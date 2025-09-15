@@ -109,7 +109,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - New Frame Layout */
-        <div className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg">
+        <div 
+          className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg border-2"
+          style={{ borderColor: "var(--main-sidebar-bg)" }}
+        >
           {/* Tertiary Sidebar - Now integrated in the frame */}
           <div className="flex-shrink-0">
             <TertiarySidebar />
