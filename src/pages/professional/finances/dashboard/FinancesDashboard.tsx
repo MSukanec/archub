@@ -12,6 +12,8 @@ import { WalletCurrencyBalanceTable } from '@/components/charts/WalletCurrencyBa
 import { MiniTrendChart } from '@/components/charts/MiniTrendChart'
 import { ActionBar } from '@/components/layout/desktop/ActionBar'
 import { formatDateShort } from '@/lib/date-utils'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { motion } from 'framer-motion'
@@ -37,7 +39,18 @@ export default function FinancesDashboard() {
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, 'desde-siempre')
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, 'desde-siempre')
 
-  const { data: walletCurrencyBalances, isLoading: walletCurrencyLoading } = useWalletCurrencyBalances(organizationId, effectiveProjectId)
+  const walletCurrencyData = useWalletCurrencyBalances(organizationId, effectiveProjectId)
+  const walletCurrencyLoading = walletCurrencyData.isLoading
+  
+  // Extract wallet balances from the KPI data structure
+  const walletCurrencyBalances = walletCurrencyData.organizationBalances?.flatMap(currency => 
+    currency.wallets?.map(wallet => ({
+      wallet: wallet.wallet,
+      currency: wallet.currency, 
+      balance: wallet.balance,
+      state: wallet.balance > 0 ? 'Positivo' as const : wallet.balance < 0 ? 'Negativo' as const : 'Neutro' as const
+    })) || []
+  ) || []
   const { data: recentMovements } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
   
   const formatCurrency = (amount: number) => {
@@ -143,7 +156,7 @@ export default function FinancesDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <WalletCurrencyBalanceTable data={walletCurrencyBalances || []} isLoading={walletCurrencyLoading} />
+              <WalletCurrencyBalanceTable data={walletCurrencyBalances} isLoading={walletCurrencyLoading} />
             </CardContent>
           </Card>
 
