@@ -5,9 +5,9 @@ import { Settings, Coins, Wallet, TrendingUp } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
 import { HelpPopover } from '@/components/ui-custom/HelpPopover';
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -32,7 +32,7 @@ export default function Preferences() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
-  const [useCurrencyExchange, setUseCurrencyExchange] = useState<boolean>(false);
+  const [useCurrencyExchange, setUseCurrencyExchange] = useState<string>('no');
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function Preferences() {
 
   useEffect(() => {
     if (userData?.organization_preferences) {
-      setUseCurrencyExchange(userData.organization_preferences.use_currency_exchange || false);
+      setUseCurrencyExchange(userData.organization_preferences.use_currency_exchange ? 'si' : 'no');
     }
   }, [userData?.organization_preferences]);
 
@@ -198,10 +198,10 @@ export default function Preferences() {
   });
 
   const updateCurrencyExchangeMutation = useMutation({
-    mutationFn: async (useExchange: boolean) => {
+    mutationFn: async (useExchange: string) => {
       const { error } = await supabase
         .from('organization_preferences')
-        .update({ use_currency_exchange: useExchange })
+        .update({ use_currency_exchange: useExchange === 'si' })
         .eq('organization_id', userData?.organization?.id);
       
       if (error) throw error;
@@ -247,7 +247,7 @@ export default function Preferences() {
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
 
-  const handleCurrencyExchangeChange = (useExchange: boolean) => {
+  const handleCurrencyExchangeChange = (useExchange: string) => {
     setUseCurrencyExchange(useExchange);
     updateCurrencyExchangeMutation.mutate(useExchange);
   };
@@ -307,15 +307,17 @@ export default function Preferences() {
 
             <div className="space-y-2">
               <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-              <ComboBoxMultiSelectField
-                options={availableSecondaryCurrencies.map(currency => ({
-                  value: currency.id,
-                  label: `${currency.name} (${currency.symbol})`
-                }))}
-                value={secondaryCurrencies}
-                onChange={handleSecondaryCurrenciesChange}
-                placeholder="Selecciona monedas secundarias"
-              />
+              <PlanRestricted feature="allow_secondary_currencies">
+                <ComboBoxMultiSelectField
+                  options={availableSecondaryCurrencies.map(currency => ({
+                    value: currency.id,
+                    label: `${currency.name} (${currency.symbol})`
+                  }))}
+                  value={secondaryCurrencies}
+                  onChange={handleSecondaryCurrenciesChange}
+                  placeholder="Selecciona monedas secundarias"
+                />
+              </PlanRestricted>
             </div>
           </div>
         </div>
@@ -387,20 +389,24 @@ export default function Preferences() {
             </p>
           </div>
 
-          {/* Right Column - Toggle */}
+          {/* Right Column - Select */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="currency-exchange-toggle">Usar Cotización de Monedas</Label>
-                <p className="text-xs text-muted-foreground">
-                  Mostrar campos de cotización en formularios
-                </p>
-              </div>
-              <Switch
-                id="currency-exchange-toggle"
-                checked={useCurrencyExchange}
-                onCheckedChange={handleCurrencyExchangeChange}
-              />
+            <div className="space-y-2">
+              <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Mostrar campos de cotización en formularios
+              </p>
+              <PlanRestricted feature="allow_exchange_rate">
+                <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
+                  <SelectTrigger id="currency-exchange-select">
+                    <SelectValue placeholder="Selecciona una opción" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">No usar cotización</SelectItem>
+                    <SelectItem value="si">Usar cotización</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PlanRestricted>
             </div>
           </div>
         </div>

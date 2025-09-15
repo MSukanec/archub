@@ -72,6 +72,24 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     actionLabel: "Saber más",
     actionUrl: "/roadmap",
   },
+  allow_secondary_currencies: {
+    message: "Las monedas secundarias están disponibles solo en los planes PRO y TEAMS.",
+    actionLabel: "Actualizar a Pro",
+    actionUrl: "/billing",
+    planType: 'pro',
+    iconColor: 'white',
+    backgroundColor: 'hsl(213, 100%, 30%)',
+    borderColor: 'hsl(213, 100%, 30%)',
+  },
+  allow_exchange_rate: {
+    message: "La cotización de monedas está disponible solo en los planes PRO y TEAMS.",
+    actionLabel: "Actualizar a Pro", 
+    actionUrl: "/billing",
+    planType: 'pro',
+    iconColor: 'white',
+    backgroundColor: 'hsl(213, 100%, 30%)',
+    borderColor: 'hsl(213, 100%, 30%)',
+  },
 };
 
 export function getRestrictionMessage(key: string): RestrictionMessage {

@@ -216,6 +216,52 @@ export function PlanRestricted({
     }
   }
 
+  // Para allow_secondary_currencies, determinar dinámicamente el plan objetivo
+  if (restrictionKey === "allow_secondary_currencies") {
+    const organizationId = userData?.preferences?.last_organization_id;
+    const currentOrganization = userData?.organizations?.find(
+      (org) => org.id === organizationId,
+    );
+    const currentPlan = currentOrganization?.plan?.name;
+
+    if (currentPlan === "Free") {
+      // Free → Pro
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message:
+          "Las monedas secundarias están disponibles solo en los planes PRO y TEAMS. Actualiza a Pro para usar múltiples monedas.",
+        actionLabel: "Actualizar a Pro",
+        planType: "pro" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(213, 100%, 30%)",
+        borderColor: "hsl(213, 100%, 30%)",
+      };
+    }
+  }
+
+  // Para allow_exchange_rate, determinar dinámicamente el plan objetivo
+  if (restrictionKey === "allow_exchange_rate") {
+    const organizationId = userData?.preferences?.last_organization_id;
+    const currentOrganization = userData?.organizations?.find(
+      (org) => org.id === organizationId,
+    );
+    const currentPlan = currentOrganization?.plan?.name;
+
+    if (currentPlan === "Free") {
+      // Free → Pro
+      dynamicRestriction = {
+        ...dynamicRestriction,
+        message:
+          "La cotización de monedas está disponible solo en los planes PRO y TEAMS. Actualiza a Pro para gestionar tasas de cambio.",
+        actionLabel: "Actualizar a Pro",
+        planType: "pro" as const,
+        iconColor: "white",
+        backgroundColor: "hsl(213, 100%, 30%)",
+        borderColor: "hsl(213, 100%, 30%)",
+      };
+    }
+  }
+
   const handleActionClick = () => {
     if (dynamicRestriction.actionUrl) {
       navigate(dynamicRestriction.actionUrl);
