@@ -830,7 +830,12 @@ export default function MovementsList() {
 
 
 
-  const tableColumns = useMemo(() => [
+  const tableColumns = useMemo(() => {
+    // Lógica condicional para mostrar columnas
+    const hasMultipleCurrencies = organizationCurrencies.length > 1
+    const hasMultipleWallets = organizationWallets.length > 1
+    
+    return [
     // Columna "Proyecto" - solo visible en modo GENERAL (cuando no hay proyecto seleccionado)
     ...(isGeneralMode ? [{
       key: "project",
@@ -1023,7 +1028,8 @@ export default function MovementsList() {
         );
       },
     },
-    {
+    // Columna "Moneda" - solo visible si hay múltiples monedas
+    ...(hasMultipleCurrencies ? [{
       key: "currency",
       label: "Moneda",
       width: "5%",
@@ -1052,8 +1058,9 @@ export default function MovementsList() {
           </div>
         );
       },
-    },
-    {
+    }] : []),
+    // Columna "Billetera" - solo visible si hay múltiples billeteras
+    ...(hasMultipleWallets ? [{
       key: "wallet",
       label: "Billetera",
       width: "5%",
@@ -1089,7 +1096,7 @@ export default function MovementsList() {
           </span>
         );
       },
-    },
+    }] : []),
     {
       key: "amount",
       label: "Cantidad",
@@ -1250,7 +1257,8 @@ export default function MovementsList() {
         );
       },
     },
-  ], [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete]);
+  ];
+}, [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete, organizationCurrencies, organizationWallets]);
 
 
 
