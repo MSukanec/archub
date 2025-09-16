@@ -172,7 +172,7 @@ export function PageLayout({
   }, [tabs, hasTabs]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-0">
       {/* Page Header */}
       <div style={{ backgroundColor: "hsl(0, 0%, 95%)" }}>
         <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${
@@ -483,7 +483,7 @@ export function PageLayout({
       </div>
 
       {/* Page Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {children}
       </div>
     </div>
