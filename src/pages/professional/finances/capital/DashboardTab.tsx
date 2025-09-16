@@ -26,8 +26,8 @@ export default function FinancesDashboard() {
   const projectId = userData?.preferences?.last_project_id
 
   
-  // State for view mode toggle
-  const [viewMode, setViewMode] = useState<'project' | 'all'>('project')
+  // Always use organization view mode
+  const viewMode = 'all'
   
   // Get organization currencies to determine default currency
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
@@ -99,32 +99,6 @@ export default function FinancesDashboard() {
   return (
     <>
       <div>
-        {/* View mode toggle */}
-        <div className="flex items-center justify-between p-4 border-b bg-background/50 backdrop-blur-sm mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Ver datos de:</span>
-            <div className="flex bg-muted rounded-lg p-1">
-              <Button
-                variant={viewMode === 'project' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('project')}
-                className="h-8 px-3"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Proyecto Actual
-              </Button>
-              <Button
-                variant={viewMode === 'all' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('all')}
-                className="h-8 px-3"
-              >
-                <Building className="w-4 h-4 mr-2" />
-                Toda la Organización
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Show empty state if no movements exist */}
         {!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0) ? (
@@ -254,7 +228,7 @@ export default function FinancesDashboard() {
         </div>
 
         {/* FILA 2: 4 columnas - 3 KPIs apilados + Gráfico de Flujo Financiero */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 mt-6">
           {/* Columna 1: 3 KPIs apilados */}
           <div className="space-y-4">
             {/* Income Card */}
