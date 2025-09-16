@@ -219,15 +219,22 @@ export function Header() {
                 data-testid={`organization-option-${org.id}`}
                 className="flex items-center gap-2"
               >
-                <div 
-                  className="w-4 h-4 rounded flex items-center justify-center text-xs font-bold"
-                  style={{
-                    backgroundColor: org.id === currentUser?.organization?.id ? "var(--accent)" : "var(--muted)",
-                    color: org.id === currentUser?.organization?.id ? "var(--primary-foreground)" : "var(--muted-foreground)",
-                  }}
-                >
-                  {org.name.charAt(0).toUpperCase()}
-                </div>
+                {org.logo_url ? (
+                  <img 
+                    src={org.logo_url} 
+                    alt="Avatar"
+                    className="w-6 h-6 rounded-lg object-cover border border-white/20"
+                  />
+                ) : (
+                  <div 
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-semibold text-white border border-white/20"
+                    style={{
+                      backgroundColor: org.id === currentUser?.organization?.id ? "var(--accent)" : "var(--muted)",
+                    }}
+                  >
+                    {org.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 {org.name}
               </DropdownMenuItem>
             ))}
