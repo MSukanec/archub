@@ -153,7 +153,7 @@ export function Header() {
       <div className="flex items-center ml-0">
         <Button
           variant="ghost"
-          className="h-7 px-3 justify-start text-sm font-normal border-0"
+          className="h-7 px-3 justify-start text-sm font-normal border-0 flex items-center gap-2"
           style={{
             color: "var(--header-button-fg)",
             backgroundColor: "var(--header-button-bg)",
@@ -171,23 +171,22 @@ export function Header() {
             navigate('/organization/dashboard');
           }}
         >
-          {currentUser?.organization?.name || "Seleccionar Organización"}
+          <span>{currentUser?.organization?.name || "Seleccionar Organización"}</span>
+          {/* Plan Badge inside button */}
+          {currentUser?.plan?.name && (
+            <Badge 
+              variant="secondary" 
+              className="h-4 px-1.5 text-xs font-medium text-white opacity-75"
+              style={{
+                backgroundColor: currentUser.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
+                                currentUser.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
+                                currentUser.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
+              }}
+            >
+              {currentUser.plan.name}
+            </Badge>
+          )}
         </Button>
-        
-        {/* Plan Badge */}
-        {currentUser?.plan?.name && (
-          <Badge 
-            variant="secondary" 
-            className="ml-2 h-5 px-2 text-xs font-medium text-white opacity-75"
-            style={{
-              backgroundColor: currentUser.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
-                              currentUser.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
-                              currentUser.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
-            }}
-          >
-            {currentUser.plan.name}
-          </Badge>
-        )}
         
         {/* Organization dropdown arrow button */}
         <DropdownMenu>
