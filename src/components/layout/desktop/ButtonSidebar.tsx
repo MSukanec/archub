@@ -62,13 +62,7 @@ export default function SidebarButton({
     <div className="relative group">
       <button
         ref={buttonRef}
-        className={cn(
-          'relative flex items-center justify-center transition-all duration-200 ease-out overflow-hidden',
-          // Botón SIEMPRE 32x32px (w-8 h-8), SIEMPRE centrado
-          'w-8 h-8',
-          // Cuando expandido, el botón se extiende 
-          isExpanded && 'w-full justify-start pr-2'
-        )}
+        className="flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden"
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
@@ -76,84 +70,77 @@ export default function SidebarButton({
         }}
         style={{ 
           borderRadius: '4px',
-          backgroundColor: 'transparent', // Sin fondo
+          backgroundColor: 'transparent',
           color: (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
         } as React.CSSProperties}
         onMouseLeave={(e) => {
           setIsHovered(false);
         }}
       >
-      
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
-      {!isChild && !(isHeaderButton && icon === null) && (
-        <div 
-          className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0 transition-colors duration-200"
-          style={{
-            color: (isActive || isHovered) 
-              ? 'var(--accent)' 
-              : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
-          }}
-        >
-          {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
-              alt="Avatar"
-              className="w-[28px] h-[28px] rounded-full"
-            />
-          ) : userFullName ? (
-            <div 
-              className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border"
-              style={{ 
-                backgroundColor: projectColor || 'transparent',
-                borderColor: projectColor 
-                  ? 'transparent' 
-                  : (isActive || isHovered)
-                  ? `var(--accent)`
-                  : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
-                color: projectColor 
-                  ? 'white' 
-                  : (isActive || isHovered)
-                  ? `var(--accent)`
-                  : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
-              }}
-            >
-              {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
-            </div>
-          ) : (
-            icon
+        {/* RAIL DE 47px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
+        <span className="shrink-0 w-12 flex items-center justify-center transition-colors duration-200">
+          {!isChild && !(isHeaderButton && icon === null) && (
+            <>
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="Avatar"
+                  className="w-[28px] h-[28px] rounded-full"
+                />
+              ) : userFullName ? (
+                <div 
+                  className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border"
+                  style={{ 
+                    backgroundColor: projectColor || 'transparent',
+                    borderColor: projectColor 
+                      ? 'transparent' 
+                      : (isActive || isHovered)
+                      ? `var(--accent)`
+                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
+                    color: projectColor 
+                      ? 'white' 
+                      : (isActive || isHovered)
+                      ? `var(--accent)`
+                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+                  }}
+                >
+                  {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
+                </div>
+              ) : (
+                <span 
+                  style={{
+                    color: (isActive || isHovered) 
+                      ? 'var(--accent)' 
+                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
+                  }}
+                >
+                  {icon}
+                </span>
+              )}
+            </>
           )}
-        </div>
-      )}
-      
-      {/* Texto - solo cuando expandido (SIN animaciones complicadas) */}
-      {(isExpanded || (isHeaderButton && (isHovered || isActive))) && (
-        <div className={cn(
-          "flex items-center justify-between w-full",
-          isChild ? "ml-2" : 
-          (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
-          "ml-10" // Más margen para separar del icono
-        )}>
+        </span>
+        
+        {/* Texto - Solo aparece cuando expandido, SIN mover el icono */}
+        {isExpanded && (
           <span 
             className={cn(
-              "text-sm whitespace-nowrap text-left transition-all duration-200",
-              isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2",
+              isHeaderButton ? "font-bold" : "font-normal"
             )}
             style={{
               color: (isActive || isHovered) ? 'white' : 'inherit'
             }}
           >
-            {label}
+            <span>{label}</span>
+            {rightIcon && (
+              <span className="flex-shrink-0 ml-2 mr-2">
+                {rightIcon}
+              </span>
+            )}
           </span>
-          {rightIcon && (
-            <div className="flex-shrink-0 ml-2 mr-2">
-              {rightIcon}
-            </div>
-          )}
-        </div>
-      )}
+        )}
       </button>
-      
-
     </div>
   );
 }

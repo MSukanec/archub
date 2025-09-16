@@ -17,7 +17,7 @@ export function Header() {
   
   return (
     <header 
-      className="h-10 flex items-center pl-4 pr-6"
+      className="h-12 flex items-center pl-4 pr-6"
       style={{
         backgroundColor: "var(--main-sidebar-bg)",
       }}
