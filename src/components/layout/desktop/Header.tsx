@@ -128,16 +128,20 @@ export function Header() {
         borderColor: "var(--header-border)",
       }}
     >
-      {/* Logo - Aligned with sidebar icons */}
+      {/* Logo - Aligned with sidebar icons (same 48px rail) */}
       <div className="flex items-center">
-        <div 
-          className="w-8 h-8 flex items-center justify-center text-sm font-bold"
+        <button
+          className="h-8 w-12 flex items-center justify-center text-sm font-bold transition-opacity duration-200 hover:opacity-80 border-0 bg-transparent"
           style={{
             color: "var(--header-fg)",
+            borderRadius: '4px'
+          }}
+          onClick={() => {
+            // Optional: could navigate to home or do nothing
           }}
         >
           A
-        </div>
+        </button>
       </div>
 
       {/* Organization Selector */}
