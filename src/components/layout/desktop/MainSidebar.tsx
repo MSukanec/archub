@@ -787,18 +787,71 @@ export function MainSidebar() {
         )}
       >
       {/* Encabezado del contexto activo */}
-      {isExpanded && (
-        <div className="px-3 pt-3 pb-2 border-b border-[var(--main-sidebar-border)]">
-          <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
-            {sidebarLevel === 'organization' 
-              ? userData?.organization?.name || 'Organización'
-              : sidebarLevel === 'project' && selectedProjectId
-                ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
-                : 'Proyecto'
-            }
+      <div className="border-b border-[var(--main-sidebar-border)]">
+        {isExpanded ? (
+          // Expandido: mostrar texto
+          <div className="px-3 pt-3 pb-2">
+            <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+              {sidebarLevel === 'organization' 
+                ? userData?.organization?.name || 'Organización'
+                : sidebarLevel === 'project' && selectedProjectId
+                  ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
+                  : 'Proyecto'
+              }
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          // Colapsado: mostrar avatar
+          <div className="flex justify-center pt-3 pb-2">
+            {sidebarLevel === 'organization' ? (
+              // Avatar de la organización
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                {userData?.organization?.logo_url ? (
+                  <img 
+                    src={userData.organization.logo_url} 
+                    alt="Organización"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div 
+                    className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  >
+                    {getOrganizationInitials(userData?.organization?.name || 'O')}
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Avatar del proyecto seleccionado
+              selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  {projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url ? (
+                    <img 
+                      src={projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url} 
+                      alt={projects.find(p => p.id === selectedProjectId)?.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                      style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
+                    >
+                      {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Fallback si no hay proyecto seleccionado
+                <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                  <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                    P
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        )}
+      </div>
       
       {/* Navigation Items - Scrollable Content */}
       <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
