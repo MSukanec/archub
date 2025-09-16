@@ -723,10 +723,6 @@ export function MainSidebar() {
           href: '/organization/dashboard'
         },
         {
-          type: 'section',
-          label: 'ORGANIZACIÓN'
-        },
-        {
           type: 'accordion',
           id: 'organization',
           label: 'Administración',
@@ -739,10 +735,6 @@ export function MainSidebar() {
           label: 'Finanzas',
           icon: DollarSign,
           items: sidebarContent.finances || []
-        },
-        {
-          type: 'section',
-          label: 'GENERAL'
         },
 
         {
