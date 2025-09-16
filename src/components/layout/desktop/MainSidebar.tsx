@@ -785,7 +785,7 @@ export function MainSidebar() {
         isDocked ? "h-full" : "h-screen"
       )}
       style={{
-        overflow: 'hidden',
+        overflow: 'visible',
         borderColor: 'var(--main-sidebar-border)'
       }}
       onMouseEnter={() => {
@@ -1018,10 +1018,7 @@ export function MainSidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className={cn(
-        "pb-3",
-        isExpanded ? "px-2" : "px-0"
-      )}>
+      <div className="pb-3 px-0">
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
