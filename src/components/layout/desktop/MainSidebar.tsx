@@ -720,63 +720,68 @@ export function MainSidebar() {
       {/* Columna izquierda - Avatar de organización y proyectos */}
       <div 
         className={cn(
-          "flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2 transition-all duration-150",
+          "flex-shrink-0 flex flex-col items-center border-r border-[var(--main-sidebar-border)] transition-all duration-150",
           isHovered ? "w-12 opacity-100" : "w-0 opacity-0 overflow-hidden"
         )}
       >
-        {/* Avatar de organización */}
-        <button
-          onClick={handleOrganizationSelect}
-          className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
-            sidebarLevel === 'organization' ? "ring-2 ring-white ring-opacity-50" : ""
-          )}
-        >
-          {userData?.organization?.logo_url ? (
-            <img 
-              src={userData.organization.logo_url} 
-              alt="Organización"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div 
-              className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
-              style={{ backgroundColor: 'var(--accent)' }}
-            >
-              {getOrganizationInitials(userData?.organization?.name || 'O')}
-            </div>
-          )}
-        </button>
-        
-        {/* Separador visual */}
-        <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-        
-        {/* Avatares de proyectos */}
-        {projects.map((project: any) => (
+        {/* Avatar de organización - misma altura que header derecho */}
+        <div className="h-[52px] flex items-center justify-center border-b border-[var(--main-sidebar-border)]">
           <button
-            key={project.id}
-            onClick={() => handleProjectSelect(project.id)}
+            onClick={handleOrganizationSelect}
             className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
-              selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+              sidebarLevel === 'organization' ? "ring-2 ring-white ring-opacity-50" : ""
             )}
           >
-            {project.project_data?.project_image_url ? (
+            {userData?.organization?.logo_url ? (
               <img 
-                src={project.project_data.project_image_url} 
-                alt={project.name}
+                src={userData.organization.logo_url} 
+                alt="Organización"
                 className="w-full h-full object-cover"
               />
             ) : (
               <div 
-                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+                className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
-                {getProjectInitials(project.name || 'P')}
+                {getOrganizationInitials(userData?.organization?.name || 'O')}
               </div>
             )}
           </button>
-        ))}
+        </div>
+        
+        {/* Separador visual y proyectos */}
+        <div className="flex flex-col items-center pt-3 gap-2">
+          {/* Separador visual */}
+          <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+          
+          {/* Avatares de proyectos */}
+          {projects.map((project: any) => (
+            <button
+              key={project.id}
+              onClick={() => handleProjectSelect(project.id)}
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
+                selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+              )}
+            >
+              {project.project_image_url ? (
+                <img 
+                  src={project.project_image_url} 
+                  alt={project.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div 
+                  className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                  style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+                >
+                  {getProjectInitials(project.name || 'P')}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
       
       {/* Columna derecha - Sidebar actual */}
@@ -825,9 +830,9 @@ export function MainSidebar() {
               // Avatar del proyecto seleccionado
               selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                 <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                  {projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url ? (
+                  {projects.find(p => p.id === selectedProjectId)?.project_image_url ? (
                     <img 
-                      src={projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url} 
+                      src={projects.find(p => p.id === selectedProjectId)?.project_image_url} 
                       alt={projects.find(p => p.id === selectedProjectId)?.name}
                       className="w-full h-full object-cover"
                     />
