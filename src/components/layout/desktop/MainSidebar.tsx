@@ -789,42 +789,39 @@ export function MainSidebar() {
 
   return (
     <>
-    {/* Contenedor de dos columnas */}
-    <div className="flex">
-      {/* Primera columna */}
-      <aside 
-        className={cn(
-          "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-col overflow-visible",
-          isExpanded ? "w-64" : "w-12"
-        )}
-        style={{
-          height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
-        }}
-        onMouseEnter={() => {
-          if (!isProjectPopoverOpen) {
-            setHovered(true);
+    <aside 
+      className={cn(
+        "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-col overflow-visible",
+        isExpanded ? "w-64" : "w-12"
+      )}
+      style={{
+        height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
+      }}
+      onMouseEnter={() => {
+        if (!isProjectPopoverOpen) {
+          setHovered(true);
+        }
+        // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
+        if (sidebarLevel === 'project') {
+          if (location.startsWith('/general')) {
+            setExpandedAccordion('general');
+          } else if (location.startsWith('/construction')) {
+            setExpandedAccordion('construction');
+          } else if (location.startsWith('/finances')) {
+            setExpandedAccordion('finanzas');
+          } else if (location.startsWith('/design')) {
+            setExpandedAccordion('diseno');
+          } else if (location.startsWith('/project/')) {
+            setExpandedAccordion('recursos');
           }
-          // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
-          if (sidebarLevel === 'project') {
-            if (location.startsWith('/general')) {
-              setExpandedAccordion('general');
-            } else if (location.startsWith('/construction')) {
-              setExpandedAccordion('construction');
-            } else if (location.startsWith('/finances')) {
-              setExpandedAccordion('finanzas');
-            } else if (location.startsWith('/design')) {
-              setExpandedAccordion('diseno');
-            } else if (location.startsWith('/project/')) {
-              setExpandedAccordion('recursos');
-            }
-          }
-        }}
-        onMouseLeave={() => {
-          if (!isProjectPopoverOpen) {
-            setHovered(false);
-          }
-        }}
-      >
+        }
+      }}
+      onMouseLeave={() => {
+        if (!isProjectPopoverOpen) {
+          setHovered(false);
+        }
+      }}
+    >
       {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
       <div className={cn(
         "h-12 flex-shrink-0 flex items-center",
