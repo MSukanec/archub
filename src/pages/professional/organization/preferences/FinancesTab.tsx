@@ -101,7 +101,7 @@ export function FinancesTab({}: FinancesTabProps) {
     },
     onSuccess: () => {
       toast({ title: 'Moneda por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies'] });
+      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
     },
     onError: (error) => {
       toast({ 
@@ -177,7 +177,7 @@ export function FinancesTab({}: FinancesTabProps) {
     onSuccess: () => {
       console.log('🔧 SaveDefaultWallet: Success callback triggered');
       toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
+      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
     },
     onError: (error) => {
       console.error('🔧 SaveDefaultWallet: Error occurred:', error);
@@ -218,8 +218,8 @@ export function FinancesTab({}: FinancesTabProps) {
         title: 'Monedas secundarias actualizadas', 
         description: 'La configuración de monedas se ha guardado exitosamente.' 
       });
-      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-currencies'] });
+      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
     },
     onError: (error) => {
       toast({ 
@@ -258,8 +258,8 @@ export function FinancesTab({}: FinancesTabProps) {
         title: 'Billeteras secundarias actualizadas', 
         description: 'La configuración de billeteras se ha guardado exitosamente.' 
       });
-      queryClient.invalidateQueries({ queryKey: ['organizationWallets'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
     },
     onError: (error) => {
       toast({ 
