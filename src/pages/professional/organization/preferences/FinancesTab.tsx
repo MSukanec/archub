@@ -335,8 +335,8 @@ export function FinancesTab({}: FinancesTabProps) {
       {/* Sección 1: Moneda por Defecto */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column - Título y Descripción */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
             <Coins className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Moneda por Defecto</h2>
           </div>
@@ -368,8 +368,8 @@ export function FinancesTab({}: FinancesTabProps) {
       {/* Sección 2: Monedas Secundarias y Cotización */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column - Título y Descripción */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
             <Coins className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
             <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
@@ -418,8 +418,8 @@ export function FinancesTab({}: FinancesTabProps) {
       {/* Sección 3: Billeteras */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Left Column - Título y Descripción */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
             <Wallet className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Billeteras</h2>
           </div>
