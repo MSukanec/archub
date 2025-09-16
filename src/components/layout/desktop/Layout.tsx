@@ -129,16 +129,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 <MainSidebar />
               </div>
             ) : (
-              <>
-                {/* When not docked: Overlay on top of content starting below header */}
-                <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
-                  <MainSidebar />
-                </div>
-                {/* Spacer to reserve space when sidebar is visible in overlay mode */}
-                {(isHovered) && (
-                  <div className="flex-shrink-0 w-64" />
-                )}
-              </>
+              // When not docked: Overlay on top of content starting below header
+              <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
+                <MainSidebar />
+              </div>
             )}
 
             {/* Main Content Area with rounded corners and inset appearance */}
