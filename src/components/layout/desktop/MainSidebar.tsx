@@ -17,16 +17,16 @@ import {
   FileText,
   DollarSign,
   FolderOpen,
-  Folder,
   Mail,
   Activity,
   Calendar,
   ArrowLeft,
   ArrowRight,
   Tag,
-  ChevronDown,
   ChevronRight,
   ChevronUp,
+  ChevronDown,
+  Folder,
   Search,
   Crown,
   Package,
@@ -66,16 +66,10 @@ import {
 } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { SelectorPopover } from "@/components/popovers/SelectorPopover";
-import { Input } from "@/components/ui/input";
-import { useProjectsLite } from "@/hooks/use-projects-lite";
-import { useCurrenciesLite } from "@/hooks/use-currencies-lite";
-import { useWalletsLite } from "@/hooks/use-wallets-lite";
-import { useMovementConceptsLite } from "@/hooks/use-movement-concepts-lite";
 import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
-import { useProjects } from "@/hooks/use-projects";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -115,98 +109,6 @@ function getOrganizationInitials(name: string): string {
   return name
     .charAt(0)
     .toUpperCase();
-}
-// Función auxiliar para generar iniciales de proyectos
-function getProjectInitials(name: string): string {
-  return name
-    .charAt(0)
-    .toUpperCase();
-}
-// Componente selector de proyectos para el header (con avatar)
-function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
-  const { data: userData } = useCurrentUser();
-  const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
-  const { selectedProjectId, setSelectedProject } = useProjectContext();
-  const { setSidebarLevel } = useNavigationStore();
-  
-  // Ordenar proyectos: proyecto activo primero, luego el resto
-  const sortedProjects = [...projects].sort((a, b) => {
-    if (selectedProjectId === a.id) return -1;
-    if (selectedProjectId === b.id) return 1;
-    return a.name.localeCompare(b.name);
-  });
-  const queryClient = useQueryClient();
-  
-  // Encontrar proyecto actual
-  const currentProject = selectedProjectId ? projects.find((p: any) => p.id === selectedProjectId) : null;
-  const displayName = currentProject?.name || "Sin proyecto";
-  
-  // Mutación para cambiar proyecto
-  const updateProjectMutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      if (!userData?.user?.id || !userData?.organization?.id) {
-        throw new Error('Usuario u organización no disponibles');
-      }
-      const { error } = await supabase
-        .from('user_organization_preferences')
-        .upsert(
-          {
-            user_id: userData.user.id,
-            organization_id: userData.organization.id,
-            last_project_id: projectId,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: 'user_id,organization_id' }
-        );
-      if (error) throw error;
-      return projectId;
-    },
-    onSuccess: (projectId) => {
-      setSelectedProject(projectId);
-      setSidebarLevel('project'); // Switch to project mode
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
-    }
-  });
-  
-  const handleProjectSelect = (projectId: string) => {
-    if (selectedProjectId === projectId) return;
-    updateProjectMutation.mutate(projectId);
-  };
-  
-  // Preparar items para el selector
-  const selectorItems = projects.map((project: any) => ({
-    id: project.id,
-    name: project.name,
-    type: "Proyecto" as const,
-    color: project.color ?? undefined
-  }));
-
-  return (
-    <SelectorPopover
-      trigger={
-        <div>
-          <ButtonSidebar
-            icon={<Folder className="w-[18px] h-[18px]" />}
-            label={isExpanded ? displayName : ""}
-            isActive={false}
-            isExpanded={isExpanded}
-            variant="main"
-            isHeaderButton={true}
-            avatarUrl={undefined}
-            userFullName={currentProject ? getProjectInitials(currentProject.name) : undefined}
-            projectColor={currentProject?.color ?? undefined}
-            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
-          />
-        </div>
-      }
-      items={selectorItems}
-      selectedId={selectedProjectId || undefined}
-      onSelect={handleProjectSelect}
-      emptyMessage="No hay proyectos disponibles"
-      getInitials={getProjectInitials}
-    />
-  );
 }
 // Componente selector de organizaciones para el header (con avatar)
 function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
@@ -361,51 +263,7 @@ export function MainSidebar() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
-  // Mutación específica para cambiar proyecto (igual a la que funciona en Projects.tsx)
-  const updatePreferencesMutation = useMutation({
-    mutationFn: async ({ organizationId, lastProjectId }: { organizationId: string, lastProjectId: string | null }) => {
-      if (!userData?.user?.id) {
-        throw new Error('Usuario no disponible');
-      }
-      
-      const { error } = await supabase
-        .from('user_organization_preferences')
-        .upsert({
-          user_id: userData.user.id,
-          organization_id: organizationId,
-          last_project_id: lastProjectId,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,organization_id'
-        })
-      
-      if (error) throw error
-      return lastProjectId;
-    },
-    onSuccess: (projectId) => {
-      // ESTO es lo crucial que me faltaba!
-      setSelectedProject(projectId, userData?.organization?.id);
-      setSidebarLevel('project'); // Switch to project mode
-      
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, userData?.organization?.id] 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    }
-  });
   
-  // Get projects for the current organization
-  const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
-  
-  // Ordenar proyectos: proyecto activo primero, luego el resto
-  const sortedProjects = [...projects].sort((a, b) => {
-    if (selectedProjectId === a.id) return -1;
-    if (selectedProjectId === b.id) return 1;
-    return a.name.localeCompare(b.name);
-  });
-  
-  // Find the currently selected project
-  const currentProject = projects.find(p => p.id === selectedProjectId);
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -503,8 +361,6 @@ export function MainSidebar() {
     return saved || null;
   });
 
-  // Estado para controlar el popover de selección de proyecto
-  const [isProjectPopoverOpen, setIsProjectPopoverOpen] = useState(false);
   // Estado para transiciones
   const [isTransitioning, setIsTransitioning] = useState(false);
   // Función para navegación con transición hacia adelante
@@ -534,8 +390,6 @@ export function MainSidebar() {
     }
   }, [expandedAccordion]);
   
-  // Estado para búsqueda de proyectos
-  const [projectSearchValue, setProjectSearchValue] = useState('');
   const prevContextRef = useRef(currentSidebarContext);
   
   // Handle fade animation when context changes
@@ -543,7 +397,6 @@ export function MainSidebar() {
     prevContextRef.current = currentSidebarContext;
   }, [currentSidebarContext]);
   
-  // Project selector removed as requested
   
   const toggleAccordion = (key: string) => {
     setExpandedAccordion(prev => prev === key ? null : key);
@@ -798,9 +651,7 @@ export function MainSidebar() {
         height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
       }}
       onMouseEnter={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(true);
-        }
+        setHovered(true);
         // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
         if (sidebarLevel === 'project') {
           if (location.startsWith('/general')) {
@@ -817,63 +668,11 @@ export function MainSidebar() {
         }
       }}
       onMouseLeave={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(false);
-        }
+        setHovered(false);
       }}
     >
-      {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
-      <div className={cn(
-        "h-12 flex-shrink-0 flex items-center",
-        "pl-[14px] pr-4 justify-start"
-      )}>
-        {currentProject ? (
-          <div 
-            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
-          >
-            <div className="flex-shrink-0">
-              {currentProject.project_data?.project_image_url ? (
-                <img 
-                  src={currentProject.project_data.project_image_url} 
-                  alt="Proyecto"
-                  className="w-8 h-8 rounded-full border-2"
-                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
-                />
-              ) : (
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
-                  style={{ 
-                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
-                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
-                  }}
-                >
-                  {getProjectInitials(currentProject.name || 'P')}
-                </div>
-              )}
-            </div>
-            
-            {isExpanded && (
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {currentProject.name}
-                </div>
-                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : isExpanded ? (
-          <span className="text-sm font-black text-black uppercase">
-            MENÚ LATERAL
-          </span>
-        ) : null}
-      </div>
-      */}
-      
       {/* Navigation Items - Scrollable Content */}
-<div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
+      <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
@@ -1030,176 +829,6 @@ export function MainSidebar() {
       
     </aside>
 
-    {/* Popover de selección de proyecto */}
-    {isProjectPopoverOpen && (
-      <>
-        {/* Overlay para cerrar al hacer click fuera */}
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => setIsProjectPopoverOpen(false)}
-        />
-        
-        {/* Popover */}
-        <div
-          className={cn(
-            "fixed border bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
-            "transition-all duration-300",
-            "w-64"
-          )}
-          style={{
-            left: '280px',
-            top: '8px'
-          }}
-        >
-          {/* Contenido del popover */}
-          <div className={cn(
-            "py-6",
-            isExpanded ? "pl-[14px] pr-2" : "pl-0 pr-0"
-          )}>
-            <div className="flex flex-col gap-[2px]">
-              
-              {/* Organización */}
-              <div 
-                className={cn(
-                  "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
-                  isExpanded ? "px-2" : "px-0",
-                  !selectedProjectId ? "" : ""
-                )}
-                style={{
-                  backgroundColor: 'var(--main-sidebar-button-bg)'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedProjectId) return;
-                  e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedProjectId) return;
-                  e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
-                }}
-                onClick={() => {
-                  if (userData?.organization?.id) {
-                    updatePreferencesMutation.mutate({
-                      organizationId: userData.organization.id,
-                      lastProjectId: null
-                    });
-                  }
-                  setIsProjectPopoverOpen(false);
-                }}
-              >
-                <div className="flex items-center flex-1 min-w-0">
-                  {/* Logo/Avatar de la organización */}
-                  <div className="flex-shrink-0">
-                    {userData?.organization?.logo_url ? (
-                      <img 
-                        src={userData.organization.logo_url} 
-                        alt="Organización"
-                        className="w-6 h-6 rounded-full"
-                      />
-                    ) : (
-                      <div 
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: 'var(--accent)' }}
-                      >
-                        {getOrganizationInitials(userData?.organization?.name || 'O')}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Nombre de la organización */}
-                  <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {userData?.organization?.name || 'Organización'}
-                    </div>
-                  </div>
-                  
-                  {/* Indicador de organización activa */}
-                  {!selectedProjectId && (
-                    <div className="ml-2 flex-shrink-0">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Divisor */}
-              <div className="h-px my-2" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-              
-              {/* Proyectos */}
-              {sortedProjects.map((project: any) => (
-                <div 
-                  key={project.id}
-                  className={cn(
-                    "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
-                    isExpanded ? "px-2" : "px-0",
-                    selectedProjectId === project.id ? "" : ""
-                  )}
-                  style={{
-                    color: selectedProjectId === project.id ? 'var(--main-sidebar-button-active-fg)' : 'var(--main-sidebar-button-fg)',
-                    backgroundColor: 'var(--main-sidebar-button-bg)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedProjectId === project.id) return;
-                    e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedProjectId === project.id) return;
-                    e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
-                  }}
-                  onClick={() => {
-                    if (userData?.organization?.id) {
-                      updatePreferencesMutation.mutate({
-                        organizationId: userData.organization.id,
-                        lastProjectId: project.id
-                      });
-                    }
-                    setIsProjectPopoverOpen(false);
-                  }}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
-                    {/* Avatar del proyecto */}
-                    <div className="flex-shrink-0">
-                      {project.project_data?.project_image_url ? (
-                        <img 
-                          src={project.project_data.project_image_url} 
-                          alt="Proyecto"
-                          className="w-6 h-6 rounded-full border"
-                          style={{ borderColor: project.color || 'var(--main-sidebar-button-bg)' }}
-                        />
-                      ) : (
-                        <div 
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold border text-xs"
-                          style={{ 
-                            backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
-                            borderColor: project.color || 'var(--main-sidebar-button-bg)'
-                          }}
-                        >
-                          {getProjectInitials(project.name || 'P')}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Nombre del proyecto */}
-                    <div className="ml-3 flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">
-                        {project.name}
-                      </div>
-                    </div>
-                    
-                    {/* Indicador de proyecto activo */}
-                    {selectedProjectId === project.id && (
-                      <div className="ml-2 flex-shrink-0">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-            </div>
-          </div>
-        </div>
-      </>
-    )}
     </>
   );
 }
