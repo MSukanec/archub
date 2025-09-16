@@ -8,13 +8,24 @@
   /* Layout */
   --layout-bg: hsl(0, 0%, 15%); /* Desktop - fondo oscuro que rodea todo */
   --layout-mobile-bg: hsl(0, 0%, 97%); /* Mobile - fondo claro */
-  --layout-text: hsl(0, 0%, 45%);
-  --layout-border: hsl(0, 0%, 45%);
+  --layout-text: hsl(0, 0%, 40%);
+  --layout-border: hsl(0, 0%, 40%);
+
+  /* Header */
+  --header-bg: hsl(0, 0%, 12%);
+  --header-fg: hsl(0, 0%, 90%);
+  --header-border: hsl(0, 0%, 25%);
+  --header-button-bg: transparent;
+  --header-button-fg: hsl(0, 0%, 90%);
+  --header-button-active-bg: transparent;
+  --header-button-active-fg: hsl(76, 100%, 40%);
+  --header-button-hover-bg: hsl(0, 0%, 25%);
+  --header-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 97%);
-  --main-sidebar-fg: hsl(0, 0%, 20%);
-  --main-sidebar-border: hsl(0, 0%, 85%);
+  --main-sidebar-fg: hsl(0, 0%, 40%);
+  --main-sidebar-border: hsl(0, 0%, 40%);
   --main-sidebar-button-bg: transparent;
   --main-sidebar-button-fg: hsl(0, 0%, 45%);
   --main-sidebar-button-active-bg: transparent;
@@ -207,6 +218,17 @@
   --layout-bg: hsl(0, 0%, 20%);
   --layout-text: hsl(0, 0%, 90%);
   --layout-border: hsl(0, 0%, 20%);
+
+  /* Header */
+  --header-bg: hsl(0, 0%, 12%);
+  --header-fg: hsl(0, 0%, 90%);
+  --header-border: hsl(0, 0%, 25%);
+  --header-button-bg: transparent;
+  --header-button-fg: hsl(0, 0%, 90%);
+  --header-button-active-bg: transparent;
+  --header-button-active-fg: hsl(76, 100%, 40%);
+  --header-button-hover-bg: hsl(0, 0%, 25%);
+  --header-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Main Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 12%);

@@ -110,9 +110,10 @@ export function Header() {
   
   return (
     <header 
-      className="h-12 flex items-center pl-4 pr-6"
+      className="h-12 flex items-center pl-4 pr-6 border-b"
       style={{
-        backgroundColor: "var(--main-sidebar-bg)",
+        backgroundColor: "var(--header-bg)",
+        borderColor: "var(--header-border)",
       }}
     >
       {/* Logo - Aligned with sidebar icons */}
@@ -120,7 +121,7 @@ export function Header() {
         <div 
           className="w-8 h-8 flex items-center justify-center text-sm font-bold"
           style={{
-            color: "white",
+            color: "var(--header-fg)",
           }}
         >
           A
@@ -131,9 +132,18 @@ export function Header() {
       <div className="flex items-center ml-6">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white border-0"
+          className="h-8 px-3 justify-start text-sm font-normal border-0"
           style={{
-            color: "white",
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
           }}
         >
           {currentUser?.organization?.name || "Seleccionar Organización"}
@@ -145,9 +155,18 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white border-0"
+              className="h-8 w-8 ml-1 border-0"
               style={{
-                color: "white",
+                color: "var(--header-button-fg)",
+                backgroundColor: "var(--header-button-bg)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+                e.currentTarget.style.color = "var(--header-button-hover-fg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+                e.currentTarget.style.color = "var(--header-button-fg)";
               }}
             >
               <ChevronDown className="h-3 w-3" />
@@ -181,9 +200,18 @@ export function Header() {
       <div className="flex items-center ml-4">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white border-0"
+          className="h-8 px-3 justify-start text-sm font-normal border-0"
           style={{
-            color: "white",
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
           }}
         >
           {currentProject?.name || "Seleccionar Proyecto"}
@@ -195,9 +223,18 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white border-0"
+              className="h-8 w-8 ml-1 border-0"
               style={{
-                color: "white",
+                color: "var(--header-button-fg)",
+                backgroundColor: "var(--header-button-bg)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+                e.currentTarget.style.color = "var(--header-button-hover-fg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+                e.currentTarget.style.color = "var(--header-button-fg)";
               }}
               data-testid="project-selector-dropdown"
             >

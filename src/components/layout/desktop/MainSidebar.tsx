@@ -813,11 +813,12 @@ export function MainSidebar() {
     <>
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full",
+        "bg-[var(--main-sidebar-bg)] border-r transition-all duration-300 z-30 flex flex-col h-full",
         isExpanded ? "w-64" : "w-12"
       )}
       style={{
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderColor: 'var(--main-sidebar-border)'
       }}
       onMouseEnter={() => {
         if (!isProjectPopoverOpen) {
