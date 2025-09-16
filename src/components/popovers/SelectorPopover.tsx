@@ -96,12 +96,12 @@ export function SelectorPopover({
                   <img 
                     src={item.logo_url} 
                     alt="Avatar"
-                    className="w-6 h-6 rounded-full object-cover"
+                    className="w-8 h-8 rounded-lg object-cover border border-white/20"
                   />
                 ) : (
                   <div 
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium text-white"
-                    style={{ backgroundColor: (item as any).color || 'hsl(var(--accent))' }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold text-white border border-white/20"
+                    style={{ backgroundColor: (item as any).color || 'var(--accent)' }}
                   >
                     {getInitials(item.name)}
                   </div>
