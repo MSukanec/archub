@@ -136,7 +136,15 @@ export default function SidebarButton({
               {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
             </div>
           ) : (
-            icon
+            <div 
+              style={{
+                color: isActive
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-icon-fg)`
+              }}
+            >
+              {icon}
+            </div>
           )}
         </div>
       )}
@@ -149,14 +157,28 @@ export default function SidebarButton({
           (isHeaderButton && icon === null) ? "ml-2" : // Sin margen para ARCHUB
           "ml-10" // Más margen para separar del icono
         )}>
-          <span className={cn(
-            "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
-            isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
-          )}>
+          <span 
+            className={cn(
+              "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+              isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
+            )}
+            style={{
+              color: isActive
+                ? `var(--main-sidebar-button-active-fg)`
+                : `var(--main-sidebar-button-text-fg)`
+            }}
+          >
             {label}
           </span>
           {rightIcon && (
-            <div className="flex-shrink-0 ml-2 mr-2">
+            <div 
+              className="flex-shrink-0 ml-2 mr-2"
+              style={{
+                color: isActive
+                  ? `var(--main-sidebar-button-active-fg)`
+                  : `var(--main-sidebar-button-icon-fg)`
+              }}
+            >
               {rightIcon}
             </div>
           )}
