@@ -27,7 +27,7 @@ import Projects from "@/pages/professional/organization/Projects";
 
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
 import OrganizationMovements from "@/pages/professional/finances/movements/Movements";
-import { Clients } from "@/pages/professional/project/general/clients/Clients";
+import { Clients } from "@/pages/professional/project/commercialization/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
 
 
@@ -43,9 +43,9 @@ import ConstructionTasks from "@/pages/professional/project/construction/tasks/T
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
-import Media from "@/pages/professional/project/general/media/Media";
+import Media from "@/pages/professional/general/media/Media";
 import Contacts from "@/pages/professional/organization/contacts/Contacts";
-import Calendar from "@/pages/professional/project/general/calendar/Calendar";
+import Calendar from "@/pages/professional/general/calendar/Calendar";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 
@@ -120,7 +120,7 @@ function Router() {
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/general/clients" component={Clients} />
+        <Route path="/commercialization/clients" component={Clients} />
         <Route path="/general/media" component={Media} />
         
 
@@ -155,7 +155,7 @@ function Router() {
         
         {/* Duplicate General Routes for compatibility */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/general/clients" component={Clients} />
+        <Route path="/commercialization/clients" component={Clients} />
 
 
         {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}

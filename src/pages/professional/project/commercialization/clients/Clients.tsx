@@ -40,7 +40,7 @@ export function Clients() {
       setActions({
         home: {
           id: 'home',
-          icon: <Home className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          icon: Home,
           label: 'Inicio',
           onClick: () => {
             navigate('/dashboard');
@@ -48,7 +48,7 @@ export function Clients() {
         },
         search: {
           id: 'search',
-          icon: <Search className="h-5 w-5" />,
+          icon: Search,
           label: 'Buscar',
           onClick: () => {
             // Popover is handled in MobileActionBar
@@ -56,14 +56,14 @@ export function Clients() {
         },
         create: {
           id: 'create',
-          icon: <Plus className="h-6 w-6" />,
+          icon: Plus,
           label: 'Nuevo Compromiso',
           onClick: () => openModal('project-client'),
           variant: 'primary'
         },
         filter: {
           id: 'filter',
-          icon: <Filter className="h-5 w-5" />,
+          icon: Filter,
           label: 'Filtros',
           onClick: () => {
             // Popover is handled in MobileActionBar
@@ -71,7 +71,7 @@ export function Clients() {
         },
         notifications: {
           id: 'notifications',
-          icon: <Bell className="h-6 w-6 text-gray-600 dark:text-gray-400" />,
+          icon: Bell,
           label: 'Notificaciones',
           onClick: () => {
             // Popover is handled in MobileActionBar
@@ -142,7 +142,7 @@ export function Clients() {
     },
     {
       id: "details",
-      label: "Pagos",
+      label: "Historial de Pagos",
       isActive: activeTab === "details"
     }
   ]
