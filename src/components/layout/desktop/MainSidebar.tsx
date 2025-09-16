@@ -70,6 +70,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
+import { useProjectsLite } from "@/hooks/use-projects-lite";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -258,15 +259,58 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     />
   );
 }
+// Función auxiliar para generar iniciales de proyectos
+function getProjectInitials(name: string): string {
+  return name
+    .charAt(0)
+    .toUpperCase();
+}
+
 export function MainSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   
+  // Obtener proyectos de la organización actual
+  const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
+  
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Mutación para cambiar proyecto
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!userData?.user?.id || !userData?.organization?.id) {
+        throw new Error('Usuario u organización no disponibles');
+      }
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: userData.user.id,
+            organization_id: userData.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId);
+      setSidebarLevel('project');
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+  
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate(projectId);
+  };
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
@@ -669,8 +713,9 @@ export function MainSidebar() {
         setHovered(false);
       }}
     >
-      {/* Columna izquierda - Avatar de organización */}
-      <div className="w-12 flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)]">
+      {/* Columna izquierda - Avatar de organización y proyectos */}
+      <div className="w-12 flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2">
+        {/* Avatar de organización */}
         <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
           {userData?.organization?.logo_url ? (
             <img 
@@ -687,6 +732,36 @@ export function MainSidebar() {
             </div>
           )}
         </div>
+        
+        {/* Separador visual */}
+        <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+        
+        {/* Avatares de proyectos */}
+        {projects.map((project: any) => (
+          <button
+            key={project.id}
+            onClick={() => handleProjectSelect(project.id)}
+            className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
+              selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+            )}
+          >
+            {project.project_data?.project_image_url ? (
+              <img 
+                src={project.project_data.project_image_url} 
+                alt={project.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div 
+                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+              >
+                {getProjectInitials(project.name || 'P')}
+              </div>
+            )}
+          </button>
+        ))}
       </div>
       
       {/* Columna derecha - Sidebar actual */}
