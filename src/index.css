@@ -12,7 +12,7 @@
   --layout-border: hsl(0, 0%, 45%);
 
   /* Sidebar */
-  --main-sidebar-bg: hsl(0, 0%, 15%);
+  --main-sidebar-bg: hsl(0, 0%, 97%);
   --main-sidebar-fg: hsl(0, 0%, 20%);
   --main-sidebar-border: hsl(0, 0%, 85%);
   --main-sidebar-button-bg: transparent;
@@ -23,7 +23,7 @@
   --main-sidebar-button-hover-fg: hsl(0, 0%, 20%);
 
   /* Cards */
-  --card-bg: hsl(0, 0%, 95%);
+  --card-bg: hsl(0, 0%, 97%);
   --card-fg: hsl(0, 0%, 35%);
   --card-text: hsl(0, 0%, 35%);
   --card-border: hsl(0, 0%, 90%);
