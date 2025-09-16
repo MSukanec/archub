@@ -3,7 +3,6 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import TaskList from './TaskList'
 import MaterialList from './MaterialList'
 import LaborList from './LaborList'
@@ -15,8 +14,13 @@ export default function Analysis() {
 
   // Set sidebar context on mount
   useEffect(() => {
-    setSidebarContext('recursos')
+    setSidebarContext('organization')
   }, [setSidebarContext])
+
+  // Tab change handler
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId)
+  }
 
   // Tab handlers
   const handleNewTask = () => {
@@ -61,44 +65,37 @@ export default function Analysis() {
     }
   }
 
-  // Header configuration
+  // Header configuration with dynamic tabs
   const headerProps = {
     title: "Análisis de Costos",
     icon: BarChart3,
-    actionButton: getActionButton()
+    actionButton: getActionButton(),
+    tabs: [
+      {
+        id: 'tasks',
+        label: 'Tareas',
+        isActive: activeTab === 'tasks'
+      },
+      {
+        id: 'materials',
+        label: 'Materiales',
+        isActive: activeTab === 'materials'
+      },
+      {
+        id: 'labor',
+        label: 'Mano de Obra',
+        isActive: activeTab === 'labor'
+      }
+    ],
+    onTabChange: handleTabChange
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="tasks" className="flex items-center gap-2">
-              <CheckSquare className="h-4 w-4" />
-              Tareas
-            </TabsTrigger>
-            <TabsTrigger value="materials" className="flex items-center gap-2">
-              <Package2 className="h-4 w-4" />
-              Materiales
-            </TabsTrigger>
-            <TabsTrigger value="labor" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Mano de Obra
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="tasks" className="mt-6">
-            <TaskList />
-          </TabsContent>
-
-          <TabsContent value="materials" className="mt-6">
-            <MaterialList />
-          </TabsContent>
-
-          <TabsContent value="labor" className="mt-6">
-            <LaborList onNewLabor={handleNewLabor} />
-          </TabsContent>
-        </Tabs>
+        {activeTab === 'tasks' && <TaskList />}
+        {activeTab === 'materials' && <MaterialList />}
+        {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
       </div>
     </Layout>
   )
