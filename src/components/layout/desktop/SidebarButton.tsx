@@ -66,8 +66,8 @@ export default function SidebarButton({
           'relative flex items-center transition-all duration-200 ease-out overflow-hidden',
           // Botón SIEMPRE del ancho completo disponible, altura fija 32px
           'w-full h-8',
-          // Siempre alineado al inicio para que el icono esté en posición fija
-          'justify-start pr-2'
+          // Alineación condicional: centrado cuando colapsado, al inicio cuando expandido
+          isExpanded ? 'justify-start pr-2' : 'justify-center px-0'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {

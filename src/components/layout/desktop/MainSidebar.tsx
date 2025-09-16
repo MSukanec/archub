@@ -814,7 +814,7 @@ export function MainSidebar() {
     <aside 
       className={cn(
         "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full rounded-l-2xl",
-        isExpanded ? "w-64" : "w-[60px]"
+        isExpanded ? "w-64" : "w-10"
       )}
       style={{
         overflow: 'hidden'
