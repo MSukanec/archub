@@ -33,8 +33,8 @@ export default function FinancesDashboard() {
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId)
   const defaultCurrency = organizationCurrencies?.find(c => c.is_default)?.currency
   
-  // Use current project for data queries or all projects based on view mode
-  const effectiveProjectId = viewMode === 'project' ? (projectId || "") : ""
+  // Always use organization view (all projects)
+  const effectiveProjectId = ""
   
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, 'desde-siempre')
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, 'desde-siempre')
