@@ -14,6 +14,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects } from '@/hooks/use-projects';
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
 import { useProjectContext } from '@/stores/projectContext';
+import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import type { UserData } from "@/hooks/use-current-user";
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
@@ -32,6 +33,7 @@ export default function OrganizationDashboard() {
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
   const { setSelectedProject } = useProjectContext();
+  const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
@@ -75,7 +77,9 @@ export default function OrganizationDashboard() {
       return projectId;
     },
     onSuccess: (projectId) => {
+      // Update both stores: project context and navigation
       setSelectedProject(projectId, organizationId);
+      setSidebarLevel('project');
       
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 

@@ -162,6 +162,7 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
     },
     onSuccess: (projectId) => {
       setSelectedProject(projectId);
+      setSidebarLevel('project'); // Switch to project mode
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
     }
@@ -380,6 +381,7 @@ export function MainSidebar() {
     onSuccess: (projectId) => {
       // ESTO es lo crucial que me faltaba!
       setSelectedProject(projectId, userData?.organization?.id);
+      setSidebarLevel('project'); // Switch to project mode
       
       queryClient.invalidateQueries({ 
         queryKey: ['user-organization-preferences', userData?.user?.id, userData?.organization?.id] 
@@ -489,25 +491,8 @@ export function MainSidebar() {
   }, [userData?.preferences?.sidebar_docked, setDocked]);
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   
-  // Auto-detect and set correct sidebarLevel based on current location
-  // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
-  useEffect(() => {
-    if (sidebarLevel === 'main') {
-      if (location.startsWith('/organization/')) {
-        setSidebarLevel('organization');
-      } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/') || location.startsWith('/construction/')) {
-        setSidebarLevel('project');
-        // Auto-expand construcción accordion when on construction routes
-        if (location.startsWith('/construction/')) {
-          setExpandedAccordion('construction');
-        }
-      } else if (location.startsWith('/proveedor/')) {
-        setSidebarLevel('provider');
-      } else if (location.startsWith('/admin/')) {
-        setSidebarLevel('admin');
-      }
-    }
-  }, [location, sidebarLevel, setSidebarLevel]);
+  // Sidebar level is now managed entirely through Zustand stores
+  // No URL-based detection needed - components update stores directly
   
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
