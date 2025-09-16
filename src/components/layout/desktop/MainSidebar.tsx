@@ -916,7 +916,7 @@ export function MainSidebar() {
               // Si es una sección, renderizar con líneas divisorias como Supabase
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className="h-8 flex items-center my-2">
+                  <div key={`section-${index}`} className="h-5 flex items-center my-1">
                     {isExpanded ? (
                       // Expandido: línea + texto centrado + línea
                       <div className="flex items-center w-full">
