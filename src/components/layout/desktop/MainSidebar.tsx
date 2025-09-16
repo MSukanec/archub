@@ -492,20 +492,27 @@ export function MainSidebar() {
   // Auto-detect and set correct sidebarLevel based on current location
   // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
   useEffect(() => {
+    console.log('🔧 MainSidebar: Auto-detect effect - sidebarLevel:', sidebarLevel, 'location:', location);
     if (sidebarLevel === 'main') {
       if (location.startsWith('/organization/')) {
+        console.log('🔧 MainSidebar: Auto-setting to organization');
         setSidebarLevel('organization');
       } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/') || location.startsWith('/construction/')) {
+        console.log('🔧 MainSidebar: Auto-setting to project');
         setSidebarLevel('project');
         // Auto-expand construcción accordion when on construction routes
         if (location.startsWith('/construction/')) {
           setExpandedAccordion('construction');
         }
       } else if (location.startsWith('/proveedor/')) {
+        console.log('🔧 MainSidebar: Auto-setting to provider');
         setSidebarLevel('provider');
       } else if (location.startsWith('/admin/')) {
+        console.log('🔧 MainSidebar: Auto-setting to admin');
         setSidebarLevel('admin');
       }
+    } else {
+      console.log('🔧 MainSidebar: Skipping auto-detect, sidebarLevel is not main');
     }
   }, [location, sidebarLevel, setSidebarLevel]);
   
@@ -572,6 +579,8 @@ export function MainSidebar() {
     admin: null // Admin title removed as requested
   };
   // Función para detectar qué sección debería estar expandida basándose en la ubicación actual
+  console.log('🔧 MainSidebar: Rendering with sidebarLevel:', sidebarLevel);
+  
   const getActiveSectionFromLocation = () => {
     if (location.startsWith('/organization')) return 'organizacion';
     if (location.startsWith('/design')) return 'diseno';

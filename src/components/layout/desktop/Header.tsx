@@ -158,6 +158,7 @@ export function Header() {
             e.currentTarget.style.color = "var(--header-button-fg)";
           }}
           onClick={() => {
+            console.log('🔧 Header: Clicking organization button, setting sidebar to organization');
             setSidebarLevel('organization');
             navigate('/organization/dashboard');
           }}
@@ -230,6 +231,7 @@ export function Header() {
             e.currentTarget.style.color = "var(--header-button-fg)";
           }}
           onClick={() => {
+            console.log('🔧 Header: Clicking project button, setting sidebar to project');
             setSidebarLevel('project');
             if (selectedProjectId) {
               navigate('/general/dashboard');
@@ -311,6 +313,29 @@ export function Header() {
 
       {/* Right side - utility buttons and user avatar */}
       <div className="flex-1" />
+      
+      {/* Temporary debug buttons */}
+      <div className="flex items-center gap-2 mr-4 px-2 py-1 bg-yellow-100 rounded text-xs">
+        <span>Debug:</span>
+        <button 
+          onClick={() => {
+            console.log('🔧 Debug: Force setting to organization');
+            setSidebarLevel('organization');
+          }}
+          className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+        >
+          Org
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔧 Debug: Force setting to project');
+            setSidebarLevel('project');
+          }}
+          className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+        >
+          Proj
+        </button>
+      </div>
       
       {/* Utility buttons */}
       <div className="flex items-center gap-1 mr-4">
