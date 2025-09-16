@@ -59,15 +59,12 @@ export default function SidebarButton({
     }
   };
   return (
-    <div className="relative group flex justify-center">
+    <div className="relative group">
       <button
         ref={buttonRef}
         data-active={isActive}
         className={cn(
-          "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded",
-          isExpanded 
-            ? "w-auto" // Expandido: ancho automático para contener icono + texto
-            : "w-8 justify-center", // Colapsado: cuadrado centrado
+          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded",
           "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
           !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
           "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"
@@ -81,20 +78,20 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* RAIL DE 32px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
-        <span className="shrink-0 w-8 flex items-center justify-center transition-colors duration-200">
+        {/* RAIL DE 47px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
+        <span className="shrink-0 w-12 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
                 <img 
                   src={avatarUrl} 
                   alt="Avatar"
-                  className="w-[20px] h-[20px] rounded-full"
+                  className="w-[28px] h-[28px] rounded-full"
                 />
               ) : userFullName ? (
                 <div 
                   className={cn(
-                    "w-[20px] h-[20px] rounded-full flex items-center justify-center text-xs font-medium border",
+                    "w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border",
                     projectColor ? "" : "text-current border-current"
                   )}
                   style={projectColor ? { 
@@ -118,13 +115,13 @@ export default function SidebarButton({
         {isExpanded && (
           <span 
             className={cn(
-              "text-sm whitespace-nowrap text-left pr-3 text-current",
+              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2 text-current",
               isHeaderButton ? "font-bold" : "font-normal"
             )}
           >
-            {label}
+            <span>{label}</span>
             {rightIcon && (
-              <span className="ml-2">
+              <span className="flex-shrink-0 ml-2 mr-2">
                 {rightIcon}
               </span>
             )}
