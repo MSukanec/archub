@@ -786,7 +786,10 @@ export function MainSidebar() {
 
   // Función para determinar qué acordeón está activo basado en la URL
   const getActiveAccordion = () => {
-    if (location.startsWith('/organization')) return 'organization';
+    // No activar acordeón cuando estemos en la página de resumen
+    if (location === '/organization/dashboard') return null;
+    // Solo activar acordeón "Administración" para rutas específicas de organización (no dashboard)
+    if (location.startsWith('/organization/') && location !== '/organization/dashboard') return 'organization';
     if (location.startsWith('/general')) return 'general';  
     if (location.startsWith('/construction')) return 'construction';
     if (location.startsWith('/finances')) return 'finances';
