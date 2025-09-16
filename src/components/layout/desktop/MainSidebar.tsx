@@ -1032,7 +1032,7 @@ export function MainSidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons - Outside scroll area - Asegurar que siempre sea visible */}
-      <div className="mt-auto pb-6 px-0 flex-shrink-0">
+      <div className="mt-auto pb-3 px-0 flex-shrink-0">
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
