@@ -920,15 +920,15 @@ export function MainSidebar() {
                     {isExpanded ? (
                       // Expandido: línea + texto centrado + línea
                       <div className="flex items-center w-full">
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-                        <div className="mx-3 text-[10px] font-medium uppercase tracking-wider text-[var(--main-sidebar-button-fg)]">
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
+                        <div className="mx-3 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.6 }}>
                           {item.label}
                         </div>
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
                       </div>
                     ) : (
                       // Colapsado: solo línea divisoria centrada verticalmente
-                      <div className="h-px mx-2 w-full" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+                      <div className="h-px mx-2 w-full" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
                     )}
                   </div>
                 );
