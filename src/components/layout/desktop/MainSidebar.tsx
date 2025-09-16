@@ -642,13 +642,11 @@ export function MainSidebar() {
 
   return (
     <>
-    <aside 
-      className={cn(
-        "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-col overflow-visible",
-        isExpanded ? "w-64" : "w-12"
-      )}
+    <div 
+      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
       style={{
-        height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
+        height: 'calc(100vh - 3rem)', // 3rem = 48px del header h-12
+        width: isExpanded ? '304px' : '96px' // 48px + 256px cuando expandido, 48px + 48px cuando colapsado
       }}
       onMouseEnter={() => {
         setHovered(true);
@@ -671,6 +669,33 @@ export function MainSidebar() {
         setHovered(false);
       }}
     >
+      {/* Columna izquierda - Avatar de organización */}
+      <div className="w-12 flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)]">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+          {userData?.organization?.logo_url ? (
+            <img 
+              src={userData.organization.logo_url} 
+              alt="Organización"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div 
+              className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+              style={{ backgroundColor: 'var(--accent)' }}
+            >
+              {getOrganizationInitials(userData?.organization?.name || 'O')}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Columna derecha - Sidebar actual */}
+      <aside 
+        className={cn(
+          "flex flex-col overflow-visible flex-1",
+          isExpanded ? "w-64" : "w-12"
+        )}
+      >
       {/* Navigation Items - Scrollable Content */}
       <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
         <div className="flex flex-col gap-[2px] h-full">
@@ -827,8 +852,8 @@ export function MainSidebar() {
         </div>
       </div>
       
-    </aside>
-
+      </aside>
+    </div>
     </>
   );
 }
