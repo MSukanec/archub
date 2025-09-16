@@ -19,7 +19,8 @@ import {
   Package2, 
   Users,
   Calendar,
-  Crown
+  Crown,
+  DollarSign
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -322,6 +323,29 @@ export function Header() {
       
       {/* Utility buttons */}
       <div className="flex items-center gap-1 mr-4">
+        {/* Movimientos */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/finances/movements')}
+          data-testid="header-movements"
+        >
+          <DollarSign className="h-4 w-4" />
+        </Button>
+
         {/* Contactos */}
         <Button
           variant="ghost"
