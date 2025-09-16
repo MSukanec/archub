@@ -18,7 +18,8 @@ import {
   FileText, 
   Package2, 
   Users,
-  Calendar
+  Calendar,
+  Crown
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -455,6 +456,32 @@ export function Header() {
           data-testid="header-labor"
         >
           <Users className="h-4 w-4" />
+        </Button>
+        
+        {/* Administración */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => {
+            setSidebarLevel('admin');
+            navigate('/admin/dashboard');
+          }}
+          data-testid="header-admin"
+        >
+          <Crown className="h-4 w-4" />
         </Button>
       </div>
 

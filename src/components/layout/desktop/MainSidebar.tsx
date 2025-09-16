@@ -735,14 +735,45 @@ export function MainSidebar() {
           label: 'Finanzas',
           icon: DollarSign,
           items: sidebarContent.finances || []
-        },
-
+        }
+      ];
+    } else if (sidebarLevel === 'admin') {
+      // Vista ADMINISTRACIÓN
+      return [
         {
-          type: 'accordion',
-          id: 'admin',
-          label: 'Administración',
+          type: 'button',
+          id: 'admin-dashboard',
           icon: Crown,
-          items: sidebarContent.admin || []
+          label: 'Comunidad',
+          href: '/admin/dashboard'
+        },
+        {
+          type: 'button',
+          id: 'admin-tasks',
+          icon: ListTodo,
+          label: 'Tareas',
+          href: '/admin/tasks'
+        },
+        {
+          type: 'button',
+          id: 'admin-materials',
+          icon: Database,
+          label: 'Costos',
+          href: '/admin/materials'
+        },
+        {
+          type: 'button',
+          id: 'admin-general',
+          icon: Settings,
+          label: 'General',
+          href: '/admin/general'
+        },
+        {
+          type: 'button',
+          id: 'admin-products',
+          icon: Package,
+          label: 'Productos',
+          href: '/providers/products'
         }
       ];
     } else {
