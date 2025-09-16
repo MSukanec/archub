@@ -485,23 +485,10 @@ export function Header() {
         </Button>
       </div>
 
-      {/* User Avatar */}
+      {/* User Avatar - Solo avatar 32x32px sin borde ni texto */}
       <div className="flex items-center">
-        <Button
-          variant="ghost"
-          className="h-8 px-2 gap-2"
-          style={{
-            color: "var(--header-button-fg)",
-            backgroundColor: "var(--header-button-bg)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-            e.currentTarget.style.color = "var(--header-button-hover-fg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-            e.currentTarget.style.color = "var(--header-button-fg)";
-          }}
+        <div 
+          className="cursor-pointer"
           onClick={() => navigate('/profile')}
           data-testid="header-user-avatar"
         >
@@ -509,11 +496,11 @@ export function Header() {
             <img 
               src={currentUser.user.avatar_url} 
               alt="Avatar"
-              className="w-6 h-6 rounded-full"
+              className="w-8 h-8 rounded-full"
             />
           ) : (
             <div 
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
               style={{ 
                 backgroundColor: "var(--accent)",
                 color: "var(--accent-foreground)"
@@ -522,12 +509,7 @@ export function Header() {
               {currentUser?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
           )}
-          {currentUser?.user?.full_name && (
-            <span className="text-sm font-medium">
-              {currentUser.user.full_name}
-            </span>
-          )}
-        </Button>
+        </div>
       </div>
     </header>
   );

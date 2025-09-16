@@ -1031,34 +1031,6 @@ export function MainSidebar() {
         </div>
       </div>
       
-      {/* Bottom Section - Fixed Buttons - Outside scroll area - Asegurar que siempre sea visible */}
-      <div className="mt-auto pb-3 px-0 flex-shrink-0">
-        <div className="flex flex-col gap-[2px]">
-          {/* Notifications */}
-          <ButtonSidebar
-            icon={<Bell className="w-[18px] h-[18px]" />}
-            label="Notificaciones"
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => console.log('Notificaciones clicked')}
-            variant="secondary"
-          />
-          
-          {/* User Avatar */}
-          <ButtonSidebar
-            icon={null}
-            avatarUrl={userData?.user?.avatar_url}
-            userFullName={userData?.user?.full_name}
-            label={userData?.user?.full_name || 'Usuario'}
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={() => navigate('/profile')}
-            variant="secondary"
-            disableHover={true}
-          />
-          
-        </div>
-      </div>
     </aside>
 
     {/* Popover de selección de proyecto */}
