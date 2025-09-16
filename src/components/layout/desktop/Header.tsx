@@ -12,6 +12,15 @@ import { useProjects } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { 
+  Contact, 
+  CheckSquare, 
+  FileText, 
+  Package2, 
+  Users,
+  Calendar
+} from "lucide-react";
+import { useLocation } from "wouter";
 
 function getProjectInitials(name: string): string {
   return (name?.trim()?.[0] || '').toUpperCase();
@@ -21,6 +30,7 @@ export function Header() {
   const { data: currentUser } = useCurrentUser();
   const { selectedProjectId: contextProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     currentUser?.organization?.id || ''
@@ -287,8 +297,194 @@ export function Header() {
         </DropdownMenu>
       </div>
 
-      {/* Right side - could add user profile, notifications, etc. */}
+      {/* Right side - utility buttons and user avatar */}
       <div className="flex-1" />
+      
+      {/* Utility buttons */}
+      <div className="flex items-center gap-1 mr-4">
+        {/* Contactos */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/organization/contacts')}
+          data-testid="header-contacts"
+        >
+          <Contact className="h-4 w-4" />
+        </Button>
+
+        {/* Calendar/Tablero */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/general/calendar')}
+          data-testid="header-calendar"
+        >
+          <Calendar className="h-4 w-4" />
+        </Button>
+
+        {/* Media */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/general/media')}
+          data-testid="header-media"
+        >
+          <FileText className="h-4 w-4" />
+        </Button>
+
+        {/* Tareas */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/library/tasks')}
+          data-testid="header-tasks"
+        >
+          <CheckSquare className="h-4 w-4" />
+        </Button>
+
+        {/* Materiales */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/library/materials')}
+          data-testid="header-materials"
+        >
+          <Package2 className="h-4 w-4" />
+        </Button>
+
+        {/* Mano de Obra */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-8 w-8"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/library/labor')}
+          data-testid="header-labor"
+        >
+          <Users className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* User Avatar */}
+      <div className="flex items-center">
+        <Button
+          variant="ghost"
+          className="h-8 px-2 gap-2"
+          style={{
+            color: "var(--header-button-fg)",
+            backgroundColor: "var(--header-button-bg)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+            e.currentTarget.style.color = "var(--header-button-hover-fg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+            e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => navigate('/profile')}
+          data-testid="header-user-avatar"
+        >
+          {currentUser?.user?.avatar_url ? (
+            <img 
+              src={currentUser.user.avatar_url} 
+              alt="Avatar"
+              className="w-6 h-6 rounded-full"
+            />
+          ) : (
+            <div 
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium"
+              style={{ 
+                backgroundColor: "var(--accent)",
+                color: "var(--accent-foreground)"
+              }}
+            >
+              {currentUser?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+          )}
+          {currentUser?.user?.full_name && (
+            <span className="text-sm font-medium">
+              {currentUser.user.full_name}
+            </span>
+          )}
+        </Button>
+      </div>
     </header>
   );
 }
