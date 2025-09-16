@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronDown, ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -152,7 +153,7 @@ export function Header() {
       <div className="flex items-center ml-0">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal border-0"
+          className="h-7 px-3 justify-start text-sm font-normal border-0"
           style={{
             color: "var(--header-button-fg)",
             backgroundColor: "var(--header-button-bg)",
@@ -173,13 +174,28 @@ export function Header() {
           {currentUser?.organization?.name || "Seleccionar Organización"}
         </Button>
         
+        {/* Plan Badge */}
+        {currentUser?.plan?.name && (
+          <Badge 
+            variant="secondary" 
+            className="ml-2 h-5 px-2 text-xs font-medium text-white opacity-75"
+            style={{
+              backgroundColor: currentUser.plan.name === 'Teams' ? '#3B82F6' : 
+                              currentUser.plan.name === 'Pro' ? '#10B981' : 
+                              currentUser.plan.name === 'Enterprise' ? '#8B5CF6' : '#6B7280'
+            }}
+          >
+            {currentUser.plan.name}
+          </Badge>
+        )}
+        
         {/* Organization dropdown arrow button */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1 border-0"
+              className="h-7 w-6 ml-1 border-0"
               style={{
                 color: "var(--header-button-fg)",
                 backgroundColor: "var(--header-button-bg)",
@@ -193,7 +209,7 @@ export function Header() {
                 e.currentTarget.style.color = "var(--header-button-fg)";
               }}
             >
-              <ChevronDown className="h-3 w-3" />
+              <ChevronsUpDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
@@ -225,7 +241,7 @@ export function Header() {
         <div className="flex items-center ml-4">
           <Button
             variant="ghost"
-            className="h-8 px-3 justify-start text-sm font-normal border-0"
+            className="h-7 px-3 justify-start text-sm font-normal border-0"
             style={{
               color: "var(--header-button-fg)",
               backgroundColor: "var(--header-button-bg)",
@@ -254,7 +270,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="h-8 w-8 ml-1 border-0"
+                className="h-7 w-6 ml-1 border-0"
                 style={{
                   color: "var(--header-button-fg)",
                   backgroundColor: "var(--header-button-bg)",
@@ -269,7 +285,7 @@ export function Header() {
                 }}
                 data-testid="project-selector-dropdown"
               >
-                <ChevronDown className="h-3 w-3" />
+                <ChevronsUpDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64">
