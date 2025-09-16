@@ -33,7 +33,7 @@ export function Header() {
   const { selectedProjectId: contextProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
-  const { setSidebarLevel } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     currentUser?.organization?.id || ''
@@ -217,102 +217,104 @@ export function Header() {
         </DropdownMenu>
       </div>
 
-      {/* Project Selector */}
-      <div className="flex items-center ml-4">
-        <Button
-          variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal border-0"
-          style={{
-            color: "var(--header-button-fg)",
-            backgroundColor: "var(--header-button-bg)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-            e.currentTarget.style.color = "var(--header-button-hover-fg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-            e.currentTarget.style.color = "var(--header-button-fg)";
-          }}
-          onClick={() => {
-            setSidebarLevel('project');
-            if (selectedProjectId) {
-              navigate('/project/dashboard');
-            }
-          }}
-        >
-          {currentProject?.name || "Seleccionar Proyecto"}
-        </Button>
-        
-        {/* Project dropdown arrow button */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="h-8 w-8 ml-1 border-0"
-              style={{
-                color: "var(--header-button-fg)",
-                backgroundColor: "var(--header-button-bg)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-                e.currentTarget.style.color = "var(--header-button-hover-fg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-                e.currentTarget.style.color = "var(--header-button-fg)";
-              }}
-              data-testid="project-selector-dropdown"
-            >
-              <ChevronDown className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            {isLoadingProjects ? (
-              <DropdownMenuItem disabled className="opacity-50">
-                Cargando proyectos...
-              </DropdownMenuItem>
-            ) : sortedProjects.length === 0 ? (
-              <DropdownMenuItem disabled className="opacity-50">
-                No hay proyectos disponibles
-              </DropdownMenuItem>
-            ) : (
-              sortedProjects.map((project) => (
-                <DropdownMenuItem 
-                  key={project.id}
-                  onClick={() => handleProjectSelect(project.id)}
-                  className="flex items-center gap-3 p-3"
-                  data-testid={`project-option-${project.id}`}
-                >
-                  {/* Project Avatar */}
-                  <div 
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                    style={{
-                      backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
-                    }}
-                  >
-                    {getProjectInitials(project.name)}
-                  </div>
-                  
-                  {/* Project Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{project.name}</span>
-                      {project.id === selectedProjectId && (
-                        <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground truncate block">
-                      {project.project_data?.project_type?.name || 'Sin tipo'}
-                    </span>
-                  </div>
+      {/* Project Selector - Solo mostrar cuando NO estemos en modo organización */}
+      {sidebarLevel !== 'organization' && (
+        <div className="flex items-center ml-4">
+          <Button
+            variant="ghost"
+            className="h-8 px-3 justify-start text-sm font-normal border-0"
+            style={{
+              color: "var(--header-button-fg)",
+              backgroundColor: "var(--header-button-bg)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+              e.currentTarget.style.color = "var(--header-button-hover-fg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+              e.currentTarget.style.color = "var(--header-button-fg)";
+            }}
+            onClick={() => {
+              setSidebarLevel('project');
+              if (selectedProjectId) {
+                navigate('/project/dashboard');
+              }
+            }}
+          >
+            {currentProject?.name || "Seleccionar Proyecto"}
+          </Button>
+          
+          {/* Project dropdown arrow button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="h-8 w-8 ml-1 border-0"
+                style={{
+                  color: "var(--header-button-fg)",
+                  backgroundColor: "var(--header-button-bg)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+                  e.currentTarget.style.color = "var(--header-button-hover-fg)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+                  e.currentTarget.style.color = "var(--header-button-fg)";
+                }}
+                data-testid="project-selector-dropdown"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64">
+              {isLoadingProjects ? (
+                <DropdownMenuItem disabled className="opacity-50">
+                  Cargando proyectos...
                 </DropdownMenuItem>
-              ))
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              ) : sortedProjects.length === 0 ? (
+                <DropdownMenuItem disabled className="opacity-50">
+                  No hay proyectos disponibles
+                </DropdownMenuItem>
+              ) : (
+                sortedProjects.map((project) => (
+                  <DropdownMenuItem 
+                    key={project.id}
+                    onClick={() => handleProjectSelect(project.id)}
+                    className="flex items-center gap-3 p-3"
+                    data-testid={`project-option-${project.id}`}
+                  >
+                    {/* Project Avatar */}
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                      style={{
+                        backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
+                      }}
+                    >
+                      {getProjectInitials(project.name)}
+                    </div>
+                    
+                    {/* Project Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate">{project.name}</span>
+                        {project.id === selectedProjectId && (
+                          <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground truncate block">
+                        {project.project_data?.project_type?.name || 'Sin tipo'}
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       {/* Right side - utility buttons and user avatar */}
       <div className="flex-1" />
