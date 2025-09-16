@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, UserPlus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
+import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
+import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { DataBasicTab } from './DataBasicTab';
 import { MembersTab } from './MembersTab';
 import { FinancesTab } from './FinancesTab';
@@ -11,6 +15,8 @@ export default function Preferences() {
   const [activeTab, setActiveTab] = useState('basic');
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
+  const { openModal } = useGlobalModalStore();
+  const { data: organizationMembers = [] } = useOrganizationMembers();
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -35,12 +41,27 @@ export default function Preferences() {
     }
   ];
 
+  // Create action button for members tab
+  const membersActions = activeTab === 'members' ? [
+    <PlanRestricted key="invite-member" feature="max_members" current={organizationMembers.length}>
+      <Button 
+        onClick={() => openModal('member')}
+        className="flex items-center gap-2"
+        data-testid="invite-member-button"
+      >
+        <UserPlus className="h-4 w-4" />
+        Invitar Miembro
+      </Button>
+    </PlanRestricted>
+  ] : undefined;
+
   const headerProps = {
     icon: Settings,
     title: 'Preferencias',
     subtitle: 'Gestiona los datos básicos, miembros y configuraciones financieras de tu organización',
     tabs: headerTabs,
-    onTabChange: (tabId: string) => setActiveTab(tabId)
+    onTabChange: (tabId: string) => setActiveTab(tabId),
+    actions: membersActions
   };
 
   const renderTabContent = () => {
