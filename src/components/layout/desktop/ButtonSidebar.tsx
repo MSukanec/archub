@@ -59,16 +59,15 @@ export default function SidebarButton({
     }
   };
   return (
-    <div className={cn(
-      "relative group flex items-center",
-      isExpanded ? "justify-start" : "justify-center" // Centrado cuando colapsado, alineado a la izquierda cuando expandido
-    )}>
+    <div className="relative group flex justify-center">
       <button
         ref={buttonRef}
         data-active={isActive}
         className={cn(
           "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded",
-          isExpanded ? "w-full" : "w-8 justify-center", // Cuadrado centrado cuando colapsado, ancho completo cuando expandido
+          isExpanded 
+            ? "w-auto" // Expandido: ancho automático para contener icono + texto
+            : "w-8 justify-center", // Colapsado: cuadrado centrado
           "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
           !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
           "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"
@@ -82,11 +81,8 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* Contenedor del icono - mantiene posición fija */}
-        <span className={cn(
-          "shrink-0 flex items-center justify-center transition-colors duration-200",
-          "w-8" // SIEMPRE 32px para mantener posición del icono fija
-        )}>
+        {/* RAIL DE 32px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
+        <span className="shrink-0 w-8 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
@@ -118,17 +114,17 @@ export default function SidebarButton({
           )}
         </span>
         
-        {/* Texto - aparece DENTRO del botón cuando expandido, como Supabase */}
+        {/* Texto - Solo aparece cuando expandido, SIN mover el icono */}
         {isExpanded && (
           <span 
             className={cn(
-              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-1 text-current",
+              "text-sm whitespace-nowrap text-left pr-3 text-current",
               isHeaderButton ? "font-bold" : "font-normal"
             )}
           >
-            <span>{label}</span>
+            {label}
             {rightIcon && (
-              <span className="flex-shrink-0 ml-2 mr-2">
+              <span className="ml-2">
                 {rightIcon}
               </span>
             )}
