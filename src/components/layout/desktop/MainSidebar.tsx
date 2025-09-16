@@ -622,6 +622,8 @@ export function MainSidebar() {
   const sidebarContent = {
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
+      { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
@@ -714,18 +716,6 @@ export function MainSidebar() {
           label: item.label,
           href: item.href
         })),
-        // Botones de finanzas
-        {
-          type: 'section',
-          label: 'FINANZAS'
-        },
-        ...(sidebarContent.finances || []).map(item => ({
-          type: 'button',
-          id: `finances-${item.href.split('/').pop()}`,
-          icon: item.icon,
-          label: item.label,
-          href: item.href
-        }))
       ];
       return organizationItems;
     } else if (sidebarLevel === 'admin') {
