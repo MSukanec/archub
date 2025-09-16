@@ -498,7 +498,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     
     if (hasSignificantChanges) {
       // Avoid triggering validation/dirty flags during reset
-      const resetOptions = { shouldDirty: false, shouldTouch: false, shouldValidate: false }
+      const resetOptions = { keepDirtyValues: false, keepTouched: false, keepIsValidating: false }
       form.reset({ ...currentValues, ...updatedDefaults }, resetOptions)
     }
   }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, hasLoadedInitialData, isInitialLoading, editingMovement?.created_by, editingMovement?.currency_id, editingMovement?.wallet_id, form])
