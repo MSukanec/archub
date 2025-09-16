@@ -25,7 +25,6 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 
-import Finances from "@/pages/professional/finances/dashboard/Finances";
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
 import OrganizationMovements from "@/pages/professional/finances/movements/Movements";
 import { Clients } from "@/pages/professional/project/general/clients/Clients";
@@ -152,7 +151,7 @@ function Router() {
 
 
         {/* Finances Routes */}
-        <Route path="/finances/dashboard" component={Finances} />
+        <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
 
         <Route path="/finances/capital" component={FinancesCapitalMovements} />
         <Route path="/finances/movements" component={OrganizationMovements} />
