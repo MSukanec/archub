@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { useSidebarStore } from "@/stores/sidebarStore";
 
 interface Tab {
   id: string;
@@ -114,6 +115,9 @@ export function PageLayout({
   const [searchFocused, setSearchFocused] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   
+  // Get sidebar state for padding compensation
+  const { isDocked } = useSidebarStore();
+  
   // Estado y refs para animación de tabs
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
@@ -171,7 +175,9 @@ export function PageLayout({
     <div className="flex flex-col h-full">
       {/* Page Header */}
       <div style={{ backgroundColor: "hsl(0, 0%, 95%)" }}>
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-[72px]`}>
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${
+          isDocked ? 'pl-[72px] pr-[72px]' : 'pl-[120px] pr-[72px]'
+        }`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           {/* Left: Page Title */}
