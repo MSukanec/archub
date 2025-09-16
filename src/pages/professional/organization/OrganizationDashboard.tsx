@@ -1,29 +1,111 @@
 import { useEffect } from "react";
-import { Building, Plus, Users, DollarSign, CheckSquare, FileText, HardHat, Receipt, Clock, Calendar, Kanban, Home } from "lucide-react";
+import { Building, Clock, Calendar, Home, Folder, Plus } from "lucide-react";
 import { useLocation } from 'wouter';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CustomButton } from "@/components/ui-custom/fields/CustomButton";
+import { Button } from '@/components/ui/button';
+import ProjectItem from '@/components/ui-custom/general/ProjectItem';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjects } from '@/hooks/use-projects';
+import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
+import { useProjectContext } from '@/stores/projectContext';
+import { useToast } from '@/hooks/use-toast';
 import type { UserData } from "@/hooks/use-current-user";
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
+  const { openModal } = useGlobalModalStore();
   
   const { data: userData, isLoading } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+  const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
+  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
+  const activeProjectId = userOrgPrefs?.last_project_id;
+  const { setSelectedProject } = useProjectContext();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   
   // Usar la organización actual del usuario
   const organization = (userData as UserData | undefined)?.organization ?? null;
   const currentTime = new Date();
+  
+  // Prepare projects with active flag
+  const projectsWithActive = projects.map(project => ({
+    ...project,
+    is_active: project.id === activeProjectId
+  }));
+  
+  // Put active project first
+  const sortedProjects = activeProjectId ? [
+    ...projectsWithActive.filter(project => project.id === activeProjectId),
+    ...projectsWithActive.filter(project => project.id !== activeProjectId)
+  ] : projectsWithActive;
 
+  // Mutation for selecting project
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.user?.id || !organizationId) {
+        throw new Error('Required data not available');
+      }
+      
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: organizationId,
+          last_project_id: projectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        })
+      
+      if (error) throw error
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId, organizationId);
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      toast({
+        title: "Proyecto seleccionado",
+        description: "El proyecto se ha seleccionado correctamente"
+      });
+      
+      // Navigate to project dashboard
+      setLocation('/construction/dashboard');
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      })
+    }
+  });
+
+  const handleSelectProject = (projectId: string) => {
+    selectProjectMutation.mutate(projectId);
+  };
+
+  const handleEditProject = (project: any) => {
+    openModal('project', { editingProject: project, isEditing: true });
+  };
 
   // Dashboard no debe mostrar action bar
   useEffect(() => {
@@ -54,7 +136,7 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Dashboard"
+    title: "Resumen de la Organización"
   };
 
   return (
@@ -105,86 +187,63 @@ export default function OrganizationDashboard() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Acciones Rápidas de Organización */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                Acciones Rápidas de Organización
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <CustomButton
-                icon={Plus}
-                title="Crear un nuevo proyecto"
-                description="Inicia un nuevo proyecto de construcción"
-                onClick={() => setLocation('/profile/projects')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={Users}
-                title="Crear un nuevo contacto"
-                description="Agrega un nuevo cliente o proveedor"
-                onClick={() => setLocation('/organization/contacts')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={DollarSign}
-                title="Crear un nuevo movimiento"
-                description="Registra un ingreso o egreso financiero"
-                onClick={() => setLocation('/finances/dashboard')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={Kanban}
-                title="Gestionar tablero de organización"
-                description="Administra las tareas del tablero organizacional"
-                onClick={() => setLocation('/recursos/board')}
-                showPlusIcon={true}
-              />
-            </CardContent>
-          </Card>
+        {/* Projects Section */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Folder className="h-5 w-5" />
+                Proyectos de la Organización
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Selecciona un proyecto para comenzar a trabajar
+              </p>
+            </div>
+            <Button
+              onClick={() => openModal('project', {})}
+              className="h-9 px-4 text-sm"
+              data-testid="button-create-project"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Proyecto
+            </Button>
+          </div>
 
-          {/* Acciones Rápidas de Proyecto */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <HardHat className="h-5 w-5" />
-                Acciones Rápidas de Proyecto
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <CustomButton
-                icon={CheckSquare}
-                title="Gestionar cronograma"
-                description="Administra tareas y cronograma del proyecto"
-                onClick={() => setLocation('/construction/schedule')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={FileText}
-                title="Gestionar bitácoras"
-                description="Registra el progreso y eventos del proyecto"
-                onClick={() => setLocation('/construction/logs')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={HardHat}
-                title="Gestionar subcontratos"
-                description="Administra subcontratistas y sus tareas"
-                onClick={() => setLocation('/construction/subcontracts')}
-                showPlusIcon={true}
-              />
-              <CustomButton
-                icon={Receipt}
-                title="Gestionar presupuestos"
-                description="Administra costos y presupuestos del proyecto"
-                onClick={() => setLocation('/construction/budgets')}
-                showPlusIcon={true}
-              />
-            </CardContent>
-          </Card>
+          {isLoading || projectsLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-muted-foreground">Cargando proyectos...</div>
+            </div>
+          ) : sortedProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedProjects.map((project) => (
+                <ProjectItem
+                  key={project.id}
+                  project={project}
+                  onClick={() => handleSelectProject(project.id)}
+                  onEdit={() => handleEditProject(project)}
+                  isActive={project.id === activeProjectId}
+                  projectColor={project.color || 'var(--accent)'}
+                  data-testid={`project-item-${project.id}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Folder className="w-12 h-12" />}
+              title="No hay proyectos creados"
+              description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+              action={
+                <Button
+                  onClick={() => openModal('project', {})}
+                  className="mt-4"
+                  data-testid="button-create-first-project"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuevo Proyecto
+                </Button>
+              }
+            />
+          )}
         </div>
       </div>
     </Layout>
