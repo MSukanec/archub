@@ -411,7 +411,7 @@ export default function FinancesCapitalMovements() {
 
           {activeTab === "details" && (
             <CapitalHistory
-              movements={movements}
+              movements={movements as CapitalMovement[]}
               searchValue={searchValue}
               aportesPropriosConcept={aportesPropriosConcept}
               retirosPropriosConcept={retirosPropriosConcept}
