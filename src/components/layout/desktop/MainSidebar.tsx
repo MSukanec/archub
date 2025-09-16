@@ -916,10 +916,10 @@ export function MainSidebar() {
               // Si es una sección, renderizar con líneas divisorias como Supabase
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className="flex flex-col my-2">
+                  <div key={`section-${index}`} className="h-8 flex items-center my-2">
                     {isExpanded ? (
                       // Expandido: línea + texto centrado + línea
-                      <div className="flex items-center">
+                      <div className="flex items-center w-full">
                         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
                         <div className="mx-3 text-[10px] font-medium uppercase tracking-wider text-[var(--main-sidebar-button-fg)]">
                           {item.label}
@@ -927,8 +927,8 @@ export function MainSidebar() {
                         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
                       </div>
                     ) : (
-                      // Colapsado: solo línea divisoria
-                      <div className="h-px mx-2" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+                      // Colapsado: solo línea divisoria centrada verticalmente
+                      <div className="h-px mx-2 w-full" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
                     )}
                   </div>
                 );
