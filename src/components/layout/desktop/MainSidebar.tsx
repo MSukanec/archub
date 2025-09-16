@@ -803,10 +803,11 @@ export function MainSidebar() {
     <aside 
       className={cn(
         "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-300 z-30 flex flex-col overflow-visible",
-        isExpanded ? "w-64" : "w-12",
-        // Siempre usar h-screen para asegurar altura completa y evitar que los botones se corten
-        "h-screen"
+        isExpanded ? "w-64" : "w-12"
       )}
+      style={{
+        height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
+      }}
       onMouseEnter={() => {
         if (!isProjectPopoverOpen) {
           setHovered(true);
