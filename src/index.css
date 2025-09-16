@@ -28,10 +28,10 @@
   --main-sidebar-border: hsl(0, 0%, 88%);
   --main-sidebar-button-bg: transparent;
   --main-sidebar-button-fg: hsl(0, 0%, 44%);
-  --main-sidebar-button-active-bg: hsl(0, 0%, 40%);
-  --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
-  --main-sidebar-button-hover-bg: hsl(0, 0%, 40%);
-  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-active-bg: transparent;
+  --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
+  --main-sidebar-button-hover-bg: transparent;
+  --main-sidebar-button-hover-fg: hsl(76, 100%, 40%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);
