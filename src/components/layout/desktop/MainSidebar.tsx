@@ -702,14 +702,6 @@ export function MainSidebar() {
         {
           type: 'section',
           label: 'GENERAL'
-        },
-
-        {
-          type: 'accordion',
-          id: 'admin',
-          label: 'Administración',
-          icon: Crown,
-          items: sidebarContent.admin || []
         }
       ];
     } else if (sidebarLevel === 'organization') {
@@ -812,8 +804,8 @@ export function MainSidebar() {
       className={cn(
         "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-300 z-30 flex flex-col overflow-visible",
         isExpanded ? "w-64" : "w-12",
-        // When in absolute positioning (not docked), need to specify full height explicitly
-        isDocked ? "h-full" : "h-screen"
+        // Siempre usar h-screen para asegurar altura completa y evitar que los botones se corten
+        "h-screen"
       )}
       onMouseEnter={() => {
         if (!isProjectPopoverOpen) {
@@ -891,7 +883,7 @@ export function MainSidebar() {
       */}
       
       {/* Navigation Items - Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pt-3 pb-3 px-0">
+<div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
@@ -1038,8 +1030,8 @@ export function MainSidebar() {
         </div>
       </div>
       
-      {/* Bottom Section - Fixed Buttons - Outside scroll area */}
-      <div className="pb-2 px-0 flex-shrink-0">
+      {/* Bottom Section - Fixed Buttons - Outside scroll area - Asegurar que siempre sea visible */}
+      <div className="mt-auto pb-6 px-0 flex-shrink-0">
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
