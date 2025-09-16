@@ -648,6 +648,7 @@ export function MainSidebar() {
     ],
     finances: [
       { icon: Home, label: 'Resumen de Finanzas', href: '/finances/dashboard' },
+      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' }
     ],
@@ -665,7 +666,6 @@ export function MainSidebar() {
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
     ],
     library: [
-      { icon: DollarSign, label: 'Movimientos', href: '/finances/movements' },
       { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
       { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
       { icon: FileText, label: 'Media', href: '/general/media' },

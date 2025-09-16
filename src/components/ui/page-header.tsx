@@ -20,7 +20,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn("bg-[var(--layout-bg)]", className)}>
-      <div className="max-w-[1440px] mx-auto px-6 py-4 border-b border-[var(--main-sidebar-border)]">
+      <div className="max-w-[1440px] mx-auto px-[72px] py-4 border-b border-[var(--main-sidebar-border)]">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {Icon && (
