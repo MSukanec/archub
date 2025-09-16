@@ -2,6 +2,7 @@ import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { MainSidebar } from "./MainSidebar";
 import { RightSidebar } from "./RightSidebar";
+import { Header } from "./Header";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { PageLayout } from "./PageLayout";
@@ -112,64 +113,70 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </main>
         </HeaderMobile>
       ) : (
-        /* Desktop View - New Frame Layout */
-        <div
-          className="h-[calc(100vh-16px)] flex rounded-2xl overflow-hidden shadow-lg border-2"
-          style={{ borderColor: "var(--main-sidebar-bg)" }}
-        >
-          {/* Tertiary Sidebar - Now integrated in the frame */}
-          <div className="flex-shrink-0">
-            <MainSidebar />
-          </div>
-
-          {/* Main Content Area with rounded corners and inset appearance */}
-          <main
-            className="flex-1 flex flex-col overflow-hidden rounded-2xl"
-            style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
+        /* Desktop View - New Frame Layout with Global Header */
+        <div className="h-[calc(100vh-16px)] flex flex-col">
+          {/* Global Header - Above everything */}
+          <Header />
+          
+          {/* Main Layout Frame */}
+          <div
+            className="flex-1 flex rounded-2xl overflow-hidden shadow-lg border-2"
+            style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
-            {headerProps ? (
-              <PageLayout
-                icon={headerProps.icon}
-                title={headerProps.title}
-                tabs={headerProps.tabs?.map((tab) => ({
-                  id: tab.id,
-                  label: tab.label,
-                  isActive: tab.isActive,
-                  onClick: () => headerProps.onTabChange?.(tab.id),
-                }))}
-                onTabChange={headerProps.onTabChange}
-                showHeaderSearch={headerProps.showHeaderSearch}
-                headerSearchValue={headerProps.headerSearchValue}
-                onHeaderSearchChange={headerProps.onHeaderSearchChange}
-                showCurrencySelector={headerProps.showCurrencySelector}
-                currencyView={headerProps.currencyView}
-                onCurrencyViewChange={headerProps.onCurrencyViewChange}
-                actionButton={headerProps.actionButton}
-                actions={headerProps.actions}
-                showBackButton={headerProps.showBackButton}
-                onBackClick={headerProps.onBackClick}
-                backButtonText={headerProps.backButtonText}
-                isViewMode={headerProps.isViewMode}
-                wide={wide}
-              >
+            {/* Tertiary Sidebar - Now integrated in the frame */}
+            <div className="flex-shrink-0">
+              <MainSidebar />
+            </div>
+
+            {/* Main Content Area with rounded corners and inset appearance */}
+            <main
+              className="flex-1 flex flex-col overflow-hidden rounded-2xl"
+              style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
+            >
+              {headerProps ? (
+                <PageLayout
+                  icon={headerProps.icon}
+                  title={headerProps.title}
+                  tabs={headerProps.tabs?.map((tab) => ({
+                    id: tab.id,
+                    label: tab.label,
+                    isActive: tab.isActive,
+                    onClick: () => headerProps.onTabChange?.(tab.id),
+                  }))}
+                  onTabChange={headerProps.onTabChange}
+                  showHeaderSearch={headerProps.showHeaderSearch}
+                  headerSearchValue={headerProps.headerSearchValue}
+                  onHeaderSearchChange={headerProps.onHeaderSearchChange}
+                  showCurrencySelector={headerProps.showCurrencySelector}
+                  currencyView={headerProps.currencyView}
+                  onCurrencyViewChange={headerProps.onCurrencyViewChange}
+                  actionButton={headerProps.actionButton}
+                  actions={headerProps.actions}
+                  showBackButton={headerProps.showBackButton}
+                  onBackClick={headerProps.onBackClick}
+                  backButtonText={headerProps.backButtonText}
+                  isViewMode={headerProps.isViewMode}
+                  wide={wide}
+                >
+                  <div
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-[72px] py-6 pb-32 h-full overflow-auto`}
+                  >
+                    {children}
+                  </div>
+                </PageLayout>
+              ) : (
                 <div
-                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-[72px] py-6 pb-32 h-full overflow-auto`}
+                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-[72px] md:py-6 pb-32 h-full overflow-auto`}
                 >
                   {children}
                 </div>
-              </PageLayout>
-            ) : (
-              <div
-                className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:px-[72px] md:py-6 pb-32 h-full overflow-auto`}
-              >
-                {children}
-              </div>
-            )}
-          </main>
+              )}
+            </main>
 
-          {/* Right Sidebar - New project switcher */}
-          <div className="flex-shrink-0">
-            <RightSidebar />
+            {/* Right Sidebar - New project switcher */}
+            <div className="flex-shrink-0">
+              <RightSidebar />
+            </div>
           </div>
         </div>
       )}
