@@ -96,7 +96,7 @@ export function Header() {
             color: "white",
           }}
         >
-          {currentProject?.name || "Seleccionar Proyecto"}
+          {currentProject ? currentProject.name : "Seleccionar Proyecto"}
         </Button>
         
         {/* Project dropdown arrow button */}

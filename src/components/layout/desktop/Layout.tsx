@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { MainSidebar } from "./MainSidebar";
-import { RightSidebar } from "./RightSidebar";
 import { Header } from "./Header";
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -96,7 +95,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
   return (
     <div
-      className="min-h-screen p-2"
+      className="min-h-screen"
       style={{
         backgroundColor: isMobile
           ? "var(--layout-mobile-bg)"
@@ -114,13 +113,13 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - New Frame Layout with Global Header */
-        <div className="h-[calc(100vh-16px)] flex flex-col">
+        <div className="h-screen flex flex-col">
           {/* Global Header - Above everything */}
           <Header />
           
           {/* Main Layout Frame */}
           <div
-            className="flex-1 flex rounded-2xl overflow-hidden shadow-lg border-2"
+            className="flex-1 flex overflow-hidden"
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
             {/* Tertiary Sidebar - Now integrated in the frame */}
@@ -130,7 +129,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
             {/* Main Content Area with rounded corners and inset appearance */}
             <main
-              className="flex-1 flex flex-col overflow-hidden rounded-2xl"
+              className="flex-1 flex flex-col overflow-hidden"
               style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
             >
               {headerProps ? (
@@ -173,10 +172,6 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               )}
             </main>
 
-            {/* Right Sidebar - New project switcher */}
-            <div className="flex-shrink-0">
-              <RightSidebar />
-            </div>
           </div>
         </div>
       )}
