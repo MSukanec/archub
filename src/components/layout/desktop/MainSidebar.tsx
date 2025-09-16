@@ -787,11 +787,11 @@ export function MainSidebar() {
         )}
       >
       {/* Encabezado del contexto activo */}
-      <div className="border-b border-[var(--main-sidebar-border)]">
+      <div className="border-b border-[var(--main-sidebar-border)] h-[52px] flex items-center">
         {isExpanded ? (
           // Expandido: mostrar texto
-          <div className="px-3 pt-3 pb-2">
-            <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+          <div className="px-3 w-full">
+            <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate leading-5">
               {sidebarLevel === 'organization' 
                 ? userData?.organization?.name || 'Organización'
                 : sidebarLevel === 'project' && selectedProjectId
@@ -802,7 +802,7 @@ export function MainSidebar() {
           </div>
         ) : (
           // Colapsado: mostrar avatar
-          <div className="flex justify-center pt-3 pb-2">
+          <div className="flex justify-center w-full">
             {sidebarLevel === 'organization' ? (
               // Avatar de la organización
               <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
