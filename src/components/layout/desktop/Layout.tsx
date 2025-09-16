@@ -119,18 +119,29 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           
           {/* Main Layout Frame */}
           <div
-            className="flex-1 flex overflow-hidden"
+            className="flex-1 flex overflow-hidden relative"
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
-            {/* Tertiary Sidebar - Now integrated in the frame */}
-            <div className="flex-shrink-0">
-              <MainSidebar />
-            </div>
+            {/* Tertiary Sidebar - Conditional layout based on docked state */}
+            {isDocked ? (
+              // When docked: Take up space and push content
+              <div className="flex-shrink-0">
+                <MainSidebar />
+              </div>
+            ) : (
+              // When not docked: Overlay on top of content
+              <div className="absolute top-0 left-0 z-50">
+                <MainSidebar />
+              </div>
+            )}
 
             {/* Main Content Area with rounded corners and inset appearance */}
             <main
-              className="flex-1 flex flex-col overflow-hidden"
-              style={{ backgroundColor: "hsl(0, 0%, 95%)" }}
+              className={`flex-1 flex flex-col overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+              style={{ 
+                backgroundColor: "hsl(0, 0%, 95%)",
+                marginLeft: isDocked ? '0' : '0' // No margin when not docked since sidebar is absolute
+              }}
             >
               {headerProps ? (
                 <PageLayout
