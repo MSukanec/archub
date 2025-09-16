@@ -801,6 +801,20 @@ export function MainSidebar() {
 
   const activeAccordion = getActiveAccordion();
 
+  // Sincronizar el estado del acordeón con la URL actual
+  useEffect(() => {
+    const currentActiveAccordion = getActiveAccordion();
+    console.log('🔧 Sidebar accordion sync:', { 
+      location, 
+      currentActiveAccordion, 
+      expandedAccordion,
+      shouldUpdate: currentActiveAccordion !== expandedAccordion 
+    });
+    if (currentActiveAccordion !== expandedAccordion) {
+      setExpandedAccordion(currentActiveAccordion);
+    }
+  }, [location]);
+
   return (
     <>
     <aside 
