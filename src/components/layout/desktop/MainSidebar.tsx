@@ -76,6 +76,8 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import { useProjects } from "@/hooks/use-projects";
+import { SidebarAvatarButton } from "./SidebarAvatarButton";
+import { Plus } from 'lucide-react';
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -113,14 +115,15 @@ type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | Si
 // Función auxiliar para generar iniciales de organizaciones
 function getOrganizationInitials(name: string): string {
   return name
-    .charAt(0)
-    .toUpperCase();
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 // Función auxiliar para generar iniciales de proyectos
 function getProjectInitials(name: string): string {
-  return name
-    .charAt(0)
-    .toUpperCase();
+  return (name?.trim()?.[0] || '').toUpperCase();
 }
 // Componente selector de proyectos para el header (con avatar)
 function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
@@ -393,6 +396,31 @@ export function MainSidebar() {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
     }
   });
+
+  // Handlers for organization and project selection (from RightSidebar)
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updatePreferencesMutation.mutate({
+      organizationId: userData?.organization?.id || '',
+      lastProjectId: projectId
+    });
+  };
+
+  const handleOrganizationSelect = () => {
+    // Clear project selection to show organization view
+    if (selectedProjectId === null) return; // Already in organization view
+    setSelectedProject(null);
+    // Update database to clear last_project_id
+    updatePreferencesMutation.mutate({
+      organizationId: userData?.organization?.id || '',
+      lastProjectId: null
+    });
+  };
+
+  const handleCreateProject = () => {
+    // TODO: Open create project modal
+    console.log('Create new project');
+  };
   
   // Get projects for the current organization
   const { data: projects = [] } = useProjects(currentOrganizationId || undefined);
@@ -791,16 +819,14 @@ export function MainSidebar() {
     <>
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-col overflow-visible",
+        "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex overflow-visible",
         isExpanded ? "w-64" : "w-12"
       )}
       style={{
         height: 'calc(100vh - 3rem)' // 3rem = 48px del header h-12
       }}
       onMouseEnter={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(true);
-        }
+        setHovered(true);
         // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
         if (sidebarLevel === 'project') {
           if (location.startsWith('/general')) {
@@ -817,389 +843,288 @@ export function MainSidebar() {
         }
       }}
       onMouseLeave={() => {
-        if (!isProjectPopoverOpen) {
-          setHovered(false);
-        }
+        setHovered(false);
       }}
     >
-      {/* Project Selector Header - COMMENTED OUT: Now handled by right sidebar
-      <div className={cn(
-        "h-12 flex-shrink-0 flex items-center",
-        "pl-[14px] pr-4 justify-start"
-      )}>
-        {currentProject ? (
-          <div 
-            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setIsProjectPopoverOpen(!isProjectPopoverOpen)}
+      {/* Left Column - Organization and Projects */}
+      <div className="w-12 flex-shrink-0 flex flex-col h-full">
+        {/* Organization Button */}
+        <div className="pt-3 px-2">
+          <SidebarAvatarButton
+            avatarUrl={userData?.organization?.logo_url}
+            backgroundColor="var(--accent)"
+            borderColor="rgba(255, 255, 255, 0.3)"
+            letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+            primaryText={userData?.organization?.name || 'Organización'}
+            secondaryText="Organización"
+            isExpanded={isExpanded}
+            isActive={selectedProjectId === null}
+            shape="rounded"
+            onClick={handleOrganizationSelect}
+          />
+        </div>
+        
+        {/* Create New Project Button */}
+        <div className="px-2 mt-2">
+          <div
+            className={cn(
+              "flex items-center cursor-pointer rounded-lg transition-colors duration-200",
+              "hover:bg-white/10 justify-center py-2"
+            )}
+            onClick={handleCreateProject}
+            data-testid="create-project-button"
           >
-            <div className="flex-shrink-0">
-              {currentProject.project_data?.project_image_url ? (
-                <img 
-                  src={currentProject.project_data.project_image_url} 
-                  alt="Proyecto"
-                  className="w-8 h-8 rounded-full border-2"
-                  style={{ borderColor: currentProject.color || 'var(--main-sidebar-button-bg)' }}
-                />
-              ) : (
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold border-2 text-sm"
-                  style={{ 
-                    backgroundColor: currentProject.color || 'var(--main-sidebar-button-bg)',
-                    borderColor: currentProject.color || 'var(--main-sidebar-button-bg)'
-                  }}
-                >
-                  {getProjectInitials(currentProject.name || 'P')}
-                </div>
-              )}
+            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
+                <Plus className="w-4 h-4 text-white" />
+              </div>
             </div>
             
             {isExpanded && (
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {currentProject.name}
-                </div>
-                <div className="text-xs truncate" style={{ color: 'var(--main-sidebar-button-fg)' }}>
-                  {currentProject.project_data?.project_type?.name || 'Sin tipo'}
-                </div>
+              <div className={cn(
+                "flex-1 min-w-0 leading-tight overflow-hidden transition-[max-width,opacity,transform] duration-300",
+                "ml-3 max-w-[220px] opacity-100 translate-x-0"
+              )}>
+                <p className="text-sm font-medium text-white truncate leading-tight whitespace-nowrap">
+                  Nuevo Proyecto
+                </p>
+                <p className="text-xs text-white/60 truncate leading-tight -mt-0.5 whitespace-nowrap">
+                  Crear proyecto
+                </p>
               </div>
             )}
           </div>
-        ) : isExpanded ? (
-          <span className="text-sm font-black text-black uppercase">
-            MENÚ LATERAL
-          </span>
-        ) : null}
-      </div>
-      */}
-      
-      {/* Navigation Items - Scrollable Content */}
-<div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
-        <div className="flex flex-col gap-[2px] h-full">
-          {getTertiarySidebarItems().map((item: any, index: number) => {
-              // Type guard to ensure we're working with a proper item
-              if (!item || typeof item !== 'object') {
-                return null;
-              }
-
-              // Si es un divisor, renderizar línea divisoria
-              if ('type' in item && item.type === 'divider') {
-                return (
-                  <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
-                );
-              }
-              
-              // Si es una sección, renderizar con líneas divisorias como Supabase
-              if ('type' in item && item.type === 'section') {
-                return (
-                  <div key={`section-${index}`} className="h-5 flex items-center my-1">
-                    {isExpanded ? (
-                      // Expandido: línea + texto centrado + línea
-                      <div className="flex items-center w-full">
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                        <div className="mx-3 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.6 }}>
-                          {item.label}
-                        </div>
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                      </div>
-                    ) : (
-                      // Colapsado: solo línea divisoria centrada verticalmente
-                      <div className="h-px mx-2 w-full" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                    )}
-                  </div>
-                );
-              }
-
-              // Si es un botón simple, renderizar ButtonSidebar directo
-              if ('type' in item && item.type === 'button') {
-                return (
-                  <ButtonSidebar
-                    key={`button-${item.id}`}
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={location === item.href}
-                    isExpanded={isExpanded}
-                    onClick={() => navigate(item.href)}
-                    variant="secondary"
-                  />
-                );
-              }
-
-              // Si es un acordeón, renderizar acordeón con elementos expandibles
-              if ('type' in item && item.type === 'accordion') {
-                const accordionItem = item as any;
-                const isAccordionExpanded = expandedAccordion === accordionItem.id;
-                
-                return (
-                  <div key={`accordion-${accordionItem.id}`}>
-                    {/* Botón del acordeón */}
-                    <ButtonSidebar
-                      icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
-                      label={accordionItem.label}
-                      isActive={accordionItem.id === activeAccordion}
-                      isExpanded={isExpanded}
-                      onClick={() => toggleAccordion(accordionItem.id)}
-                      variant="secondary"
-                      disableHover={true}
-                      rightIcon={isExpanded ? (
-                        <div className="transition-transform duration-200">
-                          {isAccordionExpanded ? 
-                            <ChevronUp className="w-3 h-3" /> : 
-                            <ChevronDown className="w-3 h-3" />
-                          }
-                        </div>
-                      ) : undefined}
-                    />
-                    
-                    {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
-                    {isExpanded && isAccordionExpanded && (
-                      <div className="relative">
-                        {/* Línea vertical que conecta los elementos hijos */}
-                        <div 
-                          className={cn(
-                            "absolute top-1 bottom-1 w-[1px]",
-                            isExpanded ? "left-[16px]" : "left-1/2 -translate-x-1/2"
-                          )}
-                          style={{
-                            backgroundColor: 'var(--main-sidebar-button-fg)',
-                            opacity: 0.3,
-                            zIndex: 1
-                          }}
-                        />
-                        
-                        <div className="ml-[32px]">
-                          {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
-                            const isSubItemActive = Boolean(subItem.href && location === subItem.href);
-                            return (
-                              <ButtonSidebar
-                                key={`${accordionItem.id}-${subIndex}`}
-                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                                label={subItem.label}
-                                isActive={isSubItemActive}
-                                isExpanded={isExpanded}
-                                onClick={() => {
-                                  if (subItem.href) {
-                                    navigate(subItem.href);
-                                  }
-                                }}
-                                href={subItem.href}
-                                variant="secondary"
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              // For basic sidebar items (our current structure)
-              const sidebarItem = item as SidebarItem;
-              
-              // Verificar que tengamos icon y label antes de renderizar
-              if (!sidebarItem.icon || !sidebarItem.label) {
-                return null;
-              }
-              
-              const itemKey = sidebarItem.label || `item-${index}`;
-              const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
-              const buttonElement = (
-                <ButtonSidebar
-                  icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
-                  label={sidebarItem.label}
-                  isActive={isActive}
-                  isExpanded={isExpanded}
-                  onClick={() => {
-                    if (sidebarItem.href) {
-                      navigate(sidebarItem.href);
-                    }
-                  }}
-                  href={sidebarItem.href}
-                  variant="secondary"
-                />
-              );
-              
-              return (
-                <div key={`${itemKey}-${index}`}>
-                  {buttonElement}
-                </div>
-              );
+        </div>
+        
+        {/* Separator */}
+        {sortedProjects.length > 0 && (
+          <div className="h-px bg-white/20 mx-4 my-3"></div>
+        )}
+        
+        {/* Project Buttons */}
+        <div className="px-2 space-y-2 flex-1">
+          {sortedProjects.map((project: any) => {
+            const isActive = selectedProjectId === project.id;
+            return (
+              <SidebarAvatarButton
+                key={project.id}
+                backgroundColor={project.color || 'var(--main-sidebar-button-bg)'}
+                letter={getProjectInitials(project.name)}
+                primaryText={project.name}
+                secondaryText={project.project_data?.project_type?.name || 'Sin tipo'}
+                isExpanded={isExpanded}
+                isActive={isActive}
+                shape="circular"
+                onClick={() => handleProjectSelect(project.id)}
+                testId={`project-avatar-${project.id}`}
+              />
+            );
           })}
         </div>
       </div>
       
-    </aside>
-
-    {/* Popover de selección de proyecto */}
-    {isProjectPopoverOpen && (
-      <>
-        {/* Overlay para cerrar al hacer click fuera */}
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => setIsProjectPopoverOpen(false)}
-        />
-        
-        {/* Popover */}
-        <div
-          className={cn(
-            "fixed border bg-[var(--main-sidebar-bg)] border-[var(--main-sidebar-border)] z-50 flex flex-col rounded-2xl shadow-lg",
-            "transition-all duration-300",
-            "w-64"
-          )}
-          style={{
-            left: '280px',
-            top: '8px'
-          }}
-        >
-          {/* Contenido del popover */}
+      {/* Right Column - Navigation (only visible when expanded) */}
+      {isExpanded && (
+        <div className="flex-1 flex flex-col h-full">
+          {/* Header with back button and title if needed */}
           <div className={cn(
-            "py-6",
-            isExpanded ? "pl-[14px] pr-2" : "pl-0 pr-0"
+            "h-12 flex-shrink-0 flex items-center px-4",
+            sidebarLevel === 'organization' ? "hidden" : ""
           )}>
-            <div className="flex flex-col gap-[2px]">
-              
-              {/* Organización */}
-              <div 
-                className={cn(
-                  "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
-                  isExpanded ? "px-2" : "px-0",
-                  !selectedProjectId ? "" : ""
-                )}
-                style={{
-                  backgroundColor: 'var(--main-sidebar-button-bg)'
-                }}
-                onMouseEnter={(e) => {
-                  if (!selectedProjectId) return;
-                  e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
-                }}
-                onMouseLeave={(e) => {
-                  if (!selectedProjectId) return;
-                  e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
-                }}
+            {sidebarLevel !== 'organization' && (
+              <button 
                 onClick={() => {
-                  if (userData?.organization?.id) {
-                    updatePreferencesMutation.mutate({
-                      organizationId: userData.organization.id,
-                      lastProjectId: null
-                    });
+                  switch (sidebarLevel) {
+                    case 'project':
+                    case 'admin':
+                    case 'provider':
+                      setSidebarLevel('organization');
+                      break;
+                    default:
+                      goToMainLevel();
                   }
-                  setIsProjectPopoverOpen(false);
                 }}
+                className="flex items-center space-x-2 text-sm text-white/70 hover:text-white transition-colors"
+                data-testid="back-button"
               >
-                <div className="flex items-center flex-1 min-w-0">
-                  {/* Logo/Avatar de la organización */}
-                  <div className="flex-shrink-0">
-                    {userData?.organization?.logo_url ? (
-                      <img 
-                        src={userData.organization.logo_url} 
-                        alt="Organización"
-                        className="w-6 h-6 rounded-full"
-                      />
-                    ) : (
-                      <div 
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: 'var(--accent)' }}
-                      >
-                        {getOrganizationInitials(userData?.organization?.name || 'O')}
-                      </div>
-                    )}
-                  </div>
+                <ArrowLeft className="w-4 h-4" />
+                <span>Atrás</span>
+              </button>
+            )}
+          </div>
+          
+          {/* Navigation Items - Scrollable Content */}
+          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
+            <div className="flex flex-col gap-[2px] h-full">
+              {getTertiarySidebarItems().map((item: any, index: number) => {
+                  // Type guard to ensure we're working with a proper item
+                  if (!item || typeof item !== 'object') {
+                    return null;
+                  }
+
+                  // Si es un divisor, renderizar línea divisoria
+                  if ('type' in item && item.type === 'divider') {
+                    return (
+                      <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                    );
+                  }
                   
-                  {/* Nombre de la organización */}
-                  <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {userData?.organization?.name || 'Organización'}
-                    </div>
-                  </div>
-                  
-                  {/* Indicador de organización activa */}
-                  {!selectedProjectId && (
-                    <div className="ml-2 flex-shrink-0">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Divisor */}
-              <div className="h-px my-2" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-              
-              {/* Proyectos */}
-              {sortedProjects.map((project: any) => (
-                <div 
-                  key={project.id}
-                  className={cn(
-                    "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
-                    isExpanded ? "px-2" : "px-0",
-                    selectedProjectId === project.id ? "" : ""
-                  )}
-                  style={{
-                    color: selectedProjectId === project.id ? 'var(--main-sidebar-button-active-fg)' : 'var(--main-sidebar-button-fg)',
-                    backgroundColor: 'var(--main-sidebar-button-bg)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedProjectId === project.id) return;
-                    e.currentTarget.style.color = 'var(--main-sidebar-button-active-fg)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedProjectId === project.id) return;
-                    e.currentTarget.style.color = 'var(--main-sidebar-button-fg)';
-                  }}
-                  onClick={() => {
-                    if (userData?.organization?.id) {
-                      updatePreferencesMutation.mutate({
-                        organizationId: userData.organization.id,
-                        lastProjectId: project.id
-                      });
-                    }
-                    setIsProjectPopoverOpen(false);
-                  }}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
-                    {/* Avatar del proyecto */}
-                    <div className="flex-shrink-0">
-                      {project.project_data?.project_image_url ? (
-                        <img 
-                          src={project.project_data.project_image_url} 
-                          alt="Proyecto"
-                          className="w-6 h-6 rounded-full border"
-                          style={{ borderColor: project.color || 'var(--main-sidebar-button-bg)' }}
-                        />
-                      ) : (
-                        <div 
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white font-semibold border text-xs"
-                          style={{ 
-                            backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
-                            borderColor: project.color || 'var(--main-sidebar-button-bg)'
-                          }}
-                        >
-                          {getProjectInitials(project.name || 'P')}
+                  // Si es una sección, renderizar con líneas divisorias como Supabase
+                  if ('type' in item && item.type === 'section') {
+                    return (
+                      <div key={`section-${index}`} className="h-5 flex items-center my-1">
+                        {/* Expandido: línea + texto centrado + línea */}
+                        <div className="flex items-center w-full">
+                          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
+                          <div className="mx-3 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.6 }}>
+                            {item.label}
+                          </div>
+                          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
                         </div>
-                      )}
-                    </div>
-                    
-                    {/* Nombre del proyecto */}
-                    <div className="ml-3 flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">
-                        {project.name}
                       </div>
-                    </div>
+                    );
+                  }
+
+                  // Si es un botón simple, renderizar ButtonSidebar directo
+                  if ('type' in item && item.type === 'button') {
+                    return (
+                      <ButtonSidebar
+                        key={`button-${item.id}`}
+                        icon={<item.icon className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={location === item.href}
+                        isExpanded={isExpanded}
+                        onClick={() => navigate(item.href)}
+                        variant="secondary"
+                      />
+                    );
+                  }
+
+                  // Si es un acordeón, renderizar acordeón con elementos expandibles
+                  if ('type' in item && item.type === 'accordion') {
+                    const accordionItem = item as any;
+                    const isAccordionExpanded = expandedAccordion === accordionItem.id;
                     
-                    {/* Indicador de proyecto activo */}
-                    {selectedProjectId === project.id && (
-                      <div className="ml-2 flex-shrink-0">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
+                    return (
+                      <div key={`accordion-${accordionItem.id}`}>
+                        {/* Botón del acordeón */}
+                        <ButtonSidebar
+                          icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
+                          label={accordionItem.label}
+                          isActive={accordionItem.id === activeAccordion}
+                          isExpanded={isExpanded}
+                          onClick={() => toggleAccordion(accordionItem.id)}
+                          variant="secondary"
+                          disableHover={true}
+                          rightIcon={(
+                            <div className="transition-transform duration-200">
+                              {isAccordionExpanded ? 
+                                <ChevronUp className="w-3 h-3" /> : 
+                                <ChevronDown className="w-3 h-3" />
+                              }
+                            </div>
+                          )}
+                        />
+                        
+                        {/* Elementos del acordeón expandidos */}
+                        {isAccordionExpanded && (
+                          <div className="relative">
+                            <div 
+                              className="absolute top-1 bottom-1 w-[1px] left-[16px]"
+                              style={{
+                                backgroundColor: 'var(--main-sidebar-button-fg)',
+                                opacity: 0.3,
+                                zIndex: 1
+                              }}
+                            />
+                            
+                            <div className="ml-[32px]">
+                              {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
+                                const isSubItemActive = Boolean(subItem.href && location === subItem.href);
+                                return (
+                                  <ButtonSidebar
+                                    key={`${accordionItem.id}-${subIndex}`}
+                                    icon={<subItem.icon className="w-[16px] h-[16px]" />}
+                                    label={subItem.label}
+                                    isActive={isSubItemActive}
+                                    isExpanded={isExpanded}
+                                    onClick={() => {
+                                      if (subItem.href) {
+                                        navigate(subItem.href);
+                                      }
+                                    }}
+                                    href={subItem.href}
+                                    variant="secondary"
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
+                    );
+                  }
+
+                  // For basic sidebar items
+                  const sidebarItem = item as SidebarItem;
+                  
+                  if (!sidebarItem.icon || !sidebarItem.label) {
+                    return null;
+                  }
+                  
+                  const itemKey = sidebarItem.label || `item-${index}`;
+                  const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
+                  
+                  return (
+                    <div key={`${itemKey}-${index}`}>
+                      <ButtonSidebar
+                        icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
+                        label={sidebarItem.label}
+                        isActive={isActive}
+                        isExpanded={isExpanded}
+                        onClick={() => {
+                          if (sidebarItem.href) {
+                            navigate(sidebarItem.href);
+                          }
+                        }}
+                        href={sidebarItem.href}
+                        variant="secondary"
+                      />
+                    </div>
+                  );
+              })}
             </div>
           </div>
+          
+          {/* Settings row - Always at bottom */}
+          <div className="mt-auto px-4 pb-4 flex items-center justify-between">
+            <button
+              onClick={handleThemeToggle}
+              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-5 h-5 text-white/70" />
+              ) : (
+                <Sun className="w-5 h-5 text-white/70" />
+              )}
+            </button>
+            
+            <button
+              onClick={handleDockToggle}
+              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+              title={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+            >
+              {isDocked ? (
+                <PanelLeftClose className="w-5 h-5 text-white/70" />
+              ) : (
+                <PanelLeftOpen className="w-5 h-5 text-white/70" />
+              )}
+            </button>
+          </div>
         </div>
-      </>
-    )}
+      )}
+    </aside>
+
     </>
   );
 }
