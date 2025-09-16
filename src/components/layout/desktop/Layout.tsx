@@ -137,10 +137,11 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
             {/* Main Content Area with rounded corners and inset appearance */}
             <main
-              className={`flex-1 flex flex-col overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+              className={`flex-1 flex flex-col overflow-y-auto ${!isDocked ? 'w-full' : ''}`}
               style={{ 
                 backgroundColor: "hsl(0, 0%, 95%)",
-                marginLeft: isDocked ? '0' : '0' // No margin when not docked since sidebar is absolute
+                marginLeft: isDocked ? '0' : '0', // No margin when not docked since sidebar is absolute
+                scrollbarGutter: 'stable'
               }}
             >
               {headerProps ? (
@@ -169,7 +170,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                   wide={wide}
                 >
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 h-full overflow-auto ${
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-full ${
                       isDocked ? 'pl-[72px] pr-[72px]' : 'pl-[120px] pr-[72px]'
                     }`}
                   >
@@ -178,7 +179,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 </PageLayout>
               ) : (
                 <div
-                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 h-full overflow-auto ${
+                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-full ${
                     isDocked ? 'md:pl-[72px] md:pr-[72px]' : 'md:pl-[120px] md:pr-[72px]'
                   }`}
                 >
