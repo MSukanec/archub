@@ -33,7 +33,7 @@ export function Header() {
   const { selectedProjectId: contextProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
-  const { setSidebarLevel } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     currentUser?.organization?.id || ''
@@ -217,11 +217,12 @@ export function Header() {
         </DropdownMenu>
       </div>
 
-      {/* Project Selector */}
+      {/* Project Selector - Hidden when in organization mode */}
+      {sidebarLevel !== 'organization' && (
       <div className="flex items-center ml-4">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal border-0"
+          className="h-8 px-3 justify-start text-xs font-normal border-0"
           style={{
             color: "var(--header-button-fg)",
             backgroundColor: "var(--header-button-bg)",
@@ -313,6 +314,7 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      )}
 
       {/* Right side - utility buttons and user avatar */}
       <div className="flex-1" />
