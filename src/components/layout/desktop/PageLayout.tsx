@@ -127,28 +127,44 @@ export function PageLayout({
 
   // Actualizar posición del subrayado animado
   useEffect(() => {
-    if (!hasTabs || !tabsContainerRef.current) return;
-    
-    const activeTab = tabs.find(tab => tab.isActive);
-    if (!activeTab) {
-      setUnderlineStyle({ width: 0, left: 0 });
-      return;
-    }
-    
-    // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
-    requestAnimationFrame(() => {
+    const updateUnderlinePosition = () => {
+      if (!hasTabs || !tabsContainerRef.current) return;
+      
+      const activeTab = tabs.find(tab => tab.isActive);
+      if (!activeTab) {
+        setUnderlineStyle({ width: 0, left: 0 });
+        return;
+      }
+      
       const tabButton = tabsContainerRef.current?.querySelector(`[data-tab-id="${activeTab.id}"]`) as HTMLElement;
       if (tabButton && tabsContainerRef.current) {
-        const containerRect = tabsContainerRef.current.getBoundingClientRect();
-        const tabRect = tabButton.getBoundingClientRect();
+        // Obtener posición relativa del contenedor padre
+        const tabOffsetLeft = tabButton.offsetLeft;
+        const tabWidth = tabButton.offsetWidth;
         
-        // Calcular posición relativa exacta
-        const left = tabRect.left - containerRect.left;
-        const width = tabRect.width;
+        // Obtener el padding interno del botón (px-1 = 4px cada lado)
+        const buttonPadding = 4;
+        
+        // console.log('🔧 Tab positioning:', {
+        //   activeTabId: activeTab.id,
+        //   tabOffsetLeft,
+        //   tabWidth,
+        //   tabLabel: activeTab.label,
+        //   adjustedLeft: tabOffsetLeft + buttonPadding,
+        //   adjustedWidth: tabWidth - (buttonPadding * 2)
+        // });
+        
+        // Calcular posición exacta del contenido del texto (sin el padding del botón)
+        const left = tabOffsetLeft + buttonPadding;
+        const width = tabWidth - (buttonPadding * 2);
         
         setUnderlineStyle({ width, left });
       }
-    });
+    };
+    
+    // Ejecutar inmediatamente y también después de un frame para asegurar medición correcta
+    updateUnderlinePosition();
+    requestAnimationFrame(updateUnderlinePosition);
   }, [tabs, hasTabs]);
 
   return (
@@ -397,7 +413,7 @@ export function PageLayout({
           {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
             <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)] relative overflow-hidden">
-              <div ref={tabsContainerRef} className="flex items-center space-x-6 relative w-full">
+              <div ref={tabsContainerRef} className="flex items-center relative w-full" style={{ gap: '24px' }}>
                 {tabs.map((tab) => {
                   const tabContent = (
                     <button
@@ -409,13 +425,18 @@ export function PageLayout({
                           : onTabChange?.(tab.id)
                       }
                       disabled={tab.isDisabled}
-                      className={`relative text-sm transition-colors duration-200 flex items-center gap-2 px-1 h-8 flex-shrink-0 ${
+                      className={`relative text-sm flex items-center gap-2 px-1 h-8 flex-shrink-0 min-w-0 ${
                         tab.isDisabled || tab.isRestricted
                           ? "text-muted-foreground opacity-60 cursor-not-allowed"
                           : tab.isActive
                             ? "text-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground"
+                            : "text-muted-foreground"
                       }`}
+                      style={{ 
+                        transition: 'none',
+                        transform: 'translateZ(0)',
+                        willChange: 'auto'
+                      }}
                     >
                       {tab.label}
                       {tab.badge && (
