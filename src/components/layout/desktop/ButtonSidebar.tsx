@@ -62,17 +62,18 @@ export default function SidebarButton({
     <div className="relative group">
       <button
         ref={buttonRef}
-        className="flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden"
+        data-active={isActive}
+        className={cn(
+          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded",
+          "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
+          !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
+          "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"
+        )}
         onClick={handleClick}
         onMouseEnter={(e) => {
           handleMouseEnter();
           setIsHovered(true);
         }}
-        style={{ 
-          borderRadius: '4px',
-          backgroundColor: 'transparent',
-          color: (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
-        } as React.CSSProperties}
         onMouseLeave={(e) => {
           setIsHovered(false);
         }}
@@ -89,31 +90,20 @@ export default function SidebarButton({
                 />
               ) : userFullName ? (
                 <div 
-                  className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border"
-                  style={{ 
-                    backgroundColor: projectColor || 'transparent',
-                    borderColor: projectColor 
-                      ? 'transparent' 
-                      : (isActive || isHovered)
-                      ? `var(--accent)`
-                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
-                    color: projectColor 
-                      ? 'white' 
-                      : (isActive || isHovered)
-                      ? `var(--accent)`
-                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
-                  }}
+                  className={cn(
+                    "w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-medium border",
+                    projectColor ? "" : "text-current border-current"
+                  )}
+                  style={projectColor ? { 
+                    backgroundColor: projectColor,
+                    borderColor: 'transparent',
+                    color: 'white'
+                  } : {}}
                 >
                   {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
               ) : (
-                <span 
-                  style={{
-                    color: (isActive || isHovered) 
-                      ? 'var(--accent)' 
-                      : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`)
-                  }}
-                >
+                <span className="text-current">
                   {icon}
                 </span>
               )}
@@ -125,12 +115,9 @@ export default function SidebarButton({
         {isExpanded && (
           <span 
             className={cn(
-              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2",
+              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2 text-current",
               isHeaderButton ? "font-bold" : "font-normal"
             )}
-            style={{
-              color: (isActive || isHovered) ? 'white' : 'inherit'
-            }}
           >
             <span>{label}</span>
             {rightIcon && (

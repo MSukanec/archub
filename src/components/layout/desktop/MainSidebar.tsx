@@ -779,15 +779,11 @@ export function MainSidebar() {
     <>
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] border-r transition-all duration-300 z-30 flex flex-col",
+        "bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-300 z-30 flex flex-col overflow-visible",
         isExpanded ? "w-64" : "w-12",
         // When in absolute positioning (not docked), need to specify full height explicitly
         isDocked ? "h-full" : "h-screen"
       )}
-      style={{
-        overflow: 'visible',
-        borderColor: 'var(--main-sidebar-border)'
-      }}
       onMouseEnter={() => {
         if (!isProjectPopoverOpen) {
           setHovered(true);
@@ -863,11 +859,8 @@ export function MainSidebar() {
       </div>
       */}
       
-      {/* Navigation Items */}
-      <div className={cn(
-        "flex-1 pt-3 pb-3",
-        isExpanded ? "px-2" : "px-0"
-      )}>
+      {/* Navigation Items - Scrollable Content */}
+      <div className="flex-1 overflow-y-auto pt-3 pb-3 px-0">
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
@@ -885,12 +878,9 @@ export function MainSidebar() {
               // Si es una sección, renderizar con la misma altura que un botón
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className={cn(
-                    "h-8 flex items-center mb-[2px]",
-                    isExpanded ? "px-2" : "px-0"
-                  )}>
+                  <div key={`section-${index}`} className="h-8 flex items-center mb-[2px] px-0">
                     {isExpanded && (
-                      <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
+                      <div className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--main-sidebar-button-fg)]">
                         {item.label}
                       </div>
                     )}
@@ -1017,8 +1007,8 @@ export function MainSidebar() {
         </div>
       </div>
       
-      {/* Bottom Section - Fixed Buttons */}
-      <div className="pb-3 px-0">
+      {/* Bottom Section - Fixed Buttons - Outside scroll area */}
+      <div className="pb-2 px-0 flex-shrink-0">
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
