@@ -14,13 +14,14 @@ import { useToast } from '@/hooks/use-toast'
 import { CapitalDashboard } from './CapitalDashboard'
 import { CapitalDetail } from './CapitalDetail'
 import { CapitalHistory } from './CapitalHistory'
+import { PartnersTab } from './PartnersTab'
 
 interface CapitalMovement {
   id: string
   movement_date: string
   amount: number
   description: string
-  member_id: string
+  member_id?: string
   currency_id: string
   wallet_id: string
   project_id: string
@@ -57,7 +58,7 @@ export default function FinancesCapitalMovements() {
   const organizationId = userData?.organization?.id
 
   // Get all movements for the organization
-  const { data: allMovements = [], isLoading } = useMovements(organizationId, null)
+  const { data: allMovements = [], isLoading } = useMovements(organizationId, undefined)
 
   // Get movement concepts to identify capital movements
   const { data: concepts = [] } = useQuery({
@@ -238,7 +239,7 @@ export default function FinancesCapitalMovements() {
   }, [movements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
 
   // For compatibility with existing components
-  const allMovementPartners = []
+  const allMovementPartners: any[] = []
 
   const handleAddAportePpropio = () => {
     openModal('movement', { 
@@ -318,6 +319,11 @@ export default function FinancesCapitalMovements() {
       id: "details",
       label: "Detalle de Aportes/Retiros",
       isActive: activeTab === "details"
+    },
+    {
+      id: "partners",
+      label: "Socios",
+      isActive: activeTab === "partners"
     }
   ]
 
@@ -368,26 +374,26 @@ export default function FinancesCapitalMovements() {
             icon={<DollarSign className="h-8 w-8" />}
             title="Aún no hay movimientos de capital registrados"
             description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
-            actionButtons={[
-              <Button
-                key="add-aporte"
-                onClick={handleAddAportePpropio}
-                className="bg-green-600 hover:bg-green-700 text-white"
-                data-testid="button-add-aporte-empty"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Registrar Aporte
-              </Button>,
-              <Button
-                key="add-retiro"
-                onClick={handleAddRetiroPpropio}
-                variant="outline"
-                data-testid="button-add-retiro-empty"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Registrar Retiro
-              </Button>
-            ]}
+            action={
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAddAportePpropio}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  data-testid="button-add-aporte-empty"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Registrar Aporte
+                </Button>
+                <Button
+                  onClick={handleAddRetiroPpropio}
+                  variant="outline"
+                  data-testid="button-add-retiro-empty"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Registrar Retiro
+                </Button>
+              </div>
+            }
           />
         </div>
       ) : (
@@ -416,6 +422,10 @@ export default function FinancesCapitalMovements() {
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
+          )}
+
+          {activeTab === "partners" && (
+            <PartnersTab />
           )}
         </div>
       )}

@@ -1,8 +1,5 @@
-import { useState } from 'react';
-import { HandHeart, MoreHorizontal } from 'lucide-react';
-
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { HandHeart, MoreHorizontal } from 'lucide-react';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -22,9 +20,6 @@ import { queryClient } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import { MemberCard } from '@/components/ui/cards/MemberCard';
-
-// Helper functions
 function getInitials(name: string): string {
   if (!name) return '?';
   return name
@@ -35,33 +30,12 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function isMobileDevice(): boolean {
-  return window.innerWidth < 768;
-}
-
-function getRoleBadgeVariant(role: string): "default" | "secondary" | "destructive" | "outline" {
-  if (role.includes('propietario') || role.includes('fundador')) return 'default';
-  if (role.includes('socio')) return 'secondary';
-  return 'outline';
-}
-
-function getRoleBadgeClassName(role: string): string {
-  if (role.includes('propietario') || role.includes('fundador')) return 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90';
-  return '';
-}
-
-interface MemberPartnersProps {
-  organization: any;
-}
-
-export function MemberPartners({ organization }: MemberPartnersProps) {
+export function PartnersTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   
-  const [isMobile] = useState(isMobileDevice());
-  
-  const organizationId = organization?.id;
+  const organizationId = userData?.organization?.id;
 
   // Query to get partners with their contact information
   const { data: partners = [], isLoading } = usePartners(organizationId);
@@ -109,7 +83,7 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Section Description */}
         <div className="lg:col-span-4">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-6">
             <HandHeart className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Socios</h2>
           </div>
@@ -120,7 +94,6 @@ export function MemberPartners({ organization }: MemberPartnersProps) {
 
         {/* Right Column - Partners Content */}
         <div className="lg:col-span-8">
-          
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">Cargando socios...</div>

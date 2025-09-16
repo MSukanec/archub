@@ -3,7 +3,6 @@ import { Users, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { MembersTab } from '../preferences/MembersTab';
-import { MemberPartners } from './MemberPartners';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -27,11 +26,6 @@ export default function Members() {
       id: 'Lista',
       label: 'Lista',
       isActive: activeTab === 'Lista'
-    },
-    {
-      id: 'Socios',
-      label: 'Socios',
-      isActive: activeTab === 'Socios'
     }
   ];
 
@@ -53,13 +47,6 @@ export default function Members() {
             {button}
           </PlanRestricted>
         )
-      }
-    }),
-    ...(activeTab === 'Socios' && {
-      actionButton: {
-        label: 'Ingresar Socio',
-        icon: UserPlus,
-        onClick: () => openModal('partner')
       }
     })
   };
@@ -87,7 +74,6 @@ export default function Members() {
   return (
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'Lista' && <MembersTab />}
-      {activeTab === 'Socios' && <MemberPartners organization={organization} />}
     </Layout>
   );
 }
