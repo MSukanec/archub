@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Plus } from 'lucide-react'
 
 import { Layout } from '@/components/layout/desktop/Layout'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMovements } from '@/hooks/use-movements'
 import { supabase } from '@/lib/supabase'
@@ -324,7 +325,28 @@ export default function FinancesCapitalMovements() {
     title: "Movimientos de Capital",
     icon: DollarSign,
     tabs: headerTabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actionButtons: movements.length > 0 ? [
+      <Button
+        key="add-aporte"
+        onClick={handleAddAportePpropio}
+        className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white"
+        data-testid="button-add-aporte"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Aporte
+      </Button>,
+      <Button
+        key="add-retiro"
+        onClick={handleAddRetiroPpropio}
+        variant="outline"
+        className="h-9 px-3"
+        data-testid="button-add-retiro"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Retiro
+      </Button>
+    ] : []
   }
 
   if (isLoading) {
@@ -341,11 +363,33 @@ export default function FinancesCapitalMovements() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Conditional Content - EmptyState or Tabs */}
       {movements.length === 0 ? (
-        <EmptyState
-          icon={<DollarSign className="h-8 w-8" />}
-          title="Aún no hay movimientos de capital registrados"
-          description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
-        />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <EmptyState
+            icon={<DollarSign className="h-8 w-8" />}
+            title="Aún no hay movimientos de capital registrados"
+            description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
+            actionButtons={[
+              <Button
+                key="add-aporte"
+                onClick={handleAddAportePpropio}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                data-testid="button-add-aporte-empty"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Registrar Aporte
+              </Button>,
+              <Button
+                key="add-retiro"
+                onClick={handleAddRetiroPpropio}
+                variant="outline"
+                data-testid="button-add-retiro-empty"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Registrar Retiro
+              </Button>
+            ]}
+          />
+        </div>
       ) : (
         <div className="space-y-4">
           {activeTab === "members" && memberSummary.length > 0 && (
