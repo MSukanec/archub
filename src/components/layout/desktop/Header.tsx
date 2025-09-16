@@ -71,9 +71,7 @@ export function Header() {
     onSuccess: (projectId) => {
       setSelectedProject(projectId);
       setSidebarLevel('project'); // Switch to project mode
-      if (projectId) {
-        navigate('/project/dashboard'); // Navigate to project dashboard
-      }
+      // No navegamos automáticamente - solo cambiamos el proyecto activo
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
     }

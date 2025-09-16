@@ -117,6 +117,9 @@ export default function Projects() {
       });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
+      // Navegar al resumen del proyecto
+      navigate('/project/dashboard');
+      
       toast({
         title: "Proyecto seleccionado",
         description: "El proyecto se ha seleccionado correctamente"
