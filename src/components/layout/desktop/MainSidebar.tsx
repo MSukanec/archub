@@ -639,7 +639,6 @@ export function MainSidebar() {
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     organization: [
-      { icon: Home, label: 'Dashboard', href: '/organization/dashboard' },
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
       { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
