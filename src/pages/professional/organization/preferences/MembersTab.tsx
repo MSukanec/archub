@@ -55,18 +55,14 @@ function getRoleBadgeClassName(roleName: string) {
   return '';
 }
 
-interface MemberListProps {
-  organization: any;
-}
-
-export function MemberList({ organization }: MemberListProps) {
+export function MembersTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
 
   const isMobile = useMobile();
 
-  const organizationId = organization?.id;
+  const organizationId = userData?.organization?.id;
 
   // Fetch organization members
   const { data: members = [], isLoading: membersLoading } = useQuery({
@@ -185,7 +181,7 @@ export function MemberList({ organization }: MemberListProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Section Description */}
         <div className="lg:col-span-4">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-6">
             <Users className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Miembros</h2>
           </div>
@@ -303,7 +299,7 @@ export function MemberList({ organization }: MemberListProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Guests Section Description */}
         <div className="lg:col-span-4">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-6">
             <UserCheck className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Invitados</h2>
           </div>
@@ -318,9 +314,11 @@ export function MemberList({ organization }: MemberListProps) {
           {isMobile ? (
             <div className="space-y-3">
               {guests.map((guest) => (
-                <MemberCard 
+                <MemberRow
                   key={guest.id} 
                   member={guest}
+                  onClick={() => {}}
+                  density="normal"
                 />
               ))}
               {guests.length === 0 && (
@@ -412,7 +410,7 @@ export function MemberList({ organization }: MemberListProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Pending Invites Section Description */}
         <div className="lg:col-span-4">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-6">
             <Clock className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
           </div>

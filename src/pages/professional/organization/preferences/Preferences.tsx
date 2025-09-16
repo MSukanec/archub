@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { DataBasicTab } from './DataBasicTab';
+import { MembersTab } from './MembersTab';
 import { FinancesTab } from './FinancesTab';
 
 export default function Preferences() {
@@ -23,6 +24,11 @@ export default function Preferences() {
       isActive: activeTab === 'basic'
     },
     {
+      id: 'members',
+      label: 'Miembros',
+      isActive: activeTab === 'members'
+    },
+    {
       id: 'finances',
       label: 'Finanzas',
       isActive: activeTab === 'finances'
@@ -32,7 +38,7 @@ export default function Preferences() {
   const headerProps = {
     icon: Settings,
     title: 'Preferencias',
-    subtitle: 'Gestiona los datos básicos y configuraciones financieras de tu organización',
+    subtitle: 'Gestiona los datos básicos, miembros y configuraciones financieras de tu organización',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId)
   };
@@ -41,6 +47,8 @@ export default function Preferences() {
     switch (activeTab) {
       case 'basic':
         return <DataBasicTab />;
+      case 'members':
+        return <MembersTab />;
       case 'finances':
         return <FinancesTab />;
       default:

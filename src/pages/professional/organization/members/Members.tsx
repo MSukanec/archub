@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Users, UserPlus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
-import { MemberList } from './MemberList';
+import { MembersTab } from '../preferences/MembersTab';
 import { MemberPartners } from './MemberPartners';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -86,7 +86,7 @@ export default function Members() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {activeTab === 'Lista' && <MemberList organization={organization} />}
+      {activeTab === 'Lista' && <MembersTab />}
       {activeTab === 'Socios' && <MemberPartners organization={organization} />}
     </Layout>
   );
