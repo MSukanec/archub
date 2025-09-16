@@ -33,9 +33,6 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   },
   // Estados para los niveles del sidebar
   sidebarLevel: 'main',
-  setSidebarLevel: (level: SidebarLevel) => {
-    console.log('🔧 NavigationStore: Setting sidebar level to:', level);
-    set({ sidebarLevel: level });
-  },
+  setSidebarLevel: (level: SidebarLevel) => set({ sidebarLevel: level }),
   goToMainLevel: () => set({ sidebarLevel: 'main' }),
 }))

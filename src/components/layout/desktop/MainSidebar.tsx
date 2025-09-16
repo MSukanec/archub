@@ -492,27 +492,20 @@ export function MainSidebar() {
   // Auto-detect and set correct sidebarLevel based on current location
   // Only set automatically when sidebarLevel is 'main' (initial state) to avoid interfering with user navigation
   useEffect(() => {
-    console.log('🔧 MainSidebar: Auto-detect effect - sidebarLevel:', sidebarLevel, 'location:', location);
     if (sidebarLevel === 'main') {
       if (location.startsWith('/organization/')) {
-        console.log('🔧 MainSidebar: Auto-setting to organization');
         setSidebarLevel('organization');
       } else if (location.startsWith('/project/') || location.startsWith('/general/') || location.startsWith('/design/') || location.startsWith('/finances/') || location.startsWith('/construction/')) {
-        console.log('🔧 MainSidebar: Auto-setting to project');
         setSidebarLevel('project');
         // Auto-expand construcción accordion when on construction routes
         if (location.startsWith('/construction/')) {
           setExpandedAccordion('construction');
         }
       } else if (location.startsWith('/proveedor/')) {
-        console.log('🔧 MainSidebar: Auto-setting to provider');
         setSidebarLevel('provider');
       } else if (location.startsWith('/admin/')) {
-        console.log('🔧 MainSidebar: Auto-setting to admin');
         setSidebarLevel('admin');
       }
-    } else {
-      console.log('🔧 MainSidebar: Skipping auto-detect, sidebarLevel is not main');
     }
   }, [location, sidebarLevel, setSidebarLevel]);
   
@@ -579,7 +572,6 @@ export function MainSidebar() {
     admin: null // Admin title removed as requested
   };
   // Función para detectar qué sección debería estar expandida basándose en la ubicación actual
-  console.log('🔧 MainSidebar: Rendering with sidebarLevel:', sidebarLevel);
   
   const getActiveSectionFromLocation = () => {
     if (location.startsWith('/organization')) return 'organizacion';
@@ -677,11 +669,9 @@ export function MainSidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
-  // Función para obtener el contenido del sidebar basado en el contexto (organización vs proyecto)
+  // Función para obtener el contenido del sidebar basado en el sidebarLevel
   const getTertiarySidebarItems = () => {
-    const isProjectView = !!selectedProjectId;
-    
-    if (isProjectView) {
+    if (sidebarLevel === 'project') {
       // Vista PROYECTO: cuando hay un proyecto seleccionado
       return [
         {
@@ -722,8 +712,8 @@ export function MainSidebar() {
           items: sidebarContent.admin || []
         }
       ];
-    } else {
-      // Vista ORGANIZACIÓN: cuando no hay proyecto seleccionado
+    } else if (sidebarLevel === 'organization') {
+      // Vista ORGANIZACIÓN
       return [
         {
           type: 'button',
@@ -763,6 +753,9 @@ export function MainSidebar() {
           items: sidebarContent.admin || []
         }
       ];
+    } else {
+      // Default fallback para otros estados del sidebar
+      return [];
     }
   };
 
