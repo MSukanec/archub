@@ -75,9 +75,19 @@ export default function SidebarButton({
           setIsHovered(true);
           if (!isActive && !disableHover) {
             const hoverBgVar = variant === 'secondary' ? 'var(--main-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
-            const hoverFgVar = variant === 'secondary' ? 'var(--main-sidebar-button-hover-fg)' : 'var(--main-sidebar-button-hover-fg)';
             e.currentTarget.style.backgroundColor = hoverBgVar;
-            e.currentTarget.style.color = hoverFgVar;
+            
+            // Aplicar hover colors a iconos y texto por separado
+            const iconElements = e.currentTarget.querySelectorAll('[data-icon]');
+            const textElements = e.currentTarget.querySelectorAll('[data-text]');
+            
+            iconElements.forEach(el => {
+              (el as HTMLElement).style.color = 'var(--main-sidebar-button-hover-icon-fg)';
+            });
+            
+            textElements.forEach(el => {
+              (el as HTMLElement).style.color = 'var(--main-sidebar-button-hover-text-fg)';
+            });
           }
         }}
         style={{ 
@@ -97,9 +107,19 @@ export default function SidebarButton({
         setIsHovered(false);
         if (!isActive && !disableHover) {
           const normalBgVar = variant === 'secondary' ? 'var(--main-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
-          const normalFgVar = variant === 'secondary' ? 'var(--main-sidebar-button-fg)' : 'var(--main-sidebar-button-fg)';
           e.currentTarget.style.backgroundColor = normalBgVar;
-          e.currentTarget.style.color = normalFgVar;
+          
+          // Restaurar colores normales a iconos y texto por separado
+          const iconElements = e.currentTarget.querySelectorAll('[data-icon]');
+          const textElements = e.currentTarget.querySelectorAll('[data-text]');
+          
+          iconElements.forEach(el => {
+            (el as HTMLElement).style.color = 'var(--main-sidebar-button-icon-fg)';
+          });
+          
+          textElements.forEach(el => {
+            (el as HTMLElement).style.color = 'var(--main-sidebar-button-text-fg)';
+          });
         }
       }}
     >
@@ -137,9 +157,10 @@ export default function SidebarButton({
             </div>
           ) : (
             <div 
+              data-icon
               style={{
                 color: isActive
-                  ? `var(--main-sidebar-button-active-fg)`
+                  ? `var(--main-sidebar-button-active-icon-fg)`
                   : `var(--main-sidebar-button-icon-fg)`
               }}
             >
@@ -158,13 +179,14 @@ export default function SidebarButton({
           "ml-10" // Más margen para separar del icono
         )}>
           <span 
+            data-text
             className={cn(
               "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
               isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
             )}
             style={{
               color: isActive
-                ? `var(--main-sidebar-button-active-fg)`
+                ? `var(--main-sidebar-button-active-text-fg)`
                 : `var(--main-sidebar-button-text-fg)`
             }}
           >
@@ -172,10 +194,11 @@ export default function SidebarButton({
           </span>
           {rightIcon && (
             <div 
+              data-icon
               className="flex-shrink-0 ml-2 mr-2"
               style={{
                 color: isActive
-                  ? `var(--main-sidebar-button-active-fg)`
+                  ? `var(--main-sidebar-button-active-icon-fg)`
                   : `var(--main-sidebar-button-icon-fg)`
               }}
             >
