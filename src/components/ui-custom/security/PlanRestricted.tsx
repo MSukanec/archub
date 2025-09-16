@@ -10,7 +10,6 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectContext } from "@/stores/projectContext";
 
 interface PlanRestrictedProps {
@@ -40,8 +39,6 @@ export function PlanRestricted({
   // Verificar proyecto seleccionado
   const { selectedProjectId } = useProjectContext();
 
-  // Verificar si el usuario es administrador
-  const isAdmin = useIsAdmin();
 
   // Determinar si está restringido
   let isRestricted = false;
@@ -131,18 +128,8 @@ export function PlanRestricted({
     );
   }
 
-  // Plan restrictions (max_members, max_projects, etc.) apply to admins too
-  const isPlanRestriction =
-    feature &&
-    (feature.startsWith("max_") ||
-      feature.startsWith("allow_") ||
-      ["max_members", "max_projects", "max_organizations", "allow_exchange_rate", "allow_secondary_currencies"].includes(feature));
-
-  // Si es administrador, permitir acceso EXCEPTO para restricciones de plan y "general_mode"
-  // Las restricciones de plan se aplican incluso a administradores
-  if (isAdmin && reason !== "general_mode" && !isPlanRestriction) {
-    return <>{children}</>;
-  }
+  // Eliminar completamente la lógica de bypass para admins
+  // Las restricciones de plan se aplican a TODOS los usuarios, incluyendo administradores
 
   // Lógica dinámica para determinar el plan objetivo
   let dynamicRestriction = getRestrictionMessage(restrictionKey);
