@@ -135,15 +135,20 @@ export function PageLayout({
       return;
     }
     
-    const tabButton = tabsContainerRef.current.querySelector(`[data-tab-id="${activeTab.id}"]`) as HTMLElement;
-    if (tabButton) {
-      const containerRect = tabsContainerRef.current.getBoundingClientRect();
-      const tabRect = tabButton.getBoundingClientRect();
-      const left = tabRect.left - containerRect.left;
-      const width = tabRect.width;
-      
-      setUnderlineStyle({ width, left });
-    }
+    // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
+    requestAnimationFrame(() => {
+      const tabButton = tabsContainerRef.current?.querySelector(`[data-tab-id="${activeTab.id}"]`) as HTMLElement;
+      if (tabButton && tabsContainerRef.current) {
+        const containerRect = tabsContainerRef.current.getBoundingClientRect();
+        const tabRect = tabButton.getBoundingClientRect();
+        
+        // Calcular posición relativa exacta
+        const left = tabRect.left - containerRect.left;
+        const width = tabRect.width;
+        
+        setUnderlineStyle({ width, left });
+      }
+    });
   }, [tabs, hasTabs]);
 
   return (
@@ -391,58 +396,59 @@ export function PageLayout({
 
           {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
-            <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)] relative">
-            <div ref={tabsContainerRef} className="flex items-center space-x-6 relative">
-              {tabs.map((tab) => {
-                const tabContent = (
-                  <button
-                    key={tab.id}
-                    data-tab-id={tab.id}
-                    onClick={() =>
-                      tab.isDisabled || tab.isRestricted
-                        ? undefined
-                        : onTabChange?.(tab.id)
-                    }
-                    disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-200 flex items-center gap-2 px-1 h-8 ${
-                      tab.isDisabled || tab.isRestricted
-                        ? "text-muted-foreground opacity-60 cursor-not-allowed"
-                        : tab.isActive
-                          ? "text-foreground font-medium"
-                          : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-
-                // Si la tab está restringida, envolverla con PlanRestricted
-                if (tab.isRestricted && tab.restrictionReason) {
-                  return (
-                    <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
-                      {tabContent}
-                    </PlanRestricted>
+            <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)] relative overflow-hidden">
+              <div ref={tabsContainerRef} className="flex items-center space-x-6 relative w-full">
+                {tabs.map((tab) => {
+                  const tabContent = (
+                    <button
+                      key={tab.id}
+                      data-tab-id={tab.id}
+                      onClick={() =>
+                        tab.isDisabled || tab.isRestricted
+                          ? undefined
+                          : onTabChange?.(tab.id)
+                      }
+                      disabled={tab.isDisabled}
+                      className={`relative text-sm transition-colors duration-200 flex items-center gap-2 px-1 h-8 flex-shrink-0 ${
+                        tab.isDisabled || tab.isRestricted
+                          ? "text-muted-foreground opacity-60 cursor-not-allowed"
+                          : tab.isActive
+                            ? "text-foreground font-medium"
+                            : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab.label}
+                      {tab.badge && (
+                        <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                          {tab.badge}
+                        </span>
+                      )}
+                    </button>
                   );
-                }
 
-                return tabContent;
-              })}
-              
-              {/* Subrayado animado dinámico */}
-              <div
-                className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out"
-                style={{
-                  width: `${underlineStyle.width}px`,
-                  transform: `translateX(${underlineStyle.left}px)`,
-                  opacity: underlineStyle.width > 0 ? 1 : 0
-                }}
-              />
-            </div>
+                  // Si la tab está restringida, envolverla con PlanRestricted
+                  if (tab.isRestricted && tab.restrictionReason) {
+                    return (
+                      <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
+                        {tabContent}
+                      </PlanRestricted>
+                    );
+                  }
+
+                  return tabContent;
+                })}
+                
+                {/* Subrayado animado dinámico */}
+                <div
+                  className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out pointer-events-none"
+                  style={{
+                    width: `${underlineStyle.width}px`,
+                    transform: `translateX(${underlineStyle.left}px)`,
+                    opacity: underlineStyle.width > 0 ? 1 : 0,
+                    left: 0
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
