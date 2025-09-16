@@ -81,7 +81,7 @@ export default function SidebarButton({
           }
         }}
         style={{ 
-        borderRadius: '4px', // All buttons have 4px rounded corners
+        borderRadius: '6px', // Supabase-style rounded corners
         backgroundColor: isActive && !isExpanded
           ? `var(--main-sidebar-bg)` // Botón activo del sidebar primario usa color del secundario
           : isActive
@@ -103,9 +103,13 @@ export default function SidebarButton({
         }
       }}
     >
-      {/* Contenedor del icono - SIEMPRE centrado en 32x32px, no mostrar para hijos o cuando es header ARCHUB */}
+      {/* Contenedor del icono - EXACTAMENTE como Supabase: 32x32px perfectamente centrado */}
       {!isChild && !(isHeaderButton && icon === null) && (
-        <div className="absolute left-0 top-0 w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className={cn(
+          "absolute top-0 flex items-center justify-center flex-shrink-0",
+          "w-8 h-8", // 32x32px como Supabase
+          "left-1" // Siempre a 4px del borde izquierdo como en Supabase
+        )}>
           {avatarUrl ? (
             <img 
               src={avatarUrl} 

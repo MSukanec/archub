@@ -813,7 +813,7 @@ export function MainSidebar() {
     <>
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full rounded-l-2xl",
+        "bg-[var(--main-sidebar-bg)] transition-all duration-300 z-30 flex flex-col h-full",
         isExpanded ? "w-64" : "w-10"
       )}
       style={{
