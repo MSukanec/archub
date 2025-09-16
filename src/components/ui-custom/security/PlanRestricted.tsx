@@ -40,6 +40,7 @@ export function PlanRestricted({
   const { selectedProjectId } = useProjectContext();
 
 
+
   // Determinar si está restringido
   let isRestricted = false;
   let restrictionKey = "";

@@ -16,7 +16,7 @@ export default function Preferences() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
-  const { data: organizationMembers = [] } = useOrganizationMembers();
+  const { data: organizationMembers = [] } = useOrganizationMembers(userData?.organization?.id);
 
   // Set sidebar context on mount
   useEffect(() => {
