@@ -85,7 +85,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   const getInitialState = () => {
     if (location === '/organization/dashboard') return { level: 'main', section: null, subsection: null };
     if (location.startsWith('/organization')) return { level: 'section', section: 'organization', subsection: null };
-    if (location.startsWith('/professional/library')) return { level: 'section', section: 'library', subsection: null };
+    if (location.startsWith('/analysis')) return { level: 'section', section: 'library', subsection: null };
     if (location.startsWith('/proveedor')) return { level: 'section', section: 'provider', subsection: null };
     if (location.startsWith('/admin')) return { level: 'section', section: 'admin', subsection: null };
     
@@ -354,9 +354,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { type: 'divider' }
       ],
       library: [
-        { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
-        { icon: Package2, label: 'Materiales', href: '/library/materials' },
-        { icon: Users, label: 'Mano de Obra', href: '/library/labor' }
+        { icon: BarChart3, label: 'Análisis de Costos', href: '/analysis' }
       ],
       admin: [
         { icon: Crown, label: 'Comunidad', href: '/admin/dashboard' },
@@ -407,7 +405,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         'organization': 'Organización',
         'project': 'Proyecto',
         'construction': 'Construcción',
-        'library': 'Biblioteca',
+        'library': 'Análisis',
         'admin': 'Administración'
       };
       return titleMap[selectedSection as keyof typeof titleMap] || 'Menú';

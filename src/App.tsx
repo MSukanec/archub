@@ -69,11 +69,9 @@ import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 // Provider Pages  
 import Products from "@/pages/providers/products/Products";
 
-// Library Pages
-import Tasks from "@/pages/professional/library/tasks/Tasks";
-import TaskView from "@/pages/professional/library/tasks/TaskView";
-import Materials from "@/pages/professional/library/materials/Materials";
-import Labor from "@/pages/professional/library/labor/Labor";
+// Analysis Pages
+import Analysis from "@/pages/professional/analysis/Analysis";
+import TaskView from "@/pages/professional/analysis/TaskView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
 
@@ -148,10 +146,8 @@ function Router() {
         <Route path="/construction/personnel" component={ConstructionPersonnel} />
         <Route path="/construction/budgets" component={ConstructionBudgets} />
         <Route path="/construction/materials" component={ConstructionMaterials} />
-        <Route path="/library/tasks" component={Tasks} />
-        <Route path="/library/tasks/:id" component={TaskView} />
-        <Route path="/library/materials" component={Materials} />
-        <Route path="/library/labor" component={Labor} />
+        <Route path="/analysis" component={Analysis} />
+        <Route path="/analysis/:id" component={TaskView} />
         
 
 
