@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { CapitalDashboard } from './CapitalDashboard'
 import { CapitalHistory } from './CapitalHistory'
 import { PartnersTab } from './PartnersTab'
+import DashboardTab from './DashboardTab'
 
 interface CapitalMovement {
   id: string
@@ -43,11 +44,12 @@ interface CapitalMovement {
   category_name?: string
   subcategory_name?: string
   type_name?: string
+  partner?: string
 }
 
 export default function FinancesCapitalMovements() {
   const [searchValue, setSearchValue] = useState("")
-  const [activeTab, setActiveTab] = useState("members")
+  const [activeTab, setActiveTab] = useState("dashboard")
   
   const { data: userData } = useCurrentUser()
   const { openModal } = useGlobalModalStore()
@@ -305,14 +307,14 @@ export default function FinancesCapitalMovements() {
   // Create tabs for the header
   const headerTabs = [
     {
+      id: "dashboard",
+      label: "Resumen Financiero",
+      isActive: activeTab === "dashboard"
+    },
+    {
       id: "members",
       label: "Resumen por Socio",
       isActive: activeTab === "members"
-    },
-    {
-      id: "currencies",
-      label: "Detalle por Moneda", 
-      isActive: activeTab === "currencies"
     },
     {
       id: "details",
@@ -397,15 +399,14 @@ export default function FinancesCapitalMovements() {
         </div>
       ) : (
         <div className="space-y-4">
+          {activeTab === "dashboard" && (
+            <DashboardTab />
+          )}
+
           {activeTab === "members" && memberSummary.length > 0 && (
             <CapitalDashboard memberSummary={memberSummary} />
           )}
 
-          {activeTab === "currencies" && memberSummary.length > 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Funcionalidad temporalmente no disponible</p>
-            </div>
-          )}
 
           {activeTab === "details" && (
             <CapitalHistory
