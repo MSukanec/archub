@@ -17,10 +17,9 @@ export function Header() {
   
   return (
     <header 
-      className="h-10 flex items-center px-6 border-b"
+      className="h-10 flex items-center pl-4 pr-6"
       style={{
         backgroundColor: "var(--main-sidebar-bg)",
-        borderColor: "var(--main-sidebar-border)",
       }}
     >
       {/* Logo - Aligned with sidebar icons */}
@@ -40,9 +39,9 @@ export function Header() {
       <div className="flex items-center ml-6">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white"
+          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white border-0"
           style={{
-            color: "var(--main-sidebar-fg)",
+            color: "white",
           }}
         >
           {currentUser?.organization?.name || "Seleccionar Organización"}
@@ -54,9 +53,9 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white"
+              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white border-0"
               style={{
-                color: "var(--main-sidebar-fg-muted)",
+                color: "white",
               }}
             >
               <ChevronDown className="h-3 w-3" />
@@ -92,11 +91,9 @@ export function Header() {
       <div className="flex items-center ml-4">
         <Button
           variant="ghost"
-          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white"
+          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white border-0"
           style={{
-            color: currentProject 
-              ? "var(--main-sidebar-fg)" 
-              : "var(--main-sidebar-fg-muted)",
+            color: "white",
           }}
         >
           {currentProject?.name || "Seleccionar Proyecto"}
@@ -108,9 +105,9 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white"
+              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white border-0"
               style={{
-                color: "var(--main-sidebar-fg-muted)",
+                color: "white",
               }}
             >
               <ChevronDown className="h-3 w-3" />
