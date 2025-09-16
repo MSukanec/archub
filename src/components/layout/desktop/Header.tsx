@@ -38,32 +38,15 @@ export function Header() {
 
       {/* Organization Selector */}
       <div className="flex items-center ml-6">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 px-3 justify-start text-sm font-normal"
-              style={{
-                color: "var(--main-sidebar-fg)",
-              }}
-            >
-              {currentUser?.organization?.name || "Seleccionar Organización"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            {currentUser?.organizations?.map((org) => (
-              <DropdownMenuItem 
-                key={org.id}
-                onClick={() => {
-                  // TODO: Implement organization switching
-                  console.log("Switch to organization:", org.name);
-                }}
-              >
-                {org.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="ghost"
+          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white"
+          style={{
+            color: "var(--main-sidebar-fg)",
+          }}
+        >
+          {currentUser?.organization?.name || "Seleccionar Organización"}
+        </Button>
         
         {/* Organization dropdown arrow button */}
         <DropdownMenu>
@@ -71,7 +54,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1"
+              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white"
               style={{
                 color: "var(--main-sidebar-fg-muted)",
               }}
@@ -79,7 +62,7 @@ export function Header() {
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align="start" className="w-56">
             {currentUser?.organizations?.map((org) => (
               <DropdownMenuItem 
                 key={org.id}
@@ -87,7 +70,17 @@ export function Header() {
                   // TODO: Implement organization switching
                   console.log("Switch to organization:", org.name);
                 }}
+                className="flex items-center gap-2"
               >
+                <div 
+                  className="w-4 h-4 rounded flex items-center justify-center text-xs font-bold"
+                  style={{
+                    backgroundColor: org.id === currentUser?.organization?.id ? "var(--accent)" : "var(--muted)",
+                    color: org.id === currentUser?.organization?.id ? "var(--primary-foreground)" : "var(--muted-foreground)",
+                  }}
+                >
+                  {org.name.charAt(0).toUpperCase()}
+                </div>
                 {org.name}
               </DropdownMenuItem>
             ))}
@@ -97,32 +90,17 @@ export function Header() {
 
       {/* Project Selector */}
       <div className="flex items-center ml-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 px-3 justify-start text-sm font-normal"
-              style={{
-                color: currentProject 
-                  ? "var(--main-sidebar-fg)" 
-                  : "var(--main-sidebar-fg-muted)",
-              }}
-            >
-              {currentProject?.name || "Seleccionar Proyecto"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem>
-              Proyecto Demo 1
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Proyecto Demo 2
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Sin Proyecto
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="ghost"
+          className="h-8 px-3 justify-start text-sm font-normal hover:bg-opacity-10 hover:bg-white"
+          style={{
+            color: currentProject 
+              ? "var(--main-sidebar-fg)" 
+              : "var(--main-sidebar-fg-muted)",
+          }}
+        >
+          {currentProject?.name || "Seleccionar Proyecto"}
+        </Button>
         
         {/* Project dropdown arrow button */}
         <DropdownMenu>
@@ -130,7 +108,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="h-8 w-8 ml-1"
+              className="h-8 w-8 ml-1 hover:bg-opacity-10 hover:bg-white"
               style={{
                 color: "var(--main-sidebar-fg-muted)",
               }}
@@ -138,15 +116,15 @@ export function Header() {
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem>
-              Proyecto Demo 1
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuItem className="text-muted-foreground">
+              Sin Proyecto Seleccionado
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              Proyecto Demo 2
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Sin Proyecto
+            <DropdownMenuItem disabled className="opacity-50">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs">Proyectos disponibles:</span>
+                <span className="text-xs opacity-70">Próximamente...</span>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
