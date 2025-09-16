@@ -895,7 +895,10 @@ export function MainSidebar() {
       */}
       
       {/* Navigation Items */}
-      <div className="flex-1 pt-3 pb-3 px-2">
+      <div className={cn(
+        "flex-1 pt-3 pb-3",
+        isExpanded ? "px-2" : "px-0"
+      )}>
         <div className="flex flex-col gap-[2px] h-full">
           {getTertiarySidebarItems().map((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
@@ -913,7 +916,10 @@ export function MainSidebar() {
               // Si es una sección, renderizar con la misma altura que un botón
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className="h-8 flex items-center px-2 mb-[2px]">
+                  <div key={`section-${index}`} className={cn(
+                    "h-8 flex items-center mb-[2px]",
+                    isExpanded ? "px-2" : "px-0"
+                  )}>
                     {isExpanded && (
                       <div className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)' }}>
                         {item.label}
@@ -969,7 +975,10 @@ export function MainSidebar() {
                       <div className="relative">
                         {/* Línea vertical que conecta los elementos hijos */}
                         <div 
-                          className="absolute left-[16px] top-1 bottom-1 w-[1px]"
+                          className={cn(
+                            "absolute top-1 bottom-1 w-[1px]",
+                            isExpanded ? "left-[16px]" : "left-1/2 -translate-x-1/2"
+                          )}
                           style={{
                             backgroundColor: 'var(--main-sidebar-button-fg)',
                             opacity: 0.3,
@@ -1040,7 +1049,10 @@ export function MainSidebar() {
       </div>
       
       {/* Bottom Section - Fixed Buttons */}
-      <div className="pb-3 px-2">
+      <div className={cn(
+        "pb-3",
+        isExpanded ? "px-2" : "px-0"
+      )}>
         <div className="flex flex-col gap-[2px]">
           {/* Notifications */}
           <ButtonSidebar
@@ -1091,13 +1103,17 @@ export function MainSidebar() {
           }}
         >
           {/* Contenido del popover */}
-          <div className="py-6 pl-[14px] pr-2">
+          <div className={cn(
+            "py-6",
+            isExpanded ? "pl-[14px] pr-2" : "pl-0 pr-0"
+          )}>
             <div className="flex flex-col gap-[2px]">
               
               {/* Organización */}
               <div 
                 className={cn(
-                  "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
+                  "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
+                  isExpanded ? "px-2" : "px-0",
                   !selectedProjectId ? "" : ""
                 )}
                 style={{
@@ -1164,7 +1180,8 @@ export function MainSidebar() {
                 <div 
                   key={project.id}
                   className={cn(
-                    "h-8 flex items-center px-2 mb-[2px] cursor-pointer rounded transition-colors",
+                    "h-8 flex items-center mb-[2px] cursor-pointer rounded transition-colors",
+                    isExpanded ? "px-2" : "px-0",
                     selectedProjectId === project.id ? "" : ""
                   )}
                   style={{
