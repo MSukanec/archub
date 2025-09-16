@@ -8,12 +8,105 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjects } from "@/hooks/use-projects";
+import { useProjectContext } from "@/stores/projectContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+function getProjectInitials(name: string): string {
+  return (name?.trim()?.[0] || '').toUpperCase();
+}
 
 export function Header() {
   const { data: currentUser } = useCurrentUser();
-  
-  // Mock project data for now - will be connected to real data later
-  const currentProject = null; // No project selected initially
+  const { selectedProjectId: contextProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
+  const queryClient = useQueryClient();
+
+  const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
+    currentUser?.organization?.id || ''
+  );
+
+  const selectedProjectId = contextProjectId || currentUser?.preferences?.last_project_id || null;
+  const currentProject = projects.find(p => p.id === selectedProjectId);
+
+  // Sort projects to show active project first
+  const sortedProjects = [...projects].sort((a, b) => {
+    if (a.id === selectedProjectId) return -1;
+    if (b.id === selectedProjectId) return 1;
+    return 0;
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationFn: async (projectId: string | null) => {
+      if (!currentUser?.user?.id || !currentUser?.organization?.id) {
+        throw new Error('Usuario u organización no disponibles');
+      }
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert(
+          {
+            user_id: currentUser.user.id,
+            organization_id: currentUser.organization.id,
+            last_project_id: projectId,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id,organization_id' }
+        );
+      if (error) throw error;
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      setSelectedProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+
+  const organizationMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      if (!currentUser?.user?.id) {
+        throw new Error('Usuario no disponible');
+      }
+
+      const response = await fetch('/api/user/select-organization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.user.id,
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          organization_id: organizationId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cambiar de organización');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data, organizationId) => {
+      // Update project context to clear project and set new organization
+      setCurrentOrganization(organizationId);
+      setSelectedProject(null); // Clear project since we're switching organizations
+      
+      // Invalidate queries to refresh data for new organization
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+    }
+  });
+
+  const handleProjectSelect = (projectId: string) => {
+    if (selectedProjectId === projectId) return;
+    updateProjectMutation.mutate(projectId);
+  };
+
+  const handleOrganizationSelect = (organizationId: string) => {
+    if (currentUser?.organization?.id === organizationId) return;
+    organizationMutation.mutate(organizationId);
+  };
   
   return (
     <header 
@@ -25,10 +118,9 @@ export function Header() {
       {/* Logo - Aligned with sidebar icons */}
       <div className="flex items-center">
         <div 
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+          className="w-8 h-8 flex items-center justify-center text-sm font-bold"
           style={{
-            backgroundColor: "var(--accent)",
-            color: "var(--primary-foreground)",
+            color: "white",
           }}
         >
           A
@@ -65,10 +157,8 @@ export function Header() {
             {currentUser?.organizations?.map((org) => (
               <DropdownMenuItem 
                 key={org.id}
-                onClick={() => {
-                  // TODO: Implement organization switching
-                  console.log("Switch to organization:", org.name);
-                }}
+                onClick={() => handleOrganizationSelect(org.id)}
+                data-testid={`organization-option-${org.id}`}
                 className="flex items-center gap-2"
               >
                 <div 
@@ -96,7 +186,7 @@ export function Header() {
             color: "white",
           }}
         >
-          {"Seleccionar Proyecto"}
+          {currentProject?.name || "Seleccionar Proyecto"}
         </Button>
         
         {/* Project dropdown arrow button */}
@@ -109,20 +199,53 @@ export function Header() {
               style={{
                 color: "white",
               }}
+              data-testid="project-selector-dropdown"
             >
               <ChevronDown className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuItem className="text-muted-foreground">
-              Sin Proyecto Seleccionado
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled className="opacity-50">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs">Proyectos disponibles:</span>
-                <span className="text-xs opacity-70">Próximamente...</span>
-              </div>
-            </DropdownMenuItem>
+          <DropdownMenuContent align="start" className="w-64">
+            {isLoadingProjects ? (
+              <DropdownMenuItem disabled className="opacity-50">
+                Cargando proyectos...
+              </DropdownMenuItem>
+            ) : sortedProjects.length === 0 ? (
+              <DropdownMenuItem disabled className="opacity-50">
+                No hay proyectos disponibles
+              </DropdownMenuItem>
+            ) : (
+              sortedProjects.map((project) => (
+                <DropdownMenuItem 
+                  key={project.id}
+                  onClick={() => handleProjectSelect(project.id)}
+                  className="flex items-center gap-3 p-3"
+                  data-testid={`project-option-${project.id}`}
+                >
+                  {/* Project Avatar */}
+                  <div 
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                    style={{
+                      backgroundColor: project.color || 'var(--main-sidebar-button-bg)',
+                    }}
+                  >
+                    {getProjectInitials(project.name)}
+                  </div>
+                  
+                  {/* Project Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{project.name}</span>
+                      {project.id === selectedProjectId && (
+                        <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate block">
+                      {project.project_data?.project_type?.name || 'Sin tipo'}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
