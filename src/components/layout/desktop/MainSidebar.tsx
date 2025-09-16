@@ -681,10 +681,6 @@ export function MainSidebar() {
           label: 'Resumen de Proyecto',
           href: '/project/dashboard'
         },
-        {
-          type: 'section',
-          label: 'PROYECTO'
-        },
         // Botones de construcción
         {
           type: 'section',
@@ -713,7 +709,7 @@ export function MainSidebar() {
       return projectItems;
     } else if (sidebarLevel === 'organization') {
       // Vista ORGANIZACIÓN
-      return [
+      const organizationItems = [
         {
           type: 'button',
           id: 'organization-summary',
@@ -721,21 +717,32 @@ export function MainSidebar() {
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
         },
+        // Botones de administración
         {
-          type: 'accordion',
-          id: 'organization',
-          label: 'Administración',
-          icon: Building,
-          items: sidebarContent.organization || []
+          type: 'section',
+          label: 'ADMINISTRACIÓN'
         },
+        ...(sidebarContent.organization || []).map(item => ({
+          type: 'button',
+          id: `organization-${item.href.split('/').pop()}`,
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        })),
+        // Botones de finanzas
         {
-          type: 'accordion',
-          id: 'finances',
-          label: 'Finanzas',
-          icon: DollarSign,
-          items: sidebarContent.finances || []
-        }
+          type: 'section',
+          label: 'FINANZAS'
+        },
+        ...(sidebarContent.finances || []).map(item => ({
+          type: 'button',
+          id: `finances-${item.href.split('/').pop()}`,
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        }))
       ];
+      return organizationItems;
     } else if (sidebarLevel === 'admin') {
       // Vista ADMINISTRACIÓN
       return [
