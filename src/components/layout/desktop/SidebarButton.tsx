@@ -66,8 +66,8 @@ export default function SidebarButton({
           'relative flex items-center transition-all duration-200 ease-out overflow-hidden',
           // Botón SIEMPRE del ancho completo disponible, altura fija 32px
           'w-full h-8',
-          // Alineación condicional: centrado cuando colapsado, al inicio cuando expandido
-          isExpanded ? 'justify-start pr-2' : 'justify-center px-0'
+          // SIN alineación condicional - el icono permanece ESTÁTICO como Supabase
+          'justify-start'
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -108,7 +108,7 @@ export default function SidebarButton({
         <div className={cn(
           "absolute top-0 flex items-center justify-center flex-shrink-0",
           "w-8 h-8", // 32x32px como Supabase
-          "left-1" // Siempre a 4px del borde izquierdo como en Supabase
+          "left-3" // Perfectamente centrado en 40px: (40-16)/2 = 12px como Supabase
         )}>
           {avatarUrl ? (
             <img 
