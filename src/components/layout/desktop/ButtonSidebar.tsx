@@ -79,11 +79,8 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* RAIL DE 47px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
-        <span className={cn(
-          "shrink-0 flex items-center justify-center transition-colors duration-200",
-          isExpanded ? "w-12" : "w-8" // Ajustar ancho del contenedor del icono
-        )}>
+        {/* RAIL FIJO - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
+        <span className="shrink-0 w-8 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
