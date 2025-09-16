@@ -88,7 +88,7 @@ export default function OrganizationDashboard() {
       });
       
       // Navigate to project dashboard
-      setLocation('/construction/dashboard');
+      setLocation('/project/dashboard');
     },
     onError: () => {
       toast({
@@ -188,63 +188,35 @@ export default function OrganizationDashboard() {
         </Card>
 
         {/* Projects Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Folder className="h-5 w-5" />
-                Proyectos de la Organización
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Selecciona un proyecto para comenzar a trabajar
-              </p>
-            </div>
-            <Button
-              onClick={() => openModal('project', {})}
-              className="h-9 px-4 text-sm"
-              data-testid="button-create-project"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuevo Proyecto
-            </Button>
-          </div>
-
-          {isLoading || projectsLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-muted-foreground">Cargando proyectos...</div>
-            </div>
-          ) : sortedProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedProjects.map((project) => (
-                <ProjectItem
-                  key={project.id}
-                  project={project}
-                  onClick={() => handleSelectProject(project.id)}
-                  onEdit={() => handleEditProject(project)}
-                  isActive={project.id === activeProjectId}
-                  projectColor={project.color || 'var(--accent)'}
-                  data-testid={`project-item-${project.id}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon={<Folder className="w-12 h-12" />}
-              title="No hay proyectos creados"
-              description="Comienza creando tu primer proyecto para gestionar tu trabajo"
-              action={
-                <Button
-                  onClick={() => openModal('project', {})}
-                  className="mt-4"
-                  data-testid="button-create-first-project"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuevo Proyecto
-                </Button>
-              }
-            />
-          )}
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            {isLoading || projectsLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-muted-foreground">Cargando proyectos...</div>
+              </div>
+            ) : sortedProjects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedProjects.map((project) => (
+                  <ProjectItem
+                    key={project.id}
+                    project={project}
+                    onClick={() => handleSelectProject(project.id)}
+                    onEdit={() => handleEditProject(project)}
+                    isActive={project.id === activeProjectId}
+                    projectColor={project.color || 'var(--accent)'}
+                    data-testid={`project-item-${project.id}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Folder className="w-12 h-12" />}
+                title="No hay proyectos creados"
+                description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
