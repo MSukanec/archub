@@ -14,13 +14,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { 
   Contact, 
-  CheckSquare, 
   FileText, 
-  Package2, 
-  Users,
   Calendar,
   Crown,
-  DollarSign
+  DollarSign,
+  BarChart3
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -419,7 +417,7 @@ export function Header() {
           <FileText className="h-4 w-4" />
         </Button>
 
-        {/* Tareas */}
+        {/* Análisis de Costos */}
         <Button
           variant="ghost"
           size="icon-sm"
@@ -436,56 +434,10 @@ export function Header() {
             e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
             e.currentTarget.style.color = "var(--header-button-fg)";
           }}
-          onClick={() => navigate('/library/tasks')}
-          data-testid="header-tasks"
+          onClick={() => navigate('/analysis')}
+          data-testid="header-analysis"
         >
-          <CheckSquare className="h-4 w-4" />
-        </Button>
-
-        {/* Materiales */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="h-8 w-8"
-          style={{
-            color: "var(--header-button-fg)",
-            backgroundColor: "var(--header-button-bg)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-            e.currentTarget.style.color = "var(--header-button-hover-fg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-            e.currentTarget.style.color = "var(--header-button-fg)";
-          }}
-          onClick={() => navigate('/library/materials')}
-          data-testid="header-materials"
-        >
-          <Package2 className="h-4 w-4" />
-        </Button>
-
-        {/* Mano de Obra */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="h-8 w-8"
-          style={{
-            color: "var(--header-button-fg)",
-            backgroundColor: "var(--header-button-bg)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-            e.currentTarget.style.color = "var(--header-button-hover-fg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-            e.currentTarget.style.color = "var(--header-button-fg)";
-          }}
-          onClick={() => navigate('/library/labor')}
-          data-testid="header-labor"
-        >
-          <Users className="h-4 w-4" />
+          <BarChart3 className="h-4 w-4" />
         </Button>
         
         {/* Administración */}
