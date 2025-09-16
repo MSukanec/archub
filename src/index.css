@@ -111,8 +111,8 @@
   --chart-positive: hsl(76, 100%, 40%);
 
   /* Tables */
-  --table-header-bg: hsl(60, 8%, 95%);
-  --table-header-fg: hsl(0, 0%, 25%);
+  --table-header-bg: hsl(0, 0%, 40%);
+  --table-header-fg: hsl(0, 0%, 97%);
   --table-header-border: hsl(0, 0%, 80%);
   --table-row-bg: transparent;
   --table-row-fg: hsl(0, 0%, 35%);
