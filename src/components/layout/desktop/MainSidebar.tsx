@@ -750,11 +750,8 @@ export function MainSidebar() {
           </button>
         </div>
         
-        {/* Separador visual y proyectos */}
+        {/* Avatares de proyectos */}
         <div className="flex flex-col items-center pt-3 gap-2">
-          {/* Separador visual */}
-          <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-          
           {/* Avatares de proyectos */}
           {projects.map((project: any) => (
             <button
@@ -765,9 +762,9 @@ export function MainSidebar() {
                 selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
               )}
             >
-              {project.project_image_url ? (
+              {project.project_data?.project_image_url ? (
                 <img 
-                  src={project.project_image_url} 
+                  src={project.project_data.project_image_url} 
                   alt={project.name}
                   className="w-full h-full object-cover"
                 />
@@ -830,9 +827,9 @@ export function MainSidebar() {
               // Avatar del proyecto seleccionado
               selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                 <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                  {projects.find(p => p.id === selectedProjectId)?.project_image_url ? (
+                  {projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url ? (
                     <img 
-                      src={projects.find(p => p.id === selectedProjectId)?.project_image_url} 
+                      src={projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url} 
                       alt={projects.find(p => p.id === selectedProjectId)?.name}
                       className="w-full h-full object-cover"
                     />
