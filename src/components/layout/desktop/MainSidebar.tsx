@@ -311,6 +311,10 @@ export function MainSidebar() {
     if (selectedProjectId === projectId) return;
     updateProjectMutation.mutate(projectId);
   };
+  
+  const handleOrganizationSelect = () => {
+    setSidebarLevel('organization');
+  };
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
@@ -716,7 +720,13 @@ export function MainSidebar() {
       {/* Columna izquierda - Avatar de organización y proyectos */}
       <div className="w-12 flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2">
         {/* Avatar de organización */}
-        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+        <button
+          onClick={handleOrganizationSelect}
+          className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
+            sidebarLevel === 'organization' ? "ring-2 ring-white ring-opacity-50" : ""
+          )}
+        >
           {userData?.organization?.logo_url ? (
             <img 
               src={userData.organization.logo_url} 
@@ -731,7 +741,7 @@ export function MainSidebar() {
               {getOrganizationInitials(userData?.organization?.name || 'O')}
             </div>
           )}
-        </div>
+        </button>
         
         {/* Separador visual */}
         <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
