@@ -32,7 +32,7 @@ import { Clients } from "@/pages/professional/project/general/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
 
 
-import Preferences from "@/pages/professional/organization/Preferences";
+import Preferences from "@/pages/professional/organization/preferences/Preferences";
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
 import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
@@ -52,7 +52,6 @@ import OrganizationDashboard from "@/pages/professional/organization/Organizatio
 import Members from "@/pages/professional/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
-import OrganizationData from "@/pages/professional/organization/data/OrganizationData";
 
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
@@ -111,7 +110,6 @@ function Router() {
         <Route path="/organization/dashboard" component={OrganizationDashboard} />
         <Route path="/organization/preferences" component={Preferences} />
         <Route path="/organization/activity" component={Activity} />
-        <Route path="/organization/data" component={OrganizationData} />
         <Route path="/organization/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
         <Route path="/organization/members" component={Members} />

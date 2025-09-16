@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Database } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { DataBasic } from './DataBasic';
+import { DataBasicTab } from './DataBasicTab';
+import { FinancesTab } from './FinancesTab';
 
-export default function OrganizationData() {
+export default function Preferences() {
   const [activeTab, setActiveTab] = useState('basic');
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
@@ -15,20 +16,23 @@ export default function OrganizationData() {
     setSidebarContext('organization');
   }, [setSidebarContext]);
 
-  const currentOrganization = userData?.organization;
-
   const headerTabs = [
     {
       id: 'basic',
       label: 'Datos Básicos',
       isActive: activeTab === 'basic'
+    },
+    {
+      id: 'finances',
+      label: 'Finanzas',
+      isActive: activeTab === 'finances'
     }
   ];
 
   const headerProps = {
-    icon: Database,
-    title: 'Datos de la Organización',
-    subtitle: 'Gestiona la información básica de tu organización',
+    icon: Settings,
+    title: 'Preferencias',
+    subtitle: 'Gestiona los datos básicos y configuraciones financieras de tu organización',
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId)
   };
@@ -36,9 +40,11 @@ export default function OrganizationData() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
-        return <DataBasic organization={currentOrganization} />;
+        return <DataBasicTab />;
+      case 'finances':
+        return <FinancesTab />;
       default:
-        return <DataBasic organization={currentOrganization} />;
+        return <DataBasicTab />;
     }
   };
 
