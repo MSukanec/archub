@@ -13,24 +13,24 @@
 
   /* Header */
   --header-bg: hsl(0, 0%, 97%);
-  --header-fg: hsl(0, 0%, 44%);
+  --header-fg: hsl(0, 0%, 40%);
   --header-border: hsl(0, 0%, 88%);
   --header-button-bg: transparent;
-  --header-button-fg: hsl(0, 0%, 44%);
+  --header-button-fg: hsl(0, 0%, 40%);
   --header-button-active-bg: transparent;
   --header-button-active-fg: hsl(76, 100%, 40%);
-  --header-button-hover-bg: hsl(0, 0%, 30%);
+  --header-button-hover-bg: hsl(0, 0%, 40%);
   --header-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 97%);
-  --main-sidebar-fg: hsl(0, 0%, 44%);
+  --main-sidebar-fg: hsl(0, 0%, 40%);
   --main-sidebar-border: hsl(0, 0%, 88%);
   --main-sidebar-button-bg: transparent;
   --main-sidebar-button-fg: hsl(0, 0%, 44%);
-  --main-sidebar-button-active-bg: hsl(0, 0%, 30%);
+  --main-sidebar-button-active-bg: hsl(0, 0%, 40%);
   --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
-  --main-sidebar-button-hover-bg: hsl(0, 0%, 30%);
+  --main-sidebar-button-hover-bg: hsl(0, 0%, 40%);
   --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Cards */
@@ -85,10 +85,10 @@
 
   /* Toast */
   --toast-bg: hsl(0, 0%, 100%);
-  --toast-fg: hsl(0, 0%, 35%);
+  --toast-fg: hsl(0, 0%, 40%);
   --toast-border: hsl(0, 0%, 85%);
   --toast-title: hsl(0, 0%, 10%);
-  --toast-description: hsl(240, 5%, 45%);
+  --toast-description: hsl(0, 0%, 40%);
 
   /* Accent / State */
   --accent: hsl(76, 100%, 40%);
@@ -111,11 +111,11 @@
   --chart-positive: hsl(76, 100%, 40%);
 
   /* Tables */
-  --table-header-bg: hsl(0, 0%, 40%);
-  --table-header-fg: hsl(0, 0%, 97%);
+  --table-header-bg: hsl(0, 0%, 97%);
+  --table-header-fg: hsl(0, 0%, 20%);
   --table-header-border: hsl(0, 0%, 80%);
   --table-row-bg: transparent;
-  --table-row-fg: hsl(0, 0%, 35%);
+  --table-row-fg: hsl(0, 0%, 40%);
   --table-row-hover-bg: hsl(60, 8%, 92%);
   --table-row-border: hsl(0, 0%, 85%);
   --table-group-header-bg: hsl(0, 0%, 25%);

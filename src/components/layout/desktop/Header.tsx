@@ -180,9 +180,9 @@ export function Header() {
             variant="secondary" 
             className="ml-2 h-5 px-2 text-xs font-medium text-white opacity-75"
             style={{
-              backgroundColor: currentUser.plan.name === 'Teams' ? '#3B82F6' : 
-                              currentUser.plan.name === 'Pro' ? '#10B981' : 
-                              currentUser.plan.name === 'Enterprise' ? '#8B5CF6' : '#6B7280'
+              backgroundColor: currentUser.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
+                              currentUser.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
+                              currentUser.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
             }}
           >
             {currentUser.plan.name}
