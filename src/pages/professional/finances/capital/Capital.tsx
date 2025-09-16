@@ -12,7 +12,6 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useToast } from '@/hooks/use-toast'
 
 import { CapitalDashboard } from './CapitalDashboard'
-import { CapitalDetail } from './CapitalDetail'
 import { CapitalHistory } from './CapitalHistory'
 import { PartnersTab } from './PartnersTab'
 
@@ -403,15 +402,14 @@ export default function FinancesCapitalMovements() {
           )}
 
           {activeTab === "currencies" && memberSummary.length > 0 && (
-            <CapitalDetail 
-              memberSummary={memberSummary} 
-              availableCurrencies={availableCurrencies} 
-            />
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Funcionalidad temporalmente no disponible</p>
+            </div>
           )}
 
           {activeTab === "details" && (
             <CapitalHistory
-              movements={movements as CapitalMovement[]}
+              movements={movements}
               searchValue={searchValue}
               aportesPropriosConcept={aportesPropriosConcept}
               retirosPropriosConcept={retirosPropriosConcept}
