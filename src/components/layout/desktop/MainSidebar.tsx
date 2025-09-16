@@ -787,8 +787,10 @@ export function MainSidebar() {
     <>
     <aside 
       className={cn(
-        "bg-[var(--main-sidebar-bg)] border-r transition-all duration-300 z-30 flex flex-col h-full",
-        isExpanded ? "w-64" : "w-12"
+        "bg-[var(--main-sidebar-bg)] border-r transition-all duration-300 z-30 flex flex-col",
+        isExpanded ? "w-64" : "w-12",
+        // When in absolute positioning (not docked), need to specify full height explicitly
+        isDocked ? "h-full" : "h-screen"
       )}
       style={{
         overflow: 'hidden',
