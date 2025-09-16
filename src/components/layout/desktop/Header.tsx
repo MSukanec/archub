@@ -122,16 +122,16 @@ export function Header() {
   
   return (
     <header 
-      className="h-12 flex items-center pl-4 pr-6 border-b"
+      className="h-12 flex items-center pr-6 border-b"
       style={{
         backgroundColor: "var(--header-bg)",
         borderColor: "var(--header-border)",
       }}
     >
-      {/* Logo - Aligned with sidebar icons (same 48px rail) */}
-      <div className="flex items-center">
+      {/* Logo - Aligned with sidebar icons (32x32 square button) */}
+      <div className="flex items-center w-12 justify-center">
         <button
-          className="h-8 w-12 flex items-center justify-center text-sm font-bold transition-opacity duration-200 hover:opacity-80 border-0 bg-transparent"
+          className="h-8 w-8 flex items-center justify-center text-sm font-bold transition-opacity duration-200 hover:opacity-80 border-0 bg-transparent rounded"
           style={{
             color: "var(--header-fg)",
             borderRadius: '4px'
@@ -144,8 +144,8 @@ export function Header() {
         </button>
       </div>
 
-      {/* Organization Selector */}
-      <div className="flex items-center ml-6">
+      {/* Organization Selector - Starts exactly where sidebar ends (47px) */}
+      <div className="flex items-center ml-0">
         <Button
           variant="ghost"
           className="h-8 px-3 justify-start text-sm font-normal border-0"
