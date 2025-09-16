@@ -786,6 +786,20 @@ export function MainSidebar() {
           isExpanded ? "w-64" : "w-12"
         )}
       >
+      {/* Encabezado del contexto activo */}
+      {isExpanded && (
+        <div className="px-3 pt-3 pb-2 border-b border-[var(--main-sidebar-border)]">
+          <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+            {sidebarLevel === 'organization' 
+              ? userData?.organization?.name || 'Organización'
+              : sidebarLevel === 'project' && selectedProjectId
+                ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
+                : 'Proyecto'
+            }
+          </div>
+        </div>
+      )}
+      
       {/* Navigation Items - Scrollable Content */}
       <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
         <div className="flex flex-col gap-[2px] h-full">
