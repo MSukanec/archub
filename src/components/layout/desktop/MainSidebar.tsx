@@ -622,7 +622,6 @@ export function MainSidebar() {
   const sidebarContent = {
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
-      { icon: Users, label: 'Miembros', href: '/organization/members' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
