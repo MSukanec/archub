@@ -31,6 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
 import { useMobile } from "@/hooks/use-mobile";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
+import { useOrganizationMembers } from "@/hooks/use-organization-members";
 
 function getInitials(name: string): string {
   return name
@@ -63,6 +65,9 @@ export function MembersTab() {
   const isMobile = useMobile();
 
   const organizationId = userData?.organization?.id;
+
+  // Obtener miembros actuales para restricciones de plan
+  const { data: currentMembers = [] } = useOrganizationMembers(organizationId);
 
   // Fetch organization members
   const { data: members = [], isLoading: membersLoading } = useQuery({
@@ -177,6 +182,20 @@ export function MembersTab() {
 
   return (
     <div className="space-y-6">
+      {/* Botón de Invitar Miembro */}
+      <div className="flex justify-end mb-6">
+        <PlanRestricted feature="max_members" current={currentMembers.length}>
+          <Button 
+            onClick={() => openModal('member')}
+            className="flex items-center gap-2"
+            data-testid="invite-member-button"
+          >
+            <UserPlus className="h-4 w-4" />
+            Invitar Miembro
+          </Button>
+        </PlanRestricted>
+      </div>
+
       {/* Two Column Layout - Section descriptions left, content right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Section Description */}

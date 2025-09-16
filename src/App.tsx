@@ -48,7 +48,6 @@ import Contacts from "@/pages/professional/organization/contacts/Contacts";
 import Calendar from "@/pages/professional/project/general/calendar/Calendar";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
-import Members from "@/pages/professional/organization/members/Members";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -109,14 +108,12 @@ function Router() {
         <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
-        <Route path="/organization/members" component={Members} />
         <Route path="/finances/general-costs" component={GeneralCosts} />
         
         <Route path="/organization" component={OrganizationDashboard} />
 
         <Route path="/general/calendar" component={Calendar} />
 
-        <Route path="/organization/:organizationId" component={Members} />
 
         {/* Projects Routes */}
         <Route path="/projects" component={Projects} />
