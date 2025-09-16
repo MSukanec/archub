@@ -689,7 +689,6 @@ export function MainSidebar() {
   }, [location]);
 
   return (
-    <>
     <div 
       className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
       style={{
@@ -720,63 +719,66 @@ export function MainSidebar() {
       {/* Columna izquierda - Avatar de organización y proyectos */}
       <div 
         className={cn(
-          "flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2 transition-all duration-150",
+          "flex-shrink-0 flex flex-col items-center justify-start border-r border-[var(--main-sidebar-border)] transition-all duration-150",
           isHovered ? "w-12 opacity-100" : "w-0 opacity-0 overflow-hidden"
         )}
       >
-        {/* Avatar de organización */}
-        <button
-          onClick={handleOrganizationSelect}
-          className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
-            sidebarLevel === 'organization' ? "ring-2 ring-white ring-opacity-50" : ""
-          )}
-        >
-          {userData?.organization?.logo_url ? (
-            <img 
-              src={userData.organization.logo_url} 
-              alt="Organización"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div 
-              className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
-              style={{ backgroundColor: 'var(--accent)' }}
-            >
-              {getOrganizationInitials(userData?.organization?.name || 'O')}
-            </div>
-          )}
-        </button>
-        
-        {/* Separador visual */}
-        <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
-        
-        {/* Avatares de proyectos */}
-        {projects.map((project: any) => (
+        {/* Espacio superior para alinear con encabezado derecho */}
+        <div className="pt-3 pb-3 flex flex-col items-center gap-2">
+          {/* Avatar de organización */}
           <button
-            key={project.id}
-            onClick={() => handleProjectSelect(project.id)}
+            onClick={handleOrganizationSelect}
             className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
-              selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+              sidebarLevel === 'organization' ? "ring-2 ring-white ring-opacity-50" : ""
             )}
           >
-            {project.project_data?.project_image_url ? (
+            {userData?.organization?.logo_url ? (
               <img 
-                src={project.project_data.project_image_url} 
-                alt={project.name}
+                src={userData.organization.logo_url} 
+                alt="Organización"
                 className="w-full h-full object-cover"
               />
             ) : (
               <div 
-                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+                className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
-                {getProjectInitials(project.name || 'P')}
+                {getOrganizationInitials(userData?.organization?.name || 'O')}
               </div>
             )}
           </button>
-        ))}
+          
+          {/* Separador visual */}
+          <div className="w-6 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+          
+          {/* Avatares de proyectos */}
+          {projects.map((project: any) => (
+            <button
+              key={project.id}
+              onClick={() => handleProjectSelect(project.id)}
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
+                selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+              )}
+            >
+              {project.project_data?.project_image_url ? (
+                <img 
+                  src={project.project_data.project_image_url} 
+                  alt={project.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div 
+                  className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                  style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+                >
+                  {getProjectInitials(project.name || 'P')}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
       
       {/* Columna derecha - Sidebar actual */}
@@ -790,7 +792,7 @@ export function MainSidebar() {
       <div className="border-b border-[var(--main-sidebar-border)]">
         {isExpanded ? (
           // Expandido: mostrar texto
-          <div className="px-3 pt-3 pb-2">
+          <div className="px-3 pt-3 pb-3">
             <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
               {sidebarLevel === 'organization' 
                 ? userData?.organization?.name || 'Organización'
@@ -802,7 +804,7 @@ export function MainSidebar() {
           </div>
         ) : (
           // Colapsado: mostrar avatar
-          <div className="flex justify-center pt-3 pb-2">
+          <div className="flex justify-center pt-3 pb-3">
             {sidebarLevel === 'organization' ? (
               // Avatar de la organización
               <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
@@ -1011,6 +1013,5 @@ export function MainSidebar() {
       
       </aside>
     </div>
-    </>
   );
 }
