@@ -175,7 +175,7 @@ export function PageLayout({
     <div className="flex flex-col min-h-0">
       {/* Page Header */}
       <div style={{ backgroundColor: "hsl(0, 0%, 95%)" }}>
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} ${
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
           isDocked ? 'pl-[72px] pr-[72px]' : 'pl-[120px] pr-[72px]'
         }`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
