@@ -127,6 +127,7 @@ function ProjectSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();
   const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
   const { selectedProjectId, setSelectedProject } = useProjectContext();
+  const { setSidebarLevel } = useNavigationStore();
   
   // Ordenar proyectos: proyecto activo primero, luego el resto
   const sortedProjects = [...projects].sort((a, b) => {
@@ -212,6 +213,7 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
   const { data: userData } = useCurrentUser();
   const organizations = userData?.organizations || [];
   const { setCurrentOrganization } = useProjectContext();
+  const { setSidebarLevel } = useNavigationStore();
   const queryClient = useQueryClient();
   
   // Encontrar organización actual
@@ -236,6 +238,7 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     },
     onSuccess: (organizationId) => {
       setCurrentOrganization(organizationId);
+      setSidebarLevel('organization'); // Ensure organization mode after switching
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
@@ -357,6 +360,7 @@ export function MainSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
+  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   // Mutación específica para cambiar proyecto (igual a la que funciona en Projects.tsx)
   const updatePreferencesMutation = useMutation({
     mutationFn: async ({ organizationId, lastProjectId }: { organizationId: string, lastProjectId: string | null }) => {
@@ -489,7 +493,6 @@ export function MainSidebar() {
       setDocked(userData.preferences.sidebar_docked);
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
-  const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   
   // Sidebar level is now managed entirely through Zustand stores
   // No URL-based detection needed - components update stores directly

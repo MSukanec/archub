@@ -32,7 +32,7 @@ export const useNavigationStore = create<NavigationState>((set) => ({
     console.log('Setting current project:', project)
   },
   // Estados para los niveles del sidebar
-  sidebarLevel: 'main',
+  sidebarLevel: 'organization',
   setSidebarLevel: (level: SidebarLevel) => set({ sidebarLevel: level }),
   goToMainLevel: () => set({ sidebarLevel: 'main' }),
 }))
