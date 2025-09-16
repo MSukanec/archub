@@ -899,14 +899,22 @@ export function MainSidebar() {
                 );
               }
               
-              // Si es una sección, renderizar con la misma altura que un botón
+              // Si es una sección, renderizar con líneas divisorias como Supabase
               if ('type' in item && item.type === 'section') {
                 return (
-                  <div key={`section-${index}`} className="h-8 flex items-center mb-[2px] px-0">
-                    {isExpanded && (
-                      <div className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--main-sidebar-button-fg)]">
-                        {item.label}
+                  <div key={`section-${index}`} className="flex flex-col my-2">
+                    {isExpanded ? (
+                      // Expandido: línea + texto centrado + línea
+                      <div className="flex items-center">
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
+                        <div className="mx-3 text-[10px] font-medium uppercase tracking-wider text-[var(--main-sidebar-button-fg)]">
+                          {item.label}
+                        </div>
+                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
                       </div>
+                    ) : (
+                      // Colapsado: solo línea divisoria
+                      <div className="h-px mx-2" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.2 }}></div>
                     )}
                   </div>
                 );
