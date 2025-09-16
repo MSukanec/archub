@@ -694,7 +694,7 @@ export function MainSidebar() {
       className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
       style={{
         height: 'calc(100vh - 3rem)', // 3rem = 48px del header h-12
-        width: isExpanded ? '304px' : '96px' // 48px + 256px cuando expandido, 48px + 48px cuando colapsado
+        width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
       }}
       onMouseEnter={() => {
         setHovered(true);
@@ -718,7 +718,12 @@ export function MainSidebar() {
       }}
     >
       {/* Columna izquierda - Avatar de organización y proyectos */}
-      <div className="w-12 flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2">
+      <div 
+        className={cn(
+          "flex-shrink-0 flex flex-col items-center justify-start pt-3 border-r border-[var(--main-sidebar-border)] gap-2 transition-all duration-150",
+          isHovered ? "w-12 opacity-100" : "w-0 opacity-0 overflow-hidden"
+        )}
+      >
         {/* Avatar de organización */}
         <button
           onClick={handleOrganizationSelect}
