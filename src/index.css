@@ -13,25 +13,25 @@
 
   /* Header */
   --header-bg: hsl(0, 0%, 97%);
-  --header-fg: hsl(0, 0%, 90%);
+  --header-fg: hsl(0, 0%, 44%);
   --header-border: hsl(0, 0%, 88%);
   --header-button-bg: transparent;
-  --header-button-fg: hsl(0, 0%, 90%);
+  --header-button-fg: hsl(0, 0%, 44%);
   --header-button-active-bg: transparent;
   --header-button-active-fg: hsl(76, 100%, 40%);
-  --header-button-hover-bg: hsl(0, 0%, 25%);
+  --header-button-hover-bg: hsl(0, 0%, 30%);
   --header-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 97%);
-  --main-sidebar-fg: hsl(0, 0%, 40%);
-  --main-sidebar-border: hsl(0, 0%, 90%);
+  --main-sidebar-fg: hsl(0, 0%, 44%);
+  --main-sidebar-border: hsl(0, 0%, 88%);
   --main-sidebar-button-bg: transparent;
-  --main-sidebar-button-fg: hsl(0, 0%, 45%);
+  --main-sidebar-button-fg: hsl(0, 0%, 44%);
   --main-sidebar-button-active-bg: transparent;
   --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
-  --main-sidebar-button-hover-bg: hsl(0, 0%, 25%);
-  --main-sidebar-button-hover-fg: hsl(0, 0%, 20%);
+  --main-sidebar-button-hover-bg: hsl(0, 0%, 30%);
+  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);

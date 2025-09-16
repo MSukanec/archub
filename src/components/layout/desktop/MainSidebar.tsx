@@ -501,8 +501,6 @@ export function MainSidebar() {
         if (location.startsWith('/construction/')) {
           setExpandedAccordion('construction');
         }
-      } else if (location.startsWith('/library/')) {
-        setSidebarLevel('library');
       } else if (location.startsWith('/proveedor/')) {
         setSidebarLevel('provider');
       } else if (location.startsWith('/admin/')) {
@@ -579,7 +577,6 @@ export function MainSidebar() {
     if (location.startsWith('/design')) return 'diseno';
     if (location.startsWith('/construction')) return 'construction';
     if (location.startsWith('/finances')) return 'finanzas';
-    if (location.startsWith('/library')) return 'biblioteca';
     if (location.startsWith('/proveedor')) return 'proveedor';
     if (location.startsWith('/admin')) return 'administracion';
     if (location === '/organization/dashboard') return null; // Dashboard es independiente
@@ -600,9 +597,6 @@ export function MainSidebar() {
         break;
       case 'proyecto':
         setSidebarLevel('project');
-        break;
-      case 'biblioteca':
-        setSidebarLevel('library');
         break;
       case 'proveedor':
         setSidebarLevel('provider');
@@ -630,7 +624,6 @@ export function MainSidebar() {
     if (location.includes('/construction')) return 'construction';
     if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
     if (location.includes('/project')) return 'proyecto';
-    if (location.includes('/library')) return 'biblioteca';
     if (location.includes('/proveedor')) return 'proveedor';
     if (location.includes('/admin')) return 'administracion';
     return 'organizacion'; // Default to organization instead of inicio
@@ -663,14 +656,6 @@ export function MainSidebar() {
       { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
       { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
       { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
-    ],
-    library: [
-      { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
-      { icon: CheckSquare, label: 'Tablero', href: '/general/calendar' },
-      { icon: FileText, label: 'Media', href: '/general/media' },
-      { icon: CheckSquare, label: 'Tareas', href: '/library/tasks' },
-      { icon: Package2, label: 'Materiales', href: '/library/materials' },
-      { icon: Users, label: 'Mano de Obra', href: '/library/labor' }
     ],
     provider: [
       { icon: Package, label: 'Productos', href: '/proveedor/productos' }
@@ -719,13 +704,7 @@ export function MainSidebar() {
           type: 'section',
           label: 'GENERAL'
         },
-        {
-          type: 'accordion',
-          id: 'library',
-          label: 'Recursos',
-          icon: Library,
-          items: sidebarContent.library || []
-        },
+
         {
           type: 'accordion',
           id: 'admin',
@@ -766,13 +745,7 @@ export function MainSidebar() {
           type: 'section',
           label: 'GENERAL'
         },
-        {
-          type: 'accordion',
-          id: 'library',
-          label: 'Recursos',
-          icon: Library,
-          items: sidebarContent.library || []
-        },
+
         {
           type: 'accordion',
           id: 'admin',
@@ -793,7 +766,6 @@ export function MainSidebar() {
     if (location.startsWith('/general')) return 'general';  
     if (location.startsWith('/construction')) return 'construction';
     if (location.startsWith('/finances')) return 'finances';
-    if (location.startsWith('/library')) return 'library';
     if (location.startsWith('/admin')) return 'admin';
     // Agregar más rutas según sea necesario
     return null;

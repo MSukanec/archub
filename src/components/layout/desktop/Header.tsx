@@ -21,6 +21,7 @@ import {
   Calendar
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 function getProjectInitials(name: string): string {
   return (name?.trim()?.[0] || '').toUpperCase();
@@ -31,6 +32,7 @@ export function Header() {
   const { selectedProjectId: contextProjectId, setSelectedProject, setCurrentOrganization } = useProjectContext();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
+  const { setSidebarLevel } = useNavigationStore();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     currentUser?.organization?.id || ''
@@ -155,6 +157,10 @@ export function Header() {
             e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
             e.currentTarget.style.color = "var(--header-button-fg)";
           }}
+          onClick={() => {
+            setSidebarLevel('organization');
+            navigate('/organization/dashboard');
+          }}
         >
           {currentUser?.organization?.name || "Seleccionar Organización"}
         </Button>
@@ -222,6 +228,12 @@ export function Header() {
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
             e.currentTarget.style.color = "var(--header-button-fg)";
+          }}
+          onClick={() => {
+            setSidebarLevel('project');
+            if (selectedProjectId) {
+              navigate('/general/dashboard');
+            }
           }}
         >
           {currentProject?.name || "Seleccionar Proyecto"}
