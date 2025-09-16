@@ -308,8 +308,16 @@ export function MainSidebar() {
   });
   
   const handleProjectSelect = (projectId: string) => {
-    if (selectedProjectId === projectId) return;
-    updateProjectMutation.mutate(projectId);
+    // Siempre cambiar al nivel de proyecto cuando se clickea un proyecto
+    setSidebarLevel('project');
+    
+    // Solo actualizar la preferencia si es un proyecto diferente
+    if (selectedProjectId !== projectId) {
+      updateProjectMutation.mutate(projectId);
+    } else {
+      // Si es el mismo proyecto, solo asegurar que el contexto esté actualizado
+      setSelectedProject(projectId);
+    }
   };
   
   const handleOrganizationSelect = () => {
