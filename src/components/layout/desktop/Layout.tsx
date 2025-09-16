@@ -169,18 +169,14 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                   wide={wide}
                 >
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 h-full overflow-auto ${
-                      isDocked ? 'pl-[72px] pr-[72px]' : 'px-[72px]'
-                    }`}
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 h-full overflow-auto px-[72px]`}
                   >
                     {children}
                   </div>
                 </PageLayout>
               ) : (
                 <div
-                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 h-full overflow-auto ${
-                    isDocked ? 'md:pl-[72px] md:pr-[72px]' : 'md:px-[72px]'
-                  }`}
+                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 h-full overflow-auto md:px-[72px]`}
                 >
                   {children}
                 </div>
