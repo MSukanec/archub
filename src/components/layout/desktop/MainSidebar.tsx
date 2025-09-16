@@ -673,7 +673,7 @@ export function MainSidebar() {
   const getTertiarySidebarItems = () => {
     if (sidebarLevel === 'project') {
       // Vista PROYECTO: cuando hay un proyecto seleccionado
-      return [
+      const projectItems = [
         {
           type: 'button',
           id: 'project-summary',
@@ -685,25 +685,32 @@ export function MainSidebar() {
           type: 'section',
           label: 'PROYECTO'
         },
-        {
-          type: 'accordion', 
-          id: 'construction',
-          label: 'Construcción',
-          icon: HardHat,
-          items: sidebarContent.construction || []
-        },
-        {
-          type: 'accordion', 
-          id: 'commercialization',
-          label: 'Comercialización',
-          icon: Handshake,
-          items: sidebarContent.commercialization || []
-        },
+        // Botones de construcción
         {
           type: 'section',
-          label: 'GENERAL'
-        }
+          label: 'CONSTRUCCIÓN'
+        },
+        ...(sidebarContent.construction || []).map(item => ({
+          type: 'button',
+          id: `construction-${item.href.split('/').pop()}`,
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        })),
+        // Botones de comercialización
+        {
+          type: 'section',
+          label: 'COMERCIALIZACIÓN'
+        },
+        ...(sidebarContent.commercialization || []).map(item => ({
+          type: 'button',
+          id: `commercialization-${item.href.split('/').pop()}`,
+          icon: item.icon,
+          label: item.label,
+          href: item.href
+        }))
       ];
+      return projectItems;
     } else if (sidebarLevel === 'organization') {
       // Vista ORGANIZACIÓN
       return [
