@@ -238,7 +238,7 @@ export default function FinancesCapitalMovements() {
   }, [movements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
 
   // For compatibility with existing components
-  const allMovementPartners = []
+  const allMovementPartners: any[] = []
 
   const handleAddAportePpropio = () => {
     openModal('movement', { 
@@ -363,23 +363,21 @@ export default function FinancesCapitalMovements() {
     <Layout headerProps={headerProps} wide={true}>
       {/* Conditional Content - EmptyState or Tabs */}
       {movements.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <EmptyState
-            icon={<DollarSign className="h-8 w-8" />}
-            title="Aún no hay movimientos de capital registrados"
-            description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
-            actionButtons={[
+        <EmptyState
+          icon={<DollarSign className="h-8 w-8" />}
+          title="Aún no hay movimientos de capital registrados"
+          description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
+          action={
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
-                key="add-aporte"
                 onClick={handleAddAportePpropio}
                 className="bg-green-600 hover:bg-green-700 text-white"
                 data-testid="button-add-aporte-empty"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Registrar Aporte
-              </Button>,
+              </Button>
               <Button
-                key="add-retiro"
                 onClick={handleAddRetiroPpropio}
                 variant="outline"
                 data-testid="button-add-retiro-empty"
@@ -387,9 +385,9 @@ export default function FinancesCapitalMovements() {
                 <Plus className="w-4 h-4 mr-2" />
                 Registrar Retiro
               </Button>
-            ]}
-          />
-        </div>
+            </div>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {activeTab === "members" && memberSummary.length > 0 && (
@@ -405,7 +403,7 @@ export default function FinancesCapitalMovements() {
 
           {activeTab === "details" && (
             <CapitalHistory
-              movements={movements}
+              movements={movements as any[]}
               searchValue={searchValue}
               aportesPropriosConcept={aportesPropriosConcept}
               retirosPropriosConcept={retirosPropriosConcept}
