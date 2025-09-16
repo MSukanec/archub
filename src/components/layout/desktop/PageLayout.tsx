@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Search, Filter, X, ArrowLeft, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,6 +113,10 @@ export function PageLayout({
   const [searchInputValue, setSearchInputValue] = useState(headerSearchValue);
   const [searchFocused, setSearchFocused] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  
+  // Estado y refs para animación de tabs
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
 
   const handleHeaderSearchChange = (value: string) => {
     setSearchInputValue(value);
@@ -120,6 +124,27 @@ export function PageLayout({
   };
 
   const hasTabs = tabs.length > 0;
+
+  // Actualizar posición del subrayado animado
+  useEffect(() => {
+    if (!hasTabs || !tabsContainerRef.current) return;
+    
+    const activeTab = tabs.find(tab => tab.isActive);
+    if (!activeTab) {
+      setUnderlineStyle({ width: 0, left: 0 });
+      return;
+    }
+    
+    const tabButton = tabsContainerRef.current.querySelector(`[data-tab-id="${activeTab.id}"]`) as HTMLElement;
+    if (tabButton) {
+      const containerRect = tabsContainerRef.current.getBoundingClientRect();
+      const tabRect = tabButton.getBoundingClientRect();
+      const left = tabRect.left - containerRect.left;
+      const width = tabRect.width;
+      
+      setUnderlineStyle({ width, left });
+    }
+  }, [tabs, hasTabs]);
 
   return (
     <div className="flex flex-col h-full">
@@ -366,23 +391,24 @@ export function PageLayout({
 
           {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
-            <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)]">
-            <div className="flex items-center space-x-6">
+            <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)] relative">
+            <div ref={tabsContainerRef} className="flex items-center space-x-6 relative">
               {tabs.map((tab) => {
                 const tabContent = (
                   <button
                     key={tab.id}
+                    data-tab-id={tab.id}
                     onClick={() =>
                       tab.isDisabled || tab.isRestricted
                         ? undefined
                         : onTabChange?.(tab.id)
                     }
                     disabled={tab.isDisabled}
-                    className={`relative text-sm transition-all duration-300 flex items-center gap-2 px-1 h-8 ${
+                    className={`relative text-sm transition-all duration-200 flex items-center gap-2 px-1 h-8 ${
                       tab.isDisabled || tab.isRestricted
                         ? "text-muted-foreground opacity-60 cursor-not-allowed"
                         : tab.isActive
-                          ? "text-foreground font-medium border-b-2 border-[var(--accent)] -mb-[2px]"
+                          ? "text-foreground font-medium"
                           : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -406,6 +432,16 @@ export function PageLayout({
 
                 return tabContent;
               })}
+              
+              {/* Subrayado animado dinámico */}
+              <div
+                className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out"
+                style={{
+                  width: `${underlineStyle.width}px`,
+                  transform: `translateX(${underlineStyle.left}px)`,
+                  opacity: underlineStyle.width > 0 ? 1 : 0
+                }}
+              />
             </div>
             </div>
           )}
