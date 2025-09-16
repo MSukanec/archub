@@ -761,17 +761,22 @@ export function MainSidebar() {
                 "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
                 selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
               )}
+              style={{
+                opacity: selectedProjectId === project.id ? 1 : 0.5
+              }}
             >
-              {project.project_data?.project_image_url ? (
+              {project.project_image_url ? (
                 <img 
-                  src={project.project_data.project_image_url} 
+                  src={project.project_image_url} 
                   alt={project.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div 
                   className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                  style={{ backgroundColor: project.color || 'var(--main-sidebar-button-bg)' }}
+                  style={{ 
+                    backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
+                  }}
                 >
                   {getProjectInitials(project.name || 'P')}
                 </div>
