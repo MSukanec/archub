@@ -145,7 +145,7 @@ export function Header() {
           <img 
             src="/ArchubLogo.png" 
             alt="Archub" 
-            className="h-7 w-7 object-contain"
+            className="h-8 w-8 object-contain"
           />
         </button>
       </div>
