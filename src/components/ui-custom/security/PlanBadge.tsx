@@ -36,7 +36,10 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
               <span className="text-xs font-medium text-[var(--main-sidebar-fg)]">Plan actual:</span>
             </div>
             <div className="mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.1s_forwards]">
-              <span className="text-sm font-semibold capitalize text-white">
+              <span 
+                className="text-sm font-semibold capitalize"
+                style={{ color: 'var(--text-important)' }}
+              >
                 {userData?.plan?.name || 'Free'}
               </span>
             </div>
