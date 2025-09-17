@@ -300,32 +300,6 @@ export function Header() {
         </Button>
       </div>
 
-      {/* User Avatar - Solo avatar 32x32px sin borde ni texto */}
-      <div className="flex items-center">
-        <div 
-          className="cursor-pointer"
-          onClick={() => navigate('/profile')}
-          data-testid="header-user-avatar"
-        >
-          {currentUser?.user?.avatar_url ? (
-            <img 
-              src={currentUser.user.avatar_url} 
-              alt="Avatar"
-              className="w-8 h-8 rounded-full"
-            />
-          ) : (
-            <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
-              style={{ 
-                backgroundColor: "var(--accent)",
-                color: "var(--accent-foreground)"
-              }}
-            >
-              {currentUser?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
-          )}
-        </div>
-      </div>
     </header>
   );
 }

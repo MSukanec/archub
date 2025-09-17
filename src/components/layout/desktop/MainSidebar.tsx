@@ -815,6 +815,34 @@ export function MainSidebar() {
             </span>
           </button>
         </div>
+        
+        {/* User Avatar - Al fondo del sidebar */}
+        <div className="mt-auto pb-3 flex justify-center">
+          <button
+            onClick={() => navigate('/profile')}
+            className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110"
+            title="Perfil de usuario"
+            data-testid="sidebar-user-avatar"
+          >
+            {userData?.user?.avatar_url ? (
+              <img 
+                src={userData.user.avatar_url} 
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div 
+                className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+                style={{ 
+                  backgroundColor: "var(--accent)",
+                  color: "var(--accent-foreground)"
+                }}
+              >
+                {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
+          </button>
+        </div>
       </div>
       
       {/* Columna derecha - Sidebar actual */}
