@@ -812,13 +812,28 @@ export function MainSidebar() {
         {isExpanded ? (
           // Expandido: mostrar texto
           <div className="px-3 w-full">
-            <div className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate leading-5">
-              {sidebarLevel === 'organization' 
-                ? userData?.organization?.name || 'Organización'
-                : sidebarLevel === 'project' && selectedProjectId
-                  ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
-                  : 'Proyecto'
-              }
+            <div className="flex items-center justify-between w-full">
+              <div className="text-xs font-medium text-[var(--main-sidebar-fg)] truncate leading-5 flex-1">
+                {sidebarLevel === 'organization' 
+                  ? userData?.organization?.name || 'Organización'
+                  : sidebarLevel === 'project' && selectedProjectId
+                    ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
+                    : 'Proyecto'
+                }
+              </div>
+              {sidebarLevel === 'organization' && userData?.plan?.name && (
+                <Badge 
+                  variant="secondary" 
+                  className="h-4 px-1.5 text-xs font-medium text-white opacity-75 ml-2"
+                  style={{
+                    backgroundColor: userData.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
+                                    userData.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
+                                    userData.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
+                  }}
+                >
+                  {userData.plan.name}
+                </Badge>
+              )}
             </div>
           </div>
         ) : (
