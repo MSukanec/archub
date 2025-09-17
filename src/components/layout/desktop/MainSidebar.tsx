@@ -144,7 +144,8 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     onSuccess: (organizationId) => {
       setCurrentOrganization(organizationId);
       setSidebarLevel('organization'); // Ensure organization mode after switching
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Optimistic update: don't invalidate current-user to avoid 1000ms delay
+      // The context state is already updated, no need to refetch user data
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     }
@@ -310,7 +311,8 @@ export function MainSidebar() {
     onSuccess: (projectId) => {
       setSelectedProject(projectId);
       setSidebarLevel('project');
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Optimistic update: don't invalidate current-user to avoid 1000ms delay
+      // The context state is already updated, no need to refetch user data
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
     }
   });
