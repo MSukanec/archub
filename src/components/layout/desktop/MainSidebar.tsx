@@ -71,6 +71,7 @@ import { useSidebarStore, useSecondarySidebarStore } from "@/stores/sidebarStore
 import { useNavigationStore } from "@/stores/navigationStore";
 import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
+import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 
 // Define types for sidebar items
@@ -1089,6 +1090,13 @@ export function MainSidebar() {
           })}
         </div>
       </div>
+      
+      {/* PlanBadge - Solo en sidebar de organización cuando está expandido */}
+      {isExpanded && sidebarLevel === 'organization' && (
+        <div className="px-3 pb-3">
+          <PlanBadge isExpanded={true} />
+        </div>
+      )}
       
       </aside>
     </div>
