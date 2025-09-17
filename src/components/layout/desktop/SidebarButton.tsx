@@ -161,6 +161,8 @@ export default function SidebarButton({
               style={{
                 color: isActive
                   ? `var(--main-sidebar-button-active-icon-fg)`
+                  : isHovered
+                  ? `var(--main-sidebar-button-hover-icon-fg)`
                   : `var(--main-sidebar-button-icon-fg)`
               }}
             >
@@ -187,6 +189,8 @@ export default function SidebarButton({
             style={{
               color: isActive
                 ? `var(--main-sidebar-button-active-text-fg)`
+                : isHovered
+                ? `var(--main-sidebar-button-hover-text-fg)`
                 : `var(--main-sidebar-button-text-fg)`
             }}
           >
@@ -199,6 +203,8 @@ export default function SidebarButton({
               style={{
                 color: isActive
                   ? `var(--main-sidebar-button-active-icon-fg)`
+                  : isHovered
+                  ? `var(--main-sidebar-button-hover-icon-fg)`
                   : `var(--main-sidebar-button-icon-fg)`
               }}
             >
