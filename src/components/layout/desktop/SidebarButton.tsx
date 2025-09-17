@@ -98,8 +98,8 @@ export default function SidebarButton({
           ? (variant === 'secondary' ? `var(--main-sidebar-button-hover-bg)` : `var(--main-sidebar-button-active-bg)`) // Usar hover para activo en sidebar secundario
           : (variant === 'secondary' ? `var(--main-sidebar-button-bg)` : `var(--main-sidebar-button-bg)`),
         color: isActive
-          ? (variant === 'secondary' ? `var(--main-sidebar-button-hover-fg)` : `var(--main-sidebar-button-active-fg)`) // Usar hover para activo en sidebar secundario
-          : (variant === 'secondary' ? `var(--main-sidebar-button-fg)` : `var(--main-sidebar-button-fg)`),
+          ? (variant === 'secondary' ? `var(--main-sidebar-button-hover-text-fg)` : `var(--main-sidebar-button-active-text-fg)`) // Usar hover para activo en sidebar secundario
+          : (variant === 'secondary' ? `var(--main-sidebar-button-text-fg)` : `var(--main-sidebar-button-text-fg)`),
         '--hover-bg': variant === 'secondary' ? `var(--main-sidebar-button-hover-bg)` : `var(--main-sidebar-button-hover-bg)`,
         '--hover-fg': variant === 'secondary' ? `var(--main-sidebar-button-hover-fg)` : `var(--main-sidebar-button-hover-fg)`
       } as React.CSSProperties}
