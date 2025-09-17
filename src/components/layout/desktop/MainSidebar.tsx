@@ -234,6 +234,8 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     type: "Organización" as const
   }));
 
+  // COMENTADO - SelectorPopover para organizaciones
+  /*
   return (
     <SelectorPopover
       trigger={
@@ -258,6 +260,10 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
       getInitials={getOrganizationInitials}
     />
   );
+  */
+  
+  // Placeholder temporal mientras usamos la nueva funcionalidad del sidebar
+  return null;
 }
 // Función auxiliar para generar iniciales de proyectos
 function getProjectInitials(name: string): string {
