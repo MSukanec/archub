@@ -774,10 +774,10 @@ export function MainSidebar() {
               onClick={() => handleProjectSelect(project.id)}
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center overflow-hidden transition-all duration-200 hover:scale-110",
-                selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
+                sidebarLevel !== 'organization' && selectedProjectId === project.id ? "ring-2 ring-white ring-opacity-50" : ""
               )}
               style={{
-                opacity: selectedProjectId === project.id ? 1 : 0.5
+                opacity: sidebarLevel === 'organization' ? 0.3 : (selectedProjectId === project.id ? 1 : 0.5)
               }}
             >
               {project.project_image_url ? (
@@ -862,9 +862,9 @@ export function MainSidebar() {
               // Avatar del proyecto seleccionado
               selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                 <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                  {projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url ? (
+                  {false ? (
                     <img 
-                      src={projects.find(p => p.id === selectedProjectId)?.project_data?.project_image_url} 
+                      src="" 
                       alt={projects.find(p => p.id === selectedProjectId)?.name}
                       className="w-full h-full object-cover"
                     />
