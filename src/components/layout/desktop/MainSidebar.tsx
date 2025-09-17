@@ -859,7 +859,10 @@ export function MainSidebar() {
           // Expandido: mostrar texto
           <div className="px-3 w-full">
             <div className="flex items-center justify-between w-full">
-              <div className="text-xs font-medium text-[var(--main-sidebar-fg)] truncate leading-5 flex-1">
+              <div 
+                className="text-xs font-medium truncate leading-5 flex-1"
+                style={{ color: 'var(--text-important)' }}
+              >
                 {sidebarLevel === 'organization' 
                   ? userData?.organization?.name || 'Organización'
                   : sidebarLevel === 'project' && selectedProjectId
