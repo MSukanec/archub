@@ -798,6 +798,26 @@ export function MainSidebar() {
               )}
             </button>
           ))}
+          
+          {/* Botón para crear nuevo proyecto */}
+          <button
+            onClick={() => navigate('/organization/projects')}
+            className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-dashed transition-all duration-200 hover:scale-110"
+            style={{
+              borderColor: sidebarLevel === 'organization' ? 'var(--main-sidebar-fg)' : 'var(--main-sidebar-button-fg)',
+              opacity: sidebarLevel === 'organization' ? 1 : 0.5
+            }}
+            title="Crear nuevo proyecto"
+          >
+            <span 
+              className="text-lg font-light"
+              style={{
+                color: sidebarLevel === 'organization' ? 'var(--main-sidebar-fg)' : 'var(--main-sidebar-button-fg)'
+              }}
+            >
+              +
+            </span>
+          </button>
         </div>
       </div>
       
