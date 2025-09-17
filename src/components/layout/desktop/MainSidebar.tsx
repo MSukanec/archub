@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useProjectContext } from '@/stores/projectContext';
+import { Badge } from "@/components/ui/badge";
 import { 
   Settings, 
   UserCircle,
