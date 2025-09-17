@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { subDays, startOfDay, format } from 'date-fns'
 
 export interface OrganizationStats {
@@ -16,13 +17,12 @@ export interface ActivityData {
 }
 
 export function useOrganizationStats() {
-  const { data: userData } = useCurrentUser()
-  const organizationId = userData?.organization?.id
+  const { currentOrganizationId } = useProjectContext()
 
   return useQuery({
-    queryKey: ['organization-stats', organizationId],
+    queryKey: ['organization-stats', currentOrganizationId],
     queryFn: async (): Promise<OrganizationStats> => {
-      if (!supabase || !organizationId) {
+      if (!supabase || !currentOrganizationId) {
         return {
           activeProjects: 0,
           documentsLast30Days: 0,
@@ -38,14 +38,14 @@ export function useOrganizationStats() {
       const { count: activeProjectsCount } = await supabase
         .from('projects')
         .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId)
+        .eq('organization_id', currentOrganizationId)
         .eq('is_active', true)
 
       // Count documents uploaded in last 30 days
       const { count: documentsCount } = await supabase
         .from('design_documents')
         .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId)
+        .eq('organization_id', currentOrganizationId)
         .gte('created_at', thirtyDaysAgo.toISOString())
 
       // Count generated tasks
@@ -57,7 +57,7 @@ export function useOrganizationStats() {
       const { data: movements } = await supabase
         .from('movements')
         .select('amount')
-        .eq('organization_id', organizationId)
+        .eq('organization_id', currentOrganizationId)
         .gte('movement_date', thirtyDaysAgo.toISOString())
 
       const totalMovements = movements?.reduce((sum, movement) => sum + (movement.amount || 0), 0) || 0
@@ -73,7 +73,7 @@ export function useOrganizationStats() {
         throw new Error('Error al cargar estadísticas. Inténtalo nuevamente.')
       }
     },
-    enabled: !!organizationId,
+    enabled: !!currentOrganizationId,
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
@@ -81,12 +81,12 @@ export function useOrganizationStats() {
 
 export function useOrganizationActivity() {
   const { data: userData } = useCurrentUser()
-  const organizationId = userData?.organization?.id
+  const currentOrganizationId = userData?.organization?.id
 
   return useQuery({
-    queryKey: ['organization-activity', organizationId],
+    queryKey: ['organization-activity', currentOrganizationId],
     queryFn: async (): Promise<ActivityData[]> => {
-      if (!supabase || !organizationId) return []
+      if (!supabase || !currentOrganizationId) return []
 
       try {
         const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -104,7 +104,7 @@ export function useOrganizationActivity() {
         const { count: movimientosCount } = await supabase
           .from('movements')
           .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
+          .eq('organization_id', currentOrganizationId)
           .gte('movement_date', date.toISOString())
           .lt('movement_date', nextDay.toISOString())
 
@@ -119,7 +119,7 @@ export function useOrganizationActivity() {
         const { count: contactosCount } = await supabase
           .from('contacts')
           .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
+          .eq('organization_id', currentOrganizationId)
           .gte('created_at', date.toISOString())
           .lt('created_at', nextDay.toISOString())
 
@@ -127,7 +127,7 @@ export function useOrganizationActivity() {
         const { count: documentosCount } = await supabase
           .from('design_documents')
           .select('*', { count: 'exact', head: true })
-          .eq('organization_id', organizationId)
+          .eq('organization_id', currentOrganizationId)
           .gte('created_at', date.toISOString())
           .lt('created_at', nextDay.toISOString())
 
@@ -153,7 +153,7 @@ export function useOrganizationActivity() {
         throw new Error('Error al cargar actividad. Inténtalo nuevamente.')
       }
     },
-    enabled: !!organizationId,
+    enabled: !!currentOrganizationId,
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })

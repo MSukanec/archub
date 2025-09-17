@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 // Removed direct Supabase import - now using server endpoints
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
+import { useProjectContext } from '@/stores/projectContext'
 
 interface Budget {
   id: string
@@ -15,17 +16,17 @@ interface Budget {
 }
 
 export function useBudgets(projectId?: string) {
-  const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
 
   return useQuery({
-    queryKey: ['budgets', projectId, userData?.organization?.id],
+    queryKey: ['budgets', projectId, currentOrganizationId],
     queryFn: async () => {
-      if (!projectId || !userData?.organization?.id) {
+      if (!projectId || !currentOrganizationId) {
         return []
       }
 
       // Use server endpoint instead of direct Supabase access
-      const response = await fetch(`/api/budgets?project_id=${projectId}&organization_id=${userData.organization.id}`, {
+      const response = await fetch(`/api/budgets?project_id=${projectId}&organization_id=${currentOrganizationId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +40,7 @@ export function useBudgets(projectId?: string) {
       const data = await response.json()
       return data as Budget[]
     },
-    enabled: !!projectId && !!userData?.organization?.id
+    enabled: !!projectId && !!currentOrganizationId
   })
 }
 

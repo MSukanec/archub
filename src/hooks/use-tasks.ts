@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
+import { useProjectContext } from '@/stores/projectContext'
 
 interface Task {
   id: string
@@ -34,16 +35,16 @@ interface CreateTaskData {
 }
 
 export function useTasks() {
-  const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
   
   return useQuery({
-    queryKey: ['tasks', userData?.organization?.id],
+    queryKey: ['tasks', currentOrganizationId],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id) {
+      if (!supabase || !currentOrganizationId) {
         return []
       }
 
-      console.log('Fetching tasks for organization:', userData.organization.id)
+      console.log('Fetching tasks for organization:', currentOrganizationId)
       
       const { data, error } = await supabase
         .from('tasks')
@@ -58,7 +59,7 @@ export function useTasks() {
       console.log('Tasks data received:', data)
       return data as Task[]
     },
-    enabled: !!userData?.organization?.id && !!supabase
+    enabled: !!currentOrganizationId && !!supabase
   })
 }
 

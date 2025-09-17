@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 
 export function useContacts() {
   const { data: userData, isLoading: userLoading } = useCurrentUser()
-
-
+  const { currentOrganizationId } = useProjectContext()
 
   return useQuery({
-    queryKey: ['contacts', userData?.organization?.id],
+    queryKey: ['contacts', currentOrganizationId],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id) {
+      if (!supabase || !currentOrganizationId) {
         return []
       }
 
@@ -37,7 +37,7 @@ export function useContacts() {
             )
           )
         `)
-        .eq('organization_id', userData.organization.id)
+        .eq('organization_id', currentOrganizationId)
         .order('first_name', { ascending: true })
 
       if (error) {
@@ -49,10 +49,10 @@ export function useContacts() {
       const transformedData = data?.map(contact => ({
         ...contact,
         contact_types: contact.contact_types?.map((link: any) => link.contact_type).filter(Boolean) || []
-      })).filter(contact => contact.linked_user_id !== userData.user.id) || []
+      })).filter(contact => contact.linked_user_id !== userData?.user?.id) || []
       
       return transformedData
     },
-    enabled: !!supabase && !!userData?.organization?.id && !userLoading,
+    enabled: !!supabase && !!currentOrganizationId && !userLoading,
   })
 }

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
 import { InsertOrganizationMaterialPrice } from '../../shared/schema'
+import { useProjectContext } from '@/stores/projectContext'
 
 export interface Material {
   id: string
@@ -51,10 +52,10 @@ export interface NewMaterialData {
 // MaterialPriceData interface eliminada - usar InsertOrganizationMaterialPrice del schema
 
 export function useMaterials() {
-  const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
   
   return useQuery({
-    queryKey: ['materials', userData?.organization?.id],
+    queryKey: ['materials', currentOrganizationId],
     queryFn: async () => {
       if (!supabase) {
         return []
@@ -86,6 +87,7 @@ export function useMaterials() {
 export function useCreateMaterial() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
 
   return useMutation({
     mutationFn: async (data: NewMaterialData) => {
@@ -94,7 +96,7 @@ export function useCreateMaterial() {
       // Prepare material data with organization context
       const materialData = {
         ...data,
-        organization_id: userData?.organization?.id || null,
+        organization_id: currentOrganizationId || null,
         is_system: false // Always false for organization-created materials
       }
 

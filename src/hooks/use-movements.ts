@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useProjectContext } from '@/stores/projectContext'
 
 // NOTE: For activity logging integration, import logActivity from '@/utils/logActivity'
 // and add logging calls in mutation onSuccess handlers as needed
@@ -71,14 +72,20 @@ interface Movement {
   }
 }
 
-export function useMovements(organizationId: string | undefined, projectId: string | undefined) {
+export function useMovements(organizationId?: string | undefined, projectId?: string | undefined) {
+  const { currentOrganizationId, selectedProjectId } = useProjectContext()
+  
+  // Use ProjectContext IDs as primary source, fallback to parameters
+  const effectiveOrgId = organizationId || currentOrganizationId
+  const effectiveProjectId = projectId || selectedProjectId
+  
   return useQuery({
-    queryKey: ['movements', organizationId, projectId],
+    queryKey: ['movements', effectiveOrgId, effectiveProjectId],
     queryFn: async () => {
-      if (!organizationId) return []
+      if (!effectiveOrgId) return []
 
-      console.log('Fetching movements for organization:', organizationId, 'project:', projectId)
-      console.log('Project filter active:', !!projectId)
+      console.log('Fetching movements for organization:', effectiveOrgId, 'project:', effectiveProjectId)
+      console.log('Project filter active:', !!effectiveProjectId)
 
       if (!supabase) {
         throw new Error('Supabase client not initialized')
@@ -129,15 +136,15 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           general_cost
         `)
         
-      query = query.eq('organization_id', organizationId)
+      query = query.eq('organization_id', effectiveOrgId)
         .order('movement_date', { ascending: false })
         .order('created_at', { ascending: false });
 
       // If project is specified, filter by project
       // Only filter by project if projectId is explicitly provided and not null
-      if (projectId && projectId !== 'null') {
-        console.log('Filtering by project_id:', projectId);
-        query = query.eq('project_id', projectId);
+      if (effectiveProjectId && effectiveProjectId !== 'null') {
+        console.log('Filtering by project_id:', effectiveProjectId);
+        query = query.eq('project_id', effectiveProjectId);
       } else {
         console.log('Not filtering by project - showing all movements for organization');
       }
@@ -150,7 +157,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       }
 
       if (!data || data.length === 0) {
-        console.log('No movements found for organization:', organizationId)
+        console.log('No movements found for organization:', effectiveOrgId)
         return []
       }
 
@@ -161,8 +168,8 @@ export function useMovements(organizationId: string | undefined, projectId: stri
           organization_id: data[0]?.organization_id,
           description: data[0]?.description
         })
-        console.log('Expected organization_id:', organizationId)
-        console.log('Expected project_id:', projectId)
+        console.log('Expected organization_id:', effectiveOrgId)
+        console.log('Expected project_id:', effectiveProjectId)
       }
 
       // All data now comes from the view, no need for additional queries
@@ -215,7 +222,7 @@ export function useMovements(organizationId: string | undefined, projectId: stri
       
       return transformedData as Movement[];
     },
-    enabled: !!organizationId
+    enabled: !!effectiveOrgId
   })
 }
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectContext } from '@/stores/projectContext';
 
 // Helper function to build category hierarchy path
 async function buildCategoryHierarchy(categoryId: string): Promise<string> {
@@ -67,10 +68,10 @@ export interface NewProductData {
 }
 
 export function useProducts() {
-  const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
   
   return useQuery({
-    queryKey: ['products', userData?.organization?.id],
+    queryKey: ['products', currentOrganizationId],
     queryFn: async () => {
       if (!supabase) {
         return []

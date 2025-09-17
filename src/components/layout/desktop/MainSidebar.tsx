@@ -281,8 +281,8 @@ export function MainSidebar() {
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
   const { currentSidebarContext, setSidebarContext, activeSidebarSection, setActiveSidebarSection, sidebarLevel, setSidebarLevel, goToMainLevel } = useNavigationStore();
   
-  // Obtener proyectos de la organización actual
-  const { data: projects = [] } = useProjectsLite(userData?.organization?.id);
+  // Obtener proyectos de la organización actual - ahora usa ProjectContext automáticamente
+  const { data: projects = [] } = useProjectsLite();
   
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
