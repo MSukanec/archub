@@ -77,17 +77,7 @@ export default function SidebarButton({
             const hoverBgVar = variant === 'secondary' ? 'var(--main-sidebar-button-hover-bg)' : 'var(--main-sidebar-button-hover-bg)';
             e.currentTarget.style.backgroundColor = hoverBgVar;
             
-            // Aplicar hover colors a iconos y texto por separado
-            const iconElements = e.currentTarget.querySelectorAll('[data-icon]');
-            const textElements = e.currentTarget.querySelectorAll('[data-text]');
-            
-            iconElements.forEach(el => {
-              (el as HTMLElement).style.color = 'var(--main-sidebar-button-hover-icon-fg)';
-            });
-            
-            textElements.forEach(el => {
-              (el as HTMLElement).style.color = 'var(--main-sidebar-button-hover-text-fg)';
-            });
+            // Los colores ahora se manejan por estilos inline basados en isHovered
           }
         }}
         style={{ 
@@ -109,17 +99,7 @@ export default function SidebarButton({
           const normalBgVar = variant === 'secondary' ? 'var(--main-sidebar-button-bg)' : 'var(--main-sidebar-button-bg)';
           e.currentTarget.style.backgroundColor = normalBgVar;
           
-          // Restaurar colores normales a iconos y texto por separado
-          const iconElements = e.currentTarget.querySelectorAll('[data-icon]');
-          const textElements = e.currentTarget.querySelectorAll('[data-text]');
-          
-          iconElements.forEach(el => {
-            (el as HTMLElement).style.color = 'var(--main-sidebar-button-icon-fg)';
-          });
-          
-          textElements.forEach(el => {
-            (el as HTMLElement).style.color = 'var(--main-sidebar-button-text-fg)';
-          });
+          // Los colores ahora se manejan por estilos inline basados en isHovered
         }
       }}
     >
