@@ -620,11 +620,7 @@ export function MainSidebar() {
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
         },
-        // Botones de administración
-        {
-          type: 'section',
-          label: 'ADMINISTRACIÓN'
-        },
+        // Botones de administración (sin línea divisoria)
         ...(sidebarContent.organization || []).map(item => ({
           type: 'button',
           id: `organization-${item.href.split('/').pop()}`,
