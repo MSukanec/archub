@@ -119,7 +119,11 @@ export default function Landing() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
-                <Building className="h-8 w-8" style={{ color: 'var(--accent)' }} />
+                <img 
+                  src="/ArchubLogo.png" 
+                  alt="Archub" 
+                  className="h-8 w-8 object-contain"
+                />
                 <span className="text-xl font-bold">Archub</span>
               </div>
               

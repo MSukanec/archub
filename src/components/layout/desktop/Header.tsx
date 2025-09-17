@@ -134,16 +134,19 @@ export function Header() {
       {/* Logo - Aligned with sidebar icons (32x32 square button) */}
       <div className="flex items-center w-12 justify-center">
         <button
-          className="h-8 w-8 flex items-center justify-center text-sm font-bold transition-opacity duration-200 hover:opacity-80 border-0 bg-transparent rounded"
+          className="h-8 w-8 flex items-center justify-center transition-opacity duration-200 hover:opacity-80 border-0 bg-transparent rounded"
           style={{
-            color: "var(--header-fg)",
             borderRadius: '4px'
           }}
           onClick={() => {
             // Optional: could navigate to home or do nothing
           }}
         >
-          A
+          <img 
+            src="/ArchubLogo.png" 
+            alt="Archub" 
+            className="h-7 w-7 object-contain"
+          />
         </button>
       </div>
 
