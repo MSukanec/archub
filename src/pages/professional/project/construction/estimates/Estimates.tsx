@@ -4,6 +4,7 @@ import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-
 import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -23,6 +24,7 @@ export default function Estimates() {
   const [activeTab, setActiveTab] = useState("tasks")
   
   const { data: userData } = useCurrentUser()
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
   const updatePhasePositions = useUpdatePhasePositions()
@@ -38,8 +40,9 @@ export default function Estimates() {
     setSidebarContext('construction')
   }, [setSidebarContext])
 
-  const projectId = userData?.preferences?.last_project_id
-  const organizationId = userData?.preferences?.last_organization_id
+  // Usar ProjectContext como fuente única de verdad para org/project IDs
+  const projectId = selectedProjectId
+  const organizationId = currentOrganizationId
 
   // Usar la misma fuente que el cronograma para consistencia
   const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')

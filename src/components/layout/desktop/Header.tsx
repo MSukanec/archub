@@ -106,10 +106,31 @@ export function Header() {
       setCurrentOrganization(organizationId);
       setSelectedProject(null); // Clear project since we're switching organizations
       
-      // Invalidate queries to refresh data for new organization
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      // Optimistic update: update current-user cache instead of invalidating
+      queryClient.setQueryData(['current-user'], (oldData: any) => {
+        if (!oldData) return oldData;
+        
+        // Find the new organization from the user's organizations list
+        const newOrganization = oldData.organizations?.find((org: any) => org.id === organizationId);
+        
+        return {
+          ...oldData,
+          organization: newOrganization,
+          preferences: {
+            ...oldData.preferences,
+            last_organization_id: organizationId,
+            last_project_id: null, // Clear project when switching orgs
+            updated_at: new Date().toISOString()
+          }
+        };
+      });
+      
+      // Invalidate organization-specific queries
+      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['projects-lite', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ['construction-tasks-view', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['movements', organizationId] });
     }
   });
 

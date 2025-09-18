@@ -204,8 +204,9 @@ export default function MovementsList() {
 
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.preferences?.last_organization_id;
-  const { selectedProjectId, isGlobalView } = useProjectContext();
+  const { selectedProjectId, isGlobalView, currentOrganizationId } = useProjectContext();
+  // Usar ProjectContext como fuente única de verdad para org/project IDs
+  const organizationId = currentOrganizationId || undefined;
   const projectId = selectedProjectId;
 
   const { data: rawMovements = [], isLoading } = useMovements(

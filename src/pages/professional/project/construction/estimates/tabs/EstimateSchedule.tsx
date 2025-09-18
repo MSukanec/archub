@@ -12,6 +12,7 @@ import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -47,6 +48,7 @@ export function EstimateSchedule() {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   
   const { data: userData } = useCurrentUser()
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
   const { showDeleteConfirmation } = useDeleteConfirmation()
@@ -57,8 +59,9 @@ export function EstimateSchedule() {
     setSidebarContext('construction')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const projectId = userData?.preferences?.last_project_id
-  const organizationId = userData?.preferences?.last_organization_id
+  // Usar ProjectContext como fuente única de verdad para org/project IDs
+  const projectId = selectedProjectId
+  const organizationId = currentOrganizationId
 
   const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
 
