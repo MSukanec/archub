@@ -78,10 +78,10 @@ export function useDebouncedAutoSave<T>({
       // This looks like initial data loading, not user editing
       console.log('Skipping auto-save: detected initial data loading');
       previousDataRef.current = data;
-      // Set a flag to enable saves after a delay (allowing for user interactions)
+      // Set a flag to enable saves after a shorter delay (allowing for user interactions)
       setTimeout(() => {
         hasUserEditedRef.current = true;
-      }, 1000);
+      }, 500);
       return;
     }
 

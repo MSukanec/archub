@@ -201,14 +201,16 @@ export function DataBasicTab() {
   useEffect(() => {
     // Use userData.organization first (already available), fallback to organizationInfo
     const organization = userData?.organization || organizationInfo;
-    if (organization) {
+    if (organization && !organizationName && !logoUrl) {
+      // Only initialize if fields are currently empty to avoid triggering auto-save
       setOrganizationName(organization.name || '');
       setLogoUrl(organization.logo_url || '');
     }
-  }, [userData?.organization, organizationInfo]);
+  }, [userData?.organization, organizationInfo, organizationName, logoUrl]);
 
   useEffect(() => {
-    if (organizationData) {
+    if (organizationData && !description && !address && !city && !state && !country && !postalCode && !phone && !email && !website && !taxId) {
+      // Only initialize if fields are currently empty to avoid triggering auto-save
       setDescription(organizationData.description || '');
       setAddress(organizationData.address || '');
       setCity(organizationData.city || '');
@@ -220,7 +222,7 @@ export function DataBasicTab() {
       setWebsite(organizationData.website || '');
       setTaxId(organizationData.tax_id || '');
     }
-  }, [organizationData]);
+  }, [organizationData, description, address, city, state, country, postalCode, phone, email, website, taxId]);
 
   // Handle logo upload success
   const handleLogoUploadSuccess = async (imageUrl: string) => {
