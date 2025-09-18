@@ -16,18 +16,15 @@ export function useProjectTypes() {
         throw new Error('Supabase not available')
       }
 
-      console.log('🔧 Fetching project types...')
       const { data, error } = await supabase
         .from('project_types')
         .select('*')
         .order('name')
 
       if (error) {
-        console.error('🔧 Error fetching project types:', error)
         throw error
       }
 
-      console.log('🔧 Project types fetched:', data?.length || 0, 'items')
       return data || []
     }
   })

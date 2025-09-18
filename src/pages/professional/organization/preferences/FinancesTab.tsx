@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Coins, Wallet, Bug } from 'lucide-react';
+import { Coins, Wallet } from 'lucide-react';
 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 
@@ -326,71 +325,6 @@ export function FinancesTab({}: FinancesTabProps) {
     updateCurrencyExchangeMutation.mutate(useExchange);
   };
 
-  // DEBUG FUNCTION - TEMPORAL
-  const testSupabaseQueries = async () => {
-    console.log('🔧 MANUAL TEST: Testing Supabase queries...');
-    
-    try {
-      // Test 1: Basic currencies table
-      console.log('🔧 TEST 1: Fetching currencies...');
-      const { data: currData, error: currError } = await supabase
-        .from('currencies')
-        .select('*')
-        .order('name');
-      
-      console.log('🔧 TEST 1 RESULT:', { data: currData, error: currError });
-
-      // Test 2: Basic wallets table  
-      console.log('🔧 TEST 2: Fetching wallets...');
-      const { data: walletData, error: walletError } = await supabase
-        .from('wallets')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-      
-      console.log('🔧 TEST 2 RESULT:', { data: walletData, error: walletError });
-
-      // Test 3: Organization currencies
-      console.log('🔧 TEST 3: Fetching organization currencies...');
-      const { data: orgCurrData, error: orgCurrError } = await supabase
-        .from('organization_currencies')
-        .select(`
-          id,
-          organization_id,
-          currency_id,
-          is_default,
-          is_active,
-          currency:currencies(*)
-        `)
-        .eq('organization_id', userData?.organization?.id)
-        .order('is_default', { ascending: false });
-      
-      console.log('🔧 TEST 3 RESULT:', { data: orgCurrData, error: orgCurrError });
-
-      // Test 4: Organization wallets
-      console.log('🔧 TEST 4: Fetching organization wallets...');
-      const { data: orgWalletData, error: orgWalletError } = await supabase
-        .from('organization_wallets')
-        .select(`
-          *,
-          wallets:wallet_id (
-            id,
-            name,
-            created_at,
-            is_active
-          )
-        `)
-        .eq('organization_id', userData?.organization?.id)
-        .eq('is_active', true)
-        .order('is_default', { ascending: false });
-      
-      console.log('🔧 TEST 4 RESULT:', { data: orgWalletData, error: orgWalletError });
-
-    } catch (err) {
-      console.error('🔧 TEST ERROR:', err);
-    }
-  };
-
   // Get available currencies and wallets (excluding defaults from secondary options)
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
@@ -525,23 +459,6 @@ export function FinancesTab({}: FinancesTabProps) {
             />
           </div>
         </div>
-      </div>
-
-      {/* DEBUG SECTION - TEMPORAL */}
-      <div className="mt-8 p-4 border border-red-200 bg-red-50 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Bug className="h-4 w-4 text-red-600" />
-          <h3 className="text-sm font-medium text-red-800">Debug - Test Supabase Queries</h3>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={testSupabaseQueries}
-          className="text-red-700 border-red-200 hover:bg-red-100"
-        >
-          Test Database Queries
-        </Button>
-        <p className="text-xs text-red-600 mt-2">Click to test database queries and check console logs</p>
       </div>
 
     </div>

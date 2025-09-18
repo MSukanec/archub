@@ -13,24 +13,14 @@ export const useAllWallets = () => {
   return useQuery({
     queryKey: ['wallets'],
     queryFn: async () => {
-      console.log('🔧 Fetching all wallets...')
-      try {
-        const { data, error } = await supabase
-          .from('wallets')
-          .select('*')
-          .eq('is_active', true)
-          .order('name');
-        
-        if (error) {
-          console.error('🔧 Error fetching wallets:', error)
-          throw error;
-        }
-        console.log('🔧 Wallets fetched:', data?.length || 0, 'items', data)
-        return data as Wallet[];
-      } catch (err) {
-        console.error('🔧 Exception fetching wallets:', err)
-        throw err;
-      }
+      const { data, error } = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Wallet[];
     },
   });
 };

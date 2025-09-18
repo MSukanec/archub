@@ -21,23 +21,13 @@ export const useCurrencies = () => {
   return useQuery({
     queryKey: ['currencies'],
     queryFn: async () => {
-      console.log('🔧 Fetching all currencies...')
-      try {
-        const { data, error } = await supabase
-          .from('currencies')
-          .select('*')
-          .order('name')
-        
-        if (error) {
-          console.error('🔧 Error fetching currencies:', error)
-          throw error
-        }
-        console.log('🔧 Currencies fetched:', data?.length || 0, 'items', data)
-        return data as Currency[]
-      } catch (err) {
-        console.error('🔧 Exception fetching currencies:', err)
-        throw err
-      }
+      const { data, error } = await supabase
+        .from('currencies')
+        .select('*')
+        .order('name')
+      
+      if (error) throw error
+      return data as Currency[]
     },
   })
 }
@@ -48,7 +38,6 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) return []
       
-      console.log('🔧 Fetching organization currencies for:', organizationId)
       const { data, error } = await supabase
         .from('organization_currencies')
         .select(`
@@ -62,11 +51,7 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
         .eq('organization_id', organizationId)
         .order('is_default', { ascending: false })
       
-      if (error) {
-        console.error('🔧 Error fetching organization currencies:', error)
-        throw error
-      }
-      console.log('🔧 Organization currencies fetched:', data?.length || 0, 'items')
+      if (error) throw error
       return (data || []) as unknown as OrganizationCurrency[]
     },
     enabled: !!organizationId,
