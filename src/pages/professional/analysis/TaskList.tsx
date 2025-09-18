@@ -277,7 +277,7 @@ export default function TaskList() {
     const duplicateTask = {
       ...task,
       id: undefined, // Remove ID so it creates a new task
-      custom_name: `${task.custom_name} - Copia`,
+      custom_name: `${task.custom_name || task.name_rendered || 'Tarea'} - Copia`,
       created_at: undefined, // Remove created_at
       updated_at: undefined  // Remove updated_at
     }

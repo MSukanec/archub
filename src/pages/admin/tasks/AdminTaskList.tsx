@@ -17,7 +17,7 @@ import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type Gene
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
-import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye } from 'lucide-react'
+import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye, Copy } from 'lucide-react'
 import { EditableParametersTable } from '@/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
@@ -102,6 +102,18 @@ const AdminTaskList = () => {
     // Marcar que venimos del admin
     localStorage.setItem('taskViewSource', 'admin');
     navigate(`/analysis/${task.id}`)
+  }
+
+  const handleDuplicate = (task: GeneratedTask) => {
+    // Create a duplicate object with " - Copia" added to the name
+    const duplicateTask = {
+      ...task,
+      id: undefined, // Remove ID so it creates a new task
+      custom_name: `${task.custom_name || task.name_rendered || 'Tarea'} - Copia`,
+      created_at: undefined, // Remove created_at
+      updated_at: undefined  // Remove updated_at
+    }
+    openModal('parametric-task', { task: duplicateTask, isDuplicating: true })
   }
 
   const handleDelete = (task: GeneratedTask) => {
@@ -354,6 +366,15 @@ const AdminTaskList = () => {
             title="Editar tarea"
           >
             <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDuplicate(task)}
+            className="h-8 w-8 p-0"
+            title="Duplicar tarea"
+          >
+            <Copy className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
