@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -31,6 +31,7 @@ interface LaborType {
   name: string
   description: string | null
   unit_id: string | null
+  unit_name: string | null  // Agregado para mostrar la unidad
   is_system: boolean
   created_at: string
   updated_at: string | null
@@ -48,6 +49,7 @@ interface CostModalProps {
 export function CostModal({ modalData, onClose }: CostModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [costType, setCostType] = useState<'material' | 'labor' | ''>('')
+  const [selectedItemUnit, setSelectedItemUnit] = useState<string>('')
   
   const { task, isEditing = false, costData } = modalData
   
@@ -57,14 +59,14 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const { data: userData } = useCurrentUser()
   const { data: materials = [] } = useMaterials()
 
-  // Hook para obtener tipos de mano de obra (usando la misma query que AdminCostLabor)
+  // Hook para obtener tipos de mano de obra con unit_name desde labor_view
   const { data: laborTypes = [] } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized')
       
       const { data, error } = await supabase
-        .from('labor_types')
+        .from('labor_view')
         .select('*')
         .order('name')
       
@@ -172,6 +174,18 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     }
   }, [isEditing, costData, form]);
 
+  // Función para obtener la unidad del item seleccionado
+  const getSelectedItemUnit = useCallback((itemId: string, type: string): string => {
+    if (type === 'material') {
+      const material = materials.find(m => m.id === itemId)
+      return material?.unit_of_computation || ''
+    } else if (type === 'labor') {
+      const laborType = laborTypes.find((lt: LaborType) => lt.id === itemId)
+      return laborType?.unit_name || ''
+    }
+    return ''
+  }, [materials, laborTypes])
+
   // Watch for type changes to reset item selection
   const watchedType = form.watch('type')
   useEffect(() => {
@@ -180,9 +194,21 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       // Solo limpiar item_id si no estamos en modo edición inicial
       if (!isEditing || costType !== '') {
         form.setValue('item_id', '')
+        setSelectedItemUnit('')
       }
     }
   }, [watchedType, costType, form, isEditing])
+
+  // Watch for item_id changes to update unit display
+  const watchedItemId = form.watch('item_id')
+  useEffect(() => {
+    if (watchedItemId && costType) {
+      const unit = getSelectedItemUnit(watchedItemId, costType)
+      setSelectedItemUnit(unit)
+    } else {
+      setSelectedItemUnit('')
+    }
+  }, [watchedItemId, costType, getSelectedItemUnit])
 
   const onSubmit = async (data: z.infer<typeof costSchema>) => {
     if (!task?.id) {
@@ -304,13 +330,15 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           name="quantity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cantidad *</FormLabel>
+              <FormLabel>
+                Cantidad * {selectedItemUnit && `(${selectedItemUnit})`}
+              </FormLabel>
               <FormControl>
                 <Input
                   type="number"
                   step="0.001"
                   min="0"
-                  placeholder="Cantidad"
+                  placeholder={selectedItemUnit ? `Cantidad en ${selectedItemUnit}` : "Cantidad"}
                   {...field}
                 />
               </FormControl>
