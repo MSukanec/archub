@@ -144,8 +144,7 @@ export default function ProjectItem({
               <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="icon-sm"
-                  className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
+                  className="h-10 w-10 p-0 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
