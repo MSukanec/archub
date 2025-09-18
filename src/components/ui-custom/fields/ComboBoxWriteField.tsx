@@ -99,9 +99,9 @@ export function ComboBox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] bg-[var(--input-bg)] text-foreground rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1",
+            "flex w-full items-center justify-between text-sm md:text-xs leading-tight py-3 md:py-2 px-4 md:px-3 border border-[var(--input-border)] border-gray-300 dark:border-gray-600 bg-[var(--input-bg)] bg-white dark:bg-gray-900 text-foreground text-gray-900 dark:text-gray-100 rounded-md transition-all duration-150 data-[placeholder]:text-[var(--input-placeholder)] placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1",
             "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive aria-[invalid=true]:ring-1",
-            !selectedOption && "text-[var(--input-placeholder)]",
+            !selectedOption && "text-[var(--input-placeholder)] text-gray-500 dark:text-gray-400",
             className
           )}
           disabled={disabled}
@@ -113,11 +113,11 @@ export function ComboBox({
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0 bg-[var(--card-bg)] border-[var(--card-border)] shadow-lg max-h-60 overflow-hidden" 
+        className="w-[--radix-popover-trigger-width] p-0 bg-[var(--card-bg)] bg-white dark:bg-gray-900 border-[var(--card-border)] border-gray-200 dark:border-gray-700 shadow-lg max-h-60 overflow-hidden" 
         align="start" 
         style={{ zIndex: 9999 }}
       >
-        <Command className="bg-[var(--card-bg)]" shouldFilter={false}>
+        <Command className="bg-[var(--card-bg)] bg-white dark:bg-gray-900" shouldFilter={false}>
           <CommandInput 
             placeholder={searchPlaceholder}
             value={onSearchChange ? searchQuery : searchValue}
@@ -128,11 +128,11 @@ export function ComboBox({
                 setSearchValue(value);
               }
             }}
-            className="text-xs bg-[var(--card-bg)] border-none text-foreground placeholder:text-muted-foreground"
+            className="text-xs bg-[var(--card-bg)] bg-white dark:bg-gray-900 border-none text-foreground text-gray-900 dark:text-gray-100 placeholder:text-[var(--muted-fg)] placeholder:text-gray-500 dark:placeholder:text-gray-400"
           />
           <CommandList className="max-h-48 overflow-y-auto scrollbar-thin">
             {filteredOptions.length === 0 && !canCreateNew && (
-              <CommandEmpty className="text-sm text-muted-foreground py-3 text-center">{emptyMessage}</CommandEmpty>
+              <CommandEmpty className="text-sm text-[var(--muted-fg)] text-gray-500 dark:text-gray-400 py-3 text-center">{emptyMessage}</CommandEmpty>
             )}
             
             <CommandGroup>
@@ -141,18 +141,18 @@ export function ComboBox({
                   key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center"
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center"
                 >
                   {value === option.value && (
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
                   )}
                   <span className={cn(
-                    "text-foreground truncate",
+                    "text-foreground text-gray-900 dark:text-gray-100 truncate",
                     value !== option.value && "ml-5" // Add left margin when check is not visible
                   )}>
                     {option.label && option.label.includes(' - ') ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded font-mono">
+                        <span className="text-xs bg-muted bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded font-mono">
                           {option.label.split(' - ')[0]}
                         </span>
                         {option.label.split(' - ')[1]}
@@ -170,7 +170,7 @@ export function ComboBox({
                 <CommandItem
                   value={`create-${searchValue}`}
                   onSelect={handleCreateNew}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors border-t border-border"
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-t border-border border-gray-200 dark:border-gray-700"
                   disabled={isCreating}
                 >
                   {createIcon && <span className="mr-2 text-accent">{createIcon}</span>}

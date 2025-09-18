@@ -1,4 +1,4 @@
-import { Calendar, User, Ruler, Building, FileText, Zap, Hash, Trash2 } from "lucide-react";
+import { Calendar, User, Ruler, Building, FileText, Zap, Hash, Trash2, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
@@ -16,10 +16,133 @@ import { queryClient } from '@/lib/queryClient';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useLocation } from 'wouter';
+import { useTaskMaterials } from '@/hooks/use-generated-tasks';
+import { useTaskLabor } from '@/hooks/use-task-labor';
 
 interface TaskBasicDataViewProps {
   task: any;
   onTabChange?: (tab: string) => void;
+}
+
+// Componente inline para mostrar resumen de costos
+function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: { 
+  task: any; 
+  onTabChange?: (tab: string) => void; 
+  canEdit: boolean;
+  handleDeleteTask: () => void;
+}) {
+  // Usar task.task_id o task.id según esté disponible
+  const taskId = task.task_id || task.id;
+  
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId);
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId);
+
+  const isLoading = materialsLoading || laborLoading;
+
+  // Calcular total de materiales por unidad (misma lógica que TaskCostPopover)
+  const materialsTotalPerUnit = materials.reduce((sum, material) => {
+    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+    const unitPrice = materialView?.avg_price || 0;
+    const quantity = material.amount || 0;
+    return sum + (quantity * unitPrice);
+  }, 0);
+
+  // Calcular total de mano de obra por unidad (misma lógica que TaskCostPopover)
+  const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
+    const laborView = laborItem.labor_view;
+    const unitPrice = laborView?.avg_price || 0;
+    const quantity = laborItem.quantity || 0;
+    return sum + (quantity * unitPrice);
+  }, 0);
+
+  const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit;
+
+  // Formatear moneda estilo argentino
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const hasCosts = materials.length > 0 || labor.length > 0;
+
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader 
+        icon={Calculator}
+        title="Costos"
+        description="Información de costos por unidad"
+      />
+      <CardContent className="flex-1 space-y-4 pt-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <p className="text-sm text-muted-foreground">Cargando costos...</p>
+          </div>
+        ) : !hasCosts ? (
+          <div className="flex items-center justify-center py-6">
+            <p className="text-sm text-muted-foreground">No hay costos definidos para esta tarea</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Sección de totales */}
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                <div>
+                  <p className="text-sm font-medium">Materiales</p>
+                  <p className="text-xs text-muted-foreground">{materials.length} items</p>
+                </div>
+                <p className="text-sm font-semibold">{formatCurrency(materialsTotalPerUnit)}</p>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                <div>
+                  <p className="text-sm font-medium">Mano de Obra</p>
+                  <p className="text-xs text-muted-foreground">{labor.length} items</p>
+                </div>
+                <p className="text-sm font-semibold">{formatCurrency(laborTotalPerUnit)}</p>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div>
+                  <p className="text-sm font-semibold">Total por unidad</p>
+                  <p className="text-xs text-muted-foreground">Costo total</p>
+                </div>
+                <p className="text-sm font-bold text-primary">{formatCurrency(totalPerUnit)}</p>
+              </div>
+            </div>
+
+            {/* Botón Ver detalle */}
+            <FormSubsectionButton
+              icon={<FileText className="h-4 w-4" />}
+              title="Ver detalle"
+              description="Ver descomposición completa de costos"
+              onClick={() => onTabChange?.('Costos')}
+              variant="default"
+              showPlusIcon={false}
+              data-testid="button-ver-detalle-costos"
+            />
+          </div>
+        )}
+
+        {/* Botón Eliminar tarea al final */}
+        <div className="mt-6 pt-3 border-t">
+          <FormSubsectionButton
+            icon={<Trash2 className="h-4 w-4" />}
+            title="Eliminar tarea"
+            description="Eliminar permanentemente esta tarea"
+            onClick={handleDeleteTask}
+            variant="destructive"
+            showPlusIcon={false}
+            disabled={!canEdit}
+            data-testid="button-eliminar-tarea"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function TaskBasicDataView({ 
@@ -274,35 +397,13 @@ export function TaskBasicDataView({
           </CardContent>
         </Card>
 
-        {/* Card derecha - Acciones rápidas */}
-        <Card className="h-full flex flex-col">
-          <CardHeader 
-            icon={Zap}
-            title="Acciones Rápidas"
-            description="Accesos directos para gestionar la tarea"
-          />
-          <CardContent className="flex-1 space-y-3 pt-4">
-            <FormSubsectionButton
-              icon={<FileText className="h-4 w-4" />}
-              title="Ver costos"
-              description="Materiales y mano de obra asociada"
-              onClick={() => onTabChange?.('Costos')}
-              variant="default"
-              showPlusIcon={false}
-            />
-
-            <FormSubsectionButton
-              icon={<Trash2 className="h-4 w-4" />}
-              title="Eliminar tarea"
-              description="Eliminar permanentemente esta tarea"
-              onClick={handleDeleteTask}
-              variant="destructive"
-              showPlusIcon={false}
-              disabled={!canEdit}
-            />
-
-          </CardContent>
-        </Card>
+        {/* Card derecha - Costos */}
+        <CostSummaryCard 
+          task={task}
+          onTabChange={onTabChange}
+          canEdit={canEdit}
+          handleDeleteTask={handleDeleteTask}
+        />
       </div>
     </div>
   );

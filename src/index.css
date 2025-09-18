@@ -77,12 +77,15 @@
   --button-ghost-hover-border: transparent;
 
   /* Inputs */
-  --input-bg: transparent;
+  --input-bg: hsl(0, 0%, 100%);
   --input-text: hsl(0, 0%, 0%);
-  --input-border: hsl(0, 0%, 70%);
-  --input-placeholder: hsl(0, 0%, 60%);
+  --input-border: hsl(0, 0%, 75%);
+  --input-placeholder: hsl(0, 0%, 55%);
   --input-focus-ring: hsl(76, 100%, 40%);
   --input-focus-border: hsl(76, 100%, 40%);
+  
+  /* Muted foreground */
+  --muted-fg: hsl(0, 0%, 45%);
 
   /* Popover/Dropdown */
   --popover-bg: hsl(0, 0%, 97%);
@@ -284,10 +287,13 @@
   /* Inputs */
   --input-bg: hsl(0, 0%, 12%);
   --input-text: hsl(0, 0%, 98%);
-  --input-border: hsl(0, 0%, 20%);
-  --input-placeholder: hsl(0, 0%, 50%);
-  --input-focus-ring: hsl(90, 50 50%);
+  --input-border: hsl(0, 0%, 25%);
+  --input-placeholder: hsl(0, 0%, 55%);
+  --input-focus-ring: hsl(90, 50%, 50%);
   --input-focus-border: hsl(90, 50%, 50%);
+  
+  /* Muted foreground */
+  --muted-fg: hsl(0, 0%, 60%);
 
   /* Popover/Dropdown */
   --popover-bg: hsl(0, 0%, 14%);
