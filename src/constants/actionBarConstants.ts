@@ -72,7 +72,7 @@ export const GROUPING_OPTIONS = {
   // Construcción - Materiales
   MATERIALS: ['Agrupar por Categorías'] as (string | null)[],
   
-  // Construcción - Tareas
+  // Construcción - Cómputos
   TASKS: ['Sin Agrupar', 'Por Rubros', 'Por Fases'] as (string | null)[],
   
   // Cronograma
@@ -81,7 +81,7 @@ export const GROUPING_OPTIONS = {
 
 // Etiquetas estándar para acciones
 export const ACTION_LABELS = {
-  NEW_TASK: 'Nueva Tarea',
+  NEW_TASK: 'Nuevo Cómputo',
   NEW_MATERIAL: 'Nuevo Material',
   NEW_MOVEMENT: 'Nuevo Movimiento',
   ADD_ITEM: 'Agregar',

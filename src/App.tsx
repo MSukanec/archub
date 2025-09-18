@@ -26,7 +26,7 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
-import OrganizationMovements from "@/pages/professional/finances/movements/Movements";
+import OrganizationMovements from "@/pages/professional/general/movements/Movements";
 import { Clients } from "@/pages/professional/project/commercialization/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
 
@@ -37,7 +37,7 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionBudgets from "@/pages/professional/project/construction/ConstructionBudgets";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import ConstructionTasks from "@/pages/professional/project/construction/tasks/Tasks";
+import ConstructionEstimates from "@/pages/professional/project/construction/estimates/Estimates";
 
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
@@ -132,7 +132,7 @@ function Router() {
 
         {/* Construction Routes */}
         <Route path="/construction/dashboard" component={ConstructionDashboard} />
-        <Route path="/construction/tasks" component={ConstructionTasks} />
+        <Route path="/construction/tasks" component={ConstructionEstimates} />
 
 
         <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />

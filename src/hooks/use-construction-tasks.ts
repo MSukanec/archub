@@ -10,6 +10,7 @@ export interface ConstructionTaskView {
   task_id: string;
   custom_name: string;
   category_name: string;
+  division_name: string; // Campo agregado desde la vista SQL
   unit: string; // Nueva columna agregada desde la vista
   quantity: number; // real en DB, number en TS
   start_date: string | null; // date en DB, string en TS
@@ -55,6 +56,9 @@ export interface ConstructionTask {
   // Datos de la tarea
   task_code: string;
   param_values: any;
+  display_name?: string;    // Nombre renderizado de la tarea
+  rubro_name?: string;      // Nombre del rubro/división
+  unit_symbol?: string;     // Símbolo de la unidad
   
   // Fechas y duración
   start_date?: string;
@@ -343,15 +347,15 @@ export function useCreateConstructionTask() {
         queryKey: ['construction-materials', data.project_id] 
       });
       toast({
-        title: "Tarea agregada",
-        description: "La tarea se agregó correctamente al proyecto",
+        title: "Cómputo agregado",
+        description: "El cómputo se agregó correctamente al proyecto",
       });
     },
     onError: (error) => {
       console.error('Error adding construction task:', error);
       toast({
         title: "Error",
-        description: "No se pudo agregar la tarea",
+        description: "No se pudo agregar el cómputo",
         variant: "destructive",
       });
     },
@@ -457,7 +461,7 @@ export function useUpdateConstructionTask() {
         queryKey: ['construction-dependencies'] 
       });
       toast({
-        title: "Tarea actualizada",
+        title: "Cómputo actualizado",
         description: "Los cambios se guardaron correctamente",
       });
     },
@@ -623,8 +627,8 @@ export function useDeleteConstructionTask() {
         queryKey: ['construction-dependencies'] 
       });
       toast({
-        title: "Tarea eliminada",
-        description: "La tarea se eliminó correctamente del proyecto",
+        title: "Cómputo eliminado",
+        description: "El cómputo se eliminó correctamente del proyecto",
       });
     },
     onError: (error: any) => {

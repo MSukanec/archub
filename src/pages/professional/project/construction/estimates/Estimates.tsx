@@ -14,12 +14,12 @@ import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 
-// Import tab components
-import { TaskList } from './tabs/TaskList'
-import { TaskPhases } from './tabs/TaskPhases'
-import { TaskSchedule } from './tabs/TaskSchedule'
+// Import tab components  
+import { EstimateList } from './tabs/EstimateList.tsx'
+import { EstimatePhases } from './tabs/EstimatePhases.tsx'
+import { EstimateSchedule } from './tabs/EstimateSchedule.tsx'
 
-export default function Tasks() {
+export default function Estimates() {
   const [activeTab, setActiveTab] = useState("tasks")
   
   const { data: userData } = useCurrentUser()
@@ -44,7 +44,7 @@ export default function Tasks() {
   // Usar la misma fuente que el cronograma para consistencia
   const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
   
-  // Transformar las tareas de la vista para que sean compatibles con el componente TaskList
+  // Transformar las tareas de la vista para que sean compatibles con el componente EstimateList
   const tasks = tasksView.map(task => ({
     id: task.id,
     project_id: task.project_id,
@@ -229,7 +229,7 @@ export default function Tasks() {
       create: {
         id: 'create',
         icon: Plus,
-        label: activeTab === 'tasks' ? 'Nueva Tarea' : activeTab === 'phases' ? 'Nueva Fase' : 'Crear',
+        label: activeTab === 'tasks' ? 'Nuevo Cómputo' : activeTab === 'phases' ? 'Nueva Fase' : 'Crear',
         onClick: () => {
           if (activeTab === 'tasks') {
             handleAddSingleTask()
@@ -262,7 +262,7 @@ export default function Tasks() {
 
     // Configure filters based on active tab
     const filterConfig = activeTab === 'tasks' ? {
-      title: 'Filtros de Tareas',
+      title: 'Filtros de Cómputos',
       filters: [
         {
           key: 'phase',
@@ -316,7 +316,7 @@ export default function Tasks() {
   const headerTabs = [
     {
       id: "tasks",
-      label: "Tareas",
+      label: "Cómputos",
       isActive: activeTab === "tasks"
     },
     {
@@ -332,12 +332,12 @@ export default function Tasks() {
   ]
 
   const headerProps = {
-    title: "Listado de Tareas",
+    title: "Listado de Cómputos",
     icon: CheckSquare,
     tabs: headerTabs,
     onTabChange: setActiveTab,
     actionButton: activeTab === "tasks" ? {
-      label: "Agregar Tarea",
+      label: "Agregar Cómputo",
       icon: Plus,
       onClick: handleAddSingleTask
     } : activeTab === "phases" ? {
@@ -351,7 +351,7 @@ export default function Tasks() {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando tareas...</div>
+          <div className="text-muted-foreground">Cargando cómputos...</div>
         </div>
       </Layout>
     )
@@ -361,7 +361,7 @@ export default function Tasks() {
     <Layout headerProps={headerProps} wide={true}>
       <div>
         {activeTab === "tasks" && (
-          <TaskList
+          <EstimateList
             tasks={tasks}
             isLoading={isLoading}
             onEditTask={handleEditTask}
@@ -370,7 +370,7 @@ export default function Tasks() {
         )}
         
         {activeTab === "phases" && (
-          <TaskPhases
+          <EstimatePhases
             projectPhases={projectPhases}
             onReorder={handleReorderPhases}
             onEdit={handleEditPhase}
@@ -380,7 +380,7 @@ export default function Tasks() {
         )}
         
         {activeTab === "schedule" && (
-          <TaskSchedule />
+          <EstimateSchedule />
         )}
       </div>
     </Layout>

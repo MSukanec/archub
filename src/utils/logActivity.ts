@@ -80,7 +80,7 @@ export const ACTIVITY_ACTIONS = {
   UPDATE_DESIGN_DOCUMENT: 'update_design_document',
   DELETE_DESIGN_DOCUMENT: 'delete_design_document',
   
-  // Tareas
+  // Cómputos
   CREATE_TASK: 'create_task',
   UPDATE_TASK: 'update_task',
   DELETE_TASK: 'delete_task',

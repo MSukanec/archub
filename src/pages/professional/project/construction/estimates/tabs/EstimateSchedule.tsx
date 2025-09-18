@@ -24,7 +24,7 @@ import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {
-  if (!name) return 'Tarea sin nombre'
+  if (!name) return 'Estimación sin nombre'
   
   // Eliminar códigos al inicio (ej: "RPE-000001: ")
   let cleanedName = name.replace(/^[A-Z]{2,4}-[0-9]{6}:\s*/, '')
@@ -38,10 +38,10 @@ function cleanTaskDisplayName(name: string): string {
   // Limpiar espacios múltiples y trim
   cleanedName = cleanedName.replace(/\s+/g, ' ').trim()
   
-  return cleanedName || 'Tarea sin nombre'
+  return cleanedName || 'Estimación sin nombre'
 }
 
-export function TaskSchedule() {
+export function EstimateSchedule() {
   const [activeTab, setActiveTab] = useState("gantt")
   const [groupingType, setGroupingType] = useState('rubros')
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
@@ -75,7 +75,7 @@ export function TaskSchedule() {
 
     // Agrupar tareas por phase_name usando los datos de la vista
     const tasksByPhase = filteredTasks.reduce((acc, task) => {
-      const phaseName = task.phase_name || 'TAREAS SIN FASE ASIGNADA';
+      const phaseName = task.phase_name || 'ESTIMACIONES SIN FASE ASIGNADA';
       if (!acc[phaseName]) {
         acc[phaseName] = [];
       }
@@ -113,7 +113,7 @@ export function TaskSchedule() {
 
         ganttRows.push({
           id: task.id,
-          name: cleanTaskDisplayName(task.name_rendered || 'Tarea sin nombre'),
+          name: cleanTaskDisplayName(task.custom_name || 'Estimación sin nombre'),
           type: 'task',
           level: 1,
           startDate: validStartDate,
@@ -146,7 +146,7 @@ export function TaskSchedule() {
     },
     {
       id: "list", 
-      label: "Listado de Tareas",
+      label: "Listado de Estimaciones",
       isActive: activeTab === "list",
       disabled: true // Bloquear esta tab
     },
@@ -166,8 +166,8 @@ export function TaskSchedule() {
           {filteredTasks.length === 0 ? (
             <EmptyState
               icon={<Calendar className="h-16 w-16" />}
-              title="No hay tareas en el cronograma"
-              description="Comienza agregando tareas de construcción para visualizar el cronograma del proyecto."
+              title="No hay estimaciones en el cronograma"
+              description="Comienza agregando estimaciones de construcción para visualizar el cronograma del proyecto."
             />
           ) : (
             <GanttContainer
@@ -187,8 +187,8 @@ export function TaskSchedule() {
               onItemDelete={(item) => {
                 const task = filteredTasks.find(t => t.id === item.id)
                 showDeleteConfirmation({
-                  title: 'Eliminar Tarea',
-                  description: `¿Estás seguro de que quieres eliminar "${task?.name_rendered || 'esta tarea'}"?`,
+                  title: 'Eliminar Estimación',
+                  description: `¿Estás seguro de que quieres eliminar "${task?.custom_name || 'esta estimación'}"?`,
                   onConfirm: () => deleteTask.mutate({
                     id: item.id,
                     project_id: task?.project_id || '',
@@ -206,9 +206,9 @@ export function TaskSchedule() {
           <PlanRestricted reason="coming_soon">
             <div className="flex flex-col items-center justify-center py-16">
               <CheckSquare className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Listado de Tareas</h3>
+              <h3 className="text-lg font-semibold mb-2">Listado de Estimaciones</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                Esta funcionalidad estará disponible próximamente. Aquí podrás ver y gestionar todas las tareas 
+                Esta funcionalidad estará disponible próximamente. Aquí podrás ver y gestionar todas las estimaciones 
                 del proyecto en formato de tabla con filtros avanzados.
               </p>
             </div>

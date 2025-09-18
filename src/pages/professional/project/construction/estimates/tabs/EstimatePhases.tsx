@@ -2,7 +2,7 @@ import { Settings } from 'lucide-react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
 
-interface TaskPhasesProps {
+interface EstimatePhasesProps {
   projectPhases: any[]
   onReorder: (reorderedPhases: any[]) => void
   onEdit: (phase: any) => void
@@ -10,19 +10,19 @@ interface TaskPhasesProps {
   isUpdating: boolean
 }
 
-export function TaskPhases({ 
+export function EstimatePhases({ 
   projectPhases, 
   onReorder, 
   onEdit, 
   onDelete, 
   isUpdating 
-}: TaskPhasesProps) {
+}: EstimatePhasesProps) {
   if (projectPhases.length === 0) {
     return (
       <EmptyState
         icon={<Settings className="h-8 w-8" />}
         title="No hay fases en el proyecto"
-        description="Comienza creando la primera fase del proyecto para organizar las tareas por etapas."
+        description="Comienza creando la primera fase del proyecto para organizar las estimaciones por etapas."
       />
     )
   }

@@ -242,18 +242,8 @@ export default function FinancesCapitalMovements() {
   // For compatibility with existing components
   const allMovementPartners: any[] = []
 
-  const handleAddAportePpropio = () => {
-    openModal('movement', { 
-      movementType: 'aportes_propios',
-      editingMovement: null 
-    })
-  }
-
-  const handleAddRetiroPpropio = () => {
-    openModal('movement', { 
-      movementType: 'retiros_propios',
-      editingMovement: null 
-    })
+  const handleNewMovement = () => {
+    openModal('movement', {})
   }
 
   const handleEdit = (movement: CapitalMovement) => {
@@ -333,25 +323,17 @@ export default function FinancesCapitalMovements() {
     icon: DollarSign,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actionButtons: movements.length > 0 ? [
+    actions: movements.length > 0 ? [
       <Button
-        key="add-aporte"
-        onClick={handleAddAportePpropio}
-        className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white"
-        data-testid="button-add-aporte"
+        key="new-movement"
+        variant="default"
+        size="sm"
+        onClick={handleNewMovement}
+        className="h-8 px-3 text-xs font-normal"
+        data-testid="button-new-movement"
       >
-        <Plus className="w-4 h-4 mr-2" />
-        Aporte
-      </Button>,
-      <Button
-        key="add-retiro"
-        onClick={handleAddRetiroPpropio}
-        variant="outline"
-        className="h-9 px-3"
-        data-testid="button-add-retiro"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Retiro
+        <Plus className="w-4 h-4 mr-1" />
+        Nuevo Movimiento
       </Button>
     ] : []
   }
@@ -376,24 +358,13 @@ export default function FinancesCapitalMovements() {
             title="Aún no hay movimientos de capital registrados"
             description="Esta sección muestra los aportes y retiros de capital de los socios del proyecto."
             action={
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleAddAportePpropio}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  data-testid="button-add-aporte-empty"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Registrar Aporte
-                </Button>
-                <Button
-                  onClick={handleAddRetiroPpropio}
-                  variant="outline"
-                  data-testid="button-add-retiro-empty"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Registrar Retiro
-                </Button>
-              </div>
+              <Button
+                onClick={handleNewMovement}
+                data-testid="button-new-movement"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Movimiento
+              </Button>
             }
           />
         </div>

@@ -18,19 +18,19 @@ import TaskRow from '@/components/ui/data-row/rows/TaskRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { cn } from '@/lib/utils'
 
-interface TaskListProps {
+interface EstimateListProps {
   tasks: any[]
   isLoading: boolean
   onEditTask: (task: any) => void
   onDeleteTask: (taskId: string) => void
 }
 
-export function TaskList({ 
+export function EstimateList({ 
   tasks, 
   isLoading, 
   onEditTask, 
   onDeleteTask 
-}: TaskListProps) {
+}: EstimateListProps) {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [groupingType, setGroupingType] = useState('rubros-phases')
@@ -121,8 +121,8 @@ export function TaskList({
     try {
       const exportColumns = createExportColumns(columns)
       await exportToExcel({
-        filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
-        sheetName: 'Tareas de Construcción',
+        filename: `estimaciones-construccion-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+        sheetName: 'Estimaciones de Construcción',
         columns: exportColumns,
         data: finalTasks
       })
@@ -141,7 +141,7 @@ export function TaskList({
       { 
         type: "header", 
         enabled: true, 
-        data: { title: "Presupuesto de Tareas de Construcción" } 
+        data: { title: "Presupuesto de Estimaciones de Construcción" } 
       },
       { 
         type: "budgetTable", 
@@ -157,7 +157,7 @@ export function TaskList({
 
     openModal('pdf-exporter', {
       blocks: pdfConfig,
-      filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.pdf`
+      filename: `estimaciones-construccion-${format(new Date(), 'yyyy-MM-dd')}.pdf`
     })
   }
 
@@ -177,7 +177,7 @@ export function TaskList({
     },
     {
       key: 'display_name',
-      label: 'Tarea',
+      label: 'Estimación',
       render: (task: any) => {
         const customName = task.custom_name || task.task?.display_name;
         // Solo mostrar si existe custom_name y no es un UUID
@@ -307,12 +307,12 @@ export function TaskList({
     return (
       <EmptyState
         icon={<CheckSquare className="h-8 w-8" />}
-        title="No hay tareas en el proyecto"
-        description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
+        title="No hay estimaciones en el proyecto"
+        description="Comienza creando la primera fase y sus estimaciones de construcción para organizar el trabajo del proyecto."
         action={
           <Button onClick={() => openModal('construction-single-task', {})}>
             <Plus className="w-4 h-4 mr-2" />
-            Nueva Tarea
+            Nueva Estimación
           </Button>
         }
       />
@@ -329,7 +329,7 @@ export function TaskList({
   // Render filter popover content
   const renderFilterContent = () => {
     const filterOptions = [
-      { value: 'all', label: 'Todas las tareas' },
+      { value: 'all', label: 'Todas las estimaciones' },
       { value: 'phase', label: 'Solo con fase' },
       { value: 'rubro', label: 'Solo con rubro' }
     ];
@@ -363,9 +363,9 @@ export function TaskList({
       { value: 'none', label: 'Sin agrupar' },
       { value: 'phases', label: 'Agrupar por fases' },
       { value: 'rubros', label: 'Agrupar por rubros' },
-      { value: 'tasks', label: 'Agrupar por tareas' },
+      { value: 'tasks', label: 'Agrupar por estimaciones' },
       { value: 'rubros-phases', label: 'Agrupar por fases y rubros' },
-      { value: 'phases-rubros', label: 'Agrupar por rubros y tareas' }
+      { value: 'phases-rubros', label: 'Agrupar por rubros y estimaciones' }
     ];
 
     return (
@@ -445,7 +445,7 @@ export function TaskList({
           return (
             <>
               <div className="truncate text-sm font-medium text-white">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Estimación' : 'Estimaciones'})
               </div>
               <div></div>
               <div></div>
@@ -460,7 +460,7 @@ export function TaskList({
           return (
             <>
               <div className="col-span-full text-sm font-medium text-white">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Estimación' : 'Estimaciones'})
               </div>
             </>
           );
@@ -469,8 +469,8 @@ export function TaskList({
       emptyState={
         <EmptyState
           icon={<CheckSquare className="h-8 w-8" />}
-          title="No hay tareas que coincidan"
-          description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
+          title="No hay estimaciones que coincidan"
+          description="Intenta cambiar los filtros de búsqueda para encontrar las estimaciones que buscas."
         />
       }
     />

@@ -61,6 +61,6 @@ export async function renderTaskNameWithFallback(
       .map(([key, value]) => value)
       .join(' ');
     
-    return paramNames || 'Tarea sin nombre';
+    return paramNames || 'Cómputo sin nombre';
   }
 }
