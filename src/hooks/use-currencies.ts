@@ -22,17 +22,22 @@ export const useCurrencies = () => {
     queryKey: ['currencies'],
     queryFn: async () => {
       console.log('🔧 Fetching all currencies...')
-      const { data, error } = await supabase
-        .from('currencies')
-        .select('*')
-        .order('name')
-      
-      if (error) {
-        console.error('🔧 Error fetching currencies:', error)
-        throw error
+      try {
+        const { data, error } = await supabase
+          .from('currencies')
+          .select('*')
+          .order('name')
+        
+        if (error) {
+          console.error('🔧 Error fetching currencies:', error)
+          throw error
+        }
+        console.log('🔧 Currencies fetched:', data?.length || 0, 'items', data)
+        return data as Currency[]
+      } catch (err) {
+        console.error('🔧 Exception fetching currencies:', err)
+        throw err
       }
-      console.log('🔧 Currencies fetched:', data?.length || 0, 'items')
-      return data as Currency[]
     },
   })
 }
