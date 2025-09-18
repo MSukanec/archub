@@ -204,7 +204,7 @@ export default function TaskList() {
       label: 'Acciones',
       width: '9%',
       render: (task: any) => {
-        // Todas las tareas pueden ser visualizadas, solo las de la organización pueden ser editadas
+        // Solo las tareas de la organización pueden ser editadas y eliminadas
         const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
         
         return (
@@ -214,36 +214,40 @@ export default function TaskList() {
               size="sm"
               onClick={() => handleView(task.id)}
               className="h-7 w-7 p-0"
+              title="Ver detalles"
             >
               <Eye className="h-3 w-3" />
             </Button>
             {canEdit && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEdit(task)}
-                  className="h-7 w-7 p-0"
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDuplicate(task)}
-                  className="h-7 w-7 p-0"
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(task)}
-                  className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEdit(task)}
+                className="h-7 w-7 p-0"
+                title="Editar tarea"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDuplicate(task)}
+              className="h-7 w-7 p-0"
+              title="Duplicar tarea"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDelete(task)}
+                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                title="Eliminar tarea"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             )}
           </div>
         );
