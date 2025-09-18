@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks } from '@/hooks/use-generated-tasks'
+import { useConstructionTasksView } from '@/hooks/use-construction-tasks'
+import { useProjectContext } from '@/stores/projectContext'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
@@ -145,19 +147,43 @@ function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: Materi
 export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const { task, isEditing, taskData, taskId, isDuplicating } = modalData || {}
   
+  // Get project context for construction tasks view
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
+  
   // Load tasks data to find the task by ID if taskId is provided
   const { data: tasksData } = useGeneratedTasks()
   
-  // Determine the actual task data
+  // Load construction tasks view data for enriched task information
+  const { data: constructionTasksData } = useConstructionTasksView(
+    selectedProjectId || '', 
+    currentOrganizationId || ''
+  )
+  
+  // Determine the actual task data - prefer construction_tasks_view for editing
   const actualTask = React.useMemo(() => {
     if (task || taskData) {
       return task || taskData
     }
-    if (taskId && tasksData) {
-      return tasksData.find(t => t.id === taskId)
+    if (taskId) {
+      // For editing mode, try to find the task in construction_tasks_view first (has enriched data)
+      if (isEditing && constructionTasksData) {
+        const constructionTask = constructionTasksData.find(ct => ct.task_id === taskId)
+        if (constructionTask) {
+          console.log('🔧 Found task in construction_tasks_view:', constructionTask)
+          return constructionTask
+        }
+      }
+      // Fallback to tasks_view
+      if (tasksData) {
+        const basicTask = tasksData.find(t => t.id === taskId)
+        if (basicTask) {
+          console.log('🔧 Found task in tasks_view:', basicTask)
+          return basicTask
+        }
+      }
     }
     return null
-  }, [task, taskData, taskId, tasksData])
+  }, [task, taskData, taskId, tasksData, constructionTasksData, isEditing])
   
   // Determine if we're editing (either explicit flag or taskId provided, but not if duplicating)
   const isEditingMode = !isDuplicating && (isEditing || (taskId && actualTask))
@@ -316,29 +342,38 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Load form data when task and reference data is available
   React.useEffect(() => {
     if ((isEditingMode || isDuplicating) && actualTask) {
+      console.log('🔧 Loading task data for editing:', actualTask)
+      
       // Load existing custom_name and is_completed
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
       }
       
-      // Find unit ID by name from TASKS_VIEW
-      if (actualTask.unit && units.length > 0) {
-        const foundUnit = units.find(unit => unit.name === actualTask.unit)
+      // Find unit ID by name - check both construction_tasks_view and tasks_view formats
+      const unitName = actualTask.unit || actualTask.unit_name
+      if (unitName && units.length > 0) {
+        const foundUnit = units.find(unit => unit.name === unitName)
         if (foundUnit) {
           setUnitId(foundUnit.id)
+          console.log('🔧 Set unit ID:', foundUnit.id, 'for unit name:', unitName)
         }
       }
       
       // Always keep is_completed as false for analysis tasks
       
-      // Load task_division_id if exists - CRITICAL FIX
+      // Load task_division_id - check both direct ID and name from view
       if (actualTask.task_division_id) {
         setTaskDivisionId(actualTask.task_division_id)
-      } else if (actualTask.division && taskDivisions.length > 0) {
-        // Fallback: try to find division by name from the view
-        const foundDivision = taskDivisions.find(div => div.name === actualTask.division)
-        if (foundDivision) {
-          setTaskDivisionId(foundDivision.id)
+        console.log('🔧 Set division ID from task_division_id:', actualTask.task_division_id)
+      } else {
+        // Try to find division by name from construction_tasks_view or tasks_view
+        const divisionName = actualTask.division_name || actualTask.division
+        if (divisionName && taskDivisions.length > 0) {
+          const foundDivision = taskDivisions.find(div => div.name === divisionName)
+          if (foundDivision) {
+            setTaskDivisionId(foundDivision.id)
+            console.log('🔧 Set division ID from name lookup:', foundDivision.id, 'for division name:', divisionName)
+          }
         }
       }
     }
