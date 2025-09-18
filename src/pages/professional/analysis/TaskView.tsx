@@ -34,15 +34,11 @@ export default function TaskView() {
     }
   ];
 
-  // Función para truncar título largo
-  const truncateTitle = (title: string, maxLength: number = 60) => {
-    if (title.length <= maxLength) return title;
-    return title.substring(0, maxLength) + "...";
-  };
+  // Mostrar nombre completo sin truncar
 
   const headerProps = {
     icon: CheckSquare,
-    title: truncateTitle(task?.custom_name || task?.name_rendered || "Tarea"),
+    title: task?.custom_name || task?.name_rendered || "Tarea",
     showBackButton: true,
     onBackClick: () => {
       // Limpiar localStorage al salir

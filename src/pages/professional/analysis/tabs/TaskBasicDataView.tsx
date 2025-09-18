@@ -31,12 +31,14 @@ export function TaskBasicDataView({
   const [, navigate] = useLocation();
   
   const [taskName, setTaskName] = useState(task.custom_name || task.name_rendered || '');
-  const [taskRubro, setTaskRubro] = useState(task.division || task.category || '');
+  const [taskRubro, setTaskRubro] = useState(task.division || '');
   const [taskUnit, setTaskUnit] = useState(task.unit || '');
   
   // Actualizar estados cuando cambian los datos de la tarea
   useEffect(() => {
     setTaskName(task.custom_name || task.name_rendered || '');
+    setTaskRubro(task.division || '');
+    setTaskUnit(task.unit || '');
   }, [task]);
   
   const isSystemTask = task.is_system;
@@ -181,21 +183,8 @@ export function TaskBasicDataView({
     }
   });
 
-  // Actualizar rubro cuando cambien los datos de la tarea o las divisiones estén cargadas
-  useEffect(() => {
-    if (divisions.length > 0) {
-      const rubroValue = task.division || task.category || '';
-      setTaskRubro(rubroValue);
-    }
-  }, [task.division, task.category, divisions.length]);
-
-  // Actualizar unidad cuando cambien los datos de la tarea o las unidades estén cargadas
-  useEffect(() => {
-    if (units.length > 0) {
-      const unitValue = task.unit || '';
-      setTaskUnit(unitValue);
-    }
-  }, [task.unit, units.length]);
+  // Los valores ya se actualizan en el useEffect principal de arriba
+  // Remover useEffects duplicados que pueden causar conflictos
 
   return (
     <div className="space-y-6">
