@@ -55,7 +55,11 @@ export default function ForgotPassword() {
           <div className="text-center mb-8">
             <Link href="/">
               <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
-                <Building className="h-8 w-8 text-[var(--accent)]" />
+                <img 
+                  src="/ArchubLogo.png" 
+                  alt="Archub" 
+                  className="h-8 w-8 object-contain"
+                />
                 <span className="text-2xl font-bold">Archub</span>
               </div>
             </Link>
@@ -123,7 +127,11 @@ export default function ForgotPassword() {
         <div className="text-center mb-8">
           <Link href="/">
             <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
-              <Building className="h-8 w-8 text-[var(--accent)]" />
+              <img 
+                src="/ArchubLogo.png" 
+                alt="Archub" 
+                className="h-8 w-8 object-contain"
+              />
               <span className="text-2xl font-bold">Archub</span>
             </div>
           </Link>

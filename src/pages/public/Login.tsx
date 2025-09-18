@@ -66,7 +66,11 @@ export default function Login() {
         <Card className="bg-white border-gray-200">
           <CardHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center space-x-2">
-              <Building className="h-8 w-8 text-[var(--accent)]" />
+              <img 
+                src="/ArchubLogo.png" 
+                alt="Archub" 
+                className="h-8 w-8 object-contain"
+              />
               <span className="text-2xl font-bold text-gray-900">Archub</span>
             </div>
             <CardTitle className="text-xl text-gray-900">Iniciar Sesión</CardTitle>
