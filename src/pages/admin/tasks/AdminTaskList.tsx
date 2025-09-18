@@ -55,6 +55,24 @@ const AdminTaskList = () => {
       return matchesSearch
     })
     .sort((a: GeneratedTask, b: GeneratedTask) => {
+      // Si está agrupado por rubros, ordenar alfabéticamente por rubro
+      if (groupingType === 'rubros') {
+        const rubroA = (a.division || 'Sin rubro').toLowerCase()
+        const rubroB = (b.division || 'Sin rubro').toLowerCase()
+        
+        // Primero ordenar por rubro alfabéticamente (A-Z)
+        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base' })
+        if (rubroComparison !== 0) {
+          return rubroComparison
+        }
+        
+        // Si el rubro es igual, ordenar por nombre de tarea
+        const nameA = (a.custom_name || a.name_rendered || '').toLowerCase()
+        const nameB = (b.custom_name || b.name_rendered || '').toLowerCase()
+        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' })
+      }
+      
+      // Ordenamiento por defecto cuando no está agrupado por rubros
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 

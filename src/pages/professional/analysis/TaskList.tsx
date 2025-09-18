@@ -86,7 +86,7 @@ export default function TaskList() {
     }
   }, [isMobile, groupingType])
 
-  // Filtrar tareas por modo de vista y agregar groupKey
+  // Filtrar tareas por modo de vista, agregar groupKey y ordenar
   const filteredTasks = useMemo(() => {
     let filtered = tasks;
     
@@ -101,7 +101,8 @@ export default function TaskList() {
       );
     }
     
-    return filtered.map(task => {
+    // Agregar groupKey y ordenar
+    const tasksWithGroupKey = filtered.map(task => {
       let groupKey = '';
       
       switch (groupingType) {
@@ -116,6 +117,29 @@ export default function TaskList() {
         ...task,
         groupKey
       };
+    });
+    
+    // Ordenar las tareas
+    return tasksWithGroupKey.sort((a, b) => {
+      // Si está agrupado por rubros, ordenar alfabéticamente por rubro
+      if (groupingType === 'rubros') {
+        const rubroA = (a.division || 'Sin rubro').toLowerCase()
+        const rubroB = (b.division || 'Sin rubro').toLowerCase()
+        
+        // Primero ordenar por rubro alfabéticamente (A-Z)
+        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base' })
+        if (rubroComparison !== 0) {
+          return rubroComparison
+        }
+        
+        // Si el rubro es igual, ordenar por nombre de tarea
+        const nameA = (a.custom_name || a.name_rendered || '').toLowerCase()
+        const nameB = (b.custom_name || b.name_rendered || '').toLowerCase()
+        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' })
+      }
+      
+      // Ordenamiento por defecto cuando no está agrupado por rubros (por fecha de creación, más recientes primero)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     });
   }, [tasks, groupingType, viewMode, userData?.organization?.id]);
 
