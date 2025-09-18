@@ -160,6 +160,72 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     }
   })
 
+  // Mutation para actualizar task_material
+  const updateTaskMaterialMutation = useMutation({
+    mutationFn: async (data: { id: string; material_id: string; amount: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { error } = await supabase
+        .from('task_materials')
+        .update({
+          material_id: data.material_id,
+          amount: data.amount
+        })
+        .eq('id', data.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] })
+      toast({
+        title: "Material actualizado",
+        description: "El material ha sido actualizado correctamente.",
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating material:', error)
+      toast({
+        title: "Error al actualizar material",
+        description: "No se pudo actualizar el material.",
+        variant: "destructive",
+      })
+    }
+  })
+
+  // Mutation para actualizar task_labor
+  const updateTaskLaborMutation = useMutation({
+    mutationFn: async (data: { id: string; labor_type_id: string; quantity: number }) => {
+      if (!supabase) throw new Error('Supabase not initialized')
+      
+      const { error } = await supabase
+        .from('task_labor')
+        .update({
+          labor_type_id: data.labor_type_id,
+          quantity: data.quantity
+        })
+        .eq('id', data.id)
+      
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] })
+      toast({
+        title: "Mano de obra actualizada",
+        description: "La mano de obra ha sido actualizada correctamente.",
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating labor:', error)
+      toast({
+        title: "Error al actualizar mano de obra",
+        description: "No se pudo actualizar la mano de obra.",
+        variant: "destructive",
+      })
+    }
+  })
+
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
@@ -238,21 +304,49 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       return
     }
 
+    // Validación adicional para modo edición
+    if (isEditing && !costData?.id) {
+      toast({
+        title: "Error",
+        description: "No se encontró el ID del costo a editar.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
     
     try {
-      if (data.type === 'material') {
-        await createTaskMaterialMutation.mutateAsync({
-          task_id: task.id,
-          material_id: data.item_id,
-          amount: data.quantity
-        })
-      } else if (data.type === 'labor') {
-        await createTaskLaborMutation.mutateAsync({
-          task_id: task.id,
-          labor_type_id: data.item_id,
-          quantity: data.quantity
-        })
+      if (isEditing && costData?.id) {
+        // Modo edición - actualizar registro existente
+        if (data.type === 'material') {
+          await updateTaskMaterialMutation.mutateAsync({
+            id: costData.id,
+            material_id: data.item_id,
+            amount: data.quantity
+          })
+        } else if (data.type === 'labor') {
+          await updateTaskLaborMutation.mutateAsync({
+            id: costData.id,
+            labor_type_id: data.item_id,
+            quantity: data.quantity
+          })
+        }
+      } else {
+        // Modo crear - insertar nuevo registro
+        if (data.type === 'material') {
+          await createTaskMaterialMutation.mutateAsync({
+            task_id: task.id,
+            material_id: data.item_id,
+            amount: data.quantity
+          })
+        } else if (data.type === 'labor') {
+          await createTaskLaborMutation.mutateAsync({
+            task_id: task.id,
+            labor_type_id: data.item_id,
+            quantity: data.quantity
+          })
+        }
       }
       
       onClose()
@@ -300,7 +394,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Costo *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isEditing}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona el tipo de costo" />
