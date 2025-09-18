@@ -316,11 +316,12 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Load form data when task and reference data is available
   React.useEffect(() => {
     if ((isEditingMode || isDuplicating) && actualTask) {
-      console.log('🔧 Loading task data for editing:', actualTask)
+      console.log('🔧 Loading task data for editing/duplicating:', actualTask)
       
-      // Load existing custom_name and is_completed
+      // Load existing custom_name (always load first)
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
+        console.log('🔧 Set custom name:', actualTask.custom_name)
       }
       
       // Find unit ID by name from tasks_view
@@ -329,6 +330,13 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         if (foundUnit) {
           setUnitId(foundUnit.id)
           console.log('🔧 Set unit ID:', foundUnit.id, 'for unit name:', actualTask.unit)
+        }
+      } else if (actualTask.unit_id && units.length > 0) {
+        // Fallback: if we have unit_id directly
+        const foundUnit = units.find(unit => unit.id === actualTask.unit_id)
+        if (foundUnit) {
+          setUnitId(foundUnit.id)
+          console.log('🔧 Set unit ID from unit_id field:', foundUnit.id)
         }
       }
       
