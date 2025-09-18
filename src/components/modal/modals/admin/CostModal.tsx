@@ -28,12 +28,13 @@ const costSchema = z.object({
 })
 
 interface LaborType {
-  id: string
-  name: string
-  description: string | null
+  labor_id: string
+  labor_name: string
+  labor_description: string | null
   unit_id: string | null
-  unit_name: string | null  // Agregado para mostrar la unidad
+  unit_name: string | null  // Para mostrar la unidad
   is_system: boolean
+  organization_id: string | null
   created_at: string
   updated_at: string | null
 }
@@ -61,22 +62,17 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const { currentOrganizationId } = useProjectContext()
   const { data: materials = [] } = useMaterials()
 
-  // Hook para obtener tipos de mano de obra con unit_name desde labor_view
+  // Hook para obtener tipos de mano de obra con unit_name desde labor_view (global, sin filtro de organización)
   const { data: laborTypes = [] } = useQuery({
-    queryKey: ['labor-types', currentOrganizationId],
+    queryKey: ['labor-types'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized')
-      if (!currentOrganizationId) {
-        console.log('🔧 CostModal: No organization ID, skipping labor types fetch')
-        return []
-      }
       
-      console.log('🔧 CostModal: Fetching labor types from labor_view for org:', currentOrganizationId)
+      console.log('🔧 CostModal: Fetching labor types from labor_view (global)')
       const { data, error } = await supabase
         .from('labor_view')
         .select('*')
-        .eq('organization_id', currentOrganizationId)
-        .order('name')
+        .order('labor_name')
       
       if (error) {
         console.error('🔧 CostModal: Error fetching labor types:', error)
@@ -89,8 +85,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       }
       
       return data || []
-    },
-    enabled: !!currentOrganizationId
+    }
   })
 
   // Mutation para crear task_material
@@ -264,7 +259,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       const material = materials.find(m => m.id === itemId)
       return material?.unit_of_computation || ''
     } else if (type === 'labor') {
-      const laborType = laborTypes.find((lt: LaborType) => lt.id === itemId)
+      const laborType = laborTypes.find((lt: LaborType) => lt.labor_id === itemId)
       return laborType?.unit_name || ''
     }
     return ''
@@ -367,8 +362,8 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       }))
     } else if (costType === 'labor') {
       return laborTypes.map((laborType: LaborType) => ({
-        value: laborType.id,
-        label: laborType.name
+        value: laborType.labor_id,
+        label: laborType.labor_name
       }))
     }
     return []
