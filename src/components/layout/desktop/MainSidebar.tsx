@@ -131,61 +131,28 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
       if (!userData?.user?.id) {
         throw new Error('Usuario no disponible');
       }
-      
-      // Usar el endpoint API en lugar de Supabase directamente
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-      
-      const response = await fetch('/api/user/select-organization', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'x-user-id': userData.user.id
-        },
-        body: JSON.stringify({
-          organization_id: organizationId
+      const { error } = await supabase
+        .from('user_preferences')
+        .update({
+          last_organization_id: organizationId,
+          updated_at: new Date().toISOString()
         })
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Error changing organization: ${error}`);
-      }
-      
+        .eq('user_id', userData.user.id);
+      if (error) throw error;
       return organizationId;
     },
     onSuccess: (organizationId) => {
-      console.log("✅ Organization switch successful:", organizationId);
       setCurrentOrganization(organizationId);
       setSidebarLevel('organization'); // Ensure organization mode after switching
-      
-      // CRÍTICO: Invalidar datos del usuario para que la UI se actualice
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      // Optimistic update: don't invalidate current-user to avoid 1000ms delay
+      // The context state is already updated, no need to refetch user data
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      
-      // Invalidar datos que dependen de la organización
-      queryClient.invalidateQueries({ queryKey: ['movements'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
-    },
-    onError: (error) => {
-      console.error("❌ Organization switch failed:", error);
-      // Mostrar error al usuario si es posible
-      alert(`Error al cambiar organización: ${error.message}`);
     }
   });
   
   const handleOrganizationSelect = async (organizationId: string) => {
-    if (currentOrganization?.id === organizationId) {
-      console.log("🔄 Organization already selected:", organizationId);
-      return;
-    }
+    if (currentOrganization?.id === organizationId) return;
     
     // Prefetch critical data before switching organization to eliminate delays
     try {
@@ -259,7 +226,6 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
     }
     
     // Now switch organization with data already cached
-    console.log("🔄 Switching to organization:", organizationId);
     updateOrganizationMutation.mutate(organizationId);
   };
   
@@ -587,7 +553,7 @@ export function MainSidebar() {
     ],
     project: [],
     commercialization: [
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
+      { icon: Users, label: 'Clientes', href: '/general/clients' }
     ],
     construction: [
       { icon: CheckSquare, label: 'Cómputos', href: '/construction/tasks' },

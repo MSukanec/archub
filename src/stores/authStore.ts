@@ -3,63 +3,6 @@ import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
 
-// Helper function to ensure user data exists for new users
-async function ensureUserDataExists(user: User) {
-  if (!supabase) return;
-  
-  try {
-    // Check if user_data exists
-    const { data: userData, error: userDataError } = await supabase
-      .from('user_data')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-    
-    // Create user_data if it doesn't exist
-    if (userDataError?.code === 'PGRST116' || !userData) {
-      const { error: insertUserDataError } = await supabase
-        .from('user_data')
-        .insert({
-          user_id: user.id,
-          first_name: '',
-          last_name: '',
-          country: '',
-          birthdate: null
-        });
-      
-      if (insertUserDataError) {
-        console.error('Error creating user_data:', insertUserDataError);
-      }
-    }
-    
-    // Check if user_preferences exists
-    const { data: preferencesData, error: preferencesError } = await supabase
-      .from('user_preferences')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-    
-    // Create user_preferences if it doesn't exist
-    if (preferencesError?.code === 'PGRST116' || !preferencesData) {
-      const { error: insertPreferencesError } = await supabase
-        .from('user_preferences')
-        .insert({
-          user_id: user.id,
-          theme: 'light',
-          sidebar_docked: false,
-          onboarding_completed: false,
-          last_user_type: null
-        });
-      
-      if (insertPreferencesError) {
-        console.error('Error creating user_preferences:', insertPreferencesError);
-      }
-    }
-  } catch (error) {
-    console.error('Error ensuring user data exists:', error);
-  }
-}
-
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -113,18 +56,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       // Set up auth state change listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         console.log('🔧 AuthStore: Auth state changed:', event, !!session?.user);
         
         if (event === 'SIGNED_OUT' || !session?.user) {
           set({ user: null, loading: false });
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           set({ user: session.user, loading: false });
-          
-          // Ensure user data exists for new users
-          if (event === 'SIGNED_IN' && session.user) {
-            await ensureUserDataExists(session.user);
-          }
         }
       });
       
@@ -192,7 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/organization/dashboard`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

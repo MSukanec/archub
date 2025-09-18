@@ -368,7 +368,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
     subsections: {
       general: [
         { icon: Info, label: 'Información', href: '/general/info' },
-        { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
+        { icon: Users, label: 'Clientes', href: '/general/clients' }
       ],
       diseno: [
         { icon: Home, label: 'Resumen de Diseño', href: '/design/dashboard' }

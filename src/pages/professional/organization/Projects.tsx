@@ -195,25 +195,7 @@ export default function Projects() {
       
       return { previousProjects }
     },
-    onSuccess: async (_, projectId) => {
-      // Si el proyecto eliminado era el actualmente seleccionado, limpiamos la preferencia
-      if (activeProjectId === projectId && userData?.user?.id && organizationId) {
-        try {
-          await supabase
-            .from('user_organization_preferences')
-            .upsert({
-              user_id: userData.user.id,
-              organization_id: organizationId,
-              last_project_id: null,
-              updated_at: new Date().toISOString()
-            }, {
-              onConflict: 'user_id,organization_id'
-            })
-        } catch (error) {
-          console.warn('Error clearing project preference:', error)
-        }
-      }
-
+    onSuccess: () => {
       toast({
         title: "Proyecto eliminado",
         description: "El proyecto se ha eliminado correctamente"
@@ -221,9 +203,6 @@ export default function Projects() {
       
       queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
-      })
     },
     onError: (error: any, projectId, context) => {
       if (context?.previousProjects) {
@@ -417,7 +396,6 @@ export default function Projects() {
                       project={project}
                       onClick={() => handleSelectProject(project.id)}
                       onEdit={() => openModal('project', { editingProject: project, isEditing: true })}
-                      onDelete={() => handleDeleteClick(project)}
                       isActive={project.id === userOrgPrefs?.last_project_id}
                       projectColor={project.color || 'var(--accent)'}
                     />

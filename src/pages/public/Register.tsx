@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Building, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 
@@ -92,11 +92,7 @@ export default function Register() {
         <Card className="bg-white border-gray-200">
           <CardHeader className="space-y-4 text-center">
             <div className="flex items-center justify-center space-x-2">
-              <img 
-                src="/ArchubLogo.png" 
-                alt="Archub" 
-                className="h-8 w-8 object-contain"
-              />
+              <Building className="h-8 w-8 text-[var(--accent)]" />
               <span className="text-2xl font-bold text-gray-900">Archub</span>
             </div>
             <CardTitle className="text-xl text-gray-900">Comenzar gratis</CardTitle>

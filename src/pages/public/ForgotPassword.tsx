@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail } from "lucide-react";
+import { Building, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,11 +55,7 @@ export default function ForgotPassword() {
           <div className="text-center mb-8">
             <Link href="/">
               <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
-                <img 
-                  src="/ArchubLogo.png" 
-                  alt="Archub" 
-                  className="h-8 w-8 object-contain"
-                />
+                <Building className="h-8 w-8 text-[var(--accent)]" />
                 <span className="text-2xl font-bold">Archub</span>
               </div>
             </Link>
@@ -127,11 +123,7 @@ export default function ForgotPassword() {
         <div className="text-center mb-8">
           <Link href="/">
             <div className="inline-flex items-center space-x-2 text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors">
-              <img 
-                src="/ArchubLogo.png" 
-                alt="Archub" 
-                className="h-8 w-8 object-contain"
-              />
+              <Building className="h-8 w-8 text-[var(--accent)]" />
               <span className="text-2xl font-bold">Archub</span>
             </div>
           </Link>

@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Edit, MoreVertical, Trash2 } from 'lucide-react';
+import { Edit } from 'lucide-react';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -43,7 +42,6 @@ interface ProjectItemProps {
   project: Project;
   onClick?: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
   selected?: boolean;
   className?: string;
   isActive?: boolean;
@@ -87,13 +85,11 @@ export default function ProjectItem({
   project, 
   onClick, 
   onEdit,
-  onDelete,
   selected, 
   className,
   isActive = false,
   projectColor = 'var(--accent)'
 }: ProjectItemProps) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const imageUrl = project.project_data?.project_image_url;
   const initials = getProjectInitials(project.name);
   const statusText = getStatusText(project.status);
@@ -139,53 +135,18 @@ export default function ProjectItem({
               </AvatarFallback>
             </Avatar>
 
-            {/* Botón de acciones */}
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className="h-10 w-10 p-0 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  data-testid="button-project-actions"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-2" align="end">
-                <div className="space-y-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsPopoverOpen(false);
-                      onEdit?.();
-                    }}
-                    data-testid="button-edit-project"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsPopoverOpen(false);
-                      onDelete?.();
-                    }}
-                    data-testid="button-delete-project"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+            {/* Botón Editar */}
+            <Button 
+              variant="ghost" 
+              size="icon-sm"
+              className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Botón "Ir al Proyecto" */}

@@ -1,21 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
 
-type PlanRestrictionConfig = {
-  feature?: string
-  current?: number
-  reason?: 'coming_soon' | 'general_mode' | string
-  functionName?: string
-  badgeOnly?: boolean
-}
-
 interface ActionBarAction {
   id: string
   icon: LucideIcon
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary'
-  restriction?: PlanRestrictionConfig
 }
 
 interface ActionBarActions {
