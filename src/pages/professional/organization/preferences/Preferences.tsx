@@ -7,6 +7,8 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
+import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
+import { useMobile } from '@/hooks/use-mobile';
 import { DataBasicTab } from './DataBasicTab';
 import { MembersTab } from './MembersTab';
 import { FinancesTab } from './FinancesTab';
@@ -17,11 +19,43 @@ export default function Preferences() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
   const { data: organizationMembers = [] } = useOrganizationMembers(userData?.organization?.id);
+  const { setActions, setShowActionBar, clearActions } = useActionBarMobile();
+  const isMobile = useMobile();
 
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('organization');
   }, [setSidebarContext]);
+
+  // Configure mobile action bar based on active tab
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    if (activeTab === 'members') {
+      setActions({
+        create: {
+          id: 'invite-member',
+          icon: UserPlus,
+          label: 'Invitar Miembro',
+          onClick: () => openModal('member'),
+          restriction: {
+            feature: 'max_members',
+            current: organizationMembers.length,
+            badgeOnly: true
+          }
+        }
+      });
+      setShowActionBar(true);
+    } else {
+      clearActions();
+    }
+    
+    return () => {
+      if (isMobile) {
+        clearActions();
+      }
+    };
+  }, [activeTab, isMobile, organizationMembers.length, setActions, setShowActionBar, clearActions, openModal]);
 
   const headerTabs = [
     {

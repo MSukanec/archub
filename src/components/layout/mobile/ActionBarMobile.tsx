@@ -269,20 +269,29 @@ export function ActionBarMobile() {
 
           {/* Slot 3: Create (Central, only if exists) */}
           {actions.create && (
-            <PlanRestricted 
-              feature="max_projects" 
-              current={projects.length}
-              functionName="Crear Proyecto"
-              badgeOnly={true}
-            >
-              <button
-                onClick={actions.create.onClick}
-                className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
-                style={{ backgroundColor: 'var(--accent)' }}
-              >
-                {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
-              </button>
-            </PlanRestricted>
+            (() => {
+              const button = (
+                <button
+                  onClick={actions.create.onClick}
+                  className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                >
+                  {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
+                </button>
+              );
+              
+              // If restriction config exists, wrap with PlanRestricted
+              if (actions.create.restriction) {
+                return (
+                  <PlanRestricted {...actions.create.restriction}>
+                    {button}
+                  </PlanRestricted>
+                );
+              }
+              
+              // Otherwise, render button directly
+              return button;
+            })()
           )}
 
           {/* Slot 4: Filter */}
