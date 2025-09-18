@@ -171,13 +171,11 @@ export function TaskBasicDataView({
   // Usuario normal: solo puede editar tareas de su organización (no sistema)
   const canEdit = userData?.role?.name === 'Administrador' || !isSystemTask;
   
-  // Auto-save mutation for task data
+  // Auto-save mutation for task name
   const saveTaskMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!task.id || !supabase || !canEdit) return;
 
-      // Solo actualizar custom_name por ahora
-      // Las otras propiedades (rubro, unidad) se actualizan por separado
       const { error } = await supabase
         .from('tasks')
         .update({
@@ -188,8 +186,20 @@ export function TaskBasicDataView({
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
+      // Invalidar TODAS las queries relacionadas para sincronización completa
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['task-library'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
       toast({
         title: "Cambios guardados",
         description: "Los cambios se han guardado automáticamente"
@@ -204,9 +214,97 @@ export function TaskBasicDataView({
       });
     }
   });
+
+  // Auto-save mutation for task division/rubro
+  const saveTaskRubroMutation = useMutation({
+    mutationFn: async (division: string) => {
+      if (!task.id || !supabase || !canEdit) return;
+
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          division: division
+        })
+        .eq('id', task.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
+      toast({
+        title: "Rubro actualizado",
+        description: "El rubro de la tarea se ha actualizado automáticamente"
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error saving task division:', error);
+      toast({
+        title: "Error al guardar rubro",
+        description: "No se pudo guardar el rubro de la tarea",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Auto-save mutation for task unit
+  const saveTaskUnitMutation = useMutation({
+    mutationFn: async (unit: string) => {
+      if (!task.id || !supabase || !canEdit) return;
+
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          unit: unit
+        })
+        .eq('id', task.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidar TODAS las queries relacionadas para sincronización completa
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-task', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view', task.id] });
+      queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+      queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+      queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
+      
+      toast({
+        title: "Unidad actualizada",
+        description: "La unidad de cómputo se ha actualizado automáticamente"
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error saving task unit:', error);
+      toast({
+        title: "Error al guardar unidad",
+        description: "No se pudo guardar la unidad de cómputo",
+        variant: "destructive"
+      });
+    }
+  });
   
-  // Auto-save hook solo para el nombre
-  const { isSaving } = useDebouncedAutoSave({
+  // Auto-save hook para el nombre de la tarea
+  const { isSaving: isSavingName } = useDebouncedAutoSave({
     data: {
       taskName
     },
@@ -216,6 +314,33 @@ export function TaskBasicDataView({
     delay: 1000,
     enabled: canEdit
   });
+
+  // Auto-save hook para el rubro de la tarea
+  const { isSaving: isSavingRubro } = useDebouncedAutoSave({
+    data: {
+      taskRubro
+    },
+    saveFn: async (data) => {
+      await saveTaskRubroMutation.mutateAsync(data.taskRubro);
+    },
+    delay: 1000,
+    enabled: canEdit
+  });
+
+  // Auto-save hook para la unidad de la tarea
+  const { isSaving: isSavingUnit } = useDebouncedAutoSave({
+    data: {
+      taskUnit
+    },
+    saveFn: async (data) => {
+      await saveTaskUnitMutation.mutateAsync(data.taskUnit);
+    },
+    delay: 1000,
+    enabled: canEdit
+  });
+
+  // Estado general de guardado
+  const isSaving = isSavingName || isSavingRubro || isSavingUnit;
 
   // Función para eliminar tarea
   const handleDeleteTask = () => {
@@ -244,9 +369,18 @@ export function TaskBasicDataView({
             description: "La tarea se ha eliminado correctamente"
           });
           
-          // Invalidar queries y navegar de vuelta
-          queryClient.invalidateQueries({ queryKey: ['task-library'] });
+          // Invalidar TODAS las queries relacionadas para sincronización completa
+          queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
           queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+          queryClient.invalidateQueries({ queryKey: ['task-library'] });
+          queryClient.invalidateQueries({ queryKey: ['generated-task'] });
+          queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+          queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
+          queryClient.invalidateQueries({ queryKey: ['task-parameter-values'] });
+          queryClient.invalidateQueries({ queryKey: ['all-task-parameter-values'] });
+          queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
+          queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
           
           // Determinar dónde navegar según el origen
           const isFromAdmin = typeof window !== 'undefined' && 
