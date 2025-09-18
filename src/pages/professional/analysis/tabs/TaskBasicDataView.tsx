@@ -128,7 +128,7 @@ export function TaskBasicDataView({
             (document.referrer.includes('/admin/tasks') || 
              localStorage.getItem('taskViewSource') === 'admin');
           localStorage.removeItem('taskViewSource');
-          navigate(isFromAdmin ? '/admin/tasks' : '/library/tasks');
+          navigate(isFromAdmin ? '/admin/tasks' : '/analysis');
           
         } catch (error: any) {
           console.error('Error deleting task:', error);

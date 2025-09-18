@@ -48,7 +48,7 @@ export default function TaskView() {
       // Limpiar localStorage al salir
       localStorage.removeItem('taskViewSource');
       // Navegar según el origen
-      navigate(isFromAdmin ? '/admin/tasks' : '/library/tasks');
+      navigate(isFromAdmin ? '/admin/tasks' : '/analysis');
     },
     isViewMode: true,
     tabs: headerTabs,

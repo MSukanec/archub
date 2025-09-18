@@ -83,7 +83,7 @@ const AdminTaskList = () => {
   const handleView = (task: GeneratedTask) => {
     // Marcar que venimos del admin
     localStorage.setItem('taskViewSource', 'admin');
-    navigate(`/library/tasks/${task.id}`)
+    navigate(`/analysis/${task.id}`)
   }
 
   const handleDelete = (task: GeneratedTask) => {

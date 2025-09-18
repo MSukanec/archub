@@ -261,7 +261,7 @@ export default function TaskList() {
   }
 
   const handleView = (id: string) => {
-    setLocation(`/library/tasks/${id}`);
+    setLocation(`/analysis/${id}`);
   };
 
   const handleDelete = (task: any) => {
