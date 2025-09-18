@@ -232,7 +232,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     defaultValues: {
       type: undefined,
       item_id: '',
-      quantity: 0,
+      quantity: undefined,
     },
   })
 
@@ -444,9 +444,10 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                     type="number"
                     step="0.001"
                     min="0"
-                    placeholder="Cantidad"
+                    placeholder={selectedItemUnit ? `Cantidad en ${selectedItemUnit}` : "Cantidad"}
                     className={selectedItemUnit ? "pr-16" : ""}
                     {...field}
+                    value={field.value || ''}
                   />
                   {selectedItemUnit && (
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
