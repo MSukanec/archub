@@ -16,6 +16,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { toast } from '@/hooks/use-toast'
 
 import { DollarSign } from 'lucide-react'
@@ -57,22 +58,39 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
   const { data: userData } = useCurrentUser()
+  const { currentOrganizationId } = useProjectContext()
   const { data: materials = [] } = useMaterials()
 
   // Hook para obtener tipos de mano de obra con unit_name desde labor_view
   const { data: laborTypes = [] } = useQuery({
-    queryKey: ['labor-types'],
+    queryKey: ['labor-types', currentOrganizationId],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized')
+      if (!currentOrganizationId) {
+        console.log('🔧 CostModal: No organization ID, skipping labor types fetch')
+        return []
+      }
       
+      console.log('🔧 CostModal: Fetching labor types from labor_view for org:', currentOrganizationId)
       const { data, error } = await supabase
         .from('labor_view')
         .select('*')
+        .eq('organization_id', currentOrganizationId)
         .order('name')
       
-      if (error) throw error
+      if (error) {
+        console.error('🔧 CostModal: Error fetching labor types:', error)
+        throw error
+      }
+      
+      console.log('🔧 CostModal: Fetched labor types:', data?.length, 'items')
+      if (data?.length > 0) {
+        console.log('🔧 CostModal: Sample labor type:', data[0])
+      }
+      
       return data || []
-    }
+    },
+    enabled: !!currentOrganizationId
   })
 
   // Mutation para crear task_material
@@ -330,17 +348,25 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           name="quantity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Cantidad * {selectedItemUnit && `(${selectedItemUnit})`}
-              </FormLabel>
+              <FormLabel>Cantidad *</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
-                  step="0.001"
-                  min="0"
-                  placeholder={selectedItemUnit ? `Cantidad en ${selectedItemUnit}` : "Cantidad"}
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    type="number"
+                    step="0.001"
+                    min="0"
+                    placeholder="Cantidad"
+                    className={selectedItemUnit ? "pr-16" : ""}
+                    {...field}
+                  />
+                  {selectedItemUnit && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <span className="text-sm text-muted-foreground font-medium">
+                        {selectedItemUnit}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
