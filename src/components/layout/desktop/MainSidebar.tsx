@@ -553,7 +553,7 @@ export function MainSidebar() {
     ],
     project: [],
     commercialization: [
-      { icon: Users, label: 'Clientes', href: '/general/clients' }
+      { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
     ],
     construction: [
       { icon: CheckSquare, label: 'Cómputos', href: '/construction/tasks' },

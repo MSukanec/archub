@@ -39,7 +39,7 @@ export function ProjectQuickActions() {
       icon: Users,
       label: "Clientes",
       description: "Gestionar clientes del proyecto",
-      onClick: () => navigate('/general/clients'),
+      onClick: () => navigate('/commercialization/clients'),
       color: "text-cyan-600"
     },
     {
