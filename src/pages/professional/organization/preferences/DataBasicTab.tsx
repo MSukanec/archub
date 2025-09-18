@@ -197,13 +197,15 @@ export function DataBasicTab() {
     enabled: !!organizationId
   });
 
-  // Initialize form data when data is loaded
+  // Initialize form data when data is loaded - Use userData.organization as primary source
   useEffect(() => {
-    if (organizationInfo) {
-      setOrganizationName(organizationInfo.name || '');
-      setLogoUrl(organizationInfo.logo_url || '');
+    // Use userData.organization first (already available), fallback to organizationInfo
+    const organization = userData?.organization || organizationInfo;
+    if (organization) {
+      setOrganizationName(organization.name || '');
+      setLogoUrl(organization.logo_url || '');
     }
-  }, [organizationInfo]);
+  }, [userData?.organization, organizationInfo]);
 
   useEffect(() => {
     if (organizationData) {
@@ -267,7 +269,7 @@ export function DataBasicTab() {
 
   // Get organization initials for avatar fallback
   const getOrganizationInitials = () => {
-    const name = organizationName || organizationInfo?.name || 'ORG';
+    const name = organizationName || userData?.organization?.name || organizationInfo?.name || 'ORG';
     return name.split(' ').map((word: string) => word.charAt(0)).join('').toUpperCase().slice(0, 2);
   };
 
