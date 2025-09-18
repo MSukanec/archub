@@ -12,7 +12,6 @@ interface AuthGuardProps {
 // Define route types for clarity
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
-const PROTECTED_ROUTES_DURING_ONBOARDING = ['/organization/dashboard', '/dashboard'];
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { 
@@ -48,7 +47,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     const isPublicRoute = PUBLIC_ROUTES.includes(location);
     const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
-    const isProtectedDuringOnboarding = PROTECTED_ROUTES_DURING_ONBOARDING.includes(location);
 
     // CASE 1: No user - Handle unauthenticated state
     if (!user) {
@@ -116,15 +114,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // Check if user needs onboarding
     const needsOnboarding = !onboardingCompleted || !hasPersonalData;
-    const allowedRoute = isOnboardingRoute || isProtectedDuringOnboarding;
     
-    if (needsOnboarding && !allowedRoute) {
+    if (needsOnboarding && !isOnboardingRoute) {
       // Redirect to onboarding
       if (lastNavigationRef.current !== '/onboarding') {
         console.log('AuthGuard: User needs onboarding, redirecting');
         lastNavigationRef.current = '/onboarding';
         navigate('/onboarding');
       }
+      return;
     } else {
       // User is in valid state, reset tracking
       lastNavigationRef.current = null;
