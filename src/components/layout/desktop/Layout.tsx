@@ -119,7 +119,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           
           {/* Main Layout Frame */}
           <div
-            className="flex-1 flex min-h-0 overflow-hidden relative"
+            className="flex-1 flex min-h-0 relative"
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
             {/* Tertiary Sidebar - Conditional layout based on docked state */}
