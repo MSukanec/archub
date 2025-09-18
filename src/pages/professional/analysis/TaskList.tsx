@@ -273,7 +273,7 @@ export default function TaskList() {
   }, [groupingType, viewMode]);
 
   const handleEdit = (task: any) => {
-    openModal('task', { taskId: task.id })
+    openModal('analysis-task', { taskId: task.id, isEditing: true })
   }
 
   const handleDuplicate = (task: any) => {
@@ -285,7 +285,7 @@ export default function TaskList() {
       created_at: undefined, // Remove created_at
       updated_at: undefined  // Remove updated_at
     }
-    openModal('task', { task: duplicateTask, isDuplicating: true })
+    openModal('analysis-task', { task: duplicateTask, isDuplicating: true })
   }
 
   const handleView = (id: string) => {

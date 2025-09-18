@@ -175,6 +175,8 @@ export function ModalFactory() {
     case 'parametric-task':
       return <AdminTaskModal modalData={data || undefined} onClose={closeModal} />;
     case 'task':
+      return <AdminTaskModal modalData={data || undefined} onClose={closeModal} />;
+    case 'analysis-task':
       return <TaskModal modalData={data || undefined} onClose={closeModal} />;
 
 

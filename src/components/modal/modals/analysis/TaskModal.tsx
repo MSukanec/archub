@@ -145,9 +145,6 @@ function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: Materi
 export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const { task, isEditing, taskData, taskId, isDuplicating } = modalData || {}
   
-  // DEBUG: Log modal opening
-  console.log('🔧 TaskModal opened with modalData:', modalData)
-  
   // Load tasks data to find the task by ID if taskId is provided
   const { data: tasksData } = useGeneratedTasks()
   
@@ -534,7 +531,9 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       }
       
       // Invalidate queries to refresh the task list
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['task-view'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
       
       toast({
         title: isEditingMode ? "Tarea actualizada" : "Tarea creada",
