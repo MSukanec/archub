@@ -38,7 +38,7 @@ export interface TaskMaterial {
 
 export function useGeneratedTasks() {
   return useQuery({
-    queryKey: ['task-view'],
+    queryKey: ['tasks-view'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -55,7 +55,7 @@ export function useGeneratedTasks() {
 
 export function useGeneratedTask(taskId: string) {
   return useQuery({
-    queryKey: ['task-view', taskId],
+    queryKey: ['tasks-view', taskId],
     queryFn: async () => {
       if (!supabase || !taskId) throw new Error('Supabase not initialized or no task ID');
       
