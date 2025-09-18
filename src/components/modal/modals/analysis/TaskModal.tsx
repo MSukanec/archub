@@ -145,6 +145,9 @@ function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: Materi
 export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const { task, isEditing, taskData, taskId, isDuplicating } = modalData || {}
   
+  // DEBUG: Log modal opening
+  console.log('🔧 TaskModal opened with modalData:', modalData)
+  
   // Load tasks data to find the task by ID if taskId is provided
   const { data: tasksData } = useGeneratedTasks()
   
