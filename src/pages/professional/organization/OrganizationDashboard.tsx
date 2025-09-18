@@ -217,6 +217,15 @@ export default function OrganizationDashboard() {
                 icon={<Folder className="w-12 h-12" />}
                 title="No hay proyectos creados"
                 description="Comienza creando tu primer proyecto para gestionar tu trabajo"
+                action={
+                  <Button
+                    variant="default"
+                    onClick={() => setLocation('/organization/projects')}
+                    data-testid="button-new-project"
+                  >
+                    Nuevo Proyecto
+                  </Button>
+                }
               />
             )}
           </CardContent>
