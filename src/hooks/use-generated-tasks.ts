@@ -221,7 +221,7 @@ export function useCreateGeneratedTask() {
     onSuccess: (data) => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
       queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -268,7 +268,7 @@ export function useDeleteGeneratedTask() {
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
       queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -487,7 +487,7 @@ export function useUpdateGeneratedTask() {
     onSuccess: () => {
       // Invalidar TODAS las queries relacionadas para sincronización completa
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['task-view'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
       queryClient.invalidateQueries({ queryKey: ['task-library'] });
       queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
       queryClient.invalidateQueries({ queryKey: ['task-parameters-admin'] });
@@ -498,7 +498,7 @@ export function useUpdateGeneratedTask() {
       
       toast({
         title: "Tarea Actualizada",
-        description: "La tarea se ha actualizado exitosamente"
+        description: "La tarea se ha actualizada exitosamente"
       });
     },
     onError: (error: any) => {
