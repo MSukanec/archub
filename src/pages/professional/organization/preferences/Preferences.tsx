@@ -78,7 +78,7 @@ export default function Preferences() {
   };
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       {renderTabContent()}
     </Layout>
   );
