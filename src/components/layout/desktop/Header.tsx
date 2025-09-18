@@ -13,6 +13,7 @@ import { useProjects } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { 
   Contact, 
   FileText, 
@@ -34,6 +35,7 @@ export function Header() {
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
+  const isAdmin = useIsAdmin();
 
   const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
     currentUser?.organization?.id || ''
@@ -294,31 +296,33 @@ export function Header() {
           <BarChart3 className="h-4 w-4" />
         </Button>
         
-        {/* Administración */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="h-8 w-8"
-          style={{
-            color: "var(--header-button-fg)",
-            backgroundColor: "var(--header-button-bg)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
-            e.currentTarget.style.color = "var(--header-button-hover-fg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
-            e.currentTarget.style.color = "var(--header-button-fg)";
-          }}
-          onClick={() => {
-            setSidebarLevel('admin');
-            navigate('/admin/dashboard');
-          }}
-          data-testid="header-admin"
-        >
-          <Crown className="h-4 w-4" />
-        </Button>
+        {/* Administración - Solo visible para administradores */}
+        {isAdmin && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="h-8 w-8"
+            style={{
+              color: "var(--header-button-fg)",
+              backgroundColor: "var(--header-button-bg)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--header-button-hover-bg)";
+              e.currentTarget.style.color = "var(--header-button-hover-fg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--header-button-bg)";
+              e.currentTarget.style.color = "var(--header-button-fg)";
+            }}
+            onClick={() => {
+              setSidebarLevel('admin');
+              navigate('/admin/dashboard');
+            }}
+            data-testid="header-admin"
+          >
+            <Crown className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
     </header>
