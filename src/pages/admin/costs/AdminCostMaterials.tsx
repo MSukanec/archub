@@ -102,10 +102,27 @@ const AdminCostMaterials = () => {
     }
     
     if (groupingType === 'categories') {
-      return sortedMaterials.map(material => ({
-        ...material,
-        groupKey: material.category_name || 'Sin categoría'
-      }));
+      // Agrupar por categoría
+      const grouped = sortedMaterials.reduce((acc, material) => {
+        const groupKey = material.category_name || 'Sin categoría';
+        if (!acc[groupKey]) {
+          acc[groupKey] = [];
+        }
+        acc[groupKey].push(material);
+        return acc;
+      }, {} as Record<string, Material[]>);
+      
+      // Ordenar alfabéticamente dentro de cada grupo y luego aplanar
+      return Object.entries(grouped)
+        .sort(([a], [b]) => a.localeCompare(b)) // Ordenar categorías alfabéticamente
+        .flatMap(([groupKey, materials]) => 
+          materials
+            .sort((a, b) => a.name.localeCompare(b.name)) // Ordenar materiales alfabéticamente dentro del grupo
+            .map(material => ({
+              ...material,
+              groupKey
+            }))
+        );
     }
     
     return sortedMaterials;
