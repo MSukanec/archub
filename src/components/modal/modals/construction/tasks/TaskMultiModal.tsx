@@ -520,8 +520,10 @@ export function TaskMultiModal({
       return;
     }
 
-    if (!organizationMember?.id) {
-      console.log('⚠️ organizationMember es null');
+    // Usar userData.user.id directamente si no hay organizationMember
+    const createdBy = organizationMember?.id || userData?.user?.id;
+    
+    if (!createdBy) {
       toast({
         title: "Error",
         description: "No se pudo verificar tu membresía en la organización",
@@ -563,7 +565,7 @@ export function TaskMultiModal({
           numberOfTasks: selectedTasks.length,
           organizationId: modalData.organizationId,
           projectId: modalData.projectId,
-          createdBy: organizationMember?.id,
+          createdBy: createdBy,
           taskDetails: selectedTasks.map(st => ({
             task_id: st.task_id,
             quantity: st.quantity,
@@ -571,7 +573,7 @@ export function TaskMultiModal({
           }))
         });
 
-        const createdById = organizationMember?.id;
+        const createdById = createdBy;
         console.log('🔧 ID A USAR PARA created_by:', {
           organizationMember: organizationMember?.id,
           finalId: createdById

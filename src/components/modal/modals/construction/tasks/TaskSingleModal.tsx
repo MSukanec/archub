@@ -188,9 +188,12 @@ export function TaskSingleModal({
 
   // Función para enviar el formulario
   const onSubmit = async (data: SingleTaskFormData) => {
-    if (!organizationMember?.id) {
+    // Usar userData.user.id directamente si no hay organizationMember
+    const createdBy = organizationMember?.id || userData?.user?.id;
+    
+    if (!createdBy) {
       toast({
-        title: "Error",
+        title: "Error", 
         description: "No se pudo obtener la información del usuario",
         variant: "destructive",
       });
@@ -216,7 +219,7 @@ export function TaskSingleModal({
           project_id: modalData.projectId,
           task_id: data.task_id,
           quantity: data.quantity,
-          created_by: organizationMember.id,
+          created_by: createdBy,
           project_phase_id: data.project_phase_id
         });
       }
