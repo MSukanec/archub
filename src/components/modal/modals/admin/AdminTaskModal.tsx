@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useGeneratedTasks } from '@/hooks/use-generated-tasks'
+import { useCreateGeneratedTask, useGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useTaskCategories } from '@/hooks/use-task-categories'
@@ -43,22 +43,28 @@ interface ParameterSelection {
 export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   const { task, isEditing, taskData, taskId } = modalData || {}
   
-  // Load tasks data to find the task by ID if taskId is provided
-  const { data: tasksData } = useGeneratedTasks()
+  // Use direct task fetch when taskId is provided, otherwise use passed task/taskData
+  const { data: fetchedTask, isLoading: isTaskLoading, error: taskError } = useGeneratedTask(taskId || '')
   
-  // Determine the actual task data
+  // Determine the actual task data with proper fallback hierarchy
   const actualTask = React.useMemo(() => {
+    // Priority 1: Use passed task or taskData directly (no fetch needed)
     if (task || taskData) {
       return task || taskData
     }
-    if (taskId && tasksData) {
-      return tasksData.find(t => t.id === taskId)
+    // Priority 2: Use fetched task when taskId is provided
+    if (taskId && fetchedTask) {
+      return fetchedTask
     }
     return null
-  }, [task, taskData, taskId, tasksData])
+  }, [task, taskData, taskId, fetchedTask])
   
   // Determine if we're editing (either explicit flag or taskId provided)
-  const isEditingMode = isEditing || (taskId && actualTask)
+  // CRITICAL FIX: Account for loading state - if taskId exists, we're editing regardless of actualTask
+  const isEditingMode = isEditing || Boolean(taskId)
+  
+  // Show loading state when fetching task by ID
+  const isLoadingTaskData = taskId && isTaskLoading && !task && !taskData
   
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
@@ -134,7 +140,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
 
   // Mutations
   const createTaskMutation = useCreateGeneratedTask()
-  const updateTaskMutation = useUpdateGeneratedTask()
   
   // Current user data
   const { data: userData } = useCurrentUser()
@@ -173,34 +178,6 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
     enabled: !!supabase
   })
 
-  // Initialize existing task values
-  React.useEffect(() => {
-    if (isEditingMode && actualTask && existingParamValues) {
-
-      const loadedSelections: ParameterSelection[] = []
-      
-      if (existingParamValues && typeof existingParamValues === 'object') {
-        Object.entries(existingParamValues).forEach(([parameterSlug, optionSlug]) => {
-          if (typeof optionSlug === 'string') {
-            loadedSelections.push({
-              parameterId: '',
-              optionId: '',
-              parameterSlug,
-              parameterLabel: parameterSlug,
-              optionName: optionSlug,
-              optionLabel: optionSlug
-            })
-          }
-        })
-      }
-      
-      setSelections(loadedSelections)
-      
-      if (existingParamOrder) {
-        setParameterOrder(existingParamOrder)
-      }
-    }
-  }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
 
   // Load form data when task and reference data is available
   React.useEffect(() => {
@@ -289,7 +266,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         // Update existing task
         const updateData: any = {
           custom_name: customName,
-          category_id: null,
+          category_id: categoryId || null, // FIXED: Use actual categoryId instead of hardcoded null
           unit_id: unitId || null,
           task_template_id: null,
           task_division_id: taskDivisionId || null,
@@ -384,92 +361,117 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // ViewPanel - null for creation modal
   const viewPanel = null;
 
-  // EditPanel - all form content
-  const editPanel = (
-    <div className="space-y-6">
-      {/* Tarea Section */}
-      <div className="space-y-4">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="task-division">Rubro</Label>
-            <ComboBox
-              value={taskDivisionId}
-              onValueChange={setTaskDivisionId}
-              options={taskDivisions.map(division => ({
-                value: division.id,
-                label: division.name
-              }))}
-              placeholder="Seleccionar rubro..."
-              searchPlaceholder="Buscar rubro..."
-              emptyMessage="No se encontraron rubros"
-            />
+  // EditPanel - all form content with proper loading and error states
+  const editPanel = (() => {
+    // Show loading state when fetching task data
+    if (isLoadingTaskData) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Cargando datos de la tarea...</span>
           </div>
-          
-          <div>
-            <Label htmlFor="unit-select">Unidad</Label>
-            <ComboBox
-              value={unitId}
-              onValueChange={setUnitId}
-              options={units.map(unit => ({
-                value: unit.id,
-                label: unit.name
-              }))}
-              placeholder="Seleccionar unidad..."
-              searchPlaceholder="Buscar unidad..."
-              emptyMessage="No se encontraron unidades"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="custom-name">Nombre Personalizado</Label>
-            <Textarea
-              id="custom-name"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder="Nombre personalizado para la tarea..."
-              rows={3}
-            />
-          </div>
-          
-          {/* Task Completion Status */}
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="is-completed">Tarea Completada</Label>
-              <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
+        </div>
+      );
+    }
+    
+    // Show error state when task fetch failed
+    if (taskError && taskId) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <p className="text-destructive mb-2">Error al cargar la tarea</p>
+              <p className="text-muted-foreground text-sm">{taskError.message}</p>
             </div>
-            <Switch
-              id="is-completed"
-              checked={isCompleted}
-              onCheckedChange={setIsCompleted}
-            />
+          </div>
+        </div>
+      );
+    }
+    
+    // Show form content when data is ready or for new task creation
+    return (
+      <div className="space-y-6">
+        {/* Tarea Section */}
+        <div className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="task-division">Rubro</Label>
+              <ComboBox
+                value={taskDivisionId}
+                onValueChange={setTaskDivisionId}
+                options={taskDivisions.map(division => ({
+                  value: division.id,
+                  label: division.name
+                }))}
+                placeholder="Seleccionar rubro..."
+                searchPlaceholder="Buscar rubro..."
+                emptyMessage="No se encontraron rubros"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="unit-select">Unidad</Label>
+              <ComboBox
+                value={unitId}
+                onValueChange={setUnitId}
+                options={units.map(unit => ({
+                  value: unit.id,
+                  label: unit.name
+                }))}
+                placeholder="Seleccionar unidad..."
+                searchPlaceholder="Buscar unidad..."
+                emptyMessage="No se encontraron unidades"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="custom-name">Nombre Personalizado</Label>
+              <Textarea
+                id="custom-name"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Nombre personalizado para la tarea..."
+                rows={3}
+              />
+            </div>
+            
+            {/* Task Completion Status */}
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="is-completed">Tarea Completada</Label>
+                <p className="text-xs text-muted-foreground">Indica si esta tarea está completada</p>
+              </div>
+              <Switch
+                id="is-completed"
+                checked={isCompleted}
+                onCheckedChange={setIsCompleted}
+              />
+            </div>
           </div>
         </div>
       </div>
+    );
+  })();
 
-
-
-      
-
-    </div>
-  );
-
-  // Header content
+  // Header content - show edit intent when taskId exists, even during loading
   const headerContent = (
     <FormModalHeader 
-      title={isEditingMode ? "Editar Tarea" : "Nueva Tarea Personalizada"}
-      description={isEditingMode ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
+      title={taskId ? "Editar Tarea" : "Nueva Tarea Personalizada"}
+      description={taskId ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
       icon={Zap}
     />
   );
 
-  // Footer content
+  // Footer content - show edit intent when taskId exists, even during loading
+  // CRITICAL FIX: Disable submission during loading to prevent race condition
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
+      rightLabel={taskId ? "Actualizar Tarea" : "Crear Tarea"}
       onRightClick={handleSubmit}
-
+      disabled={isLoadingTaskData || isLoading}
     />
   );
 
@@ -481,7 +483,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
-      isEditing={true} // Siempre abrir en modo edición
+      isEditing={isEditingMode} // FIXED: Use computed isEditingMode instead of hardcoded true
     />
   );
 }
