@@ -328,7 +328,7 @@ const AdminTaskList = () => {
     { 
       key: 'is_system', 
       label: 'Sistema', 
-      width: '10%',
+      width: '8%',
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
@@ -346,7 +346,7 @@ const AdminTaskList = () => {
     { 
       key: 'actions', 
       label: 'Acciones', 
-      width: '10%',
+      width: '8%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-1">
           <Button

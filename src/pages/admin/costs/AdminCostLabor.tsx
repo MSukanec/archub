@@ -274,7 +274,7 @@ const AdminCostLabor = () => {
     { 
       key: 'is_system', 
       label: 'Tipo', 
-      width: '100px',
+      width: '8%',
       render: (laborType: LaborType) => (
         <Badge 
           variant={laborType.is_system ? "default" : "secondary"}
@@ -290,6 +290,7 @@ const AdminCostLabor = () => {
     {
       key: 'actions',
       label: 'Acciones',
+      width: '8%',
       sortable: false,
       render: (laborType: LaborType) => (
         isAdmin ? (

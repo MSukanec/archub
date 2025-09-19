@@ -299,7 +299,7 @@ const AdminCostProducts = () => {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '120px',
+      width: '8%',
       render: (product: Product) => (
         <div className="flex items-center justify-center gap-1">
           <Button

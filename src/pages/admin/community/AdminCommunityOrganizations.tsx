@@ -243,7 +243,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'name',
       label: 'Organización',
-      width: '300px',
+      width: '32%',
       render: (organization: Organization) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -261,7 +261,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'plan',
       label: 'Plan',
-      width: '120px',
+      width: '10%',
       render: (organization: Organization) => (
         <Badge variant={organization.plan?.name === 'Free' ? 'secondary' : 'default'}>
           {organization.plan?.name || 'Sin plan'}
@@ -271,7 +271,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'members',
       label: 'Miembros',
-      width: '100px',
+      width: '8%',
       render: (organization: Organization) => (
         <span className="text-sm">{organization.members_count}</span>
       ),
@@ -279,7 +279,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'projects',
       label: 'Proyectos',
-      width: '100px',
+      width: '8%',
       render: (organization: Organization) => (
         <span className="text-sm">{organization.projects_count}</span>
       ),
@@ -287,7 +287,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'status',
       label: 'Estado',
-      width: '120px',
+      width: '10%',
       render: (organization: Organization) => (
         <div className="flex items-center gap-2">
           <Badge 
@@ -308,7 +308,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'created_at',
       label: 'Fecha de creación',
-      width: '150px',
+      width: '12%',
       render: (organization: Organization) => (
         <span className="text-sm">
           {organization.created_at ? format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es }) : 'No disponible'}
@@ -318,7 +318,7 @@ const AdminCommunityOrganizations = () => {
     {
       key: 'actions',
       label: '',
-      width: '80px',
+      width: '8%',
       render: (organization: Organization) => (
         <div className="flex items-center gap-1">
           <Button
