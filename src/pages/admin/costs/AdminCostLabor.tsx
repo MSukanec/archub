@@ -311,16 +311,14 @@ const AdminCostLabor = () => {
             >
               <Copy className="h-4 w-4" />
             </Button>
-            {!laborType.is_system && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDelete(laborType)}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(laborType)}
+              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
           <div className="text-xs text-muted-foreground">Solo admins</div>
@@ -398,16 +396,14 @@ const AdminCostLabor = () => {
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
-                {!laborType.is_system && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(laborType)}
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(laborType)}
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             ) : (
               <div className="text-xs text-muted-foreground">Solo admins</div>

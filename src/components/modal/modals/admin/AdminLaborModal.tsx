@@ -314,7 +314,16 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="space-y-4"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            form.handleSubmit(onSubmit)()
+          }
+        }}
+      >
         {/* Labor Type Name */}
         <FormField
           control={form.control}
@@ -400,7 +409,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
                       console.log('💱 Currency changed to:', currency)
                       form.setValue('currency_id', currency)
                     }}
-                    placeholder="0.00"
+                    placeholder="Ingresa el costo por unidad"
                   />
                 </FormControl>
                 <FormMessage />
