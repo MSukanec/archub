@@ -205,15 +205,9 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Load form data when task and reference data is available
   React.useEffect(() => {
     if (isEditingMode && actualTask) {
-      console.log('🔧 AdminTaskModal: Loading form data for task:', actualTask)
-      console.log('🔧 Categories available:', categories.length, categories.map(c => c.name))
-      console.log('🔧 TaskDivisions available:', taskDivisions.length, taskDivisions.map(d => d.name))
-      console.log('🔧 Units available:', units.length, units.map(u => u.name))
-      
       // Load existing custom_name and is_completed
       if (actualTask.custom_name) {
         setCustomName(actualTask.custom_name)
-        console.log('✅ Set custom_name:', actualTask.custom_name)
       }
       
       // Find unit ID by name from TASKS_VIEW
@@ -221,51 +215,33 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         const foundUnit = units.find(unit => unit.name === actualTask.unit)
         if (foundUnit) {
           setUnitId(foundUnit.id)
-          console.log('✅ Set unitId:', foundUnit.id, 'for unit:', actualTask.unit)
-        } else {
-          console.log('❌ Unit not found:', actualTask.unit)
         }
-      } else {
-        console.log('❌ No unit data or units not loaded:', actualTask.unit, units.length)
       }
       
       if (actualTask.is_completed !== undefined) {
         setIsCompleted(actualTask.is_completed)
-        console.log('✅ Set isCompleted:', actualTask.is_completed)
       }
       
       // Load task_division_id if exists - CRITICAL FIX
       if (actualTask.task_division_id) {
         setTaskDivisionId(actualTask.task_division_id)
-        console.log('✅ Set taskDivisionId from direct ID:', actualTask.task_division_id)
       } else if (actualTask.division && taskDivisions.length > 0) {
         // Fallback: try to find division by name from the view
         const foundDivision = taskDivisions.find(div => div.name === actualTask.division)
         if (foundDivision) {
           setTaskDivisionId(foundDivision.id)
-          console.log('✅ Set taskDivisionId from name lookup:', foundDivision.id, 'for division:', actualTask.division)
-        } else {
-          console.log('❌ Division not found:', actualTask.division)
         }
-      } else {
-        console.log('❌ No division data or divisions not loaded:', actualTask.division, taskDivisions.length)
       }
       
       // Load category_id if exists - MISSING LOGIC ADDED!
       if (actualTask.category_id) {
         setCategoryId(actualTask.category_id)
-        console.log('✅ Set categoryId from direct ID:', actualTask.category_id)
       } else if (actualTask.category && categories.length > 0) {
         // Fallback: try to find category by name from the view
         const foundCategory = categories.find(cat => cat.name === actualTask.category)
         if (foundCategory) {
           setCategoryId(foundCategory.id)
-          console.log('✅ Set categoryId from name lookup:', foundCategory.id, 'for category:', actualTask.category)
-        } else {
-          console.log('❌ Category not found:', actualTask.category)
         }
-      } else {
-        console.log('❌ No category data or categories not loaded:', actualTask.category, categories.length)
       }
     }
   }, [isEditingMode, actualTask, units, taskDivisions, categories])

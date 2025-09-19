@@ -525,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(500).json({ error: "Failed to create organization preferences" });
           }
 
-          console.log("🔧 Successfully created default preferences:", newPreferences);
+          // Default organization preferences created successfully"
           return res.json(newPreferences);
         }
         console.error("Error fetching user organization preferences:", error);
