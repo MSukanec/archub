@@ -550,6 +550,7 @@ export function TaskMultiModal({
         await updateTask.mutateAsync({
           id: modalData.editingTask.id,
           quantity: firstSelected.quantity,
+          task_id: firstSelected.task_id,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           project_phase_id: firstSelected.project_phase_id || undefined

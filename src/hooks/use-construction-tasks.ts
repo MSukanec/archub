@@ -376,6 +376,7 @@ export function useUpdateConstructionTask() {
       duration_in_days?: number;
       project_phase_id?: string;
       progress_percent?: number;
+      task_id?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -387,6 +388,7 @@ export function useUpdateConstructionTask() {
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
+      if (data.task_id !== undefined) updateData.task_id = data.task_id;
 
       const { data: result, error } = await supabase
         .from('construction_tasks')

@@ -208,6 +208,7 @@ export function TaskSingleModal({
         await updateTask.mutateAsync({
           id: modalData.editingTask.id,
           quantity: data.quantity,
+          task_id: data.task_id,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           project_phase_id: data.project_phase_id
