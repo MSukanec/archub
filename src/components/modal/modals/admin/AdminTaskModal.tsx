@@ -232,8 +232,19 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
           setTaskDivisionId(foundDivision.id)
         }
       }
+      
+      // Load category_id if exists - MISSING LOGIC ADDED!
+      if (actualTask.category_id) {
+        setCategoryId(actualTask.category_id)
+      } else if (actualTask.category && categories.length > 0) {
+        // Fallback: try to find category by name from the view
+        const foundCategory = categories.find(cat => cat.name === actualTask.category)
+        if (foundCategory) {
+          setCategoryId(foundCategory.id)
+        }
+      }
     }
-  }, [isEditingMode, actualTask, units, taskDivisions])
+  }, [isEditingMode, actualTask, units, taskDivisions, categories])
 
   // Initialize task materials when editing
   React.useEffect(() => {
