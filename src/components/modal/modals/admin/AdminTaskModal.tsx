@@ -471,7 +471,7 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
       onLeftClick={onClose}
       rightLabel={taskId ? "Actualizar Tarea" : "Crear Tarea"}
       onRightClick={handleSubmit}
-      disabled={isLoadingTaskData || isLoading}
+      submitDisabled={isLoadingTaskData || isLoading}
     />
   );
 
