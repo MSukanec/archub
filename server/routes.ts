@@ -727,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to get organization preferences" });
       }
 
-      console.log("🔧 Found user organization preferences", data);
+      // Found user organization preferences successfully
       res.json(data);
     } catch (error) {
       console.error("Error getting organization preferences:", error);

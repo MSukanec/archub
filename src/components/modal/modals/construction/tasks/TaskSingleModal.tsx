@@ -53,7 +53,7 @@ export function TaskSingleModal({
   
   const isEditing = modalData.isEditing && modalData.editingTask;
 
-  // Query para obtener la membresía actual del usuario en la organización
+  // Query para obtener la membresía actual del usuario en la organización  
   const { data: organizationMember } = useQuery({
     queryKey: ['organization-member', modalData.organizationId, userData?.user?.id],
     queryFn: async () => {
@@ -67,6 +67,14 @@ export function TaskSingleModal({
         .single();
         
       if (error) {
+        // Si no encuentra membresía, crear una estructura temporal usando el user.id directamente
+        if (error.code === 'PGRST116') {
+          return {
+            id: userData.user.id,
+            user_id: userData.user.id,
+            organization_id: modalData.organizationId
+          };
+        }
         console.error('❌ Error obteniendo membresía de organización:', error);
         return null;
       }
