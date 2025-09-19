@@ -77,7 +77,8 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
   
   // Use ProjectContext IDs as primary source, fallback to parameters
   const effectiveOrgId = organizationId || currentOrganizationId
-  const effectiveProjectId = projectId || selectedProjectId
+  // Only use selectedProjectId if projectId parameter is not explicitly passed (even if undefined)
+  const effectiveProjectId = arguments.length >= 2 ? projectId : selectedProjectId
   
   return useQuery({
     queryKey: ['movements', effectiveOrgId, effectiveProjectId],
