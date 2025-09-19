@@ -22,7 +22,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current user data
   app.get("/api/current-user", async (req, res) => {
     try {
-      console.log("Attempting to fetch current user data...");
       
       // Get the authorization token from headers
       const authHeader = req.headers.authorization;
@@ -64,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error = result.error;
       }
       
-      console.log("Supabase RPC result:", { userData, error, forceRefresh });
+      // Debug: RPC call completed
       
       if (error) {
         console.error("Error fetching current user:", error);
@@ -112,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log("Returning user data:", userData);
+      // User data retrieved successfully
       res.json(userData);
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -489,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing user_id or organization_id" });
       }
 
-      console.log("🔧 Fetching user organization preferences for:", { user_id, organization_id });
+      // Fetching user organization preferences
 
       // First try to get existing preferences
       const { data, error } = await supabase
@@ -533,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch organization preferences" });
       }
 
-      console.log("🔧 Found existing preferences:", data);
+      // Found existing organization preferences
       res.json(data);
     } catch (error) {
       console.error("Error fetching organization preferences:", error);
