@@ -277,7 +277,7 @@ const AdminCostMaterials = () => {
     {
       key: 'actions',
       label: 'Acciones',
-      width: '120px',
+      width: '10%',
       render: (material: Material) => (
         <div className="flex items-center justify-center gap-1">
           <Button

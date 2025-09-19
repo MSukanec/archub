@@ -252,7 +252,7 @@ const AdminTaskList = () => {
     { 
       key: 'is_completed', 
       label: 'Completa', 
-      width: '140px',
+      width: '12%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-1">
           {task.is_completed ? (
@@ -328,7 +328,7 @@ const AdminTaskList = () => {
     { 
       key: 'is_system', 
       label: 'Sistema', 
-      width: '100px',
+      width: '10%',
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
@@ -346,7 +346,7 @@ const AdminTaskList = () => {
     { 
       key: 'actions', 
       label: 'Acciones', 
-      width: '120px',
+      width: '10%',
       render: (task: GeneratedTask) => (
         <div className="flex items-center justify-center gap-1">
           <Button
