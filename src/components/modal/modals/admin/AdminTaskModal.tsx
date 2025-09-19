@@ -357,7 +357,10 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
 
       
       // Invalidate queries to refresh the task list
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['task-view'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] })
+      console.log('✅ Cache invalidated for generated-tasks, task-view, and tasks-view')
       
       toast({
         title: isEditingMode ? "Tarea actualizada" : "Tarea creada",
