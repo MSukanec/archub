@@ -28,7 +28,7 @@ export function useWalletCurrencyBalances(organizationId?: string, projectId?: s
   // Get all organization movements (without project filter)
   const { data: organizationMovements, isLoading: isLoadingOrgMovements } = useMovements(
     organizationId,
-    undefined // No project filter to get all movements
+    null // Explicitly null to get all movements without project filter
   );
 
   // Get project-specific movements

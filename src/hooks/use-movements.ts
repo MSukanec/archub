@@ -72,13 +72,16 @@ interface Movement {
   }
 }
 
-export function useMovements(organizationId?: string | undefined, projectId?: string | undefined) {
+export function useMovements(organizationId?: string | undefined, projectId?: string | undefined | null) {
   const { currentOrganizationId, selectedProjectId } = useProjectContext()
   
   // Use ProjectContext IDs as primary source, fallback to parameters
   const effectiveOrgId = organizationId || currentOrganizationId
-  // Only use selectedProjectId if projectId parameter is not explicitly passed (even if undefined)
-  const effectiveProjectId = arguments.length >= 2 ? projectId : selectedProjectId
+  // If projectId is explicitly null, don't filter by project
+  // If projectId is undefined and no second parameter passed, use selectedProjectId
+  // If projectId is a valid string, use it for filtering
+  const effectiveProjectId = projectId === null ? null : 
+                             (arguments.length >= 2 ? projectId : selectedProjectId)
   
   return useQuery({
     queryKey: ['movements', effectiveOrgId, effectiveProjectId],
