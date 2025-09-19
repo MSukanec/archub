@@ -7,15 +7,8 @@ import { useProjects } from '@/hooks/use-projects';
 import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 import { SidebarAvatarButton } from './SidebarAvatarButton';
+import { getOrganizationInitials } from '@/utils/initials';
 
-function getOrganizationInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 function getProjectInitials(name: string): string {
   return (name?.trim()?.[0] || '').toUpperCase();
@@ -105,7 +98,7 @@ export function RightSidebar() {
           avatarUrl={userData?.organization?.logo_url}
           backgroundColor="var(--accent)"
           borderColor="rgba(255, 255, 255, 0.3)"
-          letter={userData?.organization?.name ? getOrganizationInitials(userData.organization.name) : 'O'}
+          letter={getOrganizationInitials(userData?.organization?.name || '')}
           primaryText={userData?.organization?.name || 'Organización'}
           secondaryText="Organización"
           isExpanded={isExpanded}

@@ -15,6 +15,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { getOrganizationInitials } from '@/utils/initials';
 
 export function DataBasicTab() {
   const { data: userData } = useCurrentUser();
@@ -265,11 +266,6 @@ export function DataBasicTab() {
     }
   };
 
-  // Get organization initials for avatar fallback
-  const getOrganizationInitials = () => {
-    const name = organizationName || organizationInfo?.name || 'ORG';
-    return name.split(' ').map((word: string) => word.charAt(0)).join('').toUpperCase().slice(0, 2);
-  };
 
   return (
     <div className="space-y-6">
@@ -291,7 +287,7 @@ export function DataBasicTab() {
           <div>
             <AvatarUploader
               currentImageUrl={logoUrl}
-              fallbackText={getOrganizationInitials()}
+              fallbackText={getOrganizationInitials(organizationName || organizationInfo?.name || '')}
               bucketName="organization-logo"
               uploadPath={`org-${organizationId}/logo.jpg`}
               onUploadSuccess={handleLogoUploadSuccess}

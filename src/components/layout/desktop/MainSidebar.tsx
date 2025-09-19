@@ -73,6 +73,7 @@ import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { getOrganizationInitials } from "@/utils/initials";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -107,12 +108,6 @@ interface SidebarSection {
 }
 
 type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | SidebarSection;
-// Función auxiliar para generar iniciales de organizaciones
-function getOrganizationInitials(name: string): string {
-  return name
-    .charAt(0)
-    .toUpperCase();
-}
 // Componente selector de organizaciones para el header (con avatar)
 function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
   const { data: userData } = useCurrentUser();

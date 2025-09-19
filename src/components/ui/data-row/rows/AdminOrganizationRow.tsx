@@ -2,6 +2,7 @@ import React from 'react';
 import DataRowCard from '../DataRowCard';
 import { cn } from '@/lib/utils';
 import { Star, Crown, Zap } from 'lucide-react';
+import { getOrganizationInitials } from '@/utils/initials';
 
 // Interface para la organización (usando la estructura real de la app)
 interface Organization {
@@ -30,14 +31,6 @@ interface OrganizationRowProps {
   className?: string;
 }
 
-// Helper para obtener las iniciales de la organización
-const getOrganizationInitials = (orgName: string): string => {
-  const words = orgName.trim().split(' ');
-  if (words.length > 1) {
-    return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
-  }
-  return orgName.slice(0, 2).toUpperCase();
-};
 
 
 
