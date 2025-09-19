@@ -7,12 +7,7 @@ import { useProjects } from '@/hooks/use-projects';
 import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 import { SidebarAvatarButton } from './SidebarAvatarButton';
-import { getOrganizationInitials } from '@/utils/initials';
-
-
-function getProjectInitials(name: string): string {
-  return (name?.trim()?.[0] || '').toUpperCase();
-}
+import { getOrganizationInitials, getProjectInitials } from '@/utils/initials';
 
 export function RightSidebar() {
   const [isHovered, setIsHovered] = useState(false);

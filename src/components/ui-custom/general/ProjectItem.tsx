@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Edit } from 'lucide-react';
+import { getProjectInitials } from '@/utils/initials';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -72,14 +73,6 @@ const getStatusColor = (status: string): string => {
   return colorMap[status] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
-// Función helper para obtener iniciales del proyecto
-const getProjectInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('');
-};
 
 export default function ProjectItem({ 
   project, 

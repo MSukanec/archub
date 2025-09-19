@@ -2,7 +2,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { getOrganizationInitials } from "@/utils/initials";
+import { getOrganizationInitials, getProjectInitials } from "@/utils/initials";
 
 interface Project {
   id: string;
@@ -28,12 +28,6 @@ interface ProjectSelectorFieldProps {
   className?: string;
 }
 
-// Función para generar iniciales de proyectos (como en Sidebar.tsx)
-function getProjectInitials(name: string): string {
-  return name
-    .charAt(0)
-    .toUpperCase();
-}
 
 
 export default function ProjectSelectorField({

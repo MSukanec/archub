@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { useNavigationStore } from '@/stores/navigationStore'
+import { getProjectInitials } from '@/utils/initials'
 
 export function OrganizationRecentProjects() {
   const [, navigate] = useLocation()
@@ -91,14 +92,6 @@ export function OrganizationRecentProjects() {
     })
   }
 
-  const getProjectInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
 
   if (isLoading) {
     return (

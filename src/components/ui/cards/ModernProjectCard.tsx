@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import SwipeableCard from '@/components/layout/mobile/SwipeableCard';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { getProjectInitials } from '@/utils/initials';
 
 // Project status configurations
 const projectStatuses = {
@@ -35,14 +36,6 @@ interface ModernProjectCardProps {
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData, isActiveProject = false }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
   
-  // Function to get project initials
-  const getProjectInitials = (name: string): string => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join('');
-  };
 
   return (
     <SwipeableCard
@@ -188,7 +181,7 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
                 <Avatar className="w-8 h-8 border-2 border-background">
                   <AvatarImage src={project.creator.avatar_url || ''} />
                   <AvatarFallback className="text-xs">
-                    {project.creator.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                    {project.creator.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                   </AvatarFallback>
                 </Avatar>
               )}

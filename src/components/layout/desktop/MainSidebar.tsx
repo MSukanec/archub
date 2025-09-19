@@ -73,7 +73,7 @@ import ButtonSidebar from "./ButtonSidebar";
 import PlanRestricted from "@/components/ui-custom/security/PlanRestricted";
 import PlanBadge from "@/components/ui-custom/security/PlanBadge";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
-import { getOrganizationInitials } from "@/utils/initials";
+import { getOrganizationInitials, getProjectInitials } from "@/utils/initials";
 
 // Define types for sidebar items
 interface SidebarItem {
@@ -262,12 +262,6 @@ function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean
   
   // Placeholder temporal mientras usamos la nueva funcionalidad del sidebar
   return null;
-}
-// Función auxiliar para generar iniciales de proyectos
-function getProjectInitials(name: string): string {
-  return name
-    .charAt(0)
-    .toUpperCase();
 }
 
 export function MainSidebar() {

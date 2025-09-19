@@ -24,10 +24,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useNavigationStore } from "@/stores/navigationStore";
-
-function getProjectInitials(name: string): string {
-  return (name?.trim()?.[0] || '').toUpperCase();
-}
+import { getProjectInitials } from '@/utils/initials';
 
 export function Header() {
   const { data: currentUser } = useCurrentUser();
