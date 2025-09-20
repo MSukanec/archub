@@ -745,9 +745,12 @@ export function TaskMultiModal({
                         variant="default"
                         size="sm"
                         onClick={() => {
-                          // Navegar al subform
-                          setPanel('subform');
+                          // Log para debugging
+                          console.log('🔍 Navegando a subform parametric-task');
+                          // Navegar al subform de forma sincronizada
                           setCurrentSubform('parametric-task');
+                          setPanel('subform');
+                          console.log('🔍 Estados después de click:', { panel: 'subform', subform: 'parametric-task' });
                         }}
                         className="gap-2"
                       >
@@ -899,8 +902,10 @@ export function TaskMultiModal({
 
   // Función para crear el subform paramétrico
   const getSubform = () => {
+    console.log('🔍 getSubform called with currentSubform:', currentSubform);
     switch (currentSubform) {
       case 'parametric-task':
+        console.log('🔍 Renderizando subform parametric-task');
         return (
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto space-y-6">
@@ -1037,6 +1042,7 @@ export function TaskMultiModal({
           </div>
         );
       default:
+        console.log('🔍 getSubform: default case, currentSubform:', currentSubform);
         return null;
     }
   };
