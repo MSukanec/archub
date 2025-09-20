@@ -162,15 +162,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Determine if we're editing (either explicit flag or taskId provided, but not if duplicating)
   const isEditingMode = !isDuplicating && (isEditing || (taskId && actualTask))
   
-  // Debug - let's see what we're getting
-  console.log('🔧 TaskModal Mode Debug:', { 
-    isEditing, 
-    taskId, 
-    actualTask: !!actualTask,
-    isDuplicating,
-    isEditingMode,
-    modalDataReceived: !!modalData
-  });
   
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
@@ -294,16 +285,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     enabled: !!supabase
   })
   
-  // Debug logs to see what's happening
-  console.log('🔧 TaskModal Data Status:', { 
-    divisionsLoaded, 
-    unitsLoaded, 
-    materialsLoaded, 
-    userLoaded,
-    divisionsCount: taskDivisions?.length,
-    unitsCount: units?.length,
-    materialsCount: materials?.length
-  });
   
   // Readiness guard - check if we have the essential data
   const isDataReady = divisionsLoaded && unitsLoaded && materialsLoaded

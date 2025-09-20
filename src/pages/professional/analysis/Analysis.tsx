@@ -24,7 +24,7 @@ export default function Analysis() {
 
   // Tab handlers
   const handleNewTask = () => {
-    openModal('task', {})
+    openModal('analysis-task', {})
   }
 
   const handleNewMaterial = () => {
