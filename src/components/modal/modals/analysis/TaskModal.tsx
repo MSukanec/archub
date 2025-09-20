@@ -308,16 +308,19 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const isDuplicationDataReady = isDuplicating ? 
     (originalMaterialsLoaded && originalLaborLoaded) : true
   
+  // Basic form readiness - allows submit when essential form data is ready
+  const isBasicFormReady = customName.trim() && taskDivisionId && unitId && isDataReady && userLoaded
+  
   // Combined readiness check for submit button enablement
-  const canSubmit = isDataReady && userLoaded && isDuplicationDataReady
+  // For duplication, we don't block submit on costs loading - they'll be copied after task creation
+  const canSubmit = isBasicFormReady
   
   // Loading state for duplication costs
   const isDuplicationLoading = isDuplicating && (originalMaterialsLoading || originalLaborLoading)
 
-  // Initialize existing task values
+  // Initialize existing parameter values (only for editing parametric tasks)
   React.useEffect(() => {
     if (isEditingMode && actualTask && existingParamValues) {
-
       const loadedSelections: ParameterSelection[] = []
       
       if (existingParamValues && typeof existingParamValues === 'object') {
@@ -343,49 +346,65 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
 
-  // Load form data when task and reference data is available
+  // CRITICAL FIX: Initialize form data immediately when actualTask is available
+  // This ensures duplication fields are populated instantly, not waiting for reference data
   React.useEffect(() => {
     if ((isEditingMode || isDuplicating) && actualTask) {
-      console.log('🔧 Loading task data for editing/duplicating:', actualTask)
+      console.log('🔧 DUPLICATION: Loading task data for editing/duplicating:', {
+        taskId: actualTask.id,
+        customName: actualTask.custom_name,
+        taskDivisionId: actualTask.task_division_id,
+        unitId: actualTask.unit_id,
+        isDuplicating
+      })
       
-      // Load existing custom_name (always load first)
+      // DUPLICATION FIX: Load custom_name with " - Copia" suffix for duplication
       if (actualTask.custom_name) {
-        setCustomName(actualTask.custom_name)
-        console.log('🔧 Set custom name:', actualTask.custom_name)
+        const baseName = actualTask.custom_name
+        const duplicatedName = isDuplicating ? `${baseName} - Copia` : baseName
+        setCustomName(duplicatedName)
+        console.log('🔧 DUPLICATION: Set custom name:', duplicatedName)
       }
       
-      // Find unit ID by name from tasks_view
-      if (actualTask.unit && units.length > 0) {
+      // IMMEDIATE: Set task_division_id directly if available (don't wait for reference data)
+      if (actualTask.task_division_id) {
+        setTaskDivisionId(actualTask.task_division_id)
+        console.log('🔧 DUPLICATION: Set division ID immediately:', actualTask.task_division_id)
+      }
+      
+      // IMMEDIATE: Set unit_id directly if available (don't wait for reference data)
+      if (actualTask.unit_id) {
+        setUnitId(actualTask.unit_id)
+        console.log('🔧 DUPLICATION: Set unit ID immediately:', actualTask.unit_id)
+      }
+    }
+  }, [isEditingMode, isDuplicating, actualTask]) // Removed units and taskDivisions dependencies
+
+  // FALLBACK: Secondary effect to resolve IDs from names when reference data becomes available
+  // This runs after the immediate effect above, providing fallbacks if direct IDs weren't available
+  React.useEffect(() => {
+    if ((isEditingMode || isDuplicating) && actualTask && (units.length > 0 || taskDivisions.length > 0)) {
+      console.log('🔧 FALLBACK: Resolving names to IDs with reference data')
+      
+      // Fallback: Find unit ID by name from tasks_view (only if not already set)
+      if (!unitId && actualTask.unit && units.length > 0) {
         const foundUnit = units.find(unit => unit.name === actualTask.unit)
         if (foundUnit) {
           setUnitId(foundUnit.id)
-          console.log('🔧 Set unit ID:', foundUnit.id, 'for unit name:', actualTask.unit)
-        }
-      } else if (actualTask.unit_id && units.length > 0) {
-        // Fallback: if we have unit_id directly
-        const foundUnit = units.find(unit => unit.id === actualTask.unit_id)
-        if (foundUnit) {
-          setUnitId(foundUnit.id)
-          console.log('🔧 Set unit ID from unit_id field:', foundUnit.id)
+          console.log('🔧 FALLBACK: Set unit ID from name lookup:', foundUnit.id, 'for unit name:', actualTask.unit)
         }
       }
       
-      // Always keep is_completed as false for analysis tasks
-      
-      // Load task_division_id if exists
-      if (actualTask.task_division_id) {
-        setTaskDivisionId(actualTask.task_division_id)
-        console.log('🔧 Set division ID from task_division_id:', actualTask.task_division_id)
-      } else if (actualTask.division && taskDivisions.length > 0) {
-        // Fallback: try to find division by name from the view
+      // Fallback: Find division ID by name (only if not already set)
+      if (!taskDivisionId && actualTask.division && taskDivisions.length > 0) {
         const foundDivision = taskDivisions.find(div => div.name === actualTask.division)
         if (foundDivision) {
           setTaskDivisionId(foundDivision.id)
-          console.log('🔧 Set division ID from name lookup:', foundDivision.id, 'for division name:', actualTask.division)
+          console.log('🔧 FALLBACK: Set division ID from name lookup:', foundDivision.id, 'for division name:', actualTask.division)
         }
       }
     }
-  }, [isEditingMode, isDuplicating, actualTask, units, taskDivisions])
+  }, [isEditingMode, isDuplicating, actualTask, units, taskDivisions, unitId, taskDivisionId]) // Added current state dependencies
 
   // Initialize task materials when editing
   React.useEffect(() => {
