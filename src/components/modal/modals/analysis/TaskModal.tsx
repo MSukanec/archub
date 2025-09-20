@@ -244,27 +244,27 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const createTaskMaterialMutation = useCreateTaskMaterial()
   const deleteTaskMaterialMutation = useDeleteTaskMaterial()
   
-  // Current user data
-  const { data: userData } = useCurrentUser()
+  // Current user data with success tracking
+  const { data: userData, isSuccess: userLoaded } = useCurrentUser()
   
   // Query client for cache invalidation
   const queryClient = useQueryClient()
   
-  // Materials data
-  const { data: materials = [] } = useMaterials()
+  // Materials data with success tracking
+  const { data: materials = [], isSuccess: materialsLoaded } = useMaterials()
   const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
   
-  // Task templates data
+  // Task templates data (not used in this modal but keeping for potential future use)
   const { data: taskTemplates = [] } = useTaskTemplates()
   
-  // Task categories data
+  // Task categories data (not used in this modal but keeping for potential future use)
   const { data: categories = [] } = useTaskCategories()
   
-  // Units data
-  const { data: units = [] } = useUnits()
+  // Units data with success tracking
+  const { data: units = [], isSuccess: unitsLoaded } = useUnits()
 
-  // Task divisions data
-  const { data: taskDivisions = [] } = useQuery({
+  // Task divisions data with success tracking
+  const { data: taskDivisions = [], isSuccess: divisionsLoaded } = useQuery({
     queryKey: ['task-divisions'],
     queryFn: async () => {
       if (!supabase) return [];
@@ -283,6 +283,12 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     },
     enabled: !!supabase
   })
+  
+  // Readiness guard - only check data actually used in this modal
+  const isDataReady = divisionsLoaded && unitsLoaded && materialsLoaded
+  
+  // Separate user check for submit button enablement
+  const canSubmit = isDataReady && userLoaded
 
   // Initialize existing task values
   React.useEffect(() => {
@@ -566,8 +572,8 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // ViewPanel - null for creation modal
   const viewPanel = null;
 
-  // EditPanel - all form content
-  const editPanel = (
+  // EditPanel - defer content until data is ready
+  const stepContent = (
     <div className="space-y-6">
       {/* Task Form Fields */}
       <div className="space-y-4">
@@ -580,9 +586,10 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               value: division.id,
               label: division.name
             }))}
-            placeholder="Seleccionar rubro..."
+            placeholder={divisionsLoaded ? "Seleccionar rubro..." : "Cargando rubros..."}
             searchPlaceholder="Buscar rubro..."
             emptyMessage="No se encontraron rubros"
+            disabled={!divisionsLoaded}
           />
         </div>
         
@@ -595,9 +602,10 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               value: unit.id,
               label: unit.name
             }))}
-            placeholder="Seleccionar unidad..."
+            placeholder={unitsLoaded ? "Seleccionar unidad..." : "Cargando unidades..."}
             searchPlaceholder="Buscar unidad..."
             emptyMessage="No se encontraron unidades"
+            disabled={!unitsLoaded}
           />
         </div>
         
@@ -610,6 +618,17 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
             placeholder="Nombre personalizado para la tarea..."
             rows={3}
           />
+        </div>
+      </div>
+    </div>
+  );
+  
+  const editPanel = isDataReady ? stepContent : (
+    <div className="space-y-6">
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando datos...</p>
         </div>
       </div>
     </div>
@@ -630,8 +649,9 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
-      onRightClick={handleSubmit}
+      onRightClick={canSubmit ? handleSubmit : () => {}}
       showLoadingSpinner={isLoading}
+      disabled={!canSubmit}
     />
   );
 
