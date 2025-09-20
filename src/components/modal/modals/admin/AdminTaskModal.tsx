@@ -66,6 +66,19 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Show loading state when fetching task by ID
   const isLoadingTaskData = taskId && isTaskLoading && !task && !taskData
   
+  // DEBUG: Ver qué está pasando
+  console.log('🔧 AdminTaskModal Debug:', {
+    taskId,
+    isTaskLoading,
+    task: !!task,
+    taskData: !!taskData,
+    isLoadingTaskData,
+    modalData,
+    isEditingMode,
+    divisionsCount: taskDivisions.length,
+    unitsCount: units.length
+  });
+  
   const [isLoading, setIsLoading] = useState(false)
   const [selections, setSelections] = useState<ParameterSelection[]>([])
   const [taskPreview, setTaskPreview] = useState<string>('')
