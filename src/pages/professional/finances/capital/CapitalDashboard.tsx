@@ -30,7 +30,7 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
     {
       key: "member",
       label: "Socio",
-      width: "25%",
+      width: "20%",
       render: (item: MemberSummary) => {
         if (!item.member?.user) {
           return <div className="text-sm text-muted-foreground">Sin usuario</div>
@@ -55,7 +55,7 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
     {
       key: "total_aportes",
       label: "Total Aportes",
-      width: "18.75%",
+      width: "20%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: MemberSummary) => (
@@ -67,7 +67,7 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
     {
       key: "total_retiros",
       label: "Total Retiros",
-      width: "18.75%",
+      width: "20%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: MemberSummary) => (
@@ -79,7 +79,7 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
     {
       key: "saldo",
       label: "Saldo",
-      width: "18.75%",
+      width: "20%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: MemberSummary) => {
@@ -94,7 +94,7 @@ export function CapitalDashboard({ memberSummary }: CapitalDashboardProps) {
     {
       key: "saldo_dolarizado",
       label: "Saldo Dolarizado",
-      width: "18.75%",
+      width: "20%",
       sortable: true,
       sortType: 'number' as const,
       render: (item: MemberSummary) => {
