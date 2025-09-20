@@ -1,10 +1,12 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useEffect } from 'react'
 import { Calendar } from 'lucide-react'
 import { FormModalLayout } from '../../../form/FormModalLayout'
 import { FormModalHeader } from '../../../form/FormModalHeader'
 import { FormModalFooter } from '../../../form/FormModalFooter'
+import { useModalPanelStore } from '../../../form/modalPanelStore'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import DatePicker from '@/components/ui-custom/fields/DatePickerField'
@@ -38,12 +40,22 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
 
   const projectId = modalData?.projectId || userData?.preferences?.last_project_id
   const organizationId = modalData?.organizationId || userData?.organization?.id
   const installmentId = modalData?.installmentId
   const isEditing = modalData?.isEditing || !!installmentId
   const editingInstallment = modalData?.editingInstallment
+
+  // Set initial panel based on editing mode
+  useEffect(() => {
+    if (isEditing) {
+      setPanel('view')
+    } else {
+      setPanel('edit')
+    }
+  }, [isEditing, setPanel])
 
   // Get default values based on editing mode
   const getDefaultValues = (): InstallmentForm => {
@@ -199,8 +211,10 @@ export default function ClientInstallment({ modalData, onClose }: ClientInstallm
   const headerContent = (
     <FormModalHeader
       icon={Calendar}
-      title="Editar Cuota"
-      description="Modifica la fecha de vencimiento y el índice de ajuste de la cuota"
+      title={isEditing ? "Editar Cuota" : "Nueva Cuota"}
+      description={isEditing 
+        ? "Modifica la fecha de vencimiento y el índice de ajuste de la cuota"
+        : "Define una nueva cuota con su fecha de vencimiento e índice de ajuste"}
     />
   )
 

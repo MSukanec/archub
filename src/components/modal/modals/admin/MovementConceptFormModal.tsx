@@ -270,6 +270,11 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
         : parentConcept 
           ? `Nuevo Concepto Hijo de "${parentConcept.name}"` 
           : 'Nuevo Concepto de Movimiento'}
+      description={editingConcept 
+        ? 'Modifica los datos del concepto de movimiento seleccionado'
+        : parentConcept 
+          ? `Crea un nuevo concepto como subcategoría de "${parentConcept.name}"`
+          : 'Define un nuevo concepto para categorizar movimientos financieros'}
       icon={editingConcept ? Package2 : Plus}
     />
   );

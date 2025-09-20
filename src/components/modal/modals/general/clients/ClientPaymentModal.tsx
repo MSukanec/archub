@@ -602,6 +602,9 @@ export function ClientPaymentModal({ modalData, onClose }: ClientPaymentModalPro
   const headerContent = (
     <FormModalHeader
       title={editingInstallment ? "Editar Aporte" : "Nuevo Aporte"}
+      description={editingInstallment 
+        ? 'Modifica los datos del aporte de terceros seleccionado'
+        : 'Registra un nuevo aporte o pago de terceros al proyecto'}
       icon={DollarSign}
     />
   )

@@ -266,6 +266,11 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       title={editingConcept 
         ? `${isSystemConcept ? 'Ver' : 'Editar'} Concepto` 
         : 'Nuevo Concepto'}
+      description={editingConcept && isSystemConcept
+        ? 'Los conceptos del sistema no pueden ser modificados'
+        : editingConcept 
+          ? 'Modifica el concepto personalizado de tu organización'
+          : 'Crea un nuevo concepto personalizado para tu organización'}
       icon={Tag}
     />
   );

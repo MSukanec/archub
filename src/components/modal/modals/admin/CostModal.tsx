@@ -469,6 +469,9 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Costo de Tarea" : "Agregar Costo a Tarea"}
+      description={isEditing 
+        ? 'Modifica el material o mano de obra asignado a esta tarea'
+        : 'Asigna materiales o mano de obra necesarios para completar esta tarea'}
       icon={DollarSign}
     />
   )

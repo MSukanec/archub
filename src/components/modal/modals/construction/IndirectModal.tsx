@@ -7,6 +7,8 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
+import { useModalPanelStore } from '@/components/modal/form/modalPanelStore'
+import { useModalReadiness } from '@/components/modal/utils/modal-readiness'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -43,18 +45,46 @@ interface IndirectModalProps {
 export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
-  const { data: userData } = useCurrentUser()
   const queryClient = useQueryClient()
+  const { setPanel } = useModalPanelStore()
 
-  const projectId = modalData?.projectId || userData?.preferences?.last_project_id
-  const organizationId = modalData?.organizationId || userData?.organization?.id
-  const isEditing = modalData?.isEditing || false
+  const projectId = modalData?.projectId
+  const organizationId = modalData?.organizationId
+  const isEditing = modalData?.isEditing || !!modalData?.indirectId
 
-  // Fetch existing indirect cost data if editing
-  const { data: existingIndirect } = useIndirectCost(isEditing ? modalData?.indirectId || null : null)
-  
-  // Fetch movement concepts for categories (children of Indirectos concept)
-  const { data: indirectCategories = [] } = useMovementConcepts('categories', INDIRECT_PARENT_UUID)
+  // Critical data queries
+  const userQuery = useCurrentUser()
+  const existingIndirectQuery = useIndirectCost(isEditing ? modalData?.indirectId || null : null)
+  const indirectCategoriesQuery = useMovementConcepts('categories', INDIRECT_PARENT_UUID)
+
+  // Modal readiness setup
+  const readiness = useModalReadiness({
+    criticalQueries: [
+      userQuery,
+      indirectCategoriesQuery,
+      ...(isEditing ? [existingIndirectQuery] : [])
+    ],
+    requiredIds: { 
+      organizationId: organizationId || userQuery.data?.organization?.id 
+    },
+    onReady: () => {
+      console.log('IndirectModal ready with all data loaded')
+    },
+    onError: (error) => {
+      console.error('IndirectModal failed to load:', error)
+      toast({
+        title: 'Error',
+        description: 'No se pudo cargar los datos necesarios para este modal',
+        variant: 'destructive'
+      })
+    }
+  })
+
+  // Get data from queries (only available when ready)
+  const userData = userQuery.data
+  const existingIndirect = existingIndirectQuery.data
+  const indirectCategories = indirectCategoriesQuery.data || []
+  const finalOrganizationId = organizationId || userData?.organization?.id
 
 
   const form = useForm<IndirectForm>({
@@ -65,6 +95,15 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       category_id: ''
     }
   })
+
+  // Set initial panel based on editing mode
+  useEffect(() => {
+    if (isEditing) {
+      setPanel('view')
+    } else {
+      setPanel('edit')
+    }
+  }, [isEditing, setPanel])
 
   // Reset form when existing data is loaded
   useEffect(() => {
@@ -79,7 +118,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
   const updateIndirectCost = useUpdateIndirectCost()
 
   const onSubmit = async (data: IndirectForm) => {
-    if (!organizationId) {
+    if (!finalOrganizationId) {
       toast({
         title: 'Error',
         description: 'Faltan datos de organización',
@@ -105,7 +144,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
         // Modo creación
         await createIndirectCost.mutateAsync({
           indirectCost: {
-            organization_id: organizationId,
+            organization_id: finalOrganizationId,
             name: data.name,
             description: data.description || undefined,
             category_id: data.category_id || undefined
@@ -199,6 +238,9 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
   const headerContent = (
     <FormModalHeader
       title={isEditing ? 'Editar Costo Indirecto' : 'Nuevo Costo Indirecto'}
+      description={isEditing 
+        ? 'Modifica la información del costo indirecto seleccionado'
+        : 'Define un nuevo tipo de costo indirecto para tus proyectos'}
       icon={TrendingUp}
     />
   )
@@ -214,14 +256,40 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
     />
   )
 
+  // View panel for when viewing existing indirect cost
+  const viewPanel = isEditing && existingIndirect ? (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <h4 className="font-medium text-foreground mb-2">Nombre</h4>
+          <p className="text-sm text-muted-foreground">{existingIndirect.name}</p>
+        </div>
+        {existingIndirect.description && (
+          <div>
+            <h4 className="font-medium text-foreground mb-2">Descripción</h4>
+            <p className="text-sm text-muted-foreground">{existingIndirect.description}</p>
+          </div>
+        )}
+        {(existingIndirect as any).category_id && (
+          <div>
+            <h4 className="font-medium text-foreground mb-2">Categoría</h4>
+            <p className="text-sm text-muted-foreground">
+              {indirectCategories.find(cat => cat.id === (existingIndirect as any).category_id)?.name || 'Sin categoría'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null
+
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={null}
+      viewPanel={viewPanel}
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      isEditing={true}
+      isEditing={isEditing}
       onClose={onClose}
     />
   )
