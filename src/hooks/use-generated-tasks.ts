@@ -511,4 +511,87 @@ export function useUpdateGeneratedTask() {
   });
 }
 
+// Hook para crear labor de tarea
+export function useCreateTaskLabor() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      task_id: string;
+      labor_type_id: string;
+      quantity: number;
+      organization_id: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { data, error } = await supabase
+        .from('task_labor')
+        .insert([payload])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidar queries específicas usando taskId
+      queryClient.invalidateQueries({ queryKey: ['task-labor', variables.task_id] });
+      queryClient.invalidateQueries({ queryKey: ['task-costs', variables.task_id] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
+      
+      toast({
+        title: "Mano de Obra Agregada",
+        description: "La mano de obra se ha agregado exitosamente a la tarea",
+        variant: "default"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al agregar mano de obra a la tarea",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
+// Hook para eliminar labor de tarea
+export function useDeleteTaskLabor() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (laborId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('task_labor')
+        .delete()
+        .eq('id', laborId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      // Invalidar todas las queries relacionadas con labor
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] });
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] });
+      
+      toast({
+        title: "Mano de Obra Eliminada",
+        description: "La mano de obra se ha eliminado exitosamente de la tarea",
+        variant: "default"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar mano de obra de la tarea",
+        variant: "destructive"
+      });
+    }
+  });
+}
+
 

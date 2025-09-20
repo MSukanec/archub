@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from '@/hooks/use-toast'
-import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks } from '@/hooks/use-generated-tasks'
+import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks, useCreateTaskLabor } from '@/hooks/use-generated-tasks'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useTaskCategories } from '@/hooks/use-task-categories'
 import { useUnits } from '@/hooks/use-units'
+import { useTaskLabor } from '@/hooks/use-task-labor'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 
@@ -244,6 +245,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const updateTaskMutation = useUpdateGeneratedTask()
   const createTaskMaterialMutation = useCreateTaskMaterial()
   const deleteTaskMaterialMutation = useDeleteTaskMaterial()
+  const createTaskLaborMutation = useCreateTaskLabor()
   
   // Current user data with success tracking
   const { data: userData, isSuccess: userLoaded } = useCurrentUser()
@@ -254,6 +256,19 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Materials data with success tracking
   const { data: materials = [], isSuccess: materialsLoaded } = useMaterials()
   const { data: existingTaskMaterials = [] } = useTaskMaterials(savedTaskId || actualTask?.id)
+  
+  // Get original task materials and labor for duplication with success tracking
+  const { 
+    data: originalTaskMaterials = [], 
+    isSuccess: originalMaterialsLoaded,
+    isLoading: originalMaterialsLoading 
+  } = useTaskMaterials(isDuplicating && actualTask?.id ? actualTask.id : null)
+  
+  const { 
+    data: originalTaskLabor = [], 
+    isSuccess: originalLaborLoaded,
+    isLoading: originalLaborLoading 
+  } = useTaskLabor(isDuplicating && actualTask?.id ? actualTask.id : null)
   
   // Task templates data (not used in this modal but keeping for potential future use)
   const { data: taskTemplates = [] } = useTaskTemplates()
@@ -289,8 +304,15 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Readiness guard - check if we have the essential data
   const isDataReady = divisionsLoaded && unitsLoaded && materialsLoaded
   
-  // Separate user check for submit button enablement
-  const canSubmit = isDataReady && userLoaded
+  // During duplication, also check if original costs are loaded
+  const isDuplicationDataReady = isDuplicating ? 
+    (originalMaterialsLoaded && originalLaborLoaded) : true
+  
+  // Combined readiness check for submit button enablement
+  const canSubmit = isDataReady && userLoaded && isDuplicationDataReady
+  
+  // Loading state for duplication costs
+  const isDuplicationLoading = isDuplicating && (originalMaterialsLoading || originalLaborLoading)
 
   // Initialize existing task values
   React.useEffect(() => {
@@ -538,14 +560,74 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         }
       }
       
-      // Invalidate queries to refresh the task list
-      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['task-view'] })
+      // Copy original materials and labor if duplicating with improved error handling
+      if (isDuplicating && actualTask && taskId && userData?.organization?.id) {
+        const copiedMaterials: string[] = [];
+        const copiedLabor: string[] = [];
+        
+        try {
+          // Copy materials from original task
+          for (const material of originalTaskMaterials) {
+            const materialData = {
+              task_id: taskId,
+              material_id: material.material_id,
+              amount: material.amount,
+              organization_id: userData.organization.id
+            };
+            
+            try {
+              const result = await createTaskMaterialMutation.mutateAsync(materialData);
+              copiedMaterials.push(result.id);
+            } catch (materialError: any) {
+              console.error('❌ Error copying material:', materialError);
+              throw new Error(`Error copiando material: ${material.materials_view?.name || 'Material desconocido'}`);
+            }
+          }
+          
+          // Copy labor from original task using mutation
+          for (const labor of originalTaskLabor) {
+            const laborData = {
+              task_id: taskId,
+              labor_type_id: labor.labor_type_id,
+              quantity: labor.quantity,
+              organization_id: userData.organization.id
+            };
+            
+            try {
+              const result = await createTaskLaborMutation.mutateAsync(laborData);
+              copiedLabor.push(result.id);
+            } catch (laborError: any) {
+              console.error('❌ Error copying labor:', laborError);
+              throw new Error(`Error copiando mano de obra: ${labor.labor_view?.labor_type || 'Tipo de labor desconocido'}`);
+            }
+          }
+        } catch (duplicationError: any) {
+          // If duplication fails, show specific error
+          console.error('❌ Duplication failed:', duplicationError);
+          throw new Error(`Tarea creada pero fallo en duplicación: ${duplicationError.message}. Revisa la tarea y agrega los costos manualmente.`);
+        }
+      }
+      
+      // Invalidate queries with specific taskId for better cache management
+      queryClient.invalidateQueries({ queryKey: ['tasks-view'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['task-labor', taskId] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs', taskId] })
+      
+      // Also invalidate general queries
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] })
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] })
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] })
+      
+      const successTitle = isDuplicating ? "Tarea duplicada" : (isEditingMode ? "Tarea actualizada" : "Tarea creada")
+      const materialCount = taskMaterials.length + (isDuplicating ? originalTaskMaterials.length : 0)
+      const laborCount = isDuplicating ? originalTaskLabor.length : 0
+      const costsMsg = materialCount > 0 || laborCount > 0 ? ` con ${materialCount} materiales y ${laborCount} tipos de mano de obra` : ''
       
       toast({
-        title: isEditingMode ? "Tarea actualizada" : "Tarea creada",
-        description: `Tarea ${isEditingMode ? 'actualizada' : 'creada'} exitosamente: "${customName}" con ${taskMaterials.length} materiales.`,
+        title: successTitle,
+        description: `Tarea ${isDuplicating ? 'duplicada' : (isEditingMode ? 'actualizada' : 'creada')} exitosamente: "${customName}"${costsMsg}.`,
       })
       
       onClose()
@@ -625,7 +707,22 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     </div>
   );
   
-  const editPanel = isDataReady ? stepContent : (
+  const editPanel = isDataReady ? (
+    isDuplicationLoading ? (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Cargando costos originales para duplicación...</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              {originalMaterialsLoading && "Cargando materiales..."}
+              {originalLaborLoading && " Cargando mano de obra..."}
+            </p>
+          </div>
+        </div>
+      </div>
+    ) : stepContent
+  ) : (
     <div className="space-y-6">
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
@@ -636,11 +733,11 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     </div>
   );
 
-  // Header content
+  // Header content with duplication state
   const headerContent = (
     <FormModalHeader 
-      title={isEditingMode ? "Editar Tarea" : "Nueva Tarea Personalizada"}
-      description={isEditingMode ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
+      title={isDuplicating ? "Duplicar Tarea" : (isEditingMode ? "Editar Tarea" : "Nueva Tarea Personalizada")}
+      description={isDuplicating ? "Duplicando tarea con todos sus costos de materiales y mano de obra" : (isEditingMode ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales")}
       icon={Zap}
     />
   );
@@ -650,10 +747,10 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
+      rightLabel={isDuplicating ? "Duplicar Tarea" : (isEditingMode ? "Actualizar Tarea" : "Crear Tarea")}
       onRightClick={handleSubmit}
       showLoadingSpinner={isLoading}
-      submitDisabled={!canSubmit}
+      submitDisabled={!canSubmit || isDuplicationLoading}
     />
   );
 
