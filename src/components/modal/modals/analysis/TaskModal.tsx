@@ -284,8 +284,19 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     enabled: !!supabase
   })
   
-  // Readiness guard - only check data actually used in this modal
-  const isDataReady = divisionsLoaded && unitsLoaded && materialsLoaded
+  // Debug logs to see what's happening
+  console.log('🔧 TaskModal Data Status:', { 
+    divisionsLoaded, 
+    unitsLoaded, 
+    materialsLoaded, 
+    userLoaded,
+    divisionsCount: taskDivisions?.length,
+    unitsCount: units?.length,
+    materialsCount: materials?.length
+  });
+  
+  // Readiness guard - TEMPORARILY REMOVE to fix the stuck loading
+  const isDataReady = true // divisionsLoaded && unitsLoaded && materialsLoaded
   
   // Separate user check for submit button enablement
   const canSubmit = isDataReady && userLoaded
