@@ -74,9 +74,9 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   // Hooks
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
-  const { data: units = [] } = useUnits()
-  const { data: userData } = useCurrentUser()
-  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
+  const { data: units = [], isSuccess: unitsLoaded } = useUnits()
+  const { data: userData, isSuccess: userLoaded } = useCurrentUser()
+  const { data: organizationCurrencies = [], isSuccess: currenciesLoaded } = useOrganizationCurrencies(userData?.organization?.id)
   
   // Check if user is admin to allow editing system labor types (use useMemo to ensure proper timing)
   const isAdmin = React.useMemo(() => {
@@ -95,8 +95,8 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   }))
 
   // Get existing labor price
-  const { data: existingLaborPrice } = useQuery({
-    queryKey: ['labor-price', editingLaborType?.id],
+  const { data: existingLaborPrice, isSuccess: laborPriceLoaded } = useQuery({
+    queryKey: ['labor-price', editingLaborType?.id, userData?.organization?.id],
     queryFn: async () => {
       if (!editingLaborType?.id || !userData?.organization?.id) return null
       
@@ -194,7 +194,10 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
     }
   })
 
-  // Force edit mode when modal opens
+  // Check if required data is ready for rendering
+  const isDataReady = userLoaded && unitsLoaded && (!userData?.organization?.id || currenciesLoaded)
+  
+  // Force edit mode when modal opens (backup to isEditing prop)
   useEffect(() => {
     setPanel('edit')
   }, [setPanel])
@@ -401,15 +404,12 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
                     value={field.value || 0}
                     currency={form.watch('currency_id') || ''}
                     currencies={currencyOptions}
-                    onValueChange={(value) => {
-                      console.log('💰 Value changed to:', value)
-                      field.onChange(value)
-                    }}
+                    onValueChange={field.onChange}
                     onCurrencyChange={(currency) => {
-                      console.log('💱 Currency changed to:', currency)
                       form.setValue('currency_id', currency)
                     }}
-                    placeholder="Ingresa el costo por unidad"
+                    placeholder={currenciesLoaded ? "Ingresa el costo por unidad" : "Cargando monedas..."}
+                    disabled={!currenciesLoaded && !!userData?.organization?.id}
                   />
                 </FormControl>
                 <FormMessage />
@@ -453,10 +453,16 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
     <FormModalLayout
       columns={1}
       viewPanel={viewPanel}
-      editPanel={editPanel}
+      editPanel={isDataReady ? editPanel : null}
+      stepContent={!isDataReady ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="text-sm text-muted-foreground">Cargando datos del formulario...</div>
+        </div>
+      ) : undefined}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={onClose}
+      isEditing={true}
     />
   )
 }
