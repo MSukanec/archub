@@ -649,9 +649,9 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={isEditingMode ? "Actualizar Tarea" : "Crear Tarea"}
-      onRightClick={canSubmit ? handleSubmit : () => {}}
+      onRightClick={handleSubmit}
       showLoadingSpinner={isLoading}
-      disabled={!canSubmit}
+      submitDisabled={!canSubmit}
     />
   );
 
