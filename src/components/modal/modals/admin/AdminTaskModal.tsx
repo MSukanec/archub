@@ -396,7 +396,11 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
         <div className="space-y-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="task-division">Rubro</Label>
+              <Label htmlFor="task-division" className="flex items-center gap-2 font-semibold">
+                <div className="h-4 w-4 text-blue-600">📦</div>
+                Rubro de la Tarea
+              </Label>
+              <p className="text-sm text-muted-foreground mb-2">Selecciona la categoría principal para clasificar tu tarea</p>
               <ComboBox
                 value={taskDivisionId}
                 onValueChange={setTaskDivisionId}
@@ -404,14 +408,18 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
                   value: division.id,
                   label: division.name
                 }))}
-                placeholder="Seleccionar rubro..."
+                placeholder="🔍 Selecciona un rubro para tu tarea..."
                 searchPlaceholder="Buscar rubro..."
-                emptyMessage="No se encontraron rubros"
+                emptyMessage="No se encontraron rubros disponibles"
               />
             </div>
             
             <div>
-              <Label htmlFor="unit-select">Unidad</Label>
+              <Label htmlFor="unit-select" className="flex items-center gap-2 font-semibold">
+                <div className="h-4 w-4 text-green-600">⚙️</div>
+                Unidad de Medida
+              </Label>
+              <p className="text-sm text-muted-foreground mb-2">Define cómo se medirá esta tarea (m², kg, hrs, etc.)</p>
               <ComboBox
                 value={unitId}
                 onValueChange={setUnitId}
@@ -419,21 +427,33 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
                   value: unit.id,
                   label: unit.name
                 }))}
-                placeholder="Seleccionar unidad..."
+                placeholder="📏 Selecciona la unidad de medida..."
                 searchPlaceholder="Buscar unidad..."
-                emptyMessage="No se encontraron unidades"
+                emptyMessage="No se encontraron unidades disponibles"
               />
             </div>
             
             <div>
-              <Label htmlFor="custom-name">Nombre Personalizado</Label>
+              <Label htmlFor="custom-name" className="flex items-center gap-2 font-semibold">
+                <div className="h-4 w-4 text-purple-600">📝</div>
+                Nombre y Descripción de tu Tarea
+              </Label>
+              <p className="text-sm text-muted-foreground mb-2">Describe claramente qué trabajo se realizará en esta tarea</p>
               <Textarea
                 id="custom-name"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Nombre personalizado para la tarea..."
-                rows={3}
+                placeholder="✏️ Ejemplo: Instalación de pisos cerámicos en baño principal con preparación de superficie..."
+                rows={4}
+                className="resize-none"
               />
+              {customName.trim() && (
+                <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-1">
+                    ✅ <strong>Perfecto!</strong> Tu tarea tiene una descripción clara
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Task Completion Status */}
@@ -457,8 +477,8 @@ export function AdminTaskModal({ modalData, onClose }: AdminTaskModalProps) {
   // Header content - show edit intent when taskId exists, even during loading
   const headerContent = (
     <FormModalHeader 
-      title={taskId ? "Editar Tarea" : "Nueva Tarea Personalizada"}
-      description={taskId ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
+      title={taskId ? "✏️ Editar Tarea Personalizada" : "✨ Nueva Tarea Personalizada"}
+      description={taskId ? "Modifica y actualiza tu tarea personalizada con parámetros específicos y configuración personalizada" : "Crea una nueva tarea personalizada para tu proyecto con configuración específica y parámetros únicos"}
       icon={Zap}
     />
   );
