@@ -580,11 +580,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       {/* Task Form Fields */}
       <div className="space-y-4">
         <div>
-          <Label htmlFor="task-division" className="flex items-center gap-2 font-semibold">
-            <Package className="h-4 w-4 text-blue-600" />
-            Rubro de la Tarea
-          </Label>
-          <p className="text-sm text-muted-foreground mb-2">Selecciona la categoría principal para clasificar tu tarea</p>
+          <Label htmlFor="task-division">Rubro</Label>
           <ComboBox
             value={taskDivisionId}
             onValueChange={setTaskDivisionId}
@@ -592,19 +588,15 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               value: division.id,
               label: division.name
             }))}
-            placeholder={divisionsLoaded ? "🔍 Selecciona un rubro para tu tarea..." : "⏳ Cargando rubros disponibles..."}
+            placeholder={divisionsLoaded ? "Seleccionar rubro..." : "Cargando rubros..."}
             searchPlaceholder="Buscar rubro..."
-            emptyMessage="No se encontraron rubros disponibles"
+            emptyMessage="No se encontraron rubros"
             disabled={!divisionsLoaded}
           />
         </div>
         
         <div>
-          <Label htmlFor="unit-select" className="flex items-center gap-2 font-semibold">
-            <Settings className="h-4 w-4 text-green-600" />
-            Unidad de Medida
-          </Label>
-          <p className="text-sm text-muted-foreground mb-2">Define cómo se medirá esta tarea (m², kg, hrs, etc.)</p>
+          <Label htmlFor="unit-select">Unidad</Label>
           <ComboBox
             value={unitId}
             onValueChange={setUnitId}
@@ -612,34 +604,22 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
               value: unit.id,
               label: unit.name
             }))}
-            placeholder={unitsLoaded ? "📏 Selecciona la unidad de medida..." : "⏳ Cargando unidades disponibles..."}
+            placeholder={unitsLoaded ? "Seleccionar unidad..." : "Cargando unidades..."}
             searchPlaceholder="Buscar unidad..."
-            emptyMessage="No se encontraron unidades disponibles"
+            emptyMessage="No se encontraron unidades"
             disabled={!unitsLoaded}
           />
         </div>
         
         <div>
-          <Label htmlFor="custom-name" className="flex items-center gap-2 font-semibold">
-            <FileText className="h-4 w-4 text-purple-600" />
-            Nombre y Descripción de tu Tarea
-          </Label>
-          <p className="text-sm text-muted-foreground mb-2">Describe claramente qué trabajo se realizará en esta tarea</p>
+          <Label htmlFor="custom-name">Nombre Personalizado</Label>
           <Textarea
             id="custom-name"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
-            placeholder="✏️ Ejemplo: Instalación de pisos cerámicos en baño principal con preparación de superficie..."
-            rows={4}
-            className="resize-none"
+            placeholder="Nombre personalizado para la tarea..."
+            rows={3}
           />
-          {customName.trim() && (
-            <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-              <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-1">
-                ✅ <strong>Perfecto!</strong> Tu tarea tiene una descripción clara
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -647,18 +627,10 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   
   const editPanel = isDataReady ? stepContent : (
     <div className="space-y-6">
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary mx-auto"></div>
-          <div>
-            <h3 className="font-semibold text-lg">⚙️ Preparando tu espacio de trabajo</h3>
-            <p className="text-muted-foreground mt-2">Cargando rubros, unidades y materiales disponibles...</p>
-            <div className="flex items-center justify-center mt-3 space-x-2">
-              <div className="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
-              <div className="h-2 w-2 bg-primary/60 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-              <div className="h-2 w-2 bg-primary/30 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
-            </div>
-          </div>
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando datos...</p>
         </div>
       </div>
     </div>
@@ -667,8 +639,8 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   // Header content
   const headerContent = (
     <FormModalHeader 
-      title={isEditingMode ? "✏️ Editar Tarea Personalizada" : "✨ Nueva Tarea Personalizada"}
-      description={isEditingMode ? "Modifica y actualiza tu tarea personalizada con parámetros específicos y materiales necesarios" : "Crea una nueva tarea personalizada para tu proyecto con configuración específica, materiales y parámetros únicos"}
+      title={isEditingMode ? "Editar Tarea" : "Nueva Tarea Personalizada"}
+      description={isEditingMode ? "Modifica los parámetros y materiales de la tarea existente" : "Crea una nueva tarea personalizada configurando parámetros y materiales"}
       icon={Zap}
     />
   );
