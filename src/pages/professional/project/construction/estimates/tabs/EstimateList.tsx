@@ -121,8 +121,8 @@ export function EstimateList({
     try {
       const exportColumns = createExportColumns(columns)
       await exportToExcel({
-        filename: `estimaciones-construccion-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
-        sheetName: 'Estimaciones de Construcción',
+        filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+        sheetName: 'Tareas de Construcción',
         columns: exportColumns,
         data: finalTasks
       })
@@ -141,7 +141,7 @@ export function EstimateList({
       { 
         type: "header", 
         enabled: true, 
-        data: { title: "Presupuesto de Estimaciones de Construcción" } 
+        data: { title: "Presupuesto de Tareas de Construcción" } 
       },
       { 
         type: "budgetTable", 
@@ -157,7 +157,7 @@ export function EstimateList({
 
     openModal('pdf-exporter', {
       blocks: pdfConfig,
-      filename: `estimaciones-construccion-${format(new Date(), 'yyyy-MM-dd')}.pdf`
+      filename: `tareas-construccion-${format(new Date(), 'yyyy-MM-dd')}.pdf`
     })
   }
 
@@ -314,12 +314,12 @@ export function EstimateList({
     return (
       <EmptyState
         icon={<CheckSquare className="h-8 w-8" />}
-        title="No hay estimaciones en el proyecto"
-        description="Comienza creando la primera fase y sus estimaciones de construcción para organizar el trabajo del proyecto."
+        title="No hay tareas en el proyecto"
+        description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
         action={
           <Button onClick={() => openModal('construction-single-task', {})}>
             <Plus className="w-4 h-4 mr-2" />
-            Nueva Estimación
+            Nueva Tarea
           </Button>
         }
       />
@@ -336,7 +336,7 @@ export function EstimateList({
   // Render filter popover content
   const renderFilterContent = () => {
     const filterOptions = [
-      { value: 'all', label: 'Todas las estimaciones' },
+      { value: 'all', label: 'Todas las tareas' },
       { value: 'phase', label: 'Solo con fase' },
       { value: 'rubro', label: 'Solo con rubro' }
     ];
@@ -370,9 +370,9 @@ export function EstimateList({
       { value: 'none', label: 'Sin agrupar' },
       { value: 'phases', label: 'Agrupar por fases' },
       { value: 'rubros', label: 'Agrupar por rubros' },
-      { value: 'tasks', label: 'Agrupar por estimaciones' },
+      { value: 'tasks', label: 'Agrupar por tareas' },
       { value: 'rubros-phases', label: 'Agrupar por fases y rubros' },
-      { value: 'phases-rubros', label: 'Agrupar por rubros y estimaciones' }
+      { value: 'phases-rubros', label: 'Agrupar por rubros y tareas' }
     ];
 
     return (
@@ -452,7 +452,7 @@ export function EstimateList({
           return (
             <>
               <div className="truncate text-sm font-medium text-white">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Estimación' : 'Estimaciones'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
               </div>
               <div></div>
               <div></div>
@@ -467,7 +467,7 @@ export function EstimateList({
           return (
             <>
               <div className="col-span-full text-sm font-medium text-white">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Estimación' : 'Estimaciones'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
               </div>
             </>
           );
@@ -476,8 +476,8 @@ export function EstimateList({
       emptyState={
         <EmptyState
           icon={<CheckSquare className="h-8 w-8" />}
-          title="No hay estimaciones que coincidan"
-          description="Intenta cambiar los filtros de búsqueda para encontrar las estimaciones que buscas."
+          title="No hay tareas que coincidan"
+          description="Intenta cambiar los filtros de búsqueda para encontrar las tareas que buscas."
         />
       }
     />
