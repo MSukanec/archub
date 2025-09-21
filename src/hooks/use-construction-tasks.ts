@@ -17,6 +17,7 @@ export interface ConstructionTaskView {
   end_date: string | null; // date en DB, string en TS
   duration_in_days: number | null; // integer en DB, number en TS
   progress_percent: number; // integer en DB, number en TS
+  description: string | null; // Nueva columna description
   phase_name: string | null;
   created_at: string; // timestamp with time zone en DB, string en TS
   updated_at: string; // timestamp with time zone en DB, string en TS
@@ -71,6 +72,9 @@ export interface ConstructionTask {
   
   // Progreso
   progress_percent: number;
+
+  // Descripción
+  description?: string | null;
 
   // Para compatibilidad con el sistema existente - mapearemos los campos
   id: string; // Será task_instance_id
@@ -222,6 +226,9 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
 
           progress_percent: phaseRelation?.progress_percent || 0,
           
+          // Descripción
+          description: item.description || null,
+          
           // Campos de división - obtenidos directamente de construction_tasks_view
           division_name: item.division_name || null,
           category_name: item.category_name || null,
@@ -273,6 +280,7 @@ export function useCreateConstructionTask() {
       duration_in_days?: number;
       project_phase_id?: string; // ID de la fase del proyecto (construction_project_phases.id) para crear en construction_phase_tasks
       progress_percent?: number;
+      description?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -287,7 +295,8 @@ export function useCreateConstructionTask() {
         created_by: taskData.created_by,
         start_date: taskData.start_date || null,
         end_date: taskData.end_date || null,
-        duration_in_days: taskData.duration_in_days || null
+        duration_in_days: taskData.duration_in_days || null,
+        description: taskData.description || null
       };
 
       console.log('📝 DATOS PREPARADOS PARA INSERT (construction_tasks):', insertData);
@@ -377,6 +386,7 @@ export function useUpdateConstructionTask() {
       project_phase_id?: string;
       progress_percent?: number;
       task_id?: string;
+      description?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -389,6 +399,7 @@ export function useUpdateConstructionTask() {
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
       if (data.task_id !== undefined) updateData.task_id = data.task_id;
+      if (data.description !== undefined) updateData.description = data.description?.trim() ? data.description : null;
 
       const { data: result, error } = await supabase
         .from('construction_tasks')
