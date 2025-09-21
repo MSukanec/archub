@@ -60,6 +60,7 @@ export default function Estimates() {
     division_name: task.division_name, // ¡ESTE CAMPO FALTABA! 
     custom_name: task.custom_name, // Pasar directamente desde la vista
     unit: task.unit, // Pasar directamente desde la vista
+    description: task.description, // ¡CAMPO DESCRIPTION FALTABA!
     task: {
       id: task.task_id,
       code: task.task_id, // Usar task_id como code por compatibilidad
