@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calendar } from "lucide-react";
 import { SearchField } from "@/components/ui-custom/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -21,7 +22,8 @@ import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 const singleTaskSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
-  project_phase_id: z.string().optional()
+  project_phase_id: z.string().optional(),
+  description: z.string().optional()
 });
 
 type SingleTaskFormData = z.infer<typeof singleTaskSchema>;
@@ -116,7 +118,8 @@ export function TaskSingleModal({
     defaultValues: {
       task_id: '',
       quantity: undefined,
-      project_phase_id: ''
+      project_phase_id: '',
+      description: ''
     }
   });
 
@@ -130,7 +133,8 @@ export function TaskSingleModal({
       form.reset({
         task_id: modalData.editingTask.task_id || '',
         quantity: modalData.editingTask.quantity || undefined,
-        project_phase_id: modalData.editingTask.phase_instance_id || ''
+        project_phase_id: modalData.editingTask.phase_instance_id || '',
+        description: modalData.editingTask.description || ''
       });
     }
   }, [isEditing, modalData.editingTask, form]);
@@ -211,7 +215,8 @@ export function TaskSingleModal({
           task_id: data.task_id,
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
-          project_phase_id: data.project_phase_id
+          project_phase_id: data.project_phase_id,
+          description: data.description
         });
       } else {
         // Modo creación
@@ -221,7 +226,8 @@ export function TaskSingleModal({
           task_id: data.task_id,
           quantity: data.quantity,
           created_by: createdBy,
-          project_phase_id: data.project_phase_id
+          project_phase_id: data.project_phase_id,
+          description: data.description
         });
       }
       
@@ -443,6 +449,19 @@ export function TaskSingleModal({
             </p>
           )}
         </div>
+      </div>
+      
+      {/* Descripción */}
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Descripción
+        </label>
+        <Textarea
+          placeholder="Descripción de la tarea (opcional)"
+          value={form.watch('description') || ''}
+          onChange={(e) => form.setValue('description', e.target.value)}
+          className="min-h-[80px] resize-none"
+        />
       </div>
     </div>
   );

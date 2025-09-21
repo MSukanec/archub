@@ -1,7 +1,7 @@
 -- 1) Por las dudas, borro la vista si existe
 drop view if exists public.construction_tasks_view;
 
--- 2) La vuelvo a crear incluyendo custom_name, unidad y división
+-- 2) La vuelvo a crear incluyendo custom_name, unidad, división y description
 create view public.construction_tasks_view as
 select
   ct.id,                                   -- construction_tasks
@@ -17,6 +17,7 @@ select
   ct.end_date,                             -- construction_tasks
   ct.duration_in_days,                     -- construction_tasks
   ct.progress_percent,                     -- construction_tasks
+  ct.description as description,           -- construction_tasks.description  ⬅️ NUEVO
   ct.created_at,                           -- construction_tasks
   ct.updated_at,                           -- construction_tasks
   ph.phase_name                            -- última fase asociada

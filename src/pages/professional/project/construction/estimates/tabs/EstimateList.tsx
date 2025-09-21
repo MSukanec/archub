@@ -177,14 +177,21 @@ export function EstimateList({
     },
     {
       key: 'display_name',
-      label: 'Estimación',
+      label: 'Tarea',
       render: (task: any) => {
         const customName = task.custom_name || task.task?.display_name;
-        // Solo mostrar si existe custom_name y no es un UUID
-        if (customName && !customName.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-          return customName;
-        }
-        return task.task?.display_name || 'Sin nombre';
+        const taskName = (customName && !customName.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) 
+          ? customName 
+          : (task.task?.display_name || 'Sin nombre');
+        
+        return (
+          <div className="space-y-1">
+            <div>{taskName}</div>
+            {task.description && (
+              <div className="text-xs text-muted-foreground">{task.description}</div>
+            )}
+          </div>
+        );
       },
       width: 'auto'
     },
