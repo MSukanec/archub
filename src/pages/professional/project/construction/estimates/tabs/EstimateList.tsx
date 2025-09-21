@@ -186,7 +186,7 @@ export function EstimateList({
         
         return (
           <div className="space-y-1">
-            <div>{taskName}</div>
+            <div className="font-bold">{taskName}</div>
             {task.description && (
               <div className="text-xs text-muted-foreground">{task.description}</div>
             )}
