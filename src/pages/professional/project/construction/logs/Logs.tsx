@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjectContext } from '@/stores/projectContext';
 import { useSiteLogTimeline } from "@/hooks/use-sitelog-timeline";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal/form/useGlobalModalStore";
@@ -164,9 +165,10 @@ export default function Logs() {
   const [activeTab, setActiveTab] = useState("bitacoras");
 
   const { data: userData, isLoading } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(
-    userData?.preferences?.last_project_id,
-    userData?.organization?.id
+    selectedProjectId || undefined,
+    currentOrganizationId || undefined
   );
   const { setSidebarContext } = useNavigationStore()
 
@@ -177,8 +179,8 @@ export default function Logs() {
   
   // Site log timeline data for timeline chart
   const { data: siteLogTimelineData = [], isLoading: timelineLoading } = useSiteLogTimeline(
-    userData?.organization?.id,
-    userData?.preferences?.last_project_id,
+    currentOrganizationId || undefined,
+    selectedProjectId || undefined,
     timePeriod
   );
   const { toast } = useToast();

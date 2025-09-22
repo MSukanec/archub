@@ -123,7 +123,13 @@ function transformAttendanceData(attendanceData: any[]) {
 }
 
 // Helper function to get insurance status for a contact
-function getInsuranceStatus(contactId: string, insuranceData: any[]) {
+interface InsuranceStatus {
+  status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
+  expiryDate: string | null
+  daysToExpiry: number | null
+}
+
+function getInsuranceStatus(contactId: string, insuranceData: any[]): InsuranceStatus {
   const contactInsurances = insuranceData.filter(insurance => insurance.contact_id === contactId)
   
   if (contactInsurances.length === 0) {
@@ -131,7 +137,7 @@ function getInsuranceStatus(contactId: string, insuranceData: any[]) {
   }
 
   // Find the insurance that expires soonest
-  let nearestExpiry = null
+  let nearestExpiry: string | null = null
   let soonestDays = Infinity
 
   contactInsurances.forEach(insurance => {
@@ -148,7 +154,7 @@ function getInsuranceStatus(contactId: string, insuranceData: any[]) {
   }
 
   // Determine status based on days to expiry
-  let status = 'vigente'
+  let status: 'vigente' | 'por_vencer' | 'vencido' = 'vigente'
   if (soonestDays < 0) {
     status = 'vencido'
   } else if (soonestDays <= 30) {
@@ -257,8 +263,7 @@ export default function ConstructionPersonnel() {
 
   // Fetch insurance data using the existing hook
   const { data: insuranceData = [] } = useInsuranceList({
-    project_id: selectedProjectId || undefined,
-    organization_id: currentOrganizationId || undefined
+    project_id: selectedProjectId || undefined
   })
   const { setSidebarContext } = useNavigationStore()
   const [activeTab, setActiveTab] = useState('active')
@@ -348,7 +353,7 @@ export default function ConstructionPersonnel() {
       icon: Plus,
       onClick: () => openModal('insurance', { 
         mode: 'create', 
-        projectId: userData?.preferences?.last_project_id 
+        projectId: selectedProjectId 
       })
     } : undefined
   }

@@ -3,6 +3,7 @@ import { TrendingUp, Plus, Home, Search, Filter, Bell } from "lucide-react";
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext';
 import { useMobile } from '@/hooks/use-mobile';
@@ -15,6 +16,7 @@ import { IndirectPayments } from './IndirectPayments';
 export default function Indirects() {
   const [activeTab, setActiveTab] = useState('lista')
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { setSidebarContext } = useNavigationStore();
 
@@ -43,8 +45,8 @@ export default function Indirects() {
   // Función para crear costo indirecto
   const handleCreateIndirect = () => {
     openModal('indirect', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
       userId: userData?.user?.id,
       isEditing: false
     });
@@ -174,14 +176,14 @@ export default function Indirects() {
       <div className="h-full">
         {activeTab === 'lista' && <IndirectList filterByStatus={filterByStatus} filterByType={filterByType} />}
         
-        {activeTab === 'pagos' && userData?.preferences?.last_project_id && userData?.organization?.id && (
+        {activeTab === 'pagos' && selectedProjectId && currentOrganizationId && (
           <IndirectPayments 
-            projectId={userData.preferences.last_project_id}
-            organizationId={userData.organization.id}
+            projectId={selectedProjectId}
+            organizationId={currentOrganizationId}
           />
         )}
         
-        {activeTab === 'pagos' && (!userData?.preferences?.last_project_id || !userData?.organization?.id) && (
+        {activeTab === 'pagos' && (!selectedProjectId || !currentOrganizationId) && (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted-foreground">Selecciona un proyecto para ver los pagos de costos indirectos</p>
           </div>

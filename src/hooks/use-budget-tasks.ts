@@ -28,6 +28,7 @@ export interface CreateBudgetTaskData {
 
 export interface UpdateBudgetTaskData extends CreateBudgetTaskData {
   id: string;
+  quantity?: number; // Allow quantity updates
 }
 
 export function useBudgetTasks(budgetId: string) {

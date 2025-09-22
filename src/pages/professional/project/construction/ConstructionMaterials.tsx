@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
 import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useEffect } from 'react'
@@ -22,8 +23,9 @@ export default function ConstructionMaterials() {
   const [groupingType, setGroupingType] = useState('categories')
   
   const { data: userData, isLoading } = useCurrentUser()
+  const { selectedProjectId } = useProjectContext()
   const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
-    userData?.preferences?.last_project_id || '',
+    selectedProjectId || '',
     selectedPhase
   )
   

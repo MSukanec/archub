@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useSubcontracts, useDeleteSubcontract } from "@/hooks/use-subcontracts";
 import { useSubcontractAnalysis } from "@/hooks/use-subcontract-analysis";
@@ -26,6 +27,7 @@ interface SubcontractListProps {
 
 export default function SubcontractList({ filterByStatus = 'all', filterByType = 'all' }: SubcontractListProps) {
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const deleteSubcontract = useDeleteSubcontract();
   const isMobile = useMobile();
@@ -37,16 +39,16 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
     openModal('subcontract', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
       userId: userData?.user?.id,
       isEditing: false
     });
   };
   
   // Datos de subcontratos con análisis de pagos
-  const { data: subcontracts = [], isLoading } = useSubcontracts(userData?.preferences?.last_project_id || null);
-  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(userData?.preferences?.last_project_id || null);
+  const { data: subcontracts = [], isLoading } = useSubcontracts(selectedProjectId || null);
+  const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(selectedProjectId || null);
 
   // Cálculos para KPIs de subcontratos
   const kpiData = useMemo(() => {
@@ -192,8 +194,8 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
   // Función para editar subcontrato
   const handleEdit = (subcontract: any) => {
     openModal('subcontract', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
       userId: userData?.user?.id,
       isEditing: true,
       subcontractId: subcontract.id

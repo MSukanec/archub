@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
 import { useIndirectCosts } from '@/hooks/use-indirect-costs';
@@ -22,6 +23,7 @@ interface IndirectListProps {
 
 export default function IndirectList({ filterByStatus = 'all', filterByType = 'all' }: IndirectListProps) {
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
   
@@ -32,15 +34,15 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
   // Función para crear costo indirecto
   const handleCreateIndirect = () => {
     openModal('indirect', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
       userId: userData?.user?.id,
       isEditing: false
     });
   };
   
   // Datos de costos indirectos usando el hook existente
-  const { data: indirects = [], isLoading } = useIndirectCosts(userData?.organization?.id || null);
+  const { data: indirects = [], isLoading } = useIndirectCosts(currentOrganizationId || null);
 
   // Cálculos para KPIs de costos indirectos
   const kpiData = useMemo(() => {
@@ -144,8 +146,8 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
   // Función para editar costo indirecto
   const handleEdit = (indirect: any) => {
     openModal('indirect', {
-      projectId: userData?.preferences?.last_project_id,
-      organizationId: userData?.organization?.id,
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
       userId: userData?.user?.id,
       isEditing: true,
       indirectId: indirect.id
