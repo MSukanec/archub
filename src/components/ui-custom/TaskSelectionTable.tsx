@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Package, CheckSquare, List, FolderOpen } from 'lucide-react';
 import { useConstructionTasks } from '@/hooks/use-construction-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectContext } from '@/stores/projectContext';
 
 export interface SelectedTask {
   task_instance_id: string;
@@ -33,10 +34,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [grouping, setGrouping] = useState<GroupingType>('rubro');
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   
   const { data: allTasks = [], isLoading } = useConstructionTasks(
-    userData?.preferences?.last_project_id || '',
-    userData?.organization?.id || ''
+    selectedProjectId || '',
+    currentOrganizationId || ''
   );
 
   // Debug logging to understand data structure

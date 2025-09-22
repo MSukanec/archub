@@ -132,17 +132,18 @@ export function TaskMultiModal({
 
 
 
-  // Hook para cargar TODAS las tareas de la librería parametrica (sin filtrar por proyecto)
+  // Hook para cargar tareas SOLO de la organización actual o del sistema
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['task-library'],
+    queryKey: ['task-library', modalData.organizationId],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      console.log('🔍 Cargando librería completa de tareas parametricas');
+      console.log('🔍 Cargando tareas de la organización:', modalData.organizationId);
       
       const { data: allTasks, error } = await supabase
         .from('task_view')
         .select('*')
+        .or(`organization_id.is.null,organization_id.eq.${modalData.organizationId}`)
         .order('name_rendered', { ascending: true });
       
       if (error) {
@@ -150,12 +151,12 @@ export function TaskMultiModal({
         throw error;
       }
       
-      console.log('✅ Librería de tareas cargada:', allTasks?.length || 0);
-      console.log('📋 Primeras 3 tareas:', allTasks?.slice(0, 3));
+      console.log('✅ Tareas filtradas por organización cargadas:', allTasks?.length || 0);
+      console.log('📋 Organizaciones presentes:', [...new Set(allTasks?.map(t => t.organization_id || 'SISTEMA'))]);
       
       return allTasks || [];
     },
-    enabled: !!supabase
+    enabled: !!supabase && !!modalData.organizationId
   });
 
   // Hook para obtener las fases del proyecto
