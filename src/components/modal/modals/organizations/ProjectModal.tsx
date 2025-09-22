@@ -18,8 +18,11 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/hooks/use-organization-members";
 import { useProjectTypes } from "@/hooks/use-project-types";
 import { useProjectModalities } from "@/hooks/use-project-modalities";
+import { useProjectContext } from "@/stores/projectContext";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from 'wouter';
 
 const createProjectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
@@ -67,8 +70,11 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { data: projectTypes = [] } = useProjectTypes();
   const { data: projectModalities = [] } = useProjectModalities();
+  const { setSelectedProject } = useProjectContext();
+  const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Encontrar el member_id del usuario actual
   const currentUserMember = organizationMembers.find(member => 
@@ -219,6 +225,12 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
           
           if (preferencesError) {
             console.error('Error setting project as active:', preferencesError);
+          } else {
+            // 2. Cambiar sidebar a estado proyecto
+            setSidebarLevel('project');
+            
+            // 3. Actualizar contexto de proyecto para que se actualice el sidebar
+            setSelectedProject(newProject.id, organizationId);
           }
         } catch (error) {
           console.error('Error updating user organization preferences:', error);
@@ -229,13 +241,21 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
+      
       toast({
         title: isEditing ? "Proyecto actualizado" : "Proyecto creado",
         description: isEditing 
           ? "El proyecto ha sido actualizado exitosamente" 
           : "El nuevo proyecto ha sido creado y establecido como activo",
       });
+      
       handleClose();
+      
+      // 4. Navegar al dashboard de proyecto si es un proyecto nuevo
+      if (!isEditing && newProject) {
+        setLocation('/project/dashboard');
+      }
     },
     onError: (error: any) => {
       toast({
