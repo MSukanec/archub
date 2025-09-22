@@ -22,7 +22,7 @@ import { toast } from '@/hooks/use-toast'
 import { DollarSign } from 'lucide-react'
 
 const costSchema = z.object({
-  type: z.enum(['material', 'labor'], { required_error: 'Selecciona un tipo de costo' }),
+  type: z.enum(['material', 'consumable', 'labor'], { required_error: 'Selecciona un tipo de costo' }),
   item_id: z.string().min(1, 'Selecciona un material o mano de obra'),
   quantity: z.coerce.number().min(0.001, 'La cantidad debe ser mayor a 0'),
 })
@@ -50,7 +50,7 @@ interface CostModalProps {
 
 export function CostModal({ modalData, onClose }: CostModalProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [costType, setCostType] = useState<'material' | 'labor' | ''>('')
+  const [costType, setCostType] = useState<'material' | 'consumable' | 'labor' | ''>('')
   const [selectedItemUnit, setSelectedItemUnit] = useState<string>('')
   
   const { task, isEditing = false, costData } = modalData
@@ -239,8 +239,17 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   // Precargar datos en modo edición
   useEffect(() => {
     if (isEditing && costData) {
-      const type = costData.type === 'Material' ? 'material' : 'labor';
-      const itemId = costData.type === 'Material' ? costData.material_id : costData.labor_type_id;
+      // Lógica robusta: usar datos reales en lugar de strings de display
+      let type: 'material' | 'consumable' | 'labor';
+      if (costData.material_id) {
+        // Buscar el material en materials array
+        const material = materials.find(m => m.id === costData.material_id);
+        type = material?.material_type === 'consumable' ? 'consumable' : 'material';
+      } else {
+        type = 'labor';
+      }
+      
+      const itemId = costData.material_id || costData.labor_type_id;
       
       form.setValue('type', type);
       form.setValue('quantity', costData.quantity || 0);
@@ -251,11 +260,11 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
         form.setValue('item_id', itemId || '');
       }, 100);
     }
-  }, [isEditing, costData, form]);
+  }, [isEditing, costData, form, materials]);
 
   // Función para obtener la unidad del item seleccionado
   const getSelectedItemUnit = useCallback((itemId: string, type: string): string => {
-    if (type === 'material') {
+    if (type === 'material' || type === 'consumable') {
       const material = materials.find(m => m.id === itemId)
       return material?.unit_of_computation || ''
     } else if (type === 'labor') {
@@ -314,7 +323,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     try {
       if (isEditing && costData?.id) {
         // Modo edición - actualizar registro existente
-        if (data.type === 'material') {
+        if (data.type === 'material' || data.type === 'consumable') {
           await updateTaskMaterialMutation.mutateAsync({
             id: costData.id,
             material_id: data.item_id,
@@ -329,7 +338,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
         }
       } else {
         // Modo crear - insertar nuevo registro
-        if (data.type === 'material') {
+        if (data.type === 'material' || data.type === 'consumable') {
           await createTaskMaterialMutation.mutateAsync({
             task_id: task.id,
             material_id: data.item_id,
@@ -356,7 +365,12 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   // Prepare options based on selected type
   const getItemOptions = () => {
     if (costType === 'material') {
-      return materials.map(material => ({
+      return materials.filter(m => m.material_type === 'material').map(material => ({
+        value: material.id,
+        label: material.name
+      }))
+    } else if (costType === 'consumable') {
+      return materials.filter(m => m.material_type === 'consumable').map(material => ({
         value: material.id,
         label: material.name
       }))
@@ -371,6 +385,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
 
   const getItemPlaceholder = () => {
     if (costType === 'material') return 'Buscar material...'
+    if (costType === 'consumable') return 'Buscar consumible...'
     if (costType === 'labor') return 'Buscar tipo de mano de obra...'
     return 'Selecciona un tipo primero'
   }
@@ -397,6 +412,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="material">Material</SelectItem>
+                  <SelectItem value="consumable">Consumible</SelectItem>
                   <SelectItem value="labor">Mano de Obra</SelectItem>
                 </SelectContent>
               </Select>
@@ -412,7 +428,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {costType === 'material' ? 'Material *' : costType === 'labor' ? 'Tipo de Mano de Obra *' : 'Item *'}
+                {costType === 'material' ? 'Material *' : costType === 'consumable' ? 'Consumible *' : costType === 'labor' ? 'Tipo de Mano de Obra *' : 'Item *'}
               </FormLabel>
               <FormControl>
                 <ComboBox
@@ -421,7 +437,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                   options={getItemOptions()}
                   placeholder={getItemPlaceholder()}
                   searchPlaceholder={getItemPlaceholder()}
-                  emptyMessage={`No se encontraron ${costType === 'material' ? 'materiales' : 'tipos de mano de obra'}.`}
+                  emptyMessage={`No se encontraron ${costType === 'material' ? 'materiales' : costType === 'consumable' ? 'consumibles' : 'tipos de mano de obra'}.`}
                   disabled={!costType}
                 />
               </FormControl>
@@ -470,8 +486,8 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     <FormModalHeader 
       title={isEditing ? "Editar Costo de Tarea" : "Agregar Costo a Tarea"}
       description={isEditing 
-        ? 'Modifica el material o mano de obra asignado a esta tarea'
-        : 'Asigna materiales o mano de obra necesarios para completar esta tarea'}
+        ? 'Modifica el material, consumible o mano de obra asignado a esta tarea'
+        : 'Asigna materiales, consumibles o mano de obra necesarios para completar esta tarea'}
       icon={DollarSign}
     />
   )

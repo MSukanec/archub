@@ -42,6 +42,10 @@ TABLA MATERIALS:
   {
     "column_name": "is_completed",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "material_type",
+    "data_type": "text"
   }
 ]
 
@@ -95,6 +99,10 @@ VISTA MATERIALS_VIEW:
   {
     "column_name": "is_completed",
     "data_type": "boolean"
+  },
+  {
+    "column_name": "material_type",
+    "data_type": "text"
   },
   {
     "column_name": "created_at",

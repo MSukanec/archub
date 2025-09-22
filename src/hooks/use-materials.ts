@@ -18,6 +18,7 @@ export interface Material {
   unit_equivalence?: number
   is_system: boolean
   is_completed?: boolean
+  material_type?: string
   created_at: string
   updated_at?: string
   min_price?: number

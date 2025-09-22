@@ -14,6 +14,7 @@ select
   up.equivalence as unit_equivalence,
   m.is_system,
   m.is_completed,
+  m.material_type,                   -- << NUEVA COLUMNA
   m.created_at,
   m.updated_at,
 
