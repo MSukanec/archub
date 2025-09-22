@@ -22,13 +22,6 @@ export function ProjectQuickActions() {
       color: "text-orange-600"
     },
     {
-      icon: Calculator,
-      label: "Presupuestos",
-      description: "Gestionar presupuestos",
-      onClick: () => navigate('/construction/budgets'),
-      color: "text-green-600"
-    },
-    {
       icon: DollarSign,
       label: "Finanzas",
       description: "Movimientos financieros",

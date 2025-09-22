@@ -315,7 +315,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: CheckSquare, label: 'Cómputos', href: '/construction/tasks' },
         { icon: Users, label: 'Personal', href: '/construction/personnel' },
         { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-        { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+
         { icon: Package2, label: 'Materiales', href: '/construction/materials' },
         { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
       ],
@@ -378,7 +378,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: CheckSquare, label: 'Cómputos', href: '/construction/tasks' },
         { icon: Users, label: 'Personal', href: '/construction/personnel' },
         { icon: Handshake, label: 'Subcontratos', href: '/construction/subcontracts' },
-        { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
+
         { icon: Package2, label: 'Materiales', href: '/construction/materials' },
         { icon: FileText, label: 'Bitácora', href: '/construction/logs' }
       ],

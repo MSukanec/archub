@@ -90,16 +90,6 @@ export function ProjectStatsCards({ stats, isLoading }: ProjectStatsCardsProps) 
       buttonText: "Ver Bitácora"
     },
     {
-      title: "Presupuestos",
-      icon: Calculator,
-      value: stats?.totalBudgets || 0,
-      description: "presupuestos activos",
-      color: "#84cc16", // Using direct accent color for charts
-      increase: "+15%",
-      route: "/construction/budgets",
-      buttonText: "Ver Presupuestos"
-    },
-    {
       title: "Movimientos",
       icon: DollarSign,
       value: stats?.totalMovements || 0,

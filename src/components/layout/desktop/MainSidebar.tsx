@@ -546,7 +546,6 @@ export function MainSidebar() {
     ],
     construction: [
       { icon: CheckSquare, label: 'Cómputos', href: '/construction/tasks' },
-      { icon: Calculator, label: 'Presupuestos', href: '/construction/budgets' },
       { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
