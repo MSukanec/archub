@@ -1,6 +1,7 @@
 import { Layout } from '@/components/layout/desktop/Layout'
 import { useMemo, useEffect, useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useProjectContext } from '@/stores/projectContext'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -199,6 +200,7 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
 export default function ConstructionPersonnel() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const queryClient = useQueryClient()
 
   // Function to handle personnel deletion
@@ -215,22 +217,22 @@ export default function ConstructionPersonnel() {
       }
 
       // Invalidate and refetch the personnel and attendance data
-      queryClient.invalidateQueries({ queryKey: ['project-personnel', userData?.preferences?.last_project_id] })
+      queryClient.invalidateQueries({ queryKey: ['project-personnel', selectedProjectId] })
       queryClient.invalidateQueries({ queryKey: ['attendance-data'] })
     } catch (error) {
       console.error('Error deleting personnel:', error)
     }
   }
   const { data: attendanceData = [], isLoading } = useAttendanceData(
-    userData?.preferences?.last_project_id,
-    userData?.organization?.id
+    selectedProjectId || undefined,
+    currentOrganizationId || undefined
   )
 
   // Fetch project personnel
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
-    queryKey: ['project-personnel', userData?.preferences?.last_project_id],
+    queryKey: ['project-personnel', selectedProjectId],
     queryFn: async () => {
-      if (!userData?.preferences?.last_project_id) return []
+      if (!selectedProjectId) return []
       
       const { data, error } = await supabase
         .from('project_personnel')
@@ -244,19 +246,19 @@ export default function ConstructionPersonnel() {
             last_name
           )
         `)
-        .eq('project_id', userData.preferences.last_project_id)
+        .eq('project_id', selectedProjectId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
       return data
     },
-    enabled: !!userData?.preferences?.last_project_id
+    enabled: !!selectedProjectId
   })
 
   // Fetch insurance data using the existing hook
   const { data: insuranceData = [] } = useInsuranceList({
-    project_id: userData?.preferences?.last_project_id,
-    organization_id: userData?.organization?.id
+    project_id: selectedProjectId || undefined,
+    organization_id: currentOrganizationId || undefined
   })
   const { setSidebarContext } = useNavigationStore()
   const [activeTab, setActiveTab] = useState('active')
