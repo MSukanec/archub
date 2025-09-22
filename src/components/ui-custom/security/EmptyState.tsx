@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
+  image?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
@@ -12,6 +13,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   icon,
+  image,
   title,
   description,
   action,
@@ -32,24 +34,37 @@ export function EmptyState({
       style={{
         borderColor: 'var(--accent)',
       }}>
-        {/* Diagonal Hatch Background Pattern */}
-        <div className="absolute inset-0 z-[-1] overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                45deg,
-                var(--accent) 0px,
-                var(--accent) 1px,
-                transparent 1px,
-                transparent 12px
-              )`
-            }}
-          />
-        </div>
+        {/* Diagonal Hatch Background Pattern - Only show when using icon */}
+        {!image && (
+          <div className="absolute inset-0 z-[-1] overflow-hidden">
+            <div 
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: `repeating-linear-gradient(
+                  45deg,
+                  var(--accent) 0px,
+                  var(--accent) 1px,
+                  transparent 1px,
+                  transparent 12px
+                )`
+              }}
+            />
+          </div>
+        )}
 
-        {/* Icon container */}
-        {icon && (
+        {/* Image container */}
+        {image && (
+          <div className="relative mb-8">
+            <img 
+              src={image}
+              alt="Empty state illustration"
+              className="w-32 h-32 mx-auto object-contain transition-all duration-300 hover:scale-105"
+            />
+          </div>
+        )}
+
+        {/* Icon container - Only show when no image */}
+        {!image && icon && (
           <div className="relative mb-8">
             <div 
               className="w-20 h-20 mx-auto rounded-full flex items-center justify-center shadow-lg border transition-all duration-300 hover:scale-105 hover:shadow-xl"
@@ -72,7 +87,7 @@ export function EmptyState({
               }}
             />
             
-            {/* Floating particles */}
+            {/* Floating particles - Only show when using icon */}
             <div className="absolute inset-0 pointer-events-none">
               <div 
                 className="absolute top-4 left-1/4 w-2 h-2 rounded-full animate-float-diagonal" 

@@ -313,7 +313,7 @@ export function EstimateList({
   if (tasks.length === 0) {
     return (
       <EmptyState
-        icon={<CheckSquare className="h-8 w-8" />}
+        image="/Estimates.png"
         title="No hay tareas en el proyecto"
         description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
         action={
