@@ -16,6 +16,8 @@ import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal'
 import GroupSubtotal from '@/components/construction/GroupSubtotal'
 import TaskRow from '@/components/ui/data-row/rows/TaskRow'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useProjectContext } from '@/stores/projectContext'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { cn } from '@/lib/utils'
 
 interface EstimateListProps {
@@ -37,6 +39,8 @@ export function EstimateList({
   const [filterType, setFilterType] = useState('all')
   const [isExporting, setIsExporting] = useState(false)
   const { openModal } = useGlobalModalStore()
+  const { selectedProjectId, currentOrganizationId } = useProjectContext()
+  const { data: userData } = useCurrentUser()
 
   // Filtrar tareas según búsqueda
   const filteredTasks = useMemo(() => {
@@ -317,7 +321,12 @@ export function EstimateList({
         title="No hay tareas en el proyecto"
         description="Comienza creando la primera fase y sus tareas de construcción para organizar el trabajo del proyecto."
         action={
-          <Button onClick={() => openModal('construction-single-task', {})}>
+          <Button onClick={() => openModal('construction-single-task', {
+            projectId: selectedProjectId,
+            organizationId: currentOrganizationId,
+            userId: userData?.user?.id,
+            isEditing: false
+          })}>
             <Plus className="w-4 h-4 mr-2" />
             Nueva Tarea
           </Button>

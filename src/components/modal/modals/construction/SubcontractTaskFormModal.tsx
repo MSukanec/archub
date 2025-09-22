@@ -7,6 +7,7 @@ import { useModalPanelStore } from '../../form/modalPanelStore';
 import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSelectionTable';
 import { useSubcontractTasks } from '@/hooks/use-subcontract-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectContext } from '@/stores/projectContext';
 
 interface SubcontractTaskFormModalProps {
   modalData?: {
@@ -24,6 +25,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
   
   // Obtener datos del usuario
   const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   
   // Obtener tareas ya existentes en el subcontrato para excluirlas
   const { subcontractTasks: existingSubcontractTasks = [], createMultipleSubcontractTasks } = useSubcontractTasks(subcontractId || '');
@@ -44,8 +46,8 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
     const tasksToAdd = selectedTasks.map(task => ({
       subcontract_id: subcontractId,
       task_id: task.task_instance_id, // task_instance_id es el ID correcto
-      organization_id: userData.organization?.id || '',
-      project_id: projectId || userData.preferences?.last_project_id || '',
+      organization_id: currentOrganizationId || '',
+      project_id: selectedProjectId || '',
       quantity: task.quantity || 1,
       unit: task.unit || '',
       notes: task.notes || ''
