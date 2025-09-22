@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
+  image?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
@@ -12,6 +13,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   icon,
+  image,
   title,
   description,
   action,
@@ -48,31 +50,58 @@ export function EmptyState({
           />
         </div>
 
-        {/* Icon container */}
-        {icon && (
+        {/* Image or Icon container */}
+        {(image || icon) && (
           <div className="relative mb-8">
-            <div 
-              className="w-20 h-20 mx-auto rounded-full flex items-center justify-center shadow-lg border transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              style={{
-                backgroundColor: 'rgba(var(--accent-rgb), 0.1)',
-                borderColor: 'rgba(var(--accent-rgb), 0.2)',
-                color: 'var(--accent)'
-              }}
-            >
-              <div className="[&>svg]:w-12 [&>svg]:h-12" style={{ color: 'var(--accent)' }}>
-                {icon}
+            {image ? (
+              /* Image container */
+              <div className="relative">
+                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-xl overflow-hidden shadow-lg border transition-all duration-300 hover:scale-105 hover:shadow-xl group"
+                     style={{
+                       borderColor: 'rgba(var(--accent-rgb), 0.2)'
+                     }}>
+                  <img 
+                    src={image}
+                    alt="Empty state illustration"
+                    className="w-full h-full object-cover object-center transition-all duration-300 group-hover:scale-110"
+                  />
+                </div>
+                
+                {/* Subtle image glow */}
+                <div 
+                  className="absolute inset-0 w-20 h-20 md:w-24 md:h-24 mx-auto rounded-xl blur-md animate-pulse" 
+                  style={{
+                    backgroundColor: 'rgba(var(--accent-rgb), 0.05)'
+                  }}
+                />
               </div>
-            </div>
+            ) : (
+              /* Icon container */
+              <div>
+                <div 
+                  className="w-20 h-20 mx-auto rounded-full flex items-center justify-center shadow-lg border transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  style={{
+                    backgroundColor: 'rgba(var(--accent-rgb), 0.1)',
+                    borderColor: 'rgba(var(--accent-rgb), 0.2)',
+                    color: 'var(--accent)'
+                  }}
+                >
+                  <div className="[&>svg]:w-12 [&>svg]:h-12" style={{ color: 'var(--accent)' }}>
+                    {icon}
+                  </div>
+                </div>
+                
+                {/* Subtle icon glow */}
+                <div 
+                  className="absolute inset-0 w-20 h-20 mx-auto rounded-full blur-md animate-pulse" 
+                  style={{
+                    backgroundColor: 'rgba(var(--accent-rgb), 0.05)'
+                  }}
+                />
+              </div>
+            )}
             
-            {/* Subtle icon glow */}
-            <div 
-              className="absolute inset-0 w-20 h-20 mx-auto rounded-full blur-md animate-pulse" 
-              style={{
-                backgroundColor: 'rgba(var(--accent-rgb), 0.05)'
-              }}
-            />
-            
-            {/* Floating particles */}
+            {/* Floating particles - preserved for both image and icon */}
             <div className="absolute inset-0 pointer-events-none">
               <div 
                 className="absolute top-4 left-1/4 w-2 h-2 rounded-full animate-float-diagonal" 

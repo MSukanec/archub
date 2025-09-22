@@ -3,6 +3,7 @@ import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Users,
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
+import SubcontratsImage from '/Subcontrats.png';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -591,7 +592,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       {/* Lista/Tabla de Subcontratos */}
       {filteredSubcontracts.length === 0 ? (
         <EmptyState
-          icon={<Package className="w-12 h-12 text-muted-foreground" />}
+          image={SubcontratsImage}
           title="No hay subcontratos"
           description={searchQuery ? "No se encontraron subcontratos que coincidan con tu búsqueda." : "Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato' para comenzar."}
         />
