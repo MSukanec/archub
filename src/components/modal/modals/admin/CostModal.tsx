@@ -365,7 +365,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   // Prepare options based on selected type
   const getItemOptions = () => {
     if (costType === 'material') {
-      return materials.filter(m => m.material_type === 'material').map(material => ({
+      return materials.filter(m => m.material_type !== 'consumable').map(material => ({
         value: material.id,
         label: material.name
       }))
@@ -385,7 +385,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
 
   const getItemPlaceholder = () => {
     if (costType === 'material') return 'Buscar material...'
-    if (costType === 'consumable') return 'Buscar consumible...'
+    if (costType === 'consumable') return 'Buscar insumo...'
     if (costType === 'labor') return 'Buscar tipo de mano de obra...'
     return 'Selecciona un tipo primero'
   }
@@ -412,7 +412,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="material">Material</SelectItem>
-                  <SelectItem value="consumable">Consumible</SelectItem>
+                  <SelectItem value="consumable">Insumo</SelectItem>
                   <SelectItem value="labor">Mano de Obra</SelectItem>
                 </SelectContent>
               </Select>
@@ -428,7 +428,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {costType === 'material' ? 'Material *' : costType === 'consumable' ? 'Consumible *' : costType === 'labor' ? 'Tipo de Mano de Obra *' : 'Item *'}
+                {costType === 'material' ? 'Material *' : costType === 'consumable' ? 'Insumo *' : costType === 'labor' ? 'Tipo de Mano de Obra *' : 'Item *'}
               </FormLabel>
               <FormControl>
                 <ComboBox
@@ -437,7 +437,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                   options={getItemOptions()}
                   placeholder={getItemPlaceholder()}
                   searchPlaceholder={getItemPlaceholder()}
-                  emptyMessage={`No se encontraron ${costType === 'material' ? 'materiales' : costType === 'consumable' ? 'consumibles' : 'tipos de mano de obra'}.`}
+                  emptyMessage={`No se encontraron ${costType === 'material' ? 'materiales' : costType === 'consumable' ? 'insumos' : 'tipos de mano de obra'}.`}
                   disabled={!costType}
                 />
               </FormControl>
@@ -486,8 +486,8 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     <FormModalHeader 
       title={isEditing ? "Editar Costo de Tarea" : "Agregar Costo a Tarea"}
       description={isEditing 
-        ? 'Modifica el material, consumible o mano de obra asignado a esta tarea'
-        : 'Asigna materiales, consumibles o mano de obra necesarios para completar esta tarea'}
+        ? 'Modifica el material, insumo o mano de obra asignado a esta tarea'
+        : 'Asigna materiales, insumos o mano de obra necesarios para completar esta tarea'}
       icon={DollarSign}
     />
   )

@@ -43,6 +43,7 @@ export interface Material {
 
 export interface NewMaterialData {
   name: string
+  material_type?: string
   unit_id: string
   category_id: string
   is_completed?: boolean

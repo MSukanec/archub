@@ -22,6 +22,7 @@ import { Package } from 'lucide-react'
 
 const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
+  material_type: z.enum(['material', 'consumable'], { required_error: 'Selecciona el tipo de material' }),
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   is_completed: z.boolean().optional(),
@@ -120,6 +121,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     resolver: zodResolver(materialSchema),
     defaultValues: {
       name: '',
+      material_type: 'material',
       category_id: '',
       unit_id: '',
       is_completed: false,
@@ -144,6 +146,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       
       form.reset({
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
+        material_type: (editingMaterial.material_type as 'material' | 'consumable') || 'material',
         category_id: categoryId,
         unit_id: editingMaterial.unit_id,
         is_completed: editingMaterial.is_completed || false,
@@ -155,6 +158,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
     } else if (!isEditing && !isDuplicating) {
       form.reset({
         name: '',
+        material_type: 'material',
         category_id: '',
         unit_id: '',
         is_completed: false,
@@ -174,6 +178,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
           id: editingMaterial.id,
           data: {
             name: values.name,
+            material_type: values.material_type,
             unit_id: values.unit_id,
             category_id: values.category_id,
             is_completed: values.is_completed,
@@ -183,6 +188,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
         // Crear material
         const materialData: NewMaterialData = {
           name: values.name,
+          material_type: values.material_type,
           category_id: values.category_id,
           unit_id: values.unit_id,
           is_completed: values.is_completed,
@@ -223,6 +229,29 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Material Type */}
+        <FormField
+          control={form.control}
+          name="material_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Material *</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona el tipo de material" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="material">Material</SelectItem>
+                  <SelectItem value="consumable">Insumo</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
