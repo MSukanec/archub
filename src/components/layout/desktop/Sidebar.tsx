@@ -417,7 +417,7 @@ export function MainSidebar() {
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
     const saved = localStorage.getItem('sidebar-accordion');
-    return saved || null;
+    return saved || 'CONSTRUCCIÓN'; // Por defecto "CONSTRUCCIÓN" expandida
   });
 
   // Estado para transiciones
@@ -783,9 +783,9 @@ export function MainSidebar() {
                   ) : (
                     // Avatar proyecto seleccionado
                     selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
-                      projects.find(p => p.id === selectedProjectId)?.project_image_url ? (
+                      false ? (
                         <img 
-                          src={projects.find(p => p.id === selectedProjectId)?.project_image_url} 
+                          src="" 
                           alt={projects.find(p => p.id === selectedProjectId)?.name}
                           className="w-full h-full object-cover"
                         />
@@ -1012,53 +1012,69 @@ export function MainSidebar() {
       {/* Navigation Items - Scrollable Content */}
       <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
         <div className="flex flex-col gap-[2px] h-full">
-          {getTertiarySidebarItems().map((item: any, index: number) => {
+          {(() => {
+            const items = getTertiarySidebarItems();
+            let currentSection: string | null = null;
+            const elementsToRender: React.ReactNode[] = [];
+            
+            items.forEach((item: any, index: number) => {
               // Type guard to ensure we're working with a proper item
               if (!item || typeof item !== 'object') {
-                return null;
+                return;
               }
 
               // Si es un divisor, renderizar línea divisoria
               if ('type' in item && item.type === 'divider') {
-                return (
+                elementsToRender.push(
                   <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
                 );
+                return;
               }
               
-              // Si es una sección, renderizar con líneas divisorias como Supabase
+              // Si es una sección, renderizar como botón acordeón colapsable y actualizar currentSection
               if ('type' in item && item.type === 'section') {
-                return (
-                  <div key={`section-${index}`} className="h-5 flex items-center my-1">
-                    {isExpanded ? (
-                      // Expandido: línea + texto centrado + línea
-                      <div className="flex items-center w-full">
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                        <div className="mx-3 text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--main-sidebar-button-fg)', opacity: 0.6 }}>
-                          {item.label}
-                        </div>
-                        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                      </div>
-                    ) : (
-                      // Colapsado: solo línea divisoria centrada verticalmente
-                      <div className="h-px mx-2 w-full" style={{ backgroundColor: 'var(--main-sidebar-button-fg)', opacity: 0.15 }}></div>
-                    )}
-                  </div>
-                );
-              }
-
-              // Si es un botón simple, renderizar ButtonSidebar directo
-              if ('type' in item && item.type === 'button') {
-                return (
+                currentSection = item.label;
+                const isAccordionExpanded = expandedAccordion === item.label;
+                
+                elementsToRender.push(
                   <ButtonSidebar
-                    key={`button-${item.id}`}
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    key={`section-${index}`}
+                    icon={<Folder className="w-[18px] h-[18px]" />}
                     label={item.label}
-                    isActive={location === item.href}
+                    isActive={false}
                     isExpanded={isExpanded}
-                    onClick={() => navigate(item.href)}
+                    onClick={() => toggleAccordion(item.label)}
                     variant="secondary"
+                    rightIcon={isExpanded ? (
+                      <div className="transition-transform duration-200">
+                        {isAccordionExpanded ? 
+                          <ChevronUp className="w-3 h-3" /> : 
+                          <ChevronDown className="w-3 h-3" />
+                        }
+                      </div>
+                    ) : undefined}
                   />
                 );
+                return;
+              }
+
+              // Si es un botón simple, renderizar solo si su sección está expandida (o si no hay sección activa)
+              if ('type' in item && item.type === 'button') {
+                // Si no hay currentSection o si la currentSection está expandida, mostrar el botón
+                if (!currentSection || expandedAccordion === currentSection) {
+                  elementsToRender.push(
+                    <ButtonSidebar
+                      key={`button-${item.id}`}
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={location === item.href}
+                      isExpanded={isExpanded}
+                      onClick={() => navigate(item.href)}
+                      variant="secondary"
+                    />
+                  );
+                }
+                return;
               }
 
               // Si es un acordeón, renderizar acordeón con elementos expandibles
@@ -1135,7 +1151,7 @@ export function MainSidebar() {
               
               // Verificar que tengamos icon y label antes de renderizar
               if (!sidebarItem.icon || !sidebarItem.label) {
-                return null;
+                return;
               }
               
               const itemKey = sidebarItem.label || `item-${index}`;
@@ -1156,12 +1172,15 @@ export function MainSidebar() {
                 />
               );
               
-              return (
+              elementsToRender.push(
                 <div key={`${itemKey}-${index}`}>
                   {buttonElement}
                 </div>
               );
-          })}
+            });
+            
+            return elementsToRender;
+          })()}
         </div>
       </div>
       
