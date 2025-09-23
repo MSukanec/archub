@@ -73,76 +73,71 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="group flex items-center justify-between p-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]">
-        {/* Left side: Drag handle + Task info */}
-        <div className="flex items-center space-x-3 flex-1">
-          {/* Drag handle */}
-          <div 
-            {...listeners} 
-            className="cursor-grab hover:cursor-grabbing p-1 hover:bg-accent/20 rounded"
-            title="Arrastrar para reordenar"
-          >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-          
-          {/* Task icon */}
-          <div className="flex-shrink-0">
-            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-              <Calculator className="h-4 w-4 text-primary" />
+      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
+           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}>
+        
+        {/* Drag handle */}
+        <div 
+          {...listeners} 
+          className="cursor-grab hover:cursor-grabbing p-1 hover:bg-accent/20 rounded flex items-center"
+          title="Arrastrar para reordenar"
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+        
+        {/* Task content */}
+        <div className="flex-1 min-w-0">
+          {/* Task name and description */}
+          <div className="space-y-1">
+            <div className="font-medium text-foreground truncate">
+              {getTaskName(task)}
             </div>
-          </div>
-          
-          {/* Task content */}
-          <div className="flex-1 min-w-0">
-            {/* Task name and description */}
-            <div className="space-y-1">
-              <div className="font-medium text-foreground truncate">
-                {getTaskName(task)}
+            {task.description && (
+              <div className="text-xs text-muted-foreground truncate">
+                {task.description}
               </div>
-              {task.description && (
-                <div className="text-xs text-muted-foreground truncate">
-                  {task.description}
-                </div>
-              )}
+            )}
+          </div>
+          
+          {/* Phase badge only */}
+          {task.phase_name && (
+            <div className="mt-2">
+              <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                {task.phase_name}
+              </Badge>
             </div>
-            
-            {/* Task metadata badges */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {task.phase_name && (
-                <Badge variant="outline" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                  {task.phase_name}
-                </Badge>
-              )}
-              {task.division_name && (
-                <Badge variant="outline" className="text-xs px-2 py-1 bg-green-50 text-green-700 border-green-200">
-                  {task.division_name}
-                </Badge>
-              )}
-              {task.unit && (
-                <Badge variant="outline" className="text-xs px-2 py-1">
-                  {task.quantity?.toFixed(2) || '0.00'} {task.unit}
-                </Badge>
-              )}
-            </div>
+          )}
+        </div>
+        
+        {/* Unit column */}
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground mb-1">Unidad</div>
+          <div className="text-sm">
+            {task.unit || '-'}
           </div>
         </div>
         
-        {/* Right side: Cost info */}
-        <div className="flex items-center space-x-4 flex-shrink-0">
-          {/* Unit cost */}
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground mb-1">Costo Unit.</div>
-            <div className="text-sm">
-              <TaskMaterialsUnitCost task={task} />
-            </div>
+        {/* Quantity column */}
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground mb-1">Cantidad</div>
+          <div className="text-sm">
+            {task.quantity?.toFixed(2) || '0.00'}
           </div>
-          
-          {/* Total subtotal */}
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground mb-1">Subtotal</div>
-            <div className="text-sm font-medium">
-              <TaskTotalSubtotal task={task} />
-            </div>
+        </div>
+        
+        {/* Unit cost column */}
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground mb-1">Costo Unit.</div>
+          <div className="text-sm">
+            <TaskMaterialsUnitCost task={task} />
+          </div>
+        </div>
+        
+        {/* Subtotal column */}
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground mb-1">Subtotal</div>
+          <div className="text-sm font-medium">
+            <TaskTotalSubtotal task={task} />
           </div>
         </div>
       </div>
