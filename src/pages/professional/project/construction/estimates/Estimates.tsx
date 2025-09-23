@@ -22,7 +22,7 @@ import { EstimatePhases } from './tabs/EstimatePhases.tsx'
 import { EstimateSchedule } from './tabs/EstimateSchedule.tsx'
 
 export default function Estimates() {
-  const [activeTab, setActiveTab] = useState("tasks")
+  // Removed tab functionality - only showing budget view now
   
   const { data: userData } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
@@ -236,13 +236,9 @@ export default function Estimates() {
       create: {
         id: 'create',
         icon: Plus,
-        label: activeTab === 'tasks' ? 'Nuevo Cómputo' : activeTab === 'phases' ? 'Nueva Fase' : 'Crear',
+        label: 'Nueva Tarea',
         onClick: () => {
-          if (activeTab === 'tasks') {
-            handleAddSingleTask()
-          } else if (activeTab === 'phases') {
-            handleAddPhase()
-          }
+          handleAddSingleTask()
         },
         variant: 'primary' as const
       },
@@ -267,9 +263,9 @@ export default function Estimates() {
     setActions(actions)
     setShowActionBar(true)
 
-    // Configure filters based on active tab
-    const filterConfig = activeTab === 'tasks' ? {
-      title: 'Filtros de Cómputos',
+    // Configure filters for task list
+    const filterConfig = {
+      title: 'Filtros de Tareas',
       filters: [
         {
           key: 'phase',
@@ -290,24 +286,6 @@ export default function Estimates() {
       ],
       onApplyFilters: (filters: any) => console.log('Applied filters:', filters),
       onClearFilters: () => console.log('Cleared filters')
-    } : {
-      title: 'Filtros de Fases',
-      filters: [
-        {
-          key: 'status',
-          label: 'Estado',
-          type: 'select' as const,
-          options: [
-            { value: 'active', label: 'Activa' },
-            { value: 'completed', label: 'Completada' },
-            { value: 'pending', label: 'Pendiente' }
-          ],
-          value: '',
-          placeholder: 'Todos los estados'
-        }
-      ],
-      onApplyFilters: (filters: any) => console.log('Applied phase filters:', filters),
-      onClearFilters: () => console.log('Cleared phase filters')
     }
     
     setFilterConfig(filterConfig)
@@ -315,45 +293,25 @@ export default function Estimates() {
     return () => {
       clearActions()
     }
-  }, [isMobile, activeTab]) // Solo dependencias primitivas
+  }, [isMobile]) // Solo dependencias primitivas
 
 
-
-  // Crear tabs para el header
-  const headerTabs = [
-    {
-      id: "tasks",
-      label: "Cómputo",
-      isActive: activeTab === "tasks"
-    },
-    {
-      id: "budget",
-      label: "Presupuesto",
-      isActive: activeTab === "budget"
-    }
-  ]
 
   const headerProps = {
-    title: "Cómputo y Presupuesto",
+    title: "Listado de Tareas",
     icon: CheckSquare,
-    tabs: headerTabs,
-    onTabChange: setActiveTab,
-    actionButton: activeTab === "tasks" ? {
-      label: "Agregar Cómputo",
-      icon: Plus,
-      onClick: handleAddSingleTask
-    } : activeTab === "budget" ? {
+    actionButton: {
       label: "Agregar Tarea",
       icon: Plus,
       onClick: handleAddSingleTask
-    } : undefined
+    }
   }
 
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Cargando cómputos...</div>
+          <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
       </Layout>
     )
@@ -361,24 +319,11 @@ export default function Estimates() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div>
-        {activeTab === "tasks" && (
-          <EstimateList
-            tasks={tasks}
-            isLoading={isLoading}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
-          />
-        )}
-        
-        {activeTab === "budget" && (
-          <EstimateBudget 
-            tasks={tasks}
-            isLoading={isLoading}
-            onEditTask={handleEditTask}
-          />
-        )}
-      </div>
+      <EstimateBudget 
+        tasks={tasks}
+        isLoading={isLoading}
+        onEditTask={handleEditTask}
+      />
     </Layout>
   )
 }

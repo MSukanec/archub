@@ -568,7 +568,10 @@ export function MainSidebar() {
           {/* User Avatar - Bottom of left sidebar */}
           <div className="mt-auto border-t border-[var(--main-sidebar-border)] p-2 flex-shrink-0">
             <div className="flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => navigate('/profile')}
+              >
                 {userData?.user?.avatar_url ? (
                   <img 
                     src={userData.user.avatar_url} 
