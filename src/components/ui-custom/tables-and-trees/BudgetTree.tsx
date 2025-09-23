@@ -114,7 +114,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
                 <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
                   <span className="text-xs font-semibold">Material ({materials.length})</span>
                   <span className="text-xs font-semibold">
-                    $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="space-y-1">
@@ -136,12 +136,12 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
                             <span>{quantity} {unitName}</span>
                             <span>x</span>
                             <span className="font-mono">
-                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$ 0.00'}
                             </span>
                           </div>
                         </div>
                         <div className="text-xs text-right font-medium text-[var(--card-fg)] min-w-[60px]">
-                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                     );
@@ -156,7 +156,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
                 <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
                   <span className="text-xs font-semibold">Mano de Obra ({labor.length})</span>
                   <span className="text-xs font-semibold">
-                    $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="space-y-1">
@@ -178,12 +178,12 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
                             <span>{quantity} {unitName}</span>
                             <span>x</span>
                             <span className="font-mono">
-                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$ 0.00'}
                             </span>
                           </div>
                         </div>
                         <div className="text-xs text-right font-medium text-[var(--card-fg)] min-w-[60px]">
-                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                     );
@@ -200,7 +200,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
         <div className="px-3 py-2 flex items-center justify-between border-t border-[var(--card-border)]">
           <span className="text-xs font-semibold uppercase text-[var(--card-fg)]">TOTAL POR UNIDAD:</span>
           <div className="text-xs font-semibold text-[var(--card-fg)]">
-            $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
       )}
@@ -477,8 +477,8 @@ const InlineUnitCostEditor = ({
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -537,7 +537,7 @@ const InlineUnitCostEditor = ({
                 </label>
                 <Input
                   type="number"
-                  value={customCost}
+                  value={customCost === 0 ? '' : customCost}
                   onChange={(e) => setCustomCost(parseFloat(e.target.value) || 0)}
                   className="h-8 text-xs"
                   placeholder="0.00"
@@ -882,8 +882,8 @@ const GroupHeader = ({
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
   
