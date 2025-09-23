@@ -89,7 +89,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
     <div className="w-full">
       {/* Header */}
       <div className="px-3 py-2 flex items-center gap-2 border-b border-[var(--card-border)]">
-        <Info className="h-3 w-3 text-[var(--accent)]" />
+        <Info className="h-3 w-3 text-[var(--accent-2)]" />
         <h3 className="text-xs font-semibold text-[var(--card-fg)]">
           Costos por unidad
         </h3>
@@ -112,7 +112,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
             {/* Sección de Materiales */}
             {materials.length > 0 && (
               <div>
-                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
+                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent-2)] text-white rounded">
                   <span className="text-xs font-semibold">Material ({materials.length})</span>
                   <span className="text-xs font-semibold">
                     $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -154,7 +154,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
             {/* Sección de Mano de Obra */}
             {labor.length > 0 && (
               <div>
-                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
+                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent-2)] text-white rounded">
                   <span className="text-xs font-semibold">Mano de Obra ({labor.length})</span>
                   <span className="text-xs font-semibold">
                     $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -263,7 +263,7 @@ const InlineMarginEditor = ({
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleSave}
-        className="h-8 w-16 text-xs text-right border-[var(--accent)]"
+        className="h-8 w-16 text-xs text-right border-[var(--accent-2)]"
         step="0.1"
         min="0"
         max="100"
@@ -276,7 +276,7 @@ const InlineMarginEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+      className="h-8 px-2 text-xs font-medium text-[var(--accent-2)] hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
     >
       <div className="flex items-center justify-end gap-1">
         <span>{formatDisplayValue(currentMargin)}</span>
@@ -330,7 +330,7 @@ const InlineDescriptionEditor = ({
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleSave}
-        className="h-6 text-xs border-[var(--accent)]"
+        className="h-6 text-xs border-[var(--accent-2)]"
         placeholder="Descripción de la tarea"
         autoFocus
         onFocus={(e) => e.target.select()}
@@ -341,12 +341,12 @@ const InlineDescriptionEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="text-left w-full text-xs transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+      className="text-left w-full text-xs transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
     >
       {currentDescription ? (
         <span className="text-muted-foreground">{currentDescription}</span>
       ) : (
-        <span className="text-[var(--accent)]">Agregar descripción</span>
+        <span className="text-[var(--accent-2)]">Agregar descripción</span>
       )}
     </button>
   );
@@ -385,7 +385,7 @@ const InlineCostTypeEditor = ({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <button
-            className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+            className="h-8 px-2 text-xs font-medium text-[var(--accent-2)] hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
           >
             {getCostScopeDisplayText(task.cost_scope)}
           </button>
@@ -402,7 +402,7 @@ const InlineCostTypeEditor = ({
                   value="materials_and_labor"
                   checked={(task.cost_scope || 'materials_and_labor') === 'materials_and_labor'}
                   onChange={(e) => handleCostScopeChange(e.target.value)}
-                  className="accent-[var(--accent)]"
+                  className="accent-[var(--accent-2)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Ambos</span>
               </label>
@@ -414,7 +414,7 @@ const InlineCostTypeEditor = ({
                   value="materials_only"
                   checked={task.cost_scope === 'materials_only'}
                   onChange={(e) => handleCostScopeChange(e.target.value)}
-                  className="accent-[var(--accent)]"
+                  className="accent-[var(--accent-2)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Materiales</span>
               </label>
@@ -426,7 +426,7 @@ const InlineCostTypeEditor = ({
                   value="labor_only"
                   checked={task.cost_scope === 'labor_only'}
                   onChange={(e) => handleCostScopeChange(e.target.value)}
-                  className="accent-[var(--accent)]"
+                  className="accent-[var(--accent-2)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Mano de Obra</span>
               </label>
@@ -488,7 +488,7 @@ const InlineUnitCostEditor = ({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <button
-            className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+            className="h-8 px-2 text-xs font-medium text-[var(--accent-2)] hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
           >
             {formatCost(displayCost)}
           </button>
@@ -509,7 +509,7 @@ const InlineUnitCostEditor = ({
                     setCostType(newType);
                     onCostTypeChange?.(newType);
                   }}
-                  className="accent-[var(--accent)]"
+                  className="accent-[var(--accent-2)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Costo de Tarea</span>
               </label>
@@ -525,7 +525,7 @@ const InlineUnitCostEditor = ({
                     setCostType(newType);
                     onCostTypeChange?.(newType);
                   }}
-                  className="accent-[var(--accent)]"
+                  className="accent-[var(--accent-2)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Costo Independiente</span>
               </label>
@@ -619,7 +619,7 @@ const InlineQuantityEditor = ({
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleSave}
-        className="h-8 w-20 text-xs text-right border-[var(--accent)]"
+        className="h-8 w-20 text-xs text-right border-[var(--accent-2)]"
         step="0.01"
         min="0"
         autoFocus
@@ -631,7 +631,7 @@ const InlineQuantityEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+      className="h-8 px-2 text-xs font-medium text-[var(--accent-2)] hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
     >
       <div className="flex items-center justify-end gap-1">
         <span>{formatDisplayValue(currentQuantity)}</span>
@@ -720,7 +720,7 @@ const SortableTaskItem = ({
         {/* Drag handle */}
         <div 
           {...listeners} 
-          className="cursor-grab hover:cursor-grabbing p-1 hover:bg-accent/20 rounded flex items-center"
+          className="cursor-grab hover:cursor-grabbing p-1 hover:bg-accent-2/20 rounded flex items-center"
           title="Arrastrar para reordenar"
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -791,7 +791,7 @@ const SortableTaskItem = ({
                 className={`h-4 w-4 p-0 ${
                   isIndependentCost 
                     ? 'text-muted-foreground cursor-not-allowed opacity-50' 
-                    : 'text-[var(--accent)] hover:text-[var(--accent)] opacity-70 hover:opacity-100'
+                    : 'text-[var(--accent-2)] hover:text-[var(--accent-2)] opacity-70 hover:opacity-100'
                 }`}
               >
                 <Info className="h-3 w-3" />
