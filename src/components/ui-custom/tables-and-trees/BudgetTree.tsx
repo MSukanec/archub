@@ -208,6 +208,72 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
   );
 };
 
+// Inline Description Editor Component
+const InlineDescriptionEditor = ({ 
+  taskId, 
+  currentDescription,
+  onDescriptionChange 
+}: { 
+  taskId: string;
+  currentDescription?: string;
+  onDescriptionChange: (taskId: string, description: string) => void;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(currentDescription || '');
+
+  // Update input value when currentDescription changes
+  useEffect(() => {
+    setInputValue(currentDescription || '');
+  }, [currentDescription]);
+
+  const handleSave = () => {
+    onDescriptionChange(taskId, inputValue);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setInputValue(currentDescription || '');
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        className="h-6 text-xs border-[var(--accent)]"
+        placeholder="Descripción de la tarea"
+        autoFocus
+        onFocus={(e) => e.target.select()}
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="text-left w-full text-xs transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+    >
+      {currentDescription ? (
+        <span className="text-muted-foreground">{currentDescription}</span>
+      ) : (
+        <span className="text-[var(--accent)]">Agregar descripción</span>
+      )}
+    </button>
+  );
+};
+
 // Inline Unit Cost Editor Component
 const InlineUnitCostEditor = ({ 
   task 
@@ -413,7 +479,8 @@ const SortableTaskItem = ({
   onDeleteTask,
   handleLocalQuantityChange,
   localQuantities,
-  isLastInGroup
+  isLastInGroup,
+  handleDescriptionChange
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -426,6 +493,7 @@ const SortableTaskItem = ({
   handleLocalQuantityChange: (taskId: string, quantity: number) => void;
   localQuantities: { [taskId: string]: number };
   isLastInGroup?: boolean;
+  handleDescriptionChange: (taskId: string, description: string) => void;
 }) => {
   const {
     attributes,
@@ -488,16 +556,18 @@ const SortableTaskItem = ({
         
         {/* Task content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center text-xs">
-          {/* Task name and description */}
-          <div className="space-y-1">
-            <div className="font-medium text-foreground truncate text-xs">
-              {getTaskName(task)}
-            </div>
-            {task.description && (
-              <div className="text-muted-foreground truncate text-xs">
-                {task.description}
-              </div>
-            )}
+          {/* Task name */}
+          <div className="font-medium text-foreground truncate text-xs">
+            {getTaskName(task)}
+          </div>
+          
+          {/* Task description - always shown */}
+          <div className="mt-1">
+            <InlineDescriptionEditor
+              taskId={task.id}
+              currentDescription={task.description}
+              onDescriptionChange={handleDescriptionChange}
+            />
           </div>
           
           {/* Phase badge only */}
@@ -728,6 +798,21 @@ export function BudgetTree({
     }
   }, [tasks, userData, updateTaskMutation]);
 
+  // Handle description changes
+  const handleDescriptionChange = useCallback((taskId: string, description: string) => {
+    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
+      console.warn('No project or organization selected');
+      return;
+    }
+    
+    updateTaskMutation.mutate({
+      id: taskId,
+      description: description,
+      project_id: userData.preferences.last_project_id,
+      organization_id: userData.preferences.last_organization_id,
+    });
+  }, [updateTaskMutation, userData]);
+
   // Use auto-save for quantity changes
   const { isSaving } = useDebouncedAutoSave({
     data: localQuantities,
@@ -908,6 +993,7 @@ export function BudgetTree({
                     handleLocalQuantityChange={handleLocalQuantityChange}
                     localQuantities={localQuantities}
                     isLastInGroup={taskIndex === groupTasks.length - 1}
+                    handleDescriptionChange={handleDescriptionChange}
                   />
                 ))}
               </div>
