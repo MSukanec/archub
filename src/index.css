@@ -709,7 +709,4 @@ input[type="number"] {
   background: transparent;
 }
 
-/* Ensure body scrollbar reaches the top */
-html, body {
-  scrollbar-gutter: stable;
-}
+/* Remove scrollbar gutter to avoid white border when no scrollbar */
