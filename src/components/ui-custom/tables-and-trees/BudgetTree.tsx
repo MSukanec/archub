@@ -1189,7 +1189,8 @@ export function BudgetTree({
             >
               <div></div> {/* Empty space for drag handle column */}
               <div className="flex items-center">
-                Fase: {tasks.length === 0 ? 'General' : Object.keys(groupedByPhases).join(' • ')}
+                <span className="font-normal">Fase: </span>
+                <span className="font-bold text-base">{tasks.length === 0 ? 'General' : Object.keys(groupedByPhases).join(' • ')}</span>
               </div>
               <div></div> {/* Empty space for description column */}
               <div></div> {/* Empty space for tipo column */}
