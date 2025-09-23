@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
-import { GripVertical, Calculator, FileText } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
@@ -45,6 +47,8 @@ interface BudgetTreeProps {
   tasks: BudgetTask[];
   onReorder?: (reorderedTasks: BudgetTask[]) => void;
   onEditTask?: (task: BudgetTask) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onQuantityChange?: (taskId: string, quantity: number) => void;
 }
 
 // Sortable Item component for drag and drop
@@ -54,7 +58,10 @@ const SortableTaskItem = ({
   groupSubtotal,
   totalSubtotal,
   taskSubtotals,
-  itemNumber
+  itemNumber,
+  onEditTask,
+  onDeleteTask,
+  onQuantityChange
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -62,6 +69,9 @@ const SortableTaskItem = ({
   totalSubtotal: number;
   taskSubtotals: { [taskId: string]: number };
   itemNumber: string;
+  onEditTask?: (task: BudgetTask) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onQuantityChange?: (taskId: string, quantity: number) => void;
 }) => {
   const {
     attributes,
@@ -89,7 +99,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
-           style={{ gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px" }}>
         
         {/* Drag handle */}
         <div 
@@ -150,11 +160,19 @@ const SortableTaskItem = ({
           </div>
         </div>
         
-        {/* Quantity column */}
+        {/* Quantity column - Editable input */}
         <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm">
-            {task.quantity?.toFixed(2) || '0.00'}
-          </div>
+          <Input
+            type="number"
+            value={task.quantity?.toFixed(2) || '0.00'}
+            onChange={(e) => {
+              const newQuantity = parseFloat(e.target.value) || 0;
+              onQuantityChange?.(task.id, newQuantity);
+            }}
+            className="h-8 w-20 text-xs text-right"
+            step="0.01"
+            min="0"
+          />
         </div>
         
         {/* Unit cost column */}
@@ -183,6 +201,30 @@ const SortableTaskItem = ({
               return '–';
             })()}
           </div>
+        </div>
+        
+        {/* Actions column */}
+        <div className="flex items-center justify-center gap-2">
+          {onEditTask && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEditTask(task)}
+              className="h-8 w-8 p-0"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          {onDeleteTask && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDeleteTask(task.id)}
+              className="h-8 w-8 p-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -220,7 +262,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-2 text-base font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px",
+        gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -244,6 +286,8 @@ const GroupHeader = ({
       <div className="text-right">
         <span className="font-medium">{groupPercentage}%</span>
       </div>
+      {/* Empty space for actions column */}
+      <div></div>
     </div>
   );
 };
@@ -251,7 +295,9 @@ const GroupHeader = ({
 export function BudgetTree({ 
   tasks, 
   onReorder, 
-  onEditTask 
+  onEditTask,
+  onDeleteTask,
+  onQuantityChange 
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
@@ -365,7 +411,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px",
+            gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -380,6 +426,7 @@ export function BudgetTree({
           <div className="text-right">Costo Unit.</div>
           <div className="text-right">Subtotal</div>
           <div className="text-right">% de Incidencia</div>
+          <div className="text-center">Acciones</div>
         </div>
 
         {/* Groups */}
@@ -407,6 +454,9 @@ export function BudgetTree({
                     totalSubtotal={totalSubtotal}
                     taskSubtotals={taskSubtotals}
                     itemNumber={`${groupIndex + 1}.${taskIndex + 1}`}
+                    onEditTask={onEditTask}
+                    onDeleteTask={onDeleteTask}
+                    onQuantityChange={onQuantityChange}
                   />
                 ))}
               </div>
