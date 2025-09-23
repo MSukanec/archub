@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useUpdateConstructionTask, useInitializeCostScope } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
@@ -183,7 +183,13 @@ const SortableTaskItem = ({
 
   // Helper function to get cost scope value for the Select component
   const getCostScopeValue = (costScope: string | undefined) => {
-    console.log('Task cost_scope value:', costScope, 'for task:', task.id);
+    console.log('Task full data:', {
+      id: task.id,
+      cost_scope: task.cost_scope,
+      cost_scope_label: task.cost_scope_label,
+      custom_name: task.custom_name,
+      quantity: task.quantity
+    });
     return costScope || 'materials_and_labor'; // default value
   };
 
@@ -387,6 +393,22 @@ const GroupHeader = ({
   );
 };
 
+// Component to initialize cost_scope for existing records
+const CostScopeInitializer = ({ projectId, organizationId }: { projectId: string, organizationId: string }) => {
+  const initializeCostScope = useInitializeCostScope();
+  
+  React.useEffect(() => {
+    console.log('CostScopeInitializer: Initializing cost_scope for project:', projectId, 'organization:', organizationId);
+    // Auto-initialize cost_scope for records that don't have it
+    initializeCostScope.mutate({
+      project_id: projectId,
+      organization_id: organizationId
+    });
+  }, [projectId, organizationId]);
+
+  return null;
+};
+
 export function BudgetTree({ 
   tasks, 
   onReorder, 
@@ -399,6 +421,10 @@ export function BudgetTree({
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
   const { data: userData } = useCurrentUser();
   const updateTaskMutation = useUpdateConstructionTask();
+
+  // Initialize cost_scope for existing records
+  const projectId = userData?.preferences?.last_project_id;
+  const organizationId = userData?.preferences?.last_organization_id;
   
   // Initialize local quantities from tasks
   useEffect(() => {
@@ -563,6 +589,10 @@ export function BudgetTree({
       onDragEnd={handleDragEnd}
     >
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
+        {/* Initialize cost_scope for existing records */}
+        {projectId && organizationId && (
+          <CostScopeInitializer projectId={projectId} organizationId={organizationId} />
+        )}
         <div className="space-y-0">
           {/* Main Header - Column titles */}
         <div 

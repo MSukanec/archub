@@ -373,6 +373,42 @@ export function useCreateConstructionTask() {
   });
 }
 
+// Función para inicializar cost_scope en registros existentes
+export function useInitializeCostScope() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      organization_id: string;
+      project_id: string;
+    }) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data: result, error } = await supabase
+        .from('construction_tasks')
+        .update({ cost_scope: 'materials_and_labor' })
+        .eq('organization_id', data.organization_id)
+        .eq('project_id', data.project_id)
+        .is('cost_scope', null)
+        .select();
+
+      if (error) {
+        console.error('Error initializing cost_scope:', error);
+        throw error;
+      }
+
+      return result;
+    },
+    onSuccess: (result, data) => {
+      console.log(`Initialized cost_scope for ${result.length} tasks`);
+      // Invalidar cache para refrescar los datos
+      queryClient.invalidateQueries({ 
+        queryKey: ['construction-tasks-view', data.project_id, data.organization_id]
+      });
+    },
+  });
+}
+
 export function useUpdateConstructionTask() {
   const queryClient = useQueryClient();
 
