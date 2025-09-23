@@ -870,8 +870,7 @@ const GroupHeader = ({
   groupTasks, 
   groupSubtotal, 
   totalSubtotal,
-  groupIndex,
-  phaseName 
+  groupIndex 
 }: { 
   groupName: string; 
   tasksCount: number; 
@@ -879,7 +878,6 @@ const GroupHeader = ({
   groupSubtotal: number;
   totalSubtotal: number;
   groupIndex: number;
-  phaseName?: string;
 }) => {
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -1059,59 +1057,40 @@ export function BudgetTree({
     })
   );
 
-  // Group tasks by phases (for now, all tasks go to "General" phase)
-  const groupedByPhases = useMemo(() => {
-    const phases: { [phaseName: string]: { [groupKey: string]: BudgetTask[] } } = {
-      'General': {}
-    };
+  // Group tasks by division_name
+  const groupedTasks = useMemo(() => {
+    const groups: { [key: string]: BudgetTask[] } = {};
     
     tasks.forEach(task => {
-      const phaseName = task.phase_name || 'General';
       const groupKey = task.division_name || 'Sin categoría';
-      
-      if (!phases[phaseName]) {
-        phases[phaseName] = {};
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
       }
-      if (!phases[phaseName][groupKey]) {
-        phases[phaseName][groupKey] = [];
-      }
-      phases[phaseName][groupKey].push(task);
+      groups[groupKey].push(task);
     });
     
-    return phases;
+    return groups;
   }, [tasks]);
-
-  // Calculate phase-specific subtotals and overall total
-  const { phaseSubtotals, groupSubtotals, totalSubtotal } = useMemo(() => {
-    const phaseSums: { [phaseName: string]: number } = {};
-    const groupSums: { [phaseGroupKey: string]: number } = {};
+  
+  // Calculate group subtotals and total
+  const { groupSubtotals, totalSubtotal } = useMemo(() => {
+    const groupSums: { [groupName: string]: number } = {};
     let total = 0;
     
-    Object.entries(groupedByPhases).forEach(([phaseName, phaseGroups]) => {
-      let phaseSum = 0;
-      
-      Object.entries(phaseGroups).forEach(([groupName, groupTasks]) => {
-        const groupSum = groupTasks.reduce((sum, task) => {
-          const taskSubtotal = taskSubtotals[task.id] || 0;
-          return sum + taskSubtotal;
-        }, 0);
-        
-        // Use phase-group key to avoid conflicts between phases
-        const phaseGroupKey = `${phaseName}::${groupName}`;
-        groupSums[phaseGroupKey] = groupSum;
-        phaseSum += groupSum;
-      });
-      
-      phaseSums[phaseName] = phaseSum;
-      total += phaseSum;
+    Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+      const groupSum = groupTasks.reduce((sum, task) => {
+        const taskSubtotal = taskSubtotals[task.id] || 0;
+        return sum + taskSubtotal;
+      }, 0);
+      groupSums[groupName] = groupSum;
+      total += groupSum;
     });
     
     return {
-      phaseSubtotals: phaseSums,
       groupSubtotals: groupSums,
       totalSubtotal: total
     };
-  }, [groupedByPhases, taskSubtotals]);
+  }, [groupedTasks, taskSubtotals]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -1129,13 +1108,8 @@ export function BudgetTree({
     
     if (!draggedTask || !targetTask) return;
     
-    // Only allow reordering within the same phase and group
-    const draggedPhase = draggedTask.phase_name || 'General';
-    const targetPhase = targetTask.phase_name || 'General';
-    const draggedGroup = draggedTask.division_name || 'Sin categoría';
-    const targetGroup = targetTask.division_name || 'Sin categoría';
-    
-    if (draggedPhase !== targetPhase || draggedGroup !== targetGroup) {
+    // Only allow reordering within the same group
+    if ((draggedTask.division_name || 'Sin categoría') !== (targetTask.division_name || 'Sin categoría')) {
       return;
     }
 
@@ -1178,98 +1152,64 @@ export function BudgetTree({
           <CostScopeInitializer projectId={projectId} organizationId={organizationId} />
         )}
         <div className="space-y-0">
-          {/* Two-row Header */}
-          <div className="sticky top-0" style={{ backgroundColor: "var(--background)", zIndex: 10 }}>
-            {/* Phase Header Row */}
-            <div 
-              className="grid gap-4 px-4 py-2 text-sm font-semibold text-foreground border-b border-[var(--border)]"
-              style={{ 
-                gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px"
-              }}
-            >
-              <div></div> {/* Empty space for drag handle column */}
-              <div className="flex items-center">
-                <span className="font-normal">Fase: </span>
-                <span className="font-bold text-base">{tasks.length === 0 ? 'General' : Object.keys(groupedByPhases).join(' • ')}</span>
-              </div>
-              <div></div> {/* Empty space for description column */}
-              <div></div> {/* Empty space for tipo column */}
-              <div></div> {/* Empty space for cantidad column */}
-              <div></div> {/* Empty space for costo unit column */}
-              <div></div> {/* Empty space for margen column */}
-              <div></div> {/* Empty space for subtotal column */}
-              <div></div> {/* Empty space for incidencia column */}
-              <div className="flex justify-end">
-                {onAddTask && (
-                  <Button onClick={onAddTask} variant="outline" size="sm" className="h-8">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Agregar Tarea
-                  </Button>
-                )}
-              </div>
-            </div>
-            
-            {/* Column Headers Row */}
-            <div 
-              className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 border-b border-[var(--border)]"
-              style={{ 
-                gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px"
-              }}
-            >
-              <div></div> {/* Empty space for drag handle column */}
-              <div>Ítem</div>
-              <div>Descripción</div>
-              <div>Tipo</div>
-              <div className="text-right">Cantidad</div>
-              <div className="text-right">Costo Unit.</div>
-              <div className="text-right">Margen</div>
-              <div className="text-right">Subtotal</div>
-              <div className="text-right">% de Incidencia</div>
-              <div className="text-center">Acciones</div>
-            </div>
-          </div>
+          {/* Main Header - Column titles */}
+        <div 
+          className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
+          style={{ 
+            gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px",
+            backgroundColor: "var(--background)",
+            borderBottom: "1px solid var(--border)",
+            zIndex: 10
+          }}
+        >
+          <div></div> {/* Empty space for drag handle column */}
+          <div>Ítem</div>
+          <div>Descripción</div>
+          <div>Tipo</div>
+          <div className="text-right">Cantidad</div>
+          <div className="text-right">Costo Unit.</div>
+          <div className="text-right">Margen</div>
+          <div className="text-right">Subtotal</div>
+          <div className="text-right">% de Incidencia</div>
+          <div className="text-center">Acciones</div>
+        </div>
 
-        {/* Phases and Groups */}
-        {Object.entries(groupedByPhases).map(([phaseName, phaseGroups]) => (
-          <div key={phaseName}>
-            {Object.entries(phaseGroups).map(([groupName, groupTasks], groupIndex) => (
-              <div key={`${phaseName}-${groupName}`}>
-                {/* Group Header */}
-                <GroupHeader 
-                  groupName={groupName} 
-                  tasksCount={groupTasks.length} 
-                  groupTasks={groupTasks}
-                  groupSubtotal={groupSubtotals[`${phaseName}::${groupName}`] || 0}
-                  totalSubtotal={totalSubtotal}
-                  groupIndex={groupIndex + 1}
-                  phaseName={phaseName}
-                />
-                
-                {/* Group Tasks */}
-                <SortableContext items={groupTasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-0">
-                    {groupTasks.map((task, taskIndex) => (
-                      <SortableTaskItem 
-                        key={task.id} 
-                        task={task} 
-                        onSubtotalChange={handleSubtotalChange}
-                        groupSubtotal={groupSubtotals[`${phaseName}::${groupName}`] || 0}
-                        totalSubtotal={totalSubtotal}
-                        taskSubtotals={taskSubtotals}
-                        itemNumber={`${groupIndex + 1}.${taskIndex + 1}`}
-                        onDuplicateTask={onDuplicateTask}
-                        onDeleteTask={onDeleteTask}
-                        handleLocalQuantityChange={handleLocalQuantityChange}
-                        localQuantities={localQuantities}
-                        isLastInGroup={taskIndex === groupTasks.length - 1}
-                        handleDescriptionChange={handleDescriptionChange}
-                        handleMarginChange={handleMarginChange}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
+        {/* Groups */}
+        {Object.entries(groupedTasks).map(([groupName, groupTasks], groupIndex) => (
+          <div key={groupName}>
+            {/* Group Header */}
+            <GroupHeader 
+              groupName={groupName} 
+              tasksCount={groupTasks.length} 
+              groupTasks={groupTasks}
+              groupSubtotal={groupSubtotals[groupName] || 0}
+              totalSubtotal={totalSubtotal}
+              groupIndex={groupIndex + 1}
+            />
+            
+            {/* Group Tasks */}
+            <SortableContext items={groupTasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-0">
+                {groupTasks.map((task, taskIndex) => (
+                  <SortableTaskItem 
+                    key={task.id} 
+                    task={task} 
+                    onSubtotalChange={handleSubtotalChange}
+                    groupSubtotal={groupSubtotals[groupName] || 0}
+                    totalSubtotal={totalSubtotal}
+                    taskSubtotals={taskSubtotals}
+                    itemNumber={`${groupIndex + 1}.${taskIndex + 1}`}
+                    onDuplicateTask={onDuplicateTask}
+                    onDeleteTask={onDeleteTask}
+                    handleLocalQuantityChange={handleLocalQuantityChange}
+                    localQuantities={localQuantities}
+                    isLastInGroup={taskIndex === groupTasks.length - 1}
+                    handleDescriptionChange={handleDescriptionChange}
+                    handleMarginChange={handleMarginChange}
+                  />
+                ))}
               </div>
-            ))}
+            </SortableContext>
           </div>
         ))}
         </div>
