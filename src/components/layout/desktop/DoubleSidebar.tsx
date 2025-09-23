@@ -564,6 +564,28 @@ export function MainSidebar() {
               )}
             </div>
           </div>
+          
+          {/* User Avatar - Bottom of left sidebar */}
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] p-2 flex-shrink-0">
+            <div className="flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                {userData?.user?.avatar_url ? (
+                  <img 
+                    src={userData.user.avatar_url} 
+                    alt={userData.user.email}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div 
+                    className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  >
+                    {userData?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </aside>
       </div>
 
