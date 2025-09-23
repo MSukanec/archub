@@ -12,6 +12,8 @@ export interface ConstructionTaskView {
   category_name: string;
   division_name: string; // Campo agregado desde la vista SQL
   unit: string; // Nueva columna agregada desde la vista
+  cost_scope: string; // Enum: materials_only | labor_only | materials_and_labor
+  cost_scope_label: string; // Label human-readable: MAT | M.O. | M.O. + MAT.
   quantity: number; // real en DB, number en TS
   start_date: string | null; // date en DB, string en TS
   end_date: string | null; // date en DB, string en TS
@@ -378,6 +380,7 @@ export function useUpdateConstructionTask() {
     mutationFn: async (data: {
       id: string;
       quantity?: number;
+      cost_scope?: string;
       project_id: string;
       organization_id: string;
       start_date?: string;
@@ -395,6 +398,7 @@ export function useUpdateConstructionTask() {
       };
 
       if (data.quantity !== undefined) updateData.quantity = data.quantity;
+      if (data.cost_scope !== undefined) updateData.cost_scope = data.cost_scope;
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;

@@ -181,6 +181,23 @@ const SortableTaskItem = ({
       : (task.task?.display_name || 'Sin nombre');
   };
 
+  // Helper function to get cost scope value for the Select component
+  const getCostScopeValue = (costScope: string | undefined) => {
+    return costScope || 'materials_and_labor'; // default value
+  };
+
+  // Cost scope change handler
+  const updateConstructionTask = useUpdateConstructionTask();
+  
+  const handleCostScopeChange = (taskId: string, newCostScope: string) => {
+    updateConstructionTask.mutate({
+      id: taskId,
+      cost_scope: newCostScope,
+      project_id: task.project_id,
+      organization_id: task.organization_id
+    });
+  };
+
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
@@ -226,14 +243,17 @@ const SortableTaskItem = ({
         
         {/* Tipo column */}
         <div className="flex items-center text-xs">
-          <Select defaultValue="mo-mat">
+          <Select 
+            value={getCostScopeValue(task.cost_scope)} 
+            onValueChange={(value) => handleCostScopeChange(task.id, value)}
+          >
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mo-mat">M.O. + MAT.</SelectItem>
-              <SelectItem value="mo">M.O.</SelectItem>
-              <SelectItem value="mat">MAT</SelectItem>
+              <SelectItem value="materials_and_labor">M.O. + MAT.</SelectItem>
+              <SelectItem value="labor_only">M.O.</SelectItem>
+              <SelectItem value="materials_only">MAT</SelectItem>
             </SelectContent>
           </Select>
         </div>

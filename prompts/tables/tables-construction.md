@@ -36,6 +36,14 @@ VISTA CONSTRUCTION_TASKS_VIEW:
     "data_type": "text"
   },
   {
+    "column_name": "cost_scope",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "cost_scope_label",
+    "data_type": "text"
+  },
+  {
     "column_name": "quantity",
     "data_type": "real"
   },
@@ -127,5 +135,9 @@ TABLA CONSTRUCTION_TASKS:
   {
     "column_name": "description",
     "data_type": "text"
+  },
+  {
+    "column_name": "cost_scope",
+    "data_type": "USER-DEFINED"
   }
 ]

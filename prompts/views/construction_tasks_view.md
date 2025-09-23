@@ -1,7 +1,7 @@
 -- 1) Por las dudas, borro la vista si existe
 drop view if exists public.construction_tasks_view;
 
--- 2) La vuelvo a crear incluyendo custom_name, unidad, división y description
+-- 2) La vuelvo a crear incluyendo custom_name, unidad, división, description y tipo (cost_scope)
 create view public.construction_tasks_view as
 select
   ct.id,                                   -- construction_tasks
@@ -12,6 +12,16 @@ select
   u.name as unit,                          -- units.name (via tasks.unit_id)
   tc.name as category_name,                -- task_categories.name (via tasks.category_id)
   td.name as division_name,                -- task_divisions.name (via tasks.task_division_id)
+
+  -- 🔹 Tipo de costeo (enum crudo + etiqueta para la UI)
+  ct.cost_scope,                           -- construction_tasks.cost_scope (enum)
+  case ct.cost_scope
+    when 'materials_and_labor' then 'M.O. + MAT.'
+    when 'labor_only'           then 'M.O.'
+    when 'materials_only'       then 'MAT'
+    else 'M.O. + MAT.'
+  end as cost_scope_label,
+
   ct.quantity,                             -- construction_tasks
   ct.start_date,                           -- construction_tasks
   ct.end_date,                             -- construction_tasks
@@ -20,6 +30,7 @@ select
   ct.description as description,           -- construction_tasks.description  ⬅️ NUEVO
   ct.created_at,                           -- construction_tasks
   ct.updated_at,                           -- construction_tasks
+
   ph.phase_name                            -- última fase asociada
 from public.construction_tasks ct
 left join public.tasks t
