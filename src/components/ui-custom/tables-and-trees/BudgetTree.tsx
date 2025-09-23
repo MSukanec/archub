@@ -58,10 +58,12 @@ interface BudgetTreeProps {
 const InlineQuantityEditor = ({ 
   taskId, 
   currentQuantity, 
+  unit,
   onQuantityChange 
 }: { 
   taskId: string;
   currentQuantity: number;
+  unit?: string;
   onQuantityChange: (taskId: string, quantity: number) => void;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -120,9 +122,12 @@ const InlineQuantityEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent/50 hover:text-blue-600 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-blue-400"
+      className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-accent"
     >
-      {formatDisplayValue(currentQuantity)}
+      <div className="flex items-center justify-end gap-1">
+        <span>{formatDisplayValue(currentQuantity)}</span>
+        {unit && <span className="text-muted-foreground">{unit}</span>}
+      </div>
     </button>
   );
 };
@@ -179,7 +184,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
-           style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px" }}>
         
         {/* Drag handle */}
         <div 
@@ -233,20 +238,14 @@ const SortableTaskItem = ({
           </Select>
         </div>
         
-        {/* Quantity column - Inline editable */}
+        {/* Quantity + Unit column - Inline editable */}
         <div className="text-right text-xs flex items-center justify-end">
           <InlineQuantityEditor
             taskId={task.id}
             currentQuantity={localQuantities[task.id] ?? task.quantity ?? 0}
+            unit={task.unit}
             onQuantityChange={handleLocalQuantityChange}
           />
-        </div>
-        
-        {/* Unit column */}
-        <div className="text-right text-xs flex items-center justify-end">
-          <div className="text-xs">
-            {task.unit || '-'}
-          </div>
         </div>
         
         {/* Unit cost column */}
@@ -336,7 +335,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-3 text-xs font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
+        gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -349,7 +348,7 @@ const GroupHeader = ({
       <div className="font-bold text-xs">
         {groupIndex}
       </div>
-      <div className="col-span-5">
+      <div className="col-span-4">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
       {/* Subtotal column */}
@@ -547,7 +546,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
+            gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -558,7 +557,6 @@ export function BudgetTree({
           <div>Descripción</div>
           <div>Tipo</div>
           <div className="text-right">Cantidad</div>
-          <div className="text-right">Unidad</div>
           <div className="text-right">Costo Unit.</div>
           <div className="text-right">Subtotal</div>
           <div className="text-right">% de Incidencia</div>
