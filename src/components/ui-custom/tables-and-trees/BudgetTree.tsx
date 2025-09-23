@@ -111,7 +111,6 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Unit column */}
         <div className="text-right">
-          <div className="text-sm text-muted-foreground mb-1">Unidad</div>
           <div className="text-sm">
             {task.unit || '-'}
           </div>
@@ -119,7 +118,6 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Quantity column */}
         <div className="text-right">
-          <div className="text-sm text-muted-foreground mb-1">Cantidad</div>
           <div className="text-sm">
             {task.quantity?.toFixed(2) || '0.00'}
           </div>
@@ -127,7 +125,6 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Unit cost column */}
         <div className="text-right">
-          <div className="text-sm text-muted-foreground mb-1">Costo Unit.</div>
           <div className="text-sm">
             <TaskMaterialsUnitCost task={task} />
           </div>
@@ -135,7 +132,6 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Subtotal column */}
         <div className="text-right">
-          <div className="text-sm text-muted-foreground mb-1">Subtotal</div>
           <div className="text-sm font-medium">
             <TaskTotalSubtotal task={task} />
           </div>
@@ -159,20 +155,37 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
 
   return (
     <div 
-      className="grid gap-4 px-4 py-3 text-sm font-medium"
       style={{ 
         backgroundColor: "var(--table-group-header-bg)",
-        color: "white",
-        gridTemplateColumns: "auto 1fr auto auto auto auto"
+        color: "white"
       }}
     >
-      <div></div> {/* Empty space for drag handle column */}
-      <div className="col-span-4">
-        {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+      {/* First row: Group name and total */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-sm font-medium"
+        style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div className="col-span-4">
+          {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+        </div>
+        <div className="text-right">
+          {/* Group total - placeholder for now */}
+          <span className="font-medium">Total: --</span>
+        </div>
       </div>
-      <div className="text-right">
-        {/* Group total - placeholder for now */}
-        <span className="font-medium">Total: --</span>
+      
+      {/* Second row: Column headers */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-xs font-medium opacity-90"
+        style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div>Descripción</div>
+        <div className="text-right">Unidad</div>
+        <div className="text-right">Cantidad</div>
+        <div className="text-right">Costo Unit.</div>
+        <div className="text-right">Subtotal</div>
       </div>
     </div>
   );
