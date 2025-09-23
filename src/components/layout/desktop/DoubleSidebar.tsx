@@ -107,161 +107,6 @@ interface SidebarSection {
 }
 
 type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | SidebarSection;
-// Componente selector de organizaciones para el header (con avatar)
-function OrganizationSelectorSidebarHeader({ isExpanded }: { isExpanded: boolean }) {
-  const { data: userData } = useCurrentUser();
-  const organizations = userData?.organizations || [];
-  const { setCurrentOrganization } = useProjectContext();
-  const { setSidebarLevel } = useNavigationStore();
-  const queryClient = useQueryClient();
-  
-  // Encontrar organización actual
-  const currentOrganization = userData?.organization;
-  const displayName = currentOrganization?.name || "Sin organización";
-  
-  // Mutación para cambiar organización
-  const updateOrganizationMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      if (!userData?.user?.id) {
-        throw new Error('Usuario no disponible');
-      }
-      const { error } = await supabase
-        .from('user_preferences')
-        .update({
-          last_organization_id: organizationId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userData.user.id);
-      if (error) throw error;
-      return organizationId;
-    },
-    onSuccess: (organizationId) => {
-      setCurrentOrganization(organizationId);
-      setSidebarLevel('organization'); // Ensure organization mode after switching
-      // Optimistic update: don't invalidate current-user to avoid 1000ms delay
-      // The context state is already updated, no need to refetch user data
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    }
-  });
-  
-  const handleOrganizationSelect = async (organizationId: string) => {
-    if (currentOrganization?.id === organizationId) return;
-    
-    // Prefetch critical data before switching organization to eliminate delays
-    try {
-      await Promise.all([
-        // Prefetch projects for the new organization
-        queryClient.prefetchQuery({
-          queryKey: ['projects-lite', organizationId],
-          queryFn: async () => {
-            const { data, error } = await supabase
-              .from('projects')
-              .select('id, name, color, status')
-              .eq('organization_id', organizationId)
-              .eq('is_active', true)
-              .order('name')
-            
-            if (error) throw error
-            return data || []
-          },
-          staleTime: 30 * 60 * 1000, // 30 minutes
-        }),
-        
-        // Prefetch movement concepts for the new organization
-        queryClient.prefetchQuery({
-          queryKey: ['movement-concepts-lite', organizationId],
-          queryFn: async () => {
-            const { data, error } = await supabase
-              .from('movement_concepts')
-              .select('id, name, view_mode, type')
-              .or(`and(is_system.eq.true,organization_id.is.null),organization_id.eq.${organizationId}`)
-              .order('name')
-
-            if (error) throw error
-            return data || []
-          },
-          staleTime: 30 * 60 * 1000, // 30 minutes
-        }),
-        
-        // Prefetch currencies (global data, but cache it anyway)
-        queryClient.prefetchQuery({
-          queryKey: ['currencies-lite'],
-          queryFn: async () => {
-            const { data, error } = await supabase
-              .from('currencies')
-              .select('id, name, symbol, code')
-              .order('name')
-            
-            if (error) throw error
-            return data || []
-          },
-          staleTime: 30 * 60 * 1000, // 30 minutes
-        }),
-        
-        // Prefetch wallets (global data, but cache it anyway)
-        queryClient.prefetchQuery({
-          queryKey: ['wallets-lite'],
-          queryFn: async () => {
-            const { data, error } = await supabase
-              .from('wallets')
-              .select('id, name, is_default')
-              .eq('is_active', true)
-              .order('name')
-            
-            if (error) throw error
-            return data || []
-          },
-          staleTime: 30 * 60 * 1000, // 30 minutes
-        })
-      ]);
-    } catch (error) {
-      console.warn('Prefetch failed, but proceeding with organization switch:', error);
-    }
-    
-    // Now switch organization with data already cached
-    updateOrganizationMutation.mutate(organizationId);
-  };
-  
-  // Preparar items para el selector
-  const selectorItems = organizations.map((organization: any) => ({
-    id: organization.id,
-    name: organization.name,
-    logo_url: organization.logo_url,
-    type: "Organización" as const
-  }));
-
-  // COMENTADO - SelectorPopover para organizaciones
-  /*
-  return (
-    <SelectorPopover
-      trigger={
-        <div>
-          <ButtonSidebar
-            icon={<Building2 className="w-[18px] h-[18px]" />}
-            label={isExpanded ? displayName : ""}
-            isActive={false}
-            isExpanded={isExpanded}
-            variant="main"
-            isHeaderButton={true}
-            avatarUrl={currentOrganization?.logo_url || undefined}
-            userFullName={currentOrganization ? getOrganizationInitials(currentOrganization.name) : undefined}
-            rightIcon={isExpanded ? <ChevronDown className="w-3 h-3" /> : undefined}
-          />
-        </div>
-      }
-      items={selectorItems}
-      selectedId={currentOrganization?.id}
-      onSelect={handleOrganizationSelect}
-      emptyMessage="No hay organizaciones disponibles"
-      getInitials={getOrganizationInitials}
-    />
-  );
-  */
-  
-  // Placeholder temporal mientras usamos la nueva funcionalidad del sidebar
-  return null;
-}
 
 export function MainSidebar() {
   const [location, navigate] = useLocation();
@@ -326,6 +171,7 @@ export function MainSidebar() {
     // Cerrar dropdown
     setIsDropdownOpen(false);
   };
+  
   const { isDocked, isHovered, setHovered, setDocked } = useSidebarStore();
   const { isDocked: isSecondaryDocked, isHovered: isSecondaryHovered, setDocked: setSecondarySidebarDocked } = useSecondarySidebarStore();
   
@@ -411,9 +257,6 @@ export function MainSidebar() {
     }
   }, [userData?.preferences?.sidebar_docked, setDocked]);
   
-  // Sidebar level is now managed entirely through Zustand stores
-  // No URL-based detection needed - components update stores directly
-  
   // Estado para acordeones - solo uno abierto a la vez
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(() => {
     const saved = localStorage.getItem('sidebar-accordion');
@@ -440,24 +283,7 @@ export function MainSidebar() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isDropdownOpen]);
-  // Función para navegación con transición hacia adelante
-  const navigateForward = (newContext: string, href: string) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setSidebarContext(newContext as any);
-      navigate(href);
-      setIsTransitioning(false);
-    }, 150);
-  };
-  // Función para navegación con transición hacia atrás
-  const navigateBackward = (newContext: string, href: string) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setSidebarContext(newContext as any);
-      navigate(href);
-      setIsTransitioning(false);
-    }, 150);
-  };
+
   // Guardar estado de acordeón en localStorage
   useEffect(() => {
     if (expandedAccordion) {
@@ -467,85 +293,8 @@ export function MainSidebar() {
     }
   }, [expandedAccordion]);
   
-  const prevContextRef = useRef(currentSidebarContext);
-  
-  // Handle fade animation when context changes
-  useEffect(() => {
-    prevContextRef.current = currentSidebarContext;
-  }, [currentSidebarContext]);
-  
-  
   const toggleAccordion = (key: string) => {
     setExpandedAccordion(prev => prev === key ? null : key);
-  };
-  // Context titles - removing all titles as requested
-  const sidebarContextTitles = {
-    organization: null,
-    organizations: null,
-    project: null,
-    design: null,
-    construction: null,
-    finances: null,
-    commercialization: null,
-    admin: null // Admin title removed as requested
-  };
-  // Función para detectar qué sección debería estar expandida basándose en la ubicación actual
-  
-  const getActiveSectionFromLocation = () => {
-    if (location.startsWith('/organization')) return 'organizacion';
-    if (location.startsWith('/design')) return 'diseno';
-    if (location.startsWith('/construction')) return 'construction';
-    if (location.startsWith('/finances')) return 'finanzas';
-    if (location.startsWith('/proveedor')) return 'proveedor';
-    if (location.startsWith('/admin')) return 'administracion';
-    if (location === '/organization/dashboard') return null; // Dashboard es independiente
-    return null;
-  };
-  // Función para manejar clicks en botones principales
-  const handleMainSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Dashboard no tiene submenu, navegar directamente
-    if (sectionId === 'dashboard') {
-      navigate(defaultRoute);
-      return;
-    }
-    
-    // Cambiar al nivel correspondiente del sidebar
-    switch (sectionId) {
-      case 'organizacion':
-        setSidebarLevel('organization');
-        break;
-      case 'proyecto':
-        setSidebarLevel('project');
-        break;
-      case 'proveedor':
-        setSidebarLevel('provider');
-        break;
-      case 'administracion':
-        setSidebarLevel('admin');
-        break;
-      default:
-        // Para otros casos, navegar directamente
-        navigate(defaultRoute);
-    }
-  };
-  // Función para manejar acordeón en subniveles
-  const handleSubSectionClick = (sectionId: string, defaultRoute: string) => {
-    // Si es una sección con submenu, toggle acordeón
-    if (['construction', 'finanzas', 'diseno', 'analysis'].includes(sectionId)) {
-      setExpandedAccordion(prev => prev === sectionId ? null : sectionId);
-    } else {
-      // Si no tiene submenu, navegar directamente
-      navigate(defaultRoute);
-    }
-  };
-  // Función para determinar qué sección está activa en el header
-  const getActiveHeaderSection = () => {
-    if (location.includes('/construction')) return 'construction';
-    if (location === '/' || location.includes('/organization') || location.includes('/finances') || location.includes('/design') || location.includes('/resources') || location.includes('/members')) return 'organizacion';
-    if (location.includes('/project')) return 'proyecto';
-    if (location.includes('/proveedor')) return 'proveedor';
-    if (location.includes('/admin')) return 'administracion';
-    return 'organizacion'; // Default to organization instead of inicio
   };
 
   // Definir contenido para cada nivel del sidebar
@@ -585,6 +334,7 @@ export function MainSidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
+
   // Función para obtener el contenido del sidebar basado en el sidebarLevel
   const getTertiarySidebarItems = () => {
     if (sidebarLevel === 'project') {
@@ -688,108 +438,60 @@ export function MainSidebar() {
     }
   };
 
-  // Función para determinar qué acordeón está activo basado en la URL
-  const getActiveAccordion = () => {
-    // No activar acordeón cuando estemos en la página de resumen
-    if (location === '/organization/dashboard') return null;
-    // Solo activar acordeón "Administración" para rutas específicas de organización (no dashboard)
-    if (location.startsWith('/organization/') && location !== '/organization/dashboard') return 'organization';
-    if (location.startsWith('/general')) return 'general';  
-    if (location.startsWith('/construction')) return 'construction';
-    if (location.startsWith('/finances')) return 'finances';
-    if (location.startsWith('/admin')) return 'admin';
-    // Agregar más rutas según sea necesario
-    return null;
-  };
-
-  const activeAccordion = getActiveAccordion();
-
-  // Sincronizar el estado del acordeón con la URL actual
-  useEffect(() => {
-    const currentActiveAccordion = getActiveAccordion();
-    if (currentActiveAccordion !== expandedAccordion) {
-      setExpandedAccordion(currentActiveAccordion);
-    }
-  }, [location]);
-
   return (
     <>
-    <div 
-      className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
-      style={{
-        height: 'calc(100vh - 3rem)', // 3rem = 48px del header h-12
-        width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
-      }}
-      onMouseEnter={() => {
-        setHovered(true);
-        // En el nivel proyecto, expandir automáticamente la sección basada en la ubicación
-        if (sidebarLevel === 'project') {
-          if (location.startsWith('/general')) {
-            setExpandedAccordion('general');
-          } else if (location.startsWith('/construction')) {
-            setExpandedAccordion('construction');
-          } else if (location.startsWith('/finances')) {
-            setExpandedAccordion('finanzas');
-          } else if (location.startsWith('/design')) {
-            setExpandedAccordion('diseno');
-          } else if (location.startsWith('/project/')) {
-            setExpandedAccordion('recursos');
-          }
-        }
-      }}
-      onMouseLeave={() => {
-        setHovered(false);
-      }}
-    >
+    {/* Container principal para AMBOS sidebars */}
+    <div className="flex flex-row">
       
-      {/* Columna derecha - Sidebar actual */}
-      <aside 
-        className={cn(
-          "flex flex-col overflow-visible flex-1",
-          isExpanded ? "w-64" : "w-12"
-        )}
+      {/* SIDEBAR IZQUIERDO - Idéntico al derecho */}
+      <div 
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
+        style={{
+          height: 'calc(100vh - 3rem)',
+          width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-      {/* Encabezado del contexto activo */}
-      <div className={cn(
-        "border-b border-[var(--main-sidebar-border)] flex items-center",
-        isExpanded ? "min-h-[52px]" : "h-[52px]"
-      )}>
-        {isExpanded ? (
-          // Expandido: mostrar dropdown selector
-          <div className="w-full relative" ref={dropdownRef}>
-            {/* Botón selector - muestra solo el elemento seleccionado */}
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center px-3 py-2 text-left w-full transition-all duration-200 hover:bg-[var(--main-sidebar-button-hover-bg)] min-h-[48px]"
-            >
-              <div className="flex items-center flex-1 min-w-0">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
-                  {sidebarLevel === 'organization' ? (
-                    // Avatar organización
-                    userData?.organization?.logo_url ? (
-                      <img 
-                        src={userData.organization.logo_url} 
-                        alt="Organización"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div 
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: 'var(--accent)' }}
-                      >
-                        {getOrganizationInitials(userData?.organization?.name || 'O')}
-                      </div>
-                    )
-                  ) : (
-                    // Avatar proyecto seleccionado
-                    selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
-                      false ? (
+        <aside 
+          className={cn(
+            "flex flex-col overflow-visible flex-1",
+            isExpanded ? "w-64" : "w-12"
+          )}
+        >
+          {/* Header - SIDEBAR IZQUIERDO */}
+          <div className={cn(
+            "flex items-center border-b border-[var(--main-sidebar-border)] flex-shrink-0 px-0 py-0",
+            isExpanded ? "min-h-[52px]" : "h-[52px]"
+          )}>
+            {isExpanded ? (
+              <div className="w-full relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200",
+                    "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                    isDropdownOpen && "bg-[var(--main-sidebar-button-hover-bg)]"
+                  )}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {sidebarLevel === 'organization' ? (
+                      userData?.organization?.logo_url ? (
                         <img 
-                          src="" 
-                          alt={projects.find(p => p.id === selectedProjectId)?.name}
+                          src={userData.organization.logo_url} 
+                          alt={userData.organization.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
+                        <div 
+                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                          style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                        >
+                          {getOrganizationInitials(userData?.organization?.name || 'O')}
+                        </div>
+                      )
+                    ) : (
+                      selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                         <div 
                           className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
                           style={{ 
@@ -798,394 +500,604 @@ export function MainSidebar() {
                         >
                           {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
                         </div>
-                      )
-                    ) : (
-                      <div 
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
-                      >
-                        P
-                      </div>
-                    )
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div 
-                    className="text-xs font-medium truncate"
-                    style={{ color: 'var(--text-important)' }}
-                  >
-                    {sidebarLevel === 'organization' 
-                      ? userData?.organization?.name || 'Organización'
-                      : sidebarLevel === 'project' && selectedProjectId
-                        ? projects.find(p => p.id === selectedProjectId)?.name || 'Proyecto'
-                        : 'Proyecto'
-                    }
-                  </div>
-                </div>
-                {sidebarLevel === 'organization' && userData?.plan?.name && (
-                  <Badge 
-                    variant="secondary" 
-                    className="h-4 px-1.5 text-xs font-medium text-white opacity-75 ml-2"
-                    style={{
-                      backgroundColor: userData.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
-                                      userData.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
-                                      userData.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
-                    }}
-                  >
-                    {userData.plan.name}
-                  </Badge>
-                )}
-                {/* Chevron */}
-                <ChevronDown 
-                  className={cn(
-                    "w-3 h-3 ml-2 transition-transform duration-200",
-                    isDropdownOpen ? "rotate-180" : ""
-                  )} 
-                />
-              </div>
-            </button>
-
-            {/* Dropdown - aparece solo cuando isDropdownOpen es true */}
-            {isDropdownOpen && (
-              <div 
-                className="absolute top-full left-0 right-0 z-50 border border-[var(--main-sidebar-border)] rounded-md shadow-lg"
-                style={{ backgroundColor: 'var(--main-sidebar-bg)' }}
-              >
-                {/* Organización */}
-                <button
-                  onClick={handleOrganizationSelect}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-left w-full transition-all duration-200 first:rounded-t-md",
-                    sidebarLevel === 'organization' 
-                      ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
-                      : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
-                  )}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
-                      {userData?.organization?.logo_url ? (
-                        <img 
-                          src={userData.organization.logo_url} 
-                          alt="Organización"
-                          className="w-full h-full object-cover"
-                        />
                       ) : (
-                        <div 
-                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                          style={{ backgroundColor: 'var(--accent)' }}
-                        >
-                          {getOrganizationInitials(userData?.organization?.name || 'O')}
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                          <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                            P
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <div 
-                      className="text-xs font-medium truncate"
-                      style={{ 
-                        color: sidebarLevel === 'organization' 
-                          ? 'var(--main-sidebar-button-active-fg)' 
-                          : 'var(--text-important)' 
-                      }}
-                    >
-                      {userData?.organization?.name || 'Organización'}
-                    </div>
-                    {sidebarLevel === 'organization' && userData?.plan?.name && (
-                      <Badge 
-                        variant="secondary" 
-                        className="h-4 px-1.5 text-xs font-medium text-white opacity-75 ml-auto"
-                        style={{
-                          backgroundColor: userData.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
-                                          userData.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
-                                          userData.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
-                        }}
-                      >
-                        {userData.plan.name}
-                      </Badge>
+                      )
                     )}
                   </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div 
+                      className="text-sm font-medium truncate"
+                      style={{ color: 'var(--text-important)' }}
+                    >
+                      {sidebarLevel === 'organization' 
+                        ? userData?.organization?.name || "Sin organización"
+                        : (selectedProjectId && projects.find(p => p.id === selectedProjectId))
+                          ? projects.find(p => p.id === selectedProjectId)?.name || "Sin proyecto"
+                          : "Seleccionar proyecto"
+                      }
+                    </div>
+                  </div>
+                  
+                  <ChevronDown className={cn(
+                    "w-4 h-4 transition-transform duration-200 flex-shrink-0",
+                    isDropdownOpen && "rotate-180"
+                  )} />
                 </button>
 
-                {/* Divisor */}
-                <div className="h-px bg-[var(--main-sidebar-border)] mx-2"></div>
-
-                {/* Proyectos */}
-                <div className="max-h-40 overflow-y-auto">
-                  {projects.map((project: any) => (
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--main-sidebar-bg)] border border-[var(--main-sidebar-border)] rounded-md shadow-lg z-50 max-h-72 overflow-y-auto">
                     <button
-                      key={project.id}
-                      onClick={() => handleProjectSelect(project.id)}
+                      onClick={handleOrganizationSelect}
                       className={cn(
-                        "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md",
-                        sidebarLevel === 'project' && selectedProjectId === project.id
+                        "flex items-center px-3 py-3 text-left w-full transition-all duration-200 border-b border-[var(--main-sidebar-border)]",
+                        sidebarLevel === 'organization' 
                           ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
                           : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
                       )}
                     >
                       <div className="flex items-center flex-1 min-w-0">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
-                          {project.project_image_url ? (
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
+                          {userData?.organization?.logo_url ? (
                             <img 
-                              src={project.project_image_url} 
-                              alt={project.name}
+                              src={userData.organization.logo_url} 
+                              alt={userData.organization.name}
                               className="w-full h-full object-cover"
                             />
                           ) : (
                             <div 
                               className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                              style={{ 
-                                backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
-                              }}
+                              style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
                             >
-                              {getProjectInitials(project.name || 'P')}
+                              {getOrganizationInitials(userData?.organization?.name || 'O')}
                             </div>
                           )}
                         </div>
-                        <div 
-                          className="text-xs font-medium truncate"
-                          style={{ 
-                            color: sidebarLevel === 'project' && selectedProjectId === project.id
-                              ? 'var(--main-sidebar-button-active-fg)' 
-                              : 'var(--text-important)' 
-                          }}
-                        >
-                          {project.name}
+                        <div>
+                          <div 
+                            className="text-xs font-medium"
+                            style={{ 
+                              color: sidebarLevel === 'organization' 
+                                ? 'var(--main-sidebar-button-active-fg)' 
+                                : 'var(--text-important)' 
+                            }}
+                          >
+                            {userData?.organization?.name || "Sin organización"}
+                          </div>
+                          <div className="text-[10px] opacity-60">Organización</div>
                         </div>
                       </div>
+                      
+                      {sidebarLevel === 'organization' && userData?.plan && (
+                        <Badge 
+                          variant="secondary" 
+                          className="ml-2 text-[9px] px-1.5 py-0.5 h-auto"
+                          style={{
+                            backgroundColor: 'var(--main-sidebar-button-active-fg)',
+                            color: 'var(--main-sidebar-button-active-bg)'
+                          }}
+                        >
+                          {userData.plan.name}
+                        </Badge>
+                      )}
                     </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Colapsado: mostrar avatar
-          <div className="flex justify-center w-full">
-            {sidebarLevel === 'organization' ? (
-              // Avatar de la organización
-              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                {userData?.organization?.logo_url ? (
-                  <img 
-                    src={userData.organization.logo_url} 
-                    alt="Organización"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div 
-                    className="w-full h-full flex items-center justify-center text-white font-semibold text-sm"
-                    style={{ backgroundColor: 'var(--accent)' }}
-                  >
-                    {getOrganizationInitials(userData?.organization?.name || 'O')}
+
+                    <div className="h-px bg-[var(--main-sidebar-border)] mx-2"></div>
+
+                    <div className="max-h-40 overflow-y-auto">
+                      {projects.map((project: any) => (
+                        <button
+                          key={project.id}
+                          onClick={() => handleProjectSelect(project.id)}
+                          className={cn(
+                            "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md",
+                            sidebarLevel === 'project' && selectedProjectId === project.id
+                              ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
+                              : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                          )}
+                        >
+                          <div className="flex items-center flex-1 min-w-0">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
+                              <div 
+                                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                style={{ 
+                                  backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
+                                }}
+                              >
+                                {getProjectInitials(project.name || 'P')}
+                              </div>
+                            </div>
+                            <div 
+                              className="text-xs font-medium truncate"
+                              style={{ 
+                                color: sidebarLevel === 'project' && selectedProjectId === project.id
+                                  ? 'var(--main-sidebar-button-active-fg)' 
+                                  : 'var(--text-important)' 
+                              }}
+                            >
+                              {project.name}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
-              // Avatar del proyecto seleccionado
-              selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                  {false ? (
-                    <img 
-                      src="" 
-                      alt={projects.find(p => p.id === selectedProjectId)?.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div 
-                      className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                      style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
-                    >
-                      {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Fallback si no hay proyecto seleccionado
-                <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
-                  <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
-                    P
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        )}
-      </div>
-      
-      {/* Navigation Items - Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
-        <div className="flex flex-col gap-[2px] h-full">
-          {(() => {
-            const items = getTertiarySidebarItems();
-            let currentSection: string | null = null;
-            const elementsToRender: React.ReactNode[] = [];
-            
-            items.forEach((item: any, index: number) => {
-              // Type guard to ensure we're working with a proper item
-              if (!item || typeof item !== 'object') {
-                return;
-              }
-
-              // Si es un divisor, renderizar línea divisoria
-              if ('type' in item && item.type === 'divider') {
-                elementsToRender.push(
-                  <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
-                );
-                return;
-              }
-              
-              // Si es una sección, renderizar como botón acordeón colapsable y actualizar currentSection
-              if ('type' in item && item.type === 'section') {
-                currentSection = item.label;
-                const isAccordionExpanded = expandedAccordion === item.label;
-                
-                elementsToRender.push(
-                  <ButtonSidebar
-                    key={`section-${index}`}
-                    icon={<Folder className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={false}
-                    isExpanded={isExpanded}
-                    onClick={() => toggleAccordion(item.label)}
-                    variant="secondary"
-                    rightIcon={isExpanded ? (
-                      <div className="transition-transform duration-200">
-                        {isAccordionExpanded ? 
-                          <ChevronUp className="w-3 h-3" /> : 
-                          <ChevronDown className="w-3 h-3" />
-                        }
-                      </div>
-                    ) : undefined}
-                  />
-                );
-                return;
-              }
-
-              // Si es un botón simple, renderizar solo si su sección está expandida (o si no hay sección activa)
-              if ('type' in item && item.type === 'button') {
-                // Si no hay currentSection o si la currentSection está expandida, mostrar el botón
-                if (!currentSection || expandedAccordion === currentSection) {
-                  elementsToRender.push(
-                    <ButtonSidebar
-                      key={`button-${item.id}`}
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={location === item.href}
-                      isExpanded={isExpanded}
-                      onClick={() => navigate(item.href)}
-                      variant="secondary"
-                    />
-                  );
-                }
-                return;
-              }
-
-              // Si es un acordeón, renderizar acordeón con elementos expandibles
-              if ('type' in item && item.type === 'accordion') {
-                const accordionItem = item as any;
-                const isAccordionExpanded = expandedAccordion === accordionItem.id;
-                
-                return (
-                  <div key={`accordion-${accordionItem.id}`}>
-                    {/* Botón del acordeón */}
-                    <ButtonSidebar
-                      icon={<accordionItem.icon className="w-[18px] h-[18px]" />}
-                      label={accordionItem.label}
-                      isActive={accordionItem.id === activeAccordion}
-                      isExpanded={isExpanded}
-                      onClick={() => toggleAccordion(accordionItem.id)}
-                      variant="secondary"
-                      disableHover={true}
-                      rightIcon={isExpanded ? (
-                        <div className="transition-transform duration-200">
-                          {isAccordionExpanded ? 
-                            <ChevronUp className="w-3 h-3" /> : 
-                            <ChevronDown className="w-3 h-3" />
-                          }
-                        </div>
-                      ) : undefined}
-                    />
-                    
-                    {/* Elementos del acordeón expandidos - solo si el sidebar está expandido Y el acordeón está expandido */}
-                    {isExpanded && isAccordionExpanded && (
-                      <div className="relative">
-                        {/* Línea vertical que conecta los elementos hijos */}
-                        <div 
-                          className={cn(
-                            "absolute top-1 bottom-1 w-[1px]",
-                            isExpanded ? "left-[16px]" : "left-1/2 -translate-x-1/2"
-                          )}
-                          style={{
-                            backgroundColor: 'var(--main-sidebar-button-fg)',
-                            opacity: 0.3,
-                            zIndex: 1
-                          }}
-                        />
-                        
-                        <div className="ml-[32px]">
-                          {(accordionItem.items || []).map((subItem: any, subIndex: number) => {
-                            const isSubItemActive = Boolean(subItem.href && location === subItem.href);
-                            return (
-                              <ButtonSidebar
-                                key={`${accordionItem.id}-${subIndex}`}
-                                icon={<subItem.icon className="w-[16px] h-[16px]" />}
-                                label={subItem.label}
-                                isActive={isSubItemActive}
-                                isExpanded={isExpanded}
-                                onClick={() => {
-                                  if (subItem.href) {
-                                    navigate(subItem.href);
-                                  }
-                                }}
-                                href={subItem.href}
-                                variant="secondary"
-                              />
-                            );
-                          })}
-                        </div>
+              <div className="flex justify-center w-full">
+                {sidebarLevel === 'organization' ? (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                    {userData?.organization?.logo_url ? (
+                      <img 
+                        src={userData.organization.logo_url} 
+                        alt={userData.organization.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                      >
+                        {getOrganizationInitials(userData?.organization?.name || 'O')}
                       </div>
                     )}
                   </div>
-                );
-              }
+                ) : (
+                  selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
+                      >
+                        {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                      <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                        P
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Navigation Items - SIDEBAR IZQUIERDO */}
+          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
+            <div className="flex flex-col gap-[2px] h-full">
+              {(() => {
+                const items = getTertiarySidebarItems();
+                let currentSection: string | null = null;
+                const elementsToRender: React.ReactNode[] = [];
+                
+                items.forEach((item: any, index: number) => {
+                  if (!item || typeof item !== 'object') {
+                    return;
+                  }
 
-              // For basic sidebar items (our current structure)
-              const sidebarItem = item as SidebarItem;
-              
-              // Verificar que tengamos icon y label antes de renderizar
-              if (!sidebarItem.icon || !sidebarItem.label) {
-                return;
-              }
-              
-              const itemKey = sidebarItem.label || `item-${index}`;
-              const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
-              const buttonElement = (
-                <ButtonSidebar
-                  icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
-                  label={sidebarItem.label}
-                  isActive={isActive}
-                  isExpanded={isExpanded}
-                  onClick={() => {
-                    if (sidebarItem.href) {
-                      navigate(sidebarItem.href);
+                  if ('type' in item && item.type === 'divider') {
+                    elementsToRender.push(
+                      <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                    );
+                    return;
+                  }
+                  
+                  if ('type' in item && item.type === 'section') {
+                    currentSection = item.label;
+                    const isAccordionExpanded = expandedAccordion === item.label;
+                    
+                    elementsToRender.push(
+                      <ButtonSidebar
+                        key={`section-${index}`}
+                        icon={<Folder className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={false}
+                        isExpanded={isExpanded}
+                        onClick={() => toggleAccordion(item.label)}
+                        variant="secondary"
+                        rightIcon={isExpanded ? (
+                          <div className="transition-transform duration-200">
+                            {isAccordionExpanded ? 
+                              <ChevronUp className="w-3 h-3" /> : 
+                              <ChevronDown className="w-3 h-3" />
+                            }
+                          </div>
+                        ) : undefined}
+                      />
+                    );
+                    return;
+                  }
+
+                  if ('type' in item && item.type === 'button') {
+                    if (!currentSection || expandedAccordion === currentSection) {
+                      elementsToRender.push(
+                        <ButtonSidebar
+                          key={`button-${item.id}`}
+                          icon={<item.icon className="w-[18px] h-[18px]" />}
+                          label={item.label}
+                          isActive={location === item.href}
+                          isExpanded={isExpanded}
+                          onClick={() => navigate(item.href)}
+                          variant="secondary"
+                        />
+                      );
                     }
-                  }}
-                  href={sidebarItem.href}
-                  variant="secondary"
-                />
-              );
-              
-              elementsToRender.push(
-                <div key={`${itemKey}-${index}`}>
-                  {buttonElement}
-                </div>
-              );
-            });
-            
-            return elementsToRender;
-          })()}
-        </div>
+                    return;
+                  }
+
+                  const sidebarItem = item as SidebarItem;
+                  
+                  if (!sidebarItem.icon || !sidebarItem.label) {
+                    return;
+                  }
+                  
+                  const itemKey = sidebarItem.label || `item-${index}`;
+                  const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
+                  const buttonElement = (
+                    <ButtonSidebar
+                      icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
+                      label={sidebarItem.label}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                      onClick={() => {
+                        if (sidebarItem.href) {
+                          navigate(sidebarItem.href);
+                        }
+                      }}
+                      href={sidebarItem.href}
+                      variant="secondary"
+                    />
+                  );
+                  
+                  elementsToRender.push(
+                    <div key={`${itemKey}-${index}`}>
+                      {buttonElement}
+                    </div>
+                  );
+                });
+                
+                return elementsToRender;
+              })()}
+            </div>
+          </div>
+        </aside>
       </div>
-      
-      
-      </aside>
+
+      {/* SIDEBAR DERECHO - Idéntico al izquierdo */}
+      <div 
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
+        style={{
+          height: 'calc(100vh - 3rem)',
+          width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <aside 
+          className={cn(
+            "flex flex-col overflow-visible flex-1",
+            isExpanded ? "w-64" : "w-12"
+          )}
+        >
+          {/* Header - SIDEBAR DERECHO */}
+          <div className={cn(
+            "flex items-center border-b border-[var(--main-sidebar-border)] flex-shrink-0 px-0 py-0",
+            isExpanded ? "min-h-[52px]" : "h-[52px]"
+          )}>
+            {isExpanded ? (
+              <div className="w-full relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200",
+                    "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                    isDropdownOpen && "bg-[var(--main-sidebar-button-hover-bg)]"
+                  )}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {sidebarLevel === 'organization' ? (
+                      userData?.organization?.logo_url ? (
+                        <img 
+                          src={userData.organization.logo_url} 
+                          alt={userData.organization.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div 
+                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                          style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                        >
+                          {getOrganizationInitials(userData?.organization?.name || 'O')}
+                        </div>
+                      )
+                    ) : (
+                      selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
+                        <div 
+                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                          style={{ 
+                            backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)'
+                          }}
+                        >
+                          {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                          <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                            P
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div 
+                      className="text-sm font-medium truncate"
+                      style={{ color: 'var(--text-important)' }}
+                    >
+                      {sidebarLevel === 'organization' 
+                        ? userData?.organization?.name || "Sin organización"
+                        : (selectedProjectId && projects.find(p => p.id === selectedProjectId))
+                          ? projects.find(p => p.id === selectedProjectId)?.name || "Sin proyecto"
+                          : "Seleccionar proyecto"
+                      }
+                    </div>
+                  </div>
+                  
+                  <ChevronDown className={cn(
+                    "w-4 h-4 transition-transform duration-200 flex-shrink-0",
+                    isDropdownOpen && "rotate-180"
+                  )} />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--main-sidebar-bg)] border border-[var(--main-sidebar-border)] rounded-md shadow-lg z-50 max-h-72 overflow-y-auto">
+                    <button
+                      onClick={handleOrganizationSelect}
+                      className={cn(
+                        "flex items-center px-3 py-3 text-left w-full transition-all duration-200 border-b border-[var(--main-sidebar-border)]",
+                        sidebarLevel === 'organization' 
+                          ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
+                          : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                      )}
+                    >
+                      <div className="flex items-center flex-1 min-w-0">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
+                          {userData?.organization?.logo_url ? (
+                            <img 
+                              src={userData.organization.logo_url} 
+                              alt={userData.organization.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div 
+                              className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                              style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                            >
+                              {getOrganizationInitials(userData?.organization?.name || 'O')}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div 
+                            className="text-xs font-medium"
+                            style={{ 
+                              color: sidebarLevel === 'organization' 
+                                ? 'var(--main-sidebar-button-active-fg)' 
+                                : 'var(--text-important)' 
+                            }}
+                          >
+                            {userData?.organization?.name || "Sin organización"}
+                          </div>
+                          <div className="text-[10px] opacity-60">Organización</div>
+                        </div>
+                      </div>
+                      
+                      {sidebarLevel === 'organization' && userData?.plan && (
+                        <Badge 
+                          variant="secondary" 
+                          className="ml-2 text-[9px] px-1.5 py-0.5 h-auto"
+                          style={{
+                            backgroundColor: 'var(--main-sidebar-button-active-fg)',
+                            color: 'var(--main-sidebar-button-active-bg)'
+                          }}
+                        >
+                          {userData.plan.name}
+                        </Badge>
+                      )}
+                    </button>
+
+                    <div className="h-px bg-[var(--main-sidebar-border)] mx-2"></div>
+
+                    <div className="max-h-40 overflow-y-auto">
+                      {projects.map((project: any) => (
+                        <button
+                          key={project.id}
+                          onClick={() => handleProjectSelect(project.id)}
+                          className={cn(
+                            "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md",
+                            sidebarLevel === 'project' && selectedProjectId === project.id
+                              ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
+                              : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                          )}
+                        >
+                          <div className="flex items-center flex-1 min-w-0">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
+                              <div 
+                                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                style={{ 
+                                  backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
+                                }}
+                              >
+                                {getProjectInitials(project.name || 'P')}
+                              </div>
+                            </div>
+                            <div 
+                              className="text-xs font-medium truncate"
+                              style={{ 
+                                color: sidebarLevel === 'project' && selectedProjectId === project.id
+                                  ? 'var(--main-sidebar-button-active-fg)' 
+                                  : 'var(--text-important)' 
+                              }}
+                            >
+                              {project.name}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-center w-full">
+                {sidebarLevel === 'organization' ? (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                    {userData?.organization?.logo_url ? (
+                      <img 
+                        src={userData.organization.logo_url} 
+                        alt={userData.organization.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                      >
+                        {getOrganizationInitials(userData?.organization?.name || 'O')}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
+                      >
+                        {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                      <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                        P
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Navigation Items - SIDEBAR DERECHO */}
+          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
+            <div className="flex flex-col gap-[2px] h-full">
+              {(() => {
+                const items = getTertiarySidebarItems();
+                let currentSection: string | null = null;
+                const elementsToRender: React.ReactNode[] = [];
+                
+                items.forEach((item: any, index: number) => {
+                  if (!item || typeof item !== 'object') {
+                    return;
+                  }
+
+                  if ('type' in item && item.type === 'divider') {
+                    elementsToRender.push(
+                      <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                    );
+                    return;
+                  }
+                  
+                  if ('type' in item && item.type === 'section') {
+                    currentSection = item.label;
+                    const isAccordionExpanded = expandedAccordion === item.label;
+                    
+                    elementsToRender.push(
+                      <ButtonSidebar
+                        key={`section-${index}`}
+                        icon={<Folder className="w-[18px] h-[18px]" />}
+                        label={item.label}
+                        isActive={false}
+                        isExpanded={isExpanded}
+                        onClick={() => toggleAccordion(item.label)}
+                        variant="secondary"
+                        rightIcon={isExpanded ? (
+                          <div className="transition-transform duration-200">
+                            {isAccordionExpanded ? 
+                              <ChevronUp className="w-3 h-3" /> : 
+                              <ChevronDown className="w-3 h-3" />
+                            }
+                          </div>
+                        ) : undefined}
+                      />
+                    );
+                    return;
+                  }
+
+                  if ('type' in item && item.type === 'button') {
+                    if (!currentSection || expandedAccordion === currentSection) {
+                      elementsToRender.push(
+                        <ButtonSidebar
+                          key={`button-${item.id}`}
+                          icon={<item.icon className="w-[18px] h-[18px]" />}
+                          label={item.label}
+                          isActive={location === item.href}
+                          isExpanded={isExpanded}
+                          onClick={() => navigate(item.href)}
+                          variant="secondary"
+                        />
+                      );
+                    }
+                    return;
+                  }
+
+                  const sidebarItem = item as SidebarItem;
+                  
+                  if (!sidebarItem.icon || !sidebarItem.label) {
+                    return;
+                  }
+                  
+                  const itemKey = sidebarItem.label || `item-${index}`;
+                  const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
+                  const buttonElement = (
+                    <ButtonSidebar
+                      icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
+                      label={sidebarItem.label}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                      onClick={() => {
+                        if (sidebarItem.href) {
+                          navigate(sidebarItem.href);
+                        }
+                      }}
+                      href={sidebarItem.href}
+                      variant="secondary"
+                    />
+                  );
+                  
+                  elementsToRender.push(
+                    <div key={`${itemKey}-${index}`}>
+                      {buttonElement}
+                    </div>
+                  );
+                });
+                
+                return elementsToRender;
+              })()}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
     </>
   );
