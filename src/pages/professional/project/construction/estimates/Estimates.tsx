@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 
 // Import tab components  
 import { EstimateList } from './tabs/EstimateList.tsx'
+import { EstimateBudget } from './tabs/EstimateBudget.tsx'
 import { EstimatePhases } from './tabs/EstimatePhases.tsx'
 import { EstimateSchedule } from './tabs/EstimateSchedule.tsx'
 
@@ -322,6 +323,11 @@ export default function Estimates() {
       id: "tasks",
       label: "Cómputos",
       isActive: activeTab === "tasks"
+    },
+    {
+      id: "budget",
+      label: "Presupuesto",
+      isActive: activeTab === "budget"
     }
   ]
 
@@ -357,6 +363,10 @@ export default function Estimates() {
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
           />
+        )}
+        
+        {activeTab === "budget" && (
+          <EstimateBudget />
         )}
       </div>
     </Layout>
