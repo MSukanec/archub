@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { MainSidebar } from "./MainSidebar";
-import { Header } from "./Header";
+// Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
 import { PageLayout } from "./PageLayout";
@@ -112,12 +112,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           </main>
         </HeaderMobile>
       ) : (
-        /* Desktop View - New Frame Layout with Global Header */
-        <div className="h-screen flex flex-col">
-          {/* Global Header - Above everything */}
-          <Header />
-          
-          {/* Main Layout Frame */}
+        /* Desktop View - Frame Layout without Header */
+        <div className="h-screen flex">
+          {/* Main Layout Frame - Full height */}
           <div
             className="flex-1 flex min-h-0 overflow-hidden relative"
             style={{ borderColor: "var(--main-sidebar-bg)" }}
@@ -129,7 +126,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 <MainSidebar />
               </div>
             ) : (
-              // When not docked: Overlay on top of content starting below header
+              // When not docked: Overlay on top of content from top
               <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
                 <MainSidebar />
               </div>

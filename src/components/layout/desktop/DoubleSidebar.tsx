@@ -447,7 +447,7 @@ export function MainSidebar() {
       <div 
         className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
         style={{
-          height: 'calc(100vh - 3rem)',
+          height: '100vh', // Ahora llega hasta arriba, sin header
           width: '48px' // Ancho fijo para solo iconos
         }}
       >
@@ -553,7 +553,7 @@ export function MainSidebar() {
       <div 
         className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
         style={{
-          height: 'calc(100vh - 3rem)',
+          height: '100vh', // Ahora llega hasta arriba, sin header
           width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
         }}
         onMouseEnter={() => setHovered(true)}
@@ -565,7 +565,67 @@ export function MainSidebar() {
             isExpanded ? "w-64" : "w-12"
           )}
         >
-          {/* Header - SIDEBAR DERECHO */}
+          {/* Header con Logo de Organización - SIDEBAR DERECHO */}
+          <div className={cn(
+            "flex items-center border-b border-[var(--main-sidebar-border)] flex-shrink-0 px-0 py-0",
+            isExpanded ? "min-h-[72px]" : "h-[72px]" // Más alto para el logo
+          )}>
+            {isExpanded && (
+              <div className="flex items-center px-3 py-2 w-full">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
+                  {userData?.organization?.logo_url ? (
+                    <img 
+                      src={userData.organization.logo_url} 
+                      alt={userData.organization.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-white font-semibold text-lg"
+                      style={{ backgroundColor: 'var(--accent)' }}
+                    >
+                      {getOrganizationInitials(userData?.organization?.name || 'O')}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div 
+                    className="text-sm font-semibold truncate"
+                    style={{ color: 'var(--text-important)' }}
+                  >
+                    {userData?.organization?.name || "Sin organización"}
+                  </div>
+                  {userData?.plan && (
+                    <div className="text-xs opacity-60">
+                      Plan {userData.plan.name}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {!isExpanded && (
+              <div className="flex justify-center w-full py-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  {userData?.organization?.logo_url ? (
+                    <img 
+                      src={userData.organization.logo_url} 
+                      alt={userData.organization.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-white font-semibold text-lg"
+                      style={{ backgroundColor: 'var(--accent)' }}
+                    >
+                      {getOrganizationInitials(userData?.organization?.name || 'O')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Selector de Organización/Proyecto - SIDEBAR DERECHO */}
           <div className={cn(
             "flex items-center border-b border-[var(--main-sidebar-border)] flex-shrink-0 px-0 py-0",
             isExpanded ? "min-h-[52px]" : "h-[52px]"
