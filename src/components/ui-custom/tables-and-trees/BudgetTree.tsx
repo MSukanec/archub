@@ -183,6 +183,7 @@ const SortableTaskItem = ({
 
   // Helper function to get cost scope value for the Select component
   const getCostScopeValue = (costScope: string | undefined) => {
+    console.log('Task cost_scope value:', costScope, 'for task:', task.id);
     return costScope || 'materials_and_labor'; // default value
   };
 
@@ -190,6 +191,7 @@ const SortableTaskItem = ({
   const updateConstructionTask = useUpdateConstructionTask();
   
   const handleCostScopeChange = (taskId: string, newCostScope: string) => {
+    console.log('Changing cost_scope:', taskId, newCostScope);
     updateConstructionTask.mutate({
       id: taskId,
       cost_scope: newCostScope,
