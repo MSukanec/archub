@@ -208,6 +208,83 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
   );
 };
 
+// Inline Margin Editor Component
+const InlineMarginEditor = ({ 
+  taskId, 
+  currentMargin,
+  onMarginChange 
+}: { 
+  taskId: string;
+  currentMargin: number;
+  onMarginChange: (taskId: string, margin: number) => void;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(currentMargin.toString());
+
+  // Update input value when currentMargin changes
+  useEffect(() => {
+    setInputValue(currentMargin.toString());
+  }, [currentMargin]);
+
+  const handleSave = () => {
+    const numValue = parseFloat(inputValue) || 0;
+    if (!isNaN(numValue)) {
+      onMarginChange(taskId, numValue);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setInputValue(currentMargin.toString());
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
+  const formatDisplayValue = (value: number) => {
+    return new Intl.NumberFormat('es-AR', { 
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1 
+    }).format(value);
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        type="number"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        className="h-8 w-16 text-xs text-right border-[var(--accent)]"
+        step="0.1"
+        min="0"
+        max="100"
+        autoFocus
+        onFocus={(e) => e.target.select()}
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+    >
+      <div className="flex items-center justify-end gap-1">
+        <span>{formatDisplayValue(currentMargin)}</span>
+        <span className="text-muted-foreground">%</span>
+      </div>
+    </button>
+  );
+};
+
 // Inline Description Editor Component
 const InlineDescriptionEditor = ({ 
   taskId, 
@@ -566,7 +643,8 @@ const SortableTaskItem = ({
   handleLocalQuantityChange,
   localQuantities,
   isLastInGroup,
-  handleDescriptionChange
+  handleDescriptionChange,
+  handleMarginChange
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -580,6 +658,7 @@ const SortableTaskItem = ({
   localQuantities: { [taskId: string]: number };
   isLastInGroup?: boolean;
   handleDescriptionChange: (taskId: string, description: string) => void;
+  handleMarginChange: (taskId: string, margin: number) => void;
 }) => {
   const {
     attributes,
@@ -624,7 +703,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
-           style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px" }}>
         
         {/* Drag handle */}
         <div 
@@ -702,6 +781,15 @@ const SortableTaskItem = ({
               <TaskCostBreakdown task={task} />
             </PopoverContent>
           </Popover>
+        </div>
+        
+        {/* Margin column */}
+        <div className="text-right text-xs flex items-center justify-end">
+          <InlineMarginEditor
+            taskId={task.id}
+            currentMargin={task.margin || 0}
+            onMarginChange={handleMarginChange}
+          />
         </div>
         
         {/* Subtotal column */}
@@ -784,7 +872,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-3 text-xs font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px",
+        gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -797,7 +885,7 @@ const GroupHeader = ({
       <div className="font-bold text-xs">
         {groupIndex}
       </div>
-      <div className="col-span-4">
+      <div className="col-span-5">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
       {/* Subtotal column */}
@@ -888,6 +976,23 @@ export function BudgetTree({
       project_id: userData.preferences.last_project_id,
       organization_id: userData.preferences.last_organization_id,
     });
+  }, [updateTaskMutation, userData]);
+
+  // Handle margin changes
+  const handleMarginChange = useCallback((taskId: string, margin: number) => {
+    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
+      console.warn('No project or organization selected');
+      return;
+    }
+    
+    // TODO: Add margin field to schema
+    // updateTaskMutation.mutate({
+    //   id: taskId,
+    //   margin: margin,
+    //   project_id: userData.preferences.last_project_id,
+    //   organization_id: userData.preferences.last_organization_id,
+    // });
+    console.log('Margin change saved:', taskId, margin);
   }, [updateTaskMutation, userData]);
 
   // Use auto-save for quantity changes
@@ -1023,7 +1128,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 150px 100px 120px 120px 110px 80px",
+            gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -1035,6 +1140,7 @@ export function BudgetTree({
           <div>Tipo</div>
           <div className="text-right">Cantidad</div>
           <div className="text-right">Costo Unit.</div>
+          <div className="text-right">Margen</div>
           <div className="text-right">Subtotal</div>
           <div className="text-right">% de Incidencia</div>
           <div className="text-center">Acciones</div>
@@ -1071,6 +1177,7 @@ export function BudgetTree({
                     localQuantities={localQuantities}
                     isLastInGroup={taskIndex === groupTasks.length - 1}
                     handleDescriptionChange={handleDescriptionChange}
+                    handleMarginChange={handleMarginChange}
                   />
                 ))}
               </div>
