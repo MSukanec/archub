@@ -58,6 +58,59 @@ interface BudgetTreeProps {
   onAddTask?: () => void;
 }
 
+// Component for subtotal calculation (Cantidad x Costo Unitario)
+const SubtotalDisplay = ({ task, quantity }: { task: any; quantity: number }) => {
+  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id);
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id || task.id);
+
+  const isLoadingData = isLoading || laborLoading;
+
+  // Calculate cost per unit (materials + labor)
+  const costPerUnit = useMemo(() => {
+    const materialsCost = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const amount = material.amount || 0;
+      return sum + (amount * unitPrice);
+    }, 0);
+
+    const laborCost = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const amount = laborItem.quantity || 0;
+      return sum + (amount * unitPrice);
+    }, 0);
+
+    return materialsCost + laborCost;
+  }, [materials, labor]);
+
+  // Calculate subtotal (quantity × cost per unit)
+  const subtotal = quantity * costPerUnit;
+
+  const formatCost = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  if (isLoadingData) {
+    return <span className="text-xs text-muted-foreground">...</span>;
+  }
+
+  if (subtotal === 0) {
+    return <span className="text-xs text-muted-foreground">–</span>;
+  }
+
+  return (
+    <span className="text-xs font-medium text-foreground">
+      {formatCost(subtotal)}
+    </span>
+  );
+};
+
 // Component for cost breakdown popover content
 const TaskCostBreakdown = ({ task }: { task: any }) => {
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
@@ -715,7 +768,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
-           style={{ gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px" }}>
         
         {/* Drag handle */}
         <div 
@@ -805,6 +858,11 @@ const SortableTaskItem = ({
           </Popover>
         </div>
         
+        {/* New Subtotal column (Cantidad x Costo Unitario) */}
+        <div className="text-right text-xs flex items-center justify-end">
+          <SubtotalDisplay task={task} quantity={localQuantities[task.id] ?? task.quantity ?? 0} />
+        </div>
+        
         {/* Margin column */}
         <div className="text-right text-xs flex items-center justify-end">
           <InlineMarginEditor
@@ -814,7 +872,7 @@ const SortableTaskItem = ({
           />
         </div>
         
-        {/* Subtotal column */}
+        {/* Total column (antes era Subtotal) */}
         <div className="text-right text-xs flex items-center justify-end">
           <div className="text-xs font-medium [&>span]:!text-xs">
             <TaskTotalSubtotal task={task} onSubtotalChange={onSubtotalChange} />
@@ -1156,7 +1214,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px",
+            gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -1167,9 +1225,10 @@ export function BudgetTree({
           <div>Descripción</div>
           <div>Tipo</div>
           <div className="text-right">Cantidad</div>
-          <div className="text-right">Costo Unit.</div>
-          <div className="text-right">Margen</div>
+          <div className="text-right">Costo Unitario</div>
           <div className="text-right">Subtotal</div>
+          <div className="text-right">Margen</div>
+          <div className="text-right">Total</div>
           <div className="text-right">% de Incidencia</div>
           <div className="text-center">Acciones</div>
         </div>
