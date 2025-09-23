@@ -457,64 +457,93 @@ export function MainSidebar() {
           {/* Navigation Items - SIDEBAR IZQUIERDO - Solo iconos */}
           <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
             <div className="flex flex-col gap-[2px] h-full">
-              {(() => {
-                const items = getTertiarySidebarItems();
-                const elementsToRender: React.ReactNode[] = [];
-                
-                items.forEach((item: any, index: number) => {
-                  if (!item || typeof item !== 'object') {
-                    return;
-                  }
+              {/* Botón Organización */}
+              <ButtonSidebar
+                icon={<Building className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={sidebarLevel === 'organization'}
+                isExpanded={false}
+                onClick={() => setSidebarLevel('organization')}
+                variant="secondary"
+              />
 
-                  // Skip dividers and sections - solo botones
-                  if ('type' in item && (item.type === 'divider' || item.type === 'section')) {
-                    return;
-                  }
+              {/* Botón Proyecto */}
+              <ButtonSidebar
+                icon={<Folder className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={sidebarLevel === 'project'}
+                isExpanded={false}
+                onClick={() => setSidebarLevel('project')}
+                variant="secondary"
+              />
 
-                  if ('type' in item && item.type === 'button') {
-                    elementsToRender.push(
-                      <ButtonSidebar
-                        key={`left-button-${item.id}`}
-                        icon={<item.icon className="w-[18px] h-[18px]" />}
-                        label=""  // Sin texto
-                        isActive={location === item.href}
-                        isExpanded={false}  // Siempre colapsado
-                        onClick={() => navigate(item.href)}
-                        variant="secondary"
-                      />
-                    );
-                    return;
-                  }
+              {/* Divisor */}
+              <div className="h-px bg-white/20 my-2 mx-2"></div>
 
-                  const sidebarItem = item as SidebarItem;
-                  
-                  if (!sidebarItem.icon || !sidebarItem.label) {
-                    return;
-                  }
-                  
-                  const itemKey = sidebarItem.label || `item-${index}`;
-                  const isActive = Boolean('href' in sidebarItem && location === sidebarItem.href);
-                  
-                  elementsToRender.push(
-                    <ButtonSidebar
-                      key={`left-${itemKey}-${index}`}
-                      icon={<sidebarItem.icon className="w-[18px] h-[18px]" />}
-                      label=""  // Sin texto
-                      isActive={isActive}
-                      isExpanded={false}  // Siempre colapsado
-                      onClick={() => {
-                        if (sidebarItem.href) {
-                          navigate(sidebarItem.href);
-                        }
-                      }}
-                      href={sidebarItem.href}
-                      variant="secondary"
-                    />
-                  );
-                });
-                
-                return elementsToRender;
-              })()}
+              {/* Botón Finanzas */}
+              <ButtonSidebar
+                icon={<DollarSign className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={location.startsWith('/finances')}
+                isExpanded={false}
+                onClick={() => navigate('/finances/movements')}
+                variant="secondary"
+              />
+
+              {/* Botón Contactos */}
+              <ButtonSidebar
+                icon={<Contact className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={location === '/organization/contacts'}
+                isExpanded={false}
+                onClick={() => navigate('/organization/contacts')}
+                variant="secondary"
+              />
+
+              {/* Botón Calendar */}
+              <ButtonSidebar
+                icon={<Calendar className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={location === '/general/calendar'}
+                isExpanded={false}
+                onClick={() => navigate('/general/calendar')}
+                variant="secondary"
+              />
+
+              {/* Botón Media */}
+              <ButtonSidebar
+                icon={<FileText className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={location === '/general/media'}
+                isExpanded={false}
+                onClick={() => navigate('/general/media')}
+                variant="secondary"
+              />
+
+              {/* Botón Análisis */}
+              <ButtonSidebar
+                icon={<BarChart3 className="w-[18px] h-[18px]" />}
+                label=""
+                isActive={location === '/analysis'}
+                isExpanded={false}
+                onClick={() => navigate('/analysis')}
+                variant="secondary"
+              />
+
+              {/* Botón Administración - Solo para admins */}
+              {isAdmin && (
+                <ButtonSidebar
+                  icon={<Crown className="w-[18px] h-[18px]" />}
+                  label=""
+                  isActive={sidebarLevel === 'admin'}
+                  isExpanded={false}
+                  onClick={() => {
+                    setSidebarLevel('admin');
+                    navigate('/admin/dashboard');
+                  }}
+                  variant="secondary"
+                />
+              )}
             </div>
           </div>
         </aside>
