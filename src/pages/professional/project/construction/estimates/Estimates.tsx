@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast'
 import { EstimateBudget } from './tabs/EstimateBudget'
 import { EstimatePhases } from './tabs/EstimatePhases'
 import { EstimateSchedule } from './tabs/EstimateSchedule'
+import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
 
 export default function Estimates() {
   const [activeTab, setActiveTab] = useState('listado-tareas')
@@ -27,6 +28,7 @@ export default function Estimates() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { openModal } = useGlobalModalStore()
   const deleteTask = useDeleteConstructionTask()
+  const createTask = useCreateConstructionTask()
   const updatePhasePositions = useUpdatePhasePositions()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
@@ -115,6 +117,24 @@ export default function Estimates() {
       organizationId,
       userId: userData.user.id,
       isEditing: false
+    })
+  }
+
+  const handleDuplicateTask = (task: any) => {
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for task duplication')
+      return
+    }
+
+    // Duplicar la tarea con los mismos datos pero nueva instancia
+    createTask.mutate({
+      organization_id: organizationId,
+      project_id: projectId,
+      task_id: task.task_id, // Usar el mismo task_id para duplicar
+      quantity: task.quantity || 1,
+      created_by: userData.user.id,
+      project_phase_id: "", // No asignar fase inicialmente
+      description: task.description || ""
     })
   }
 
@@ -335,6 +355,7 @@ export default function Estimates() {
         onEditTask={handleEditTask}
         onAddTask={handleAddSingleTask}
         onDeleteTask={handleDeleteTask}
+        onDuplicateTask={handleDuplicateTask}
       />
     </Layout>
   )

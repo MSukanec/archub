@@ -9,6 +9,7 @@ interface EstimateBudgetProps {
   onEditTask?: (task: any) => void
   onAddTask?: () => void
   onDeleteTask?: (taskId: string) => void
+  onDuplicateTask?: (task: any) => void
 }
 
 export function EstimateBudget({ 
@@ -16,7 +17,8 @@ export function EstimateBudget({
   isLoading = false, 
   onEditTask,
   onAddTask,
-  onDeleteTask
+  onDeleteTask,
+  onDuplicateTask
 }: EstimateBudgetProps) {
   // Handle reorder tasks
   const handleReorder = (reorderedTasks: any[]) => {
@@ -26,8 +28,9 @@ export function EstimateBudget({
 
   // Handle duplicate task
   const handleDuplicateTask = (task: any) => {
-    console.log('Duplicating task:', task)
-    // TODO: Implement actual duplicate logic
+    if (onDuplicateTask) {
+      onDuplicateTask(task)
+    }
   }
 
   // Handle delete task
