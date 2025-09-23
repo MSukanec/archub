@@ -140,13 +140,7 @@ export default function OrganizationDashboard() {
 
   const headerProps = {
     icon: Home,
-    title: "Resumen de la Organización",
-    // Botón de ejemplo para demostrar la funcionalidad
-    actionButton: {
-      label: "Nuevo Proyecto",
-      icon: Plus,
-      onClick: () => openModal('project', { isEditing: false })
-    }
+    title: "Resumen de la Organización"
   };
 
   return (

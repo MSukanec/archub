@@ -8,7 +8,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useProjectContext } from '@/stores/projectContext';
-import { useHeaderActionsStore } from '@/stores/headerActionsStore';
 import { Badge } from "@/components/ui/badge";
 import { 
   Settings, 
@@ -564,9 +563,6 @@ export function MainSidebar() {
       { icon: Package, label: 'Productos', href: '/providers/products' }
     ]
   };
-  // Obtener las acciones del store a nivel del componente
-  const { organizationActions, projectActions } = useHeaderActionsStore();
-  
   // Función para obtener el contenido del sidebar basado en el sidebarLevel
   const getTertiarySidebarItems = () => {
     if (sidebarLevel === 'project') {
@@ -602,23 +598,7 @@ export function MainSidebar() {
           icon: item.icon,
           label: item.label,
           href: item.href
-        })),
-        // Sección General con botones dinámicos
-        ...(projectActions.length > 0 ? [
-          {
-            type: 'section',
-            label: 'GENERAL'
-          },
-          ...projectActions.map((action: any) => ({
-            type: 'action-button',
-            id: `project-action-${action.id}`,
-            icon: action.icon,
-            label: action.label,
-            onClick: action.onClick,
-            variant: action.variant,
-            disabled: action.disabled
-          }))
-        ] : [])
+        }))
       ];
       return projectItems;
     } else if (sidebarLevel === 'organization') {
@@ -639,22 +619,6 @@ export function MainSidebar() {
           label: item.label,
           href: item.href
         })),
-        // Sección General con botones dinámicos
-        ...(organizationActions.length > 0 ? [
-          {
-            type: 'section',
-            label: 'GENERAL'
-          },
-          ...organizationActions.map((action: any) => ({
-            type: 'action-button',
-            id: `organization-action-${action.id}`,
-            icon: action.icon,
-            label: action.label,
-            onClick: action.onClick,
-            variant: action.variant,
-            disabled: action.disabled
-          }))
-        ] : [])
       ];
       return organizationItems;
     } else if (sidebarLevel === 'admin') {
@@ -1012,21 +976,6 @@ export function MainSidebar() {
                     isExpanded={isExpanded}
                     onClick={() => navigate(item.href)}
                     variant="secondary"
-                  />
-                );
-              }
-
-              // Si es un action-button, renderizar con su onClick personalizado
-              if ('type' in item && item.type === 'action-button') {
-                return (
-                  <ButtonSidebar
-                    key={`action-${item.id}`}
-                    icon={item.icon ? <item.icon className="w-[18px] h-[18px]" /> : undefined}
-                    label={item.label}
-                    isActive={false}
-                    isExpanded={isExpanded}
-                    onClick={() => item.onClick?.()}
-                    variant={item.variant === 'default' ? 'main' : 'secondary'}
                   />
                 );
               }
