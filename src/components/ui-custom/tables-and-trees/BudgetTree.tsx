@@ -170,25 +170,25 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
     >
       {/* First row: Group name and total */}
       <div 
-        className="grid gap-4 px-4 py-2 text-base font-medium"
-        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}
+        className="grid gap-4 px-4 py-2 pb-1 text-base font-medium"
+        style={{ gridTemplateColumns: "32px 1fr 80px 100px 240px" }}
       >
         {/* Drag handle for group */}
         <div className="flex items-center justify-center">
           <GripVertical className="h-4 w-4 text-white/70" />
         </div>
-        <div className="col-span-4">
+        <div className="col-span-3">
           {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
         </div>
         <div className="text-right">
-          {/* Group total - calculated */}
+          {/* Group total - calculated - now spans wider */}
           <span className="font-medium">Subtotal de Rubro: {calculateGroupSubtotal()}</span>
         </div>
       </div>
       
       {/* Second row: Column headers */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs opacity-90"
+        className="grid gap-4 px-4 py-1 pb-2 text-xs opacity-90"
         style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}
       >
         <div></div> {/* Empty space for drag handle column */}
