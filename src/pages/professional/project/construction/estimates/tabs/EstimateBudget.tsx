@@ -41,24 +41,10 @@ export function EstimateBudget({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="border-b pb-4">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
-          Presupuesto del Proyecto
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Organiza el orden de presentación de las tareas arrastrando los elementos
-        </p>
-      </div>
-
-      {/* Budget Tree */}
-      <BudgetTree 
-        tasks={tasks}
-        onReorder={handleReorder}
-        onEditTask={onEditTask}
-      />
-    </div>
+    <BudgetTree 
+      tasks={tasks}
+      onReorder={handleReorder}
+      onEditTask={onEditTask}
+    />
   )
 }

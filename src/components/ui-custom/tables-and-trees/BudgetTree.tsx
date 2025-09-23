@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { GripVertical, Calculator, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
@@ -73,7 +73,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="group flex items-center justify-between rounded-md p-3 mb-2 bg-card border border-border hover:bg-accent/50 transition-colors">
+      <div className="group flex items-center justify-between p-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]">
         {/* Left side: Drag handle + Task info */}
         <div className="flex items-center space-x-3 flex-1">
           {/* Drag handle */}
@@ -150,6 +150,21 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
   );
 };
 
+// Group Header component
+const GroupHeader = ({ groupName, tasksCount }: { groupName: string; tasksCount: number }) => (
+  <div 
+    className="grid gap-4 px-4 py-3 text-xs font-medium"
+    style={{ 
+      backgroundColor: "var(--table-group-header-bg)",
+      color: "white"
+    }}
+  >
+    <div className="col-span-full">
+      {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+    </div>
+  </div>
+);
+
 export function BudgetTree({ 
   tasks, 
   onReorder, 
@@ -164,6 +179,21 @@ export function BudgetTree({
     })
   );
 
+  // Group tasks by division_name
+  const groupedTasks = useMemo(() => {
+    const groups: { [key: string]: BudgetTask[] } = {};
+    
+    tasks.forEach(task => {
+      const groupKey = task.division_name || 'Sin categoría';
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(task);
+    });
+    
+    return groups;
+  }, [tasks]);
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
@@ -173,6 +203,17 @@ export function BudgetTree({
     setActiveId(null);
 
     if (!over || active.id === over.id) return;
+
+    // Find which group the dragged and target tasks belong to
+    const draggedTask = tasks.find(task => task.id === active.id);
+    const targetTask = tasks.find(task => task.id === over.id);
+    
+    if (!draggedTask || !targetTask) return;
+    
+    // Only allow reordering within the same group
+    if ((draggedTask.division_name || 'Sin categoría') !== (targetTask.division_name || 'Sin categoría')) {
+      return;
+    }
 
     const oldIndex = tasks.findIndex((task) => task.id === active.id);
     const newIndex = tasks.findIndex((task) => task.id === over.id);
@@ -201,16 +242,23 @@ export function BudgetTree({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
-          <div className="text-sm text-muted-foreground mb-4">
-            Arrastra las tareas para cambiar el orden de presentación en el presupuesto
+      <div className="space-y-0">
+        {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
+          <div key={groupName}>
+            {/* Group Header */}
+            <GroupHeader groupName={groupName} tasksCount={groupTasks.length} />
+            
+            {/* Group Tasks */}
+            <SortableContext items={groupTasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-0">
+                {groupTasks.map((task) => (
+                  <SortableTaskItem key={task.id} task={task} />
+                ))}
+              </div>
+            </SortableContext>
           </div>
-          {tasks.map((task) => (
-            <SortableTaskItem key={task.id} task={task} />
-          ))}
-        </div>
-      </SortableContext>
+        ))}
+      </div>
     </DndContext>
   );
 }
