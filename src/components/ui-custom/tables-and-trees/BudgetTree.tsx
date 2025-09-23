@@ -2,11 +2,12 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2, ChevronDown, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
@@ -53,6 +54,92 @@ interface BudgetTreeProps {
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
 }
+
+// Quantity Edit Popover Component
+const QuantityEditPopover = ({ 
+  taskId, 
+  currentQuantity, 
+  onQuantityChange 
+}: { 
+  taskId: string;
+  currentQuantity: number;
+  onQuantityChange: (taskId: string, quantity: number) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(currentQuantity.toString());
+
+  // Update input value when currentQuantity changes
+  useEffect(() => {
+    setInputValue(currentQuantity.toString());
+  }, [currentQuantity]);
+
+  const handleSave = () => {
+    const numValue = parseFloat(inputValue) || 0;
+    if (!isNaN(numValue)) {
+      onQuantityChange(taskId, numValue);
+    }
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setInputValue(currentQuantity.toString());
+      setIsOpen(false);
+    }
+  };
+
+  const formatDisplayValue = (value: number) => {
+    // Format like the image shows: with proper decimal places
+    return new Intl.NumberFormat('es-AR', { 
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2 
+    }).format(value);
+  };
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent/50 border border-transparent hover:border-border"
+        >
+          <span>{formatDisplayValue(currentQuantity)}</span>
+          <ChevronDown className="ml-1 h-3 w-3 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-3" align="end">
+        <div className="space-y-2">
+          <div className="text-xs font-medium text-muted-foreground">
+            Cantidad
+          </div>
+          <div className="flex items-center space-x-2">
+            <Input
+              type="number"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-8 text-xs"
+              step="0.01"
+              min="0"
+              autoFocus
+              onFocus={(e) => e.target.select()}
+            />
+            <Button
+              size="sm" 
+              onClick={handleSave}
+              className="h-8 w-8 p-0"
+            >
+              <Check className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 // Sortable Item component for drag and drop
 const SortableTaskItem = ({ 
@@ -160,21 +247,12 @@ const SortableTaskItem = ({
           </Select>
         </div>
         
-        {/* Quantity column - Editable input */}
+        {/* Quantity column - Clickable with popover */}
         <div className="text-right text-xs flex items-center justify-end">
-          <Input
-            type="number"
-            value={localQuantities[task.id] ?? task.quantity ?? 0}
-            onChange={(e) => {
-              const value = e.target.value;
-              const numValue = value === '' ? 0 : parseFloat(value);
-              if (!isNaN(numValue)) {
-                handleLocalQuantityChange(task.id, numValue);
-              }
-            }}
-            className="h-8 w-20 text-xs text-right"
-            step="0.01"
-            min="0"
+          <QuantityEditPopover
+            taskId={task.id}
+            currentQuantity={localQuantities[task.id] ?? task.quantity ?? 0}
+            onQuantityChange={handleLocalQuantityChange}
           />
         </div>
         
