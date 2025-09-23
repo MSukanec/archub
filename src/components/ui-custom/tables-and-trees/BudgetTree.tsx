@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { GripVertical, Calculator, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
@@ -88,7 +89,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
-           style={{ gridTemplateColumns: "32px 60px 1fr 80px 100px 120px 120px 110px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px" }}>
         
         {/* Drag handle */}
         <div 
@@ -126,6 +127,20 @@ const SortableTaskItem = ({
               </Badge>
             </div>
           )}
+        </div>
+        
+        {/* Tipo column */}
+        <div className="flex items-center text-sm">
+          <Select defaultValue="mano-obra-materiales">
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mano-obra-materiales">Mano de Obra + Materiales</SelectItem>
+              <SelectItem value="mano-obra">Mano de Obra</SelectItem>
+              <SelectItem value="materiales">Materiales</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         {/* Unit column */}
@@ -205,7 +220,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-2 text-base font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 80px 100px 120px 120px 110px",
+        gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -218,7 +233,7 @@ const GroupHeader = ({
       <div className="font-bold text-lg">
         {groupIndex}
       </div>
-      <div className="col-span-4">
+      <div className="col-span-5">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
       {/* Subtotal column */}
@@ -350,7 +365,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 80px 100px 120px 120px 110px",
+            gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -359,6 +374,7 @@ export function BudgetTree({
           <div></div> {/* Empty space for drag handle column */}
           <div>Ítem</div>
           <div>Descripción</div>
+          <div>Tipo</div>
           <div className="text-right">Unidad</div>
           <div className="text-right">Cantidad</div>
           <div className="text-right">Costo Unit.</div>
