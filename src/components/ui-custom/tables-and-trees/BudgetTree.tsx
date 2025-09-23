@@ -208,6 +208,121 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
   );
 };
 
+// Inline Unit Cost Editor Component
+const InlineUnitCostEditor = ({ 
+  task 
+}: { 
+  task: any;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [costType, setCostType] = useState<'task' | 'independent'>('task');
+  const [customCost, setCustomCost] = useState<number>(0);
+
+  // Get current unit cost from TaskMaterialsUnitCost component logic
+  const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
+  const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
+
+  const taskCost = useMemo(() => {
+    const materialsCost = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const quantity = material.amount || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    const laborCost = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const quantity = laborItem.quantity || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    return materialsCost + laborCost;
+  }, [materials, labor]);
+
+  const displayCost = costType === 'task' ? taskCost : customCost;
+
+  const formatCost = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  return (
+    <div className="flex items-center justify-end">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+          >
+            {formatCost(displayCost)}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-3" align="end">
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-[var(--card-fg)]">Tipo de Costo</h4>
+            
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-type-${task.id}`}
+                  value="task"
+                  checked={costType === 'task'}
+                  onChange={(e) => setCostType(e.target.value as 'task')}
+                  className="accent-[var(--accent)]"
+                />
+                <span className="text-xs text-[var(--card-fg)]">Costo de Tarea</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-type-${task.id}`}
+                  value="independent"
+                  checked={costType === 'independent'}
+                  onChange={(e) => setCostType(e.target.value as 'independent')}
+                  className="accent-[var(--accent)]"
+                />
+                <span className="text-xs text-[var(--card-fg)]">Costo Independiente</span>
+              </label>
+            </div>
+
+            {costType === 'independent' && (
+              <div className="mt-3">
+                <label className="block text-xs text-[var(--muted-fg)] mb-1">
+                  Costo personalizado:
+                </label>
+                <Input
+                  type="number"
+                  value={customCost}
+                  onChange={(e) => setCustomCost(parseFloat(e.target.value) || 0)}
+                  className="h-8 text-xs"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-[var(--card-border)]">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--muted-fg)]">Costo actual:</span>
+                <span className="font-medium text-[var(--card-fg)]">
+                  {formatCost(displayCost)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
 // Inline Quantity Editor Component
 const InlineQuantityEditor = ({ 
   taskId, 
@@ -264,7 +379,7 @@ const InlineQuantityEditor = ({
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleSave}
-        className="h-8 w-20 text-xs text-right border-blue-500"
+        className="h-8 w-20 text-xs text-right border-[var(--accent)]"
         step="0.01"
         min="0"
         autoFocus
@@ -276,7 +391,7 @@ const InlineQuantityEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="h-8 px-2 text-xs font-medium text-accent hover:text-accent transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-accent"
+      className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
     >
       <div className="flex items-center justify-end gap-1">
         <span>{formatDisplayValue(currentQuantity)}</span>
@@ -424,9 +539,7 @@ const SortableTaskItem = ({
         
         {/* Unit cost column */}
         <div className="text-right text-xs flex items-center justify-end gap-2">
-          <div className="text-xs [&>span]:!text-xs">
-            <TaskMaterialsUnitCost task={task} />
-          </div>
+          <InlineUnitCostEditor task={task} />
           {/* Information icon with cost breakdown popover */}
           <Popover>
             <PopoverTrigger asChild>
