@@ -1,53 +1,56 @@
 -- 1) Por las dudas, borro la vista si existe
-drop view if exists public.construction_tasks_view;
+DROP VIEW IF EXISTS public.construction_tasks_view;
 
--- 2) La vuelvo a crear incluyendo custom_name, unidad, división, description y tipo (cost_scope)
-create view public.construction_tasks_view as
-select
+-- 2) La vuelvo a crear incluyendo markup_pct
+CREATE VIEW public.construction_tasks_view AS
+SELECT
   ct.id,                                   -- construction_tasks
   ct.organization_id,                      -- construction_tasks
   ct.project_id,                           -- construction_tasks
   ct.task_id,                              -- tasks (FK)
   t.custom_name,                           -- tasks.custom_name
-  u.name as unit,                          -- units.name (via tasks.unit_id)
-  tc.name as category_name,                -- task_categories.name (via tasks.category_id)
-  td.name as division_name,                -- task_divisions.name (via tasks.task_division_id)
+  u.name AS unit,                          -- units.name (via tasks.unit_id)
+  tc.name AS category_name,                -- task_categories.name (via tasks.category_id)
+  td.name AS division_name,                -- task_divisions.name (via tasks.task_division_id)
 
   -- 🔹 Tipo de costeo (enum crudo + etiqueta para la UI)
   ct.cost_scope,                           -- construction_tasks.cost_scope (enum)
-  case ct.cost_scope
-    when 'materials_and_labor' then 'M.O. + MAT.'
-    when 'labor_only'           then 'M.O.'
-    when 'materials_only'       then 'MAT'
-    else 'M.O. + MAT.'
-  end as cost_scope_label,
+  CASE ct.cost_scope
+    WHEN 'materials_and_labor' THEN 'M.O. + MAT.'
+    WHEN 'labor_only'           THEN 'M.O.'
+    WHEN 'materials_only'       THEN 'MAT'
+    ELSE 'M.O. + MAT.'
+  END AS cost_scope_label,
 
   ct.quantity,                             -- construction_tasks
   ct.start_date,                           -- construction_tasks
   ct.end_date,                             -- construction_tasks
   ct.duration_in_days,                     -- construction_tasks
   ct.progress_percent,                     -- construction_tasks
-  ct.description as description,           -- construction_tasks.description  ⬅️ NUEVO
+  ct.description AS description,           -- construction_tasks.description
+
+  ct.markup_pct,                           -- ⬅️ NUEVO: porcentaje guardado en la línea
+
   ct.created_at,                           -- construction_tasks
   ct.updated_at,                           -- construction_tasks
 
   ph.phase_name                            -- última fase asociada
-from public.construction_tasks ct
-left join public.tasks t
-  on t.id = ct.task_id
-left join public.units u
-  on u.id = t.unit_id
-left join public.task_categories tc
-  on tc.id = t.category_id
-left join public.task_divisions td
-  on td.id = t.task_division_id
+FROM public.construction_tasks ct
+LEFT JOIN public.tasks t
+  ON t.id = ct.task_id
+LEFT JOIN public.units u
+  ON u.id = t.unit_id
+LEFT JOIN public.task_categories tc
+  ON tc.id = t.category_id
+LEFT JOIN public.task_divisions td
+  ON td.id = t.task_division_id
 -- Tomo UNA fase por task (la más reciente por created_at)
-left join lateral (
-  select cp.name as phase_name
-  from public.construction_phase_tasks cpt
-  join public.construction_phases cp
-    on cp.id = cpt.project_phase_id
-  where cpt.construction_task_id = ct.id
-  order by cpt.created_at desc
-  limit 1
-) ph on true;
+LEFT JOIN LATERAL (
+  SELECT cp.name AS phase_name
+  FROM public.construction_phase_tasks cpt
+  JOIN public.construction_phases cp
+    ON cp.id = cpt.project_phase_id
+  WHERE cpt.construction_task_id = ct.id
+  ORDER BY cpt.created_at DESC
+  LIMIT 1
+) ph ON TRUE;

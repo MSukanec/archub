@@ -20,6 +20,7 @@ export interface ConstructionTaskView {
   duration_in_days: number | null; // integer en DB, number en TS
   progress_percent: number; // integer en DB, number en TS
   description: string | null; // Nueva columna description
+  markup_pct: number | null; // Nueva columna para margen de beneficio
   phase_name: string | null;
   created_at: string; // timestamp with time zone en DB, string en TS
   updated_at: string; // timestamp with time zone en DB, string en TS
@@ -426,6 +427,7 @@ export function useUpdateConstructionTask() {
       progress_percent?: number;
       task_id?: string;
       description?: string;
+      markup_pct?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -440,6 +442,7 @@ export function useUpdateConstructionTask() {
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
       if (data.task_id !== undefined) updateData.task_id = data.task_id;
       if (data.description !== undefined) updateData.description = data.description?.trim() ? data.description : null;
+      if (data.markup_pct !== undefined) updateData.markup_pct = data.markup_pct;
 
       const { data: result, error } = await supabase
         .from('construction_tasks')

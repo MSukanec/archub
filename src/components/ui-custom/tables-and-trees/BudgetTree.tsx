@@ -1008,13 +1008,12 @@ export function BudgetTree({
       return;
     }
     
-    // TODO: Add margin field to schema
-    // updateTaskMutation.mutate({
-    //   id: taskId,
-    //   margin: margin,
-    //   project_id: userData.preferences.last_project_id,
-    //   organization_id: userData.preferences.last_organization_id,
-    // });
+    updateTaskMutation.mutate({
+      id: taskId,
+      markup_pct: margin,
+      project_id: userData.preferences.last_project_id,
+      organization_id: userData.preferences.last_organization_id,
+    });
     console.log('Margin change saved:', taskId, margin);
   }, [updateTaskMutation, userData]);
 

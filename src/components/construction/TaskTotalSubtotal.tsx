@@ -35,7 +35,12 @@ export default function TaskTotalSubtotal({ task, onSubtotalChange }: TaskTotalS
   const laborSubtotal = laborCostPerUnit * taskQuantity;
 
   // Total = materiales + mano de obra
-  const totalSubtotal = materialSubtotal + laborSubtotal;
+  const baseSubtotal = materialSubtotal + laborSubtotal;
+  
+  // Aplicar margen de beneficio
+  const marginPct = task.margin || 0;
+  const marginAmount = baseSubtotal * (marginPct / 100);
+  const totalSubtotal = baseSubtotal + marginAmount;
 
   // Emit subtotal changes via callback
   useEffect(() => {

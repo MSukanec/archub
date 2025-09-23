@@ -56,6 +56,7 @@ export default function Estimates() {
     quantity: task.quantity,
     cost_scope: task.cost_scope, // ¡AGREGADO!
     cost_scope_label: task.cost_scope_label, // ¡AGREGADO!
+    margin: task.markup_pct || 0, // Mapear markup_pct a margin
     created_at: task.created_at,
     updated_at: task.updated_at,
     phase_name: task.phase_name,
