@@ -593,11 +593,13 @@ export function MainSidebar() {
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-200",
+                    "w-full flex items-center transition-all duration-200",
                     "hover:bg-[var(--main-sidebar-button-hover-bg)]",
                     isDropdownOpen && "bg-[var(--main-sidebar-button-hover-bg)]"
                   )}
+                  style={{ padding: '12px' }} // Padding fijo para mantener consistencia
                 >
+                  {/* Avatar fijo en la misma posición */}
                   <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                       <div 
@@ -609,15 +611,17 @@ export function MainSidebar() {
                         {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
-                        <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
-                          P
-                        </div>
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                      >
+                        P
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex-1 min-w-0">
+                  {/* Contenido expandible */}
+                  <div className="flex-1 flex items-center gap-2 ml-3 min-w-0">
                     <div 
                       className="text-sm font-medium truncate"
                       style={{ color: 'var(--text-important)' }}
@@ -627,12 +631,12 @@ export function MainSidebar() {
                         : "Seleccionar proyecto"
                       }
                     </div>
+                    
+                    <ChevronDown className={cn(
+                      "w-4 h-4 transition-transform duration-200 flex-shrink-0",
+                      isDropdownOpen && "rotate-180"
+                    )} />
                   </div>
-                  
-                  <ChevronDown className={cn(
-                    "w-4 h-4 transition-transform duration-200 flex-shrink-0",
-                    isDropdownOpen && "rotate-180"
-                  )} />
                 </button>
 
                 {isDropdownOpen && (
@@ -678,7 +682,7 @@ export function MainSidebar() {
                 )}
               </div>
             ) : (
-              <div className="flex justify-center w-full">
+              <div className="flex justify-center w-full py-3">
                 {selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
                     <div 
@@ -689,7 +693,10 @@ export function MainSidebar() {
                     </div>
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" 
+                    style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
+                  >
                     <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
                       P
                     </div>
