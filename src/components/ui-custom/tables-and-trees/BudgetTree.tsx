@@ -274,6 +274,92 @@ const InlineDescriptionEditor = ({
   );
 };
 
+// Inline Cost Type Editor Component
+const InlineCostTypeEditor = ({ 
+  task,
+  onCostScopeChange 
+}: { 
+  task: any;
+  onCostScopeChange: (taskId: string, newCostScope: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Helper function to get cost scope display text
+  const getCostScopeDisplayText = (costScope: string | undefined) => {
+    switch (costScope) {
+      case 'materials_only':
+        return 'Materiales';
+      case 'labor_only':
+        return 'Mano de Obra';
+      case 'materials_and_labor':
+      default:
+        return 'Ambos';
+    }
+  };
+
+  const handleCostScopeChange = (newCostScope: string) => {
+    onCostScopeChange(task.id, newCostScope);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="flex items-center">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className="h-8 px-2 text-xs font-medium text-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent)]"
+          >
+            {getCostScopeDisplayText(task.cost_scope)}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-3" align="start">
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-[var(--card-fg)]">Tipo de Costo</h4>
+            
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-scope-${task.id}`}
+                  value="materials_and_labor"
+                  checked={(task.cost_scope || 'materials_and_labor') === 'materials_and_labor'}
+                  onChange={(e) => handleCostScopeChange(e.target.value)}
+                  className="accent-[var(--accent)]"
+                />
+                <span className="text-xs text-[var(--card-fg)]">Ambos</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-scope-${task.id}`}
+                  value="materials_only"
+                  checked={task.cost_scope === 'materials_only'}
+                  onChange={(e) => handleCostScopeChange(e.target.value)}
+                  className="accent-[var(--accent)]"
+                />
+                <span className="text-xs text-[var(--card-fg)]">Materiales</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-scope-${task.id}`}
+                  value="labor_only"
+                  checked={task.cost_scope === 'labor_only'}
+                  onChange={(e) => handleCostScopeChange(e.target.value)}
+                  className="accent-[var(--accent)]"
+                />
+                <span className="text-xs text-[var(--card-fg)]">Mano de Obra</span>
+              </label>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
 // Inline Unit Cost Editor Component
 const InlineUnitCostEditor = ({ 
   task 
@@ -582,19 +668,10 @@ const SortableTaskItem = ({
         
         {/* Tipo column */}
         <div className="flex items-center text-xs">
-          <Select 
-            value={getCostScopeValue(task.cost_scope)} 
-            onValueChange={(value) => handleCostScopeChange(task.id, value)}
-          >
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="materials_and_labor">M.O. + MAT.</SelectItem>
-              <SelectItem value="labor_only">M.O.</SelectItem>
-              <SelectItem value="materials_only">MAT</SelectItem>
-            </SelectContent>
-          </Select>
+          <InlineCostTypeEditor
+            task={task}
+            onCostScopeChange={handleCostScopeChange}
+          />
         </div>
         
         {/* Quantity + Unit column - Inline editable */}
