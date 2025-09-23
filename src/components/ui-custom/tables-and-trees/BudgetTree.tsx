@@ -183,13 +183,15 @@ const SortableTaskItem = ({
 
   // Helper function to get cost scope value for the Select component
   const getCostScopeValue = (costScope: string | undefined) => {
-    console.log('Task full data:', {
-      id: task.id,
-      cost_scope: task.cost_scope,
-      cost_scope_label: task.cost_scope_label,
-      custom_name: task.custom_name,
-      quantity: task.quantity
-    });
+    // Remove excessive logging, keep only for debugging
+    if (!costScope) {
+      console.log('Task missing cost_scope:', {
+        id: task.id,
+        cost_scope: task.cost_scope,
+        cost_scope_label: task.cost_scope_label,
+        custom_name: task.custom_name
+      });
+    }
     return costScope || 'materials_and_labor'; // default value
   };
 

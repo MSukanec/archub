@@ -400,10 +400,10 @@ export function useInitializeCostScope() {
       return result;
     },
     onSuccess: (result, data) => {
-      console.log(`Initialized cost_scope for ${result.length} tasks`);
+      console.log(`Initialized cost_scope for ${result?.length || 0} tasks`);
       // Invalidar cache para refrescar los datos
       queryClient.invalidateQueries({ 
-        queryKey: ['construction-tasks-view', data.project_id, data.organization_id]
+        queryKey: ['construction-tasks-view']
       });
     },
   });
@@ -501,9 +501,9 @@ export function useUpdateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-phase-task'] 
       });
-      // Invalidar cache de vista para modales de movimientos
+      // Invalidar cache de vista para modales de movimientos - MEJORADO para capturar cambios de cost_scope
       queryClient.invalidateQueries({ 
-        queryKey: ['construction-tasks-view', data.project_id] 
+        queryKey: ['construction-tasks-view'] 
       });
       // Invalidar cache de materiales para que se actualice automáticamente
       queryClient.invalidateQueries({ 
@@ -513,10 +513,15 @@ export function useUpdateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-dependencies'] 
       });
-      toast({
-        title: "Cómputo actualizado",
-        description: "Los cambios se guardaron correctamente",
-      });
+      
+      // Solo mostrar toast para operaciones que no sean cost_scope
+      const isOnlyCostScope = Object.keys(data).length <= 4 && 'cost_scope' in data;
+      if (!isOnlyCostScope) {
+        toast({
+          title: "Cómputo actualizado",
+          description: "Los cambios se guardaron correctamente",
+        });
+      }
     },
     onError: (error) => {
       console.error('Error updating construction task:', error);
