@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { GripVertical, Calculator, FileText, Edit, Trash2 } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,7 +46,7 @@ interface BudgetTask {
 interface BudgetTreeProps {
   tasks: BudgetTask[];
   onReorder?: (reorderedTasks: BudgetTask[]) => void;
-  onEditTask?: (task: BudgetTask) => void;
+  onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
 }
@@ -59,7 +59,7 @@ const SortableTaskItem = ({
   totalSubtotal,
   taskSubtotals,
   itemNumber,
-  onEditTask,
+  onDuplicateTask,
   onDeleteTask,
   onQuantityChange
 }: { 
@@ -69,7 +69,7 @@ const SortableTaskItem = ({
   totalSubtotal: number;
   taskSubtotals: { [taskId: string]: number };
   itemNumber: string;
-  onEditTask?: (task: BudgetTask) => void;
+  onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
 }) => {
@@ -99,7 +99,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
-           style={{ gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px" }}>
+           style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px" }}>
         
         {/* Drag handle */}
         <div 
@@ -153,13 +153,6 @@ const SortableTaskItem = ({
           </Select>
         </div>
         
-        {/* Unit column */}
-        <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm">
-            {task.unit || '-'}
-          </div>
-        </div>
-        
         {/* Quantity column - Editable input */}
         <div className="text-right text-sm flex items-center justify-end">
           <Input
@@ -169,10 +162,17 @@ const SortableTaskItem = ({
               const newQuantity = parseFloat(e.target.value) || 0;
               onQuantityChange?.(task.id, newQuantity);
             }}
-            className="h-8 w-20 text-xs text-right"
+            className="h-8 w-20 text-sm text-right"
             step="0.01"
             min="0"
           />
+        </div>
+        
+        {/* Unit column */}
+        <div className="text-right text-sm flex items-center justify-end">
+          <div className="text-sm">
+            {task.unit || '-'}
+          </div>
         </div>
         
         {/* Unit cost column */}
@@ -205,14 +205,14 @@ const SortableTaskItem = ({
         
         {/* Actions column */}
         <div className="flex items-center justify-center gap-2">
-          {onEditTask && (
+          {onDuplicateTask && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onEditTask(task)}
+              onClick={() => onDuplicateTask(task)}
               className="h-8 w-8 p-0"
             >
-              <Edit className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </Button>
           )}
           {onDeleteTask && (
@@ -262,7 +262,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-2 text-base font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px",
+        gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -295,7 +295,7 @@ const GroupHeader = ({
 export function BudgetTree({ 
   tasks, 
   onReorder, 
-  onEditTask,
+  onDuplicateTask,
   onDeleteTask,
   onQuantityChange 
 }: BudgetTreeProps) {
@@ -411,7 +411,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 150px 80px 100px 120px 120px 110px 80px",
+            gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
@@ -421,8 +421,8 @@ export function BudgetTree({
           <div>Ítem</div>
           <div>Descripción</div>
           <div>Tipo</div>
-          <div className="text-right">Unidad</div>
           <div className="text-right">Cantidad</div>
+          <div className="text-right">Unidad</div>
           <div className="text-right">Costo Unit.</div>
           <div className="text-right">Subtotal</div>
           <div className="text-right">% de Incidencia</div>
@@ -454,7 +454,7 @@ export function BudgetTree({
                     totalSubtotal={totalSubtotal}
                     taskSubtotals={taskSubtotals}
                     itemNumber={`${groupIndex + 1}.${taskIndex + 1}`}
-                    onEditTask={onEditTask}
+                    onDuplicateTask={onDuplicateTask}
                     onDeleteTask={onDeleteTask}
                     onQuantityChange={onQuantityChange}
                   />
