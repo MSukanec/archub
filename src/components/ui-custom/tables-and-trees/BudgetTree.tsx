@@ -439,9 +439,11 @@ const InlineCostTypeEditor = ({
 
 // Inline Unit Cost Editor Component
 const InlineUnitCostEditor = ({ 
-  task 
+  task,
+  onCostTypeChange 
 }: { 
   task: any;
+  onCostTypeChange?: (costType: 'task' | 'independent') => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [costType, setCostType] = useState<'task' | 'independent'>('task');
@@ -501,7 +503,11 @@ const InlineUnitCostEditor = ({
                   name={`cost-type-${task.id}`}
                   value="task"
                   checked={costType === 'task'}
-                  onChange={(e) => setCostType(e.target.value as 'task')}
+                  onChange={(e) => {
+                    const newType = e.target.value as 'task';
+                    setCostType(newType);
+                    onCostTypeChange?.(newType);
+                  }}
                   className="accent-[var(--accent)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Costo de Tarea</span>
@@ -513,7 +519,11 @@ const InlineUnitCostEditor = ({
                   name={`cost-type-${task.id}`}
                   value="independent"
                   checked={costType === 'independent'}
-                  onChange={(e) => setCostType(e.target.value as 'independent')}
+                  onChange={(e) => {
+                    const newType = e.target.value as 'independent';
+                    setCostType(newType);
+                    onCostTypeChange?.(newType);
+                  }}
                   className="accent-[var(--accent)]"
                 />
                 <span className="text-xs text-[var(--card-fg)]">Costo Independiente</span>
@@ -660,6 +670,7 @@ const SortableTaskItem = ({
   handleDescriptionChange: (taskId: string, description: string) => void;
   handleMarginChange: (taskId: string, margin: number) => void;
 }) => {
+  const [isIndependentCost, setIsIndependentCost] = useState(false);
   const {
     attributes,
     listeners,
@@ -765,21 +776,31 @@ const SortableTaskItem = ({
         
         {/* Unit cost column */}
         <div className="text-right text-xs flex items-center justify-end gap-2">
-          <InlineUnitCostEditor task={task} />
+          <InlineUnitCostEditor 
+            task={task} 
+            onCostTypeChange={(costType) => setIsIndependentCost(costType === 'independent')}
+          />
           {/* Information icon with cost breakdown popover */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-4 w-4 p-0 text-[var(--accent)] hover:text-[var(--accent)] opacity-70 hover:opacity-100"
+                disabled={isIndependentCost}
+                className={`h-4 w-4 p-0 ${
+                  isIndependentCost 
+                    ? 'text-muted-foreground cursor-not-allowed opacity-50' 
+                    : 'text-[var(--accent)] hover:text-[var(--accent)] opacity-70 hover:opacity-100'
+                }`}
               >
                 <Info className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <TaskCostBreakdown task={task} />
-            </PopoverContent>
+            {!isIndependentCost && (
+              <PopoverContent className="w-80 p-0" align="end">
+                <TaskCostBreakdown task={task} />
+              </PopoverContent>
+            )}
           </Popover>
         </div>
         
