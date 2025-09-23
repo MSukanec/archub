@@ -342,6 +342,10 @@ export default function Estimates() {
       label: "Agregar Cómputo",
       icon: Plus,
       onClick: handleAddSingleTask
+    } : activeTab === "budget" ? {
+      label: "Agregar Tarea",
+      icon: Plus,
+      onClick: handleAddSingleTask
     } : undefined
   }
 
