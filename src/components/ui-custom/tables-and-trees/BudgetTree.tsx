@@ -262,7 +262,7 @@ const GroupHeader = ({
 
   return (
     <div 
-      className="grid gap-4 px-4 py-2 text-base font-medium"
+      className="grid gap-4 px-4 py-2 text-xs font-medium"
       style={{ 
         gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
@@ -274,7 +274,7 @@ const GroupHeader = ({
         <GripVertical className="h-4 w-4 text-white/70" />
       </div>
       {/* Item number for group */}
-      <div className="font-bold text-lg">
+      <div className="font-bold text-xs">
         {groupIndex}
       </div>
       <div className="col-span-5">
