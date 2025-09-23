@@ -164,10 +164,13 @@ const SortableTaskItem = ({
         <div className="text-right text-xs flex items-center justify-end">
           <Input
             type="number"
-            value={(localQuantities[task.id] ?? task.quantity ?? 0).toFixed(2)}
+            value={localQuantities[task.id] ?? task.quantity ?? 0}
             onChange={(e) => {
-              const newQuantity = parseFloat(e.target.value) || 0;
-              handleLocalQuantityChange(task.id, newQuantity);
+              const value = e.target.value;
+              const numValue = value === '' ? 0 : parseFloat(value);
+              if (!isNaN(numValue)) {
+                handleLocalQuantityChange(task.id, numValue);
+              }
             }}
             className="h-8 w-20 text-xs text-right"
             step="0.01"
