@@ -122,7 +122,7 @@ const InlineQuantityEditor = ({
   return (
     <button
       onClick={() => setIsEditing(true)}
-      className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-accent"
+      className="h-8 px-2 text-xs font-medium text-accent hover:text-accent transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-accent"
     >
       <div className="flex items-center justify-end gap-1">
         <span>{formatDisplayValue(currentQuantity)}</span>
