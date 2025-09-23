@@ -1182,17 +1182,29 @@ export function BudgetTree({
           <div className="sticky top-0" style={{ backgroundColor: "var(--background)", zIndex: 10 }}>
             {/* Phase Header Row */}
             <div 
-              className="grid gap-4 px-4 py-2 text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)]"
+              className="grid gap-4 px-4 py-2 text-sm font-semibold text-foreground border-b border-[var(--border)]"
               style={{ 
                 gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px"
               }}
             >
               <div></div> {/* Empty space for drag handle column */}
-              <div 
-                className="flex items-center justify-center bg-[var(--accent)]/10 rounded px-2 py-1 text-center" 
-                style={{ gridColumn: "2 / -1" }}
-              >
+              <div className="flex items-center bg-[var(--accent)]/10 rounded px-2 py-1">
                 {tasks.length === 0 ? 'General' : Object.keys(groupedByPhases).join(' • ')}
+              </div>
+              <div></div> {/* Empty space for description column */}
+              <div></div> {/* Empty space for tipo column */}
+              <div></div> {/* Empty space for cantidad column */}
+              <div></div> {/* Empty space for costo unit column */}
+              <div></div> {/* Empty space for margen column */}
+              <div></div> {/* Empty space for subtotal column */}
+              <div></div> {/* Empty space for incidencia column */}
+              <div className="flex justify-end">
+                {onAddTask && (
+                  <Button onClick={onAddTask} variant="outline" size="sm" className="h-8">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Agregar Tarea
+                  </Button>
+                )}
               </div>
             </div>
             
