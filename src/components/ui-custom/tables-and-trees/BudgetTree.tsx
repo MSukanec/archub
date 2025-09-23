@@ -262,7 +262,7 @@ const GroupHeader = ({
 
   return (
     <div 
-      className="grid gap-4 px-4 py-2 text-xs font-medium"
+      className="grid gap-4 px-4 py-3 text-xs font-medium"
       style={{ 
         gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
@@ -428,8 +428,9 @@ export function BudgetTree({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-0">
-        {/* Main Header - Column titles */}
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
+        <div className="space-y-0">
+          {/* Main Header - Column titles */}
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
@@ -486,6 +487,7 @@ export function BudgetTree({
             </SortableContext>
           </div>
         ))}
+        </div>
       </div>
     </DndContext>
   );
