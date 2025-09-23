@@ -54,6 +54,8 @@ export default function Estimates() {
     project_id: task.project_id,
     task_id: task.task_id,
     quantity: task.quantity,
+    cost_scope: task.cost_scope, // ¡AGREGADO!
+    cost_scope_label: task.cost_scope_label, // ¡AGREGADO!
     created_at: task.created_at,
     updated_at: task.updated_at,
     phase_name: task.phase_name,

@@ -183,15 +183,6 @@ const SortableTaskItem = ({
 
   // Helper function to get cost scope value for the Select component
   const getCostScopeValue = (costScope: string | undefined) => {
-    // Remove excessive logging, keep only for debugging
-    if (!costScope) {
-      console.log('Task missing cost_scope:', {
-        id: task.id,
-        cost_scope: task.cost_scope,
-        cost_scope_label: task.cost_scope_label,
-        custom_name: task.custom_name
-      });
-    }
     return costScope || 'materials_and_labor'; // default value
   };
 
@@ -199,7 +190,6 @@ const SortableTaskItem = ({
   const updateConstructionTask = useUpdateConstructionTask();
   
   const handleCostScopeChange = (taskId: string, newCostScope: string) => {
-    console.log('Changing cost_scope:', taskId, newCostScope);
     updateConstructionTask.mutate({
       id: taskId,
       cost_scope: newCostScope,
@@ -395,20 +385,9 @@ const GroupHeader = ({
   );
 };
 
-// Component to initialize cost_scope for existing records
+// Component to initialize cost_scope for existing records - no longer needed, can be removed
 const CostScopeInitializer = ({ projectId, organizationId }: { projectId: string, organizationId: string }) => {
-  const initializeCostScope = useInitializeCostScope();
-  
-  React.useEffect(() => {
-    console.log('CostScopeInitializer: Initializing cost_scope for project:', projectId, 'organization:', organizationId);
-    // Auto-initialize cost_scope for records that don't have it
-    initializeCostScope.mutate({
-      project_id: projectId,
-      organization_id: organizationId
-    });
-  }, [projectId, organizationId]);
-
-  return null;
+  return null; // Disabled - data transformation fixed the issue
 };
 
 export function BudgetTree({ 
