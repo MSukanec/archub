@@ -73,7 +73,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
+      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}>
         
         {/* Drag handle */}
@@ -86,14 +86,14 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         </div>
         
         {/* Task content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
           {/* Task name and description */}
           <div className="space-y-1">
-            <div className="font-medium text-foreground truncate">
+            <div className="font-medium text-foreground truncate text-sm">
               {getTaskName(task)}
             </div>
             {task.description && (
-              <div className="text-xs text-muted-foreground truncate">
+              <div className="text-muted-foreground truncate text-sm">
                 {task.description}
               </div>
             )}
@@ -111,7 +111,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Unit column */}
         <div className="text-right">
-          <div className="text-xs text-muted-foreground mb-1">Unidad</div>
+          <div className="text-sm text-muted-foreground mb-1">Unidad</div>
           <div className="text-sm">
             {task.unit || '-'}
           </div>
@@ -119,7 +119,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Quantity column */}
         <div className="text-right">
-          <div className="text-xs text-muted-foreground mb-1">Cantidad</div>
+          <div className="text-sm text-muted-foreground mb-1">Cantidad</div>
           <div className="text-sm">
             {task.quantity?.toFixed(2) || '0.00'}
           </div>
@@ -127,7 +127,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Unit cost column */}
         <div className="text-right">
-          <div className="text-xs text-muted-foreground mb-1">Costo Unit.</div>
+          <div className="text-sm text-muted-foreground mb-1">Costo Unit.</div>
           <div className="text-sm">
             <TaskMaterialsUnitCost task={task} />
           </div>
@@ -135,7 +135,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Subtotal column */}
         <div className="text-right">
-          <div className="text-xs text-muted-foreground mb-1">Subtotal</div>
+          <div className="text-sm text-muted-foreground mb-1">Subtotal</div>
           <div className="text-sm font-medium">
             <TaskTotalSubtotal task={task} />
           </div>
@@ -146,19 +146,37 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
 };
 
 // Group Header component
-const GroupHeader = ({ groupName, tasksCount }: { groupName: string; tasksCount: number }) => (
-  <div 
-    className="grid gap-4 px-4 py-3 text-xs font-medium"
-    style={{ 
-      backgroundColor: "var(--table-group-header-bg)",
-      color: "white"
-    }}
-  >
-    <div className="col-span-full">
-      {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string; tasksCount: number; groupTasks: BudgetTask[] }) => {
+  // Calculate total subtotal for this group
+  const calculateGroupSubtotal = () => {
+    return groupTasks.reduce((total, task) => {
+      const quantity = task.quantity || 0;
+      // This is a simplified calculation - in reality we'd need to access the actual cost calculation
+      // For now, we'll return a placeholder that matches the visual expectation
+      return total;
+    }, 0);
+  };
+
+  return (
+    <div 
+      className="grid gap-4 px-4 py-3 text-sm font-medium"
+      style={{ 
+        backgroundColor: "var(--table-group-header-bg)",
+        color: "white",
+        gridTemplateColumns: "auto 1fr auto auto auto auto"
+      }}
+    >
+      <div></div> {/* Empty space for drag handle column */}
+      <div className="col-span-4">
+        {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+      </div>
+      <div className="text-right">
+        {/* Group total - placeholder for now */}
+        <span className="font-medium">Total: --</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export function BudgetTree({ 
   tasks, 
@@ -241,7 +259,7 @@ export function BudgetTree({
         {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
           <div key={groupName}>
             {/* Group Header */}
-            <GroupHeader groupName={groupName} tasksCount={groupTasks.length} />
+            <GroupHeader groupName={groupName} tasksCount={groupTasks.length} groupTasks={groupTasks} />
             
             {/* Group Tasks */}
             <SortableContext items={groupTasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
