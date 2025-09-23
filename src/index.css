@@ -101,7 +101,7 @@
 
   /* Accent / State */
   --accent: hsl(76, 100%, 40%);
-  --accent-2: hsl(173, 58%, 39%);
+  --accent-2: hsl(150, 80%, 30%);
   --accent-rgb: 132, 204, 22;
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
