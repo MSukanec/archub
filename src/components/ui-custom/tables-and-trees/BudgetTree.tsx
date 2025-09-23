@@ -2,13 +2,16 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUpdateConstructionTask, useInitializeCostScope } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
+import { useTaskMaterials } from '@/hooks/use-generated-tasks';
+import { useTaskLabor } from '@/hooks/use-task-labor';
 
 // Drag and Drop imports
 import {
@@ -53,6 +56,157 @@ interface BudgetTreeProps {
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
 }
+
+// Component for cost breakdown popover content
+const TaskCostBreakdown = ({ task }: { task: any }) => {
+  // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
+  const taskId = task.task_id || task.id;
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId);
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId);
+
+  const isLoading = materialsLoading || laborLoading;
+
+  // Calcular total de materiales por unidad
+  const materialsTotalPerUnit = materials.reduce((sum, material) => {
+    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+    const unitPrice = materialView?.avg_price || 0;
+    const quantity = material.amount || 0;
+    return sum + (quantity * unitPrice);
+  }, 0);
+
+  // Calcular total de mano de obra por unidad
+  const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
+    const laborView = laborItem.labor_view;
+    const unitPrice = laborView?.avg_price || 0;
+    const quantity = laborItem.quantity || 0;
+    return sum + (quantity * unitPrice);
+  }, 0);
+
+  const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit;
+
+  return (
+    <div className="w-full">
+      {/* Header */}
+      <div className="px-3 py-2 flex items-center gap-2 border-b border-[var(--card-border)]">
+        <Info className="h-3 w-3 text-[var(--accent)]" />
+        <h3 className="text-xs font-semibold text-[var(--card-fg)]">
+          Costos por unidad
+        </h3>
+      </div>
+
+      {/* Content */}
+      <div className="p-3 max-h-64 overflow-auto">
+        {isLoading ? (
+          <div className="text-center py-3">
+            <div className="text-xs text-[var(--muted-fg)]">Cargando costos...</div>
+          </div>
+        ) : materials.length === 0 && labor.length === 0 ? (
+          <div className="text-center py-3">
+            <div className="text-xs text-[var(--muted-fg)]">
+              No hay costos definidos para esta tarea
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Sección de Materiales */}
+            {materials.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
+                  <span className="text-xs font-semibold">Material ({materials.length})</span>
+                  <span className="text-xs font-semibold">
+                    $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {materials.map((material) => {
+                    const quantity = material.amount || 0;
+                    const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+                    const unitPrice = materialView?.avg_price || 0;
+                    const subtotal = quantity * unitPrice;
+                    const unitName = materialView?.unit_of_computation || 'UD';
+                    const itemName = materialView?.name || 'Material sin nombre';
+                    
+                    return (
+                      <div key={material.id} className="flex items-start justify-between py-1">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <div className="text-xs font-semibold leading-tight text-[var(--card-fg)]">
+                            {itemName}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-[var(--muted-fg)]">
+                            <span>{quantity} {unitName}</span>
+                            <span>x</span>
+                            <span className="font-mono">
+                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-right font-medium text-[var(--card-fg)] min-w-[60px]">
+                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* Sección de Mano de Obra */}
+            {labor.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between py-1 px-2 mb-2 bg-[var(--accent)] text-white rounded">
+                  <span className="text-xs font-semibold">Mano de Obra ({labor.length})</span>
+                  <span className="text-xs font-semibold">
+                    $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {labor.map((laborItem) => {
+                    const quantity = laborItem.quantity || 0;
+                    const laborView = laborItem.labor_view;
+                    const unitPrice = laborView?.avg_price || 0;
+                    const subtotal = quantity * unitPrice;
+                    const unitName = laborView?.unit_name || 'UD';
+                    const itemName = laborView?.labor_name || 'Mano de obra sin nombre';
+                    
+                    return (
+                      <div key={laborItem.id} className="flex items-start justify-between py-1">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <div className="text-xs font-semibold leading-tight text-[var(--card-fg)]">
+                            {itemName}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-[var(--muted-fg)]">
+                            <span>{quantity} {unitName}</span>
+                            <span>x</span>
+                            <span className="font-mono">
+                              {unitPrice > 0 ? `$ ${unitPrice.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '$ 0'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-right font-medium text-[var(--card-fg)] min-w-[60px]">
+                          $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer - Solo se muestra si hay materiales o mano de obra */}
+      {!isLoading && (materials.length > 0 || labor.length > 0) && (
+        <div className="px-3 py-2 flex items-center justify-between border-t border-[var(--card-border)]">
+          <span className="text-xs font-semibold uppercase text-[var(--card-fg)]">TOTAL POR UNIDAD:</span>
+          <div className="text-xs font-semibold text-[var(--card-fg)]">
+            $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Inline Quantity Editor Component
 const InlineQuantityEditor = ({ 
@@ -269,10 +423,25 @@ const SortableTaskItem = ({
         </div>
         
         {/* Unit cost column */}
-        <div className="text-right text-xs flex items-center justify-end">
+        <div className="text-right text-xs flex items-center justify-end gap-2">
           <div className="text-xs [&>span]:!text-xs">
             <TaskMaterialsUnitCost task={task} />
           </div>
+          {/* Information icon with cost breakdown popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 p-0 text-[var(--accent)] hover:text-[var(--accent)] opacity-70 hover:opacity-100"
+              >
+                <Info className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <TaskCostBreakdown task={task} />
+            </PopoverContent>
+          </Popover>
         </div>
         
         {/* Subtotal column */}
