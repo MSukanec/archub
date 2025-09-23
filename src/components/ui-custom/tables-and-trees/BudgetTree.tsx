@@ -86,7 +86,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         </div>
         
         {/* Task content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="flex-1 min-w-0 flex flex-col justify-center text-sm">
           {/* Task name and description */}
           <div className="space-y-1">
             <div className="font-medium text-foreground truncate text-sm">
@@ -110,28 +110,28 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         </div>
         
         {/* Unit column */}
-        <div className="text-right">
+        <div className="text-right text-sm">
           <div className="text-sm">
             {task.unit || '-'}
           </div>
         </div>
         
         {/* Quantity column */}
-        <div className="text-right">
+        <div className="text-right text-sm">
           <div className="text-sm">
             {task.quantity?.toFixed(2) || '0.00'}
           </div>
         </div>
         
         {/* Unit cost column */}
-        <div className="text-right">
+        <div className="text-right text-sm">
           <div className="text-sm">
             <TaskMaterialsUnitCost task={task} />
           </div>
         </div>
         
         {/* Subtotal column */}
-        <div className="text-right">
+        <div className="text-right text-sm">
           <div className="text-sm font-medium">
             <TaskTotalSubtotal task={task} />
           </div>
