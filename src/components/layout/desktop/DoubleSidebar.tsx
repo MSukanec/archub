@@ -452,11 +452,23 @@ export function MainSidebar() {
         }}
       >
         <aside className="flex flex-col overflow-visible w-12">
-          {/* Logo de la APP Archub - SIDEBAR IZQUIERDO */}
+          {/* Logo de la Organización - SIDEBAR IZQUIERDO */}
           <div className="flex items-center justify-center border-b border-[var(--main-sidebar-border)] h-[72px] px-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                 style={{ backgroundColor: 'var(--accent)' }}>
-              A
+            <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+              {userData?.organization?.logo_url ? (
+                <img 
+                  src={userData.organization.logo_url} 
+                  alt={userData.organization.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div 
+                  className="w-full h-full flex items-center justify-center text-white font-semibold text-lg"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                >
+                  {getOrganizationInitials(userData?.organization?.name || 'O')}
+                </div>
+              )}
             </div>
           </div>
           
@@ -647,38 +659,21 @@ export function MainSidebar() {
                   )}
                 >
                   <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {sidebarLevel === 'organization' ? (
-                      userData?.organization?.logo_url ? (
-                        <img 
-                          src={userData.organization.logo_url} 
-                          alt={userData.organization.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div 
-                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                          style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
-                        >
-                          {getOrganizationInitials(userData?.organization?.name || 'O')}
-                        </div>
-                      )
+                    {selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                        style={{ 
+                          backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)'
+                        }}
+                      >
+                        {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                      </div>
                     ) : (
-                      selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
-                        <div 
-                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                          style={{ 
-                            backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)'
-                          }}
-                        >
-                          {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                        <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                          P
                         </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
-                          <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
-                            P
-                          </div>
-                        </div>
-                      )
+                      </div>
                     )}
                   </div>
                   
@@ -687,11 +682,9 @@ export function MainSidebar() {
                       className="text-sm font-medium truncate"
                       style={{ color: 'var(--text-important)' }}
                     >
-                      {sidebarLevel === 'organization' 
-                        ? userData?.organization?.name || "Sin organización"
-                        : (selectedProjectId && projects.find(p => p.id === selectedProjectId))
-                          ? projects.find(p => p.id === selectedProjectId)?.name || "Sin proyecto"
-                          : "Seleccionar proyecto"
+                      {(selectedProjectId && projects.find(p => p.id === selectedProjectId))
+                        ? projects.find(p => p.id === selectedProjectId)?.name || "Sin proyecto"
+                        : "Seleccionar proyecto"
                       }
                     </div>
                   </div>
@@ -704,71 +697,14 @@ export function MainSidebar() {
 
                 {isDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--main-sidebar-bg)] border border-[var(--main-sidebar-border)] rounded-md shadow-lg z-50 max-h-72 overflow-y-auto">
-                    <button
-                      onClick={handleOrganizationSelect}
-                      className={cn(
-                        "flex items-center px-3 py-3 text-left w-full transition-all duration-200 border-b border-[var(--main-sidebar-border)]",
-                        sidebarLevel === 'organization' 
-                          ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
-                          : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
-                      )}
-                    >
-                      <div className="flex items-center flex-1 min-w-0">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
-                          {userData?.organization?.logo_url ? (
-                            <img 
-                              src={userData.organization.logo_url} 
-                              alt={userData.organization.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div 
-                              className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                              style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
-                            >
-                              {getOrganizationInitials(userData?.organization?.name || 'O')}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div 
-                            className="text-xs font-medium"
-                            style={{ 
-                              color: sidebarLevel === 'organization' 
-                                ? 'var(--main-sidebar-button-active-fg)' 
-                                : 'var(--text-important)' 
-                            }}
-                          >
-                            {userData?.organization?.name || "Sin organización"}
-                          </div>
-                          <div className="text-[10px] opacity-60">Organización</div>
-                        </div>
-                      </div>
-                      
-                      {sidebarLevel === 'organization' && userData?.plan && (
-                        <Badge 
-                          variant="secondary" 
-                          className="ml-2 text-[9px] px-1.5 py-0.5 h-auto"
-                          style={{
-                            backgroundColor: 'var(--main-sidebar-button-active-fg)',
-                            color: 'var(--main-sidebar-button-active-bg)'
-                          }}
-                        >
-                          {userData.plan.name}
-                        </Badge>
-                      )}
-                    </button>
-
-                    <div className="h-px bg-[var(--main-sidebar-border)] mx-2"></div>
-
-                    <div className="max-h-40 overflow-y-auto">
+                    <div className="max-h-60 overflow-y-auto">
                       {projects.map((project: any) => (
                         <button
                           key={project.id}
                           onClick={() => handleProjectSelect(project.id)}
                           className={cn(
                             "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md",
-                            sidebarLevel === 'project' && selectedProjectId === project.id
+                            selectedProjectId === project.id
                               ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
                               : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
                           )}
@@ -787,7 +723,7 @@ export function MainSidebar() {
                             <div 
                               className="text-xs font-medium truncate"
                               style={{ 
-                                color: sidebarLevel === 'project' && selectedProjectId === project.id
+                                color: selectedProjectId === project.id
                                   ? 'var(--main-sidebar-button-active-fg)' 
                                   : 'var(--text-important)' 
                               }}
@@ -803,40 +739,21 @@ export function MainSidebar() {
               </div>
             ) : (
               <div className="flex justify-center w-full">
-                {sidebarLevel === 'organization' ? (
+                {selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                    {userData?.organization?.logo_url ? (
-                      <img 
-                        src={userData.organization.logo_url} 
-                        alt={userData.organization.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div 
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}
-                      >
-                        {getOrganizationInitials(userData?.organization?.name || 'O')}
-                      </div>
-                    )}
+                    <div 
+                      className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                      style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
+                    >
+                      {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
+                    </div>
                   </div>
                 ) : (
-                  selectedProjectId && projects.find(p => p.id === selectedProjectId) ? (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                      <div 
-                        className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                        style={{ backgroundColor: projects.find(p => p.id === selectedProjectId)?.color || 'var(--main-sidebar-button-bg)' }}
-                      >
-                        {getProjectInitials(projects.find(p => p.id === selectedProjectId)?.name || 'P')}
-                      </div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
+                    <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
+                      P
                     </div>
-                  ) : (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--main-sidebar-button-bg)' }}>
-                      <div className="w-full h-full flex items-center justify-center text-white font-semibold text-xs">
-                        P
-                      </div>
-                    </div>
-                  )
+                  </div>
                 )}
               </div>
             )}
