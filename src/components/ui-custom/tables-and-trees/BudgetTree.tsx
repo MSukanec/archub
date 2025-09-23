@@ -1,4 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
+import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
+import { useAuthStore } from '@/stores/authStore';
 import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -306,6 +309,8 @@ export function BudgetTree({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
+  const { userData } = useAuthStore();
+  const updateTaskMutation = useUpdateConstructionTask();
   
   // Initialize local quantities from tasks
   useEffect(() => {
@@ -315,6 +320,43 @@ export function BudgetTree({
     });
     setLocalQuantities(initialQuantities);
   }, [tasks]);
+
+  // Create save function for auto-save
+  const saveQuantityChanges = useCallback(async (quantities: { [taskId: string]: number }) => {
+    if (!userData?.preferences?.last_project_id || !userData?.preferences?.active_organization_id) {
+      console.warn('No project or organization selected');
+      return;
+    }
+
+    // Find changes that need to be saved
+    const changedTasks = Object.entries(quantities).filter(([taskId, quantity]) => {
+      const originalTask = tasks.find(task => task.id === taskId);
+      return originalTask && originalTask.quantity !== quantity;
+    });
+
+    // Save each changed task
+    for (const [taskId, quantity] of changedTasks) {
+      try {
+        await updateTaskMutation.mutateAsync({
+          id: taskId,
+          quantity: quantity,
+          project_id: userData.preferences.last_project_id,
+          organization_id: userData.preferences.active_organization_id,
+        });
+      } catch (error) {
+        console.error(`Error saving quantity for task ${taskId}:`, error);
+        throw error; // Re-throw to let the auto-save hook handle it
+      }
+    }
+  }, [tasks, userData, updateTaskMutation]);
+
+  // Use auto-save for quantity changes
+  const { isSaving } = useDebouncedAutoSave({
+    data: localQuantities,
+    saveFn: saveQuantityChanges,
+    delay: 1000, // Wait 1 second after user stops typing
+    enabled: true
+  });
 
   // Handle local quantity changes
   const handleLocalQuantityChange = (taskId: string, quantity: number) => {
