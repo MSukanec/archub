@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,8 @@ const SortableTaskItem = ({
   itemNumber,
   onDuplicateTask,
   onDeleteTask,
-  onQuantityChange
+  handleLocalQuantityChange,
+  localQuantities
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -71,7 +72,8 @@ const SortableTaskItem = ({
   itemNumber: string;
   onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
-  onQuantityChange?: (taskId: string, quantity: number) => void;
+  handleLocalQuantityChange: (taskId: string, quantity: number) => void;
+  localQuantities: { [taskId: string]: number };
 }) => {
   const {
     attributes,
@@ -157,10 +159,10 @@ const SortableTaskItem = ({
         <div className="text-right text-sm flex items-center justify-end">
           <Input
             type="number"
-            value={task.quantity?.toFixed(2) || '0.00'}
+            value={(localQuantities[task.id] ?? task.quantity ?? 0).toFixed(2)}
             onChange={(e) => {
               const newQuantity = parseFloat(e.target.value) || 0;
-              onQuantityChange?.(task.id, newQuantity);
+              handleLocalQuantityChange(task.id, newQuantity);
             }}
             className="h-8 w-20 text-sm text-right"
             step="0.01"
@@ -301,6 +303,26 @@ export function BudgetTree({
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
+  const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
+  
+  // Initialize local quantities from tasks
+  useEffect(() => {
+    const initialQuantities: { [taskId: string]: number } = {};
+    tasks.forEach(task => {
+      initialQuantities[task.id] = task.quantity || 0;
+    });
+    setLocalQuantities(initialQuantities);
+  }, [tasks]);
+
+  // Handle local quantity changes
+  const handleLocalQuantityChange = (taskId: string, quantity: number) => {
+    setLocalQuantities(prev => ({
+      ...prev,
+      [taskId]: quantity
+    }));
+    // Also call the external callback if provided
+    onQuantityChange?.(taskId, quantity);
+  };
   
   // Handle subtotal changes from individual tasks
   const handleSubtotalChange = useCallback((taskId: string, subtotal: number) => {
@@ -456,7 +478,8 @@ export function BudgetTree({
                     itemNumber={`${groupIndex + 1}.${taskIndex + 1}`}
                     onDuplicateTask={onDuplicateTask}
                     onDeleteTask={onDeleteTask}
-                    onQuantityChange={onQuantityChange}
+                    handleLocalQuantityChange={handleLocalQuantityChange}
+                    localQuantities={localQuantities}
                   />
                 ))}
               </div>

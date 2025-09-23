@@ -19,6 +19,24 @@ export function EstimateBudget({
     // TODO: Implement actual reorder logic
   }
 
+  // Handle duplicate task
+  const handleDuplicateTask = (task: any) => {
+    console.log('Duplicating task:', task)
+    // TODO: Implement actual duplicate logic
+  }
+
+  // Handle delete task
+  const handleDeleteTask = (taskId: string) => {
+    console.log('Deleting task:', taskId)
+    // TODO: Implement actual delete logic
+  }
+
+  // Handle quantity change
+  const handleQuantityChange = (taskId: string, quantity: number) => {
+    console.log('Quantity change:', taskId, quantity)
+    // TODO: Implement actual quantity change logic
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -44,7 +62,9 @@ export function EstimateBudget({
     <BudgetTree 
       tasks={tasks}
       onReorder={handleReorder}
-      onEditTask={onEditTask}
+      onDuplicateTask={handleDuplicateTask}
+      onDeleteTask={handleDeleteTask}
+      onQuantityChange={handleQuantityChange}
     />
   )
 }
