@@ -8,13 +8,15 @@ interface EstimateBudgetProps {
   isLoading?: boolean
   onEditTask?: (task: any) => void
   onAddTask?: () => void
+  onDeleteTask?: (taskId: string) => void
 }
 
 export function EstimateBudget({ 
   tasks = [], 
   isLoading = false, 
   onEditTask,
-  onAddTask
+  onAddTask,
+  onDeleteTask
 }: EstimateBudgetProps) {
   // Handle reorder tasks
   const handleReorder = (reorderedTasks: any[]) => {
@@ -30,8 +32,9 @@ export function EstimateBudget({
 
   // Handle delete task
   const handleDeleteTask = (taskId: string) => {
-    console.log('Deleting task:', taskId)
-    // TODO: Implement actual delete logic
+    if (onDeleteTask) {
+      onDeleteTask(taskId)
+    }
   }
 
   // Handle quantity change

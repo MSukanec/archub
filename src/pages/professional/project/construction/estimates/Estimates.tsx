@@ -334,6 +334,7 @@ export default function Estimates() {
         isLoading={isLoading}
         onEditTask={handleEditTask}
         onAddTask={handleAddSingleTask}
+        onDeleteTask={handleDeleteTask}
       />
     </Layout>
   )
