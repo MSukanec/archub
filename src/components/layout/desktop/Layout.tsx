@@ -17,6 +17,7 @@ import { ActionBarMobile } from "@/components/layout/mobile/ActionBarMobile";
 import { useActionBarMobile } from "@/components/layout/mobile/ActionBarMobileContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/layout/mobile/HeaderMobile";
+import { useHeaderActionsStore } from "@/stores/headerActionsStore";
 
 interface Tab {
   id: string;
@@ -75,6 +76,8 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
   const { showActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   const { isDocked, isHovered } = useSidebarStore();
+  const { sidebarLevel } = useNavigationStore();
+  const { setOrganizationActions, setProjectActions, clearActions } = useHeaderActionsStore();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -92,6 +95,30 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       }
     }
   }, [data?.preferences?.theme]);
+
+  // Manejar actionButton del header y moverlo al sidebar apropiado
+  useEffect(() => {
+    if (headerProps?.actionButton) {
+      const actionButton = {
+        id: 'header-action',
+        label: headerProps.actionButton.label,
+        icon: headerProps.actionButton.icon,
+        onClick: headerProps.actionButton.onClick,
+        variant: 'default' as const,
+        disabled: false
+      };
+
+      if (sidebarLevel === 'organization') {
+        setOrganizationActions([actionButton]);
+        setProjectActions([]);
+      } else if (sidebarLevel === 'project') {
+        setProjectActions([actionButton]);
+        setOrganizationActions([]);
+      }
+    } else {
+      clearActions();
+    }
+  }, [headerProps?.actionButton, sidebarLevel, setOrganizationActions, setProjectActions, clearActions]);
 
   return (
     <div
@@ -161,7 +188,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                   showCurrencySelector={headerProps.showCurrencySelector}
                   currencyView={headerProps.currencyView}
                   onCurrencyViewChange={headerProps.onCurrencyViewChange}
-                  actionButton={headerProps.actionButton}
+                  actionButton={undefined}
                   actions={headerProps.actions}
                   showBackButton={headerProps.showBackButton}
                   onBackClick={headerProps.onBackClick}
