@@ -333,6 +333,7 @@ export default function Estimates() {
         tasks={tasks}
         isLoading={isLoading}
         onEditTask={handleEditTask}
+        onAddTask={handleAddSingleTask}
       />
     </Layout>
   )

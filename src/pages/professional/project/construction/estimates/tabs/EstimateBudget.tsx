@@ -1,17 +1,20 @@
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Plus } from 'lucide-react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { BudgetTree } from '@/components/ui-custom/tables-and-trees/BudgetTree'
+import { Button } from '@/components/ui/button'
 
 interface EstimateBudgetProps {
   tasks?: any[]
   isLoading?: boolean
   onEditTask?: (task: any) => void
+  onAddTask?: () => void
 }
 
 export function EstimateBudget({ 
   tasks = [], 
   isLoading = false, 
-  onEditTask 
+  onEditTask,
+  onAddTask
 }: EstimateBudgetProps) {
   // Handle reorder tasks
   const handleReorder = (reorderedTasks: any[]) => {
@@ -52,6 +55,14 @@ export function EstimateBudget({
           icon={<DollarSign className="h-12 w-12 text-muted-foreground" />}
           title="Presupuesto de Proyecto"
           description="No hay tareas disponibles para el presupuesto"
+          action={
+            onAddTask && (
+              <Button onClick={onAddTask} className="mt-4">
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar Tarea
+              </Button>
+            )
+          }
           className="h-full"
         />
       </div>
