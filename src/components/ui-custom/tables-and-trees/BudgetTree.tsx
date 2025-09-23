@@ -131,48 +131,48 @@ const SortableTaskItem = ({
         
         {/* Tipo column */}
         <div className="flex items-center text-sm">
-          <Select defaultValue="mano-obra-materiales">
+          <Select defaultValue="mo-mat">
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mano-obra-materiales">Mano de Obra + Materiales</SelectItem>
-              <SelectItem value="mano-obra">Mano de Obra</SelectItem>
-              <SelectItem value="materiales">Materiales</SelectItem>
+              <SelectItem value="mo-mat">M.O. + MAT.</SelectItem>
+              <SelectItem value="mo">M.O.</SelectItem>
+              <SelectItem value="mat">MAT</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         {/* Unit column */}
-        <div className="text-right text-sm">
+        <div className="text-right text-sm flex items-center justify-end">
           <div className="text-sm">
             {task.unit || '-'}
           </div>
         </div>
         
         {/* Quantity column */}
-        <div className="text-right text-sm">
+        <div className="text-right text-sm flex items-center justify-end">
           <div className="text-sm">
             {task.quantity?.toFixed(2) || '0.00'}
           </div>
         </div>
         
         {/* Unit cost column */}
-        <div className="text-right text-sm">
+        <div className="text-right text-sm flex items-center justify-end">
           <div className="text-sm [&>span]:!text-sm">
             <TaskMaterialsUnitCost task={task} />
           </div>
         </div>
         
         {/* Subtotal column */}
-        <div className="text-right text-sm">
+        <div className="text-right text-sm flex items-center justify-end">
           <div className="text-sm font-medium [&>span]:!text-sm">
             <TaskTotalSubtotal task={task} onSubtotalChange={onSubtotalChange} />
           </div>
         </div>
         
         {/* % de Incidencia column */}
-        <div className="text-right text-sm">
+        <div className="text-right text-sm flex items-center justify-end">
           <div className="text-sm text-muted-foreground">
             {(() => {
               const currentTaskSubtotal = taskSubtotals[task.id] || 0;
