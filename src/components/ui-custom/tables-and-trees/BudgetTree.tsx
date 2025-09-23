@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { GripVertical, Calculator, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
@@ -47,7 +47,19 @@ interface BudgetTreeProps {
 }
 
 // Sortable Item component for drag and drop
-const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
+const SortableTaskItem = ({ 
+  task, 
+  onSubtotalChange,
+  groupSubtotal,
+  totalSubtotal,
+  taskSubtotals
+}: { 
+  task: BudgetTask;
+  onSubtotalChange: (taskId: string, subtotal: number) => void;
+  groupSubtotal: number;
+  totalSubtotal: number;
+  taskSubtotals: { [taskId: string]: number };
+}) => {
   const {
     attributes,
     listeners,
@@ -74,7 +86,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
-           style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}>
+           style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px" }}>
         
         {/* Drag handle */}
         <div 
@@ -133,7 +145,21 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         {/* Subtotal column */}
         <div className="text-right text-sm">
           <div className="text-sm font-medium [&>span]:!text-sm">
-            <TaskTotalSubtotal task={task} />
+            <TaskTotalSubtotal task={task} onSubtotalChange={onSubtotalChange} />
+          </div>
+        </div>
+        
+        {/* % de Incidencia column */}
+        <div className="text-right text-sm">
+          <div className="text-sm text-muted-foreground">
+            {(() => {
+              const currentTaskSubtotal = taskSubtotals[task.id] || 0;
+              if (groupSubtotal > 0 && currentTaskSubtotal > 0) {
+                const percentage = (currentTaskSubtotal / groupSubtotal) * 100;
+                return `${percentage.toFixed(1)}%`;
+              }
+              return '–';
+            })()}
           </div>
         </div>
       </div>
@@ -142,24 +168,29 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
 };
 
 // Group Header component  
-const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string; tasksCount: number; groupTasks: BudgetTask[] }) => {
-  // Calculate total subtotal for this group
-  const calculateGroupSubtotal = () => {
-    // For now, we'll show a placeholder since we'd need to access the actual TaskTotalSubtotal calculations
-    // In a real implementation, we'd sum all the individual subtotals from each task
-    const formatCost = (amount: number) => {
-      return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(amount);
-    };
-    
-    // Placeholder calculation - in reality this would sum the actual subtotals
-    const estimated = groupTasks.length * 25000; // Rough estimate for demo
-    return formatCost(estimated);
+const GroupHeader = ({ 
+  groupName, 
+  tasksCount, 
+  groupTasks, 
+  groupSubtotal, 
+  totalSubtotal 
+}: { 
+  groupName: string; 
+  tasksCount: number; 
+  groupTasks: BudgetTask[];
+  groupSubtotal: number;
+  totalSubtotal: number;
+}) => {
+  const formatCost = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
+  
+  const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
   return (
     <div 
@@ -171,7 +202,7 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
       {/* First row: Group name and total */}
       <div 
         className="grid gap-4 px-4 py-2 pb-1 text-base font-medium"
-        style={{ gridTemplateColumns: "32px 1fr 80px 100px 240px" }}
+        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px" }}
       >
         {/* Drag handle for group */}
         <div className="flex items-center justify-center">
@@ -181,15 +212,17 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
           {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
         </div>
         <div className="text-right">
-          {/* Group total - calculated - now spans wider */}
-          <span className="font-medium">Subtotal de Rubro: {calculateGroupSubtotal()}</span>
+          <span className="font-medium">Subtotal de Rubro: {formatCost(groupSubtotal)}</span>
+        </div>
+        <div className="text-right">
+          <span className="font-medium">{groupPercentage}%</span>
         </div>
       </div>
       
       {/* Second row: Column headers */}
       <div 
         className="grid gap-4 px-4 py-1 pb-2 text-xs opacity-90"
-        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}
+        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px" }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div>Descripción</div>
@@ -197,6 +230,7 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
         <div className="text-right">Cantidad</div>
         <div className="text-right">Costo Unit.</div>
         <div className="text-right">Subtotal</div>
+        <div className="text-right">% de Incidencia</div>
       </div>
     </div>
   );
@@ -208,6 +242,21 @@ export function BudgetTree({
   onEditTask 
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
+  
+  // Handle subtotal changes from individual tasks
+  const handleSubtotalChange = useCallback((taskId: string, subtotal: number) => {
+    setTaskSubtotals(prev => {
+      // Only update if the value actually changed to prevent unnecessary re-renders
+      if (prev[taskId] === subtotal) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [taskId]: subtotal
+      };
+    });
+  }, []);
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -230,6 +279,26 @@ export function BudgetTree({
     
     return groups;
   }, [tasks]);
+  
+  // Calculate group subtotals and total
+  const { groupSubtotals, totalSubtotal } = useMemo(() => {
+    const groupSums: { [groupName: string]: number } = {};
+    let total = 0;
+    
+    Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+      const groupSum = groupTasks.reduce((sum, task) => {
+        const taskSubtotal = taskSubtotals[task.id] || 0;
+        return sum + taskSubtotal;
+      }, 0);
+      groupSums[groupName] = groupSum;
+      total += groupSum;
+    });
+    
+    return {
+      groupSubtotals: groupSums,
+      totalSubtotal: total
+    };
+  }, [groupedTasks, taskSubtotals]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -283,13 +352,26 @@ export function BudgetTree({
         {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
           <div key={groupName}>
             {/* Group Header */}
-            <GroupHeader groupName={groupName} tasksCount={groupTasks.length} groupTasks={groupTasks} />
+            <GroupHeader 
+              groupName={groupName} 
+              tasksCount={groupTasks.length} 
+              groupTasks={groupTasks}
+              groupSubtotal={groupSubtotals[groupName] || 0}
+              totalSubtotal={totalSubtotal}
+            />
             
             {/* Group Tasks */}
             <SortableContext items={groupTasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-0">
                 {groupTasks.map((task) => (
-                  <SortableTaskItem key={task.id} task={task} />
+                  <SortableTaskItem 
+                    key={task.id} 
+                    task={task} 
+                    onSubtotalChange={handleSubtotalChange}
+                    groupSubtotal={groupSubtotals[groupName] || 0}
+                    totalSubtotal={totalSubtotal}
+                    taskSubtotals={taskSubtotals}
+                  />
                 ))}
               </div>
             </SortableContext>

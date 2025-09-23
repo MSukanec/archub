@@ -1,11 +1,13 @@
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
+import { useEffect } from 'react'
 
 interface TaskTotalSubtotalProps {
   task: any
+  onSubtotalChange?: (taskId: string, subtotal: number) => void
 }
 
-export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
+export default function TaskTotalSubtotal({ task, onSubtotalChange }: TaskTotalSubtotalProps) {
   const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(task.task_id)
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id)
 
@@ -34,6 +36,13 @@ export default function TaskTotalSubtotal({ task }: TaskTotalSubtotalProps) {
 
   // Total = materiales + mano de obra
   const totalSubtotal = materialSubtotal + laborSubtotal;
+
+  // Emit subtotal changes via callback
+  useEffect(() => {
+    if (onSubtotalChange && task.id && !isLoading) {
+      onSubtotalChange(task.id, totalSubtotal);
+    }
+  }, [onSubtotalChange, task.id, totalSubtotal, isLoading]);
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
