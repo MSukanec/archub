@@ -483,7 +483,7 @@ export function PageLayout({
       </div>
 
       {/* Page Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         {children}
       </div>
     </div>

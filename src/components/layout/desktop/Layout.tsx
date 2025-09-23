@@ -134,11 +134,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
             {/* Main Content Area with rounded corners and inset appearance */}
             <main
-              className={`flex-1 flex flex-col overflow-y-auto min-h-0 ${!isDocked ? 'w-full' : ''}`}
+              className={`flex-1 flex flex-col ${!isDocked ? 'w-full' : ''}`}
               style={{ 
                 backgroundColor: "hsl(0, 0%, 95%)",
                 marginLeft: isDocked ? '0' : '0', // No margin when not docked since sidebar is absolute
-                scrollbarGutter: 'stable'
               }}
             >
               {headerProps ? (
