@@ -305,7 +305,7 @@ export default function Estimates() {
   ]
 
   const headerProps = {
-    title: "Presupuesto",
+    title: "Cómputo y Presupuesto",
     icon: CheckSquare,
     tabs: tabs,
     activeTab: activeTab,
