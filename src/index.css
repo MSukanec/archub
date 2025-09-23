@@ -687,19 +687,18 @@ input[type="number"] {
 
 /* Global Scrollbar Styles */
 *::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 *::-webkit-scrollbar-track {
-  background: hsl(0, 0%, 95%); /* Same as page background */
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
   background-color: hsl(210, 16%, 82%);
-  border-radius: 7px;
-  border: 2px solid hsl(0, 0%, 95%); /* Border matches page background */
-  background-clip: content-box;
+  border-radius: 6px;
+  border: none;
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -707,7 +706,7 @@ input[type="number"] {
 }
 
 *::-webkit-scrollbar-corner {
-  background: hsl(0, 0%, 95%); /* Corner matches page background */
+  background: transparent;
 }
 
 /* Ensure body scrollbar reaches the top */
