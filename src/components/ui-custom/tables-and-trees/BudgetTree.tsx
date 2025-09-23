@@ -74,7 +74,7 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
-           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}>
+           style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}>
         
         {/* Drag handle */}
         <div 
@@ -163,7 +163,7 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
       {/* First row: Group name and total */}
       <div 
         className="grid gap-4 px-4 py-2 text-sm font-medium"
-        style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}
+        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div className="col-span-4">
@@ -178,7 +178,7 @@ const GroupHeader = ({ groupName, tasksCount, groupTasks }: { groupName: string;
       {/* Second row: Column headers */}
       <div 
         className="grid gap-4 px-4 py-2 text-xs font-medium opacity-90"
-        style={{ gridTemplateColumns: "auto 1fr auto auto auto auto" }}
+        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px" }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div>Descripción</div>
