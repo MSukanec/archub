@@ -194,43 +194,25 @@ const GroupHeader = ({
 
   return (
     <div 
+      className="grid gap-4 px-4 py-2 text-base font-medium"
       style={{ 
+        gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
     >
-      {/* First row: Group name and total */}
-      <div 
-        className="grid gap-4 px-4 py-2 pb-1 text-base font-medium"
-        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px" }}
-      >
-        {/* Drag handle for group */}
-        <div className="flex items-center justify-center">
-          <GripVertical className="h-4 w-4 text-white/70" />
-        </div>
-        <div className="col-span-3">
-          {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
-        </div>
-        <div className="text-right">
-          <span className="font-medium">Subtotal de Rubro: {formatCost(groupSubtotal)}</span>
-        </div>
-        <div className="text-right">
-          <span className="font-medium">{groupPercentage}%</span>
-        </div>
+      {/* Drag handle for group */}
+      <div className="flex items-center justify-center">
+        <GripVertical className="h-4 w-4 text-white/70" />
       </div>
-      
-      {/* Second row: Column headers */}
-      <div 
-        className="grid gap-4 px-4 py-1 pb-2 text-xs opacity-90"
-        style={{ gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px" }}
-      >
-        <div></div> {/* Empty space for drag handle column */}
-        <div>Descripción</div>
-        <div className="text-right">Unidad</div>
-        <div className="text-right">Cantidad</div>
-        <div className="text-right">Costo Unit.</div>
-        <div className="text-right">Subtotal</div>
-        <div className="text-right">% de Incidencia</div>
+      <div className="col-span-3">
+        {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
+      </div>
+      <div className="text-right">
+        <span className="font-medium">Subtotal de Rubro: {formatCost(groupSubtotal)}</span>
+      </div>
+      <div className="text-right">
+        <span className="font-medium">{groupPercentage}%</span>
       </div>
     </div>
   );
@@ -349,6 +331,26 @@ export function BudgetTree({
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-0">
+        {/* Main Header - Column titles */}
+        <div 
+          className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
+          style={{ 
+            gridTemplateColumns: "32px 1fr 80px 100px 120px 120px 110px",
+            backgroundColor: "var(--background)",
+            borderBottom: "1px solid var(--border)",
+            zIndex: 10
+          }}
+        >
+          <div></div> {/* Empty space for drag handle column */}
+          <div>Descripción</div>
+          <div className="text-right">Unidad</div>
+          <div className="text-right">Cantidad</div>
+          <div className="text-right">Costo Unit.</div>
+          <div className="text-right">Subtotal</div>
+          <div className="text-right">% de Incidencia</div>
+        </div>
+
+        {/* Groups */}
         {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
           <div key={groupName}>
             {/* Group Header */}
