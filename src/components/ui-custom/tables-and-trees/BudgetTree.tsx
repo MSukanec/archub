@@ -205,12 +205,14 @@ const GroupHeader = ({
       <div className="flex items-center justify-center">
         <GripVertical className="h-4 w-4 text-white/70" />
       </div>
-      <div className="col-span-3">
+      <div className="col-span-4">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
+      {/* Subtotal column */}
       <div className="text-right">
-        <span className="font-medium">Subtotal de Rubro: {formatCost(groupSubtotal)}</span>
+        <span className="font-medium">{formatCost(groupSubtotal)}</span>
       </div>
+      {/* % de Incidencia column */}
       <div className="text-right">
         <span className="font-medium">{groupPercentage}%</span>
       </div>
