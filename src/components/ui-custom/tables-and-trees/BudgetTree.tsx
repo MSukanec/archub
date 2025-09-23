@@ -2,12 +2,11 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { GripVertical, Calculator, FileText, Copy, Trash2, ChevronDown, Check } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
@@ -55,8 +54,8 @@ interface BudgetTreeProps {
   onQuantityChange?: (taskId: string, quantity: number) => void;
 }
 
-// Quantity Edit Popover Component
-const QuantityEditPopover = ({ 
+// Inline Quantity Editor Component
+const InlineQuantityEditor = ({ 
   taskId, 
   currentQuantity, 
   onQuantityChange 
@@ -65,7 +64,7 @@ const QuantityEditPopover = ({
   currentQuantity: number;
   onQuantityChange: (taskId: string, quantity: number) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(currentQuantity.toString());
 
   // Update input value when currentQuantity changes
@@ -78,66 +77,53 @@ const QuantityEditPopover = ({
     if (!isNaN(numValue)) {
       onQuantityChange(taskId, numValue);
     }
-    setIsOpen(false);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setInputValue(currentQuantity.toString());
+    setIsEditing(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
     } else if (e.key === 'Escape') {
-      setInputValue(currentQuantity.toString());
-      setIsOpen(false);
+      handleCancel();
     }
   };
 
   const formatDisplayValue = (value: number) => {
-    // Format like the image shows: with proper decimal places
     return new Intl.NumberFormat('es-AR', { 
       minimumFractionDigits: 2,
       maximumFractionDigits: 2 
     }).format(value);
   };
 
+  if (isEditing) {
+    return (
+      <Input
+        type="number"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        className="h-8 w-20 text-xs text-right border-blue-500"
+        step="0.01"
+        min="0"
+        autoFocus
+        onFocus={(e) => e.target.select()}
+      />
+    );
+  }
+
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent/50 border border-transparent hover:border-border"
-        >
-          <span>{formatDisplayValue(currentQuantity)}</span>
-          <ChevronDown className="ml-1 h-3 w-3 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-48 p-3" align="end">
-        <div className="space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">
-            Cantidad
-          </div>
-          <div className="flex items-center space-x-2">
-            <Input
-              type="number"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="h-8 text-xs"
-              step="0.01"
-              min="0"
-              autoFocus
-              onFocus={(e) => e.target.select()}
-            />
-            <Button
-              size="sm" 
-              onClick={handleSave}
-              className="h-8 w-8 p-0"
-            >
-              <Check className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <button
+      onClick={() => setIsEditing(true)}
+      className="h-8 px-2 text-xs font-medium text-foreground hover:bg-accent/50 hover:text-blue-600 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-blue-400"
+    >
+      {formatDisplayValue(currentQuantity)}
+    </button>
   );
 };
 
@@ -247,9 +233,9 @@ const SortableTaskItem = ({
           </Select>
         </div>
         
-        {/* Quantity column - Clickable with popover */}
+        {/* Quantity column - Inline editable */}
         <div className="text-right text-xs flex items-center justify-end">
-          <QuantityEditPopover
+          <InlineQuantityEditor
             taskId={task.id}
             currentQuantity={localQuantities[task.id] ?? task.quantity ?? 0}
             onQuantityChange={handleLocalQuantityChange}
