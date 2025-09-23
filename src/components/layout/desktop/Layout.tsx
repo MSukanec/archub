@@ -113,10 +113,10 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - Frame Layout without Header */
-        <div className="h-screen flex">
+        <div className="h-screen flex overflow-hidden">
           {/* Main Layout Frame - Full height */}
           <div
-            className="flex-1 flex min-h-0 overflow-hidden relative"
+            className="flex-1 flex min-h-0 relative"
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
             {/* Tertiary Sidebar - Conditional layout based on docked state */}
@@ -134,7 +134,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
             {/* Main Content Area with rounded corners and inset appearance */}
             <main
-              className={`flex-1 flex flex-col ${!isDocked ? 'w-full' : ''}`}
+              className={`flex-1 flex flex-col overflow-y-auto ${!isDocked ? 'w-full' : ''}`}
               style={{ 
                 backgroundColor: "hsl(0, 0%, 95%)",
                 marginLeft: isDocked ? '0' : '0', // No margin when not docked since sidebar is absolute
@@ -167,7 +167,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                 >
                   <div
                     className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
-                      isDocked ? 'pl-[72px] pr-[72px]' : 'pl-[120px] pr-[72px]'
+                      isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
                     }`}
                   >
                     {children}
@@ -176,7 +176,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               ) : (
                 <div
                   className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-0 ${
-                    isDocked ? 'md:pl-[72px] md:pr-[72px]' : 'md:pl-[120px] md:pr-[72px]'
+                    isDocked ? 'md:pl-[120px] md:pr-[72px]' : 'md:pl-[168px] md:pr-[72px]'
                   }`}
                 >
                   {children}
