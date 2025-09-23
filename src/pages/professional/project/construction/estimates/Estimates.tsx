@@ -21,6 +21,7 @@ import { EstimatePhases } from './tabs/EstimatePhases'
 import { EstimateSchedule } from './tabs/EstimateSchedule'
 
 export default function Estimates() {
+  const [activeTab, setActiveTab] = useState('listado-tareas')
   
   const { data: userData } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
@@ -294,10 +295,21 @@ export default function Estimates() {
     }
   }, [isMobile]) // Solo dependencias primitivas
 
+  // Define tabs - solo una pestaña
+  const tabs = [
+    {
+      id: 'listado-tareas',
+      label: 'Listado de Tareas',
+      isActive: activeTab === 'listado-tareas'
+    }
+  ]
 
   const headerProps = {
-    title: "Listado de Tareas",
+    title: "Presupuesto",
     icon: CheckSquare,
+    tabs: tabs,
+    activeTab: activeTab,
+    onTabChange: setActiveTab,
     actionButton: {
       label: "Agregar Tarea",
       icon: Plus,
