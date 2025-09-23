@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUpdateConstructionTask, useInitializeCostScope } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { GripVertical, Calculator, FileText, Copy, Trash2, Info } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +55,7 @@ interface BudgetTreeProps {
   onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
+  onAddTask?: () => void;
 }
 
 // Component for cost breakdown popover content
@@ -933,7 +934,8 @@ export function BudgetTree({
   onReorder, 
   onDuplicateTask,
   onDeleteTask,
-  onQuantityChange 
+  onQuantityChange,
+  onAddTask 
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
@@ -1126,7 +1128,13 @@ export function BudgetTree({
       <div className="flex items-center justify-center h-32 text-muted-foreground">
         <div className="text-center">
           <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>No hay tareas para mostrar</p>
+          <p className="mb-4">No hay tareas para mostrar</p>
+          {onAddTask && (
+            <Button onClick={onAddTask} variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Tarea
+            </Button>
+          )}
         </div>
       </div>
     );
