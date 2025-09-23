@@ -125,14 +125,14 @@ const SortableTaskItem = ({ task }: { task: BudgetTask }) => {
         
         {/* Unit cost column */}
         <div className="text-right text-sm">
-          <div className="text-sm">
+          <div className="text-sm [&>span]:!text-sm">
             <TaskMaterialsUnitCost task={task} />
           </div>
         </div>
         
         {/* Subtotal column */}
         <div className="text-right text-sm">
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium [&>span]:!text-sm">
             <TaskTotalSubtotal task={task} />
           </div>
         </div>
