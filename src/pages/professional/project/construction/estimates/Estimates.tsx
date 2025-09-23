@@ -21,7 +21,6 @@ import { EstimatePhases } from './tabs/EstimatePhases'
 import { EstimateSchedule } from './tabs/EstimateSchedule'
 
 export default function Estimates() {
-  const [activeTab, setActiveTab] = useState('presupuesto')
   
   const { data: userData } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
@@ -295,58 +294,10 @@ export default function Estimates() {
     }
   }, [isMobile]) // Solo dependencias primitivas
 
-  // Define tabs
-  const tabs = [
-    {
-      id: 'presupuesto',
-      label: 'Listado de Tareas',
-      isActive: activeTab === 'presupuesto'
-    },
-    {
-      id: 'fases',
-      label: 'Fases',
-      isActive: activeTab === 'fases'
-    },
-    {
-      id: 'cronograma',
-      label: 'Cronograma',
-      isActive: activeTab === 'cronograma'
-    }
-  ]
-
-  const getActiveTabContent = () => {
-    switch (activeTab) {
-      case 'presupuesto':
-        return (
-          <EstimateBudget 
-            tasks={tasks}
-            isLoading={isLoading}
-            onEditTask={handleEditTask}
-          />
-        )
-      case 'fases':
-        return (
-          <EstimatePhases 
-            projectPhases={projectPhases}
-            onReorder={handleReorderPhases}
-            onEdit={handleEditPhase}
-            onDelete={handleDeletePhase}
-            isUpdating={false}
-          />
-        )
-      case 'cronograma':
-        return <EstimateSchedule />
-      default:
-        return null
-    }
-  }
 
   const headerProps = {
-    title: "Presupuesto",
+    title: "Listado de Tareas",
     icon: CheckSquare,
-    tabs: tabs,
-    activeTab: activeTab,
-    onTabChange: setActiveTab,
     actionButton: {
       label: "Agregar Tarea",
       icon: Plus,
@@ -366,7 +317,11 @@ export default function Estimates() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {getActiveTabContent()}
+      <EstimateBudget 
+        tasks={tasks}
+        isLoading={isLoading}
+        onEditTask={handleEditTask}
+      />
     </Layout>
   )
 }
