@@ -321,7 +321,7 @@ export default function Estimates() {
   const headerTabs = [
     {
       id: "tasks",
-      label: "Cómputos",
+      label: "Cómputo",
       isActive: activeTab === "tasks"
     },
     {
@@ -366,7 +366,11 @@ export default function Estimates() {
         )}
         
         {activeTab === "budget" && (
-          <EstimateBudget />
+          <EstimateBudget 
+            tasks={tasks}
+            isLoading={isLoading}
+            onEditTask={handleEditTask}
+          />
         )}
       </div>
     </Layout>
