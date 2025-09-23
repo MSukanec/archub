@@ -557,7 +557,7 @@ const SortableTaskItem = ({
         {/* Task content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center text-xs">
           {/* Task name */}
-          <div className="font-medium text-foreground truncate text-xs">
+          <div className="font-bold text-foreground truncate text-sm">
             {getTaskName(task)}
           </div>
           
