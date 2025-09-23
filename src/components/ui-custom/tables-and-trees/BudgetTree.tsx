@@ -62,7 +62,8 @@ const SortableTaskItem = ({
   onDuplicateTask,
   onDeleteTask,
   handleLocalQuantityChange,
-  localQuantities
+  localQuantities,
+  isLastInGroup
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -74,6 +75,7 @@ const SortableTaskItem = ({
   onDeleteTask?: (taskId: string) => void;
   handleLocalQuantityChange: (taskId: string, quantity: number) => void;
   localQuantities: { [taskId: string]: number };
+  isLastInGroup?: boolean;
 }) => {
   const {
     attributes,
@@ -100,7 +102,7 @@ const SortableTaskItem = ({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
+      <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
            style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px" }}>
         
         {/* Drag handle */}
@@ -481,6 +483,7 @@ export function BudgetTree({
                     onDeleteTask={onDeleteTask}
                     handleLocalQuantityChange={handleLocalQuantityChange}
                     localQuantities={localQuantities}
+                    isLastInGroup={taskIndex === groupTasks.length - 1}
                   />
                 ))}
               </div>
