@@ -322,16 +322,6 @@ export default function Estimates() {
       id: "tasks",
       label: "Cómputos",
       isActive: activeTab === "tasks"
-    },
-    {
-      id: "phases", 
-      label: "Fases",
-      isActive: activeTab === "phases"
-    },
-    {
-      id: "schedule", 
-      label: "Cronograma",
-      isActive: activeTab === "schedule"
     }
   ]
 
@@ -344,10 +334,6 @@ export default function Estimates() {
       label: "Agregar Cómputo",
       icon: Plus,
       onClick: handleAddSingleTask
-    } : activeTab === "phases" ? {
-      label: "Crear Fase",
-      icon: Plus,
-      onClick: handleAddPhase
     } : undefined
   }
 
@@ -371,20 +357,6 @@ export default function Estimates() {
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
           />
-        )}
-        
-        {activeTab === "phases" && (
-          <EstimatePhases
-            projectPhases={projectPhases}
-            onReorder={handleReorderPhases}
-            onEdit={handleEditPhase}
-            onDelete={handleDeletePhase}
-            isUpdating={updatePhasePositions.isPending}
-          />
-        )}
-        
-        {activeTab === "schedule" && (
-          <EstimateSchedule />
         )}
       </div>
     </Layout>
