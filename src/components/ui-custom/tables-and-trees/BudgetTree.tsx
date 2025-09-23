@@ -100,7 +100,7 @@ const SortableTaskItem = ({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-sm hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
+      <div className="group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors border-b border-[var(--table-row-border)]" 
            style={{ gridTemplateColumns: "32px 60px 1fr 150px 100px 80px 120px 120px 110px 80px" }}>
         
         {/* Drag handle */}
@@ -113,19 +113,19 @@ const SortableTaskItem = ({
         </div>
         
         {/* Item number */}
-        <div className="text-sm font-medium text-muted-foreground flex items-center">
+        <div className="text-xs font-medium text-muted-foreground flex items-center">
           {itemNumber}
         </div>
         
         {/* Task content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center text-sm">
+        <div className="flex-1 min-w-0 flex flex-col justify-center text-xs">
           {/* Task name and description */}
           <div className="space-y-1">
-            <div className="font-medium text-foreground truncate text-sm">
+            <div className="font-medium text-foreground truncate text-xs">
               {getTaskName(task)}
             </div>
             {task.description && (
-              <div className="text-muted-foreground truncate text-sm">
+              <div className="text-muted-foreground truncate text-xs">
                 {task.description}
               </div>
             )}
@@ -142,7 +142,7 @@ const SortableTaskItem = ({
         </div>
         
         {/* Tipo column */}
-        <div className="flex items-center text-sm">
+        <div className="flex items-center text-xs">
           <Select defaultValue="mo-mat">
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
@@ -156,7 +156,7 @@ const SortableTaskItem = ({
         </div>
         
         {/* Quantity column - Editable input */}
-        <div className="text-right text-sm flex items-center justify-end">
+        <div className="text-right text-xs flex items-center justify-end">
           <Input
             type="number"
             value={(localQuantities[task.id] ?? task.quantity ?? 0).toFixed(2)}
@@ -164,36 +164,36 @@ const SortableTaskItem = ({
               const newQuantity = parseFloat(e.target.value) || 0;
               handleLocalQuantityChange(task.id, newQuantity);
             }}
-            className="h-8 w-20 text-sm text-right"
+            className="h-8 w-20 text-xs text-right"
             step="0.01"
             min="0"
           />
         </div>
         
         {/* Unit column */}
-        <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm">
+        <div className="text-right text-xs flex items-center justify-end">
+          <div className="text-xs">
             {task.unit || '-'}
           </div>
         </div>
         
         {/* Unit cost column */}
-        <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm [&>span]:!text-sm">
+        <div className="text-right text-xs flex items-center justify-end">
+          <div className="text-xs [&>span]:!text-xs">
             <TaskMaterialsUnitCost task={task} />
           </div>
         </div>
         
         {/* Subtotal column */}
-        <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm font-medium [&>span]:!text-sm">
+        <div className="text-right text-xs flex items-center justify-end">
+          <div className="text-xs font-medium [&>span]:!text-xs">
             <TaskTotalSubtotal task={task} onSubtotalChange={onSubtotalChange} />
           </div>
         </div>
         
         {/* % de Incidencia column */}
-        <div className="text-right text-sm flex items-center justify-end">
-          <div className="text-sm text-muted-foreground">
+        <div className="text-right text-xs flex items-center justify-end">
+          <div className="text-xs text-muted-foreground">
             {(() => {
               const currentTaskSubtotal = taskSubtotals[task.id] || 0;
               if (groupSubtotal > 0 && currentTaskSubtotal > 0) {
