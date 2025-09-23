@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useUpdateConstructionTask } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
-import { useAuthStore } from '@/stores/authStore';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { GripVertical, Calculator, FileText, Copy, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -309,7 +309,7 @@ export function BudgetTree({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
-  const { userData } = useAuthStore();
+  const { data: userData } = useCurrentUser();
   const updateTaskMutation = useUpdateConstructionTask();
   
   // Initialize local quantities from tasks
@@ -323,7 +323,7 @@ export function BudgetTree({
 
   // Create save function for auto-save
   const saveQuantityChanges = useCallback(async (quantities: { [taskId: string]: number }) => {
-    if (!userData?.preferences?.last_project_id || !userData?.preferences?.active_organization_id) {
+    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
       console.warn('No project or organization selected');
       return;
     }
@@ -341,8 +341,9 @@ export function BudgetTree({
           id: taskId,
           quantity: quantity,
           project_id: userData.preferences.last_project_id,
-          organization_id: userData.preferences.active_organization_id,
+          organization_id: userData.preferences.last_organization_id,
         });
+        console.log('Quantity saved successfully for task:', taskId, 'quantity:', quantity);
       } catch (error) {
         console.error(`Error saving quantity for task ${taskId}:`, error);
         throw error; // Re-throw to let the auto-save hook handle it
@@ -360,6 +361,7 @@ export function BudgetTree({
 
   // Handle local quantity changes
   const handleLocalQuantityChange = (taskId: string, quantity: number) => {
+    console.log('Quantity change:', taskId, quantity);
     setLocalQuantities(prev => ({
       ...prev,
       [taskId]: quantity
