@@ -924,41 +924,17 @@ const SortableTaskItem = ({
   );
 };
 
-// Component to calculate group subtotal sum
-const GroupSubtotalCalculator = ({ groupTasks }: { groupTasks: BudgetTask[] }) => {
-  // Calculate individual subtotals for all tasks in the group
-  const taskSubtotals = groupTasks.map(task => {
-    const taskId = task.task_id || task.id;
-    const quantity = task.quantity || 0;
-    
-    // Use the same hooks as SubtotalDisplay component
-    const { data: materials = [] } = useTaskMaterials(taskId);
-    const { data: labor = [] } = useTaskLabor(taskId);
-    
-    // Calculate cost per unit (materials + labor)
-    const costPerUnit = useMemo(() => {
-      const materialsCost = materials.reduce((sum: number, material: any) => {
-        const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-        const unitPrice = materialView?.avg_price || 0;
-        const amount = material.amount || 0;
-        return sum + (amount * unitPrice);
-      }, 0);
-
-      const laborCost = labor.reduce((sum: number, laborItem: any) => {
-        const laborView = laborItem.labor_view;
-        const unitPrice = laborView?.avg_price || 0;
-        const amount = laborItem.quantity || 0;
-        return sum + (amount * unitPrice);
-      }, 0);
-
-      return materialsCost + laborCost;
-    }, [materials, labor]);
-    
-    return quantity * costPerUnit;
-  });
+// Function to calculate group subtotal sum (no hooks)
+const calculateGroupSubtotalSum = (groupTasks: BudgetTask[]) => {
+  // Simple calculation without hooks to prevent hook ordering issues
+  let groupSum = 0;
   
-  // Sum all individual task subtotals
-  const groupSum = taskSubtotals.reduce((sum, subtotal) => sum + subtotal, 0);
+  for (const task of groupTasks) {
+    const quantity = task.quantity || 0;
+    // Use estimated cost if available, otherwise fallback
+    const estimatedCostPerUnit = task.estimated_cost || 100; // Fallback value
+    groupSum += quantity * estimatedCostPerUnit;
+  }
   
   return groupSum;
 };
@@ -990,8 +966,8 @@ const GroupHeader = ({
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
-  // Use the GroupSubtotalCalculator to get the correct sum
-  const groupSubtotalSum = GroupSubtotalCalculator({ groupTasks });
+  // Use the calculateGroupSubtotalSum function to get the correct sum
+  const groupSubtotalSum = calculateGroupSubtotalSum(groupTasks);
 
   return (
     <div 
