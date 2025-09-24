@@ -43,37 +43,24 @@ export function EstimateBudget({
     
     const totalDivisions = Object.keys(divisions).length;
 
-    // Calculate total estimated cost (base cost without margin)
-    const totalEstimatedCost = tasks.reduce((sum, task) => {
-      const quantity = task.quantity || 0;
-      // Estimate basic cost per unit (placeholder - in real scenario would use materials + labor)
-      const baseCostPerUnit = 1000; // placeholder value
-      return sum + (quantity * baseCostPerUnit);
-    }, 0);
+    // Calculate total estimated cost (sum of subtotals - base cost without margin)
+    // Note: This will be calculated from real data using hooks, placeholder for now
+    const totalEstimatedCost = 0; // Will be calculated from actual subtotals
 
-    // Calculate total cost with margins
-    const totalCostWithMargin = tasks.reduce((sum, task) => {
-      const quantity = task.quantity || 0;
-      const baseCostPerUnit = 1000; // placeholder value
-      const margin = task.margin || 0;
-      const baseSubtotal = quantity * baseCostPerUnit;
-      const marginAmount = baseSubtotal * (margin / 100);
-      return sum + baseSubtotal + marginAmount;
-    }, 0);
+    // Calculate total margin value (sum of all margins applied to tasks)
+    // Note: This will be calculated from real data using hooks, placeholder for now
+    const totalMarginValue = 0; // Will be calculated from actual margin amounts
 
-    // Calculate average margin
-    const tasksWithMargin = tasks.filter(task => task.margin && task.margin > 0);
-    const averageMargin = tasksWithMargin.length > 0 
-      ? tasksWithMargin.reduce((sum, task) => sum + (task.margin || 0), 0) / tasksWithMargin.length
-      : 0;
+    // Calculate total cost with margins (final budget total)
+    // Note: This will be calculated from real data using hooks, placeholder for now
+    const totalFinalCost = 0; // Will be calculated from actual totals with margins
 
     return {
       totalTasks,
       totalDivisions,
       totalEstimatedCost,
-      totalCostWithMargin,
-      averageMargin,
-      marginValue: totalCostWithMargin - totalEstimatedCost
+      totalMarginValue,
+      totalFinalCost
     };
   }, [tasks]);
 
@@ -158,23 +145,14 @@ export function EstimateBudget({
                   <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Mini gráfico de barras */}
-                <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-sm flex-1"
-                      style={{
-                        backgroundColor: 'var(--accent)',
-                        height: `${Math.max(30, Math.random() * 100)}%`,
-                        opacity: i < Math.min(kpiData.totalTasks, 6) ? 1 : 0.3
-                      }}
-                    />
-                  ))}
+                {/* Valor principal con --accent */}
+                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                    {kpiData.totalTasks}
+                  </p>
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalTasks}</p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     {kpiData.totalDivisions} divisiones
                   </p>
@@ -194,99 +172,70 @@ export function EstimateBudget({
                   <Calculator className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Gráfico de línea de tendencia */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
-                  <svg className="w-full h-full" viewBox="0 0 100 32">
-                    <path
-                      d="M 0,24 Q 25,20 50,12 T 100,8"
-                      stroke="var(--accent)"
-                      strokeWidth="2"
-                      fill="none"
-                      className="opacity-80"
-                    />
-                    <circle cx="100" cy="8" r="2" fill="var(--accent)" />
-                  </svg>
-                </div>
-                
-                <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
+                {/* Valor principal con --accent */}
+                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
                     {formatCurrency(kpiData.totalEstimatedCost)}
                   </p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    sin margen
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Total con Margen */}
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
-                <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Total' : 'Total con Margen'}
-                  </p>
-                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
-                </div>
-                
-                {/* Indicador de progreso */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} bg-muted/20 rounded-full relative overflow-hidden`}>
-                  <div 
-                    className="h-full rounded-full transition-all duration-500" 
-                    style={{ 
-                      backgroundColor: 'var(--accent)', 
-                      width: `${Math.min(100, (kpiData.marginValue / kpiData.totalEstimatedCost) * 100 + 60)}%` 
-                    }}
-                  />
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {formatCurrency(kpiData.totalCostWithMargin)}
-                  </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    +{formatCurrency(kpiData.marginValue)} margen
+                    suma subtotales
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Margen Promedio */}
+          {/* Suma de Beneficio */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Margen' : 'Margen Promedio'}
+                    {isMobile ? 'Beneficio' : 'Suma de Beneficio'}
                   </p>
                   <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Círculo de progreso */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} flex items-center justify-center`}>
-                  <div className="relative">
-                    <svg className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`} viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="var(--accent)"
-                        strokeWidth="2"
-                        strokeDasharray={`${Math.min(kpiData.averageMargin * 2, 100)}, 100`}
-                        opacity="0.8"
-                      />
-                    </svg>
-                  </div>
+                {/* Valor principal con --accent */}
+                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                    {formatCurrency(kpiData.totalMarginValue)}
+                  </p>
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {kpiData.averageMargin.toFixed(1)}%
-                  </p>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.totalDivisions} divisiones
+                    suma márgenes
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Final */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+                <div className="flex items-center justify-between">
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Total' : 'Presupuesto Final'}
+                  </p>
+                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                {/* Valor principal con --accent */}
+                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                    {formatCurrency(kpiData.totalFinalCost)}
+                  </p>
+                </div>
+                
+                <div>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    suma totales
                   </p>
                 </div>
               </div>
