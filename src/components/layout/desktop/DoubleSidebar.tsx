@@ -306,7 +306,7 @@ export function MainSidebar() {
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Contact, label: 'Contactos', href: '/contacts' },
-      { icon: BarChart3, label: 'Análisis', href: '/analysis' },
+      { icon: BarChart3, label: 'Biblioteca', href: '/analysis' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     finances: [
@@ -404,15 +404,80 @@ export function MainSidebar() {
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
         },
-        // Botones de administración (sin línea divisoria)
-        ...(sidebarContent.organization || []).map(item => ({
+        {
+          type: 'divider'
+        },
+        // Proyectos
+        {
           type: 'button',
-          id: `organization-${item.href.split('/').pop()}`,
-          icon: item.icon,
-          label: item.label,
-          href: item.href,
-          restricted: item.href === '/organization/activity'
-        })),
+          id: 'organization-projects',
+          icon: Folder,
+          label: 'Proyectos',
+          href: '/organization/projects'
+        },
+        // Contactos
+        {
+          type: 'button',
+          id: 'organization-contacts',
+          icon: Contact,
+          label: 'Contactos',
+          href: '/contacts'
+        },
+        // Biblioteca (antes Análisis)
+        {
+          type: 'button',
+          id: 'organization-analysis',
+          icon: BarChart3,
+          label: 'Biblioteca',
+          href: '/analysis'
+        },
+        {
+          type: 'divider'
+        },
+        // Movimientos
+        {
+          type: 'button',
+          id: 'organization-movements',
+          icon: TrendingUp,
+          label: 'Movimientos',
+          href: '/movements'
+        },
+        // Capital
+        {
+          type: 'button',
+          id: 'organization-capital',
+          icon: HandCoins,
+          label: 'Capital',
+          href: '/finances/capital'
+        },
+        // Gastos Generales
+        {
+          type: 'button',
+          id: 'organization-general-costs',
+          icon: CreditCard,
+          label: 'Gastos Generales',
+          href: '/finances/general-costs'
+        },
+        {
+          type: 'divider'
+        },
+        // Actividad
+        {
+          type: 'button',
+          id: 'organization-activity',
+          icon: Activity,
+          label: 'Actividad',
+          href: '/organization/activity',
+          restricted: true
+        },
+        // Preferencias
+        {
+          type: 'button',
+          id: 'organization-preferences',
+          icon: Settings,
+          label: 'Preferencias',
+          href: '/organization/preferences'
+        }
       ];
       return organizationItems;
     } else if (sidebarLevel === 'admin') {
