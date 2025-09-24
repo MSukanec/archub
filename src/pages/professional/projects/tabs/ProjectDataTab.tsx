@@ -104,33 +104,19 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
 
       if (Object.keys(projectDataPayload).length === 0) return;
 
-      // Check if project_data record exists
-      const { data: existingData } = await supabase
+      // Use upsert to avoid race conditions
+      const { error } = await supabase
         .from('project_data')
-        .select('id')
-        .eq('project_id', activeProjectId)
-        .single();
+        .upsert({
+          project_id: activeProjectId,
+          ...projectDataPayload
+        }, {
+          onConflict: 'project_id'
+        });
 
-      let result;
-      if (existingData) {
-        // Update existing record
-        result = await supabase
-          .from('project_data')
-          .update(projectDataPayload)
-          .eq('project_id', activeProjectId);
-      } else {
-        // Insert new record
-        result = await supabase
-          .from('project_data')
-          .insert({
-            project_id: activeProjectId,
-            ...projectDataPayload
-          });
-      }
-
-      if (result.error) {
-        console.error('Error saving project data:', result.error);
-        throw result.error;
+      if (error) {
+        console.error('Error saving project data:', error);
+        throw error;
       }
     },
     onSuccess: () => {
