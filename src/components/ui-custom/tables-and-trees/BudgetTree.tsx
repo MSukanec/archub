@@ -62,7 +62,11 @@ interface BudgetTreeProps {
 }
 
 // Component for subtotal calculation (Cantidad x Costo Unitario)
-const SubtotalDisplay = ({ task, quantity }: { task: any; quantity: number }) => {
+const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: { 
+  task: any; 
+  quantity: number; 
+  onPureSubtotalChange?: (taskId: string, pureSubtotal: number) => void; 
+}) => {
   const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id);
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id || task.id);
 
@@ -89,6 +93,14 @@ const SubtotalDisplay = ({ task, quantity }: { task: any; quantity: number }) =>
 
   // Calculate subtotal (quantity × cost per unit)
   const subtotal = quantity * costPerUnit;
+
+  // Report pure subtotal change
+  useEffect(() => {
+    if (onPureSubtotalChange && !isLoadingData && subtotal >= 0) {
+      const taskId = task.task_id || task.id;
+      onPureSubtotalChange(taskId, subtotal);
+    }
+  }, [onPureSubtotalChange, isLoadingData, subtotal, task]);
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -711,7 +723,8 @@ const SortableTaskItem = ({
   localQuantities,
   isLastInGroup,
   handleDescriptionChange,
-  handleMarginChange
+  handleMarginChange,
+  handlePureSubtotalChange
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -726,6 +739,7 @@ const SortableTaskItem = ({
   isLastInGroup?: boolean;
   handleDescriptionChange: (taskId: string, description: string) => void;
   handleMarginChange: (taskId: string, margin: number) => void;
+  handlePureSubtotalChange: (taskId: string, pureSubtotal: number) => void;
 }) => {
   const [isIndependentCost, setIsIndependentCost] = useState(false);
   const {
@@ -863,7 +877,11 @@ const SortableTaskItem = ({
         
         {/* New Subtotal column (Cantidad x Costo Unitario) */}
         <div className="text-right text-xs flex items-center justify-end">
-          <SubtotalDisplay task={task} quantity={localQuantities[task.id] ?? task.quantity ?? 0} />
+          <SubtotalDisplay 
+            task={task} 
+            quantity={localQuantities[task.id] ?? task.quantity ?? 0} 
+            onPureSubtotalChange={handlePureSubtotalChange}
+          />
         </div>
         
         {/* Margin column */}
@@ -1023,6 +1041,7 @@ export function BudgetTree({
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
+  const [pureSubtotals, setPureSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
   const { data: userData } = useCurrentUser();
   const updateTaskMutation = useUpdateConstructionTask();
@@ -1134,6 +1153,18 @@ export function BudgetTree({
     });
   }, []);
   
+  const handlePureSubtotalChange = useCallback((taskId: string, pureSubtotal: number) => {
+    setPureSubtotals(prev => {
+      if (prev[taskId] === pureSubtotal) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [taskId]: pureSubtotal
+      };
+    });
+  }, []);
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -1156,7 +1187,7 @@ export function BudgetTree({
     return groups;
   }, [tasks]);
   
-  // Calculate group subtotals and total
+  // Calculate group subtotals and total (with margins)
   const { groupSubtotals, totalSubtotal } = useMemo(() => {
     const groupSums: { [groupName: string]: number } = {};
     let total = 0;
@@ -1175,6 +1206,23 @@ export function BudgetTree({
       totalSubtotal: total
     };
   }, [groupedTasks, taskSubtotals]);
+  
+  // Calculate pure subtotals for group headers (without margins)
+  const { groupPureSubtotals } = useMemo(() => {
+    const groupSums: { [groupName: string]: number } = {};
+    
+    Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+      const groupSum = groupTasks.reduce((sum, task) => {
+        const pureSubtotal = pureSubtotals[task.id] || 0;
+        return sum + pureSubtotal;
+      }, 0);
+      groupSums[groupName] = groupSum;
+    });
+    
+    return {
+      groupPureSubtotals: groupSums
+    };
+  }, [groupedTasks, pureSubtotals]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -1292,6 +1340,7 @@ export function BudgetTree({
                     isLastInGroup={taskIndex === groupTasks.length - 1}
                     handleDescriptionChange={handleDescriptionChange}
                     handleMarginChange={handleMarginChange}
+                    handlePureSubtotalChange={handlePureSubtotalChange}
                   />
                 ))}
               </div>
