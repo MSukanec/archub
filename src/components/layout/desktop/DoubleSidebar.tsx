@@ -300,7 +300,7 @@ export function MainSidebar() {
   // Definir contenido para cada nivel del sidebar
   const sidebarContent = {
     organization: [
-      { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: Folder, label: 'Gestión de Proyectos', href: '/organization/projects' },
       { icon: TrendingUp, label: 'Movimientos', href: '/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
@@ -412,7 +412,7 @@ export function MainSidebar() {
           type: 'button',
           id: 'organization-projects',
           icon: Folder,
-          label: 'Proyectos',
+          label: 'Gestión de Proyectos',
           href: '/organization/projects'
         },
         // Contactos

@@ -321,7 +321,7 @@ export function MainSidebar() {
     }
   };
   
-  const handleOrganizationSelect = () => {
+  const handleOrganizationLevelSelect = () => {
     setSidebarLevel('organization');
     // Cerrar dropdown
     setIsDropdownOpen(false);
@@ -856,7 +856,7 @@ export function MainSidebar() {
                   <div className="max-h-40 overflow-y-auto">
                     {/* Organización actual */}
                     <button
-                      onClick={handleOrganizationSelect}
+                      onClick={handleOrganizationLevelSelect}
                       className={cn(
                         "flex items-center px-3 py-2 text-left w-full transition-all duration-200 first:rounded-t-md last:rounded-b-md",
                         "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]"
