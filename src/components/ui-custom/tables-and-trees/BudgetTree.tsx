@@ -1241,7 +1241,15 @@ export function BudgetTree({
 
   useEffect(() => {
     if (onTotalsChange && Object.keys(pureSubtotals).length > 0 && Object.keys(taskSubtotals).length > 0) {
-      const totalSubtotals = Object.values(pureSubtotals).reduce((sum, value) => sum + value, 0);
+      // Filter pureSubtotals to only include tasks that are also in taskSubtotals (active tasks)
+      const activePureSubtotals = Object.keys(taskSubtotals).reduce((acc, taskId) => {
+        if (pureSubtotals[taskId] !== undefined) {
+          acc[taskId] = pureSubtotals[taskId];
+        }
+        return acc;
+      }, {} as { [taskId: string]: number });
+      
+      const totalSubtotals = Object.values(activePureSubtotals).reduce((sum, value) => sum + value, 0);
       const totalFinals = Object.values(taskSubtotals).reduce((sum, value) => sum + value, 0);
       
       // Only call onTotalsChange if values have actually changed
