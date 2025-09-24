@@ -710,7 +710,11 @@ export function MainSidebar() {
 
                   if ('type' in item && item.type === 'divider') {
                     elementsToRender.push(
-                      <div key={`divider-${index}`} className="h-px bg-white/20 my-2"></div>
+                      <div 
+                        key={`divider-${index}`} 
+                        className="h-px my-2" 
+                        style={{ backgroundColor: 'var(--main-sidebar-button-icon-fg)' }}
+                      ></div>
                     );
                     return;
                   }
