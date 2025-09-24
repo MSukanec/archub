@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast'
 import { EstimateBudget } from './tabs/EstimateBudget'
 import { EstimatePhases } from './tabs/EstimatePhases'
 import { EstimateSchedule } from './tabs/EstimateSchedule'
+import { EstimateMaterials } from './tabs/EstimateMaterials'
 import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
 
 export default function Estimates() {
@@ -315,12 +316,17 @@ export default function Estimates() {
     }
   }, [isMobile]) // Solo dependencias primitivas
 
-  // Define tabs - solo una pestaña
+  // Define tabs
   const tabs = [
     {
       id: 'listado-tareas',
       label: 'Listado de Tareas',
       isActive: activeTab === 'listado-tareas'
+    },
+    {
+      id: 'materiales',
+      label: 'Materiales',
+      isActive: activeTab === 'materiales'
     }
   ]
 
@@ -349,14 +355,20 @@ export default function Estimates() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <EstimateBudget 
-        tasks={tasks}
-        isLoading={isLoading}
-        onEditTask={handleEditTask}
-        onAddTask={handleAddSingleTask}
-        onDeleteTask={handleDeleteTask}
-        onDuplicateTask={handleDuplicateTask}
-      />
+      {activeTab === 'listado-tareas' && (
+        <EstimateBudget 
+          tasks={tasks}
+          isLoading={isLoading}
+          onEditTask={handleEditTask}
+          onAddTask={handleAddSingleTask}
+          onDeleteTask={handleDeleteTask}
+          onDuplicateTask={handleDuplicateTask}
+        />
+      )}
+      
+      {activeTab === 'materiales' && (
+        <EstimateMaterials />
+      )}
     </Layout>
   )
 }
