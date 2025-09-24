@@ -587,6 +587,15 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
           icon={<Package className="w-12 h-12 text-muted-foreground" />}
           title="No hay subcontratos"
           description={searchQuery ? "No se encontraron subcontratos que coincidan con tu búsqueda." : "Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato' para comenzar."}
+          action={
+            <Button
+              onClick={handleCreateSubcontract}
+              className="mt-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Subcontrato
+            </Button>
+          }
         />
       ) : isMobile ? (
         // Vista móvil - usar SubcontractRow
