@@ -254,7 +254,7 @@ export default function Projects() {
               key="view"
               variant="ghost"
               size="sm"
-              onClick={() => {}}
+              onClick={() => navigate(`/projects/${project.id}`)}
               className="h-8 w-8 p-0"
               title="Ver detalle"
             >

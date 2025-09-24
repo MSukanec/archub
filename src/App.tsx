@@ -19,6 +19,7 @@ import ForgotPassword from "@/pages/public/ForgotPassword";
 
 
 import Projects from "@/pages/professional/projects";
+import ProjectView from "@/pages/professional/projects/ProjectView";
 
 
 
@@ -116,6 +117,7 @@ function Router() {
 
         {/* Projects Routes */}
         <Route path="/projects" component={Projects} />
+        <Route path="/projects/:id" component={ProjectView} />
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />

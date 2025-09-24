@@ -11,13 +11,16 @@ import { ImageIcon, FileText, Users, MapPin } from 'lucide-react'
 import ImageUploadAndShowField from '@/components/ui-custom/fields/ImageUploadAndShowField'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-export default function ProjectInfoBasicData() {
+interface ProjectDataTabProps {
+  projectId?: string;
+}
+
+export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
-  const activeProjectId = userOrgPrefs?.last_project_id
+  const activeProjectId = projectId
 
   // Form states
   const [projectName, setProjectName] = useState('')
@@ -160,7 +163,7 @@ export default function ProjectInfoBasicData() {
       country: country,
       zip_code: zipCode
     },
-    mutation: saveProjectDataMutation,
+    saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 1500
   });
 
