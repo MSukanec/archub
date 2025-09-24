@@ -349,6 +349,13 @@ export function MainSidebar() {
           label: 'Resumen de Proyecto',
           href: '/project/dashboard'
         },
+        {
+          type: 'button',
+          id: 'project-calendar',
+          icon: Calendar,
+          label: 'Calendario',
+          href: '/calendar'
+        },
         // Botones de construcción
         {
           type: 'section',
@@ -515,16 +522,6 @@ export function MainSidebar() {
               {/* Divisor */}
               <div className="h-px bg-white/20 my-2 mx-2"></div>
 
-
-              {/* Botón Calendar */}
-              <ButtonSidebar
-                icon={<Calendar className="w-[18px] h-[18px]" />}
-                label=""
-                isActive={location === '/general/calendar'}
-                isExpanded={false}
-                onClick={() => navigate('/general/calendar')}
-                variant="secondary"
-              />
 
               {/* Botón Media */}
               <ButtonSidebar

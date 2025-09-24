@@ -44,7 +44,7 @@ import SubcontractView from "@/pages/professional/project/construction/subcontra
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
 import Media from "@/pages/professional/general/media/Media";
 import Contacts from "@/pages/professional/contacts/Contacts";
-import Calendar from "@/pages/professional/general/calendar/Calendar";
+import Calendar from "@/pages/professional/calendar/Calendar";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
 
@@ -111,7 +111,7 @@ function Router() {
         
         <Route path="/organization" component={OrganizationDashboard} />
 
-        <Route path="/general/calendar" component={Calendar} />
+        <Route path="/calendar" component={Calendar} />
 
 
         {/* Projects Routes */}
