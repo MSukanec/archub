@@ -108,7 +108,8 @@ interface SidebarSection {
 
 type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | SidebarSection;
 
-export function MainSidebar() {
+// COMENTADO - MainSidebar original de DoubleSidebar.tsx - ahora usando MainSidebar desde Sidebar.tsx
+export function MainSidebarOriginal() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
@@ -828,3 +829,6 @@ export function MainSidebar() {
     </>
   );
 }
+
+// Importar MainSidebar desde Sidebar.tsx
+export { MainSidebar } from './Sidebar';
