@@ -82,14 +82,16 @@ export function PlanRestricted({
     return <>{children}</>;
   }
   
-  // Si está restringido y es badge-only mode, usar tooltip pequeño
+  // Si está restringido y es badge-only mode, usar tooltip pequeño con estilo disabled
   if (badgeOnly) {
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="relative">
+            <div className="relative opacity-50 cursor-not-allowed">
               {React.cloneElement(children as React.ReactElement, {
+                disabled: true,
+                className: `${(children as React.ReactElement).props.className || ''} opacity-60 cursor-not-allowed text-muted-foreground hover:text-muted-foreground hover:bg-transparent`,
                 onClick: (e: React.MouseEvent) => {
                   // Si es admin con bypass, permitir el click
                   if (adminBypass && isAdmin) {
@@ -110,13 +112,15 @@ export function PlanRestricted({
     );
   }
 
-  // Para funciones "coming soon" usar tooltip simple
+  // Para funciones "coming soon" usar tooltip simple con estilo disabled
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative">
+          <div className="relative opacity-50 cursor-not-allowed">
             {React.cloneElement(children as React.ReactElement, {
+              disabled: true,
+              className: `${(children as React.ReactElement).props.className || ''} opacity-60 cursor-not-allowed text-muted-foreground hover:text-muted-foreground hover:bg-transparent`,
               onClick: (e: React.MouseEvent) => {
                 // Si es admin con bypass, permitir el click
                 if (adminBypass && isAdmin) {
