@@ -13,10 +13,11 @@ import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { PlanRestricted } from '@/components/ui-custom/security/PlanRestricted'
-import ProjectRow from '@/components/ui/data-row/rows/ProjectRow'
-import ProjectItem from '@/components/ui-custom/general/ProjectItem'
-import { useActionBarMobile } from '@/components/layout/mobile/ActionBarMobileContext'
-import { useMobile } from '@/hooks/use-mobile'
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Badge } from '@/components/ui/badge'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Edit, Trash2, Eye, Calendar as CalendarIcon } from 'lucide-react'
 import { usePlanFeatures } from '@/hooks/usePlanFeatures'
 
 export default function Projects() {
@@ -36,14 +37,8 @@ export default function Projects() {
   const [filterByModality, setFilterByModality] = useState('all')
   const [filterByStatus, setFilterByStatus] = useState('all')
 
-  // Mobile action bar
-  const { 
-    setActions, 
-    setShowActionBar, 
-    clearActions,
-    setFilterConfig 
-  } = useActionBarMobile()
-  const isMobile = useMobile()
+  // Estado para búsqueda en tabla
+  const [searchValue, setSearchValue] = useState('')
 
   // Mark active project using useUserOrganizationPreferences hook
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
@@ -57,8 +52,14 @@ export default function Projects() {
     is_active: project.id === activeProjectId
   }))
   
-  // Apply filters
+  // Apply filters including search
   const filteredProjects = projectsWithActive.filter(project => {
+    // Filter by search
+    const searchLower = searchValue.toLowerCase();
+    const nameMatch = project.name?.toLowerCase().includes(searchLower);
+    const descriptionMatch = project.description?.toLowerCase().includes(searchLower);
+    const searchMatch = !searchValue || nameMatch || descriptionMatch;
+    
     // Filter by project type
     const matchesProjectType = filterByProjectType === 'all' || 
       project.project_data?.project_type_id === filterByProjectType ||
@@ -73,7 +74,7 @@ export default function Projects() {
     const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();
 
-    return matchesProjectType && matchesModality && matchesStatus;
+    return searchMatch && matchesProjectType && matchesModality && matchesStatus;
   })
   
   // Put active project first
@@ -83,6 +84,7 @@ export default function Projects() {
   ] : filteredProjects
 
   const handleClearFilters = () => {
+    setSearchValue('')
     setFilterByProjectType('all')
     setFilterByModality('all')
     setFilterByStatus('all')
@@ -154,6 +156,126 @@ export default function Projects() {
     });
   }
 
+  // Función para formatear el estado del proyecto
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      'active': { color: 'var(--accent)', text: 'Activo' },
+      'completed': { color: '#22c55e', text: 'Completado' },
+      'paused': { color: '#f59e0b', text: 'Pausado' },
+      'cancelled': { color: '#ef4444', text: 'Cancelado' },
+      'planning': { color: '#3b82f6', text: 'Planificación' }
+    }
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || { color: '#6b7280', text: status || 'Sin estado' }
+    
+    return (
+      <Badge 
+        style={{ backgroundColor: config.color, color: 'white' }}
+        className="text-xs"
+      >
+        {config.text}
+      </Badge>
+    )
+  }
+
+  // Configuración de las columnas de la tabla
+  const columns = [
+    {
+      key: 'name',
+      label: 'Proyecto',
+      render: (project: any) => (
+        <div className="flex items-center gap-3">
+          {/* Indicador de proyecto activo */}
+          {project.is_active && (
+            <div 
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: 'var(--accent)' }}
+              title="Proyecto activo"
+            />
+          )}
+          <div>
+            <div className="font-medium text-sm">{project.name}</div>
+            {project.description && (
+              <div className="text-xs text-muted-foreground">
+                {project.description.length > 50 
+                  ? `${project.description.substring(0, 50)}...` 
+                  : project.description
+                }
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'project_type',
+      label: 'Tipo',
+      render: (project: any) => (
+        <div className="text-sm">
+          {project.project_data?.project_type?.name || 'Sin especificar'}
+        </div>
+      )
+    },
+    {
+      key: 'modality',
+      label: 'Modalidad',
+      render: (project: any) => (
+        <div className="text-sm">
+          {project.project_data?.modality?.name || 'Sin especificar'}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      render: (project: any) => getStatusBadge(project.status)
+    },
+    {
+      key: 'created_at',
+      label: 'Fecha de Creación',
+      render: (project: any) => (
+        <div className="text-sm text-muted-foreground">
+          {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es }) : 'Sin fecha'}
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (project: any) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleSelectProject(project.id)}
+            className="h-8 w-8 p-0"
+            title="Seleccionar proyecto"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(project)}
+            className="h-8 w-8 p-0"
+            title="Editar proyecto"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteClick(project)}
+            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+            title="Eliminar proyecto"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )
+    }
+  ]
+
   const handleNavigateToBasicData = (project: any) => {
     selectProjectMutation.mutate(project.id)
     // Los datos básicos ahora se manejan en la tab "Datos Básicos" de esta misma página
@@ -217,110 +339,7 @@ export default function Projects() {
     }
   })
 
-  // Configure mobile action bar only for projects tab
-  useEffect(() => {
-    if (isMobile && activeTab === 'projects') {
-      setActions({
-        home: { 
-          id: 'home', 
-          label: 'Inicio', 
-          icon: Home,
-          onClick: () => {} 
-        },
-        search: { 
-          id: 'search', 
-          label: 'Buscar', 
-          icon: Search,
-          onClick: () => {} 
-        },
-        create: {
-          id: 'create',
-          icon: Plus,
-          label: 'Nuevo Proyecto',
-          onClick: () => openModal('project', {}),
-          variant: 'primary'
-        },
-        filter: { 
-          id: 'filter', 
-          label: 'Filtros', 
-          icon: Filter,
-          onClick: () => {}
-        },
-        notifications: { 
-          id: 'notifications', 
-          label: 'Notificaciones', 
-          icon: Bell,
-          onClick: () => {} 
-        },
-      })
-      setShowActionBar(true)
-    } else if (isMobile) {
-      // Clear action bar for other tabs
-      clearActions()
-    }
 
-    return () => {
-      if (isMobile && activeTab === 'projects') {
-        clearActions()
-      }
-    }
-  }, [isMobile, activeTab, openModal])
-
-  // Configure filter config separately like in movements page
-  useEffect(() => {
-    if (isMobile && activeTab === 'projects') {
-      setFilterConfig({
-        filters: [
-          {
-            key: 'project_type',
-            label: 'Tipo de proyecto',
-            value: filterByProjectType,
-            onChange: setFilterByProjectType,
-            allOptionLabel: 'Todos los tipos',
-            placeholder: 'Seleccionar tipo...',
-            options: [
-              { value: 'vivienda', label: 'Vivienda' },
-              { value: 'obra nueva', label: 'Obra Nueva' },
-              { value: 'remodelacion', label: 'Remodelación' },
-              { value: 'mantenimiento', label: 'Mantenimiento' },
-              { value: 'consultoria', label: 'Consultoría' }
-            ]
-          },
-          {
-            key: 'modality',
-            label: 'Modalidad',
-            value: filterByModality,
-            onChange: setFilterByModality,
-            allOptionLabel: 'Todas las modalidades',
-            placeholder: 'Seleccionar modalidad...',
-            options: [
-              { value: 'activo', label: 'Activo' },
-              { value: 'completado', label: 'Completado' },
-              { value: 'pausado', label: 'Pausado' },
-              { value: 'cancelado', label: 'Cancelado' },
-              { value: 'planificacion', label: 'Planificación' }
-            ]
-          },
-          {
-            key: 'status',
-            label: 'Estado',
-            value: filterByStatus,
-            onChange: setFilterByStatus,
-            allOptionLabel: 'Todos los estados',
-            placeholder: 'Seleccionar estado...',
-            options: [
-              { value: 'active', label: 'En proceso' },
-              { value: 'completed', label: 'Completado' },
-              { value: 'paused', label: 'Pausado' },
-              { value: 'cancelled', label: 'Cancelado' },
-              { value: 'planning', label: 'Planificación' }
-            ]
-          }
-        ],
-        onClearFilters: handleClearFilters
-      })
-    }
-  }, [isMobile, activeTab, filterByProjectType, filterByModality, filterByStatus, setFilterConfig])
 
   const headerProps = {
     title: "Gestión de Proyectos",
@@ -372,36 +391,78 @@ export default function Projects() {
         {activeTab === 'projects' && (
           <>
 
-            {/* Projects List */}
+            {/* Projects Table */}
             {sortedProjects.length > 0 ? (
-              isMobile ? (
-                /* Mobile: Lista vertical con ProjectRow */
-                <div className="space-y-2">
-                  {sortedProjects.map((project) => (
-                    <ProjectRow
-                      key={project.id}
-                      project={project}
-                      onClick={() => handleSelectProject(project.id)}
-                      isActive={project.id === userOrgPrefs?.last_project_id}
-                      density="normal"
-                    />
-                  ))}
-                </div>
-              ) : (
-                /* Desktop: Grid de 3 columnas con ProjectItem, activo primero */
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sortedProjects.map((project) => (
-                    <ProjectItem
-                      key={project.id}
-                      project={project}
-                      onClick={() => handleSelectProject(project.id)}
-                      onEdit={() => openModal('project', { editingProject: project, isEditing: true })}
-                      isActive={project.id === userOrgPrefs?.last_project_id}
-                      projectColor={project.color || 'var(--accent)'}
-                    />
-                  ))}
-                </div>
-              )
+              <Table
+                data={sortedProjects}
+                columns={columns}
+                isLoading={projectsLoading}
+                emptyState={
+                  <EmptyState
+                    icon={<Folder className="w-12 h-12" />}
+                    title="No hay proyectos que coincidan"
+                    description="Ajusta los filtros de búsqueda para encontrar proyectos"
+                  />
+                }
+                topBar={{
+                  showSearch: true,
+                  searchValue: searchValue,
+                  onSearchChange: setSearchValue,
+                  showClearFilters: searchValue !== '' || filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all',
+                  onClearFilters: handleClearFilters,
+                  showFilter: true,
+                  renderFilterContent: () => (
+                    <div className="space-y-4 w-72">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium">Tipo de Proyecto</label>
+                        <select 
+                          value={filterByProjectType} 
+                          onChange={(e) => setFilterByProjectType(e.target.value)}
+                          className="w-full h-8 px-2 text-xs border rounded"
+                        >
+                          <option value="all">Todos los tipos</option>
+                          <option value="vivienda">Vivienda</option>
+                          <option value="obra nueva">Obra Nueva</option>
+                          <option value="remodelacion">Remodelación</option>
+                          <option value="mantenimiento">Mantenimiento</option>
+                          <option value="consultoria">Consultoría</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium">Modalidad</label>
+                        <select 
+                          value={filterByModality} 
+                          onChange={(e) => setFilterByModality(e.target.value)}
+                          className="w-full h-8 px-2 text-xs border rounded"
+                        >
+                          <option value="all">Todas las modalidades</option>
+                          <option value="activo">Activo</option>
+                          <option value="completado">Completado</option>
+                          <option value="pausado">Pausado</option>
+                          <option value="cancelado">Cancelado</option>
+                          <option value="planificacion">Planificación</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium">Estado</label>
+                        <select 
+                          value={filterByStatus} 
+                          onChange={(e) => setFilterByStatus(e.target.value)}
+                          className="w-full h-8 px-2 text-xs border rounded"
+                        >
+                          <option value="all">Todos los estados</option>
+                          <option value="active">En proceso</option>
+                          <option value="completed">Completado</option>
+                          <option value="paused">Pausado</option>
+                          <option value="cancelled">Cancelado</option>
+                          <option value="planning">Planificación</option>
+                        </select>
+                      </div>
+                    </div>
+                  ),
+                  isFilterActive: filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all'
+                }}
+              />
             ) : (
               <EmptyState
                 icon={<Folder className="w-12 h-12" />}
