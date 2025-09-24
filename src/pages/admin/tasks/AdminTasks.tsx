@@ -6,7 +6,6 @@ import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskDivisions from './AdminTaskDivisions';
 import AdminTaskParameters from './AdminTaskParameters';
-import AdminTaskTemplates from './AdminTaskTemplates';
 import AdminActionsList from './AdminActionsList';
 
 const AdminTasks = () => {
@@ -18,7 +17,6 @@ const AdminTasks = () => {
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
     { id: 'divisiones', label: 'Rubros', isActive: activeTab === 'divisiones' },
-    { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' },
     { id: 'acciones', label: 'Acciones', isActive: activeTab === 'acciones' }
   ];
 
@@ -28,7 +26,7 @@ const AdminTasks = () => {
         return {
           label: "Nueva Tarea",
           icon: Plus,
-          onClick: () => openModal('parametric-task')
+          onClick: () => console.log('Nueva tarea - funcionalidad pendiente')
         };
       case 'categorias':
         return {
@@ -47,12 +45,6 @@ const AdminTasks = () => {
           label: "Nuevo Parámetro",
           icon: Plus,
           onClick: () => openModal('task-parameter')
-        };
-      case 'plantillas':
-        return {
-          label: "Nueva Plantilla",
-          icon: Plus,
-          onClick: () => openModal('task-template')
         };
       case 'acciones':
         return {
@@ -79,8 +71,6 @@ const AdminTasks = () => {
         return <AdminTaskDivisions />;
       case 'parametros':
         return <AdminTaskParameters />;
-      case 'plantillas':
-        return <AdminTaskTemplates />;
       case 'acciones':
         return <AdminActionsList />;
       default:

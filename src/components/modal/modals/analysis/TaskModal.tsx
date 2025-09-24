@@ -3,7 +3,6 @@ import { toast } from '@/hooks/use-toast'
 import { useCreateGeneratedTask, useUpdateGeneratedTask, useTaskMaterials, useCreateTaskMaterial, useDeleteTaskMaterial, useGeneratedTasks, useCreateTaskLabor } from '@/hooks/use-generated-tasks'
 import { useMaterials } from '@/hooks/use-materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useTaskTemplates } from '@/hooks/use-task-templates'
 import { useTaskCategories } from '@/hooks/use-task-categories'
 import { useUnits } from '@/hooks/use-units'
 import { useTaskLabor } from '@/hooks/use-task-labor'
@@ -14,7 +13,6 @@ import { FormModalLayout } from '@/components/modal/form/FormModalLayout'
 import { FormModalHeader } from '@/components/modal/form/FormModalHeader'
 import { FormModalFooter } from '@/components/modal/form/FormModalFooter'
 import { ParametricTaskBuilder } from '@/components/ui-custom/admin/tasks/ParametricTaskBuilder'
-import { TemplateParametersSelector } from '@/components/ui-custom/admin/tasks/TemplateParametersSelector'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -270,8 +268,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     isLoading: originalLaborLoading 
   } = useTaskLabor(isDuplicating && actualTask?.id ? actualTask.id : null)
   
-  // Task templates data (not used in this modal but keeping for potential future use)
-  const { data: taskTemplates = [] } = useTaskTemplates()
   
   // Task categories data (not used in this modal but keeping for potential future use)
   const { data: categories = [] } = useTaskCategories()
