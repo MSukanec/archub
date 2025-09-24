@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
-import TaskList from './TaskList'
+import TaskList from '../tasks/TaskList'
 import MaterialList from './MaterialList'
 import LaborList from './LaborList'
 
