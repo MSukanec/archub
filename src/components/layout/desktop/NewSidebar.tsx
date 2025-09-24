@@ -277,7 +277,8 @@ function RightMenuSidebar() {
   const queryClient = useQueryClient();
   
   // Sidebar store state
-  const { isDocked, toggleDocked } = useSidebarStore();
+  const { isDocked, setDocked } = useSidebarStore();
+  const toggleDocked = () => setDocked(!isDocked);
   
   // Mutación para cambiar proyecto
   const updateProjectMutation = useMutation({
@@ -423,11 +424,11 @@ function RightMenuSidebar() {
   };
 
   const renderMenuItem = (item: AnySidebarItem, index: number) => {
-    if (item.type === 'divider') {
+    if ('type' in item && item.type === 'divider') {
       return <DropdownMenuSeparator key={index} className="my-2" />;
     }
 
-    if (item.type === 'section') {
+    if ('type' in item && item.type === 'section') {
       return (
         <div key={index} className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {item.label}
@@ -442,7 +443,7 @@ function RightMenuSidebar() {
       return (
         <div key={item.id}>
           <ButtonSidebar
-            icon={item.icon}
+            icon={<item.icon className="w-4 h-4" />}
             label={item.label}
             isActive={isAnySubmenuActive}
             isExpanded={true}
@@ -463,7 +464,7 @@ function RightMenuSidebar() {
               {item.submenu.map((subItem, subIndex) => (
                 <ButtonSidebar
                   key={subIndex}
-                  icon={subItem.icon}
+                  icon={<subItem.icon className="w-4 h-4" />}
                   label={subItem.label}
                   isActive={isActiveRoute(subItem.href)}
                   isExpanded={true}
@@ -479,11 +480,11 @@ function RightMenuSidebar() {
       return (
         <ButtonSidebar
           key={index}
-          icon={item.icon}
+          icon={<item.icon className="w-4 h-4" />}
           label={item.label}
-          isActive={isActiveRoute(item.href)}
+          isActive={isActiveRoute((item as SidebarItem).href)}
           isExpanded={true}
-          href={item.href}
+          href={(item as SidebarItem).href}
         />
       );
     }
@@ -517,7 +518,7 @@ function RightMenuSidebar() {
       <div className="border-t border-border p-4 space-y-2">
         {isAdmin && (
           <ButtonSidebar
-            icon={Crown}
+            icon={<Crown className="w-4 h-4" />}
             label="Administración"
             isActive={location.startsWith('/admin')}
             isExpanded={true}
@@ -527,7 +528,7 @@ function RightMenuSidebar() {
         
         <div className="flex items-center justify-between">
           <ButtonSidebar
-            icon={Settings}
+            icon={<Settings className="w-4 h-4" />}
             label="Configuración"
             isActive={location === '/settings'}
             isExpanded={true}

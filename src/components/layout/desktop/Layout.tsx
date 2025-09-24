@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { MainSidebar } from "./DoubleSidebar";
+// import { MainSidebar } from "./DoubleSidebar"; // Comentado temporalmente
+import { NewSidebar as MainSidebar } from "./NewSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
