@@ -908,7 +908,7 @@ export function MainSidebar() {
                         .map((organization: any) => (
                           <button
                             key={organization.id}
-                            onClick={() => handleOrganizationSelect(organization.id)}
+                            onClick={handleOrganizationSelect}
                             className={cn(
                               "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md hover:bg-[var(--main-sidebar-button-hover-bg)]"
                             )}
