@@ -104,7 +104,11 @@ export function PlanRestricted({
               })}
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs px-2 py-1">
+          <TooltipContent 
+            side="top" 
+            className="text-xs px-3 py-2 bg-black text-white border-gray-600 shadow-xl z-[9999]" 
+            style={{ zIndex: 9999 }}
+          >
             próximamente
           </TooltipContent>
         </Tooltip>
@@ -133,7 +137,11 @@ export function PlanRestricted({
             })}
           </div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="text-xs px-2 py-1">
+        <TooltipContent 
+          side="top" 
+          className="text-xs px-3 py-2 bg-black text-white border-gray-600 shadow-xl z-[9999]" 
+          style={{ zIndex: 9999 }}
+        >
           próximamente
         </TooltipContent>
       </Tooltip>
