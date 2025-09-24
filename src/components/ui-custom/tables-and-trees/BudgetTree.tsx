@@ -49,6 +49,9 @@ interface BudgetTask {
   [key: string]: any;
 }
 
+// Shared grid column template for consistent alignment
+const GRID_COLUMNS = "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px";
+
 interface BudgetTreeProps {
   tasks: BudgetTask[];
   onReorder?: (reorderedTasks: BudgetTask[]) => void;
@@ -67,14 +70,14 @@ const SubtotalDisplay = ({ task, quantity }: { task: any; quantity: number }) =>
 
   // Calculate cost per unit (materials + labor)
   const costPerUnit = useMemo(() => {
-    const materialsCost = materials.reduce((sum, material) => {
+    const materialsCost = materials.reduce((sum: number, material: any) => {
       const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
       const unitPrice = materialView?.avg_price || 0;
       const amount = material.amount || 0;
       return sum + (amount * unitPrice);
     }, 0);
 
-    const laborCost = labor.reduce((sum, laborItem) => {
+    const laborCost = labor.reduce((sum: number, laborItem: any) => {
       const laborView = laborItem.labor_view;
       const unitPrice = laborView?.avg_price || 0;
       const amount = laborItem.quantity || 0;
@@ -768,7 +771,7 @@ const SortableTaskItem = ({
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
-           style={{ gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px" }}>
+           style={{ gridTemplateColumns: GRID_COLUMNS }}>
         
         {/* Drag handle */}
         <div 
@@ -954,7 +957,7 @@ const GroupHeader = ({
       const quantity = task.quantity || 0;
       
       // Get materials cost per unit
-      const materialsCost = task.materials?.reduce((matSum, material) => {
+      const materialsCost = task.materials?.reduce((matSum: number, material: any) => {
         const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
         const unitPrice = materialView?.avg_price || 0;
         const amount = material.amount || 0;
@@ -962,7 +965,7 @@ const GroupHeader = ({
       }, 0) || 0;
 
       // Get labor cost per unit  
-      const laborCost = task.labor?.reduce((labSum, laborItem) => {
+      const laborCost = task.labor?.reduce((labSum: number, laborItem: any) => {
         const laborView = laborItem.labor_view;
         const unitPrice = laborView?.avg_price || 0;
         const amount = laborItem.quantity || 0;
@@ -980,7 +983,7 @@ const GroupHeader = ({
     <div 
       className="grid gap-4 px-4 py-3 text-xs font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px",
+        gridTemplateColumns: GRID_COLUMNS,
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -993,19 +996,19 @@ const GroupHeader = ({
       <div className="font-bold text-xs">
         {groupIndex}
       </div>
+      {/* Group name - spans Description, Type, Quantity columns */}
       <div className="col-span-3">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
-      {/* Empty columns for Unit Cost and Quantity */}
-      <div></div>
+      {/* Empty Unit Cost column */}
       <div></div>
       {/* Subtotal sum column */}
       <div className="text-right">
         <span className="font-medium">{formatCost(groupSubtotalSum)}</span>
       </div>
-      {/* Empty column for Margin */}
+      {/* Empty Margin column */}
       <div></div>
-      {/* Total column (antes era Subtotal) */}
+      {/* Total column */}
       <div className="text-right">
         <span className="font-medium">{formatCost(groupSubtotal)}</span>
       </div>
@@ -1013,7 +1016,7 @@ const GroupHeader = ({
       <div className="text-right">
         <span className="font-medium">{groupPercentage}%</span>
       </div>
-      {/* Empty space for actions column */}
+      {/* Empty actions column */}
       <div></div>
     </div>
   );
@@ -1251,7 +1254,7 @@ export function BudgetTree({
         <div 
           className="grid gap-4 px-4 py-3 text-xs font-medium opacity-90 sticky top-0"
           style={{ 
-            gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px",
+            gridTemplateColumns: GRID_COLUMNS,
             backgroundColor: "var(--background)",
             borderBottom: "1px solid var(--border)",
             zIndex: 10
