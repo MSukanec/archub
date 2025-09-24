@@ -306,6 +306,7 @@ export function MainSidebar() {
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
       { icon: Contact, label: 'Contactos', href: '/contacts' },
+      { icon: BarChart3, label: 'Análisis', href: '/analysis' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     finances: [
@@ -531,15 +532,6 @@ export function MainSidebar() {
 
 
 
-              {/* Botón Análisis */}
-              <ButtonSidebar
-                icon={<BarChart3 className="w-[18px] h-[18px]" />}
-                label=""
-                isActive={location === '/analysis'}
-                isExpanded={false}
-                onClick={() => navigate('/analysis')}
-                variant="secondary"
-              />
             </div>
           </div>
           
