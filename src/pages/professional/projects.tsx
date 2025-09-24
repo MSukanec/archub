@@ -140,48 +140,6 @@ export default function Projects() {
     selectProjectMutation.mutate(projectId)
   }
 
-  const handleSetActiveProject = async (projectId: string) => {
-    // Solo seleccionar como activo sin navegar
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token || !userData?.user?.id || !organizationId) {
-      toast({
-        title: "Error",
-        description: "No se pudo activar el proyecto",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    const { error } = await supabase
-      .from('user_organization_preferences')
-      .upsert({
-        user_id: userData.user.id,
-        organization_id: organizationId,
-        last_project_id: projectId,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,organization_id'
-      })
-    
-    if (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo activar el proyecto",
-        variant: "destructive"
-      })
-    } else {
-      setSelectedProject(projectId, organizationId);
-      queryClient.invalidateQueries({ 
-        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      toast({
-        title: "Proyecto activado",
-        description: "El proyecto se ha seleccionado como activo"
-      })
-    }
-  }
 
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
@@ -282,16 +240,6 @@ export default function Projects() {
           onEdit={() => handleEdit(project)}
           onDelete={() => handleDeleteClick(project)}
           additionalButtons={[
-            <Button
-              key="select-active"
-              variant="ghost"
-              size="sm"
-              onClick={() => handleSetActiveProject(project.id)}
-              className="h-8 w-8 p-0"
-              title="Seleccionar como activo"
-            >
-              <Play className="h-4 w-4" />
-            </Button>,
             <Button
               key="go-to-project"
               variant="ghost"
