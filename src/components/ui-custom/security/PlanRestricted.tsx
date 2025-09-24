@@ -92,15 +92,8 @@ export function PlanRestricted({
     // Si es admin con bypass visual, envolver con el estilo de restricción pero permitir clic
     if (isRestricted && adminBypass && isAdmin) {
       return (
-        <div className="relative w-full">
-          {/* Contenido con funcionalidad normal pero con overlay visual */}
-          <div className="relative opacity-50">
-            {children}
-          </div>
-          {/* Badge visual para admins */}
-          <div className="absolute -top-1 -right-1 rounded-full p-1 shadow-sm border border-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
-            <Lock className="h-3 w-3 text-white" />
-          </div>
+        <div className="relative opacity-50">
+          {children}
         </div>
       );
     }
