@@ -538,25 +538,27 @@ export function Table<T = any>({
               </Popover>
             )}
 
-            {/* Botón de agrupación - SIEMPRE visible */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "gap-2",
-                    topBar?.isGroupingActive ? "button-secondary-pressed" : ""
-                  )}
-                >
-                  <Group className="h-4 w-4" />
-                  <span className="text-xs">Agrupar</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-4" align="end">
-                {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
-              </PopoverContent>
-            </Popover>
+            {/* Botón de agrupación - Solo visible si showGrouping está habilitado */}
+            {topBar?.groupingOptions && topBar.groupingOptions.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "gap-2",
+                      topBar?.isGroupingActive ? "button-secondary-pressed" : ""
+                    )}
+                  >
+                    <Group className="h-4 w-4" />
+                    <span className="text-xs">Agrupar</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4" align="end">
+                  {(topBar?.renderGroupingContent ?? defaultGroupingContent)()}
+                </PopoverContent>
+              </Popover>
+            )}
 
             {/* Botón de importar */}
             {topBar?.showImport && (
@@ -577,22 +579,24 @@ export function Table<T = any>({
               </PlanRestricted>
             )}
 
-            {/* Botón de exportar - SIEMPRE visible */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  <span className="text-xs">Exportar</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-4" align="end">
-                {(topBar?.renderExportContent ?? defaultExportContent)()}
-              </PopoverContent>
-            </Popover>
+            {/* Botón de exportar - Solo visible si showExport está habilitado */}
+            {topBar?.showExport && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="text-xs">Exportar</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4" align="end">
+                  {(topBar?.renderExportContent ?? defaultExportContent)()}
+                </PopoverContent>
+              </Popover>
+            )}
 
             {/* Acciones personalizadas */}
             {topBar?.customActions}
