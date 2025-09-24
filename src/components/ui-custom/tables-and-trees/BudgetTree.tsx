@@ -924,6 +924,45 @@ const SortableTaskItem = ({
   );
 };
 
+// Component to calculate group subtotal sum
+const GroupSubtotalCalculator = ({ groupTasks }: { groupTasks: BudgetTask[] }) => {
+  // Calculate individual subtotals for all tasks in the group
+  const taskSubtotals = groupTasks.map(task => {
+    const taskId = task.task_id || task.id;
+    const quantity = task.quantity || 0;
+    
+    // Use the same hooks as SubtotalDisplay component
+    const { data: materials = [] } = useTaskMaterials(taskId);
+    const { data: labor = [] } = useTaskLabor(taskId);
+    
+    // Calculate cost per unit (materials + labor)
+    const costPerUnit = useMemo(() => {
+      const materialsCost = materials.reduce((sum: number, material: any) => {
+        const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+        const unitPrice = materialView?.avg_price || 0;
+        const amount = material.amount || 0;
+        return sum + (amount * unitPrice);
+      }, 0);
+
+      const laborCost = labor.reduce((sum: number, laborItem: any) => {
+        const laborView = laborItem.labor_view;
+        const unitPrice = laborView?.avg_price || 0;
+        const amount = laborItem.quantity || 0;
+        return sum + (amount * unitPrice);
+      }, 0);
+
+      return materialsCost + laborCost;
+    }, [materials, labor]);
+    
+    return quantity * costPerUnit;
+  });
+  
+  // Sum all individual task subtotals
+  const groupSum = taskSubtotals.reduce((sum, subtotal) => sum + subtotal, 0);
+  
+  return groupSum;
+};
+
 // Group Header component  
 const GroupHeader = ({ 
   groupName, 
@@ -951,33 +990,8 @@ const GroupHeader = ({
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
-  // Calculate group subtotal sum (Cantidad x Costo Unitario sin margen)
-  const groupSubtotalSum = useMemo(() => {
-    return groupTasks.reduce((sum, task) => {
-      const quantity = task.quantity || 0;
-      
-      // Get materials cost per unit
-      const materialsCost = task.materials?.reduce((matSum: number, material: any) => {
-        const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-        const unitPrice = materialView?.avg_price || 0;
-        const amount = material.amount || 0;
-        return matSum + (amount * unitPrice);
-      }, 0) || 0;
-
-      // Get labor cost per unit  
-      const laborCost = task.labor?.reduce((labSum: number, laborItem: any) => {
-        const laborView = laborItem.labor_view;
-        const unitPrice = laborView?.avg_price || 0;
-        const amount = laborItem.quantity || 0;
-        return labSum + (amount * unitPrice);
-      }, 0) || 0;
-
-      const costPerUnit = materialsCost + laborCost;
-      const taskSubtotal = quantity * costPerUnit;
-      
-      return sum + taskSubtotal;
-    }, 0);
-  }, [groupTasks]);
+  // Use the GroupSubtotalCalculator to get the correct sum
+  const groupSubtotalSum = GroupSubtotalCalculator({ groupTasks });
 
   return (
     <div 
