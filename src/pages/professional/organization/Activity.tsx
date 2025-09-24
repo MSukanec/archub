@@ -55,7 +55,7 @@ export default function Activity() {
         navigate('/design/documentation');
         break;
       case 'contacts':
-        navigate('/organization/contacts');
+        navigate('/contacts');
         break;
       default:
         console.log('Activity details:', activity);

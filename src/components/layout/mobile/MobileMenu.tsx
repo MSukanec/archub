@@ -304,7 +304,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
         { icon: TrendingUp, label: 'Movimientos', href: '/finances/movements' },
         { icon: DollarSign, label: 'Capital', href: '/finances/capital' },
-        { icon: Contact, label: 'Contactos', href: '/organization/contacts' },
+        { icon: Contact, label: 'Contactos', href: '/contacts' },
         { icon: Users, label: 'Miembros', href: '/organization/members' },
         { icon: Database, label: 'Datos Básicos', href: '/organization/data' },
         { icon: Activity, label: 'Actividad', href: '/organization/activity' },

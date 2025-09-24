@@ -43,7 +43,7 @@ import ConstructionSubcontracts from "@/pages/professional/project/construction/
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
 import Media from "@/pages/professional/general/media/Media";
-import Contacts from "@/pages/professional/organization/contacts/Contacts";
+import Contacts from "@/pages/professional/contacts/Contacts";
 import Calendar from "@/pages/professional/general/calendar/Calendar";
 
 import OrganizationDashboard from "@/pages/professional/organization/OrganizationDashboard";
@@ -105,7 +105,7 @@ function Router() {
         <Route path="/organization/dashboard" component={OrganizationDashboard} />
         <Route path="/organization/preferences" component={Preferences} />
         <Route path="/organization/activity" component={Activity} />
-        <Route path="/organization/contacts" component={Contacts} />
+        <Route path="/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
         <Route path="/finances/general-costs" component={GeneralCosts} />
         

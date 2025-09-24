@@ -30,7 +30,7 @@ export function OrganizationQuickActions() {
       icon: Users,
       color: "text-accent-foreground",
       bgColor: "bg-accent",
-      onClick: () => navigate('/organization/contacts')
+      onClick: () => navigate('/contacts')
     },
     {
       title: "Subir Documento",

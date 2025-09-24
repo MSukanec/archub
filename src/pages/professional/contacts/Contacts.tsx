@@ -471,7 +471,7 @@ export default function Contacts() {
         pageTitle: "Contactos",
         breadcrumb: [
           { name: "Organización", href: "/organization/dashboard" },
-          { name: "Contactos", href: "/organization/contacts" }
+          { name: "Contactos", href: "/contacts" }
         ],
         tabs: headerTabs,
         onTabChange: (tabId: string) => {

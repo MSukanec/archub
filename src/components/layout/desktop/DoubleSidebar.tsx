@@ -304,6 +304,7 @@ export function MainSidebar() {
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
+      { icon: Contact, label: 'Contactos', href: '/contacts' },
       { icon: Settings, label: 'Preferencias', href: '/organization/preferences' }
     ],
     finances: [
@@ -511,15 +512,6 @@ export function MainSidebar() {
                 variant="secondary"
               />
 
-              {/* Botón Contactos */}
-              <ButtonSidebar
-                icon={<Contact className="w-[18px] h-[18px]" />}
-                label=""
-                isActive={location === '/organization/contacts'}
-                isExpanded={false}
-                onClick={() => navigate('/organization/contacts')}
-                variant="secondary"
-              />
 
               {/* Botón Calendar */}
               <ButtonSidebar
