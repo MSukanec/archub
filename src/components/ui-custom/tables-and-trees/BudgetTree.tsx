@@ -98,6 +98,7 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
   useEffect(() => {
     if (onPureSubtotalChange && !isLoadingData && subtotal >= 0) {
       const taskId = task.task_id || task.id;
+      console.log('🔵 Pure subtotal change:', taskId, subtotal);
       onPureSubtotalChange(taskId, subtotal);
     }
   }, [onPureSubtotalChange, isLoadingData, subtotal, task]);
@@ -951,6 +952,15 @@ const calculateGroupSubtotalSum = (groupTasks: BudgetTask[], taskSubtotals: { [t
   }, 0);
 };
 
+// Function to calculate group pure subtotal sum using pureSubtotals (without margins)
+const calculateGroupPureSubtotalSum = (groupTasks: BudgetTask[], pureSubtotals: { [taskId: string]: number }) => {
+  // Sum the pure subtotals from pureSubtotals (without margins)
+  return groupTasks.reduce((sum, task) => {
+    const pureSubtotal = pureSubtotals[task.id] || 0;
+    return sum + pureSubtotal;
+  }, 0);
+};
+
 // Group Header component  
 const GroupHeader = ({ 
   groupName, 
@@ -959,7 +969,7 @@ const GroupHeader = ({
   groupSubtotal, 
   totalSubtotal,
   groupIndex,
-  taskSubtotals 
+  pureSubtotals 
 }: { 
   groupName: string; 
   tasksCount: number; 
@@ -967,7 +977,7 @@ const GroupHeader = ({
   groupSubtotal: number;
   totalSubtotal: number;
   groupIndex: number;
-  taskSubtotals: { [taskId: string]: number };
+  pureSubtotals: { [taskId: string]: number };
 }) => {
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -980,8 +990,15 @@ const GroupHeader = ({
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
-  // Use the calculateGroupSubtotalSum function with real taskSubtotals
-  const groupSubtotalSum = calculateGroupSubtotalSum(groupTasks, taskSubtotals);
+  // Use the calculateGroupPureSubtotalSum function with pure subtotals (without margins)
+  const groupPureSubtotalSum = calculateGroupPureSubtotalSum(groupTasks, pureSubtotals);
+  
+  console.log('🟡 GroupHeader debug:', {
+    groupName,
+    pureSubtotals,
+    groupPureSubtotalSum,
+    groupSubtotal
+  });
 
   return (
     <div 
@@ -1008,7 +1025,7 @@ const GroupHeader = ({
       <div></div>
       {/* Subtotal sum column */}
       <div className="text-right">
-        <span className="font-medium">{formatCost(groupSubtotalSum)}</span>
+        <span className="font-medium">{formatCost(groupPureSubtotalSum)}</span>
       </div>
       {/* Empty Margin column */}
       <div></div>
@@ -1318,7 +1335,7 @@ export function BudgetTree({
               groupSubtotal={groupSubtotals[groupName] || 0}
               totalSubtotal={totalSubtotal}
               groupIndex={groupIndex + 1}
-              taskSubtotals={taskSubtotals}
+              pureSubtotals={pureSubtotals}
             />
             
             {/* Group Tasks */}
