@@ -781,8 +781,7 @@ export function MainSidebar() {
                     elementsToRender.push(
                       <div 
                         key={`divider-${index}`} 
-                        className="h-px my-2 mx-2"
-                        style={{ backgroundColor: 'var(--main-sidebar-button-icon-fg)', opacity: 0.5 }}
+                        className="h-4"
                       ></div>
                     );
                     return;
