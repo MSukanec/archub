@@ -924,19 +924,13 @@ const SortableTaskItem = ({
   );
 };
 
-// Function to calculate group subtotal sum (no hooks)
-const calculateGroupSubtotalSum = (groupTasks: BudgetTask[]) => {
-  // Simple calculation without hooks to prevent hook ordering issues
-  let groupSum = 0;
-  
-  for (const task of groupTasks) {
-    const quantity = task.quantity || 0;
-    // Use estimated cost if available, otherwise fallback
-    const estimatedCostPerUnit = task.estimated_cost || 100; // Fallback value
-    groupSum += quantity * estimatedCostPerUnit;
-  }
-  
-  return groupSum;
+// Function to calculate group subtotal sum using real taskSubtotals
+const calculateGroupSubtotalSum = (groupTasks: BudgetTask[], taskSubtotals: { [taskId: string]: number }) => {
+  // Sum the real subtotals from taskSubtotals
+  return groupTasks.reduce((sum, task) => {
+    const taskSubtotal = taskSubtotals[task.id] || 0;
+    return sum + taskSubtotal;
+  }, 0);
 };
 
 // Group Header component  
@@ -946,7 +940,8 @@ const GroupHeader = ({
   groupTasks, 
   groupSubtotal, 
   totalSubtotal,
-  groupIndex 
+  groupIndex,
+  taskSubtotals 
 }: { 
   groupName: string; 
   tasksCount: number; 
@@ -954,6 +949,7 @@ const GroupHeader = ({
   groupSubtotal: number;
   totalSubtotal: number;
   groupIndex: number;
+  taskSubtotals: { [taskId: string]: number };
 }) => {
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -966,8 +962,8 @@ const GroupHeader = ({
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
-  // Use the calculateGroupSubtotalSum function to get the correct sum
-  const groupSubtotalSum = calculateGroupSubtotalSum(groupTasks);
+  // Use the calculateGroupSubtotalSum function with real taskSubtotals
+  const groupSubtotalSum = calculateGroupSubtotalSum(groupTasks, taskSubtotals);
 
   return (
     <div 
@@ -1274,6 +1270,7 @@ export function BudgetTree({
               groupSubtotal={groupSubtotals[groupName] || 0}
               totalSubtotal={totalSubtotal}
               groupIndex={groupIndex + 1}
+              taskSubtotals={taskSubtotals}
             />
             
             {/* Group Tasks */}
