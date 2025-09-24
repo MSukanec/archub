@@ -487,9 +487,6 @@ export function MainSidebar() {
                 variant="secondary"
               />
 
-              {/* Espacio entre Organización y Proyecto */}
-              <div className="h-8"></div>
-
               {/* Botón Proyecto */}
               <ButtonSidebar
                 icon={<Folder className="w-[18px] h-[18px]" />}
@@ -499,6 +496,21 @@ export function MainSidebar() {
                 onClick={() => setSidebarLevel('project')}
                 variant="secondary"
               />
+
+              {/* Botón Administración - Solo para admins */}
+              {isAdmin && (
+                <ButtonSidebar
+                  icon={<Crown className="w-[18px] h-[18px]" />}
+                  label=""
+                  isActive={sidebarLevel === 'admin'}
+                  isExpanded={false}
+                  onClick={() => {
+                    setSidebarLevel('admin');
+                    navigate('/admin/dashboard');
+                  }}
+                  variant="secondary"
+                />
+              )}
 
               {/* Divisor */}
               <div className="h-px bg-white/20 my-2 mx-2"></div>
@@ -543,21 +555,6 @@ export function MainSidebar() {
                 onClick={() => navigate('/analysis')}
                 variant="secondary"
               />
-
-              {/* Botón Administración - Solo para admins */}
-              {isAdmin && (
-                <ButtonSidebar
-                  icon={<Crown className="w-[18px] h-[18px]" />}
-                  label=""
-                  isActive={sidebarLevel === 'admin'}
-                  isExpanded={false}
-                  onClick={() => {
-                    setSidebarLevel('admin');
-                    navigate('/admin/dashboard');
-                  }}
-                  variant="secondary"
-                />
-              )}
             </div>
           </div>
           
