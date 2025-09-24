@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell, FileText } from 'lucide-react'
 import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -330,6 +330,14 @@ export default function Estimates() {
     }
   ]
 
+  // Handle PDF export
+  const handlePDFExport = () => {
+    openModal('pdf-exporter', {
+      blocks: [],
+      filename: `presupuesto-${new Date().toISOString().split('T')[0]}.pdf`
+    });
+  };
+
   const headerProps = {
     title: "Cómputo y Presupuesto",
     icon: CheckSquare,
@@ -339,7 +347,13 @@ export default function Estimates() {
     actionButton: {
       label: "Agregar Tarea",
       icon: Plus,
-      onClick: handleAddSingleTask
+      onClick: handleAddSingleTask,
+      additionalButton: {
+        label: "Exportar PDF",
+        icon: FileText,
+        onClick: handlePDFExport,
+        variant: "secondary" as const
+      }
     }
   }
 
