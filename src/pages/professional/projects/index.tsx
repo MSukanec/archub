@@ -140,6 +140,47 @@ export default function Projects() {
     selectProjectMutation.mutate(projectId)
   }
 
+  const handleViewDetail = async (projectId: string) => {
+    // Marcar como activo Y navegar a vista detallada
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token || !userData?.user?.id || !organizationId) {
+      toast({
+        title: "Error",
+        description: "No se pudo activar el proyecto",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    const { error } = await supabase
+      .from('user_organization_preferences')
+      .upsert({
+        user_id: userData.user.id,
+        organization_id: organizationId,
+        last_project_id: projectId,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,organization_id'
+      })
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo activar el proyecto",
+        variant: "destructive"
+      })
+    } else {
+      setSelectedProject(projectId, organizationId);
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, organizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      // Navegar a vista detallada
+      navigate(`/projects/${projectId}`)
+    }
+  }
+
 
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
@@ -254,7 +295,7 @@ export default function Projects() {
               key="view"
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/projects/${project.id}`)}
+              onClick={() => handleViewDetail(project.id)}
               className="h-8 w-8 p-0"
               title="Ver detalle"
             >
