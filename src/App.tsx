@@ -68,7 +68,7 @@ import Products from "@/pages/providers/products/Products";
 
 // Analysis Pages
 import Analysis from "@/pages/professional/analysis/Analysis";
-import TaskView from "@/pages/professional/tasks/TaskView";
+import TaskView from "@/pages/professional/analysis/TaskView";
 import GeneralCosts from "@/pages/professional/finances/general-costs/GeneralCosts";
 
 
