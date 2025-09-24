@@ -1,14 +1,11 @@
-import React, { useState } from "react";
-import { Lock, Building } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
-import { getRestrictionMessage } from "@/utils/restrictions";
-import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -33,14 +30,8 @@ export function PlanRestricted({
   children,
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
-  const [, navigate] = useLocation();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
-
-  // Verificar proyecto seleccionado
   const { selectedProjectId } = useProjectContext();
 
 
@@ -86,343 +77,63 @@ export function PlanRestricted({
     }
   }
 
-  // Si no está restringido, o si es admin con bypass, renderizar directamente los children
-  // Pero si es admin con bypass y está restringido, solo permitir funcionalidad, no cambiar apariencia
-  if (!isRestricted || (isRestricted && adminBypass && isAdmin && !badgeOnly)) {
-    // Si es admin con bypass visual, envolver con el estilo de restricción pero permitir clic
-    if (isRestricted && adminBypass && isAdmin) {
-      return (
-        <div className="relative opacity-50">
-          {children}
-        </div>
-      );
-    }
+  // Si no está restringido, renderizar directamente
+  if (!isRestricted) {
     return <>{children}</>;
   }
   
-  // Si está restringido pero es badge-only mode, mostrar solo el badge
+  // Si está restringido y es badge-only mode, usar tooltip pequeño
   if (badgeOnly) {
-    // Lógica dinámica para determinar el plan objetivo (igual que abajo)
-    let dynamicRestriction = getRestrictionMessage(restrictionKey);
-    
-    if (restrictionKey === "max_projects") {
-      const organizationId = userData?.preferences?.last_organization_id;
-      const currentOrganization = userData?.organizations?.find(
-        (org) => org.id === organizationId,
-      );
-      const currentPlan = currentOrganization?.plan?.name;
-
-      if (currentPlan === "Free") {
-        dynamicRestriction = {
-          ...dynamicRestriction,
-          backgroundColor: "hsl(213, 100%, 30%)", // Blue for Pro
-        };
-      } else if (currentPlan === "Pro") {
-        dynamicRestriction = {
-          ...dynamicRestriction,
-          backgroundColor: "hsl(271, 76%, 53%)", // Purple for Teams
-        };
-      }
-    }
-    
     return (
-      <div className="relative">
-        {React.cloneElement(children as React.ReactElement, {
-          onClick: () => {
-            // Do nothing when restricted - just the visual cue is enough
-          }
-        })}
-        <div 
-          className="absolute -top-1 -right-1 rounded-full p-1 shadow-sm border border-white"
-          style={{ backgroundColor: dynamicRestriction.backgroundColor || "hsl(213, 100%, 30%)" }}
-        >
-          <Lock className="h-3 w-3 text-white" />
-        </div>
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="relative">
+              {React.cloneElement(children as React.ReactElement, {
+                onClick: (e: React.MouseEvent) => {
+                  // Si es admin con bypass, permitir el click
+                  if (adminBypass && isAdmin) {
+                    return; // Permitir comportamiento normal
+                  }
+                  // Para usuarios comunes, prevenir el click
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              })}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs px-2 py-1">
+            próximamente
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
-  // Eliminar completamente la lógica de bypass para admins
-  // Las restricciones de plan se aplican a TODOS los usuarios, incluyendo administradores
-
-  // Lógica dinámica para determinar el plan objetivo
-  let dynamicRestriction = getRestrictionMessage(restrictionKey);
-
-  // Para max_projects, determinar dinámicamente el plan objetivo
-  if (restrictionKey === "max_projects") {
-    const organizationId = userData?.preferences?.last_organization_id;
-    const currentOrganization = userData?.organizations?.find(
-      (org) => org.id === organizationId,
-    );
-    const currentPlan = currentOrganization?.plan?.name;
-
-    if (currentPlan === "Free") {
-      // Free → Pro
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "Has alcanzado el límite de 2 proyectos de tu plan Free. Actualiza a Pro para 25 proyectos.",
-        actionLabel: "Actualizar a Pro",
-        planType: "pro" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(213, 100%, 30%)",
-        borderColor: "hsl(213, 100%, 30%)",
-      };
-    } else if (currentPlan === "Pro") {
-      // Pro → Teams
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "Has alcanzado el límite de 25 proyectos de tu plan Pro. Actualiza a Teams para proyectos ilimitados.",
-        actionLabel: "Actualizar a Teams",
-        planType: "teams" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(271, 76%, 53%)",
-        borderColor: "hsl(271, 76%, 53%)",
-      };
-    }
-  }
-
-  // Para max_kanban_boards, determinar dinámicamente el plan objetivo
-  if (restrictionKey === "max_kanban_boards") {
-    const organizationId = userData?.preferences?.last_organization_id;
-    const currentOrganization = userData?.organizations?.find(
-      (org) => org.id === organizationId,
-    );
-    const currentPlan = currentOrganization?.plan?.name;
-
-    if (currentPlan === "Free") {
-      // Free → Pro
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "Has alcanzado el límite de 1 tablero Kanban de tu plan Free. Actualiza a Pro para 25 tableros.",
-        actionLabel: "Actualizar a Pro",
-        planType: "pro" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(213, 100%, 30%)",
-        borderColor: "hsl(213, 100%, 30%)",
-      };
-    } else if (currentPlan === "Pro") {
-      // Pro → Teams
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "Has alcanzado el límite de 25 tableros Kanban de tu plan Pro. Actualiza a Teams para tableros ilimitados.",
-        actionLabel: "Actualizar a Teams",
-        planType: "teams" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(271, 76%, 53%)",
-        borderColor: "hsl(271, 76%, 53%)",
-      };
-    }
-  }
-
-  // Para allow_secondary_currencies, determinar dinámicamente el plan objetivo
-  if (restrictionKey === "allow_secondary_currencies") {
-    const organizationId = userData?.preferences?.last_organization_id;
-    const currentOrganization = userData?.organizations?.find(
-      (org) => org.id === organizationId,
-    );
-    const currentPlan = currentOrganization?.plan?.name;
-
-    if (currentPlan === "Free") {
-      // Free → Pro
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "Las monedas secundarias están disponibles solo en los planes PRO y TEAMS. Actualiza a Pro para usar múltiples monedas.",
-        actionLabel: "Actualizar a Pro",
-        planType: "pro" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(213, 100%, 30%)",
-        borderColor: "hsl(213, 100%, 30%)",
-      };
-    }
-  }
-
-  // Para allow_exchange_rate, determinar dinámicamente el plan objetivo
-  if (restrictionKey === "allow_exchange_rate") {
-    const organizationId = userData?.preferences?.last_organization_id;
-    const currentOrganization = userData?.organizations?.find(
-      (org) => org.id === organizationId,
-    );
-    const currentPlan = currentOrganization?.plan?.name;
-
-    if (currentPlan === "Free") {
-      // Free → Pro
-      dynamicRestriction = {
-        ...dynamicRestriction,
-        message:
-          "La cotización de monedas está disponible solo en los planes PRO y TEAMS. Actualiza a Pro para gestionar tasas de cambio.",
-        actionLabel: "Actualizar a Pro",
-        planType: "pro" as const,
-        iconColor: "white",
-        backgroundColor: "hsl(213, 100%, 30%)",
-        borderColor: "hsl(213, 100%, 30%)",
-      };
-    }
-  }
-
-  const handleActionClick = () => {
-    if (dynamicRestriction.actionUrl) {
-      navigate(dynamicRestriction.actionUrl);
-    }
-    setIsPopoverOpen(false);
-  };
-
-  // Determinar icono y estilo según el tipo de restricción
-  const isGeneralMode = restrictionKey === "general_mode";
-  const BadgeIcon = isGeneralMode ? Building : Lock;
-
-  // Determinar estilo según el plan específico
-  let badgeStyle,
-    popoverBgColor,
-    popoverBorderColor,
-    iconColor,
-    textColor,
-    subtextColor;
-
-  if (isGeneralMode) {
-    // Para general_mode, usar colores de toast
-    badgeStyle = null; // No mostrar badge
-    popoverBgColor = "var(--toast-bg)";
-    popoverBorderColor = "var(--toast-border)";
-    iconColor = "var(--toast-fg)";
-    textColor = "var(--toast-title)";
-    subtextColor = "var(--toast-description)";
-  } else if (dynamicRestriction.planType === "teams") {
-    // Estilo específico para plan Teams (morado)
-    badgeStyle = {
-      backgroundColor: dynamicRestriction.backgroundColor,
-      borderColor: dynamicRestriction.borderColor,
-    };
-    popoverBgColor = dynamicRestriction.backgroundColor;
-    popoverBorderColor = dynamicRestriction.borderColor;
-    iconColor = "white";
-    textColor = "white";
-    subtextColor = "rgba(255, 255, 255, 0.9)";
-  } else if (dynamicRestriction.planType === "pro") {
-    // Estilo específico para plan Pro (azul)
-    badgeStyle = {
-      backgroundColor: dynamicRestriction.backgroundColor,
-      borderColor: dynamicRestriction.borderColor,
-    };
-    popoverBgColor = dynamicRestriction.backgroundColor;
-    popoverBorderColor = dynamicRestriction.borderColor;
-    iconColor = "white";
-    textColor = "white";
-    subtextColor = "rgba(255, 255, 255, 0.9)";
-  } else {
-    // Estilo por defecto (negro)
-    badgeStyle = { backgroundColor: "black", borderColor: "black" };
-    popoverBgColor = "hsl(0, 0%, 10%)";
-    popoverBorderColor = "hsl(0, 0%, 25%)";
-    iconColor = "white";
-    textColor = "hsl(0, 0%, 95%)";
-    subtextColor = "hsl(0, 0%, 70%)";
-  }
-
+  // Para funciones "coming soon" usar tooltip simple
   return (
-    <div className="relative w-full">
-      {/* Contenido bloqueado - sin efectos hover */}
-      <div className={`relative pointer-events-none [&_*]:hover:bg-transparent [&_*]:hover:text-inherit [&_*]:hover:scale-100 [&_*]:hover:shadow-none ${
-        isGeneralMode ? 'opacity-60' : 'opacity-50'
-      }`}>
-        {children}
-      </div>
-
-      {/* Overlay que activa hover */}
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <div
-            className={`absolute inset-0 flex items-center justify-center cursor-pointer group ${
-              isGeneralMode ? 'cursor-not-allowed' : 'bg-black/5'
-            }`}
-            onMouseEnter={() => setIsPopoverOpen(true)}
-            onMouseLeave={() => setIsPopoverOpen(false)}
-          >
-            {/* Solo mostrar badge si NO es general_mode */}
-            {!isGeneralMode && badgeStyle && (
-              <div
-                className="rounded-full p-1.5 shadow-sm border group-hover:shadow-md transition-shadow"
-                style={{
-                  ...badgeStyle,
-                  // Forzar que el badge siempre tenga fondo circular visible
-                  border: `1px solid ${badgeStyle.borderColor}`,
-                  backgroundColor: badgeStyle.backgroundColor,
-                }}
-              >
-                <BadgeIcon className="h-3 w-3" style={{ color: iconColor }} />
-              </div>
-            )}
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="relative">
+            {React.cloneElement(children as React.ReactElement, {
+              onClick: (e: React.MouseEvent) => {
+                // Si es admin con bypass, permitir el click
+                if (adminBypass && isAdmin) {
+                  return; // Permitir comportamiento normal
+                }
+                // Para usuarios comunes, prevenir el click
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            })}
           </div>
-        </PopoverTrigger>
-
-        <PopoverContent
-          className={`w-64 p-3 shadow-xl ${
-            isGeneralMode ? 'rounded-[var(--radius-lg)]' : 'rounded-2xl'
-          }`}
-          style={{
-            backgroundColor: popoverBgColor,
-            border: `1px solid ${popoverBorderColor}`,
-          }}
-          side="top"
-          sideOffset={-2}
-          onMouseEnter={() => !isGeneralMode && setIsPopoverOpen(true)}
-          onMouseLeave={() => !isGeneralMode && setIsPopoverOpen(false)}
-        >
-          <div className="flex items-start gap-2">
-            <div
-              className="rounded-full p-1 flex-shrink-0"
-              style={{
-                backgroundColor: isGeneralMode
-                  ? "var(--accent-bg)"
-                  : dynamicRestriction.planType === "teams"
-                    ? "rgba(255, 255, 255, 0.2)"
-                    : "rgba(255, 255, 255, 0.2)",
-              }}
-            >
-              <BadgeIcon
-                className="h-3 w-3 text-white"
-              />
-            </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-sm plan-restricted-title">
-                {isGeneralMode
-                  ? functionName
-                    ? `${functionName} - Requiere Proyecto`
-                    : "Requiere Proyecto"
-                  : functionName
-                    ? `${functionName} - Función Bloqueada`
-                    : "Función Bloqueada"}
-              </h4>
-              <p className="text-xs mt-1" style={{ color: subtextColor }}>
-                {isGeneralMode
-                  ? "Esta sección está únicamente disponible con un proyecto seleccionado."
-                  : dynamicRestriction.message}
-              </p>
-              {!isGeneralMode &&
-                dynamicRestriction.actionLabel &&
-                dynamicRestriction.actionUrl && (
-                  <button
-                    onClick={handleActionClick}
-                    className="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors hover:bg-white/10"
-                    style={{
-                      color: "white",
-                      border: "none",
-                      outline: "1px solid rgba(255, 255, 255, 0.4)",
-                      backgroundColor: "transparent",
-                    }}
-                  >
-                    {dynamicRestriction.actionLabel}
-                  </button>
-                )}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs px-2 py-1">
+          próximamente
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
