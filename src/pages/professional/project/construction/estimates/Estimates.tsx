@@ -332,8 +332,59 @@ export default function Estimates() {
 
   // Handle PDF export
   const handlePDFExport = () => {
+    // Transform tasks data for PDF (matching PdfBudgetTable expected structure)
+    const pdfTasks = tasks.map(task => ({
+      id: task.id,
+      custom_name: task.custom_name || task.task?.display_name || 'Tarea sin nombre',
+      phase_name: task.phase_name || 'Sin fase',
+      category_name: task.division_name || 'Sin rubro', // Use division_name as rubro
+      task: {
+        display_name: task.custom_name || task.task?.display_name || 'Tarea sin nombre'
+      },
+      quantity: task.quantity || 0,
+      unit: task.unit || task.task?.unit_name || 'UN',
+      unit_cost: 0, // Will be calculated from materials/labor
+      subtotal: 0, // Will be calculated  
+      margin: task.margin || 0,
+      total: 0 // Will be calculated
+    }));
+
+    // Create PDF blocks
+    const blocks = [
+      {
+        type: 'header',
+        enabled: true,
+        data: {
+          title: 'Cómputo y Presupuesto',
+          subtitle: 'Listado de Tareas de Construcción',
+          date: new Date().toLocaleDateString('es-AR')
+        }
+      },
+      {
+        type: 'budgetTable',
+        enabled: true,
+        data: {
+          tasks: pdfTasks
+        },
+        config: {
+          titleSize: 12,
+          bodySize: 10,
+          showTableBorder: true,
+          showRowDividers: true,
+          groupBy: 'division_name'
+        }
+      },
+      {
+        type: 'footer',
+        enabled: true,
+        data: {
+          text: `Generado el ${new Date().toLocaleDateString('es-AR')} - Archub`
+        }
+      }
+    ];
+
     openModal('pdf-exporter', {
-      blocks: [],
+      blocks,
       filename: `presupuesto-${new Date().toISOString().split('T')[0]}.pdf`
     });
   };
