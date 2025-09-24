@@ -486,7 +486,7 @@ export function MainSidebar() {
               />
 
               {/* Espacio entre Organización y Proyecto */}
-              <div className="h-2"></div>
+              <div className="h-8"></div>
 
               {/* Botón Proyecto */}
               <ButtonSidebar
