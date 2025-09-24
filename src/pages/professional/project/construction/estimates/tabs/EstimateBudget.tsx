@@ -27,37 +27,45 @@ export function EstimateBudget({
 
   // Calculate KPIs from tasks
   const kpiData = useMemo(() => {
-    if (tasks.length === 0) return null;
+    if (tasks.length === 0) return {
+      totalTasks: 0,
+      totalRubros: 0,
+      totalEstimatedCost: 0,
+      totalMarginValue: 0,
+      totalFinalCost: 0
+    };
 
     const totalTasks = tasks.length;
     
-    // Group tasks by division/group
-    const divisions = tasks.reduce((acc, task) => {
-      const division = task.division_name || 'Sin División';
-      if (!acc[division]) {
-        acc[division] = [];
+    // Group tasks by division/group (rubros)
+    const rubros = tasks.reduce((acc, task) => {
+      const rubro = task.division_name || 'Sin Rubro';
+      if (!acc[rubro]) {
+        acc[rubro] = [];
       }
-      acc[division].push(task);
+      acc[rubro].push(task);
       return acc;
     }, {} as Record<string, any[]>);
     
-    const totalDivisions = Object.keys(divisions).length;
+    const totalRubros = Object.keys(rubros).length;
 
-    // Calculate total estimated cost (sum of subtotals - base cost without margin)
-    // Note: This will be calculated from real data using hooks, placeholder for now
-    const totalEstimatedCost = 0; // Will be calculated from actual subtotals
+    // For now, use placeholder calculations - these will be updated with real data later
+    // TODO: Implement real calculations using task materials and labor data
+    const totalEstimatedCost = tasks.reduce((sum, task) => {
+      return sum + ((task.quantity || 0) * 1000); // placeholder base cost
+    }, 0);
 
-    // Calculate total margin value (sum of all margins applied to tasks)
-    // Note: This will be calculated from real data using hooks, placeholder for now
-    const totalMarginValue = 0; // Will be calculated from actual margin amounts
+    const totalMarginValue = tasks.reduce((sum, task) => {
+      const baseSubtotal = (task.quantity || 0) * 1000;
+      const margin = task.margin || 0;
+      return sum + (baseSubtotal * (margin / 100));
+    }, 0);
 
-    // Calculate total cost with margins (final budget total)
-    // Note: This will be calculated from real data using hooks, placeholder for now
-    const totalFinalCost = 0; // Will be calculated from actual totals with margins
+    const totalFinalCost = totalEstimatedCost + totalMarginValue;
 
     return {
       totalTasks,
-      totalDivisions,
+      totalRubros,
       totalEstimatedCost,
       totalMarginValue,
       totalFinalCost
@@ -145,8 +153,8 @@ export function EstimateBudget({
                   <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent */}
-                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
+                {/* Valor principal con --accent alineado a la izquierda */}
+                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
                   <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
                     {kpiData.totalTasks}
                   </p>
@@ -154,7 +162,7 @@ export function EstimateBudget({
                 
                 <div>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.totalDivisions} divisiones
+                    {kpiData.totalRubros} rubros
                   </p>
                 </div>
               </div>
@@ -172,9 +180,9 @@ export function EstimateBudget({
                   <Calculator className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent */}
-                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                {/* Valor principal con --accent alineado a la izquierda */}
+                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
                     {formatCurrency(kpiData.totalEstimatedCost)}
                   </p>
                 </div>
@@ -199,9 +207,9 @@ export function EstimateBudget({
                   <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent */}
-                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                {/* Valor principal con --accent alineado a la izquierda */}
+                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
                     {formatCurrency(kpiData.totalMarginValue)}
                   </p>
                 </div>
@@ -226,9 +234,9 @@ export function EstimateBudget({
                   <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent */}
-                <div className={`flex items-center justify-center ${isMobile ? 'h-6' : 'h-8'}`}>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                {/* Valor principal con --accent alineado a la izquierda */}
+                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
                     {formatCurrency(kpiData.totalFinalCost)}
                   </p>
                 </div>
