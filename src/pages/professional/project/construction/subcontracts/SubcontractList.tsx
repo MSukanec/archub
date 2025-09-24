@@ -5,6 +5,7 @@ import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -394,32 +395,22 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       key: 'actions',
       label: 'Acciones',
       render: (subcontract: any) => (
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleView(subcontract.id)}
-            className=""
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(subcontract)}
-            className=""
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(subcontract)}
-            className=" text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <TableActionButtons
+          onEdit={() => handleEdit(subcontract)}
+          onDelete={() => handleDelete(subcontract)}
+          additionalButtons={[
+            <Button
+              key="view"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleView(subcontract.id)}
+              className="h-8 w-8 p-0"
+              title="Ver detalle"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          ]}
+        />
       )
     }
   ];

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -320,24 +321,10 @@ const AdminCommunityOrganizations = () => {
       label: '',
       width: '8%',
       render: (organization: Organization) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(organization)}
-            className="h-7 w-7 p-0"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(organization)}
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
+        <TableActionButtons
+          onEdit={() => handleEdit(organization)}
+          onDelete={() => handleDelete(organization)}
+        />
       ),
     },
   ];

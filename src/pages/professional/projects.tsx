@@ -17,7 +17,8 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Edit, Trash2, Eye, Calendar as CalendarIcon } from 'lucide-react'
+import { Eye } from 'lucide-react'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 import { usePlanFeatures } from '@/hooks/usePlanFeatures'
 
 export default function Projects() {
@@ -57,8 +58,7 @@ export default function Projects() {
     // Filter by search
     const searchLower = searchValue.toLowerCase();
     const nameMatch = project.name?.toLowerCase().includes(searchLower);
-    const descriptionMatch = project.description?.toLowerCase().includes(searchLower);
-    const searchMatch = !searchValue || nameMatch || descriptionMatch;
+    const searchMatch = !searchValue || nameMatch;
     
     // Filter by project type
     const matchesProjectType = filterByProjectType === 'all' || 
@@ -195,14 +195,6 @@ export default function Projects() {
           )}
           <div>
             <div className="font-medium text-sm">{project.name}</div>
-            {project.description && (
-              <div className="text-xs text-muted-foreground">
-                {project.description.length > 50 
-                  ? `${project.description.substring(0, 50)}...` 
-                  : project.description
-                }
-              </div>
-            )}
           </div>
         </div>
       )
@@ -243,35 +235,22 @@ export default function Projects() {
       key: 'actions',
       label: 'Acciones',
       render: (project: any) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleSelectProject(project.id)}
-            className="h-8 w-8 p-0"
-            title="Seleccionar proyecto"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(project)}
-            className="h-8 w-8 p-0"
-            title="Editar proyecto"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDeleteClick(project)}
-            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-            title="Eliminar proyecto"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <TableActionButtons
+          onEdit={() => handleEdit(project)}
+          onDelete={() => handleDeleteClick(project)}
+          additionalButtons={[
+            <Button
+              key="view"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleSelectProject(project.id)}
+              className="h-8 w-8 p-0"
+              title="Seleccionar proyecto"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          ]}
+        />
       )
     }
   ]
