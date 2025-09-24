@@ -7,7 +7,6 @@ import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskDivisions from './AdminTaskDivisions';
 import AdminTaskParameters from './AdminTaskParameters';
 import AdminTaskTemplates from './AdminTaskTemplates';
-import AdminTaskFlow from './AdminTaskFlow';
 import AdminActionsList from './AdminActionsList';
 
 const AdminTasks = () => {
@@ -17,7 +16,6 @@ const AdminTasks = () => {
   const tabs = [
     { id: 'tareas', label: 'Tareas', isActive: activeTab === 'tareas' },
     { id: 'parametros', label: 'Parámetros', isActive: activeTab === 'parametros' },
-    { id: 'flujo', label: 'Flujo', isActive: activeTab === 'flujo' },
     { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
     { id: 'divisiones', label: 'Rubros', isActive: activeTab === 'divisiones' },
     { id: 'plantillas', label: 'Plantillas', isActive: activeTab === 'plantillas' },
@@ -50,8 +48,6 @@ const AdminTasks = () => {
           icon: Plus,
           onClick: () => openModal('task-parameter')
         };
-      case 'flujo':
-        return undefined; // No action button for flow tab
       case 'plantillas':
         return {
           label: "Nueva Plantilla",
@@ -83,8 +79,6 @@ const AdminTasks = () => {
         return <AdminTaskDivisions />;
       case 'parametros':
         return <AdminTaskParameters />;
-      case 'flujo':
-        return <AdminTaskFlow />;
       case 'plantillas':
         return <AdminTaskTemplates />;
       case 'acciones':

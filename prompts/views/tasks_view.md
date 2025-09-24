@@ -1,13 +1,10 @@
 -- 1) Dropear la vista anterior si existe
 drop view if exists public.tasks_view;
 
--- 2) Crear la vista ajustada
+-- 2) Crear la vista ajustada (sin columnas paramétricas)
 create view public.tasks_view as
 select
   t.id,
-  t.param_values,
-  t.param_order,
-  t.name_rendered,
   t.custom_name,
   t.code,
   t.is_system,
