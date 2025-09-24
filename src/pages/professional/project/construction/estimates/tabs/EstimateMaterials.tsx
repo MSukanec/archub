@@ -2,18 +2,15 @@ import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 
-import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
-import { useEffect } from 'react'
-import { Package, ShoppingCart } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
 
 export function EstimateMaterials() {
-  const [activeTab, setActiveTab] = useState('materials')
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
@@ -65,19 +62,6 @@ export function EstimateMaterials() {
       return { ...material, groupKey };
     })
 
-  // Header tabs configuration (for internal subtabs within this tab)
-  const subTabs = [
-    {
-      id: "materials",
-      label: "Lista de Materiales",
-      isActive: activeTab === "materials"
-    },
-    {
-      id: "purchase-orders", 
-      label: "Órdenes de Compra",
-      isActive: activeTab === "purchase-orders"
-    }
-  ]
 
   // Columnas dinámicas - ocultar categoría cuando se agrupa por categorías
   const columns = useMemo(() => {
@@ -171,116 +155,79 @@ export function EstimateMaterials() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Sub-tabs */}
-      <div className="flex space-x-1 border-b">
-        {subTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${
-              tab.isActive
-                ? 'text-blue-600 border-blue-600'
-                : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'materials' && (
-        <>
-          {filteredMaterials.length === 0 ? (
-            <EmptyState
-              icon={<Package className="w-8 h-8 text-muted-foreground" />}
-              title="No hay materiales disponibles"
-              description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
-            />
-          ) : (
-            <Table
-              data={filteredMaterials}
-              columns={columns}
-              isLoading={materialsLoading}
-              mode="construction"
-              groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-              topBar={{
-                tabs: ['Sin Agrupar', 'Por Categorías'],
-                activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
-                onTabChange: (tab: string) => {
-                  if (tab === 'Sin Agrupar') setGroupingType('none')
-                  else setGroupingType('categories')
-                },
-                showFilter: true,
-                isFilterActive: selectedPhase !== '' || selectedCategory !== '',
-                renderFilterContent: () => (
-                  <>
-                    <div>
-                      <Label className="text-xs font-medium mb-2 block">Fase</Label>
-                      <Select value={selectedPhase} onValueChange={setSelectedPhase}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Todas las fases" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Todas las fases</SelectItem>
-                          {phases.map((phase) => (
-                            <SelectItem key={phase} value={phase}>
-                              {phase}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs font-medium mb-2 block">Categoría</Label>
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Todas las categorías" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Todas las categorías</SelectItem>
-                          {uniqueCategories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                ),
-                onClearFilters: () => {
-                  setSelectedPhase("")
-                  setSelectedCategory("")
-                }
-              }}
-              renderGroupHeader={(groupKey: string, groupRows: any[]) => (
-                <>
-                  <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
-                  </div>
-                </>
-              )}
-            />
+    <>
+      {filteredMaterials.length === 0 ? (
+        <EmptyState
+          icon={<Package className="w-8 h-8 text-muted-foreground" />}
+          title="No hay materiales disponibles"
+          description="Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al proyecto"
+        />
+      ) : (
+        <Table
+          data={filteredMaterials}
+          columns={columns}
+          isLoading={materialsLoading}
+          mode="construction"
+          groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+          topBar={{
+            tabs: ['Sin Agrupar', 'Por Categorías'],
+            activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Categorías',
+            onTabChange: (tab: string) => {
+              if (tab === 'Sin Agrupar') setGroupingType('none')
+              else setGroupingType('categories')
+            },
+            showFilter: true,
+            isFilterActive: selectedPhase !== '' || selectedCategory !== '',
+            renderFilterContent: () => (
+              <>
+                <div>
+                  <Label className="text-xs font-medium mb-2 block">Fase</Label>
+                  <Select value={selectedPhase} onValueChange={setSelectedPhase}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todas las fases" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las fases</SelectItem>
+                      {phases.map((phase) => (
+                        <SelectItem key={phase} value={phase}>
+                          {phase}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs font-medium mb-2 block">Categoría</Label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todas las categorías" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las categorías</SelectItem>
+                      {uniqueCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ),
+            onClearFilters: () => {
+              setSelectedPhase("")
+              setSelectedCategory("")
+            }
+          }}
+          renderGroupHeader={(groupKey: string, groupRows: any[]) => (
+            <>
+              <div className="col-span-full text-sm font-medium">
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
+              </div>
+            </>
           )}
-        </>
+        />
       )}
-
-      {activeTab === 'purchase-orders' && (
-        <div className="space-y-6">
-          <PlanRestricted reason="coming_soon">
-            <div className="flex flex-col items-center justify-center py-16">
-              <ShoppingCart className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Órdenes de Compra</h3>
-              <p className="text-muted-foreground text-center max-w-md">
-                Esta funcionalidad estará disponible próximamente. Aquí podrás gestionar órdenes de compra, 
-                proveedores y hacer seguimiento de tus pedidos de materiales.
-              </p>
-            </div>
-          </PlanRestricted>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
