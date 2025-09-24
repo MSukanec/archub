@@ -98,7 +98,7 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
   // Report pure subtotal change
   useEffect(() => {
     if (onPureSubtotalChange && !isLoadingData && subtotal >= 0) {
-      const taskId = task.task_id || task.id;
+      const taskId = task.id; // Use task.id (same as taskSubtotals) instead of task.task_id
       onPureSubtotalChange(taskId, subtotal);
     }
   }, [onPureSubtotalChange, isLoadingData, subtotal, task]);
@@ -956,7 +956,7 @@ const calculateGroupSubtotalSum = (groupTasks: BudgetTask[], taskSubtotals: { [t
 const calculateGroupPureSubtotalSum = (groupTasks: BudgetTask[], pureSubtotals: { [taskId: string]: number }) => {
   // Sum the pure subtotals from pureSubtotals (without margins)
   return groupTasks.reduce((sum, task) => {
-    const taskId = task.task_id || task.id; // Use task_id first, fallback to id
+    const taskId = task.id; // Use task.id (same as taskSubtotals and SubtotalDisplay)
     const pureSubtotal = pureSubtotals[taskId] || 0;
     return sum + pureSubtotal;
   }, 0);
