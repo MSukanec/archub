@@ -407,7 +407,7 @@ export default function Projects() {
 
   if (isLoading || projectsLoading) {
     return (
-      <Layout headerProps={headerProps}>
+      <Layout headerProps={headerProps} wide>
         <div className="p-8 text-center text-muted-foreground">
           Cargando proyectos...
         </div>
@@ -416,7 +416,7 @@ export default function Projects() {
   }
 
   return (
-    <Layout headerProps={headerProps}>
+    <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
         {/* Tab: Proyectos */}
         {activeTab === 'projects' && (
