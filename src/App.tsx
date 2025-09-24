@@ -26,7 +26,7 @@ import Projects from "@/pages/professional/organization/Projects";
 
 
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
-import OrganizationMovements from "@/pages/professional/general/movements/Movements";
+import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { Clients } from "@/pages/professional/project/commercialization/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
 
@@ -149,7 +149,7 @@ function Router() {
         <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
 
         <Route path="/finances/capital" component={FinancesCapitalMovements} />
-        <Route path="/finances/movements" component={OrganizationMovements} />
+        <Route path="/movements" component={OrganizationMovements} />
         
         {/* Duplicate General Routes for compatibility */}
         <Route path="/project/dashboard" component={Project} />

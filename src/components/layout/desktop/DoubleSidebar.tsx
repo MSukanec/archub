@@ -301,6 +301,7 @@ export function MainSidebar() {
   const sidebarContent = {
     organization: [
       { icon: Folder, label: 'Proyectos', href: '/organization/projects' },
+      { icon: TrendingUp, label: 'Movimientos', href: '/movements' },
       { icon: HandCoins, label: 'Capital', href: '/finances/capital' },
       { icon: CreditCard, label: 'Gastos Generales', href: '/finances/general-costs' },
       { icon: Activity, label: 'Actividad', href: '/organization/activity' },
@@ -508,7 +509,7 @@ export function MainSidebar() {
                 label=""
                 isActive={location.startsWith('/finances')}
                 isExpanded={false}
-                onClick={() => navigate('/finances/movements')}
+                onClick={() => navigate('/finances/capital')}
                 variant="secondary"
               />
 
