@@ -351,6 +351,9 @@ export function MainSidebar() {
           href: '/project/dashboard'
         },
         {
+          type: 'divider'
+        },
+        {
           type: 'button',
           id: 'project-calendar',
           icon: Calendar,
@@ -364,11 +367,10 @@ export function MainSidebar() {
           label: 'Media',
           href: '/media'
         },
-        // Botones de construcción
         {
-          type: 'section',
-          label: 'CONSTRUCCIÓN'
+          type: 'divider'
         },
+        // Botones de construcción sin sección acordeón
         ...(sidebarContent.construction || []).map(item => ({
           type: 'button',
           id: `construction-${item.href.split('/').pop()}`,
@@ -376,11 +378,10 @@ export function MainSidebar() {
           label: item.label,
           href: item.href
         })),
-        // Botones de comercialización
         {
-          type: 'section',
-          label: 'COMERCIALIZACIÓN'
+          type: 'divider'
         },
+        // Botones de comercialización sin sección acordeón
         ...(sidebarContent.commercialization || []).map(item => ({
           type: 'button',
           id: `commercialization-${item.href.split('/').pop()}`,
@@ -741,7 +742,11 @@ export function MainSidebar() {
                   }
 
                   if ('type' in item && item.type === 'button') {
-                    if (!currentSection || expandedAccordion === currentSection) {
+                    // Para el sidebar de proyecto, mostrar todos los botones sin restricción de sección
+                    // Para otros sidebars, mantener la lógica de acordeón
+                    const shouldShowButton = sidebarLevel === 'project' || !currentSection || expandedAccordion === currentSection;
+                    
+                    if (shouldShowButton) {
                       elementsToRender.push(
                         <ButtonSidebar
                           key={`button-${item.id}`}
