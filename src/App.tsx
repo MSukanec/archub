@@ -42,7 +42,7 @@ import ConstructionEstimates from "@/pages/professional/project/construction/est
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
 import SubcontractView from "@/pages/professional/project/construction/subcontracts/SubcontractView";
 import ConstructionIndirects from "@/pages/professional/project/construction/indirects/Indirects";
-import Media from "@/pages/professional/general/media/Media";
+import Media from "@/pages/professional/media/Media";
 import Contacts from "@/pages/professional/contacts/Contacts";
 import Calendar from "@/pages/professional/calendar/Calendar";
 
@@ -120,7 +120,7 @@ function Router() {
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
         <Route path="/commercialization/clients" component={Clients} />
-        <Route path="/general/media" component={Media} />
+        <Route path="/media" component={Media} />
         
 
 

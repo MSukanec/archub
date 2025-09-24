@@ -356,6 +356,13 @@ export function MainSidebar() {
           label: 'Calendario',
           href: '/calendar'
         },
+        {
+          type: 'button',
+          id: 'project-media',
+          icon: FileText,
+          label: 'Media',
+          href: '/media'
+        },
         // Botones de construcción
         {
           type: 'section',
@@ -523,15 +530,6 @@ export function MainSidebar() {
               <div className="h-px bg-white/20 my-2 mx-2"></div>
 
 
-              {/* Botón Media */}
-              <ButtonSidebar
-                icon={<FileText className="w-[18px] h-[18px]" />}
-                label=""
-                isActive={location === '/general/media'}
-                isExpanded={false}
-                onClick={() => navigate('/general/media')}
-                variant="secondary"
-              />
 
               {/* Botón Análisis */}
               <ButtonSidebar
