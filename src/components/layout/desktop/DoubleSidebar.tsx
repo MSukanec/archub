@@ -716,7 +716,10 @@ export function MainSidebar() {
                     elementsToRender.push(
                       <div 
                         key={`divider-${index}`} 
-                        className="h-px my-2 ml-12 mr-2" 
+                        className={cn(
+                          "h-px my-2",
+                          isExpanded ? "ml-12 mr-2" : "mx-2"
+                        )}
                         style={{ backgroundColor: 'var(--main-sidebar-button-icon-fg)', opacity: 0.5 }}
                       ></div>
                     );
