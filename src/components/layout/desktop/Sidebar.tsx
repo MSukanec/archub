@@ -851,108 +851,146 @@ export function MainSidebar() {
                 className="absolute top-full left-0 right-0 z-50 border border-[var(--main-sidebar-border)] rounded-md shadow-lg"
                 style={{ backgroundColor: 'var(--main-sidebar-bg)' }}
               >
-                {/* Organización */}
-                <button
-                  onClick={handleOrganizationSelect}
-                  className={cn(
-                    "flex items-center px-3 py-2 text-left w-full transition-all duration-200 first:rounded-t-md",
-                    sidebarLevel === 'organization' 
-                      ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
-                      : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
-                  )}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
-                      {userData?.organization?.logo_url ? (
-                        <img 
-                          src={userData.organization.logo_url} 
-                          alt="Organización"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div 
-                          className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                          style={{ backgroundColor: 'var(--accent)' }}
-                        >
-                          {getOrganizationInitials(userData?.organization?.name || 'O')}
-                        </div>
-                      )}
-                    </div>
-                    <div 
-                      className="text-xs font-medium truncate"
-                      style={{ 
-                        color: sidebarLevel === 'organization' 
-                          ? 'var(--main-sidebar-button-active-fg)' 
-                          : 'var(--text-important)' 
-                      }}
-                    >
-                      {userData?.organization?.name || 'Organización'}
-                    </div>
-                    {sidebarLevel === 'organization' && userData?.plan?.name && (
-                      <Badge 
-                        variant="secondary" 
-                        className="h-4 px-1.5 text-xs font-medium text-white opacity-75 ml-auto"
-                        style={{
-                          backgroundColor: userData.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
-                                          userData.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
-                                          userData.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
-                        }}
-                      >
-                        {userData.plan.name}
-                      </Badge>
-                    )}
-                  </div>
-                </button>
-
-                {/* Divisor */}
-                <div className="h-px bg-[var(--main-sidebar-border)] mx-2"></div>
-
-                {/* Proyectos */}
-                <div className="max-h-40 overflow-y-auto">
-                  {projects.map((project: any) => (
+                {/* Contexto de Organización: Mostrar organizaciones disponibles */}
+                {sidebarLevel === 'organization' && (
+                  <div className="max-h-40 overflow-y-auto">
+                    {/* Organización actual */}
                     <button
-                      key={project.id}
-                      onClick={() => handleProjectSelect(project.id)}
+                      onClick={handleOrganizationSelect}
                       className={cn(
-                        "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md",
-                        sidebarLevel === 'project' && selectedProjectId === project.id
-                          ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
-                          : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                        "flex items-center px-3 py-2 text-left w-full transition-all duration-200 first:rounded-t-md last:rounded-b-md",
+                        "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]"
                       )}
                     >
                       <div className="flex items-center flex-1 min-w-0">
                         <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
-                          {project.project_image_url ? (
+                          {userData?.organization?.logo_url ? (
                             <img 
-                              src={project.project_image_url} 
-                              alt={project.name}
+                              src={userData.organization.logo_url} 
+                              alt="Organización"
                               className="w-full h-full object-cover"
                             />
                           ) : (
                             <div 
                               className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
-                              style={{ 
-                                backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
-                              }}
+                              style={{ backgroundColor: 'var(--accent)' }}
                             >
-                              {getProjectInitials(project.name || 'P')}
+                              {getOrganizationInitials(userData?.organization?.name || 'O')}
                             </div>
                           )}
                         </div>
                         <div 
                           className="text-xs font-medium truncate"
-                          style={{ 
-                            color: sidebarLevel === 'project' && selectedProjectId === project.id
-                              ? 'var(--main-sidebar-button-active-fg)' 
-                              : 'var(--text-important)' 
-                          }}
+                          style={{ color: 'var(--main-sidebar-button-active-fg)' }}
                         >
-                          {project.name}
+                          {userData?.organization?.name || 'Organización'}
                         </div>
+                        {userData?.plan?.name && (
+                          <Badge 
+                            variant="secondary" 
+                            className="h-4 px-1.5 text-xs font-medium text-white opacity-75 ml-auto"
+                            style={{
+                              backgroundColor: userData.plan.name === 'Teams' ? 'var(--plan-teams-bg)' : 
+                                              userData.plan.name === 'Pro' ? 'var(--plan-pro-bg)' : 
+                                              userData.plan.name === 'Free' ? 'var(--plan-free-bg)' : 'var(--plan-free-bg)'
+                            }}
+                          >
+                            {userData.plan.name}
+                          </Badge>
+                        )}
                       </div>
                     </button>
-                  ))}
-                </div>
+                    
+                    {/* Aquí se pueden agregar otras organizaciones en el futuro */}
+                    {userData?.organizations && userData.organizations.length > 1 && (
+                      userData.organizations
+                        .filter((org: any) => org.id !== userData.organization?.id)
+                        .map((organization: any) => (
+                          <button
+                            key={organization.id}
+                            onClick={() => handleOrganizationSelect(organization.id)}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                            )}
+                          >
+                            <div className="flex items-center flex-1 min-w-0">
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
+                                {organization.logo_url ? (
+                                  <img 
+                                    src={organization.logo_url} 
+                                    alt="Organización"
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div 
+                                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                    style={{ backgroundColor: 'var(--accent)' }}
+                                  >
+                                    {getOrganizationInitials(organization.name || 'O')}
+                                  </div>
+                                )}
+                              </div>
+                              <div 
+                                className="text-xs font-medium truncate"
+                                style={{ color: 'var(--text-important)' }}
+                              >
+                                {organization.name || 'Organización'}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                    )}
+                  </div>
+                )}
+
+                {/* Contexto de Proyecto: Mostrar proyectos disponibles */}
+                {sidebarLevel === 'project' && (
+                  <div className="max-h-40 overflow-y-auto">
+                    {projects.map((project: any) => (
+                      <button
+                        key={project.id}
+                        onClick={() => handleProjectSelect(project.id)}
+                        className={cn(
+                          "flex items-center px-3 py-2 text-left w-full transition-all duration-200 first:rounded-t-md last:rounded-b-md",
+                          selectedProjectId === project.id
+                            ? "bg-[var(--main-sidebar-button-active-bg)] text-[var(--main-sidebar-button-active-fg)]" 
+                            : "hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                        )}
+                      >
+                        <div className="flex items-center flex-1 min-w-0">
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center mr-2 flex-shrink-0 overflow-hidden">
+                            {project.project_image_url ? (
+                              <img 
+                                src={project.project_image_url} 
+                                alt={project.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div 
+                                className="w-full h-full flex items-center justify-center text-white font-semibold text-xs"
+                                style={{ 
+                                  backgroundColor: project.color || 'var(--main-sidebar-button-bg)'
+                                }}
+                              >
+                                {getProjectInitials(project.name || 'P')}
+                              </div>
+                            )}
+                          </div>
+                          <div 
+                            className="text-xs font-medium truncate"
+                            style={{ 
+                              color: selectedProjectId === project.id
+                                ? 'var(--main-sidebar-button-active-fg)' 
+                                : 'var(--text-important)' 
+                            }}
+                          >
+                            {project.name}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
