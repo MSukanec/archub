@@ -755,7 +755,7 @@ export function MainSidebar() {
                     const shouldShowButton = sidebarLevel === 'project' || !currentSection || expandedAccordion === currentSection;
                     
                     if (shouldShowButton) {
-                      elementsToRender.push(
+                      const buttonElement = (
                         <ButtonSidebar
                           key={`button-${item.id}`}
                           icon={<item.icon className="w-[18px] h-[18px]" />}
@@ -766,6 +766,21 @@ export function MainSidebar() {
                           variant="secondary"
                         />
                       );
+                      
+                      if (item.restricted) {
+                        elementsToRender.push(
+                          <PlanRestricted 
+                            key={`restricted-${item.id}`}
+                            reason="coming_soon" 
+                            functionName={item.label}
+                            adminBypass={true}
+                          >
+                            {buttonElement}
+                          </PlanRestricted>
+                        );
+                      } else {
+                        elementsToRender.push(buttonElement);
+                      }
                     }
                     return;
                   }

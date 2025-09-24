@@ -11,6 +11,7 @@ import { getRestrictionMessage } from "@/utils/restrictions";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 
 interface PlanRestrictedProps {
   feature?: string;
@@ -18,6 +19,7 @@ interface PlanRestrictedProps {
   reason?: "coming_soon" | "general_mode" | string;
   functionName?: string;
   badgeOnly?: boolean; // New prop for mobile badge mode
+  adminBypass?: boolean; // Allow admins to click through while maintaining visual restriction
   children: React.ReactNode;
 }
 
@@ -27,6 +29,7 @@ export function PlanRestricted({
   reason,
   functionName,
   badgeOnly = false,
+  adminBypass = false,
   children,
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
@@ -35,6 +38,7 @@ export function PlanRestricted({
 
   // Datos del usuario para debug
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
 
   // Verificar proyecto seleccionado
   const { selectedProjectId } = useProjectContext();
@@ -82,8 +86,24 @@ export function PlanRestricted({
     }
   }
 
-  // Si no está restringido, renderizar directamente los children
-  if (!isRestricted) {
+  // Si no está restringido, o si es admin con bypass, renderizar directamente los children
+  // Pero si es admin con bypass y está restringido, solo permitir funcionalidad, no cambiar apariencia
+  if (!isRestricted || (isRestricted && adminBypass && isAdmin && !badgeOnly)) {
+    // Si es admin con bypass visual, envolver con el estilo de restricción pero permitir clic
+    if (isRestricted && adminBypass && isAdmin) {
+      return (
+        <div className="relative w-full">
+          {/* Contenido con funcionalidad normal pero con overlay visual */}
+          <div className="relative opacity-50">
+            {children}
+          </div>
+          {/* Badge visual para admins */}
+          <div className="absolute -top-1 -right-1 rounded-full p-1 shadow-sm border border-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
+            <Lock className="h-3 w-3 text-white" />
+          </div>
+        </div>
+      );
+    }
     return <>{children}</>;
   }
   
