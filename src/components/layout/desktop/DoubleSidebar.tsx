@@ -353,25 +353,6 @@ export function MainSidebar() {
         {
           type: 'divider'
         },
-        {
-          type: 'button',
-          id: 'project-calendar',
-          icon: Calendar,
-          label: 'Calendario',
-          href: '/calendar',
-          restricted: true
-        },
-        {
-          type: 'button',
-          id: 'project-media',
-          icon: FileText,
-          label: 'Media',
-          href: '/media',
-          restricted: true
-        },
-        {
-          type: 'divider'
-        },
         // Botones de construcción sin sección acordeón
         ...(sidebarContent.construction || []).map(item => ({
           type: 'button',
@@ -391,7 +372,26 @@ export function MainSidebar() {
           icon: item.icon,
           label: item.label,
           href: item.href
-        }))
+        })),
+        {
+          type: 'divider'
+        },
+        {
+          type: 'button',
+          id: 'project-calendar',
+          icon: Calendar,
+          label: 'Calendario',
+          href: '/calendar',
+          restricted: true
+        },
+        {
+          type: 'button',
+          id: 'project-media',
+          icon: FileText,
+          label: 'Media',
+          href: '/media',
+          restricted: true
+        }
       ];
       return projectItems;
     } else if (sidebarLevel === 'organization') {
@@ -717,7 +717,7 @@ export function MainSidebar() {
                       <div 
                         key={`divider-${index}`} 
                         className="h-px my-2 ml-12 mr-2" 
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                        style={{ backgroundColor: 'var(--main-sidebar-button-icon-fg)', opacity: 0.5 }}
                       ></div>
                     );
                     return;
