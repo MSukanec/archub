@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useMemo } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
+import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+import { useTaskLabor } from '@/hooks/use-task-labor'
 
 interface EstimateBudgetProps {
   tasks?: any[]
@@ -14,6 +16,74 @@ interface EstimateBudgetProps {
   onDeleteTask?: (taskId: string) => void
   onDuplicateTask?: (task: any) => void
 }
+
+// Component to calculate individual task's subtotal and total
+const TaskKPICalculator = ({ task }: { task: any }) => {
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(task.task_id || task.id);
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id || task.id);
+
+  const isLoadingData = materialsLoading || laborLoading;
+
+  // Calculate subtotal (quantity × unit cost without margin)
+  const subtotal = useMemo(() => {
+    if (isLoadingData) return 0;
+    
+    const quantity = task.quantity || 0;
+    
+    // Calculate cost per unit (materials + labor)
+    const materialsCost = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const amount = material.amount || 0;
+      return sum + (amount * unitPrice);
+    }, 0);
+
+    const laborCost = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const amount = laborItem.quantity || 0;
+      return sum + (amount * unitPrice);
+    }, 0);
+
+    const costPerUnit = materialsCost + laborCost;
+    return quantity * costPerUnit;
+  }, [materials, labor, task.quantity, isLoadingData]);
+
+  // Calculate total (subtotal + margin)
+  const total = useMemo(() => {
+    const marginPct = task.margin || 0;
+    const marginAmount = subtotal * (marginPct / 100);
+    return subtotal + marginAmount;
+  }, [subtotal, task.margin]);
+
+  // Calculate margin value
+  const marginValue = useMemo(() => {
+    return total - subtotal;
+  }, [total, subtotal]);
+
+  return { subtotal, total, marginValue, isLoading: isLoadingData };
+};
+
+// Component to calculate KPIs for all tasks
+const BudgetKPICalculator = ({ tasks }: { tasks: any[] }) => {
+  const taskCalculations = tasks.map(task => TaskKPICalculator({ task }));
+  
+  const totalSubtotals = useMemo(() => {
+    return taskCalculations.reduce((sum, calc) => sum + calc.subtotal, 0);
+  }, [taskCalculations]);
+
+  const totalFinals = useMemo(() => {
+    return taskCalculations.reduce((sum, calc) => sum + calc.total, 0);
+  }, [taskCalculations]);
+
+  const totalMargins = useMemo(() => {
+    return taskCalculations.reduce((sum, calc) => sum + calc.marginValue, 0);
+  }, [taskCalculations]);
+
+  const isLoading = taskCalculations.some(calc => calc.isLoading);
+
+  return { totalSubtotals, totalFinals, totalMargins, isLoading };
+};
 
 export function EstimateBudget({ 
   tasks = [], 
@@ -25,16 +95,11 @@ export function EstimateBudget({
 }: EstimateBudgetProps) {
   const isMobile = useMobile()
 
-  // Calculate KPIs from tasks
-  const kpiData = useMemo(() => {
-    if (tasks.length === 0) return {
-      totalTasks: 0,
-      totalRubros: 0,
-      totalEstimatedCost: 0,
-      totalMarginValue: 0,
-      totalFinalCost: 0
-    };
+  // Calculate real KPIs using actual task data
+  const budgetCalculations = BudgetKPICalculator({ tasks });
 
+  // Calculate basic metrics
+  const kpiData = useMemo(() => {
     const totalTasks = tasks.length;
     
     // Group tasks by division/group (rubros)
@@ -49,28 +114,14 @@ export function EstimateBudget({
     
     const totalRubros = Object.keys(rubros).length;
 
-    // For now, use placeholder calculations - these will be updated with real data later
-    // TODO: Implement real calculations using task materials and labor data
-    const totalEstimatedCost = tasks.reduce((sum, task) => {
-      return sum + ((task.quantity || 0) * 1000); // placeholder base cost
-    }, 0);
-
-    const totalMarginValue = tasks.reduce((sum, task) => {
-      const baseSubtotal = (task.quantity || 0) * 1000;
-      const margin = task.margin || 0;
-      return sum + (baseSubtotal * (margin / 100));
-    }, 0);
-
-    const totalFinalCost = totalEstimatedCost + totalMarginValue;
-
     return {
       totalTasks,
       totalRubros,
-      totalEstimatedCost,
-      totalMarginValue,
-      totalFinalCost
+      totalEstimatedCost: budgetCalculations.totalSubtotals,  // Sum of SUBTOTAL column
+      totalMarginValue: budgetCalculations.totalMargins,      // Sum of all margins applied
+      totalFinalCost: budgetCalculations.totalFinals         // Sum of TOTAL column
     };
-  }, [tasks]);
+  }, [tasks, budgetCalculations]);
 
   // Handle reorder tasks
   const handleReorder = (reorderedTasks: any[]) => {
