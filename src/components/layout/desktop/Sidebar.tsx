@@ -633,7 +633,9 @@ export function MainSidebar() {
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
         },
-        // Botones de administración (sin línea divisoria)
+        // Línea divisoria
+        { type: 'divider' },
+        // Botones de administración
         ...(sidebarContent.organization || []).map(item => ({
           type: 'button',
           id: `organization-${item.href.split('/').pop()}`,
