@@ -360,7 +360,7 @@ export function MainSidebar() {
           icon: item.icon,
           label: item.label,
           href: item.href,
-          restricted: item.href === '/construction/materials' || item.href === '/construction/logs'
+          restricted: item.label === 'Mano de Obra' || item.label === 'Indirectos' || item.href === '/construction/materials' || item.href === '/construction/logs'
         })),
         {
           type: 'divider'
@@ -448,7 +448,8 @@ export function MainSidebar() {
           id: 'organization-capital',
           icon: HandCoins,
           label: 'Capital',
-          href: '/finances/capital'
+          href: '/finances/capital',
+          restricted: true
         },
         // Gastos Generales
         {
@@ -456,7 +457,8 @@ export function MainSidebar() {
           id: 'organization-general-costs',
           icon: CreditCard,
           label: 'Gastos Generales',
-          href: '/finances/general-costs'
+          href: '/finances/general-costs',
+          restricted: true
         },
         {
           type: 'divider'
