@@ -633,9 +633,7 @@ export function MainSidebar() {
           label: 'Resumen de Organización',
           href: '/organization/dashboard'
         },
-        // Línea divisoria
-        { type: 'divider' },
-        // Botones de administración
+        // Botones de administración (sin línea divisoria)
         ...(sidebarContent.organization || []).map(item => ({
           type: 'button',
           id: `organization-${item.href.split('/').pop()}`,
@@ -910,7 +908,7 @@ export function MainSidebar() {
                         .map((organization: any) => (
                           <button
                             key={organization.id}
-                            onClick={handleOrganizationSelect}
+                            onClick={() => handleOrganizationSelect(organization.id)}
                             className={cn(
                               "flex items-center px-3 py-2 text-left w-full transition-all duration-200 last:rounded-b-md hover:bg-[var(--main-sidebar-button-hover-bg)]"
                             )}
