@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useUpdateConstructionTask, useInitializeCostScope } from '@/hooks/use-construction-tasks';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -59,6 +59,7 @@ interface BudgetTreeProps {
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
   onAddTask?: () => void;
+  onTotalsChange?: (totalSubtotals: number, totalFinals: number) => void;
 }
 
 // Component for subtotal calculation (Cantidad x Costo Unitario)
@@ -1047,7 +1048,8 @@ export function BudgetTree({
   onDuplicateTask,
   onDeleteTask,
   onQuantityChange,
-  onAddTask 
+  onAddTask,
+  onTotalsChange 
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
@@ -1233,6 +1235,25 @@ export function BudgetTree({
       groupPureSubtotals: groupSums
     };
   }, [groupedTasks, pureSubtotals]);
+
+  // Calculate total subtotals and finals across all groups and report to parent
+  const lastTotalsRef = useRef<{ totalSubtotals: number; totalFinals: number } | null>(null);
+
+  useEffect(() => {
+    if (onTotalsChange && Object.keys(pureSubtotals).length > 0 && Object.keys(taskSubtotals).length > 0) {
+      const totalSubtotals = Object.values(pureSubtotals).reduce((sum, value) => sum + value, 0);
+      const totalFinals = Object.values(taskSubtotals).reduce((sum, value) => sum + value, 0);
+      
+      // Only call onTotalsChange if values have actually changed
+      if (!lastTotalsRef.current || 
+          lastTotalsRef.current.totalSubtotals !== totalSubtotals || 
+          lastTotalsRef.current.totalFinals !== totalFinals) {
+        
+        lastTotalsRef.current = { totalSubtotals, totalFinals };
+        onTotalsChange(totalSubtotals, totalFinals);
+      }
+    }
+  }, [pureSubtotals, taskSubtotals, onTotalsChange]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);

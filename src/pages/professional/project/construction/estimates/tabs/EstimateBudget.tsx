@@ -3,7 +3,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { BudgetTree } from '@/components/ui-custom/tables-and-trees/BudgetTree'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
@@ -52,8 +52,16 @@ export function EstimateBudget({
   onDuplicateTask
 }: EstimateBudgetProps) {
   const isMobile = useMobile()
+  
+  // State to store real totals from BudgetTree
+  const [realTotals, setRealTotals] = useState<{ totalSubtotals: number; totalFinals: number } | null>(null);
 
-  // Calculate real KPIs using actual task data
+  // Handle totals change from BudgetTree
+  const handleTotalsChange = (totalSubtotals: number, totalFinals: number) => {
+    setRealTotals({ totalSubtotals, totalFinals });
+  };
+
+  // Calculate real KPIs using actual task data (fallback if real totals not available yet)
   const budgetCalculations = calculateBudgetKPIs(tasks);
 
   // Calculate basic metrics
@@ -72,14 +80,19 @@ export function EstimateBudget({
     
     const totalRubros = Object.keys(rubros).length;
 
+    // Use real totals from BudgetTree if available, otherwise fallback to calculated values
+    const actualEstimatedCost = realTotals ? realTotals.totalSubtotals : budgetCalculations.totalSubtotals;
+    const actualFinalCost = realTotals ? realTotals.totalFinals : budgetCalculations.totalFinals;
+    const actualMarginValue = actualFinalCost - actualEstimatedCost; // Calculate margin as difference
+
     return {
       totalTasks,
       totalRubros,
-      totalEstimatedCost: budgetCalculations.totalSubtotals,  // Sum of SUBTOTAL column
-      totalMarginValue: budgetCalculations.totalMargins,      // Sum of all margins applied
-      totalFinalCost: budgetCalculations.totalFinals         // Sum of TOTAL column
+      totalEstimatedCost: actualEstimatedCost,  // Sum of SUBTOTAL column (real from BudgetTree)
+      totalMarginValue: actualMarginValue,      // Difference between final and estimated (real margins)
+      totalFinalCost: actualFinalCost          // Sum of TOTAL column (real from BudgetTree)
     };
-  }, [tasks, budgetCalculations]);
+  }, [tasks, budgetCalculations, realTotals]);
 
   // Handle reorder tasks
   const handleReorder = (reorderedTasks: any[]) => {
@@ -268,6 +281,7 @@ export function EstimateBudget({
         onDuplicateTask={handleDuplicateTask}
         onDeleteTask={handleDeleteTask}
         onQuantityChange={handleQuantityChange}
+        onTotalsChange={handleTotalsChange}
       />
     </div>
   )
