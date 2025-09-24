@@ -829,7 +829,7 @@ const SortableTaskItem = ({
         </div>
         
         {/* Unit cost column */}
-        <div className="text-right text-xs flex items-center justify-end gap-2">
+        <div className="text-right text-xs flex items-center justify-end gap-1">
           <InlineUnitCostEditor 
             task={task} 
             onCostTypeChange={(costType) => setIsIndependentCost(costType === 'independent')}
@@ -948,11 +948,39 @@ const GroupHeader = ({
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
 
+  // Calculate group subtotal sum (Cantidad x Costo Unitario sin margen)
+  const groupSubtotalSum = useMemo(() => {
+    return groupTasks.reduce((sum, task) => {
+      const quantity = task.quantity || 0;
+      
+      // Get materials cost per unit
+      const materialsCost = task.materials?.reduce((matSum, material) => {
+        const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+        const unitPrice = materialView?.avg_price || 0;
+        const amount = material.amount || 0;
+        return matSum + (amount * unitPrice);
+      }, 0) || 0;
+
+      // Get labor cost per unit  
+      const laborCost = task.labor?.reduce((labSum, laborItem) => {
+        const laborView = laborItem.labor_view;
+        const unitPrice = laborView?.avg_price || 0;
+        const amount = laborItem.quantity || 0;
+        return labSum + (amount * unitPrice);
+      }, 0) || 0;
+
+      const costPerUnit = materialsCost + laborCost;
+      const taskSubtotal = quantity * costPerUnit;
+      
+      return sum + taskSubtotal;
+    }, 0);
+  }, [groupTasks]);
+
   return (
     <div 
       className="grid gap-4 px-4 py-3 text-xs font-medium"
       style={{ 
-        gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 100px 120px 110px 80px",
+        gridTemplateColumns: "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px",
         backgroundColor: "var(--table-group-header-bg)",
         color: "white"
       }}
@@ -965,10 +993,19 @@ const GroupHeader = ({
       <div className="font-bold text-xs">
         {groupIndex}
       </div>
-      <div className="col-span-5">
+      <div className="col-span-3">
         {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
-      {/* Subtotal column */}
+      {/* Empty columns for Unit Cost and Quantity */}
+      <div></div>
+      <div></div>
+      {/* Subtotal sum column */}
+      <div className="text-right">
+        <span className="font-medium">{formatCost(groupSubtotalSum)}</span>
+      </div>
+      {/* Empty column for Margin */}
+      <div></div>
+      {/* Total column (antes era Subtotal) */}
       <div className="text-right">
         <span className="font-medium">{formatCost(groupSubtotal)}</span>
       </div>
