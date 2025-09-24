@@ -358,14 +358,16 @@ export function MainSidebar() {
           id: 'project-calendar',
           icon: Calendar,
           label: 'Calendario',
-          href: '/calendar'
+          href: '/calendar',
+          restricted: true
         },
         {
           type: 'button',
           id: 'project-media',
           icon: FileText,
           label: 'Media',
-          href: '/media'
+          href: '/media',
+          restricted: true
         },
         {
           type: 'divider'
@@ -376,7 +378,8 @@ export function MainSidebar() {
           id: `construction-${item.href.split('/').pop()}`,
           icon: item.icon,
           label: item.label,
-          href: item.href
+          href: item.href,
+          restricted: item.href === '/construction/materials' || item.href === '/construction/logs'
         })),
         {
           type: 'divider'
@@ -407,7 +410,8 @@ export function MainSidebar() {
           id: `organization-${item.href.split('/').pop()}`,
           icon: item.icon,
           label: item.label,
-          href: item.href
+          href: item.href,
+          restricted: item.href === '/organization/activity'
         })),
       ];
       return organizationItems;
