@@ -99,12 +99,7 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
   useEffect(() => {
     if (onPureSubtotalChange && !isLoadingData && subtotal >= 0) {
       const taskId = task.id; // Use task.id (same as taskSubtotals) instead of task.task_id
-      
-      // Validate and cap extreme values to prevent UI overflow
-      const maxReasonableSubtotal = 10000000; // 10 million max
-      const cappedSubtotal = subtotal > maxReasonableSubtotal ? 0 : subtotal;
-      
-      onPureSubtotalChange(taskId, cappedSubtotal);
+      onPureSubtotalChange(taskId, subtotal);
     }
   }, [onPureSubtotalChange, isLoadingData, subtotal, task]);
 
@@ -1244,41 +1239,6 @@ export function BudgetTree({
   // Calculate total subtotals and finals across all groups and report to parent
   const lastTotalsRef = useRef<{ totalSubtotals: number; totalFinals: number } | null>(null);
 
-  // Clean up orphaned entries when tasks change
-  useEffect(() => {
-    const currentTaskIds = new Set(tasks.map(task => task.id));
-    
-    // Clean pureSubtotals
-    setPureSubtotals(prev => {
-      const cleaned = Object.keys(prev).reduce((acc, taskId) => {
-        if (currentTaskIds.has(taskId)) {
-          acc[taskId] = prev[taskId];
-        }
-        return acc;
-      }, {} as { [taskId: string]: number });
-      
-      // Only update if something changed
-      const hasChanges = Object.keys(cleaned).length !== Object.keys(prev).length ||
-                         Object.keys(cleaned).some(key => !prev[key]);
-      return hasChanges ? cleaned : prev;
-    });
-    
-    // Clean taskSubtotals
-    setTaskSubtotals(prev => {
-      const cleaned = Object.keys(prev).reduce((acc, taskId) => {
-        if (currentTaskIds.has(taskId)) {
-          acc[taskId] = prev[taskId];
-        }
-        return acc;
-      }, {} as { [taskId: string]: number });
-      
-      // Only update if something changed
-      const hasChanges = Object.keys(cleaned).length !== Object.keys(prev).length ||
-                         Object.keys(cleaned).some(key => !prev[key]);
-      return hasChanges ? cleaned : prev;
-    });
-  }, [tasks]);
-
   useEffect(() => {
     if (onTotalsChange && Object.keys(pureSubtotals).length > 0 && Object.keys(taskSubtotals).length > 0) {
       // Filter pureSubtotals to only include tasks that are also in taskSubtotals (active tasks)
@@ -1292,7 +1252,6 @@ export function BudgetTree({
       const totalSubtotals = Object.values(activePureSubtotals).reduce((sum, value) => sum + value, 0);
       const totalFinals = Object.values(taskSubtotals).reduce((sum, value) => sum + value, 0);
       
-      
       // Only call onTotalsChange if values have actually changed
       if (!lastTotalsRef.current || 
           lastTotalsRef.current.totalSubtotals !== totalSubtotals || 
@@ -1302,7 +1261,7 @@ export function BudgetTree({
         onTotalsChange(totalSubtotals, totalFinals);
       }
     }
-  }, [pureSubtotals, taskSubtotals, onTotalsChange, tasks]);
+  }, [pureSubtotals, taskSubtotals, onTotalsChange]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
