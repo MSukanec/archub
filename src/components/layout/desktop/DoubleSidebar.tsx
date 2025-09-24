@@ -515,16 +515,6 @@ export function MainSidebar() {
               {/* Divisor */}
               <div className="h-px bg-white/20 my-2 mx-2"></div>
 
-              {/* Botón Finanzas */}
-              <ButtonSidebar
-                icon={<DollarSign className="w-[18px] h-[18px]" />}
-                label=""
-                isActive={location.startsWith('/finances')}
-                isExpanded={false}
-                onClick={() => navigate('/finances/capital')}
-                variant="secondary"
-              />
-
 
               {/* Botón Calendar */}
               <ButtonSidebar
