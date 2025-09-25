@@ -132,7 +132,7 @@ export function useUpsertOrganizationTaskPrice() {
       return result
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['organization-task-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['organization-task-prices', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['organization-task-price', userData?.organization?.id, variables.task_id] })
       queryClient.invalidateQueries({ queryKey: ['task-costs'] })
       toast({
@@ -172,7 +172,7 @@ export function useDeleteOrganizationTaskPrice() {
       }
     },
     onSuccess: (_, taskId) => {
-      queryClient.invalidateQueries({ queryKey: ['organization-task-prices'] })
+      queryClient.invalidateQueries({ queryKey: ['organization-task-prices', userData?.organization?.id] })
       queryClient.invalidateQueries({ queryKey: ['organization-task-price', userData?.organization?.id, taskId] })
       queryClient.invalidateQueries({ queryKey: ['task-costs'] })
       toast({

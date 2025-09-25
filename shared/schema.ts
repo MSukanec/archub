@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, uuid, jsonb, real, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -333,7 +333,9 @@ export const organization_task_prices = pgTable("organization_task_prices", {
   note: text("note"),
   updated_at: timestamp("updated_at").defaultNow(),
   created_at: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  unique_org_task: unique().on(table.organization_id, table.task_id),
+}));
 
 // Movement Tasks Junction Table
 export const movement_tasks = pgTable("movement_tasks", {

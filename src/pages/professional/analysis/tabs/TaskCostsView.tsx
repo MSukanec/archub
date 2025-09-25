@@ -18,7 +18,7 @@ import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore
 import { useMobile } from '@/hooks/use-mobile';
 import { useTaskCosts } from '@/hooks/use-task-costs';
 import { useDeleteTaskMaterial } from '@/hooks/use-generated-tasks';
-import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
+import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrganizationTaskPrice, type OrganizationTaskPriceData } from '@/hooks/use-organization-task-prices';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -143,7 +143,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   const handleSaveCustomPrice = async () => {
     try {
-      const priceData: any = {
+      const priceData: OrganizationTaskPriceData = {
         task_id: taskId,
         currency_code: 'ARS', // Default to ARS
         note: pricingNote || null
