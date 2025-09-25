@@ -22,6 +22,7 @@ import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrga
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 
 interface TaskCostsViewProps {
   task: any;
@@ -54,9 +55,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const [showCustomPricing, setShowCustomPricing] = useState(false);
   const [customMaterialCost, setCustomMaterialCost] = useState<string>('');
   const [customLaborCost, setCustomLaborCost] = useState<string>('');
-  const [customTotalCost, setCustomTotalCost] = useState<string>('');
   const [pricingNote, setPricingNote] = useState<string>('');
-  const [pricingMode, setPricingMode] = useState<'separate' | 'total'>('separate');
 
   // Mutaciones para eliminar costos
   const queryClient = useQueryClient();
@@ -128,39 +127,23 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     if (customPrice) {
       setCustomMaterialCost(customPrice.material_unit_cost?.toString() || '');
       setCustomLaborCost(customPrice.labor_unit_cost?.toString() || '');
-      setCustomTotalCost(customPrice.total_unit_cost?.toString() || '');
       setPricingNote(customPrice.note || '');
       setShowCustomPricing(true);
-      
-      // Determinar el modo basado en qué campos están poblados
-      if (customPrice.total_unit_cost && !customPrice.material_unit_cost && !customPrice.labor_unit_cost) {
-        setPricingMode('total');
-      } else {
-        setPricingMode('separate');
-      }
     }
   };
 
-  const handleSaveCustomPrice = async () => {
+  const handleSaveCustomPrice = async (data: { customMaterialCost: string; customLaborCost: string; pricingNote: string }) => {
     try {
       const priceData: OrganizationTaskPriceData = {
         task_id: taskId,
-        currency_code: 'ARS', // Default to ARS
-        note: pricingNote || null
+        currency_code: 'ARS',
+        note: data.pricingNote || null,
+        material_unit_cost: data.customMaterialCost ? parseFloat(data.customMaterialCost) : null,
+        labor_unit_cost: data.customLaborCost ? parseFloat(data.customLaborCost) : null,
+        total_unit_cost: null // Always null - total is calculated automatically
       };
 
-      if (pricingMode === 'separate') {
-        priceData.material_unit_cost = customMaterialCost ? parseFloat(customMaterialCost) : null;
-        priceData.labor_unit_cost = customLaborCost ? parseFloat(customLaborCost) : null;
-        priceData.total_unit_cost = null; // Reset total when using separate
-      } else {
-        priceData.total_unit_cost = customTotalCost ? parseFloat(customTotalCost) : null;
-        priceData.material_unit_cost = null; // Reset separate when using total
-        priceData.labor_unit_cost = null;
-      }
-
       await upsertCustomPrice.mutateAsync(priceData);
-      setShowCustomPricing(false);
     } catch (error) {
       console.error('Error saving custom price:', error);
     }
@@ -171,7 +154,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       await deleteCustomPrice.mutateAsync(taskId);
       setCustomMaterialCost('');
       setCustomLaborCost('');
-      setCustomTotalCost('');
       setPricingNote('');
       setShowCustomPricing(false);
     } catch (error) {
@@ -185,11 +167,22 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     } else {
       setCustomMaterialCost('');
       setCustomLaborCost('');
-      setCustomTotalCost('');
       setPricingNote('');
     }
     setShowCustomPricing(false);
   };
+
+  // Auto-save hook for custom pricing
+  const { isSaving } = useDebouncedAutoSave({
+    data: {
+      customMaterialCost,
+      customLaborCost,
+      pricingNote
+    },
+    saveFn: handleSaveCustomPrice,
+    delay: 1000,
+    enabled: showCustomPricing && isAdmin
+  });
 
   // Filtrar costos por búsqueda
   const filteredCosts = costs.filter(cost => {
@@ -343,8 +336,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 
                 <div className="flex items-center gap-2">
                   {customPrice && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                      Personalizado
+                    <Badge variant="secondary" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+                      PERSONALIZADO
                     </Badge>
                   )}
                   {!showCustomPricing && (
@@ -369,244 +362,143 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
               {/* Values Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Material Cost */}
-                <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost ? 'var(--accent)' : 'var(--border)' }}>
+                <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE MATERIALES</span>
                       </div>
-                      {customPrice?.material_unit_cost && (
+                      {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined && (
                         <Badge variant="outline" className="text-xs">Personalizado</Badge>
                       )}
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-bold">
-                        {customPrice?.material_unit_cost ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
+                        {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {customPrice?.material_unit_cost ? `Original: ${formatCurrency(kpiData.materialTotal)}` : 'Calculado automáticamente'}
+                        {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.materialTotal)}` : 'Calculado automáticamente'}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Labor Cost */}
-                <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost ? 'var(--accent)' : 'var(--border)' }}>
+                <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE MANO DE OBRA</span>
                       </div>
-                      {customPrice?.labor_unit_cost && (
+                      {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
                         <Badge variant="outline" className="text-xs">Personalizado</Badge>
                       )}
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-bold">
-                        {customPrice?.labor_unit_cost ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
+                        {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {customPrice?.labor_unit_cost ? `Original: ${formatCurrency(kpiData.laborTotal)}` : 'Calculado automáticamente'}
+                        {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.laborTotal)}` : 'Calculado automáticamente'}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Total Cost */}
-                <Card className="border-2" style={{ borderColor: customPrice?.total_unit_cost ? 'var(--accent)' : 'var(--border)' }}>
+                {/* Total Cost - Always calculated automatically */}
+                <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO TOTAL</span>
                       </div>
-                      {customPrice?.total_unit_cost && (
-                        <Badge variant="outline" className="text-xs">Personalizado</Badge>
+                      {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined)) && (
+                        <Badge variant="outline" className="text-xs">Calculado</Badge>
                       )}
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-bold">
-                        {customPrice?.total_unit_cost ? formatCurrency(Number(customPrice.total_unit_cost)) : formatCurrency(kpiData.grandTotal)}
+                        {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal))}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {customPrice?.total_unit_cost ? `Original: ${formatCurrency(kpiData.grandTotal)}` : 'Materiales + Mano de Obra'}
+                        Materiales + Mano de Obra
                       </p>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Editing Form Section */}
+              {/* Simplified Editing Form */}
               {showCustomPricing && (
                 <>
                   <Separator />
-                  <div className="space-y-6">
-                    {/* Modal-style header for editing form */}
-                    <div className="flex items-center gap-3 py-4 border-b border-border/50">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10">
-                        <Edit className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide letter-spacing-[0.05em]">
-                          MODO DE PERSONALIZACIÓN
-                        </h4>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Modifica los costos de esta tarea específica
-                        </p>
-                      </div>
+                  <div className="space-y-4">
+                    {/* Material Cost */}
+                    <div className="space-y-2">
+                      <Label htmlFor="materialCost" className="text-sm font-medium">
+                        Costo de Materiales
+                      </Label>
+                      <Input
+                        id="materialCost"
+                        type="number"
+                        step="0.01"
+                        placeholder={`Actual: ${formatCurrency(kpiData?.materialTotal || 0)}`}
+                        value={customMaterialCost}
+                        onChange={(e) => setCustomMaterialCost(e.target.value)}
+                        className="text-right"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Valor calculado: {formatCurrency(kpiData?.materialTotal || 0)}
+                      </p>
+                    </div>
+                    
+                    {/* Labor Cost */}
+                    <div className="space-y-2">
+                      <Label htmlFor="laborCost" className="text-sm font-medium">
+                        Costo de Mano de Obra
+                      </Label>
+                      <Input
+                        id="laborCost"
+                        type="number"
+                        step="0.01"
+                        placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
+                        value={customLaborCost}
+                        onChange={(e) => setCustomLaborCost(e.target.value)}
+                        className="text-right"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
+                      </p>
                     </div>
 
-                    {/* Pricing Mode Selection */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 py-2">
-                        <Settings className="h-4 w-4 text-muted-foreground" />
-                        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          CONFIGURACIÓN DE COSTOS
-                        </h5>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
-                        <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/20 transition-colors">
-                          <input
-                            type="radio"
-                            value="separate"
-                            checked={pricingMode === 'separate'}
-                            onChange={(e) => setPricingMode(e.target.value as 'separate' | 'total')}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <div className="flex-1">
-                            <span className="text-sm font-medium">Separar por Categorías</span>
-                            <p className="text-xs text-muted-foreground">Material y Mano de Obra por separado</p>
-                          </div>
-                        </label>
-                        
-                        <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/20 transition-colors">
-                          <input
-                            type="radio"
-                            value="total"
-                            checked={pricingMode === 'total'}
-                            onChange={(e) => setPricingMode(e.target.value as 'separate' | 'total')}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <div className="flex-1">
-                            <span className="text-sm font-medium">Costo Total</span>
-                            <p className="text-xs text-muted-foreground">Un solo monto global</p>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Input Fields Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 py-2">
-                        <Calculator className="h-4 w-4 text-muted-foreground" />
-                        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          VALORES PERSONALIZADOS
-                        </h5>
-                      </div>
-
-                      <div className="pl-7">
-                        {pricingMode === 'separate' ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-3">
-                              <Label htmlFor="materialCost" className="text-sm font-medium">
-                                Costo de Materiales
-                              </Label>
-                              <Input
-                                id="materialCost"
-                                type="number"
-                                step="0.01"
-                                placeholder={`Actual: ${formatCurrency(kpiData?.materialTotal || 0)}`}
-                                value={customMaterialCost}
-                                onChange={(e) => setCustomMaterialCost(e.target.value)}
-                                className="text-right"
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                Valor calculado: {formatCurrency(kpiData?.materialTotal || 0)}
-                              </p>
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <Label htmlFor="laborCost" className="text-sm font-medium">
-                                Costo de Mano de Obra
-                              </Label>
-                              <Input
-                                id="laborCost"
-                                type="number"
-                                step="0.01"
-                                placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
-                                value={customLaborCost}
-                                onChange={(e) => setCustomLaborCost(e.target.value)}
-                                className="text-right"
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <Label htmlFor="totalCost" className="text-sm font-medium">
-                              Costo Total
-                            </Label>
-                            <Input
-                              id="totalCost"
-                              type="number"
-                              step="0.01"
-                              placeholder={`Actual: ${formatCurrency(kpiData?.grandTotal || 0)}`}
-                              value={customTotalCost}
-                              onChange={(e) => setCustomTotalCost(e.target.value)}
-                              className="text-right"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                              Valor calculado: {formatCurrency(kpiData?.grandTotal || 0)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Notes Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 py-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          OBSERVACIONES
-                        </h5>
-                      </div>
-
-                      <div className="pl-7">
-                        <Label htmlFor="note" className="text-sm font-medium">
-                          Nota Explicativa (Opcional)
-                        </Label>
-                        <Textarea
-                          id="note"
-                          placeholder="Especifica el motivo de la personalización o detalles adicionales..."
-                          value={pricingNote}
-                          onChange={(e) => setPricingNote(e.target.value)}
-                          rows={3}
-                          className="mt-2 resize-none"
-                        />
-                      </div>
+                    {/* Notes */}
+                    <div className="space-y-2">
+                      <Label htmlFor="note" className="text-sm font-medium">
+                        Nota Explicativa (Opcional)
+                      </Label>
+                      <Textarea
+                        id="note"
+                        placeholder="Especifica el motivo de la personalización o detalles adicionales..."
+                        value={pricingNote}
+                        onChange={(e) => setPricingNote(e.target.value)}
+                        rows={3}
+                        className="resize-none"
+                      />
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center justify-between pt-6 border-t border-border/50">
-                      <Button
-                        variant="outline"
-                        onClick={handleCancelCustomPricing}
-                        disabled={upsertCustomPrice.isPending}
-                        className="min-w-[100px]"
-                      >
-                        Cancelar
-                      </Button>
-                      
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                      <div className="flex items-center gap-2">
+                        {isSaving && (
+                          <span className="text-sm text-muted-foreground">Guardando automáticamente...</span>
+                        )}
                         {customPrice && (
                           <Button
                             variant="destructive"
+                            size="sm"
                             onClick={handleDeleteCustomPrice}
                             disabled={deleteCustomPrice.isPending}
                             className="flex items-center gap-2"
@@ -615,15 +507,16 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {deleteCustomPrice.isPending ? 'Eliminando...' : 'Eliminar'}
                           </Button>
                         )}
-                        <Button
-                          onClick={handleSaveCustomPrice}
-                          disabled={upsertCustomPrice.isPending}
-                          className="flex items-center gap-2 min-w-[120px]"
-                        >
-                          <Save className="h-4 w-4" />
-                          {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar Cambios'}
-                        </Button>
                       </div>
+                      
+                      <Button
+                        variant="outline"
+                        onClick={handleCancelCustomPricing}
+                        disabled={upsertCustomPrice.isPending}
+                        className="min-w-[100px]"
+                      >
+                        Cancelar
+                      </Button>
                     </div>
                   </div>
                 </>
