@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Calculator, Calendar } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Calculator, Calendar, Settings, Save } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
@@ -8,12 +8,17 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useMobile } from '@/hooks/use-mobile';
 import { useTaskCosts } from '@/hooks/use-task-costs';
 import { useDeleteTaskMaterial } from '@/hooks/use-generated-tasks';
+import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -39,6 +44,19 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   // Obtener datos reales de costos usando el hook unificado (materiales + mano de obra)
   const taskId = task?.task_id || task?.id;
   const { data: costs = [], isLoading } = useTaskCosts(taskId);
+
+  // Custom pricing functionality
+  const { data: customPrice } = useOrganizationTaskPrice(taskId);
+  const upsertCustomPrice = useUpsertOrganizationTaskPrice();
+  const deleteCustomPrice = useDeleteOrganizationTaskPrice();
+
+  // Estados para el formulario de precios personalizados
+  const [showCustomPricing, setShowCustomPricing] = useState(false);
+  const [customMaterialCost, setCustomMaterialCost] = useState<string>('');
+  const [customLaborCost, setCustomLaborCost] = useState<string>('');
+  const [customTotalCost, setCustomTotalCost] = useState<string>('');
+  const [pricingNote, setPricingNote] = useState<string>('');
+  const [pricingMode, setPricingMode] = useState<'separate' | 'total'>('separate');
 
   // Mutaciones para eliminar costos
   const queryClient = useQueryClient();
@@ -103,6 +121,74 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  // Funciones para manejar precios personalizados
+  const loadCustomPrice = () => {
+    if (customPrice) {
+      setCustomMaterialCost(customPrice.material_unit_cost?.toString() || '');
+      setCustomLaborCost(customPrice.labor_unit_cost?.toString() || '');
+      setCustomTotalCost(customPrice.total_unit_cost?.toString() || '');
+      setPricingNote(customPrice.note || '');
+      setShowCustomPricing(true);
+      
+      // Determinar el modo basado en qué campos están poblados
+      if (customPrice.total_unit_cost && !customPrice.material_unit_cost && !customPrice.labor_unit_cost) {
+        setPricingMode('total');
+      } else {
+        setPricingMode('separate');
+      }
+    }
+  };
+
+  const handleSaveCustomPrice = async () => {
+    try {
+      const priceData: any = {
+        task_id: taskId,
+        currency_code: 'ARS', // Default to ARS
+        note: pricingNote || null
+      };
+
+      if (pricingMode === 'separate') {
+        priceData.material_unit_cost = customMaterialCost ? parseFloat(customMaterialCost) : null;
+        priceData.labor_unit_cost = customLaborCost ? parseFloat(customLaborCost) : null;
+        priceData.total_unit_cost = null; // Reset total when using separate
+      } else {
+        priceData.total_unit_cost = customTotalCost ? parseFloat(customTotalCost) : null;
+        priceData.material_unit_cost = null; // Reset separate when using total
+        priceData.labor_unit_cost = null;
+      }
+
+      await upsertCustomPrice.mutateAsync(priceData);
+      setShowCustomPricing(false);
+    } catch (error) {
+      console.error('Error saving custom price:', error);
+    }
+  };
+
+  const handleDeleteCustomPrice = async () => {
+    try {
+      await deleteCustomPrice.mutateAsync(taskId);
+      setCustomMaterialCost('');
+      setCustomLaborCost('');
+      setCustomTotalCost('');
+      setPricingNote('');
+      setShowCustomPricing(false);
+    } catch (error) {
+      console.error('Error deleting custom price:', error);
+    }
+  };
+
+  const handleCancelCustomPricing = () => {
+    if (customPrice) {
+      loadCustomPrice(); // Revert to saved values
+    } else {
+      setCustomMaterialCost('');
+      setCustomLaborCost('');
+      setCustomTotalCost('');
+      setPricingNote('');
+    }
+    setShowCustomPricing(false);
   };
 
   // Filtrar costos por búsqueda
@@ -471,6 +557,232 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
             ) : undefined
           }
         />
+      )}
+
+      {/* Custom Pricing Section - Only show for admins and when there are costs */}
+      {isAdmin && kpiData && (
+        <Card className="shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Precios Personalizados
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                {customPrice && (
+                  <Badge variant="secondary" className="text-xs">
+                    Personalizado
+                  </Badge>
+                )}
+                {!showCustomPricing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (customPrice) {
+                        loadCustomPrice();
+                      } else {
+                        setShowCustomPricing(true);
+                      }
+                    }}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    {customPrice ? 'Editar' : 'Personalizar'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            {/* Current Calculated Values */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-muted-foreground" />
+                <h4 className="font-medium">Valores Calculados</h4>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Material</Label>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="font-medium">{formatCurrency(kpiData.materialTotal)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {customPrice?.material_unit_cost ? 'Personalizado' : 'Calculado'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Mano de Obra</Label>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="font-medium">{formatCurrency(kpiData.laborTotal)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {customPrice?.labor_unit_cost ? 'Personalizado' : 'Calculado'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Total</Label>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="font-medium">
+                      {customPrice?.total_unit_cost 
+                        ? formatCurrency(customPrice.total_unit_cost)
+                        : formatCurrency(kpiData.grandTotal)
+                      }
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {customPrice?.total_unit_cost ? 'Personalizado' : 'Calculado'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Pricing Form */}
+            {showCustomPricing && (
+              <>
+                <Separator />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Edit className="h-5 w-5 text-muted-foreground" />
+                    <h4 className="font-medium">Personalizar Precios</h4>
+                  </div>
+
+                  {/* Pricing Mode Toggle */}
+                  <div className="space-y-2">
+                    <Label>Modo de Personalización</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="separate"
+                          checked={pricingMode === 'separate'}
+                          onChange={(e) => setPricingMode(e.target.value as 'separate' | 'total')}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Separar Material y Mano de Obra</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          value="total"
+                          checked={pricingMode === 'total'}
+                          onChange={(e) => setPricingMode(e.target.value as 'separate' | 'total')}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Costo Total</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Input Fields */}
+                  {pricingMode === 'separate' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="materialCost">Costo de Materiales</Label>
+                        <Input
+                          id="materialCost"
+                          type="number"
+                          step="0.01"
+                          placeholder="Ingrese el costo de materiales"
+                          value={customMaterialCost}
+                          onChange={(e) => setCustomMaterialCost(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="laborCost">Costo de Mano de Obra</Label>
+                        <Input
+                          id="laborCost"
+                          type="number"
+                          step="0.01"
+                          placeholder="Ingrese el costo de mano de obra"
+                          value={customLaborCost}
+                          onChange={(e) => setCustomLaborCost(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="totalCost">Costo Total</Label>
+                      <Input
+                        id="totalCost"
+                        type="number"
+                        step="0.01"
+                        placeholder="Ingrese el costo total"
+                        value={customTotalCost}
+                        onChange={(e) => setCustomTotalCost(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* Note Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="note">Nota (Opcional)</Label>
+                    <Textarea
+                      id="note"
+                      placeholder="Agregar notas sobre la personalización..."
+                      value={pricingNote}
+                      onChange={(e) => setPricingNote(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-4">
+                    <Button
+                      onClick={handleSaveCustomPrice}
+                      disabled={upsertCustomPrice.isPending}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
+                    </Button>
+                    
+                    <Button variant="outline" onClick={handleCancelCustomPricing}>
+                      Cancelar
+                    </Button>
+                    
+                    {customPrice && (
+                      <Button
+                        variant="destructive"
+                        onClick={handleDeleteCustomPrice}
+                        disabled={deleteCustomPrice.isPending}
+                        className="ml-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Eliminar Personalización'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Custom Price Info */}
+            {customPrice && !showCustomPricing && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Personalización activa:</strong> Esta tarea tiene precios personalizados.
+                  </p>
+                  {customPrice.note && (
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Nota:</strong> {customPrice.note}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Última actualización: {customPrice.updated_at ? formatDate(new Date(customPrice.updated_at)) : 'Fecha no disponible'}
+                  </p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );

@@ -321,6 +321,20 @@ export const organization_material_prices = pgTable("organization_material_price
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Organization Task Prices Table
+export const organization_task_prices = pgTable("organization_task_prices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  task_id: uuid("task_id").notNull(),
+  labor_unit_cost: real("labor_unit_cost"),
+  material_unit_cost: real("material_unit_cost"),
+  total_unit_cost: real("total_unit_cost"),
+  currency_code: text("currency_code"),
+  note: text("note"),
+  updated_at: timestamp("updated_at").defaultNow(),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 // Movement Tasks Junction Table
 export const movement_tasks = pgTable("movement_tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -390,6 +404,12 @@ export const insertOrganizationMaterialPriceSchema = createInsertSchema(organiza
   updated_at: true,
 });
 
+export const insertOrganizationTaskPriceSchema = createInsertSchema(organization_task_prices).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
 export const insertMovementTaskSchema = createInsertSchema(movement_tasks).omit({
   id: true,
   created_at: true,
@@ -440,6 +460,8 @@ export type InsertTaskParameterPosition = z.infer<typeof insertTaskParameterPosi
 // TaskParametric types removed - now using tasks table
 export type OrganizationMaterialPrice = typeof organization_material_prices.$inferSelect;
 export type InsertOrganizationMaterialPrice = z.infer<typeof insertOrganizationMaterialPriceSchema>;
+export type OrganizationTaskPrice = typeof organization_task_prices.$inferSelect;
+export type InsertOrganizationTaskPrice = z.infer<typeof insertOrganizationTaskPriceSchema>;
 export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
 export type MovementSubcontract = typeof movement_subcontracts.$inferSelect;

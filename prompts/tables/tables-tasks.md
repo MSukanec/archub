@@ -507,3 +507,48 @@ TABLA TASK_DIVISIONS:
     "data_type": "text"
   }
 ]
+
+TABLA ORGANIZATION_TASK_PRICES:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "labor_unit_cost",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "material_unit_cost",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "total_unit_cost",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "currency_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "note",
+    "data_type": "text"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  }
+]
