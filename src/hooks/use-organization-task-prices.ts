@@ -9,6 +9,7 @@ export interface OrganizationTaskPriceData {
   task_id: string
   labor_unit_cost?: number | null
   material_unit_cost?: number | null
+  supply_unit_cost?: number | null
   total_unit_cost?: number | null
   currency_code?: string | null
   note?: string | null

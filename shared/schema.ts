@@ -328,6 +328,7 @@ export const organization_task_prices = pgTable("organization_task_prices", {
   task_id: uuid("task_id").notNull(),
   labor_unit_cost: real("labor_unit_cost"),
   material_unit_cost: real("material_unit_cost"),
+  supply_unit_cost: real("supply_unit_cost"),
   total_unit_cost: real("total_unit_cost"),
   currency_code: text("currency_code"),
   note: text("note"),

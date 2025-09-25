@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings, Save } from "lucide-react";
+import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings, Save, Truck } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
@@ -52,8 +52,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   // Estados para edición individual de cada card
   const [isEditingMaterial, setIsEditingMaterial] = useState(false);
   const [isEditingLabor, setIsEditingLabor] = useState(false);
+  const [isEditingSupply, setIsEditingSupply] = useState(false);
   const [customMaterialCost, setCustomMaterialCost] = useState<string>('');
   const [customLaborCost, setCustomLaborCost] = useState<string>('');
+  const [customSupplyCost, setCustomSupplyCost] = useState<string>('');
 
   // Mutaciones para eliminar costos
   const queryClient = useQueryClient();
@@ -91,13 +93,15 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const kpiData = useMemo(() => {
     if (costs.length === 0) return null;
 
-    // Separar materiales y mano de obra
+    // Separar materiales, mano de obra e insumos
     const materialCosts = costs.filter(c => c.type === 'Material');
     const laborCosts = costs.filter(c => c.type === 'Mano de Obra');
+    const supplyCosts = costs.filter(c => c.type === 'Insumos');
     
     const materialTotal = materialCosts.reduce((sum, c) => sum + (c.total_price || 0), 0);
     const laborTotal = laborCosts.reduce((sum, c) => sum + (c.total_price || 0), 0);
-    const grandTotal = materialTotal + laborTotal;
+    const supplyTotal = supplyCosts.reduce((sum, c) => sum + (c.total_price || 0), 0);
+    const grandTotal = materialTotal + laborTotal + supplyTotal;
     
     // Encontrar la fecha de última actualización (usar fecha actual como fallback)
     const lastUpdate = new Date();
@@ -105,6 +109,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     return {
       materialTotal,
       laborTotal,
+      supplyTotal,
       grandTotal,
       lastUpdate
     };
@@ -125,6 +130,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     if (customPrice) {
       setCustomMaterialCost(customPrice.material_unit_cost?.toString() || '');
       setCustomLaborCost(customPrice.labor_unit_cost?.toString() || '');
+      setCustomSupplyCost(customPrice.supply_unit_cost?.toString() || '');
     }
   }, [customPrice]);
 
@@ -149,6 +155,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         note: null,
         material_unit_cost: materialCostValue,
         labor_unit_cost: customPrice?.labor_unit_cost || null,
+        supply_unit_cost: customPrice?.supply_unit_cost || null,
         total_unit_cost: null
       };
       await upsertCustomPrice.mutateAsync(priceData);
@@ -178,11 +185,42 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         note: null,
         material_unit_cost: customPrice?.material_unit_cost || null,
         labor_unit_cost: laborCostValue,
+        supply_unit_cost: customPrice?.supply_unit_cost || null,
         total_unit_cost: null
       };
       await upsertCustomPrice.mutateAsync(priceData);
     } catch (error) {
       console.error('Error saving labor cost:', error);
+    }
+  };
+
+  // Función para guardar supply cost
+  const handleSaveSupplyCost = async (data: { supplyCost: string }) => {
+    try {
+      // Handle different input scenarios:
+      // Empty string "" -> save null (revert to calculated)
+      // String "0" -> save 0 (explicit zero override)
+      // Valid number strings -> save parsed number
+      let supplyCostValue: number | null = null;
+      if (data.supplyCost.trim() !== '') {
+        const parsed = parseFloat(data.supplyCost);
+        if (!isNaN(parsed)) {
+          supplyCostValue = parsed;
+        }
+      }
+      
+      const priceData: OrganizationTaskPriceData = {
+        task_id: taskId,
+        currency_code: 'ARS',
+        note: null,
+        material_unit_cost: customPrice?.material_unit_cost || null,
+        labor_unit_cost: customPrice?.labor_unit_cost || null,
+        supply_unit_cost: supplyCostValue,
+        total_unit_cost: null
+      };
+      await upsertCustomPrice.mutateAsync(priceData);
+    } catch (error) {
+      console.error('Error saving supply cost:', error);
     }
   };
 
@@ -192,8 +230,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       await deleteCustomPrice.mutateAsync(taskId);
       setCustomMaterialCost('');
       setCustomLaborCost('');
+      setCustomSupplyCost('');
       setIsEditingMaterial(false);
       setIsEditingLabor(false);
+      setIsEditingSupply(false);
     } catch (error) {
       console.error('Error deleting custom price:', error);
     }
@@ -216,6 +256,13 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     saveFn: handleSaveLaborCost,
     delay: 1000,
     enabled: isEditingLabor && isAdmin
+  });
+
+  const { isSaving: isSavingSupply } = useDebouncedAutoSave({
+    data: { supplyCost: customSupplyCost },
+    saveFn: handleSaveSupplyCost,
+    delay: 1000,
+    enabled: isEditingSupply && isAdmin
   });
 
   // Filtrar costos por búsqueda
@@ -391,7 +438,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 </div>
 
                 {/* Price Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Material Cost - Editable */}
                 <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
@@ -538,8 +585,81 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   </CardContent>
                 </Card>
 
+                {/* Supply Cost - Editable */}
+                <Card className="border-2" style={{ borderColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE INSUMOS</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined && (
+                          <Badge variant="outline" className="text-xs">Personalizado</Badge>
+                        )}
+                        {!isEditingSupply ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsEditingSupply(true)}
+                            className="h-7 px-2 text-xs"
+                            data-testid="button-edit-supply"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Editar
+                          </Button>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            {isSavingSupply && <span className="text-xs text-muted-foreground">Guardando...</span>}
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => {
+                                setIsEditingSupply(false);
+                                setCustomSupplyCost(customPrice?.supply_unit_cost?.toString() || '');
+                              }}
+                              className="h-6 w-6 p-0"
+                              data-testid="button-cancel-supply"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {!isEditingSupply ? (
+                        <>
+                          <p className="text-2xl font-bold">
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.supplyTotal)}` : 'Calculado automáticamente'}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder={`Actual: ${formatCurrency(kpiData?.supplyTotal || 0)}`}
+                            value={customSupplyCost}
+                            onChange={(e) => setCustomSupplyCost(e.target.value)}
+                            className="text-right text-lg font-bold"
+                            data-testid="input-supply-cost"
+                            autoFocus
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Valor calculado: {formatCurrency(kpiData?.supplyTotal || 0)}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Total Cost - Always calculated automatically, READ-ONLY */}
-                <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
+                <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -547,7 +667,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO TOTAL</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined)) && (
+                        {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) && (
                           <Badge variant="outline" className="text-xs">Calculado</Badge>
                         )}
                         {/* NO edit button - Total is always read-only */}
@@ -555,10 +675,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-bold">
-                        {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal))}
+                        {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Materiales + Mano de Obra
+                        Materiales + Mano de Obra + Insumos
                       </p>
                     </div>
                   </CardContent>
