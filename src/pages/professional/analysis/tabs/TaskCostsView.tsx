@@ -378,50 +378,49 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Custom Pricing Section - Only show for admins and when there are costs */}
+      {/* Custom Pricing and Note Section - Only show for admins and when there are costs */}
       {isAdmin && kpiData && (
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-            <div className="space-y-6">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
-                    <Settings className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column: Custom Pricing Card */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
+                      <Settings className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">Precios Personalizados</h3>
+                      <p className="text-sm text-muted-foreground">Ajusta los costos para esta tarea específica</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Precios Personalizados</h3>
-                    <p className="text-sm text-muted-foreground">Ajusta los costos para esta tarea específica</p>
+                  
+                  <div className="flex items-center gap-2">
+                    {customPrice && (
+                      <Badge variant="secondary" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+                        PERSONALIZADO
+                      </Badge>
+                    )}
+                    {customPrice && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleDeleteCustomPrice}
+                        disabled={deleteCustomPrice.isPending}
+                        className="flex items-center gap-2"
+                        data-testid="button-delete-custom-price"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Eliminar Todo'}
+                      </Button>
+                    )}
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  {customPrice && (
-                    <Badge variant="secondary" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-                      PERSONALIZADO
-                    </Badge>
-                  )}
-                  {customPrice && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDeleteCustomPrice}
-                      disabled={deleteCustomPrice.isPending}
-                      className="flex items-center gap-2"
-                      data-testid="button-delete-custom-price"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      {deleteCustomPrice.isPending ? 'Eliminando...' : 'Eliminar Todo'}
-                    </Button>
-                  )}
-                </div>
-              </div>
 
-              {/* Main Content Layout - Double Column */}
-              <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
-                {/* Left Column: Price Cards */}
-                <div className={`${isMobile ? 'order-2' : 'lg:col-span-2 order-1'}`}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Price Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Material Cost - Editable */}
                 <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
@@ -593,53 +592,50 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
-                  </div>
-                  
-                  {/* Last Update - Always show with better styling */}
-                  <div className="flex items-center justify-between pt-4 border-t mt-6">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Última actualización:</span>
-                      <span className="text-sm font-medium">
-                        {customPrice?.updated_at ? formatDate(new Date(customPrice.updated_at)) : formatDate(kpiData?.lastUpdate || new Date())}
-                      </span>
-                    </div>
-                  </div>
                 </div>
                 
-                {/* Right Column: Description Field */}
-                <div className={`${isMobile ? 'order-1' : 'lg:col-span-1 order-2'}`}>
-                  <Card className="h-fit">
-                    <CardContent className="p-4">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
-                            <Edit className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                          </div>
-                          <div>
-                            <h3 className="text-base font-semibold">Nota de Precios Personalizados</h3>
-                            <p className="text-sm text-muted-foreground">Especifica el motivo de personalización o detalles adicionales</p>
-                          </div>
-                          {isSavingNote && (
-                            <span className="text-sm text-muted-foreground ml-auto">Guardando...</span>
-                          )}
-                        </div>
-                        <Textarea
-                          placeholder="Especifica el motivo de la personalización o detalles adicionales..."
-                          value={pricingNote}
-                          onChange={(e) => setPricingNote(e.target.value)}
-                          rows={4}
-                          className="resize-none w-full"
-                          data-testid="input-pricing-note"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                {/* Last Update - Always show with better styling */}
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Última actualización:</span>
+                    <span className="text-sm font-medium">
+                      {customPrice?.updated_at ? formatDate(new Date(customPrice.updated_at)) : formatDate(kpiData?.lastUpdate || new Date())}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* Right Column: Note Card (completely separate) */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
+                    <Edit className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Nota de Precios Personalizados</h3>
+                    <p className="text-sm text-muted-foreground">Especifica el motivo de personalización o detalles adicionales</p>
+                  </div>
+                  {isSavingNote && (
+                    <span className="text-sm text-muted-foreground ml-auto">Guardando...</span>
+                  )}
+                </div>
+                <Textarea
+                  placeholder="Especifica el motivo de la personalización o detalles adicionales..."
+                  value={pricingNote}
+                  onChange={(e) => setPricingNote(e.target.value)}
+                  rows={6}
+                  className="resize-none w-full"
+                  data-testid="input-pricing-note"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Tabla de Costos */}
