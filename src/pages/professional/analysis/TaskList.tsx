@@ -363,7 +363,7 @@ export default function TaskList() {
       renderCard={(task: any) => (
         <AnalysisTaskRow
           task={task}
-          onClick={() => openModal('parametric-task', { taskId: task.id })}
+          onClick={() => openModal('analysis-task', { taskId: task.id })}
         />
       )}
       topBar={{
@@ -388,8 +388,18 @@ export default function TaskList() {
       emptyState={
         <EmptyState
           icon={<TableIcon className="h-16 w-16" />}
-          title="No hay tareas que coincidan"
-          description="Intenta cambiar los filtros de agrupación para encontrar las tareas que buscas."
+          title="¡Crea tu primera tarea personalizada!"
+          description="Personaliza tus propias tareas de construcción con costos específicos para tu organización."
+          action={
+            <Button
+              onClick={() => openModal('analysis-task', {})}
+              variant="default"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Crear Tarea Personalizada
+            </Button>
+          }
         />
       }
     />
