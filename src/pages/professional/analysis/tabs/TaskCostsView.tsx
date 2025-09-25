@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -55,7 +54,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const [isEditingLabor, setIsEditingLabor] = useState(false);
   const [customMaterialCost, setCustomMaterialCost] = useState<string>('');
   const [customLaborCost, setCustomLaborCost] = useState<string>('');
-  const [pricingNote, setPricingNote] = useState<string>('');
 
   // Mutaciones para eliminar costos
   const queryClient = useQueryClient();
@@ -127,7 +125,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     if (customPrice) {
       setCustomMaterialCost(customPrice.material_unit_cost?.toString() || '');
       setCustomLaborCost(customPrice.labor_unit_cost?.toString() || '');
-      setPricingNote(customPrice.note || '');
     }
   }, [customPrice]);
 
@@ -149,7 +146,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       const priceData: OrganizationTaskPriceData = {
         task_id: taskId,
         currency_code: 'ARS',
-        note: pricingNote || null,
+        note: null,
         material_unit_cost: materialCostValue,
         labor_unit_cost: customPrice?.labor_unit_cost || null,
         total_unit_cost: null
@@ -178,7 +175,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       const priceData: OrganizationTaskPriceData = {
         task_id: taskId,
         currency_code: 'ARS',
-        note: pricingNote || null,
+        note: null,
         material_unit_cost: customPrice?.material_unit_cost || null,
         labor_unit_cost: laborCostValue,
         total_unit_cost: null
@@ -189,29 +186,12 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     }
   };
 
-  // Función para guardar note
-  const handleSaveNote = async (data: { note: string }) => {
-    try {
-      const priceData: OrganizationTaskPriceData = {
-        task_id: taskId,
-        currency_code: 'ARS',
-        note: data.note || null,
-        material_unit_cost: customPrice?.material_unit_cost || null,
-        labor_unit_cost: customPrice?.labor_unit_cost || null,
-        total_unit_cost: null
-      };
-      await upsertCustomPrice.mutateAsync(priceData);
-    } catch (error) {
-      console.error('Error saving note:', error);
-    }
-  };
 
   const handleDeleteCustomPrice = async () => {
     try {
       await deleteCustomPrice.mutateAsync(taskId);
       setCustomMaterialCost('');
       setCustomLaborCost('');
-      setPricingNote('');
       setIsEditingMaterial(false);
       setIsEditingLabor(false);
     } catch (error) {
@@ -236,13 +216,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     saveFn: handleSaveLaborCost,
     delay: 1000,
     enabled: isEditingLabor && isAdmin
-  });
-
-  const { isSaving: isSavingNote } = useDebouncedAutoSave({
-    data: { note: pricingNote },
-    saveFn: handleSaveNote,
-    delay: 1000,
-    enabled: isAdmin && pricingNote !== (customPrice?.note || '')
   });
 
   // Filtrar costos por búsqueda
@@ -378,11 +351,9 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Custom Pricing and Note Section - Only show for admins and when there are costs */}
+      {/* Custom Pricing Section - Only show for admins and when there are costs */}
       {isAdmin && kpiData && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column: Custom Pricing Card */}
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
               <div className="space-y-6">
                 {/* Header */}
@@ -606,36 +577,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 </div>
               </div>
             </CardContent>
-          </Card>
-
-          {/* Right Column: Note Card (completely separate) */}
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
-                    <Edit className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">Nota de Precios Personalizados</h3>
-                    <p className="text-sm text-muted-foreground">Especifica el motivo de personalización o detalles adicionales</p>
-                  </div>
-                  {isSavingNote && (
-                    <span className="text-sm text-muted-foreground ml-auto">Guardando...</span>
-                  )}
-                </div>
-                <Textarea
-                  placeholder="Especifica el motivo de la personalización o detalles adicionales..."
-                  value={pricingNote}
-                  onChange={(e) => setPricingNote(e.target.value)}
-                  rows={6}
-                  className="resize-none w-full"
-                  data-testid="input-pricing-note"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        </Card>
       )}
 
       {/* Tabla de Costos */}
