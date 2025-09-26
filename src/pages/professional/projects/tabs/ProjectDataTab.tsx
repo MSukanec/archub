@@ -123,6 +123,10 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast({
+        title: "Cambios guardados",
+        description: "Los datos del proyecto se han guardado automáticamente"
+      });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectDataMutation:', error);
