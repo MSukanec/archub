@@ -32,7 +32,7 @@ import { Clients } from "@/pages/professional/project/commercialization/clients/
 import Project from "@/pages/professional/project/dashboard/Project";
 
 
-import Preferences from "@/pages/professional/organization/preferences/Preferences";
+import Preferences from "@/pages/professional/Preferences";
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
 import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
