@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings, Save, Truck } from "lucide-react";
+import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings, Save, Truck, Users } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
@@ -404,41 +404,37 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       {/* Custom Pricing Section - Only show for admins and when there are costs */}
       {isAdmin && kpiData && (
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
-                      <Settings className="h-5 w-5" style={{ color: 'var(--accent)' }} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">Precios Personalizados</h3>
-                      <p className="text-sm text-muted-foreground">Ajusta los costos para esta tarea específica</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {customPrice && (
-                      <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-                        PERSONALIZADO
-                      </Badge>
-                    )}
-                    {customPrice && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={handleDeleteCustomPrice}
-                        disabled={deleteCustomPrice.isPending}
-                        className="flex items-center gap-2"
-                        data-testid="button-delete-custom-price"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
+          <CardHeader 
+            icon={Settings}
+            title="Precios Personalizados" 
+            description="Ajusta los costos para esta tarea específica"
+          >
+            <div className="flex items-center gap-2">
+              {customPrice && (
+                <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+                  PERSONALIZADO
+                </Badge>
+              )}
+              <span className="text-xs text-muted-foreground">
+                Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
+              </span>
+              {customPrice && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDeleteCustomPrice}
+                  disabled={deleteCustomPrice.isPending}
+                  className="flex items-center gap-2"
+                  data-testid="button-delete-custom-price"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <div className="space-y-6">
 
                 {/* Price Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -531,7 +527,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <Users className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                         <span className="text-sm text-muted-foreground">Mano de obra</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -719,17 +715,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
-                </div>
-                
-                {/* Last Update - Always show with better styling */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                    <span className="text-sm text-muted-foreground">Última actualización:</span>
-                    <span className="text-sm font-medium">
-                      {customPrice?.updated_at ? formatDate(new Date(customPrice.updated_at)) : formatDate(kpiData?.lastUpdate || new Date())}
-                    </span>
-                  </div>
                 </div>
               </div>
             </CardContent>

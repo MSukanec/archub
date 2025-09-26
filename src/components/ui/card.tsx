@@ -35,7 +35,7 @@ const CardHeader = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={cn("px-4 py-3 border-b border-[var(--card-border)]", className)}
+        className={cn("px-4 py-3 border-b border-[var(--card-border)] flex items-center justify-between", className)}
         {...props}
       >
         <div className="flex items-center gap-2">
@@ -47,6 +47,11 @@ const CardHeader = React.forwardRef<
             </p>
           </div>
         </div>
+        {children && (
+          <div className="flex items-center gap-2">
+            {children}
+          </div>
+        )}
       </div>
     );
   }
