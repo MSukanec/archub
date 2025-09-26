@@ -323,7 +323,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       sortable: true,
       width: '15%',
       render: (cost: any) => (
-        <div className="font-medium">{cost.type}</div>
+        <div className="font-medium">{cost.type === 'Material' ? 'Materiales' : cost.type}</div>
       )
     },
     {
@@ -417,7 +417,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   
                   <div className="flex items-center gap-2">
                     {customPrice && (
-                      <Badge variant="secondary" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+                      <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                         PERSONALIZADO
                       </Badge>
                     )}
@@ -445,11 +445,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE MATERIALES</span>
+                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">MATERIALES</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined && (
-                          <Badge variant="outline" className="text-xs">Personalizado</Badge>
+                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                         )}
                         {!isEditingMaterial ? (
                           <Button
@@ -488,7 +488,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.materialTotal)}` : 'Calculado automáticamente'}
+                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.materialTotal)}` : 'Costo calculado automáticamente'}
                           </p>
                         </>
                       ) : (
@@ -518,11 +518,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE MANO DE OBRA</span>
+                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">MANO DE OBRA</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
-                          <Badge variant="outline" className="text-xs">Personalizado</Badge>
+                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                         )}
                         {!isEditingLabor ? (
                           <Button
@@ -561,7 +561,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.laborTotal)}` : 'Calculado automáticamente'}
+                            {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.laborTotal)}` : 'Costo calculado automáticamente'}
                           </p>
                         </>
                       ) : (
@@ -591,11 +591,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Truck className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO DE INSUMOS</span>
+                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">INSUMOS</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined && (
-                          <Badge variant="outline" className="text-xs">Personalizado</Badge>
+                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                         )}
                         {!isEditingSupply ? (
                           <Button
@@ -634,7 +634,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? `Original: ${formatCurrency(kpiData.supplyTotal)}` : 'Calculado automáticamente'}
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.supplyTotal)}` : 'Costo calculado automáticamente'}
                           </p>
                         </>
                       ) : (
@@ -729,7 +729,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
             return (
               <>
                 <div className="truncate text-sm font-medium">
-                  {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'})
+                  {groupKey === 'Material' ? 'Materiales' : groupKey} ({groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'})
                 </div>
                 <div></div>
                 <div></div>
