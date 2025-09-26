@@ -20,7 +20,6 @@ import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrga
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 
 interface TaskCostsViewProps {
   task: any;
@@ -242,31 +241,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     }
   };
 
-  // Auto-save hooks for individual fields
-  // Enable auto-save for all scenarios:
-  // - When user enters "0" (should save 0)
-  // - When user clears field (should save null)
-  // - When user enters valid positive numbers
-  const { isSaving: isSavingMaterial } = useDebouncedAutoSave({
-    data: { materialCost: customMaterialCost },
-    saveFn: handleSaveMaterialCost,
-    delay: 1000,
-    enabled: isEditingMaterial && isAdmin
-  });
-
-  const { isSaving: isSavingLabor } = useDebouncedAutoSave({
-    data: { laborCost: customLaborCost },
-    saveFn: handleSaveLaborCost,
-    delay: 1000,
-    enabled: isEditingLabor && isAdmin
-  });
-
-  const { isSaving: isSavingSupply } = useDebouncedAutoSave({
-    data: { supplyCost: customSupplyCost },
-    saveFn: handleSaveSupplyCost,
-    delay: 1000,
-    enabled: isEditingSupply && isAdmin
-  });
 
   // Filtrar costos por búsqueda
   const filteredCosts = costs.filter(cost => {
@@ -463,7 +437,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            {isSavingMaterial && <span className="text-xs text-muted-foreground">Guardando...</span>}
                             <Button
                               variant="ghost"
                               size="icon-sm"
@@ -492,16 +465,27 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         </>
                       ) : (
                         <>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder={`Actual: ${formatCurrency(kpiData?.materialTotal || 0)}`}
-                            value={customMaterialCost}
-                            onChange={(e) => setCustomMaterialCost(e.target.value)}
-                            className="text-right text-lg font-bold"
-                            data-testid="input-material-cost"
-                            autoFocus
-                          />
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder={`Actual: ${formatCurrency(kpiData?.materialTotal || 0)}`}
+                              value={customMaterialCost}
+                              onChange={(e) => setCustomMaterialCost(e.target.value)}
+                              className="text-right text-lg font-bold"
+                              data-testid="input-material-cost"
+                              autoFocus
+                            />
+                            <Button 
+                              onClick={() => handleSaveMaterialCost({ materialCost: customMaterialCost })}
+                              disabled={upsertCustomPrice.isPending}
+                              size="sm"
+                              className="ml-2"
+                              data-testid="button-save-material"
+                            >
+                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.materialTotal || 0)}
                           </p>
@@ -547,7 +531,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            {isSavingLabor && <span className="text-xs text-muted-foreground">Guardando...</span>}
                             <Button
                               variant="ghost"
                               size="icon-sm"
@@ -576,16 +559,27 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         </>
                       ) : (
                         <>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
-                            value={customLaborCost}
-                            onChange={(e) => setCustomLaborCost(e.target.value)}
-                            className="text-right text-lg font-bold"
-                            data-testid="input-labor-cost"
-                            autoFocus
-                          />
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
+                              value={customLaborCost}
+                              onChange={(e) => setCustomLaborCost(e.target.value)}
+                              className="text-right text-lg font-bold"
+                              data-testid="input-labor-cost"
+                              autoFocus
+                            />
+                            <Button 
+                              onClick={() => handleSaveLaborCost({ laborCost: customLaborCost })}
+                              disabled={upsertCustomPrice.isPending}
+                              size="sm"
+                              className="ml-2"
+                              data-testid="button-save-labor"
+                            >
+                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
                           </p>
@@ -631,7 +625,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            {isSavingSupply && <span className="text-xs text-muted-foreground">Guardando...</span>}
                             <Button
                               variant="ghost"
                               size="icon-sm"
@@ -660,16 +653,27 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         </>
                       ) : (
                         <>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder={`Actual: ${formatCurrency(kpiData?.supplyTotal || 0)}`}
-                            value={customSupplyCost}
-                            onChange={(e) => setCustomSupplyCost(e.target.value)}
-                            className="text-right text-lg font-bold"
-                            data-testid="input-supply-cost"
-                            autoFocus
-                          />
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder={`Actual: ${formatCurrency(kpiData?.supplyTotal || 0)}`}
+                              value={customSupplyCost}
+                              onChange={(e) => setCustomSupplyCost(e.target.value)}
+                              className="text-right text-lg font-bold"
+                              data-testid="input-supply-cost"
+                              autoFocus
+                            />
+                            <Button 
+                              onClick={() => handleSaveSupplyCost({ supplyCost: customSupplyCost })}
+                              disabled={upsertCustomPrice.isPending}
+                              size="sm"
+                              className="ml-2"
+                              data-testid="button-save-supply"
+                            >
+                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.supplyTotal || 0)}
                           </p>
