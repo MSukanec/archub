@@ -319,6 +319,7 @@ export function MainSidebar() {
       { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
     ],
     construction: [
+      { icon: Calculator, label: 'Presupuestos', href: '/budgets' },
       { icon: CheckSquare, label: 'Cómputo y Presupuesto', href: '/construction/tasks' },
       { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },

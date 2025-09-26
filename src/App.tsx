@@ -38,6 +38,7 @@ import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
 import ConstructionEstimates from "@/pages/professional/project/construction/estimates/Estimates";
+import Budgets from "@/pages/professional/budgets/Budgets";
 
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
@@ -123,6 +124,7 @@ function Router() {
         <Route path="/project/dashboard" component={Project} />
         <Route path="/commercialization/clients" component={Clients} />
         <Route path="/media" component={Media} />
+        <Route path="/budgets" component={Budgets} />
         
 
 
