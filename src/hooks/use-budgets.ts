@@ -12,7 +12,11 @@ interface Budget {
   organization_id: string
   status: string
   created_at: string
+  updated_at: string
   created_by: string
+  version: number
+  currency_id: string
+  exchange_rate?: number
 }
 
 export function useBudgets(projectId?: string) {
@@ -25,11 +29,19 @@ export function useBudgets(projectId?: string) {
         return []
       }
 
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budgets?project_id=${projectId}&organization_id=${currentOrganizationId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
       })
 

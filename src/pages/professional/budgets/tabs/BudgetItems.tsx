@@ -1,155 +1,151 @@
-import { DollarSign, Plus, Package, Calculator, FolderOpen, TrendingUp } from 'lucide-react'
+import { DollarSign, Plus, Calculator, FolderOpen, TrendingUp, Edit, Trash2, Copy, MoreHorizontal } from 'lucide-react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { BudgetTree } from '@/components/ui-custom/tables-and-trees/BudgetTree'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useMemo, useState } from 'react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Badge } from '@/components/ui/badge'
+import { useMemo } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
-import { useTaskMaterials } from '@/hooks/use-generated-tasks'
-import { useTaskLabor } from '@/hooks/use-task-labor'
+import { useBudgets, useDeleteBudget } from '@/hooks/use-budgets'
+import { useCurrencies } from '@/hooks/use-currencies'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useToast } from '@/hooks/use-toast'
 
 interface BudgetItemsProps {
-  tasks?: any[]
-  isLoading?: boolean
-  onEditTask?: (task: any) => void
-  onAddTask?: () => void
-  onDeleteTask?: (taskId: string) => void
-  onDuplicateTask?: (task: any) => void
+  onEditBudget?: (budget: any) => void
+  onAddBudget?: () => void
+  onDuplicateBudget?: (budget: any) => void
 }
 
-// Function to calculate KPIs using real data without hooks
-const calculateBudgetKPIs = (tasks: any[]) => {
-  // Basic calculation without hooks - using simple estimates for now
-  // This prevents the hook ordering issue
-  let totalSubtotals = 0;
-  let totalFinals = 0;
-  let totalMargins = 0;
-
-  for (const task of tasks) {
-    const quantity = task.quantity || 0;
-    const marginPct = task.margin || 0;
-    
-    // Use estimated costs if available, otherwise use fallback
-    const estimatedCostPerUnit = task.estimated_cost || 100; // Fallback value
-    const subtotal = quantity * estimatedCostPerUnit;
-    const marginAmount = subtotal * (marginPct / 100);
-    const total = subtotal + marginAmount;
-    
-    totalSubtotals += subtotal;
-    totalMargins += marginAmount;
-    totalFinals += total;
-  }
-
-  return { totalSubtotals, totalFinals, totalMargins };
-};
-
 export function BudgetItems({ 
-  tasks = [], 
-  isLoading = false, 
-  onEditTask,
-  onAddTask,
-  onDeleteTask,
-  onDuplicateTask
+  onEditBudget,
+  onAddBudget,
+  onDuplicateBudget
 }: BudgetItemsProps) {
   const isMobile = useMobile()
-  
-  // State to store real totals from BudgetTree
-  const [realTotals, setRealTotals] = useState<{ totalSubtotals: number; totalFinals: number } | null>(null);
+  const { data: userData } = useCurrentUser()
+  const { data: currencies } = useCurrencies()
+  const { data: budgets = [], isLoading } = useBudgets(userData?.preferences?.last_project_id)
+  const deleteBudgetMutation = useDeleteBudget()
+  const { toast } = useToast()
 
-  // Handle totals change from BudgetTree
-  const handleTotalsChange = (totalSubtotals: number, totalFinals: number) => {
-    setRealTotals({ totalSubtotals, totalFinals });
-  };
-
-  // Calculate real KPIs using actual task data (fallback if real totals not available yet)
-  const budgetCalculations = calculateBudgetKPIs(tasks);
-
-  // Calculate basic metrics
+  // Calculate KPIs based on budgets data
   const kpiData = useMemo(() => {
-    const totalTasks = tasks.length;
+    const totalBudgets = budgets.length;
     
-    // Group tasks by division/group (rubros)
-    const rubros = tasks.reduce((acc, task) => {
-      const rubro = task.division_name || 'Sin Rubro';
-      if (!acc[rubro]) {
-        acc[rubro] = [];
+    // Group budgets by status
+    const statusGroups = budgets.reduce((acc, budget) => {
+      const status = budget.status || 'draft';
+      if (!acc[status]) {
+        acc[status] = [];
       }
-      acc[rubro].push(task);
+      acc[status].push(budget);
       return acc;
     }, {} as Record<string, any[]>);
     
-    const totalRubros = Object.keys(rubros).length;
+    // Group budgets by currency
+    const currencyGroups = budgets.reduce((acc, budget) => {
+      const currencyId = budget.currency_id;
+      if (!acc[currencyId]) {
+        acc[currencyId] = [];
+      }
+      acc[currencyId].push(budget);
+      return acc;
+    }, {} as Record<string, any[]>);
 
-    // Use real totals from BudgetTree if available, otherwise fallback to calculated values
-    const actualEstimatedCost = realTotals ? realTotals.totalSubtotals : budgetCalculations.totalSubtotals;
-    const actualFinalCost = realTotals ? realTotals.totalFinals : budgetCalculations.totalFinals;
-    const actualMarginValue = actualFinalCost - actualEstimatedCost; // Calculate margin as difference
+    const totalStatuses = Object.keys(statusGroups).length;
+    const totalCurrencies = Object.keys(currencyGroups).length;
+    const draftBudgets = statusGroups['draft']?.length || 0;
+    const approvedBudgets = statusGroups['approved']?.length || 0;
+    const inProgressBudgets = statusGroups['in_progress']?.length || 0;
+    const completedBudgets = statusGroups['completed']?.length || 0;
 
     return {
-      totalTasks,
-      totalRubros,
-      totalEstimatedCost: actualEstimatedCost,  // Sum of SUBTOTAL column (real from BudgetTree)
-      totalMarginValue: actualMarginValue,      // Difference between final and estimated (real margins)
-      totalFinalCost: actualFinalCost          // Sum of TOTAL column (real from BudgetTree)
+      totalBudgets,
+      totalStatuses,
+      totalCurrencies,
+      draftBudgets,
+      approvedBudgets,
+      inProgressBudgets,
+      completedBudgets
     };
-  }, [tasks, budgetCalculations, realTotals]);
+  }, [budgets]);
 
-  // Handle reorder tasks
-  const handleReorder = (reorderedTasks: any[]) => {
-    console.log('Reordered tasks:', reorderedTasks)
-    // TODO: Implement actual reorder logic
-  }
-
-  // Handle duplicate task
-  const handleDuplicateTask = (task: any) => {
-    if (onDuplicateTask) {
-      onDuplicateTask(task)
+  // Handle delete budget
+  const handleDeleteBudget = async (budgetId: string, budgetName: string) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar el presupuesto "${budgetName}"?`)) {
+      try {
+        await deleteBudgetMutation.mutateAsync(budgetId);
+      } catch (error) {
+        console.error('Error deleting budget:', error);
+      }
     }
   }
 
-  // Handle delete task
-  const handleDeleteTask = (taskId: string) => {
-    if (onDeleteTask) {
-      onDeleteTask(taskId)
+  // Handle duplicate budget
+  const handleDuplicateBudget = (budget: any) => {
+    if (onDuplicateBudget) {
+      onDuplicateBudget(budget)
     }
   }
 
-  // Handle quantity change
-  const handleQuantityChange = (taskId: string, quantity: number) => {
-    console.log('Quantity change:', taskId, quantity)
-    // TODO: Implement actual quantity change logic
+  // Get currency code by ID
+  const getCurrencyCode = (currencyId: string) => {
+    return currencies?.find(c => c.id === currencyId)?.code || 'N/A'
   }
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Get status badge variant
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'approved': return 'default'
+      case 'in_progress': return 'secondary'
+      case 'completed': return 'outline'
+      case 'draft':
+      default: return 'destructive'
+    }
+  }
+
+  // Get status label
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'draft': return 'Borrador'
+      case 'approved': return 'Aprobado'
+      case 'in_progress': return 'En progreso'
+      case 'completed': return 'Completado'
+      default: return status
+    }
+  }
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Cargando presupuesto...</div>
+        <div className="text-muted-foreground">Cargando presupuestos...</div>
       </div>
     )
   }
 
-  if (tasks.length === 0) {
+  if (budgets.length === 0) {
     return (
       <div className="h-full">
         <EmptyState
-          icon={<DollarSign className="h-12 w-12 text-muted-foreground" />}
-          title="Presupuesto de Proyecto"
-          description="No hay tareas disponibles para el presupuesto"
+          icon={<Calculator className="h-12 w-12 text-muted-foreground" />}
+          title="Presupuestos del Proyecto"
+          description="No hay presupuestos creados para este proyecto"
           action={
-            onAddTask && (
-              <Button onClick={onAddTask} className="mt-4">
+            onAddBudget && (
+              <Button onClick={onAddBudget} className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Nuevo Presupuesto
+                Crear Presupuesto
               </Button>
             )
           }
@@ -164,108 +160,104 @@ export function BudgetItems({
       {/* KPI Cards */}
       {kpiData && (
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
-          {/* Total Tareas */}
+          {/* Total Presupuestos */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Tareas' : 'Total Tareas'}
-                  </p>
-                  <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
-                </div>
-                
-                {/* Valor principal con --accent alineado a la izquierda */}
-                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
-                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
-                    {kpiData.totalTasks}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    {kpiData.totalRubros} rubros
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Costo Estimado */}
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
-                <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Estimado' : 'Costo Estimado'}
+                    {isMobile ? 'Presupuestos' : 'Total Presupuestos'}
                   </p>
                   <Calculator className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent alineado a la izquierda */}
                 <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
                   <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
-                    {formatCurrency(kpiData.totalEstimatedCost)}
+                    {kpiData.totalBudgets}
                   </p>
                 </div>
                 
                 <div>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    suma subtotales
+                    {kpiData.totalCurrencies} monedas
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Suma de Beneficio */}
+          {/* Borradores */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Beneficio' : 'Suma de Beneficio'}
+                    {isMobile ? 'Borradores' : 'En Borrador'}
+                  </p>
+                  <FolderOpen className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                </div>
+                
+                <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
+                  <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
+                    {kpiData.draftBudgets}
+                  </p>
+                </div>
+                
+                <div>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                    sin aprobar
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Aprobados */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+                <div className="flex items-center justify-between">
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Aprobados' : 'Aprobados'}
                   </p>
                   <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent alineado a la izquierda */}
                 <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
                   <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
-                    {formatCurrency(kpiData.totalMarginValue)}
+                    {kpiData.approvedBudgets}
                   </p>
                 </div>
                 
                 <div>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    suma márgenes
+                    listos para uso
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Total Final */}
+          {/* Completados */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
             <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
               <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
                   <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Total' : 'Presupuesto Final'}
+                    {isMobile ? 'Completos' : 'Completados'}
                   </p>
                   <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
-                {/* Valor principal con --accent alineado a la izquierda */}
                 <div className={`flex items-center justify-start ${isMobile ? 'h-6' : 'h-8'}`}>
                   <p className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ color: 'var(--accent)' }}>
-                    {formatCurrency(kpiData.totalFinalCost)}
+                    {kpiData.completedBudgets}
                   </p>
                 </div>
                 
                 <div>
                   <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
-                    suma totales
+                    finalizados
                   </p>
                 </div>
               </div>
@@ -274,15 +266,125 @@ export function BudgetItems({
         </div>
       )}
 
-      {/* Budget Tree */}
-      <BudgetTree 
-        tasks={tasks}
-        onReorder={handleReorder}
-        onDuplicateTask={handleDuplicateTask}
-        onDeleteTask={handleDeleteTask}
-        onQuantityChange={handleQuantityChange}
-        onTotalsChange={handleTotalsChange}
-      />
+      {/* Budgets Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isMobile ? (
+            // Mobile layout - Card view
+            <div className="space-y-4 p-4">
+              {budgets.map((budget) => (
+                <Card key={budget.id} className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <h4 className="font-medium text-sm">{budget.name}</h4>
+                        {budget.description && (
+                          <p className="text-xs text-muted-foreground">{budget.description}</p>
+                        )}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onEditBudget?.(budget)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateBudget(budget)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteBudget(budget.id, budget.name)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <Badge variant={getStatusBadgeVariant(budget.status)}>
+                        {getStatusLabel(budget.status)}
+                      </Badge>
+                      <span className="text-muted-foreground">v{budget.version}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{getCurrencyCode(budget.currency_id)}</span>
+                      <span>{formatDate(budget.created_at)}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            // Desktop layout - Table view
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Versión</TableHead>
+                  <TableHead>Moneda</TableHead>
+                  <TableHead>Fecha de creación</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {budgets.map((budget) => (
+                  <TableRow key={budget.id}>
+                    <TableCell className="font-medium">{budget.name}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {budget.description || '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(budget.status)}>
+                        {getStatusLabel(budget.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>v{budget.version}</TableCell>
+                    <TableCell>{getCurrencyCode(budget.currency_id)}</TableCell>
+                    <TableCell>{formatDate(budget.created_at)}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onEditBudget?.(budget)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateBudget(budget)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteBudget(budget.id, budget.name)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

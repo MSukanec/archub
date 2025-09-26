@@ -15,12 +15,17 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrencies } from '@/hooks/use-currencies';
+import { supabase } from '@/lib/supabase';
 // Removed navigationStore import - using userData.preferences.last_project_id instead;
 
 const budgetSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   status: z.string().min(1, 'El estado es requerido'),
+  version: z.number().min(1, 'La versión debe ser mayor a 0'),
+  currency_id: z.string().min(1, 'La moneda es requerida'),
+  exchange_rate: z.number().optional(),
   created_at: z.date()
 });
 
@@ -40,6 +45,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const { setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
   const { data: members } = useOrganizationMembers(userData?.organization?.id);
+  const { data: currencies } = useCurrencies();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!budget;
@@ -50,6 +56,9 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       name: budget?.name || '',
       description: budget?.description || '',
       status: budget?.status || 'draft',
+      version: budget?.version || 1,
+      currency_id: budget?.currency_id || (currencies?.[0]?.id || ''),
+      exchange_rate: budget?.exchange_rate || undefined,
       created_at: budget?.created_at ? new Date(budget.created_at) : new Date()
     }
   });
@@ -60,6 +69,9 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         name: budget.name || '',
         description: budget.description || '',
         status: budget.status || 'draft',
+        version: budget.version || 1,
+        currency_id: budget.currency_id || (currencies?.[0]?.id || ''),
+        exchange_rate: budget.exchange_rate || undefined,
         created_at: budget.created_at ? new Date(budget.created_at) : new Date()
       });
     } else {
@@ -67,6 +79,9 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         name: '',
         description: '',
         status: 'draft',
+        version: 1,
+        currency_id: currencies?.[0]?.id || '',
+        exchange_rate: undefined,
         created_at: new Date()
       });
     }
@@ -91,17 +106,30 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         project_id: userData.preferences.last_project_id,
         organization_id: userData.organization.id,
         status: data.status,
+        version: data.version,
+        currency_id: data.currency_id,
+        exchange_rate: data.exchange_rate || null,
         created_at: data.created_at.toISOString(),
+        updated_at: new Date().toISOString(),
         created_by: currentMember.id
+      };
+
+      // Get the authentication token
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.session.access_token}`
       };
 
       if (isEditing && budget) {
         // Use server endpoint for updating
         const response = await fetch(`/api/budgets/${budget.id}`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(budgetData),
         })
 
@@ -114,9 +142,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         // Use server endpoint for creating
         const response = await fetch('/api/budgets', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify(budgetData),
         })
 
@@ -198,6 +224,25 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       </div>
 
       <div>
+        <h4 className="font-medium">Versión</h4>
+        <p className="text-muted-foreground mt-1">{budget?.version || 'Sin versión'}</p>
+      </div>
+
+      <div>
+        <h4 className="font-medium">Moneda</h4>
+        <p className="text-muted-foreground mt-1">
+          {currencies?.find(c => c.id === budget?.currency_id)?.code || 'Sin moneda'}
+        </p>
+      </div>
+
+      {budget?.exchange_rate && (
+        <div>
+          <h4 className="font-medium">Tipo de cambio</h4>
+          <p className="text-muted-foreground mt-1">{budget.exchange_rate}</p>
+        </div>
+      )}
+
+      <div>
         <h4 className="font-medium">Fecha de creación</h4>
         <p className="text-muted-foreground mt-1">
           {budget?.created_at ? new Date(budget.created_at).toLocaleDateString('es-ES') : 'Sin fecha'}
@@ -263,6 +308,76 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
                   className="resize-none"
                   rows={3}
                   {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Versión */}
+        <FormField
+          control={form.control}
+          name="version"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="required-asterisk">Versión</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="1"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Moneda */}
+        <FormField
+          control={form.control}
+          name="currency_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="required-asterisk">Moneda</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una moneda" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {currencies?.map((currency) => (
+                    <SelectItem key={currency.id} value={currency.id}>
+                      {currency.code} - {currency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Tipo de cambio */}
+        <FormField
+          control={form.control}
+          name="exchange_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de cambio (opcional)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number"
+                  step="0.000001"
+                  placeholder="1.0"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                 />
               </FormControl>
               <FormMessage />
