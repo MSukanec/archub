@@ -19,7 +19,7 @@ import { OrganizationMovementConceptFormModal } from '../modals/organizations/Or
 
 import MovementImportStepModal from '../modals/finances/movements/MovementImportStepModal';
 import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
-import { BudgetFormModal } from '../modals/construction/BudgetFormModal';
+import { BudgetFormModal } from '../modals/construction/BudgetModal';
 import { TaskMultiModal } from '../modals/construction/tasks/TaskMultiModal';
 import { TaskSingleModal } from '../modals/construction/tasks/TaskSingleModal';
 import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';

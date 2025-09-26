@@ -92,6 +92,20 @@ export default function Budgets() {
     })
   }
 
+  const handleAddBudget = () => {
+    if (!projectId || !organizationId || !userData?.user?.id) {
+      console.error('Missing required data for budget creation')
+      return
+    }
+
+    openModal('budget', {
+      projectId,
+      organizationId,
+      userId: userData.user.id,
+      isEditing: false
+    })
+  }
+
   const handleAddSingleTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for single task creation')
@@ -258,7 +272,7 @@ export default function Budgets() {
         icon: Plus,
         label: 'Nuevo Presupuesto',
         onClick: () => {
-          handleAddSingleTask()
+          handleAddBudget()
         },
         variant: 'primary' as const
       },
@@ -334,7 +348,7 @@ export default function Budgets() {
     actionButton: {
       label: "Nuevo Presupuesto",
       icon: Plus,
-      onClick: handleAddSingleTask
+      onClick: handleAddBudget
     }
   }
 
@@ -355,7 +369,7 @@ export default function Budgets() {
           tasks={tasks}
           isLoading={isLoading}
           onEditTask={handleEditTask}
-          onAddTask={handleAddSingleTask}
+          onAddTask={handleAddBudget}
           onDeleteTask={handleDeleteTask}
           onDuplicateTask={handleDuplicateTask}
         />
