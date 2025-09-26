@@ -128,49 +128,29 @@ export function FinancesTab({}: FinancesTabProps) {
         throw new Error('Se debe seleccionar una billetera válida');
       }
 
-      // First, reset all existing organization wallets to not default
-      const { error: resetError, count } = await supabase
+      // Paso 1: Apagar todas las billeteras marcadas como default de la organización
+      const { error: updateError } = await supabase
         .from('organization_wallets')
         .update({ is_default: false })
-        .eq('organization_id', userData.organization.id);
-      
-      console.log('🔧 Reset existing default wallets:', { count, resetError });
-      if (resetError) throw resetError;
-
-      // Check if the wallet already exists for this organization
-      const { data: existingWallet, error: checkError } = await supabase
-        .from('organization_wallets')
-        .select('id')
         .eq('organization_id', userData.organization.id)
-        .eq('wallet_id', walletId)
-        .single();
+        .eq('is_default', true);
+      
+      console.log('🔧 Step 1 - Reset existing default wallets:', { updateError });
+      if (updateError) throw updateError;
 
-      console.log('🔧 Check existing wallet:', { existingWallet, checkError });
+      // Paso 2: Encender la nueva billetera como default usando upsert
+      const { error: upsertError, data: upsertData } = await supabase
+        .from('organization_wallets')
+        .upsert({
+          organization_id: userData.organization.id,
+          wallet_id: walletId,
+          is_active: true,
+          is_default: true,
+        }, { onConflict: 'organization_id,wallet_id' })
+        .select();
 
-      if (existingWallet) {
-        // Update existing wallet to be default
-        const { error: updateError } = await supabase
-          .from('organization_wallets')
-          .update({ is_default: true, is_active: true })
-          .eq('id', existingWallet.id);
-
-        console.log('🔧 Update existing wallet to default:', { updateError });
-        if (updateError) throw updateError;
-      } else {
-        // Insert new default wallet
-        const { error: insertError, data: insertData } = await supabase
-          .from('organization_wallets')
-          .insert({
-            organization_id: userData.organization.id,
-            wallet_id: walletId,
-            is_default: true,
-            is_active: true
-          })
-          .select();
-
-        console.log('🔧 Insert new default wallet:', { insertData, insertError });
-        if (insertError) throw insertError;
-      }
+      console.log('🔧 Step 2 - Upsert new default wallet:', { upsertData, upsertError });
+      if (upsertError) throw upsertError;
 
       console.log('🔧 SaveDefaultWallet: Mutation completed successfully');
     },
