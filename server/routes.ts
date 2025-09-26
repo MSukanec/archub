@@ -336,54 +336,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Temporary endpoint to populate countries table - REMOVE AFTER TESTING
-  app.post("/api/populate-countries", async (req, res) => {
-    try {
-      const countriesData = [
-        { name: 'Argentina', alpha_3: 'ARG', country_code: 'AR' },
-        { name: 'Bolivia', alpha_3: 'BOL', country_code: 'BO' },
-        { name: 'Brasil', alpha_3: 'BRA', country_code: 'BR' },
-        { name: 'Chile', alpha_3: 'CHL', country_code: 'CL' },
-        { name: 'Colombia', alpha_3: 'COL', country_code: 'CO' },
-        { name: 'Ecuador', alpha_3: 'ECU', country_code: 'EC' },
-        { name: 'España', alpha_3: 'ESP', country_code: 'ES' },
-        { name: 'Estados Unidos', alpha_3: 'USA', country_code: 'US' },
-        { name: 'Francia', alpha_3: 'FRA', country_code: 'FR' },
-        { name: 'México', alpha_3: 'MEX', country_code: 'MX' },
-        { name: 'Paraguay', alpha_3: 'PRY', country_code: 'PY' },
-        { name: 'Perú', alpha_3: 'PER', country_code: 'PE' },
-        { name: 'Uruguay', alpha_3: 'URY', country_code: 'UY' },
-        { name: 'Venezuela', alpha_3: 'VEN', country_code: 'VE' },
-      ];
-
-      // Insert countries one by one to handle potential conflicts
-      const insertedCountries = [];
-      for (const country of countriesData) {
-        const { data, error } = await supabase
-          .from('countries')
-          .upsert(country, { onConflict: 'alpha_3' })
-          .select('*')
-          .single();
-          
-        if (error) {
-          console.warn(`Warning inserting country ${country.name}:`, error);
-        } else if (data) {
-          insertedCountries.push(data);
-        }
-      }
-
-      console.log(`Successfully populated ${insertedCountries.length} countries`);
-      res.json({ 
-        success: true, 
-        message: `Populated ${insertedCountries.length} countries`,
-        countries: insertedCountries 
-      });
-    } catch (error) {
-      console.error("Error populating countries:", error);
-      res.status(500).json({ error: "Failed to populate countries" });
-    }
-  });
-
   // Update user profile - direct table updates
   app.patch("/api/user/profile", async (req, res) => {
     try {
