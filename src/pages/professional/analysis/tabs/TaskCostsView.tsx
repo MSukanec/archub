@@ -159,6 +159,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         total_unit_cost: null
       };
       await upsertCustomPrice.mutateAsync(priceData);
+      setIsEditingMaterial(false);
     } catch (error) {
       console.error('Error saving material cost:', error);
     }
@@ -189,6 +190,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         total_unit_cost: null
       };
       await upsertCustomPrice.mutateAsync(priceData);
+      setIsEditingLabor(false);
     } catch (error) {
       console.error('Error saving labor cost:', error);
     }
@@ -219,6 +221,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         total_unit_cost: null
       };
       await upsertCustomPrice.mutateAsync(priceData);
+      setIsEditingSupply(false);
     } catch (error) {
       console.error('Error saving supply cost:', error);
     }
@@ -423,7 +426,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     )}
                     {customPrice && (
                       <Button
-                        variant="destructive"
+                        variant="secondary"
                         size="sm"
                         onClick={handleDeleteCustomPrice}
                         disabled={deleteCustomPrice.isPending}
@@ -431,7 +434,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         data-testid="button-delete-custom-price"
                       >
                         <Trash2 className="h-4 w-4" />
-                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Eliminar Todo'}
+                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
                       </Button>
                     )}
                   </div>
@@ -444,8 +447,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">MATERIALES</span>
+                        <Package className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <span className="text-sm text-muted-foreground">Materiales</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined && (
@@ -506,6 +509,17 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.materialTotal || 0)}
                           </p>
+                          <button
+                            onClick={() => {
+                              setCustomMaterialCost('');
+                              handleSaveMaterialCost({ materialCost: '' });
+                            }}
+                            className="text-xs hover:underline"
+                            style={{ color: 'var(--accent)' }}
+                            type="button"
+                          >
+                            Restaurar
+                          </button>
                         </>
                       )}
                     </div>
@@ -517,8 +531,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">MANO DE OBRA</span>
+                        <TrendingUp className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <span className="text-sm text-muted-foreground">Mano de obra</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
@@ -579,6 +593,17 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
                           </p>
+                          <button
+                            onClick={() => {
+                              setCustomLaborCost('');
+                              handleSaveLaborCost({ laborCost: '' });
+                            }}
+                            className="text-xs hover:underline"
+                            style={{ color: 'var(--accent)' }}
+                            type="button"
+                          >
+                            Restaurar
+                          </button>
                         </>
                       )}
                     </div>
@@ -590,8 +615,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">INSUMOS</span>
+                        <Truck className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <span className="text-sm text-muted-foreground">Insumos</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined && (
@@ -652,6 +677,17 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           <p className="text-xs text-muted-foreground">
                             Valor calculado: {formatCurrency(kpiData?.supplyTotal || 0)}
                           </p>
+                          <button
+                            onClick={() => {
+                              setCustomSupplyCost('');
+                              handleSaveSupplyCost({ supplyCost: '' });
+                            }}
+                            className="text-xs hover:underline"
+                            style={{ color: 'var(--accent)' }}
+                            type="button"
+                          >
+                            Restaurar
+                          </button>
                         </>
                       )}
                     </div>
@@ -688,7 +724,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 {/* Last Update - Always show with better styling */}
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <Calendar className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                     <span className="text-sm text-muted-foreground">Última actualización:</span>
                     <span className="text-sm font-medium">
                       {customPrice?.updated_at ? formatDate(new Date(customPrice.updated_at)) : formatDate(kpiData?.lastUpdate || new Date())}
