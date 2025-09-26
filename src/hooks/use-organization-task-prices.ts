@@ -94,11 +94,7 @@ export function useUpsertOrganizationTaskPrice() {
         const { data, error } = await supabase
           .from('organization_task_prices')
           .update({
-            labor_unit_cost: priceData.labor_unit_cost,
-            material_unit_cost: priceData.material_unit_cost,
-            total_unit_cost: priceData.total_unit_cost,
-            currency_code: priceData.currency_code,
-            note: priceData.note,
+            ...priceData,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingPrice.id)
