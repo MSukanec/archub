@@ -252,10 +252,7 @@ export function ProjectModal({ modalData, onClose }: ProjectModalProps) {
       
       handleClose();
       
-      // 4. Navegar al dashboard de proyecto si es un proyecto nuevo
-      if (!isEditing && newProject) {
-        setLocation('/project/dashboard');
-      }
+      // Modified: Stay on the same page after creating a project instead of navigating
     },
     onError: (error: any) => {
       toast({

@@ -18,7 +18,7 @@ import ForgotPassword from "@/pages/public/ForgotPassword";
 // Protected Pages
 
 
-import Projects from "@/pages/professional/projects";
+import Projects from "@/pages/professional/projects/Projects";
 import ProjectView from "@/pages/professional/projects/ProjectView";
 
 
