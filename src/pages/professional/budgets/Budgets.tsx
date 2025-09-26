@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Layout } from '@/components/layout/desktop/Layout'
-import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell, FileText } from 'lucide-react'
+import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-react'
 import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -19,7 +19,6 @@ import { useToast } from '@/hooks/use-toast'
 import { BudgetItems } from './tabs/BudgetItems'
 import { EstimatePhases } from '../project/construction/estimates/tabs/EstimatePhases'
 import { EstimateSchedule } from '../project/construction/estimates/tabs/EstimateSchedule'
-import { EstimateMaterials } from '../project/construction/estimates/tabs/EstimateMaterials'
 import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
 
 export default function Budgets() {
@@ -257,7 +256,7 @@ export default function Budgets() {
       create: {
         id: 'create',
         icon: Plus,
-        label: 'Nueva Tarea',
+        label: 'Nuevo Presupuesto',
         onClick: () => {
           handleAddSingleTask()
         },
@@ -322,72 +321,9 @@ export default function Budgets() {
       id: 'listado-tareas',
       label: 'Listado de Tareas',
       isActive: activeTab === 'listado-tareas'
-    },
-    {
-      id: 'materiales',
-      label: 'Materiales',
-      isActive: activeTab === 'materiales'
     }
   ]
 
-  // Handle PDF export
-  const handlePDFExport = () => {
-    // Transform tasks data for PDF (matching PdfBudgetTable expected structure)
-    const pdfTasks = tasks.map(task => ({
-      id: task.id,
-      custom_name: task.custom_name || task.task?.display_name || 'Tarea sin nombre',
-      phase_name: task.phase_name || 'Sin fase',
-      category_name: task.division_name || 'Sin rubro', // Use division_name as rubro
-      task: {
-        display_name: task.custom_name || task.task?.display_name || 'Tarea sin nombre'
-      },
-      quantity: task.quantity || 0,
-      unit: task.unit || task.task?.unit_name || 'UN',
-      unit_cost: 0, // Will be calculated from materials/labor
-      subtotal: 0, // Will be calculated  
-      margin: task.margin || 0,
-      total: 0 // Will be calculated
-    }));
-
-    // Create PDF blocks
-    const blocks = [
-      {
-        type: 'header',
-        enabled: true,
-        data: {
-          title: 'Presupuestos',
-          subtitle: 'Listado de Tareas de Construcción',
-          date: new Date().toLocaleDateString('es-AR')
-        }
-      },
-      {
-        type: 'budgetTable',
-        enabled: true,
-        data: {
-          tasks: pdfTasks
-        },
-        config: {
-          titleSize: 12,
-          bodySize: 10,
-          showTableBorder: true,
-          showRowDividers: true,
-          groupBy: 'division_name'
-        }
-      },
-      {
-        type: 'footer',
-        enabled: true,
-        data: {
-          text: `Generado el ${new Date().toLocaleDateString('es-AR')} - Archub`
-        }
-      }
-    ];
-
-    openModal('pdf-exporter', {
-      blocks,
-      filename: `presupuesto-${new Date().toISOString().split('T')[0]}.pdf`
-    });
-  };
 
   const headerProps = {
     title: "Presupuestos",
@@ -396,15 +332,9 @@ export default function Budgets() {
     activeTab: activeTab,
     onTabChange: setActiveTab,
     actionButton: {
-      label: "Agregar Tarea",
+      label: "Nuevo Presupuesto",
       icon: Plus,
-      onClick: handleAddSingleTask,
-      additionalButton: {
-        label: "Exportar PDF",
-        icon: FileText,
-        onClick: handlePDFExport,
-        variant: "secondary" as const
-      }
+      onClick: handleAddSingleTask
     }
   }
 
@@ -431,9 +361,6 @@ export default function Budgets() {
         />
       )}
       
-      {activeTab === 'materiales' && (
-        <EstimateMaterials />
-      )}
     </Layout>
   )
 }

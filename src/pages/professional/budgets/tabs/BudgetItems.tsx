@@ -149,7 +149,7 @@ export function BudgetItems({
             onAddTask && (
               <Button onClick={onAddTask} className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Agregar Tarea
+                Nuevo Presupuesto
               </Button>
             )
           }
