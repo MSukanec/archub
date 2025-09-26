@@ -62,11 +62,19 @@ export function useCreateBudget() {
 
   return useMutation({
     mutationFn: async (budgetData: Omit<Budget, 'id' | 'created_at'> & { created_at: string }) => {
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch('/api/budgets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
         body: JSON.stringify(budgetData),
       })
@@ -101,11 +109,19 @@ export function useUpdateBudget() {
 
   return useMutation({
     mutationFn: async ({ id, ...budgetData }: Partial<Budget> & { id: string }) => {
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budgets/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
         body: JSON.stringify(budgetData),
       })
@@ -139,11 +155,19 @@ export function useDeleteBudget() {
 
   return useMutation({
     mutationFn: async (budgetId: string) => {
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budgets/${budgetId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
         },
       })
 
