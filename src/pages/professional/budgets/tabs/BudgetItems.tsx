@@ -9,6 +9,7 @@ import { useBudgets } from '@/hooks/use-budgets'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDeleteBudget } from '@/hooks/use-budgets'
 import { useToast } from '@/hooks/use-toast'
+import { useProjectContext } from '@/stores/projectContext'
 
 interface BudgetItemsProps {
   onAddTask?: () => void
@@ -18,7 +19,8 @@ export function BudgetItems({
   onAddTask
 }: BudgetItemsProps) {
   const { data: userData } = useCurrentUser()
-  const { data: budgets = [], isLoading } = useBudgets()
+  const { selectedProjectId } = useProjectContext()
+  const { data: budgets = [], isLoading } = useBudgets(selectedProjectId)
   const deletebudget = useDeleteBudget()
   const { toast } = useToast()
 
