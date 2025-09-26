@@ -366,12 +366,7 @@ export default function Budgets() {
     <Layout headerProps={headerProps} wide={true}>
       {activeTab === 'listado-tareas' && (
         <BudgetItems 
-          tasks={tasks}
-          isLoading={isLoading}
-          onEditTask={handleEditTask}
           onAddTask={handleAddBudget}
-          onDeleteTask={handleDeleteTask}
-          onDuplicateTask={handleDuplicateTask}
         />
       )}
       

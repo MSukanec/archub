@@ -10,6 +10,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useDeleteBudget } from '@/hooks/use-budgets'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
+import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 
 interface BudgetItemsProps {
   onAddTask?: () => void
@@ -20,13 +21,13 @@ export function BudgetItems({
 }: BudgetItemsProps) {
   const { data: userData } = useCurrentUser()
   const { selectedProjectId } = useProjectContext()
-  const { data: budgets = [], isLoading } = useBudgets(selectedProjectId)
+  const { data: budgets = [], isLoading } = useBudgets(selectedProjectId || undefined)
   const deletebudget = useDeleteBudget()
   const { toast } = useToast()
+  const { openModal } = useGlobalModalStore()
 
   const handleEdit = (budget: any) => {
-    // TODO: Abrir modal de edición
-    console.log('Edit budget:', budget)
+    openModal('budget', { budget, mode: 'edit' })
   }
 
   const handleDelete = (budget: any) => {
