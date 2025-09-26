@@ -695,8 +695,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">COSTO TOTAL</span>
+                        <DollarSign className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                        <span className="text-sm text-muted-foreground">Total</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) && (
