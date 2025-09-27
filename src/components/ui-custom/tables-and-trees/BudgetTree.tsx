@@ -41,6 +41,7 @@ import {
 
 interface BudgetTask {
   id: string;
+  task_id?: string;
   custom_name?: string;
   task?: {
     display_name?: string;
@@ -351,14 +352,20 @@ const TaskActionButtons = ({
 
   // Handle view task navigation with source tracking
   const handleViewTask = () => {
+    // Ensure we have a task_id to navigate to
+    if (!task.task_id) {
+      console.warn('No task_id found for budget item:', task);
+      return;
+    }
+    
     // Set source in localStorage so TaskView knows where we came from
     localStorage.setItem('taskViewSource', 'budgets');
-    // Navigate to task view
-    navigate(`/analysis/tasks/${task.task_id || task.id}`);
+    // Navigate to task view using the correct route
+    navigate(`/analysis/${task.task_id}`);
   };
 
-  // Eye button for viewing task details
-  const viewButton = (
+  // Eye button for viewing task details - only show if task_id exists
+  const viewButton = task.task_id ? (
     <Button
       variant="ghost"
       size="sm"
@@ -368,7 +375,7 @@ const TaskActionButtons = ({
     >
       <Eye className="h-4 w-4" />
     </Button>
-  );
+  ) : null;
 
   return (
     <TableActionButtons
