@@ -4,38 +4,24 @@ import { toast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 
 interface BudgetItem {
+  // Campos básicos de budget_items
   id: string
-  budget_id: string
+  budget_id?: string
   task_id: string | null
   organization_id: string
   project_id: string
   description?: string
-  unit?: string
   quantity: number
-  unit_price: number
-  currency_id: string
-  markup_pct: number
-  tax_pct: number
-  created_by: string
-  cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
   created_at: string
   updated_at: string
-  // Datos de la tarea enlazada (desde join)
-  task?: {
-    id: string
-    custom_name?: string
-    name_rendered?: string
-    unit_name?: string
-    category_name?: string
-    division_name?: string
-  }
-  // Datos de la moneda (desde join)
-  currency?: {
-    id: string
-    code: string
-    name: string
-    symbol: string
-  }
+  cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
+  markup_pct: number
+  
+  // Campos enriquecidos de la vista (desde joins)
+  custom_name?: string
+  division_name?: string
+  unit?: string
+  cost_scope_label?: string
 }
 
 export function useBudgetItems(budgetId?: string) {

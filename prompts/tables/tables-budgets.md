@@ -66,3 +66,64 @@ create table public.budget_items (
 
 create trigger trg_set_budget_item_organization BEFORE INSERT on budget_items for EACH row
 execute FUNCTION set_budget_task_organization ();
+
+VISTA BUDGET_ITEMS_VIEW:
+
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "organization_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "project_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "task_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "quantity",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "custom_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "division_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "unit",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "cost_scope",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "column_name": "cost_scope_label",
+    "data_type": "text"
+  },
+  {
+    "column_name": "markup_pct",
+    "data_type": "numeric"
+  }
+]

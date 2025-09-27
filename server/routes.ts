@@ -404,12 +404,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       const { data: budgetItems, error } = await authenticatedSupabase
-        .from('budget_items')
-        .select(`
-          *,
-          task:tasks!task_id(id, custom_name, code),
-          currency:currencies!currency_id(id, code, name, symbol)
-        `)
+        .from('budget_items_view')
+        .select('*')
         .eq('budget_id', budget_id)
         .eq('organization_id', organization_id)
         .order('created_at', { ascending: false });
