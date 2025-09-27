@@ -259,7 +259,7 @@ export function FormModalLayout({
     if (enableAnimations) {
       setTimeout(() => {
         onClose();
-      }, 150); // Tiempo para animación
+      }, 250); // Tiempo para animación (sincronizado con CSS duration-250)
     } else {
       onClose();
     }
