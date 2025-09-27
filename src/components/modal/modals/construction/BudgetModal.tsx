@@ -189,6 +189,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const handleCancel = () => {
     form.reset();
     setPanel('view');
+    onClose(); // CERRAR EL MODAL COMPLETAMENTE
   };
 
   const onSubmit = async (data: BudgetFormData) => {
@@ -443,7 +444,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={onClose}
+      onClose={handleCancel}
     />
   );
 }
