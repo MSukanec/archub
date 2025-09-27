@@ -188,7 +188,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const handleClose = () => {
     form.reset();
     setPanel('view');
-    // No llamar onClose() directamente - dejar que FormModalLayout maneje la animación
+    onClose();
   };
 
   const onSubmit = async (data: BudgetFormData) => {
@@ -428,10 +428,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
-      onLeftClick={() => {
-        form.reset();
-        setPanel('view');
-      }}
+      onLeftClick={handleClose}
       submitText={createBudgetMutation.isPending ? "Guardando..." : (isEditing ? "Actualizar" : "Crear Presupuesto")}
       onSubmit={form.handleSubmit(onSubmit)}
       submitDisabled={createBudgetMutation.isPending}
@@ -446,7 +443,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={onClose}
+      onClose={handleClose}
     />
   );
 }
