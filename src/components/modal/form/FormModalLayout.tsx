@@ -99,7 +99,7 @@ export function FormModalLayout({
   // Nuevas propiedades avanzadas
   readinessState,
   preventEscapeClose = false,
-  preventClickOutsideClose = false,
+  preventClickOutsideClose = true,
   canClose,
   onClosePrevented,
   autoFocusFirstInput = false,
