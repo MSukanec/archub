@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calendar } from "lucide-react";
 import { SearchField } from "@/components/ui-custom/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useCreateConstructionTask, useUpdateConstructionTask } from "@/hooks/use-construction-tasks";
+import { useCreateBudgetItem, useUpdateBudgetItem } from "@/hooks/use-budget-items";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,19 +19,24 @@ import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
 
-const singleTaskSchema = z.object({
+const budgetItemSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
-  project_phase_id: z.string().optional(),
+  unit_price: z.number().min(0, "El precio unitario debe ser mayor o igual a 0").default(0),
+  markup_pct: z.number().min(0).max(100, "El margen debe estar entre 0 y 100%").default(0),
+  tax_pct: z.number().min(0).max(100, "El impuesto debe estar entre 0 y 100%").default(0),
+  cost_scope: z.enum(['materials_and_labor', 'materials_only', 'labor_only']).default('materials_and_labor'),
   description: z.string().optional()
 });
 
-type SingleTaskFormData = z.infer<typeof singleTaskSchema>;
+type BudgetItemFormData = z.infer<typeof budgetItemSchema>;
 
 interface TaskSingleModalProps {
   modalData: {
     projectId: string;
     organizationId: string;
+    budgetId: string;
+    currencyId?: string;
     userId?: string;
     editingTask?: any;
     isEditing?: boolean;
@@ -50,8 +55,8 @@ export function TaskSingleModal({
   const [selectedTaskUnit, setSelectedTaskUnit] = useState<string>('');
   
   const { data: userData } = useCurrentUser();
-  const createTask = useCreateConstructionTask();
-  const updateTask = useUpdateConstructionTask();
+  const createBudgetItem = useCreateBudgetItem();
+  const updateBudgetItem = useUpdateBudgetItem();
   
   const isEditing = modalData.isEditing && modalData.editingTask;
 
@@ -113,12 +118,15 @@ export function TaskSingleModal({
   const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useConstructionProjectPhases(modalData.projectId);
 
   // Configurar el formulario
-  const form = useForm<SingleTaskFormData>({
-    resolver: zodResolver(singleTaskSchema),
+  const form = useForm<BudgetItemFormData>({
+    resolver: zodResolver(budgetItemSchema),
     defaultValues: {
       task_id: '',
       quantity: undefined,
-      project_phase_id: '',
+      unit_price: 0,
+      markup_pct: 0,
+      tax_pct: 0,
+      cost_scope: 'materials_and_labor',
       description: ''
     }
   });
@@ -191,7 +199,7 @@ export function TaskSingleModal({
   };
 
   // Función para enviar el formulario
-  const onSubmit = async (data: SingleTaskFormData) => {
+  const onSubmit = async (data: BudgetItemFormData) => {
     // Usar userData.user.id directamente si no hay organizationMember
     const createdBy = organizationMember?.id || userData?.user?.id;
     
@@ -209,24 +217,31 @@ export function TaskSingleModal({
     try {
       if (isEditing && modalData.editingTask) {
         // Modo edición
-        await updateTask.mutateAsync({
+        await updateBudgetItem.mutateAsync({
           id: modalData.editingTask.id,
-          quantity: data.quantity,
+          budget_id: modalData.budgetId,
           task_id: data.task_id,
-          project_id: modalData.projectId,
-          organization_id: modalData.organizationId,
-          project_phase_id: data.project_phase_id,
+          quantity: data.quantity,
+          unit_price: data.unit_price,
+          markup_pct: data.markup_pct,
+          tax_pct: data.tax_pct,
+          cost_scope: data.cost_scope,
           description: data.description
         });
       } else {
         // Modo creación
-        await createTask.mutateAsync({
+        await createBudgetItem.mutateAsync({
+          budget_id: modalData.budgetId,
+          task_id: data.task_id,
           organization_id: modalData.organizationId,
           project_id: modalData.projectId,
-          task_id: data.task_id,
           quantity: data.quantity,
+          unit_price: data.unit_price,
+          currency_id: modalData.currencyId || 'default-currency-id', // TODO: Get from budget
+          markup_pct: data.markup_pct,
+          tax_pct: data.tax_pct,
+          cost_scope: data.cost_scope,
           created_by: createdBy,
-          project_phase_id: data.project_phase_id,
           description: data.description
         });
       }
