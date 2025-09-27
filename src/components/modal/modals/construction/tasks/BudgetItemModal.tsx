@@ -25,8 +25,7 @@ const budgetItemSchema = z.object({
   unit_price: z.number().min(0, "El precio unitario debe ser mayor o igual a 0").default(0),
   markup_pct: z.number().min(0).max(100, "El margen debe estar entre 0 y 100%").default(0),
   tax_pct: z.number().min(0).max(100, "El impuesto debe estar entre 0 y 100%").default(0),
-  cost_scope: z.enum(['materials_and_labor', 'materials_only', 'labor_only']).default('materials_and_labor'),
-  description: z.string().optional()
+  cost_scope: z.enum(['materials_and_labor', 'materials_only', 'labor_only']).default('materials_and_labor')
 });
 
 type BudgetItemFormData = z.infer<typeof budgetItemSchema>;
@@ -129,8 +128,7 @@ export function TaskSingleModal({
       unit_price: 0,
       markup_pct: 0,
       tax_pct: 0,
-      cost_scope: 'materials_and_labor',
-      description: ''
+      cost_scope: 'materials_and_labor'
     }
   });
 
@@ -144,8 +142,7 @@ export function TaskSingleModal({
       form.reset({
         task_id: modalData.editingTask.task_id || '',
         quantity: modalData.editingTask.quantity || undefined,
-        project_phase_id: modalData.editingTask.phase_instance_id || '',
-        description: modalData.editingTask.description || ''
+        project_phase_id: modalData.editingTask.phase_instance_id || ''
       });
     }
   }, [isEditing, modalData.editingTask, form]);
@@ -228,8 +225,7 @@ export function TaskSingleModal({
           unit_price: data.unit_price,
           markup_pct: data.markup_pct,
           tax_pct: data.tax_pct,
-          cost_scope: data.cost_scope,
-          description: data.description
+          cost_scope: data.cost_scope
         });
       } else {
         // Modo creación
@@ -244,8 +240,7 @@ export function TaskSingleModal({
           markup_pct: data.markup_pct,
           tax_pct: data.tax_pct,
           cost_scope: data.cost_scope,
-          created_by: createdBy,
-          description: data.description
+          created_by: createdBy
         });
       }
       
@@ -304,33 +299,37 @@ export function TaskSingleModal({
 
   const editPanel = (
     <div className="space-y-4">
-      {/* Filtros de búsqueda - Filtrar por Rubro arriba, Búsqueda de Texto abajo */}
+      {/* Filtros de búsqueda - Inline en desktop, stack en mobile */}
       <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none text-muted-foreground">
-            Filtrar por Rubro
-          </label>
-          <Select value={rubroFilter} onValueChange={setRubroFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Todos los rubros" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos los rubros</SelectItem>
-              {uniqueRubros.map((rubro) => (
-                <SelectItem key={rubro} value={rubro}>
-                  {rubro}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 space-y-2">
+            <label className="text-xs font-medium leading-none text-muted-foreground">
+              Filtrar por Rubro
+            </label>
+            <Select value={rubroFilter} onValueChange={setRubroFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos los rubros" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los rubros</SelectItem>
+                {uniqueRubros.map((rubro) => (
+                  <SelectItem key={rubro} value={rubro}>
+                    {rubro}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex-1">
+            <SearchField
+              label="Búsqueda de Texto"
+              placeholder="Buscar tarea..."
+              value={searchQuery}
+              onChange={setSearchQuery}
+            />
+          </div>
         </div>
-        
-        <SearchField
-          label="Búsqueda de Texto"
-          placeholder="Buscar tarea..."
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
       </div>
       
       {/* Lista de tareas optimizada como tabla */}
@@ -467,19 +466,6 @@ export function TaskSingleModal({
             </p>
           )}
         </div>
-      </div>
-      
-      {/* Descripción */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Descripción
-        </label>
-        <Textarea
-          placeholder="Descripción de la tarea (opcional)"
-          value={form.watch('description') || ''}
-          onChange={(e) => form.setValue('description', e.target.value)}
-          className="min-h-[80px] resize-none"
-        />
       </div>
     </div>
   );

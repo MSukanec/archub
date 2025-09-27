@@ -77,6 +77,7 @@ export default function BudgetView() {
     openModal('delete-confirmation', {
       title: 'Eliminar tarea del presupuesto',
       description: '¿Estás seguro de que deseas eliminar esta tarea del presupuesto? Esta acción no se puede deshacer.',
+      variant: 'default',
       onConfirm: () => {
         deleteBudgetItem.mutate(taskId);
       }
