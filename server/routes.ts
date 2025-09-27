@@ -405,10 +405,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { data: budgetItems, error } = await authenticatedSupabase
         .from('budget_items_view')
-        .select('*, sort_key')
+        .select('*, position')
         .eq('budget_id', budget_id)
         .eq('organization_id', organization_id)
-        .order('sort_key', { ascending: true })
+        .order('position', { ascending: true })
         .order('division_order', { ascending: true })
         .order('created_at', { ascending: false });
 
