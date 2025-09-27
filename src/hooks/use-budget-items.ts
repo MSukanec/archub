@@ -6,16 +6,22 @@ import { useProjectContext } from '@/stores/projectContext'
 interface BudgetItem {
   // Campos básicos de budget_items
   id: string
-  budget_id?: string
+  budget_id: string
   task_id: string | null
   organization_id: string
   project_id: string
-  description?: string
-  quantity: number
   created_at: string
   updated_at: string
-  cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
+  created_by: string
+  
+  // Campos de presupuesto
+  description?: string
+  quantity: number
+  unit_price: number
+  currency_id: string
   markup_pct: number
+  tax_pct: number
+  cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
   
   // Campos enriquecidos de la vista (desde joins)
   custom_name?: string

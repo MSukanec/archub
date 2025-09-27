@@ -75,6 +75,10 @@ VISTA BUDGET_ITEMS_VIEW:
     "data_type": "uuid"
   },
   {
+    "column_name": "budget_id",
+    "data_type": "uuid"
+  },
+  {
     "column_name": "organization_id",
     "data_type": "uuid"
   },
@@ -87,16 +91,16 @@ VISTA BUDGET_ITEMS_VIEW:
     "data_type": "uuid"
   },
   {
-    "column_name": "quantity",
-    "data_type": "numeric"
-  },
-  {
     "column_name": "created_at",
     "data_type": "timestamp with time zone"
   },
   {
     "column_name": "updated_at",
     "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "created_by",
+    "data_type": "uuid"
   },
   {
     "column_name": "custom_name",
@@ -115,15 +119,31 @@ VISTA BUDGET_ITEMS_VIEW:
     "data_type": "text"
   },
   {
+    "column_name": "quantity",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "unit_price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "currency_id",
+    "data_type": "uuid"
+  },
+  {
+    "column_name": "markup_pct",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "tax_pct",
+    "data_type": "numeric"
+  },
+  {
     "column_name": "cost_scope",
     "data_type": "USER-DEFINED"
   },
   {
     "column_name": "cost_scope_label",
     "data_type": "text"
-  },
-  {
-    "column_name": "markup_pct",
-    "data_type": "numeric"
   }
 ]
