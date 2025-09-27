@@ -171,7 +171,8 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         onSuccess(result.id);
       }
       
-      handleClose();
+      handleCancel();
+      onClose();
     },
     onError: (error) => {
       console.error('Error saving budget:', error);
@@ -185,10 +186,9 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
     }
   });
 
-  const handleClose = () => {
+  const handleCancel = () => {
     form.reset();
     setPanel('view');
-    onClose();
   };
 
   const onSubmit = async (data: BudgetFormData) => {
@@ -428,7 +428,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
-      onLeftClick={handleClose}
+      onLeftClick={handleCancel}
       submitText={createBudgetMutation.isPending ? "Guardando..." : (isEditing ? "Actualizar" : "Crear Presupuesto")}
       onSubmit={form.handleSubmit(onSubmit)}
       submitDisabled={createBudgetMutation.isPending}
@@ -443,7 +443,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={handleClose}
+      onClose={onClose}
     />
   );
 }
