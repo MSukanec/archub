@@ -70,7 +70,6 @@ import { CostModal } from '../modals/admin/CostModal';
 export function ModalFactory() {
   const { open, type, data, closeModal } = useGlobalModalStore();
 
-  console.log('🔥 ModalFactory render:', { open, type, data });
 
   if (!open) return null;
 

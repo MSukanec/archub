@@ -15,7 +15,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/hooks/use-organization-members';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCurrencies } from '@/hooks/use-currencies';
+import { useOrganizationCurrencies } from '@/hooks/use-currencies';
+import DatePickerField from '@/components/ui-custom/fields/DatePickerField';
 import { supabase } from '@/lib/supabase';
 // Removed navigationStore import - using userData.preferences.last_project_id instead;
 
@@ -41,16 +42,17 @@ interface BudgetFormModalProps {
 }
 
 export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
-  console.log('🔥 BudgetFormModal rendering with modalData:', modalData);
   const { budget, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
   const { data: members } = useOrganizationMembers(userData?.organization?.id);
-  const { data: currencies } = useCurrencies();
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!budget;
-  console.log('🔥 BudgetFormModal isEditing:', isEditing, 'budget:', budget);
+  
+  // Determinar si mostrar campos de moneda (más de una moneda disponible)
+  const showCurrencyFields = organizationCurrencies.length > 1;
 
   const form = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
@@ -59,7 +61,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       description: budget?.description || '',
       status: budget?.status || 'draft',
       version: budget?.version || 1,
-      currency_id: budget?.currency_id || (currencies?.[0]?.id || ''),
+      currency_id: budget?.currency_id || (organizationCurrencies?.[0]?.currency?.id || ''),
       exchange_rate: budget?.exchange_rate || undefined,
       created_at: budget?.created_at ? new Date(budget.created_at) : new Date()
     }
@@ -72,7 +74,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         description: budget.description || '',
         status: budget.status || 'draft',
         version: budget.version || 1,
-        currency_id: budget.currency_id || (currencies?.[0]?.id || ''),
+        currency_id: budget.currency_id || (organizationCurrencies?.[0]?.currency?.id || ''),
         exchange_rate: budget.exchange_rate || undefined,
         created_at: budget.created_at ? new Date(budget.created_at) : new Date()
       });
@@ -82,7 +84,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         description: '',
         status: 'draft',
         version: 1,
-        currency_id: currencies?.[0]?.id || '',
+        currency_id: organizationCurrencies?.[0]?.currency?.id || '',
         exchange_rate: undefined,
         created_at: new Date()
       });
@@ -233,7 +235,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       <div>
         <h4 className="font-medium">Moneda</h4>
         <p className="text-muted-foreground mt-1">
-          {currencies?.find(c => c.id === budget?.currency_id)?.code || 'Sin moneda'}
+          {organizationCurrencies?.find(oc => oc.currency.id === budget?.currency_id)?.currency?.code || 'Sin moneda'}
         </p>
       </div>
 
@@ -256,28 +258,47 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Fecha de creación */}
-        <FormField
-          control={form.control}
-          name="created_at"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required-asterisk">Fecha de creación</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                  onChange={(e) => {
-                    // Parse as local date to avoid UTC timezone shifts
-                    const localDate = new Date(e.target.value + 'T00:00:00');
-                    field.onChange(localDate);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Fecha y Versión inline */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="created_at"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="required-asterisk">Fecha de creación</FormLabel>
+                <FormControl>
+                  <DatePickerField
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccionar fecha"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="version"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="required-asterisk">Versión</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="1"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Nombre */}
         <FormField
@@ -317,75 +338,56 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
           )}
         />
 
-        {/* Versión */}
-        <FormField
-          control={form.control}
-          name="version"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required-asterisk">Versión</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number"
-                  min="1"
-                  step="1"
-                  placeholder="1"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Campos de moneda - Solo cuando hay más de una moneda */}
+        {showCurrencyFields && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="currency_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="required-asterisk">Moneda</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una moneda" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {organizationCurrencies?.map((orgCurrency) => (
+                        <SelectItem key={orgCurrency.currency.id} value={orgCurrency.currency.id}>
+                          {orgCurrency.currency.code} - {orgCurrency.currency.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* Moneda */}
-        <FormField
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="required-asterisk">Moneda</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una moneda" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {currencies?.map((currency) => (
-                    <SelectItem key={currency.id} value={currency.id}>
-                      {currency.code} - {currency.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Tipo de cambio */}
-        <FormField
-          control={form.control}
-          name="exchange_rate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de cambio (opcional)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number"
-                  step="0.000001"
-                  placeholder="1.0"
-                  {...field}
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de cambio (opcional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number"
+                      step="0.000001"
+                      placeholder="1.0"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         {/* Estado */}
         <FormField
@@ -418,6 +420,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Presupuesto" : "Nuevo Presupuesto"}
+      description={isEditing && budget?.description ? budget.description : "Gestiona la información del presupuesto"}
       icon={Calculator}
     />
   );
