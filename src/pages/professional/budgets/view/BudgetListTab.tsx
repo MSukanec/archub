@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
+import { useUpdateBudgetItem } from '@/hooks/use-budget-items'
 
 interface BudgetListTabProps {
   budget: any
@@ -54,6 +55,7 @@ export function BudgetListTab({
   onDuplicateTask
 }: BudgetListTabProps) {
   const isMobile = useMobile()
+  const updateBudgetItem = useUpdateBudgetItem()
   
   // State to store real totals from BudgetTree
   const [realTotals, setRealTotals] = useState<{ totalSubtotals: number; totalFinals: number } | null>(null);
@@ -118,8 +120,10 @@ export function BudgetListTab({
 
   // Handle quantity change
   const handleQuantityChange = (taskId: string, quantity: number) => {
-    console.log('Quantity change:', taskId, quantity)
-    // TODO: Implement actual quantity change logic
+    updateBudgetItem.mutate({
+      id: taskId,
+      quantity: quantity
+    });
   }
 
   // Format currency
