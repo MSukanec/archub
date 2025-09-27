@@ -762,7 +762,9 @@ const SortableTaskItem = ({
   handleDescriptionChange,
   handleMarginChange,
   handlePureSubtotalChange,
-  handleCostScopeChange
+  handleCostScopeChange,
+  localCostScopes,
+  localMargins
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -779,6 +781,8 @@ const SortableTaskItem = ({
   handleMarginChange: (taskId: string, margin: number) => void;
   handlePureSubtotalChange: (taskId: string, pureSubtotal: number) => void;
   handleCostScopeChange: (taskId: string, costScope: string) => void;
+  localCostScopes: { [taskId: string]: string };
+  localMargins: { [taskId: string]: number };
 }) => {
   const [isIndependentCost, setIsIndependentCost] = useState(false);
   const {
@@ -810,8 +814,8 @@ const SortableTaskItem = ({
       return sum + (quantity * unitPrice);
     }, 0);
 
-    // Calculate cost based on cost_scope
-    const costScope = task.cost_scope || 'materials_and_labor';
+    // Calculate cost based on LOCAL cost_scope for immediate recalculation
+    const costScope = localCostScopes[task.id] || task.cost_scope || 'materials_and_labor';
     switch (costScope) {
       case 'materials_only':
         return materialsCost;
@@ -821,7 +825,7 @@ const SortableTaskItem = ({
       default:
         return materialsCost + laborCost;
     }
-  }, [materials, labor, task.cost_scope]);
+  }, [materials, labor, task.cost_scope, localCostScopes, task.id]);
 
   const organizationCost = organizationTaskPrice?.total_unit_cost || 0;
 
@@ -1116,17 +1120,27 @@ export function BudgetTree({
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
   const [pureSubtotals, setPureSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
+  const [localMargins, setLocalMargins] = useState<{ [taskId: string]: number }>({});
+  const [localCostScopes, setLocalCostScopes] = useState<{ [taskId: string]: string }>({});
   const { data: userData } = useCurrentUser();
   const updateBudgetItemMutation = useUpdateBudgetItem();
 
   
-  // Initialize local quantities from tasks
+  // Initialize local quantities, margins, and cost scopes from tasks
   useEffect(() => {
     const initialQuantities: { [taskId: string]: number } = {};
+    const initialMargins: { [taskId: string]: number } = {};
+    const initialCostScopes: { [taskId: string]: string } = {};
+    
     tasks.forEach(task => {
       initialQuantities[task.id] = task.quantity || 0;
+      initialMargins[task.id] = task.markup_pct || 0;
+      initialCostScopes[task.id] = task.cost_scope || 'materials_and_labor';
     });
+    
     setLocalQuantities(initialQuantities);
+    setLocalMargins(initialMargins);
+    setLocalCostScopes(initialCostScopes);
   }, [tasks]);
 
   // Create save function for auto-save
@@ -1152,6 +1166,49 @@ export function BudgetTree({
     }
   }, [tasks, updateBudgetItemMutation]);
 
+  // Create save function for margin changes
+  const saveMarginChanges = useCallback(async (margins: { [taskId: string]: number }) => {
+    const changedTasks = Object.entries(margins).filter(([taskId, margin]) => {
+      const originalTask = tasks.find(task => task.id === taskId);
+      return originalTask && (originalTask.markup_pct || 0) !== margin;
+    });
+
+    for (const [taskId, margin] of changedTasks) {
+      try {
+        await updateBudgetItemMutation.mutateAsync({
+          id: taskId,
+          markup_pct: margin,
+        });
+        console.log('Margin saved successfully for task:', taskId, 'margin:', margin);
+      } catch (error) {
+        console.error(`Error saving margin for task ${taskId}:`, error);
+        throw error;
+      }
+    }
+  }, [tasks, updateBudgetItemMutation]);
+
+  // Create save function for cost scope changes
+  const saveCostScopeChanges = useCallback(async (costScopes: { [taskId: string]: string }) => {
+    const changedTasks = Object.entries(costScopes).filter(([taskId, costScope]) => {
+      const originalTask = tasks.find(task => task.id === taskId);
+      return originalTask && (originalTask.cost_scope || 'materials_and_labor') !== costScope;
+    });
+
+    for (const [taskId, costScope] of changedTasks) {
+      try {
+        await updateBudgetItemMutation.mutateAsync({
+          id: taskId,
+          cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
+          unit_price: 0 // Reset to 0 so the new archubCost based on cost_scope is used
+        });
+        console.log('Cost scope saved successfully for task:', taskId, 'cost_scope:', costScope);
+      } catch (error) {
+        console.error(`Error saving cost scope for task ${taskId}:`, error);
+        throw error;
+      }
+    }
+  }, [tasks, updateBudgetItemMutation]);
+
   // Handle description changes
   const handleDescriptionChange = useCallback((taskId: string, description: string) => {
     updateBudgetItemMutation.mutate({
@@ -1160,31 +1217,45 @@ export function BudgetTree({
     });
   }, [updateBudgetItemMutation]);
 
-  // Handle margin changes
+  // Handle local margin changes
   const handleMarginChange = useCallback((taskId: string, margin: number) => {
-    updateBudgetItemMutation.mutate({
-      id: taskId,
-      markup_pct: margin,
-    });
-    console.log('Margin change saved:', taskId, margin);
-  }, [updateBudgetItemMutation]);
+    console.log('Margin change (local):', taskId, margin);
+    setLocalMargins(prev => ({
+      ...prev,
+      [taskId]: margin
+    }));
+  }, []);
 
-  // Handle cost scope changes
+  // Handle local cost scope changes
   const handleCostScopeChange = useCallback((taskId: string, costScope: string) => {
-    // Update cost_scope and reset unit_price to 0 so it recalculates with new scope
-    updateBudgetItemMutation.mutate({
-      id: taskId,
-      cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
-      unit_price: 0 // Reset to 0 so the new archubCost based on cost_scope is used
-    });
-    console.log('Cost scope changed:', taskId, costScope, '(unit_price reset to recalculate)');
-  }, [updateBudgetItemMutation]);
+    console.log('Cost scope change (local):', taskId, costScope);
+    setLocalCostScopes(prev => ({
+      ...prev,
+      [taskId]: costScope
+    }));
+  }, []);
 
   // Use auto-save for quantity changes
-  const { isSaving } = useDebouncedAutoSave({
+  const { isSaving: isSavingQuantities } = useDebouncedAutoSave({
     data: localQuantities,
     saveFn: saveQuantityChanges,
     delay: 1000, // Wait 1 second after user stops typing
+    enabled: true
+  });
+
+  // Use auto-save for margin changes
+  const { isSaving: isSavingMargins } = useDebouncedAutoSave({
+    data: localMargins,
+    saveFn: saveMarginChanges,
+    delay: 750, // Wait 750ms after user stops typing
+    enabled: true
+  });
+
+  // Use auto-save for cost scope changes
+  const { isSaving: isSavingCostScopes } = useDebouncedAutoSave({
+    data: localCostScopes,
+    saveFn: saveCostScopeChanges,
+    delay: 500, // Wait 500ms after user stops typing (faster for scope changes)
     enabled: true
   });
 
@@ -1425,6 +1496,8 @@ export function BudgetTree({
                     handleMarginChange={handleMarginChange}
                     handlePureSubtotalChange={handlePureSubtotalChange}
                     handleCostScopeChange={handleCostScopeChange}
+                    localCostScopes={localCostScopes}
+                    localMargins={localMargins}
                   />
                 ))}
               </div>

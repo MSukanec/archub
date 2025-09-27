@@ -7,9 +7,10 @@ import { useTaskLabor } from '@/hooks/use-task-labor'
 export interface TaskCostPopoverProps {
   task: any
   showCost?: boolean
+  cost_scope?: string
 }
 
-export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps) => {
+export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCostPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
@@ -35,7 +36,23 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
     return sum + (quantity * unitPrice);
   }, 0)
 
-  const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit
+  // Get cost scope from prop or task
+  const effectiveCostScope = cost_scope || task.cost_scope || 'materials_and_labor'
+  
+  // Calculate total based on cost scope
+  const getTotalPerUnit = () => {
+    switch (effectiveCostScope) {
+      case 'materials_only':
+        return materialsTotalPerUnit
+      case 'labor_only':
+        return laborTotalPerUnit
+      case 'materials_and_labor':
+      default:
+        return materialsTotalPerUnit + laborTotalPerUnit
+    }
+  }
+  
+  const totalPerUnit = getTotalPerUnit()
 
   // Formatear el costo total
   const formatCost = (amount: number) => {
@@ -115,7 +132,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                 ) : (
                   <div className="space-y-3">
                     {/* Sección de Materiales */}
-                    {materials.length > 0 && (
+                    {materials.length > 0 && (effectiveCostScope === 'materials_only' || effectiveCostScope === 'materials_and_labor') && (
                       <div>
                         <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                           <div className="flex items-center gap-2">
@@ -164,7 +181,7 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                     )}
                     
                     {/* Sección de Mano de Obra */}
-                    {labor.length > 0 && (
+                    {labor.length > 0 && (effectiveCostScope === 'labor_only' || effectiveCostScope === 'materials_and_labor') && (
                       <div>
                         <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                           <div className="flex items-center gap-2">
@@ -214,8 +231,12 @@ export const TaskCostPopover = ({ task, showCost = false }: TaskCostPopoverProps
                 )}
               </div>
 
-              {/* Footer - Solo se muestra si hay materiales o mano de obra */}
-              {!isLoading && (materials.length > 0 || labor.length > 0) && (
+              {/* Footer - Solo se muestra si hay materiales o mano de obra según cost_scope */}
+              {!isLoading && (
+                (effectiveCostScope === 'materials_only' && materials.length > 0) ||
+                (effectiveCostScope === 'labor_only' && labor.length > 0) ||
+                (effectiveCostScope === 'materials_and_labor' && (materials.length > 0 || labor.length > 0))
+              ) && (
                 <div className="px-3 py-3 flex items-center justify-between border-t" style={{ borderColor: 'var(--card-border)' }}>
                   <div className="flex items-center gap-2 flex-1">
                     <span className="text-xs font-semibold uppercase" style={{ color: 'var(--card-fg)' }}>TOTAL POR UNIDAD:</span>
