@@ -5,7 +5,7 @@ import { DollarSign, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { BudgetListTab } from './view/BudgetListTab';
 import { useBudgets } from "@/hooks/use-budgets";
-import { useBudgetItems } from "@/hooks/use-budget-items";
+import { useBudgetItems, useCreateBudgetItem, useDeleteBudgetItem } from "@/hooks/use-budget-items";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useProjectContext } from '@/stores/projectContext';
 
@@ -19,6 +19,8 @@ export default function BudgetView() {
   const budget = budgets?.find(b => b.id === id);
   const { data: budgetItems = [], isLoading: isLoadingItems } = useBudgetItems(id);
   const { openModal } = useGlobalModalStore();
+  const createBudgetItem = useCreateBudgetItem();
+  const deleteBudgetItem = useDeleteBudgetItem();
 
   // Función para agregar tarea
   const handleAddTask = () => {
@@ -37,6 +39,48 @@ export default function BudgetView() {
 
     console.log('🔧 BudgetView - handleAddTask modalData:', modalData);
     openModal('budget-item', modalData);
+  };
+
+  // Función para duplicar tarea
+  const handleDuplicateTask = (task: any) => {
+    if (!selectedProjectId || !currentOrganizationId || !budget || !task) {
+      console.error('No project, organization, budget or task selected');
+      return;
+    }
+
+    // Crear una copia de la tarea sin el id y con campos actualizados
+    const duplicatedData = {
+      budget_id: task.budget_id,
+      task_id: task.task_id,
+      organization_id: task.organization_id,
+      project_id: task.project_id,
+      quantity: task.quantity,
+      unit_price: task.unit_price || 0,
+      currency_id: task.currency_id || budget.currency_id,
+      markup_pct: task.markup_pct || 0,
+      tax_pct: task.tax_pct || 0,
+      cost_scope: task.cost_scope || 'materials_and_labor',
+      created_by: task.created_by,
+      description: task.description ? `${task.description} (copia)` : 'Copia'
+    };
+
+    createBudgetItem.mutate(duplicatedData);
+  };
+
+  // Función para eliminar tarea
+  const handleDeleteTask = (taskId: string) => {
+    if (!taskId) {
+      console.error('No task ID provided');
+      return;
+    }
+
+    openModal('delete-confirmation', {
+      title: 'Eliminar tarea del presupuesto',
+      description: '¿Estás seguro de que deseas eliminar esta tarea del presupuesto? Esta acción no se puede deshacer.',
+      onConfirm: () => {
+        deleteBudgetItem.mutate(taskId);
+      }
+    });
   };
 
   const headerTabs = [
@@ -98,6 +142,8 @@ export default function BudgetView() {
             tasks={budgetItems}
             isLoading={isLoadingItems}
             onAddTask={handleAddTask}
+            onDuplicateTask={handleDuplicateTask}
+            onDeleteTask={handleDeleteTask}
           />
         );
       default:
