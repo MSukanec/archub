@@ -64,43 +64,12 @@ interface BudgetTreeProps {
 }
 
 // Component for subtotal calculation (Cantidad x Costo Unitario)
-const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: { 
+const SubtotalDisplay = ({ task, quantity, archubCost, onPureSubtotalChange }: { 
   task: any; 
   quantity: number; 
+  archubCost: number;
   onPureSubtotalChange?: (taskId: string, pureSubtotal: number) => void; 
 }) => {
-  // Get Archub cost for fallback when unit_price is null
-  const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
-  const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
-  
-  const archubCost = useMemo(() => {
-    const materialsCost = materials.reduce((sum, material) => {
-      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-      const unitPrice = materialView?.avg_price || 0;
-      const quantity = material.amount || 0;
-      return sum + (quantity * unitPrice);
-    }, 0);
-
-    const laborCost = labor.reduce((sum, laborItem) => {
-      const laborView = laborItem.labor_view;
-      const unitPrice = laborView?.avg_price || 0;
-      const quantity = laborItem.quantity || 0;
-      return sum + (quantity * unitPrice);
-    }, 0);
-
-    // Calculate cost based on cost_scope
-    const costScope = task.cost_scope || 'materials_and_labor';
-    switch (costScope) {
-      case 'materials_only':
-        return materialsCost;
-      case 'labor_only':
-        return laborCost;
-      case 'materials_and_labor':
-      default:
-        return materialsCost + laborCost;
-    }
-  }, [materials, labor, task.cost_scope]);
-  
   // Use saved unit_price if available and greater than 0, otherwise fallback to Archub cost
   const unitPrice = task.unit_price !== null && task.unit_price !== undefined && task.unit_price > 0 ? task.unit_price : archubCost;
   
@@ -518,9 +487,13 @@ const InlineCostTypeEditor = ({
 // Inline Unit Cost Editor Component
 const InlineUnitCostEditor = ({ 
   task,
+  archubCost,
+  organizationCost,
   onCostTypeChange 
 }: { 
   task: any;
+  archubCost: number;
+  organizationCost: number;
   onCostTypeChange?: (costType: 'archub' | 'organization' | 'independent') => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -528,41 +501,6 @@ const InlineUnitCostEditor = ({
   const [customCost, setCustomCost] = useState<number>(task.unit_price || 0);
   
   const updateBudgetItem = useUpdateBudgetItem();
-
-  // Get current unit cost from TaskMaterialsUnitCost component logic
-  const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
-  const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
-  const { data: organizationTaskPrice } = useOrganizationTaskPrice(task.task_id || task.id);
-
-  const archubCost = useMemo(() => {
-    const materialsCost = materials.reduce((sum, material) => {
-      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-      const unitPrice = materialView?.avg_price || 0;
-      const quantity = material.amount || 0;
-      return sum + (quantity * unitPrice);
-    }, 0);
-
-    const laborCost = labor.reduce((sum, laborItem) => {
-      const laborView = laborItem.labor_view;
-      const unitPrice = laborView?.avg_price || 0;
-      const quantity = laborItem.quantity || 0;
-      return sum + (quantity * unitPrice);
-    }, 0);
-
-    // Calculate cost based on cost_scope
-    const costScope = task.cost_scope || 'materials_and_labor';
-    switch (costScope) {
-      case 'materials_only':
-        return materialsCost;
-      case 'labor_only':
-        return laborCost;
-      case 'materials_and_labor':
-      default:
-        return materialsCost + laborCost;
-    }
-  }, [materials, labor, task.cost_scope]);
-
-  const organizationCost = organizationTaskPrice?.total_unit_cost || 0;
 
   const displayCost = costType === 'archub' ? archubCost : 
                     costType === 'organization' ? organizationCost : 
@@ -665,7 +603,7 @@ const InlineUnitCostEditor = ({
                     handleCostTypeChange(newType);
                   }}
                   className="accent-[var(--accent-2)]"
-                  disabled={!organizationTaskPrice?.total_unit_cost}
+                  disabled={organizationCost === 0}
                 />
                 <span className="text-xs text-[var(--card-fg)]">Costo de Organización</span>
               </label>
@@ -852,6 +790,41 @@ const SortableTaskItem = ({
     isDragging,
   } = useSortable({ id: task.id });
 
+  // Calculate costs once per task to avoid duplicate queries
+  const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
+  const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
+  const { data: organizationTaskPrice } = useOrganizationTaskPrice(task.task_id || task.id);
+
+  const archubCost = useMemo(() => {
+    const materialsCost = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const quantity = material.amount || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    const laborCost = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const quantity = laborItem.quantity || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    // Calculate cost based on cost_scope
+    const costScope = task.cost_scope || 'materials_and_labor';
+    switch (costScope) {
+      case 'materials_only':
+        return materialsCost;
+      case 'labor_only':
+        return laborCost;
+      case 'materials_and_labor':
+      default:
+        return materialsCost + laborCost;
+    }
+  }, [materials, labor, task.cost_scope]);
+
+  const organizationCost = organizationTaskPrice?.total_unit_cost || 0;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -939,6 +912,8 @@ const SortableTaskItem = ({
         <div className="text-right text-xs flex items-center justify-end gap-1">
           <InlineUnitCostEditor 
             task={task} 
+            archubCost={archubCost}
+            organizationCost={organizationCost}
             onCostTypeChange={(costType) => setIsIndependentCost(costType === 'independent')}
           />
           {/* Information icon with cost breakdown popover */}
@@ -969,7 +944,8 @@ const SortableTaskItem = ({
         <div className="text-right text-xs flex items-center justify-end">
           <SubtotalDisplay 
             task={task} 
-            quantity={localQuantities[task.id] ?? task.quantity ?? 0} 
+            quantity={localQuantities[task.id] ?? task.quantity ?? 0}
+            archubCost={archubCost}
             onPureSubtotalChange={handlePureSubtotalChange}
           />
         </div>
