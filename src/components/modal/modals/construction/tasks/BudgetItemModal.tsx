@@ -7,13 +7,19 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Calendar } from "lucide-react";
+import { Plus, Calendar, DollarSign } from "lucide-react";
 import { SearchField } from "@/components/ui-custom/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateBudgetItem, useUpdateBudgetItem } from "@/hooks/use-budget-items";
+import { useOrganizationTaskPrice } from "@/hooks/use-organization-task-prices";
+import { useTaskMaterials } from "@/hooks/use-generated-tasks";
+import { useTaskLabor } from "@/hooks/use-task-labor";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { FormModalLayout } from "@/components/modal/form/FormModalLayout";
 import { FormModalHeader } from "@/components/modal/form/FormModalHeader";
 import { FormModalFooter } from "@/components/modal/form/FormModalFooter";
@@ -28,6 +34,15 @@ const budgetItemSchema = z.object({
 });
 
 type BudgetItemFormData = z.infer<typeof budgetItemSchema>;
+
+// Tipos de costo disponibles
+type CostType = 'archub' | 'organization' | 'independent';
+
+interface CostOption {
+  id: CostType;
+  label: string;
+  description: string;
+}
 
 interface BudgetItemModalProps {
   modalData: {
@@ -51,6 +66,8 @@ export function BudgetItemModal({
   const [rubroFilter, setRubroFilter] = useState<string>('todos');
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [selectedTaskUnit, setSelectedTaskUnit] = useState<string>('');
+  const [selectedCostType, setSelectedCostType] = useState<CostType>('archub');
+  const [calculatedUnitPrice, setCalculatedUnitPrice] = useState<number>(0);
   
   const { data: userData } = useCurrentUser();
   const createBudgetItem = useCreateBudgetItem();
@@ -58,8 +75,92 @@ export function BudgetItemModal({
   
   const isEditing = modalData.isEditing && modalData.editingTask;
 
+  // Hooks para calcular costos de Archub (materiales + mano de obra)
+  const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(selectedTaskId || null);
+  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(selectedTaskId || null);
+
+  // Hook para obtener precios de organización
+  const { data: organizationTaskPrice, isLoading: orgPriceLoading } = useOrganizationTaskPrice(selectedTaskId || null);
+
+  // Opciones de costo disponibles
+  const costOptions: CostOption[] = [
+    {
+      id: 'archub',
+      label: 'Costo Archub',
+      description: 'Cálculo automático basado en materiales y mano de obra de la librería'
+    },
+    {
+      id: 'organization',
+      label: 'Costo de Organización',
+      description: 'Precio personalizado definido por tu organización'
+    },
+    {
+      id: 'independent',
+      label: 'Costo Independiente',
+      description: 'Precio manual ingresado por ti'
+    }
+  ];
+
   // Debug: Log modalData al inicializar
   console.log('🔧 BudgetItemModal - modalData received:', modalData);
+
+  // Calcular costo de Archub (materiales + mano de obra por unidad)
+  const archubUnitCost = useMemo(() => {
+    if (materialsLoading || laborLoading || !selectedTaskId) return 0;
+
+    // Calcular costo de materiales por unidad
+    const materialCostPerUnit = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const quantity = material.amount || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    // Calcular costo de mano de obra por unidad
+    const laborCostPerUnit = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const quantity = laborItem.quantity || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    return materialCostPerUnit + laborCostPerUnit;
+  }, [materials, labor, materialsLoading, laborLoading, selectedTaskId]);
+
+  // Calcular unit_price según el tipo de costo seleccionado
+  useEffect(() => {
+    let newUnitPrice = 0;
+
+    switch (selectedCostType) {
+      case 'archub':
+        newUnitPrice = archubUnitCost;
+        break;
+      case 'organization':
+        newUnitPrice = organizationTaskPrice?.total_unit_cost || 0;
+        break;
+      case 'independent':
+        // Mantener el valor actual del formulario para costo independiente
+        newUnitPrice = form.watch('unit_price') || 0;
+        break;
+    }
+
+    setCalculatedUnitPrice(newUnitPrice);
+    
+    // Solo actualizar el formulario si no es costo independiente
+    if (selectedCostType !== 'independent') {
+      form.setValue('unit_price', newUnitPrice);
+    }
+  }, [selectedCostType, archubUnitCost, organizationTaskPrice, form]);
+
+  // Formatear precios
+  const formatCost = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
 
   // Query para obtener la membresía actual del usuario en la organización  
   const { data: organizationMember } = useQuery({
@@ -433,6 +534,102 @@ export function BudgetItemModal({
           </p>
         )}
       </div>
+
+      {/* Selección de tipo de costo */}
+      {selectedTaskId && (
+        <div className="space-y-3">
+          <label className="text-xs font-medium leading-none">
+            Tipo de Costo *
+          </label>
+          <RadioGroup 
+            value={selectedCostType} 
+            onValueChange={(value: CostType) => setSelectedCostType(value)}
+            className="space-y-3"
+          >
+            {costOptions.map((option) => {
+              const isLoading = option.id === 'archub' && (materialsLoading || laborLoading);
+              const isOrgPriceAvailable = option.id === 'organization' && organizationTaskPrice?.total_unit_cost;
+              const isDisabled = option.id === 'organization' && !isOrgPriceAvailable && !orgPriceLoading;
+              
+              let displayPrice = '—';
+              if (option.id === 'archub' && !isLoading) {
+                displayPrice = formatCost(archubUnitCost);
+              } else if (option.id === 'organization' && isOrgPriceAvailable) {
+                displayPrice = formatCost(organizationTaskPrice.total_unit_cost);
+              } else if (option.id === 'independent') {
+                displayPrice = 'Manual';
+              }
+
+              return (
+                <Card key={option.id} className={`p-3 cursor-pointer transition-colors ${
+                  selectedCostType === option.id ? 'ring-2 ring-primary' : 'hover:bg-muted/30'
+                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <CardContent className="p-0">
+                    <div className="flex items-start space-x-3">
+                      <RadioGroupItem 
+                        value={option.id} 
+                        id={option.id}
+                        disabled={isDisabled}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <Label 
+                            htmlFor={option.id} 
+                            className={`text-sm font-medium cursor-pointer ${isDisabled ? 'cursor-not-allowed' : ''}`}
+                          >
+                            {option.label}
+                          </Label>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-3 h-3 text-muted-foreground" />
+                            <span className={`text-xs font-medium ${
+                              isLoading ? 'text-muted-foreground' : 'text-foreground'
+                            }`}>
+                              {isLoading ? '...' : displayPrice}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {option.description}
+                          {isDisabled && ' (No disponible para esta tarea)'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </RadioGroup>
+        </div>
+      )}
+
+      {/* Campo de precio unitario manual - Solo visible para costo independiente */}
+      {selectedCostType === 'independent' && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Precio Unitario *
+          </label>
+          <Input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="Ingrese el precio unitario"
+            value={form.watch('unit_price') || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value)) {
+                form.setValue('unit_price', value);
+              }
+            }}
+            className={form.formState.errors.unit_price ? 'border-destructive' : ''}
+          />
+          {form.formState.errors.unit_price && (
+            <p className="text-xs text-destructive">
+              {form.formState.errors.unit_price.message}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 

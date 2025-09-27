@@ -424,6 +424,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get organization task prices from ORGANIZATION_TASK_PRICES_VIEW
+  app.get("/api/organization-task-prices", async (req, res) => {
+    try {
+      const { organization_id, task_id } = req.query;
+      
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      let query = authenticatedSupabase
+        .from('organization_task_prices_view')
+        .select('*')
+        .eq('organization_id', organization_id);
+
+      // If task_id is provided, filter by it (for single task lookup)
+      if (task_id) {
+        query = query.eq('task_id', task_id).maybeSingle();
+        
+        const { data: taskPrice, error } = await query;
+        
+        if (error) {
+          console.error("Error fetching organization task price:", error);
+          return res.status(500).json({ error: "Failed to fetch organization task price" });
+        }
+
+        return res.json(taskPrice);
+      } else {
+        // Return all task prices for the organization
+        query = query.order('created_at', { ascending: false });
+        
+        const { data: taskPrices, error } = await query;
+        
+        if (error) {
+          console.error("Error fetching organization task prices:", error);
+          return res.status(500).json({ error: "Failed to fetch organization task prices" });
+        }
+
+        return res.json(taskPrices || []);
+      }
+    } catch (error) {
+      console.error("Error fetching organization task prices:", error);
+      res.status(500).json({ error: "Failed to fetch organization task prices" });
+    }
+  });
+
   // Create a new budget item
   app.post("/api/budget-items", async (req, res) => {
     try {

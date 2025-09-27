@@ -21,25 +21,34 @@ export function useOrganizationTaskPrice(taskId: string | null) {
   return useQuery({
     queryKey: ['organization-task-price', userData?.organization?.id, taskId],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id || !taskId) {
+      if (!userData?.organization?.id || !taskId) {
         return null
       }
 
-      const { data, error } = await supabase
-        .from('organization_task_prices')
-        .select('*')
-        .eq('organization_id', userData.organization.id)
-        .eq('task_id', taskId)
-        .maybeSingle()
-
-      if (error) {
-        console.error('Error fetching organization task price:', error)
-        throw error
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
       }
 
+      // Use server endpoint to query ORGANIZATION_TASK_PRICES_VIEW
+      const response = await fetch(`/api/organization-task-prices?organization_id=${userData.organization.id}&task_id=${taskId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       return data as OrganizationTaskPrice | null
     },
-    enabled: !!supabase && !!userData?.organization?.id && !!taskId
+    enabled: !!userData?.organization?.id && !!taskId
   })
 }
 
@@ -49,24 +58,34 @@ export function useOrganizationTaskPrices() {
   return useQuery({
     queryKey: ['organization-task-prices', userData?.organization?.id],
     queryFn: async () => {
-      if (!supabase || !userData?.organization?.id) {
+      if (!userData?.organization?.id) {
         return []
       }
 
-      const { data, error } = await supabase
-        .from('organization_task_prices')
-        .select('*')
-        .eq('organization_id', userData.organization.id)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching organization task prices:', error)
-        throw error
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
       }
 
+      // Use server endpoint to query ORGANIZATION_TASK_PRICES_VIEW
+      const response = await fetch(`/api/organization-task-prices?organization_id=${userData.organization.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       return data as OrganizationTaskPrice[]
     },
-    enabled: !!supabase && !!userData?.organization?.id
+    enabled: !!userData?.organization?.id
   })
 }
 

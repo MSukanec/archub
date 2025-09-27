@@ -68,40 +68,19 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
   quantity: number; 
   onPureSubtotalChange?: (taskId: string, pureSubtotal: number) => void; 
 }) => {
-  const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id);
-  const { data: labor = [], isLoading: laborLoading } = useTaskLabor(task.task_id || task.id);
-
-  const isLoadingData = isLoading || laborLoading;
-
-  // Calculate cost per unit (materials + labor)
-  const costPerUnit = useMemo(() => {
-    const materialsCost = materials.reduce((sum: number, material: any) => {
-      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
-      const unitPrice = materialView?.avg_price || 0;
-      const amount = material.amount || 0;
-      return sum + (amount * unitPrice);
-    }, 0);
-
-    const laborCost = labor.reduce((sum: number, laborItem: any) => {
-      const laborView = laborItem.labor_view;
-      const unitPrice = laborView?.avg_price || 0;
-      const amount = laborItem.quantity || 0;
-      return sum + (amount * unitPrice);
-    }, 0);
-
-    return materialsCost + laborCost;
-  }, [materials, labor]);
-
-  // Calculate subtotal (quantity × cost per unit)
-  const subtotal = quantity * costPerUnit;
+  // Use saved unit_price from BUDGET_ITEMS instead of dynamic calculation
+  const unitPrice = task.unit_price || 0;
+  
+  // Calculate subtotal (quantity × saved unit_price)
+  const subtotal = quantity * unitPrice;
 
   // Report pure subtotal change
   useEffect(() => {
-    if (onPureSubtotalChange && !isLoadingData && subtotal >= 0) {
+    if (onPureSubtotalChange && subtotal >= 0) {
       const taskId = task.id; // Use task.id (same as taskSubtotals) instead of task.task_id
       onPureSubtotalChange(taskId, subtotal);
     }
-  }, [onPureSubtotalChange, isLoadingData, subtotal, task]);
+  }, [onPureSubtotalChange, subtotal, task]);
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -111,10 +90,6 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
       maximumFractionDigits: 2
     }).format(amount);
   };
-
-  if (isLoadingData) {
-    return <span className="text-xs text-muted-foreground">...</span>;
-  }
 
   if (subtotal === 0) {
     return <span className="text-xs text-muted-foreground">–</span>;
