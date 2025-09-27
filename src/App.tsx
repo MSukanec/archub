@@ -39,6 +39,7 @@ import ConstructionPersonnel from "@/pages/professional/project/construction/Con
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
 import ConstructionEstimates from "@/pages/professional/project/construction/estimates/Estimates";
 import Budgets from "@/pages/professional/budgets/Budgets";
+import BudgetView from "@/pages/professional/budgets/BudgetView";
 
 
 import ConstructionSubcontracts from "@/pages/professional/project/construction/subcontracts/Subcontracts";
@@ -125,6 +126,8 @@ function Router() {
         <Route path="/commercialization/clients" component={Clients} />
         <Route path="/media" component={Media} />
         <Route path="/budgets" component={Budgets} />
+        <Route path="/professional/budgets" component={Budgets} />
+        <Route path="/professional/budgets/view/:id" component={BudgetView} />
         
 
 

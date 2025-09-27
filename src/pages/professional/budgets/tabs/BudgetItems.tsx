@@ -1,4 +1,4 @@
-import { DollarSign, Plus, Edit, Trash2 } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Eye } from 'lucide-react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { useDeleteBudget } from '@/hooks/use-budgets'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
+import { useLocation } from 'wouter'
 
 interface BudgetItemsProps {
   onAddTask?: () => void
@@ -25,9 +26,14 @@ export function BudgetItems({
   const deletebudget = useDeleteBudget()
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
+  const [, navigate] = useLocation()
 
   const handleEdit = (budget: any) => {
     openModal('budget', { budget, mode: 'edit' })
+  }
+
+  const handleView = (budget: any) => {
+    navigate(`/professional/budgets/view/${budget.id}`)
   }
 
   const handleDelete = (budget: any) => {
@@ -140,6 +146,15 @@ export function BudgetItems({
       width: '15%',
       render: (budget: any) => (
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleView(budget)}
+            className="h-8 w-8 p-0"
+            title="Ver"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
