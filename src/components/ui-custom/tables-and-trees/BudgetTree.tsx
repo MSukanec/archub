@@ -101,8 +101,8 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
     }
   }, [materials, labor, task.cost_scope]);
   
-  // Use saved unit_price if available, otherwise fallback to Archub cost
-  const unitPrice = task.unit_price !== null && task.unit_price !== undefined ? task.unit_price : archubCost;
+  // Use saved unit_price if available and greater than 0, otherwise fallback to Archub cost
+  const unitPrice = task.unit_price !== null && task.unit_price !== undefined && task.unit_price > 0 ? task.unit_price : archubCost;
   
   // Calculate subtotal (quantity × unit_price)
   const subtotal = quantity * unitPrice;
@@ -1195,11 +1195,11 @@ export function BudgetTree({
 
   // Handle cost scope changes
   const handleCostScopeChange = useCallback((taskId: string, costScope: string) => {
-    // Update cost_scope and reset unit_price to null so it recalculates with new scope
+    // Update cost_scope and reset unit_price to 0 so it recalculates with new scope
     updateBudgetItemMutation.mutate({
       id: taskId,
       cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
-      unit_price: null // Reset to null so the new archubCost based on cost_scope is used
+      unit_price: 0 // Reset to 0 so the new archubCost based on cost_scope is used
     });
     console.log('Cost scope changed:', taskId, costScope, '(unit_price reset to recalculate)');
   }, [updateBudgetItemMutation]);
