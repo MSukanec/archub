@@ -69,10 +69,32 @@ const SubtotalDisplay = ({ task, quantity, onPureSubtotalChange }: {
   quantity: number; 
   onPureSubtotalChange?: (taskId: string, pureSubtotal: number) => void; 
 }) => {
-  // Use saved unit_price from BUDGET_ITEMS instead of dynamic calculation
-  const unitPrice = task.unit_price || 0;
+  // Get Archub cost for fallback when unit_price is null
+  const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
+  const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
   
-  // Calculate subtotal (quantity × saved unit_price)
+  const archubCost = useMemo(() => {
+    const materialsCost = materials.reduce((sum, material) => {
+      const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
+      const unitPrice = materialView?.avg_price || 0;
+      const quantity = material.amount || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    const laborCost = labor.reduce((sum, laborItem) => {
+      const laborView = laborItem.labor_view;
+      const unitPrice = laborView?.avg_price || 0;
+      const quantity = laborItem.quantity || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
+
+    return materialsCost + laborCost;
+  }, [materials, labor]);
+  
+  // Use saved unit_price if available, otherwise fallback to Archub cost
+  const unitPrice = task.unit_price !== null && task.unit_price !== undefined ? task.unit_price : archubCost;
+  
+  // Calculate subtotal (quantity × unit_price)
   const subtotal = quantity * unitPrice;
 
   // Report pure subtotal change
