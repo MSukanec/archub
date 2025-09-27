@@ -567,7 +567,6 @@ export function MainSidebar() {
       { icon: Users, label: 'Clientes', href: '/clients' }
     ],
     construction: [
-      { icon: CheckSquare, label: 'Cómputo y Presupuesto', href: '/construction/tasks' },
       { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },
       { icon: TrendingUp, label: 'Indirectos', href: '/construction/indirects' },
