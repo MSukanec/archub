@@ -22,6 +22,7 @@ import DeleteConfirmationModal from '../modals/DeleteConfirmationModal';
 import { BudgetFormModal } from '../modals/construction/BudgetModal';
 import { TaskMultiModal } from '../modals/construction/tasks/TaskMultiModal';
 import { TaskSingleModal } from '../modals/construction/tasks/TaskSingleModal';
+import { TaskSingleModal as BudgetItemModal } from '../modals/construction/tasks/BudgetItemModal';
 import { ConstructionTaskScheduleModal } from '../modals/construction/ConstructionTaskScheduleModal';
 import { ConstructionPhaseFormModal } from '../modals/construction/ConstructionPhaseFormModal';
 
@@ -117,6 +118,8 @@ export function ModalFactory() {
       return <TaskMultiModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-single-task':
       return <TaskSingleModal modalData={data || {}} onClose={closeModal} />;
+    case 'budget-item':
+      return <BudgetItemModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-task-schedule':
       return <ConstructionTaskScheduleModal modalData={data || {}} onClose={closeModal} />;
     case 'construction-phase':

@@ -25,7 +25,7 @@ export default function BudgetView() {
       return;
     }
 
-    openModal('construction-single-task', {
+    openModal('budget-item', {
       projectId: selectedProjectId,
       organizationId: currentOrganizationId,
       isEditing: false
@@ -52,11 +52,8 @@ export default function BudgetView() {
     onTabChange: setActiveTab,
     actionButton: {
       icon: Plus,
-      label: "Agregar Item",
-      onClick: () => {
-        // TODO: Implementar modal para agregar item
-        console.log('Agregar item al presupuesto');
-      }
+      label: "Agregar Tarea",
+      onClick: handleAddTask
     }
   };
 
