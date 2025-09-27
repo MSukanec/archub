@@ -34,12 +34,18 @@ export default function TaskTotalSubtotal({ task, onSubtotalChange }: TaskTotalS
 
   const laborSubtotal = laborCostPerUnit * taskQuantity;
 
-  // Total = materiales + mano de obra
-  const baseSubtotal = materialSubtotal + laborSubtotal;
+  // Use saved unit_price if available and greater than 0, otherwise fallback to calculated cost
+  const calculatedCostPerUnit = materialCostPerUnit + laborCostPerUnit;
+  const unitPrice = task.unit_price !== null && task.unit_price !== undefined && task.unit_price > 0 
+    ? task.unit_price 
+    : calculatedCostPerUnit;
   
-  // Aplicar margen de beneficio
-  const marginPct = task.margin || 0;
-  const marginAmount = baseSubtotal * (marginPct / 100);
+  // Calculate base subtotal using unit_price and quantity
+  const baseSubtotal = unitPrice * taskQuantity;
+  
+  // Apply markup percentage using markup_pct field from database
+  const markupPct = task.markup_pct || 0;
+  const marginAmount = baseSubtotal * (markupPct / 100);
   const totalSubtotal = baseSubtotal + marginAmount;
 
   // Emit subtotal changes via callback
