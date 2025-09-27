@@ -16,10 +16,22 @@ export default function TaskView() {
   const { data: task, isLoading } = useGeneratedTask(id || '');
   const { openModal } = useGlobalModalStore();
   
-  // Detectar si venimos del admin basado en el referrer o localStorage
-  const isFromAdmin = typeof window !== 'undefined' && 
-    (document.referrer.includes('/admin/tasks') || 
-     localStorage.getItem('taskViewSource') === 'admin');
+  // Detectar el origen de navegación basado en el referrer o localStorage
+  const getNavigationSource = () => {
+    if (typeof window === 'undefined') return 'analysis';
+    
+    const storedSource = localStorage.getItem('taskViewSource');
+    const referrer = document.referrer;
+    
+    if (storedSource === 'admin' || referrer.includes('/admin/tasks')) {
+      return 'admin';
+    } else if (storedSource === 'budgets' || referrer.includes('/budgets')) {
+      return 'budgets';
+    }
+    return 'analysis';
+  };
+
+  const navigationSource = getNavigationSource();
 
   const headerTabs = [
     {
@@ -44,7 +56,17 @@ export default function TaskView() {
       // Limpiar localStorage al salir
       localStorage.removeItem('taskViewSource');
       // Navegar según el origen
-      navigate(isFromAdmin ? '/admin/tasks' : '/analysis');
+      switch (navigationSource) {
+        case 'admin':
+          navigate('/admin/tasks');
+          break;
+        case 'budgets':
+          navigate('/professional/budgets');
+          break;
+        default:
+          navigate('/analysis');
+          break;
+      }
     },
     isViewMode: true,
     tabs: headerTabs,

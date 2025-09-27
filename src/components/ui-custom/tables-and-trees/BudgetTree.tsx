@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useLocation } from 'wouter';
 import { useUpdateBudgetItem } from '@/hooks/use-budget-items';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus } from 'lucide-react';
+import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
@@ -332,6 +334,50 @@ const InlineMarginEditor = ({
         <span className="text-muted-foreground">%</span>
       </div>
     </button>
+  );
+};
+
+// Task Action Buttons Component for Budget
+const TaskActionButtons = ({ 
+  task, 
+  onDuplicateTask, 
+  onDeleteTask 
+}: { 
+  task: BudgetTask; 
+  onDuplicateTask?: (task: BudgetTask) => void; 
+  onDeleteTask?: (taskId: string) => void; 
+}) => {
+  const [, navigate] = useLocation();
+
+  // Handle view task navigation with source tracking
+  const handleViewTask = () => {
+    // Set source in localStorage so TaskView knows where we came from
+    localStorage.setItem('taskViewSource', 'budgets');
+    // Navigate to task view
+    navigate(`/analysis/tasks/${task.task_id || task.id}`);
+  };
+
+  // Eye button for viewing task details
+  const viewButton = (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleViewTask}
+      className="h-8 w-8 p-0"
+      title="Ver detalles de la tarea"
+    >
+      <Eye className="h-4 w-4" />
+    </Button>
+  );
+
+  return (
+    <TableActionButtons
+      onEdit={onDuplicateTask ? () => onDuplicateTask(task) : undefined}
+      onDelete={onDeleteTask ? () => onDeleteTask(task.id) : undefined}
+      editLabel="Duplicar"
+      deleteLabel="Eliminar"
+      additionalButtons={[viewButton]}
+    />
   );
 };
 
@@ -1259,27 +1305,12 @@ const SortableTaskItem = ({
         </div>
         
         {/* Actions column */}
-        <div className="flex items-center justify-center gap-2">
-          {onDuplicateTask && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDuplicateTask(task)}
-              className="h-8 w-8 p-0"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          )}
-          {onDeleteTask && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDeleteTask(task.id)}
-              className="h-8 w-8 p-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+        <div className="flex items-center justify-center">
+          <TaskActionButtons 
+            task={task}
+            onDuplicateTask={onDuplicateTask}
+            onDeleteTask={onDeleteTask}
+          />
         </div>
       </div>
     </div>
