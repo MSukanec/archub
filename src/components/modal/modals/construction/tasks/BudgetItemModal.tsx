@@ -60,6 +60,9 @@ export function TaskSingleModal({
   
   const isEditing = modalData.isEditing && modalData.editingTask;
 
+  // Debug: Log modalData al inicializar
+  console.log('🔧 BudgetItemModal - modalData received:', modalData);
+
   // Query para obtener la membresía actual del usuario en la organización  
   const { data: organizationMember } = useQuery({
     queryKey: ['organization-member', modalData.organizationId, userData?.user?.id],

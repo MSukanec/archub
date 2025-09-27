@@ -27,13 +27,16 @@ export default function BudgetView() {
       return;
     }
 
-    openModal('budget-item', {
+    const modalData = {
       projectId: selectedProjectId,
       organizationId: currentOrganizationId,
       budgetId: budget.id,
       currencyId: budget.currency_id,
       isEditing: false
-    });
+    };
+
+    console.log('🔧 BudgetView - handleAddTask modalData:', modalData);
+    openModal('budget-item', modalData);
   };
 
   const headerTabs = [
