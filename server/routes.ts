@@ -407,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from('budget_items')
         .select(`
           *,
-          task:tasks!task_id(id, custom_name, code, unit_id, category_id),
+          task:tasks!task_id(id, custom_name, code),
           currency:currencies!currency_id(id, code, name, symbol)
         `)
         .eq('budget_id', budget_id)
