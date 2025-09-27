@@ -62,7 +62,8 @@ export default function BudgetView() {
       tax_pct: task.tax_pct || 0,
       cost_scope: task.cost_scope || 'materials_and_labor',
       created_by: task.created_by,
-      description: task.description ? `${task.description} (copia)` : 'Copia'
+      description: task.description ? `${task.description} (copia)` : 'Copia',
+      sort_key: task.sort_key || 0
     };
 
     createBudgetItem.mutate(duplicatedData);

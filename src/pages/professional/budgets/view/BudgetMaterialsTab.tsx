@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
+import { useBudgetItems } from '@/hooks/use-budget-items'
 import { Package } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
@@ -23,20 +24,29 @@ export function BudgetMaterialsTab({ budget }: BudgetMaterialsTabProps) {
   
   const { data: userData, isLoading } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
+  const { data: budgetItems = [], isLoading: budgetItemsLoading } = useBudgetItems(budget?.id)
+  
+  // Extract budget task IDs (filter out null values)
+  const budgetTaskIds = useMemo(() => {
+    if (!budgetItems || budgetItems.length === 0) {
+      return []
+    }
+    return budgetItems
+      .map(item => item.task_id)
+      .filter((taskId): taskId is string => taskId !== null && taskId !== undefined)
+  }, [budgetItems])
+
   const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
     selectedProjectId || '',
-    selectedPhase
+    selectedPhase,
+    budgetTaskIds.length > 0 ? budgetTaskIds : undefined // Only filter if we have task IDs
   )
   
   const materials = materialsResult?.materials || []
   const phases = materialsResult?.phases || []
 
-  // Filter materials specifically for this budget's organization and project
-  const budgetSpecificMaterials = materials.filter(material => {
-    // Ensure materials are from the same organization and project as the budget
-    return material.organization_id === currentOrganizationId &&
-           material.project_id === selectedProjectId
-  })
+  // Los materiales ya vienen filtrados por task_ids específicos del presupuesto desde useConstructionMaterials
+  const budgetSpecificMaterials = materials || []
 
   // Get unique categories for filter
   const uniqueCategories = Array.from(new Set(budgetSpecificMaterials.map(m => m.category_name))).sort()
@@ -157,7 +167,7 @@ export function BudgetMaterialsTab({ budget }: BudgetMaterialsTabProps) {
     return baseColumns;
   }, [groupingType])
 
-  if (isLoading || materialsLoading) {
+  if (isLoading || materialsLoading || budgetItemsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-sm text-muted-foreground">Cargando materiales...</div>
@@ -167,11 +177,17 @@ export function BudgetMaterialsTab({ budget }: BudgetMaterialsTabProps) {
 
   return (
     <>
-      {filteredMaterials.length === 0 ? (
+      {budgetTaskIds.length === 0 ? (
         <EmptyState
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
-          title="No hay materiales disponibles"
-          description={`Los materiales aparecerán aquí cuando agregues tareas de construcción que contengan materiales al presupuesto "${budget?.name || 'este presupuesto'}"`}
+          title="No hay tareas en este presupuesto"
+          description={`Para ver materiales, primero agrega tareas de construcción al presupuesto "${budget?.name || 'este presupuesto'}". Los materiales se calcularán automáticamente basándose en las tareas incluidas.`}
+        />
+      ) : filteredMaterials.length === 0 ? (
+        <EmptyState
+          icon={<Package className="w-8 h-8 text-muted-foreground" />}
+          title="No hay materiales para las tareas seleccionadas"
+          description={`Las tareas en este presupuesto no requieren materiales, o los filtros aplicados no coinciden con ningún material.`}
         />
       ) : (
         <Table

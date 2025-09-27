@@ -22,9 +22,9 @@ export interface ConstructionMaterialsResult {
   phases: string[];
 }
 
-export function useConstructionMaterials(projectId: string, selectedPhase?: string) {
+export function useConstructionMaterials(projectId: string, selectedPhase?: string, filterTaskIds?: string[]) {
   return useQuery({
-    queryKey: ["construction-materials", projectId, selectedPhase],
+    queryKey: ["construction-materials", projectId, selectedPhase, filterTaskIds],
     queryFn: async (): Promise<ConstructionMaterialsResult> => {
       if (!supabase) {
         throw new Error("Supabase client not initialized");
@@ -56,13 +56,27 @@ export function useConstructionMaterials(projectId: string, selectedPhase?: stri
 
       // Filter construction tasks by selected phase if provided (only if not empty string)
       const shouldFilterByPhase = selectedPhase && selectedPhase.trim() !== '';
-      const filteredConstructionTasks = shouldFilterByPhase
+      let filteredConstructionTasks = shouldFilterByPhase
         ? constructionTasksData.filter(ct => ct.phase_name === selectedPhase)
         : constructionTasksData;
+      
+      // Filter by specific task IDs if provided (for budget-specific filtering)
+      if (filterTaskIds && filterTaskIds.length > 0) {
+        filteredConstructionTasks = filteredConstructionTasks.filter(ct => 
+          filterTaskIds.includes(ct.task_id)
+        );
+        console.log("🎯 Budget Task Filter Debug:", {
+          filterTaskIds,
+          beforeFilter: shouldFilterByPhase ? 'already filtered by phase' : constructionTasksData.length,
+          afterTaskIdFilter: filteredConstructionTasks.length,
+          filteredTaskIds: filteredConstructionTasks.map(ct => ct.task_id)
+        });
+      }
 
-      console.log("🔍 Phase Filter Debug:", {
+      console.log("🔍 Filter Debug:", {
         selectedPhase: `'${selectedPhase}'`,
         shouldFilterByPhase,
+        filterTaskIds: filterTaskIds || 'none',
         totalTasks: constructionTasksData.length,
         filteredTasks: filteredConstructionTasks.length,
         allPhases: uniquePhases
