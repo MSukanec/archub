@@ -6,13 +6,15 @@ import { Layout } from '@/components/layout/desktop/Layout';
 import { BudgetListTab } from './view/BudgetListTab';
 import { useBudgets } from "@/hooks/use-budgets";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { useProjectContext } from '@/stores/projectContext';
 
 export default function BudgetView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Lista');
   
-  const { data: budgets, isLoading } = useBudgets();
+  const { selectedProjectId } = useProjectContext();
+  const { data: budgets, isLoading } = useBudgets(selectedProjectId || undefined);
   const budget = budgets?.find(b => b.id === id);
   const { openModal } = useGlobalModalStore();
 
@@ -75,6 +77,8 @@ export default function BudgetView() {
         return (
           <BudgetListTab
             budget={budget}
+            tasks={[]} // Por ahora tasks vacías para mostrar empty state
+            isLoading={false}
           />
         );
       default:
