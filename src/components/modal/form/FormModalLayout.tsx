@@ -359,8 +359,8 @@ export function FormModalLayout({
       ref={overlayRef}
       className={cn(
         "fixed inset-0 z-50 bg-black/80",
-        enableAnimations && !isClosing && "animate-in fade-in duration-150",
-        enableAnimations && isClosing && "animate-out fade-out duration-150"
+        enableAnimations && !isClosing && "animate-in fade-in duration-75",
+        enableAnimations && isClosing && "animate-out fade-out duration-75"
       )}
       onClick={handleOverlayClick}
       data-testid={`modal-overlay-${modalId}`}
@@ -376,9 +376,9 @@ export function FormModalLayout({
         data-testid={`modal-content-${modalId}`}
         className={cn(
           // Nuevo layout: panel del lado derecho ocupando todo el alto
-          "fixed inset-y-0 right-0 h-full w-1/2 min-w-[600px] max-w-[800px] flex flex-col bg-background border-l shadow-lg transition ease-in-out duration-500",
-          enableAnimations && !isClosing && "animate-in slide-in-from-right",
-          enableAnimations && isClosing && "animate-out slide-out-to-right",
+          "fixed inset-y-0 right-0 h-full w-1/2 min-w-[600px] max-w-[800px] flex flex-col bg-background border-l shadow-lg transition ease-in-out duration-250",
+          enableAnimations && !isClosing && "animate-in slide-in-from-right duration-250",
+          enableAnimations && isClosing && "animate-out slide-out-to-right duration-250",
           className
         )}
         onClick={(e) => e.stopPropagation()}
