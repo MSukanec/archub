@@ -880,7 +880,7 @@ const SortableTaskItem = ({
         <div className="text-right text-xs flex items-center justify-end">
           <InlineMarginEditor
             taskId={task.id}
-            currentMargin={task.margin || 0}
+            currentMargin={task.markup_pct || 0}
             onMarginChange={handleMarginChange}
           />
         </div>
