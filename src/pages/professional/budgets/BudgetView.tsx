@@ -5,6 +5,7 @@ import { DollarSign, Plus } from 'lucide-react';
 import { Layout } from '@/components/layout/desktop/Layout';
 import { BudgetListTab } from './view/BudgetListTab';
 import { useBudgets } from "@/hooks/use-budgets";
+import { useBudgetItems } from "@/hooks/use-budget-items";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
 import { useProjectContext } from '@/stores/projectContext';
 
@@ -16,6 +17,7 @@ export default function BudgetView() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: budgets, isLoading } = useBudgets(selectedProjectId || undefined);
   const budget = budgets?.find(b => b.id === id);
+  const { data: budgetItems = [], isLoading: isLoadingItems } = useBudgetItems(id);
   const { openModal } = useGlobalModalStore();
 
   // Función para agregar tarea
@@ -59,7 +61,7 @@ export default function BudgetView() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingItems) {
     return (
       <Layout headerProps={headerProps} wide>
         <div className="space-y-6">
@@ -90,8 +92,8 @@ export default function BudgetView() {
         return (
           <BudgetListTab
             budget={budget}
-            tasks={[]} // Por ahora tasks vacías para mostrar empty state
-            isLoading={false}
+            tasks={budgetItems}
+            isLoading={isLoadingItems}
             onAddTask={handleAddTask}
           />
         );
