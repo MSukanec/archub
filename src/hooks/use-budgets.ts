@@ -17,6 +17,10 @@ interface Budget {
   version: number
   currency_id: string
   exchange_rate?: number
+  // Budget-level discount and VAT fields
+  discount_pct?: number
+  discount_amount?: number
+  vat_pct?: number
   currency?: {
     id: string
     code: string

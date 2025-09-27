@@ -13,6 +13,7 @@ import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 import { useTaskLabor } from '@/hooks/use-task-labor';
 import { useOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
+import { useBudgets, useUpdateBudget } from '@/hooks/use-budgets';
 
 // Drag and Drop imports
 import {
@@ -55,6 +56,8 @@ const GRID_COLUMNS = "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80
 
 interface BudgetTreeProps {
   tasks: BudgetTask[];
+  budgetId?: string;
+  projectId?: string;
   onReorder?: (sourceIndex: number, destinationIndex: number, draggedTask: BudgetTask) => void;
   onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
@@ -329,6 +332,262 @@ const InlineMarginEditor = ({
         <span className="text-muted-foreground">%</span>
       </div>
     </button>
+  );
+};
+
+// Budget Summary Row Component
+const BudgetSummaryRow = ({ 
+  totalSubtotals, 
+  totalFinals,
+  budgetId,
+  initialDiscountPct = 0,
+  initialDiscountAmount = 0,
+  initialVatPct = 21,
+  onBudgetUpdate
+}: { 
+  totalSubtotals: number; 
+  totalFinals: number;
+  budgetId?: string;
+  initialDiscountPct?: number;
+  initialDiscountAmount?: number;
+  initialVatPct?: number;
+  onBudgetUpdate?: (updates: { discount_pct?: number; discount_amount?: number; vat_pct?: number }) => void;
+}) => {
+  const [discountPct, setDiscountPct] = useState(initialDiscountPct);
+  const [discountAmount, setDiscountAmount] = useState(initialDiscountAmount);
+  const [vatPct, setVatPct] = useState(initialVatPct);
+  const [localDiscountPct, setLocalDiscountPct] = useState(initialDiscountPct.toString());
+  const [localVatPct, setLocalVatPct] = useState(initialVatPct.toString());
+  
+  // Update local state when props change (budget data loads)
+  useEffect(() => {
+    setDiscountPct(initialDiscountPct);
+    setDiscountAmount(initialDiscountAmount);
+    setVatPct(initialVatPct);
+    setLocalDiscountPct(initialDiscountPct.toString());
+    setLocalVatPct(initialVatPct.toString());
+  }, [initialDiscountPct, initialDiscountAmount, initialVatPct]);
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  // State for tracking changes to save
+  const [budgetUpdates, setBudgetUpdates] = useState<{ discount_pct?: number; discount_amount?: number; vat_pct?: number }>({});
+
+  // Debounced save function
+  const { isSaving } = useDebouncedAutoSave({
+    data: budgetUpdates,
+    saveFn: useCallback(async (updates: { discount_pct?: number; discount_amount?: number; vat_pct?: number }) => {
+      if (onBudgetUpdate && Object.keys(updates).length > 0) {
+        onBudgetUpdate(updates);
+      }
+    }, [onBudgetUpdate]),
+    delay: 500,
+    enabled: true
+  });
+
+  // Calculate discount amount based on percentage
+  const calculateDiscountAmount = (percentage: number) => {
+    return (totalFinals * percentage) / 100;
+  };
+
+  // Calculate final totals
+  const discountValue = discountPct > 0 ? calculateDiscountAmount(discountPct) : discountAmount;
+  const totalAfterDiscount = totalFinals - discountValue;
+  const vatAmount = (totalAfterDiscount * vatPct) / 100;
+  const grandTotal = totalAfterDiscount + vatAmount;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return new Intl.NumberFormat('es-AR', { 
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1 
+    }).format(value);
+  };
+
+  // Handle discount percentage change
+  const handleDiscountPctChange = (value: string) => {
+    setLocalDiscountPct(value);
+    const numValue = parseFloat(value) || 0;
+    setDiscountPct(numValue);
+    setDiscountAmount(0); // Reset fixed amount when using percentage
+    setBudgetUpdates({ discount_pct: numValue, discount_amount: 0 });
+  };
+
+  // Handle VAT percentage change
+  const handleVatPctChange = (value: string) => {
+    setLocalVatPct(value);
+    const numValue = parseFloat(value) || 0;
+    setVatPct(numValue);
+    setBudgetUpdates(prev => ({ ...prev, vat_pct: numValue }));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
+    if (e.key === 'Enter') {
+      setEditingField(null);
+    } else if (e.key === 'Escape') {
+      // Reset to previous values
+      if (field === 'discount') {
+        setLocalDiscountPct(discountPct.toString());
+      } else if (field === 'vat') {
+        setLocalVatPct(vatPct.toString());
+      }
+      setEditingField(null);
+    }
+  };
+
+  // Percentage of total (always 100% for summary)
+  const percentageOfTotal = 100;
+
+  return (
+    <div className="border-t-2 border-[var(--accent-2)] bg-[var(--table-header-bg)]">
+      {/* Summary Row */}
+      <div 
+        className="grid gap-4 px-4 py-4 text-sm font-semibold"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div className="flex items-center text-[var(--accent-2)]">
+          <Calculator className="h-4 w-4 mr-2" />
+          TOTAL GENERAL
+        </div>
+        <div className="text-[var(--card-fg)]">Resumen del Presupuesto</div>
+        <div></div> {/* Empty space for type column */}
+        <div></div> {/* Empty space for quantity column */}
+        <div></div> {/* Empty space for unit cost column */}
+        <div className="text-right text-[var(--card-fg)]">
+          {formatCurrency(totalSubtotals)}
+        </div>
+        <div></div> {/* Empty space for margin column */}
+        <div className="text-right text-[var(--accent-2)] font-bold">
+          {formatCurrency(totalFinals)}
+        </div>
+        <div className="text-right text-[var(--accent-2)] font-bold">
+          {formatPercentage(percentageOfTotal)}%
+        </div>
+        <div></div> {/* Empty space for actions column */}
+      </div>
+
+      {/* Adjustments Section */}
+      <div className="border-t border-[var(--card-border)] bg-[var(--card-bg)]">
+        <div className="px-4 py-3">
+          <h3 className="text-sm font-semibold text-[var(--card-fg)] mb-3 flex items-center">
+            <Calculator className="h-4 w-4 mr-2 text-[var(--accent-2)]" />
+            Ajustes Adicionales
+          </h3>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Discount Section */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[var(--muted-fg)]">Descuento</label>
+              <div className="flex items-center gap-2">
+                {editingField === 'discount' ? (
+                  <Input
+                    type="number"
+                    value={localDiscountPct}
+                    onChange={(e) => handleDiscountPctChange(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, 'discount')}
+                    onBlur={() => setEditingField(null)}
+                    className="h-8 w-20 text-xs text-right"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    autoFocus
+                    onFocus={(e) => e.target.select()}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setEditingField('discount')}
+                    className="h-8 px-2 text-xs font-medium border border-[var(--border)] rounded bg-[var(--background)] hover:bg-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    {formatPercentage(discountPct)}%
+                  </button>
+                )}
+                <span className="text-xs text-[var(--muted-fg)]">=</span>
+                <span className="text-xs font-medium text-[var(--card-fg)]">
+                  {formatCurrency(discountValue)}
+                </span>
+              </div>
+            </div>
+
+            {/* VAT Section */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[var(--muted-fg)]">IVA</label>
+              <div className="flex items-center gap-2">
+                {editingField === 'vat' ? (
+                  <Input
+                    type="number"
+                    value={localVatPct}
+                    onChange={(e) => handleVatPctChange(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, 'vat')}
+                    onBlur={() => setEditingField(null)}
+                    className="h-8 w-20 text-xs text-right"
+                    step="0.1"
+                    min="0"
+                    max="30"
+                    autoFocus
+                    onFocus={(e) => e.target.select()}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setEditingField('vat')}
+                    className="h-8 px-2 text-xs font-medium border border-[var(--border)] rounded bg-[var(--background)] hover:bg-[var(--accent)] transition-colors cursor-pointer"
+                  >
+                    {formatPercentage(vatPct)}%
+                  </button>
+                )}
+                <span className="text-xs text-[var(--muted-fg)]">=</span>
+                <span className="text-xs font-medium text-[var(--card-fg)]">
+                  {formatCurrency(vatAmount)}
+                </span>
+              </div>
+            </div>
+
+            {/* Final Total Section */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[var(--muted-fg)]">Total Final</label>
+              <div className="text-lg font-bold text-[var(--accent-2)]">
+                {formatCurrency(grandTotal)}
+              </div>
+            </div>
+          </div>
+
+          {/* Calculation Breakdown */}
+          <div className="mt-4 pt-3 border-t border-[var(--card-border)]">
+            <div className="text-xs text-[var(--muted-fg)] space-y-1">
+              <div className="flex justify-between">
+                <span>Subtotal general:</span>
+                <span>{formatCurrency(totalFinals)}</span>
+              </div>
+              {discountValue > 0 && (
+                <div className="flex justify-between">
+                  <span>Descuento ({formatPercentage(discountPct)}%):</span>
+                  <span>-{formatCurrency(discountValue)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Base para IVA:</span>
+                <span>{formatCurrency(totalAfterDiscount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>IVA ({formatPercentage(vatPct)}%):</span>
+                <span>+{formatCurrency(vatAmount)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-[var(--card-fg)] pt-1 border-t border-[var(--card-border)]">
+                <span>TOTAL FINAL:</span>
+                <span>{formatCurrency(grandTotal)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -1109,6 +1368,8 @@ const GroupHeader = ({
 
 export function BudgetTree({ 
   tasks, 
+  budgetId,
+  projectId,
   onReorder, 
   onDuplicateTask,
   onDeleteTask,
@@ -1118,6 +1379,13 @@ export function BudgetTree({
 }: BudgetTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [taskSubtotals, setTaskSubtotals] = useState<{ [taskId: string]: number }>({});
+  
+  // Get current budget data for discount/VAT values
+  const { data: budgets = [] } = useBudgets(projectId);
+  const currentBudget = budgets.find(budget => budget.id === (budgetId || tasks[0]?.budget_id));
+  
+  // Budget update mutation
+  const updateBudgetMutation = useUpdateBudget();
   const [pureSubtotals, setPureSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
   const [localMargins, setLocalMargins] = useState<{ [taskId: string]: number }>({});
@@ -1504,6 +1772,26 @@ export function BudgetTree({
             </SortableContext>
           </div>
         ))}
+
+        {/* Budget Summary Row */}
+        <BudgetSummaryRow 
+          totalSubtotals={totalSubtotal}
+          totalFinals={Object.values(taskSubtotals).reduce((sum, value) => sum + value, 0)}
+          budgetId={budgetId || tasks[0]?.budget_id}
+          // Pass current budget values as initial values
+          initialDiscountPct={currentBudget?.discount_pct || 0}
+          initialDiscountAmount={currentBudget?.discount_amount || 0}
+          initialVatPct={currentBudget?.vat_pct || 21}
+          onBudgetUpdate={(updates) => {
+            const targetBudgetId = budgetId || tasks[0]?.budget_id;
+            if (targetBudgetId) {
+              updateBudgetMutation.mutate({
+                id: targetBudgetId,
+                ...updates
+              });
+            }
+          }}
+        />
         </div>
       </div>
     </DndContext>

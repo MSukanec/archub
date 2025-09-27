@@ -365,6 +365,65 @@ export const movement_clients = pgTable("movement_clients", {
   updated_at: timestamp("updated_at").defaultNow(),
 });
 
+// Budgets Table
+export const budgets = pgTable("budgets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  project_id: uuid("project_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  status: text("status").notNull().default("draft"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  created_by: uuid("created_by"),
+  version: integer("version").notNull().default(1),
+  currency_id: uuid("currency_id").notNull(),
+  exchange_rate: real("exchange_rate"),
+  // New fields for discount and VAT at budget level
+  discount_pct: real("discount_pct").default(0),
+  discount_amount: real("discount_amount").default(0),
+  vat_pct: real("vat_pct").default(21), // Default 21% IVA for Argentina
+});
+
+// Budget Items Table
+export const budget_items = pgTable("budget_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  budget_id: uuid("budget_id").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  task_id: uuid("task_id"),
+  organization_id: uuid("organization_id").notNull(),
+  project_id: uuid("project_id").notNull(),
+  description: text("description"),
+  quantity: real("quantity").notNull().default(1),
+  unit_price: real("unit_price").notNull().default(0),
+  currency_id: uuid("currency_id").notNull(),
+  markup_pct: real("markup_pct").notNull().default(0),
+  tax_pct: real("tax_pct").notNull().default(0),
+  created_by: uuid("created_by").notNull(),
+  cost_scope: text("cost_scope", { enum: ["materials_and_labor", "materials_only", "labor_only"] }).notNull().default("materials_and_labor"),
+  sort_key: real("sort_key").notNull().default(0),
+});
+
+// Schemas for budgets
+export const insertBudgetSchema = createInsertSchema(budgets).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertBudgetItemSchema = createInsertSchema(budget_items).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+// Types for budgets
+export type Budget = typeof budgets.$inferSelect;
+export type InsertBudget = z.infer<typeof insertBudgetSchema>;
+export type BudgetItem = typeof budget_items.$inferSelect;
+export type InsertBudgetItem = z.infer<typeof insertBudgetItemSchema>;
+
 // Movement General Costs Junction Table
 export const movement_general_costs = pgTable("movement_general_costs", {
   id: uuid("id").primaryKey().defaultRandom(),
