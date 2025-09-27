@@ -1,38 +1,44 @@
-create or replace view public.budget_items_view as
+-- actualizar la vista para incluir el order de la división
+drop view if exists public.budget_items_view;
+
+create view public.budget_items_view as
 select
+  -- claves y scope
   bi.id,
+  bi.budget_id,
   bi.organization_id,
   bi.project_id,
   bi.task_id,
-  bi.quantity,
+
+  -- trazas
   bi.created_at,
   bi.updated_at,
+  bi.created_by,
 
-  -- nombre visible de la tarea (del catálogo)
-  t.custom_name                                  as custom_name,
+  -- catálogo de la tarea
+  t.custom_name                                   as custom_name,
+  td.name                                         as division_name,
+  td."order"                                      as division_order,  -- <- nuevo
 
-  -- división de la tarea (si existe)
-  td.name                                        as division_name,
+  -- unidad (tasks.unit_id -> units.name)
+  u.name                                          as unit,
 
-  -- unidad: tasks.unit_id → units.(name)
-  u.name                                         as unit,
-
-  -- descripción propia del renglón del presupuesto
+  -- datos del renglón
   bi.description,
-
-  -- scope técnico (enum) + etiqueta legible
+  bi.quantity,
+  bi.unit_price,
+  bi.currency_id,
+  bi.markup_pct,
+  bi.tax_pct,
   bi.cost_scope,
   case bi.cost_scope
     when 'materials_and_labor' then 'Materiales + Mano de obra'
     when 'materials_only'      then 'Sólo materiales'
     when 'labor_only'          then 'Sólo mano de obra'
     else initcap(replace(bi.cost_scope::text, '_', ' '))
-  end                                            as cost_scope_label,
-
-  -- markup del ítem
-  bi.markup_pct
+  end                                             as cost_scope_label
 
 from public.budget_items       bi
-left join public.tasks         t  on t.id = bi.task_id
+left join public.tasks         t  on t.id  = bi.task_id
 left join public.task_divisions td on td.id = t.task_division_id
-left join public.units         u  on u.id = t.unit_id;
+left join public.units         u  on u.id  = t.unit_id;

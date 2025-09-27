@@ -111,6 +111,10 @@ VISTA BUDGET_ITEMS_VIEW:
     "data_type": "text"
   },
   {
+    "column_name": "division_order",
+    "data_type": "integer"
+  },
+  {
     "column_name": "unit",
     "data_type": "text"
   },

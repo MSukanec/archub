@@ -26,6 +26,7 @@ interface BudgetItem {
   // Campos enriquecidos de la vista (desde joins)
   custom_name?: string
   division_name?: string
+  division_order?: number
   unit?: string
   cost_scope_label?: string
 }

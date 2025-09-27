@@ -408,6 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select('*')
         .eq('budget_id', budget_id)
         .eq('organization_id', organization_id)
+        .order('division_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (error) {
