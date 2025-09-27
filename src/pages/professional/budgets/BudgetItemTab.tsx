@@ -69,7 +69,7 @@ export function BudgetItems({
     {
       key: 'name',
       label: 'Nombre',
-      width: '30%',
+      width: '28%',
       render: (budget: any) => (
         <div>
           <div className="font-medium text-sm">{budget.name}</div>
@@ -84,7 +84,7 @@ export function BudgetItems({
     {
       key: 'status',
       label: 'Estado',
-      width: '15%',
+      width: '13%',
       render: (budget: any) => {
         const getStatusBadge = (status: string) => {
           switch (status) {
@@ -106,7 +106,7 @@ export function BudgetItems({
     {
       key: 'version',
       label: 'Versión',
-      width: '10%',
+      width: '9%',
       render: (budget: any) => (
         <span className="text-sm">v{budget.version}</span>
       )
@@ -114,7 +114,7 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      width: '12%',
+      width: '11%',
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium">
@@ -131,7 +131,7 @@ export function BudgetItems({
     {
       key: 'total',
       label: 'Total',
-      width: '15%',
+      width: '14%',
       render: (budget: any) => (
         <div className="text-sm font-medium">
           <div className="text-green-700">
@@ -143,7 +143,7 @@ export function BudgetItems({
     {
       key: 'created_at',
       label: 'Creado',
-      width: '12%',
+      width: '11%',
       sortable: true,
       sortType: 'date' as const,
       render: (budget: any) => (
@@ -155,7 +155,7 @@ export function BudgetItems({
     {
       key: 'actions',
       label: 'Acciones',
-      width: '13%',
+      width: '14%',
       render: (budget: any) => (
         <div className="flex items-center gap-1">
           <Button
