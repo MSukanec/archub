@@ -231,7 +231,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Failed to fetch budgets" });
       }
 
-      res.json(budgets || []);
+      // Calcular el total para cada presupuesto
+      const budgetsWithTotals = await Promise.all(
+        (budgets || []).map(async (budget) => {
+          const { data: items, error: itemsError } = await authenticatedSupabase
+            .from('budget_items')
+            .select('unit_price, quantity, markup_pct, tax_pct')
+            .eq('budget_id', budget.id);
+
+          if (itemsError) {
+            console.error(`Error fetching items for budget ${budget.id}:`, itemsError);
+            return { ...budget, total: 0 };
+          }
+
+          // Calcular total sumando todos los items
+          const total = (items || []).reduce((sum, item) => {
+            const subtotal = (item.unit_price || 0) * (item.quantity || 1);
+            const markupAmount = subtotal * ((item.markup_pct || 0) / 100);
+            const taxableAmount = subtotal + markupAmount;
+            const taxAmount = taxableAmount * ((item.tax_pct || 0) / 100);
+            const itemTotal = taxableAmount + taxAmount;
+            return sum + itemTotal;
+          }, 0);
+
+          return { ...budget, total };
+        })
+      );
+
+      res.json(budgetsWithTotals);
     } catch (error) {
       console.error("Error fetching budgets:", error);
       res.status(500).json({ error: "Failed to fetch budgets" });

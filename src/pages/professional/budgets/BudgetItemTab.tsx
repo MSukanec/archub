@@ -114,7 +114,7 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      width: '15%',
+      width: '12%',
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium">
@@ -129,9 +129,21 @@ export function BudgetItems({
       )
     },
     {
+      key: 'total',
+      label: 'Total',
+      width: '15%',
+      render: (budget: any) => (
+        <div className="text-sm font-medium">
+          <div className="text-green-700">
+            {budget.currency?.symbol || '$'} {formatCurrency(budget.total || 0)}
+          </div>
+        </div>
+      )
+    },
+    {
       key: 'created_at',
       label: 'Creado',
-      width: '15%',
+      width: '12%',
       sortable: true,
       sortType: 'date' as const,
       render: (budget: any) => (
@@ -143,7 +155,7 @@ export function BudgetItems({
     {
       key: 'actions',
       label: 'Acciones',
-      width: '15%',
+      width: '13%',
       render: (budget: any) => (
         <div className="flex items-center gap-1">
           <Button
