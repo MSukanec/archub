@@ -353,13 +353,12 @@ export function FormModalLayout({
     }
   };
 
-  // RENDERIZADO CON ERROR BOUNDARY Y MEJORAS DE ACCESSIBILITY
+  // RENDERIZADO CON ERROR BOUNDARY Y MEJORAS DE ACCESSIBILITY - NUEVO LAYOUT DERECHA
   const modalContent = (
     <div 
       ref={overlayRef}
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center",
-        "bg-black/80",
+        "fixed inset-0 z-50 bg-black/80",
         enableAnimations && !isClosing && "animate-in fade-in duration-150",
         enableAnimations && isClosing && "animate-out fade-out duration-150"
       )}
@@ -376,18 +375,11 @@ export function FormModalLayout({
         data-modal-content
         data-testid={`modal-content-${modalId}`}
         className={cn(
-          "bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl",
-          "w-full h-full rounded-none", // Mobile: full viewport
-          // Fullscreen mode takes precedence
-          fullscreen 
-            ? "md:w-full md:h-full md:rounded-none md:m-0" // FULLSCREEN: 100% viewport
-            : wide 
-              ? "md:w-[1200px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12" // WIDE: fixed 1200px
-              : "md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-lg md:mx-auto md:my-12", // DEFAULT: fixed 600px
-          "flex flex-col overflow-auto",
-          enableAnimations && !isClosing && "animate-in slide-in-from-bottom-4 duration-150",
-          enableAnimations && isClosing && "animate-out slide-out-to-bottom-4 duration-150",
-          className,
+          // Nuevo layout: panel del lado derecho ocupando todo el alto
+          "fixed inset-y-0 right-0 h-full w-1/2 min-w-[600px] max-w-[800px] flex flex-col bg-background border-l shadow-lg transition ease-in-out duration-500",
+          enableAnimations && !isClosing && "animate-in slide-in-from-right",
+          enableAnimations && isClosing && "animate-out slide-out-to-right",
+          className
         )}
         onClick={(e) => e.stopPropagation()}
       >
