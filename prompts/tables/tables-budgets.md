@@ -46,7 +46,6 @@ create table public.budget_items (
   organization_id uuid not null,
   project_id uuid not null,
   description text null,
-  unit text null,
   quantity numeric(14, 3) not null default 1,
   unit_price numeric(14, 2) not null default 0,
   currency_id uuid not null,
@@ -54,6 +53,7 @@ create table public.budget_items (
   tax_pct numeric(6, 2) not null default 0,
   created_by uuid not null,
   cost_scope public.cost_scope_enum not null default 'materials_and_labor'::cost_scope_enum,
+  sort_key numeric(18, 6) not null default 0,
   constraint budget_items_pkey primary key (id),
   constraint budget_items_id_key unique (id),
   constraint budget_items_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete set null,
@@ -64,8 +64,10 @@ create table public.budget_items (
   constraint budget_items_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null
 ) TABLESPACE pg_default;
 
-create trigger trg_set_budget_item_organization BEFORE INSERT on budget_items for EACH row
-execute FUNCTION set_budget_task_organization ();
+create index IF not exists idx_budget_items_budget_sort on public.budget_items using btree (budget_id, sort_key) TABLESPACE pg_default;
+
+create trigger trg_budget_item_default_sort BEFORE INSERT on budget_items for EACH row
+execute FUNCTION budget_item_set_default_sort_key ();
 
 VISTA BUDGET_ITEMS_VIEW:
 

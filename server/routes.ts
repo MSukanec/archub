@@ -405,9 +405,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { data: budgetItems, error } = await authenticatedSupabase
         .from('budget_items_view')
-        .select('*')
+        .select('*, sort_key')
         .eq('budget_id', budget_id)
         .eq('organization_id', organization_id)
+        .order('sort_key', { ascending: true })
         .order('division_order', { ascending: true })
         .order('created_at', { ascending: false });
 
@@ -553,6 +554,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting budget item:", error);
       res.status(500).json({ error: "Failed to delete budget item" });
+    }
+  });
+
+  // Move budget item (reorder)
+  app.post("/api/budget-items/move", async (req, res) => {
+    try {
+      const { budget_id, item_id, prev_item_id, next_item_id } = req.body;
+
+      if (!budget_id || !item_id) {
+        return res.status(400).json({ error: "budget_id and item_id are required" });
+      }
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data, error } = await authenticatedSupabase.rpc('budget_item_move', {
+        p_budget_id: budget_id,
+        p_item_id: item_id,
+        p_prev_item_id: prev_item_id,
+        p_next_item_id: next_item_id,
+      });
+
+      if (error) {
+        console.error("Error moving budget item:", error);
+        return res.status(500).json({ error: "Failed to move budget item" });
+      }
+
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error moving budget item:", error);
+      res.status(500).json({ error: "Failed to move budget item" });
     }
   });
 

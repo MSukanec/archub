@@ -22,6 +22,7 @@ interface BudgetItem {
   markup_pct: number
   tax_pct: number
   cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
+  sort_key: number
   
   // Campos enriquecidos de la vista (desde joins)
   custom_name?: string
@@ -29,6 +30,7 @@ interface BudgetItem {
   division_order?: number
   unit?: string
   cost_scope_label?: string
+  position?: number // alias para sort_key para compatibilidad
 }
 
 export function useBudgetItems(budgetId?: string) {
