@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useUpdateConstructionTask, useInitializeCostScope } from '@/hooks/use-construction-tasks';
+import { useUpdateBudgetItem } from '@/hooks/use-budget-items';
 import { useDebouncedAutoSave } from '@/hooks/useDebouncedAutoSave';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus } from 'lucide-react';
@@ -725,7 +725,8 @@ const SortableTaskItem = ({
   isLastInGroup,
   handleDescriptionChange,
   handleMarginChange,
-  handlePureSubtotalChange
+  handlePureSubtotalChange,
+  handleCostScopeChange
 }: { 
   task: BudgetTask;
   onSubtotalChange: (taskId: string, subtotal: number) => void;
@@ -741,6 +742,7 @@ const SortableTaskItem = ({
   handleDescriptionChange: (taskId: string, description: string) => void;
   handleMarginChange: (taskId: string, margin: number) => void;
   handlePureSubtotalChange: (taskId: string, pureSubtotal: number) => void;
+  handleCostScopeChange: (taskId: string, costScope: string) => void;
 }) => {
   const [isIndependentCost, setIsIndependentCost] = useState(false);
   const {
@@ -771,17 +773,6 @@ const SortableTaskItem = ({
     return costScope || 'materials_and_labor'; // default value
   };
 
-  // Cost scope change handler
-  const updateConstructionTask = useUpdateConstructionTask();
-  
-  const handleCostScopeChange = (taskId: string, newCostScope: string) => {
-    updateConstructionTask.mutate({
-      id: taskId,
-      cost_scope: newCostScope,
-      project_id: task.project_id,
-      organization_id: task.organization_id
-    });
-  };
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -1037,10 +1028,6 @@ const GroupHeader = ({
   );
 };
 
-// Component to initialize cost_scope for existing records - no longer needed, can be removed
-const CostScopeInitializer = ({ projectId, organizationId }: { projectId: string, organizationId: string }) => {
-  return null; // Disabled - data transformation fixed the issue
-};
 
 export function BudgetTree({ 
   tasks, 
@@ -1056,11 +1043,8 @@ export function BudgetTree({
   const [pureSubtotals, setPureSubtotals] = useState<{ [taskId: string]: number }>({});
   const [localQuantities, setLocalQuantities] = useState<{ [taskId: string]: number }>({});
   const { data: userData } = useCurrentUser();
-  const updateTaskMutation = useUpdateConstructionTask();
+  const updateBudgetItemMutation = useUpdateBudgetItem();
 
-  // Initialize cost_scope for existing records
-  const projectId = userData?.preferences?.last_project_id;
-  const organizationId = userData?.preferences?.last_organization_id;
   
   // Initialize local quantities from tasks
   useEffect(() => {
@@ -1073,11 +1057,6 @@ export function BudgetTree({
 
   // Create save function for auto-save
   const saveQuantityChanges = useCallback(async (quantities: { [taskId: string]: number }) => {
-    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
-      console.warn('No project or organization selected');
-      return;
-    }
-
     // Find changes that need to be saved
     const changedTasks = Object.entries(quantities).filter(([taskId, quantity]) => {
       const originalTask = tasks.find(task => task.id === taskId);
@@ -1087,11 +1066,9 @@ export function BudgetTree({
     // Save each changed task
     for (const [taskId, quantity] of changedTasks) {
       try {
-        await updateTaskMutation.mutateAsync({
+        await updateBudgetItemMutation.mutateAsync({
           id: taskId,
           quantity: quantity,
-          project_id: userData.preferences.last_project_id,
-          organization_id: userData.preferences.last_organization_id,
         });
         console.log('Quantity saved successfully for task:', taskId, 'quantity:', quantity);
       } catch (error) {
@@ -1099,38 +1076,33 @@ export function BudgetTree({
         throw error; // Re-throw to let the auto-save hook handle it
       }
     }
-  }, [tasks, userData, updateTaskMutation]);
+  }, [tasks, updateBudgetItemMutation]);
 
   // Handle description changes
   const handleDescriptionChange = useCallback((taskId: string, description: string) => {
-    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
-      console.warn('No project or organization selected');
-      return;
-    }
-    
-    updateTaskMutation.mutate({
+    updateBudgetItemMutation.mutate({
       id: taskId,
       description: description,
-      project_id: userData.preferences.last_project_id,
-      organization_id: userData.preferences.last_organization_id,
     });
-  }, [updateTaskMutation, userData]);
+  }, [updateBudgetItemMutation]);
 
   // Handle margin changes
   const handleMarginChange = useCallback((taskId: string, margin: number) => {
-    if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
-      console.warn('No project or organization selected');
-      return;
-    }
-    
-    updateTaskMutation.mutate({
+    updateBudgetItemMutation.mutate({
       id: taskId,
       markup_pct: margin,
-      project_id: userData.preferences.last_project_id,
-      organization_id: userData.preferences.last_organization_id,
     });
     console.log('Margin change saved:', taskId, margin);
-  }, [updateTaskMutation, userData]);
+  }, [updateBudgetItemMutation]);
+
+  // Handle cost scope changes
+  const handleCostScopeChange = useCallback((taskId: string, costScope: string) => {
+    updateBudgetItemMutation.mutate({
+      id: taskId,
+      cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
+    });
+    console.log('Cost scope change saved:', taskId, costScope);
+  }, [updateBudgetItemMutation]);
 
   // Use auto-save for quantity changes
   const { isSaving } = useDebouncedAutoSave({
@@ -1318,10 +1290,6 @@ export function BudgetTree({
       onDragEnd={handleDragEnd}
     >
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
-        {/* Initialize cost_scope for existing records */}
-        {projectId && organizationId && (
-          <CostScopeInitializer projectId={projectId} organizationId={organizationId} />
-        )}
         <div className="space-y-0">
           {/* Main Header - Column titles */}
         <div 
@@ -1380,6 +1348,7 @@ export function BudgetTree({
                     handleDescriptionChange={handleDescriptionChange}
                     handleMarginChange={handleMarginChange}
                     handlePureSubtotalChange={handlePureSubtotalChange}
+                    handleCostScopeChange={handleCostScopeChange}
                   />
                 ))}
               </div>
