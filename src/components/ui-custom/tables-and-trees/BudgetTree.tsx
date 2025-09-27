@@ -492,10 +492,10 @@ const BudgetSummaryRow = ({
   const percentageOfTotal = 100;
 
   return (
-    <div className="border-t-2 border-[var(--accent-2)]">
+    <div>
       {/* Subtotal General Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        className="grid gap-4 px-4 py-2 text-xs font-medium border-b border-white"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -517,7 +517,7 @@ const BudgetSummaryRow = ({
 
       {/* Discount Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        className="grid gap-4 px-4 py-2 text-xs font-medium border-b border-white"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -538,7 +538,7 @@ const BudgetSummaryRow = ({
               onChange={(e) => handleDiscountPctChange(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'discount')}
               onBlur={() => setEditingField(null)}
-              className="h-6 w-16 text-xs text-right bg-white text-black border-green-500"
+              className="h-6 w-16 text-xs text-right bg-white text-black"
               step="0.1"
               min="0"
               max="100"
@@ -548,7 +548,11 @@ const BudgetSummaryRow = ({
           ) : (
             <button
               onClick={() => setEditingField('discount')}
-              className="h-6 px-2 text-xs font-medium text-white hover:text-green-400 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-green-400"
+              className="h-6 px-2 text-xs font-medium transition-colors cursor-pointer border-b border-dashed border-transparent"
+              style={{ 
+                color: "var(--accent-2)",
+                borderBottomColor: "var(--accent-2)"
+              }}
             >
               {formatPercentage(discountPct)}%
             </button>
@@ -562,7 +566,7 @@ const BudgetSummaryRow = ({
 
       {/* Base para IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        className="grid gap-4 px-4 py-2 text-xs font-medium border-b border-white"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -584,7 +588,7 @@ const BudgetSummaryRow = ({
 
       {/* IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        className="grid gap-4 px-4 py-2 text-xs font-medium border-b border-white"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -605,7 +609,7 @@ const BudgetSummaryRow = ({
               onChange={(e) => handleVatPctChange(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'vat')}
               onBlur={() => setEditingField(null)}
-              className="h-6 w-16 text-xs text-right bg-white text-black border-green-500"
+              className="h-6 w-16 text-xs text-right bg-white text-black"
               step="0.1"
               min="0"
               max="30"
@@ -615,7 +619,11 @@ const BudgetSummaryRow = ({
           ) : (
             <button
               onClick={() => setEditingField('vat')}
-              className="h-6 px-2 text-xs font-medium text-white hover:text-green-400 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-green-400"
+              className="h-6 px-2 text-xs font-medium transition-colors cursor-pointer border-b border-dashed border-transparent"
+              style={{ 
+                color: "var(--accent-2)",
+                borderBottomColor: "var(--accent-2)"
+              }}
             >
               {formatPercentage(vatPct)}%
             </button>
@@ -629,7 +637,7 @@ const BudgetSummaryRow = ({
 
       {/* Total Final Row */}
       <div 
-        className="grid gap-4 px-4 py-3 text-sm font-bold border-t border-[var(--accent-2)]"
+        className="grid gap-4 px-4 py-3 text-sm font-bold"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
