@@ -371,7 +371,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========== BUDGET ITEMS ENDPOINTS ==========
 
+  // Get budget items for a budget
+  app.get("/api/budget-items", async (req, res) => {
+    try {
+      const { budget_id, organization_id } = req.query;
+      
+      if (!budget_id || !organization_id) {
+        return res.status(400).json({ error: "budget_id and organization_id are required" });
+      }
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data: budgetItems, error } = await authenticatedSupabase
+        .from('budget_items')
+        .select(`
+          *,
+          task:tasks!task_id(id, custom_name, name_rendered, unit_name, category_name, division_name),
+          currency:currencies!currency_id(id, code, name, symbol)
+        `)
+        .eq('budget_id', budget_id)
+        .eq('organization_id', organization_id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching budget items:", error);
+        return res.status(500).json({ error: "Failed to fetch budget items" });
+      }
+
+      res.json(budgetItems || []);
+    } catch (error) {
+      console.error("Error fetching budget items:", error);
+      res.status(500).json({ error: "Failed to fetch budget items" });
+    }
+  });
+
+  // Create a new budget item
+  app.post("/api/budget-items", async (req, res) => {
+    try {
+      const budgetItemData = req.body;
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data: budgetItem, error } = await authenticatedSupabase
+        .from('budget_items')
+        .insert(budgetItemData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating budget item:", error);
+        return res.status(500).json({ error: "Failed to create budget item" });
+      }
+
+      res.json(budgetItem);
+    } catch (error) {
+      console.error("Error creating budget item:", error);
+      res.status(500).json({ error: "Failed to create budget item" });
+    }
+  });
+
+  // Update a budget item
+  app.patch("/api/budget-items/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { data: budgetItem, error } = await authenticatedSupabase
+        .from('budget_items')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating budget item:", error);
+        return res.status(500).json({ error: "Failed to update budget item" });
+      }
+
+      res.json(budgetItem);
+    } catch (error) {
+      console.error("Error updating budget item:", error);
+      res.status(500).json({ error: "Failed to update budget item" });
+    }
+  });
+
+  // Delete a budget item
+  app.delete("/api/budget-items/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get the authorization token from headers
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      
+      // Create an authenticated Supabase client
+      const authenticatedSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.VITE_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+
+      const { error } = await authenticatedSupabase
+        .from('budget_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting budget item:", error);
+        return res.status(500).json({ error: "Failed to delete budget item" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting budget item:", error);
+      res.status(500).json({ error: "Failed to delete budget item" });
+    }
+  });
 
   // Get task parameter values with expression templates
   app.get("/api/task-parameter-values", async (req, res) => {
