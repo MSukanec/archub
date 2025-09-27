@@ -17,8 +17,8 @@ import { useToast } from '@/hooks/use-toast'
 
 // Import tab components  
 import { BudgetItems } from './BudgetItemTab'
-import { EstimatePhases } from '../project/construction/estimates/tabs/EstimatePhases'
-import { EstimateSchedule } from '../project/construction/estimates/tabs/EstimateSchedule'
+import { EstimatePhases } from './EstimatePhases'
+import { EstimateSchedule } from './EstimateSchedule'
 import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
 
 export default function Budgets() {
