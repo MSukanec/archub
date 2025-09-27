@@ -20,14 +20,16 @@ export default function BudgetView() {
 
   // Función para agregar tarea
   const handleAddTask = () => {
-    if (!selectedProjectId || !currentOrganizationId) {
-      console.error('No project or organization selected');
+    if (!selectedProjectId || !currentOrganizationId || !budget) {
+      console.error('No project, organization or budget selected');
       return;
     }
 
     openModal('budget-item', {
       projectId: selectedProjectId,
       organizationId: currentOrganizationId,
+      budgetId: budget.id,
+      currencyId: budget.currency_id,
       isEditing: false
     });
   };
