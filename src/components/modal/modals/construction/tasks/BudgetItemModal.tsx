@@ -29,7 +29,7 @@ const budgetItemSchema = z.object({
 
 type BudgetItemFormData = z.infer<typeof budgetItemSchema>;
 
-interface TaskSingleModalProps {
+interface BudgetItemModalProps {
   modalData: {
     projectId: string;
     organizationId: string;
@@ -42,10 +42,10 @@ interface TaskSingleModalProps {
   onClose: () => void;
 }
 
-export function TaskSingleModal({ 
+export function BudgetItemModal({ 
   modalData, 
   onClose 
-}: TaskSingleModalProps) {
+}: BudgetItemModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [rubroFilter, setRubroFilter] = useState<string>('todos');

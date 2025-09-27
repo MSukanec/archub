@@ -37,7 +37,6 @@ import ConstructionDashboard from "@/pages/professional/project/construction/Con
 import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
 import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
-import ConstructionEstimates from "@/pages/professional/project/construction/estimates/Estimates";
 import Budgets from "@/pages/professional/budgets/Budgets";
 import BudgetView from "@/pages/professional/budgets/BudgetView";
 
@@ -138,7 +137,6 @@ function Router() {
 
         {/* Construction Routes */}
         <Route path="/construction/dashboard" component={ConstructionDashboard} />
-        <Route path="/construction/tasks" component={ConstructionEstimates} />
 
 
         <Route path="/construction/subcontracts" component={ConstructionSubcontracts} />
