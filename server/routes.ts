@@ -218,7 +218,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { data: budgets, error } = await authenticatedSupabase
         .from('budgets')
-        .select('*')
+        .select(`
+          *,
+          currency:currencies!currency_id(id, code, name, symbol)
+        `)
         .eq('project_id', project_id)
         .eq('organization_id', organization_id)
         .order('created_at', { ascending: false });

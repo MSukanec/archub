@@ -111,7 +111,9 @@ export function BudgetItems({
       width: '15%',
       render: (budget: any) => (
         <div className="text-sm">
-          {budget.currency?.code || 'N/A'}
+          <div className="font-medium">
+            {budget.currency?.code || 'N/A'}
+          </div>
           {budget.exchange_rate && (
             <div className="text-xs text-muted-foreground">
               TC: {formatCurrency(budget.exchange_rate)}
@@ -177,12 +179,29 @@ export function BudgetItems({
     />
   )
 
+  if (budgets.length === 0 && !isLoading) {
+    return (
+      <EmptyState
+        icon={<DollarSign className="h-12 w-12 text-muted-foreground" />}
+        title="Sin presupuestos"
+        description="No hay presupuestos creados aún. Crea tu primer presupuesto para comenzar."
+        action={
+          onAddTask && (
+            <Button onClick={onAddTask} className="mt-4">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Presupuesto
+            </Button>
+          )
+        }
+      />
+    )
+  }
+
   return (
     <Table
       columns={columns}
       data={budgets}
       isLoading={isLoading}
-      emptyState={emptyState}
       defaultSort={{ key: 'created_at', direction: 'desc' }}
     />
   )

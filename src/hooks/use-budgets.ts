@@ -17,6 +17,12 @@ interface Budget {
   version: number
   currency_id: string
   exchange_rate?: number
+  currency?: {
+    id: string
+    code: string
+    name: string
+    symbol: string
+  }
 }
 
 export function useBudgets(projectId?: string) {
