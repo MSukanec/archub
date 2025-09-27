@@ -11,7 +11,6 @@ import { Plus, Calendar } from "lucide-react";
 import { SearchField } from "@/components/ui-custom/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateBudgetItem, useUpdateBudgetItem } from "@/hooks/use-budget-items";
-import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -116,8 +115,6 @@ export function TaskSingleModal({
     enabled: !!supabase
   });
 
-  // Hook para obtener las fases del proyecto
-  const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useConstructionProjectPhases(modalData.projectId);
 
   // Configurar el formulario
   const form = useForm<BudgetItemFormData>({
@@ -142,7 +139,6 @@ export function TaskSingleModal({
       form.reset({
         task_id: modalData.editingTask.task_id || '',
         quantity: modalData.editingTask.quantity || undefined,
-        project_phase_id: modalData.editingTask.phase_instance_id || ''
       });
     }
   }, [isEditing, modalData.editingTask, form]);
@@ -275,12 +271,6 @@ export function TaskSingleModal({
         </p>
       </div>
 
-      <div>
-        <h4 className="font-medium">Fase</h4>
-        <p className="text-muted-foreground mt-1">
-          {modalData.editingTask.phase_name || 'Sin fase'}
-        </p>
-      </div>
 
       {modalData.editingTask.created_at && (
         <div>
@@ -412,60 +402,36 @@ export function TaskSingleModal({
       )}
 
       {/* Información básica - Movido debajo de la lista */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Fase del Proyecto
-          </label>
-          <Select 
-            value={form.watch('project_phase_id') || ''} 
-            onValueChange={(value) => form.setValue('project_phase_id', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar fase" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Sin fase</SelectItem>
-              {projectPhases.map((phase) => (
-                <SelectItem key={phase.project_phase_id} value={phase.project_phase_id}>
-                  {phase.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Cantidad *
-          </label>
-          <div className="relative">
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder={selectedTaskUnit ? `Cantidad en ${selectedTaskUnit}` : "Cantidad"}
-              value={form.watch('quantity') || ''}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value)) {
-                  form.setValue('quantity', value);
-                }
-              }}
-              className={`${form.formState.errors.quantity ? 'border-destructive' : ''} ${selectedTaskUnit ? 'pr-12' : ''}`}
-            />
-            {selectedTaskUnit && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded">
-                {selectedTaskUnit}
-              </div>
-            )}
-          </div>
-          {form.formState.errors.quantity && (
-            <p className="text-xs text-destructive">
-              {form.formState.errors.quantity.message}
-            </p>
+      <div className="space-y-2">
+        <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Cantidad *
+        </label>
+        <div className="relative">
+          <Input
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder={selectedTaskUnit ? `Cantidad en ${selectedTaskUnit}` : "Cantidad"}
+            value={form.watch('quantity') || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value)) {
+                form.setValue('quantity', value);
+              }
+            }}
+            className={`${form.formState.errors.quantity ? 'border-destructive' : ''} ${selectedTaskUnit ? 'pr-12' : ''}`}
+          />
+          {selectedTaskUnit && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded">
+              {selectedTaskUnit}
+            </div>
           )}
         </div>
+        {form.formState.errors.quantity && (
+          <p className="text-xs text-destructive">
+            {form.formState.errors.quantity.message}
+          </p>
+        )}
       </div>
     </div>
   );
