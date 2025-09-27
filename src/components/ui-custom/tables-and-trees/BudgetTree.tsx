@@ -12,6 +12,7 @@ import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCo
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 import { useTaskLabor } from '@/hooks/use-task-labor';
+import { useOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
 
 // Drag and Drop imports
 import {
@@ -488,17 +489,18 @@ const InlineUnitCostEditor = ({
   onCostTypeChange 
 }: { 
   task: any;
-  onCostTypeChange?: (costType: 'task' | 'independent') => void;
+  onCostTypeChange?: (costType: 'archub' | 'organization' | 'independent') => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [costType, setCostType] = useState<'task' | 'independent'>('task');
+  const [costType, setCostType] = useState<'archub' | 'organization' | 'independent'>('archub');
   const [customCost, setCustomCost] = useState<number>(0);
 
   // Get current unit cost from TaskMaterialsUnitCost component logic
   const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
   const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
+  const { data: organizationTaskPrice } = useOrganizationTaskPrice(task.task_id || task.id);
 
-  const taskCost = useMemo(() => {
+  const archubCost = useMemo(() => {
     const materialsCost = materials.reduce((sum, material) => {
       const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
       const unitPrice = materialView?.avg_price || 0;
@@ -516,7 +518,11 @@ const InlineUnitCostEditor = ({
     return materialsCost + laborCost;
   }, [materials, labor]);
 
-  const displayCost = costType === 'task' ? taskCost : customCost;
+  const organizationCost = organizationTaskPrice?.total_unit_cost || 0;
+
+  const displayCost = costType === 'archub' ? archubCost : 
+                    costType === 'organization' ? organizationCost : 
+                    customCost;
 
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -546,16 +552,33 @@ const InlineUnitCostEditor = ({
                 <input
                   type="radio"
                   name={`cost-type-${task.id}`}
-                  value="task"
-                  checked={costType === 'task'}
+                  value="archub"
+                  checked={costType === 'archub'}
                   onChange={(e) => {
-                    const newType = e.target.value as 'task';
+                    const newType = e.target.value as 'archub';
                     setCostType(newType);
                     onCostTypeChange?.(newType);
                   }}
                   className="accent-[var(--accent-2)]"
                 />
-                <span className="text-xs text-[var(--card-fg)]">Costo de Tarea</span>
+                <span className="text-xs text-[var(--card-fg)]">Costo Archub</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`cost-type-${task.id}`}
+                  value="organization"
+                  checked={costType === 'organization'}
+                  onChange={(e) => {
+                    const newType = e.target.value as 'organization';
+                    setCostType(newType);
+                    onCostTypeChange?.(newType);
+                  }}
+                  className="accent-[var(--accent-2)]"
+                  disabled={!organizationTaskPrice?.total_unit_cost}
+                />
+                <span className="text-xs text-[var(--card-fg)]">Costo de Organización</span>
               </label>
               
               <label className="flex items-center gap-2 cursor-pointer">
