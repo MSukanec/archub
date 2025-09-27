@@ -127,30 +127,7 @@ export function BudgetItemModal({
     return materialCostPerUnit + laborCostPerUnit;
   }, [materials, labor, materialsLoading, laborLoading, selectedTaskId]);
 
-  // Calcular unit_price según el tipo de costo seleccionado
-  useEffect(() => {
-    let newUnitPrice = 0;
-
-    switch (selectedCostType) {
-      case 'archub':
-        newUnitPrice = archubUnitCost;
-        break;
-      case 'organization':
-        newUnitPrice = organizationTaskPrice?.total_unit_cost || 0;
-        break;
-      case 'independent':
-        // Mantener el valor actual del formulario para costo independiente
-        newUnitPrice = form.watch('unit_price') || 0;
-        break;
-    }
-
-    setCalculatedUnitPrice(newUnitPrice);
-    
-    // Solo actualizar el formulario si no es costo independiente
-    if (selectedCostType !== 'independent') {
-      form.setValue('unit_price', newUnitPrice);
-    }
-  }, [selectedCostType, archubUnitCost, organizationTaskPrice, form]);
+  // Calcular unit_price según el tipo de costo seleccionado (moved after form declaration)
 
   // Formatear precios
   const formatCost = (amount: number) => {
@@ -244,6 +221,31 @@ export function BudgetItemModal({
     }
   }, [isEditing, modalData.editingTask, form]);
 
+  // Calcular unit_price según el tipo de costo seleccionado
+  useEffect(() => {
+    let newUnitPrice = 0;
+
+    switch (selectedCostType) {
+      case 'archub':
+        newUnitPrice = archubUnitCost;
+        break;
+      case 'organization':
+        newUnitPrice = organizationTaskPrice?.total_unit_cost || 0;
+        break;
+      case 'independent':
+        // Mantener el valor actual del formulario para costo independiente
+        newUnitPrice = form.watch('unit_price') || 0;
+        break;
+    }
+
+    setCalculatedUnitPrice(newUnitPrice);
+    
+    // Solo actualizar el formulario si no es costo independiente
+    if (selectedCostType !== 'independent') {
+      form.setValue('unit_price', newUnitPrice);
+    }
+  }, [selectedCostType, archubUnitCost, organizationTaskPrice, form]);
+
   // Obtener divisiones únicas para el filtro (usando division de la vista)
   const uniqueRubros = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
@@ -318,7 +320,7 @@ export function BudgetItemModal({
           id: modalData.editingTask.id,
           budget_id: modalData.budgetId,
           task_id: data.task_id,
-          quantity: data.quantity,
+          quantity: data.quantity || 1,
           unit_price: data.unit_price,
           markup_pct: data.markup_pct,
           tax_pct: data.tax_pct,
@@ -331,13 +333,14 @@ export function BudgetItemModal({
           task_id: data.task_id,
           organization_id: modalData.organizationId,
           project_id: modalData.projectId,
-          quantity: data.quantity,
+          quantity: data.quantity || 1,
           unit_price: data.unit_price,
           currency_id: modalData.currencyId || 'default-currency-id', // TODO: Get from budget
           markup_pct: data.markup_pct,
           tax_pct: data.tax_pct,
           cost_scope: data.cost_scope,
-          created_by: createdBy
+          created_by: createdBy,
+          sort_key: 0 // Default sort key
         });
       }
       
@@ -555,7 +558,7 @@ export function BudgetItemModal({
               if (option.id === 'archub' && !isLoading) {
                 displayPrice = formatCost(archubUnitCost);
               } else if (option.id === 'organization' && isOrgPriceAvailable) {
-                displayPrice = formatCost(organizationTaskPrice.total_unit_cost);
+                displayPrice = formatCost(organizationTaskPrice?.total_unit_cost || 0);
               } else if (option.id === 'independent') {
                 displayPrice = 'Manual';
               }
