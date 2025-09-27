@@ -27,7 +27,10 @@ export function BudgetItems({
   const { openModal } = useGlobalModalStore()
 
   const handleEdit = (budget: any) => {
+    console.log('🔥 Clicking edit button for budget:', budget)
+    console.log('🔥 About to call openModal with:', 'budget', { budget, mode: 'edit' })
     openModal('budget', { budget, mode: 'edit' })
+    console.log('🔥 openModal called, modal should be opening now')
   }
 
   const handleDelete = (budget: any) => {

@@ -41,6 +41,7 @@ interface BudgetFormModalProps {
 }
 
 export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
+  console.log('🔥 BudgetFormModal rendering with modalData:', modalData);
   const { budget, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
   const { data: userData } = useCurrentUser();
@@ -49,6 +50,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!budget;
+  console.log('🔥 BudgetFormModal isEditing:', isEditing, 'budget:', budget);
 
   const form = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
