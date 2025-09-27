@@ -13,10 +13,24 @@ export default function BudgetView() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Lista');
   
-  const { selectedProjectId } = useProjectContext();
+  const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: budgets, isLoading } = useBudgets(selectedProjectId || undefined);
   const budget = budgets?.find(b => b.id === id);
   const { openModal } = useGlobalModalStore();
+
+  // Función para agregar tarea
+  const handleAddTask = () => {
+    if (!selectedProjectId || !currentOrganizationId) {
+      console.error('No project or organization selected');
+      return;
+    }
+
+    openModal('construction-single-task', {
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
+      isEditing: false
+    });
+  };
 
   const headerTabs = [
     {
@@ -79,6 +93,7 @@ export default function BudgetView() {
             budget={budget}
             tasks={[]} // Por ahora tasks vacías para mostrar empty state
             isLoading={false}
+            onAddTask={handleAddTask}
           />
         );
       default:
