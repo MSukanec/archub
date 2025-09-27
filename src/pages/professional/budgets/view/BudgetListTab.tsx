@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
-import { useUpdateBudgetItem } from '@/hooks/use-budget-items'
+import { useUpdateBudgetItem, useMoveBudgetItem } from '@/hooks/use-budget-items'
 
 interface BudgetListTabProps {
   budget: any
@@ -56,6 +56,7 @@ export function BudgetListTab({
 }: BudgetListTabProps) {
   const isMobile = useMobile()
   const updateBudgetItem = useUpdateBudgetItem()
+  const moveBudgetItem = useMoveBudgetItem()
   
   // State to store real totals from BudgetTree
   const [realTotals, setRealTotals] = useState<{ totalSubtotals: number; totalFinals: number } | null>(null);
@@ -99,9 +100,33 @@ export function BudgetListTab({
   }, [tasks, budgetCalculations, realTotals]);
 
   // Handle reorder tasks
-  const handleReorder = (reorderedTasks: any[]) => {
-    console.log('Reordered tasks:', reorderedTasks)
-    // TODO: Implement actual reorder logic
+  const handleReorder = async (sourceIndex: number, destinationIndex: number, draggedTask: any) => {
+    if (!budget?.id || destinationIndex === sourceIndex) return;
+
+    // Create the new array with the item moved
+    const newTasks = [...tasks];
+    const [movedTask] = newTasks.splice(sourceIndex, 1);
+    newTasks.splice(destinationIndex, 0, movedTask);
+
+    // Calculate prev and next items
+    const prevTask = newTasks[destinationIndex - 1] ?? null;
+    const nextTask = newTasks[destinationIndex + 1] ?? null;
+
+    const prev_item_id = prevTask?.id ?? null;
+    const next_item_id = nextTask?.id ?? null;
+
+    // Move the item using the RPC
+    try {
+      await moveBudgetItem.mutateAsync({
+        budget_id: budget.id,
+        item_id: draggedTask.id,
+        prev_item_id,
+        next_item_id,
+      });
+    } catch (error) {
+      console.error('Error reordering tasks:', error);
+      // The mutation hook will show a toast, but we can add additional logging here
+    }
   }
 
   // Handle duplicate task

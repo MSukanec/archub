@@ -54,7 +54,7 @@ const GRID_COLUMNS = "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80
 
 interface BudgetTreeProps {
   tasks: BudgetTask[];
-  onReorder?: (reorderedTasks: BudgetTask[]) => void;
+  onReorder?: (sourceIndex: number, destinationIndex: number, draggedTask: BudgetTask) => void;
   onDuplicateTask?: (task: BudgetTask) => void;
   onDeleteTask?: (taskId: string) => void;
   onQuantityChange?: (taskId: string, quantity: number) => void;
@@ -1256,12 +1256,12 @@ export function BudgetTree({
       return;
     }
 
-    const oldIndex = tasks.findIndex((task) => task.id === active.id);
-    const newIndex = tasks.findIndex((task) => task.id === over.id);
+    const sourceIndex = tasks.findIndex((task) => task.id === active.id);
+    const destinationIndex = tasks.findIndex((task) => task.id === over.id);
 
-    if (oldIndex !== newIndex && onReorder) {
-      const reorderedTasks = arrayMove(tasks, oldIndex, newIndex);
-      onReorder(reorderedTasks);
+    if (sourceIndex !== destinationIndex && onReorder) {
+      // Call onReorder with the new pattern: sourceIndex, destinationIndex, draggedTask
+      onReorder(sourceIndex, destinationIndex, draggedTask);
     }
   };
 

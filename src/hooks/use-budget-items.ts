@@ -208,3 +208,61 @@ export function useDeleteBudgetItem() {
     }
   })
 }
+
+export function useMoveBudgetItem() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ budget_id, item_id, prev_item_id, next_item_id }: {
+      budget_id: string;
+      item_id: string;
+      prev_item_id?: string | null;
+      next_item_id?: string | null;
+    }) => {
+      // Get the authentication token
+      const { supabase } = await import('@/lib/supabase');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No authentication token available');
+      }
+
+      // Use server endpoint for budget item move
+      const response = await fetch('/api/budget-items/move', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
+        },
+        body: JSON.stringify({
+          budget_id,
+          item_id,
+          prev_item_id,
+          next_item_id
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Move budget item failed:', response.status, errorText)
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budget-items'] })
+      toast({
+        title: "Orden actualizado",
+        description: "El orden de las tareas ha sido actualizado correctamente",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el orden de las tareas",
+        variant: "destructive",
+      })
+    }
+  })
+}
