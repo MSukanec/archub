@@ -316,10 +316,10 @@ export function MainSidebar() {
     ],
     project: [],
     commercialization: [
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
+      { icon: Users, label: 'Clientes', href: '/clients' }
     ],
     construction: [
-      { icon: Calculator, label: 'Cómputo y Presupuesto', href: '/budgets' },
+      { icon: Calculator, label: 'Cómputos y Presupuestos', href: '/budgets' },
       { icon: CheckSquare, label: 'Tareas de Construcción', href: '/construction/tasks' },
       { icon: Users, label: 'Mano de Obra', href: '/construction/personnel' },
       { icon: Package2, label: 'Materiales', href: '/construction/materials' },

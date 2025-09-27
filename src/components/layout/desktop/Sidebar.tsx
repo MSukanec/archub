@@ -564,7 +564,7 @@ export function MainSidebar() {
     ],
     project: [],
     commercialization: [
-      { icon: Users, label: 'Clientes', href: '/commercialization/clients' }
+      { icon: Users, label: 'Clientes', href: '/clients' }
     ],
     construction: [
       { icon: CheckSquare, label: 'Cómputo y Presupuesto', href: '/construction/tasks' },

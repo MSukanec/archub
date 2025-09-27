@@ -28,7 +28,7 @@ import ProjectView from "@/pages/professional/projects/ProjectView";
 
 import FinancesCapitalMovements from "@/pages/professional/finances/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
-import { Clients } from "@/pages/professional/project/commercialization/clients/Clients";
+import { Clients } from "@/pages/professional/clients/Clients";
 import Project from "@/pages/professional/project/dashboard/Project";
 
 
@@ -122,7 +122,7 @@ function Router() {
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/commercialization/clients" component={Clients} />
+        <Route path="/clients" component={Clients} />
         <Route path="/media" component={Media} />
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
@@ -158,7 +158,7 @@ function Router() {
         
         {/* Duplicate General Routes for compatibility */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/commercialization/clients" component={Clients} />
+        <Route path="/clients" component={Clients} />
 
 
         {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
