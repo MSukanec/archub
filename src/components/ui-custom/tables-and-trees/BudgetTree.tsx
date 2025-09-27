@@ -493,7 +493,9 @@ const InlineUnitCostEditor = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [costType, setCostType] = useState<'archub' | 'organization' | 'independent'>('archub');
-  const [customCost, setCustomCost] = useState<number>(0);
+  const [customCost, setCustomCost] = useState<number>(task.unit_price || 0);
+  
+  const updateBudgetItem = useUpdateBudgetItem();
 
   // Get current unit cost from TaskMaterialsUnitCost component logic
   const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
@@ -533,6 +535,53 @@ const InlineUnitCostEditor = ({
     }).format(amount);
   };
 
+  // Function to save unit price to database
+  const saveUnitPrice = async (newCostType: 'archub' | 'organization' | 'independent', newCustomCost?: number) => {
+    let unitPrice = 0;
+    
+    switch (newCostType) {
+      case 'archub':
+        unitPrice = archubCost;
+        break;
+      case 'organization':
+        unitPrice = organizationCost;
+        break;
+      case 'independent':
+        unitPrice = newCustomCost || customCost;
+        break;
+    }
+    
+    try {
+      await updateBudgetItem.mutateAsync({
+        id: task.id,
+        unit_price: unitPrice
+      });
+      console.log('Unit price saved:', unitPrice);
+    } catch (error) {
+      console.error('Error saving unit price:', error);
+    }
+  };
+
+  // Handle cost type change
+  const handleCostTypeChange = async (newType: 'archub' | 'organization' | 'independent') => {
+    setCostType(newType);
+    onCostTypeChange?.(newType);
+    await saveUnitPrice(newType);
+  };
+
+  // Handle custom cost save
+  const handleCustomCostSave = async () => {
+    await saveUnitPrice('independent', customCost);
+    setIsOpen(false);
+  };
+
+  // Handle Enter key on custom cost input
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleCustomCostSave();
+    }
+  };
+
   return (
     <div className="flex items-center justify-end">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -556,8 +605,7 @@ const InlineUnitCostEditor = ({
                   checked={costType === 'archub'}
                   onChange={(e) => {
                     const newType = e.target.value as 'archub';
-                    setCostType(newType);
-                    onCostTypeChange?.(newType);
+                    handleCostTypeChange(newType);
                   }}
                   className="accent-[var(--accent-2)]"
                 />
@@ -572,8 +620,7 @@ const InlineUnitCostEditor = ({
                   checked={costType === 'organization'}
                   onChange={(e) => {
                     const newType = e.target.value as 'organization';
-                    setCostType(newType);
-                    onCostTypeChange?.(newType);
+                    handleCostTypeChange(newType);
                   }}
                   className="accent-[var(--accent-2)]"
                   disabled={!organizationTaskPrice?.total_unit_cost}
@@ -589,8 +636,7 @@ const InlineUnitCostEditor = ({
                   checked={costType === 'independent'}
                   onChange={(e) => {
                     const newType = e.target.value as 'independent';
-                    setCostType(newType);
-                    onCostTypeChange?.(newType);
+                    handleCostTypeChange(newType);
                   }}
                   className="accent-[var(--accent-2)]"
                 />
@@ -599,19 +645,31 @@ const InlineUnitCostEditor = ({
             </div>
 
             {costType === 'independent' && (
-              <div className="mt-3">
+              <div className="mt-3 space-y-2">
                 <label className="block text-xs text-[var(--muted-fg)] mb-1">
                   Costo personalizado:
                 </label>
-                <Input
-                  type="number"
-                  value={customCost === 0 ? '' : customCost}
-                  onChange={(e) => setCustomCost(parseFloat(e.target.value) || 0)}
-                  className="h-8 text-xs"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    value={customCost === 0 ? '' : customCost}
+                    onChange={(e) => setCustomCost(parseFloat(e.target.value) || 0)}
+                    onKeyDown={handleKeyDown}
+                    className="h-8 text-xs flex-1"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleCustomCostSave}
+                    disabled={updateBudgetItem.isPending}
+                    className="h-8 px-3 text-xs"
+                  >
+                    {updateBudgetItem.isPending ? '...' : 'OK'}
+                  </Button>
+                </div>
               </div>
             )}
 
