@@ -449,8 +449,12 @@ const BudgetSummaryRow = ({
     <div className="border-t-2 border-[var(--accent-2)]">
       {/* Subtotal General Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -467,8 +471,12 @@ const BudgetSummaryRow = ({
 
       {/* Discount Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -484,7 +492,7 @@ const BudgetSummaryRow = ({
               onChange={(e) => handleDiscountPctChange(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'discount')}
               onBlur={() => setEditingField(null)}
-              className="h-6 w-16 text-xs text-right bg-white text-black border-[var(--accent-2)]"
+              className="h-6 w-16 text-xs text-right bg-white text-black border-green-500"
               step="0.1"
               min="0"
               max="100"
@@ -494,7 +502,7 @@ const BudgetSummaryRow = ({
           ) : (
             <button
               onClick={() => setEditingField('discount')}
-              className="h-6 px-2 text-xs font-medium text-white hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
+              className="h-6 px-2 text-xs font-medium text-white hover:text-green-400 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-green-400"
             >
               {formatPercentage(discountPct)}%
             </button>
@@ -508,8 +516,12 @@ const BudgetSummaryRow = ({
 
       {/* Base para IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -526,8 +538,12 @@ const BudgetSummaryRow = ({
 
       {/* IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-2 text-xs font-medium"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -543,7 +559,7 @@ const BudgetSummaryRow = ({
               onChange={(e) => handleVatPctChange(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'vat')}
               onBlur={() => setEditingField(null)}
-              className="h-6 w-16 text-xs text-right bg-white text-black border-[var(--accent-2)]"
+              className="h-6 w-16 text-xs text-right bg-white text-black border-green-500"
               step="0.1"
               min="0"
               max="30"
@@ -553,7 +569,7 @@ const BudgetSummaryRow = ({
           ) : (
             <button
               onClick={() => setEditingField('vat')}
-              className="h-6 px-2 text-xs font-medium text-white hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
+              className="h-6 px-2 text-xs font-medium text-white hover:text-green-400 transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-green-400"
             >
               {formatPercentage(vatPct)}%
             </button>
@@ -567,18 +583,22 @@ const BudgetSummaryRow = ({
 
       {/* Total Final Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-bold bg-[var(--table-group-bg)] text-white border-t border-[var(--accent-2)]"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-3 text-sm font-bold border-t border-[var(--accent-2)]"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-group-header-bg)",
+          color: "white"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
         <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
-        <div className="font-bold">TOTAL FINAL</div> {/* Title in quantity column */}
+        <div className="font-bold text-sm">TOTAL FINAL</div> {/* Title in quantity column */}
         <div></div> {/* Empty space for unit cost column */}
         <div></div> {/* Empty space for subtotal column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="text-right font-bold text-[var(--accent-2)]">{formatCurrency(grandTotal)}</div> {/* Result in total column */}
+        <div className="text-right font-bold text-lg">{formatCurrency(grandTotal)}</div> {/* Result in total column - LARGER */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
