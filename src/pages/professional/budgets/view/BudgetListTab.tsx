@@ -19,30 +19,34 @@ interface BudgetListTabProps {
   onDuplicateTask?: (task: any) => void
 }
 
-// Function to calculate KPIs using real data without hooks
+// Function to calculate KPIs using REAL Supabase data
 const calculateBudgetKPIs = (tasks: any[]) => {
-  // Basic calculation without hooks - using simple estimates for now
-  // This prevents the hook ordering issue
   let totalSubtotals = 0;
-  let totalFinals = 0;
   let totalMargins = 0;
+  let totalTaxes = 0;
+  let totalFinals = 0;
 
   for (const task of tasks) {
+    // Usar datos REALES de Supabase - NO fallbacks hardcodeados
     const quantity = task.quantity || 0;
-    const marginPct = task.margin || 0;
+    const unitPrice = task.unit_price || 0;  // Usar unit_price de Supabase
+    const markupPct = task.markup_pct || 0;  // Usar markup_pct de Supabase
+    const taxPct = task.tax_pct || 0;        // Usar tax_pct de Supabase
     
-    // Use estimated costs if available, otherwise use fallback
-    const estimatedCostPerUnit = task.estimated_cost || 100; // Fallback value
-    const subtotal = quantity * estimatedCostPerUnit;
-    const marginAmount = subtotal * (marginPct / 100);
-    const total = subtotal + marginAmount;
+    // Fórmula correcta según prompts/tables/tables-budgets.md:
+    const subtotal = unitPrice * quantity;
+    const marginAmount = subtotal * (markupPct / 100);
+    const beforeTax = subtotal + marginAmount;
+    const taxAmount = beforeTax * (taxPct / 100);
+    const total = beforeTax + taxAmount;
     
     totalSubtotals += subtotal;
     totalMargins += marginAmount;
+    totalTaxes += taxAmount;
     totalFinals += total;
   }
 
-  return { totalSubtotals, totalFinals, totalMargins };
+  return { totalSubtotals, totalMargins, totalTaxes, totalFinals };
 };
 
 export function BudgetListTab({ 
@@ -85,10 +89,10 @@ export function BudgetListTab({
     
     const totalRubros = Object.keys(rubros).length;
 
-    // Use real totals from BudgetTree if available, otherwise fallback to calculated values
+    // Use real totals from BudgetTree if available, otherwise use corrected calculations
     const actualEstimatedCost = realTotals ? realTotals.totalSubtotals : budgetCalculations.totalSubtotals;
     const actualFinalCost = realTotals ? realTotals.totalFinals : budgetCalculations.totalFinals;
-    const actualMarginValue = actualFinalCost - actualEstimatedCost; // Calculate margin as difference
+    const actualMarginValue = realTotals ? (actualFinalCost - actualEstimatedCost) : budgetCalculations.totalMargins; // Use calculated margins when available
 
     return {
       totalTasks,
