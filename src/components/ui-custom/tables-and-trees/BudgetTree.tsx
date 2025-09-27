@@ -446,146 +446,141 @@ const BudgetSummaryRow = ({
   const percentageOfTotal = 100;
 
   return (
-    <div className="border-t-2 border-[var(--accent-2)] bg-[var(--table-header-bg)]">
-      {/* Summary Row */}
+    <div className="border-t-2 border-[var(--accent-2)]">
+      {/* Subtotal General Row */}
       <div 
-        className="grid gap-4 px-4 py-4 text-sm font-semibold"
+        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
         style={{ gridTemplateColumns: GRID_COLUMNS }}
       >
         <div></div> {/* Empty space for drag handle column */}
-        <div className="flex items-center text-[var(--accent-2)]">
-          <Calculator className="h-4 w-4 mr-2" />
-          TOTAL GENERAL
-        </div>
-        <div className="text-[var(--card-fg)]">Resumen del Presupuesto</div>
+        <div></div> {/* Empty space for item number column */}
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
-        <div></div> {/* Empty space for quantity column */}
+        <div className="font-semibold">Subtotal General</div> {/* Title in quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="text-right text-[var(--card-fg)]">
-          {formatCurrency(totalSubtotals)}
-        </div>
+        <div className="text-right font-semibold">{formatCurrency(totalFinals)}</div> {/* Value in subtotal column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="text-right text-[var(--accent-2)] font-bold">
-          {formatCurrency(totalFinals)}
-        </div>
-        <div className="text-right text-[var(--accent-2)] font-bold">
-          {formatPercentage(percentageOfTotal)}%
-        </div>
+        <div className="text-right font-semibold">{formatCurrency(totalFinals)}</div> {/* Result in total column */}
+        <div className="text-right font-semibold">100.0%</div> {/* Percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
-      {/* Adjustments Section */}
-      <div className="border-t border-[var(--card-border)] bg-[var(--card-bg)]">
-        <div className="px-4 py-3">
-          <h3 className="text-sm font-semibold text-[var(--card-fg)] mb-3 flex items-center">
-            <Calculator className="h-4 w-4 mr-2 text-[var(--accent-2)]" />
-            Ajustes Adicionales
-          </h3>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Discount Section */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-[var(--muted-fg)]">Descuento</label>
-              <div className="flex items-center gap-2">
-                {editingField === 'discount' ? (
-                  <Input
-                    type="number"
-                    value={localDiscountPct}
-                    onChange={(e) => handleDiscountPctChange(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, 'discount')}
-                    onBlur={() => setEditingField(null)}
-                    className="h-8 w-20 text-xs text-right"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    autoFocus
-                    onFocus={(e) => e.target.select()}
-                  />
-                ) : (
-                  <button
-                    onClick={() => setEditingField('discount')}
-                    className="h-8 px-2 text-xs font-medium border border-[var(--border)] rounded bg-[var(--background)] hover:bg-[var(--accent)] transition-colors cursor-pointer"
-                  >
-                    {formatPercentage(discountPct)}%
-                  </button>
-                )}
-                <span className="text-xs text-[var(--muted-fg)]">=</span>
-                <span className="text-xs font-medium text-[var(--card-fg)]">
-                  {formatCurrency(discountValue)}
-                </span>
-              </div>
-            </div>
-
-            {/* VAT Section */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-[var(--muted-fg)]">IVA</label>
-              <div className="flex items-center gap-2">
-                {editingField === 'vat' ? (
-                  <Input
-                    type="number"
-                    value={localVatPct}
-                    onChange={(e) => handleVatPctChange(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, 'vat')}
-                    onBlur={() => setEditingField(null)}
-                    className="h-8 w-20 text-xs text-right"
-                    step="0.1"
-                    min="0"
-                    max="30"
-                    autoFocus
-                    onFocus={(e) => e.target.select()}
-                  />
-                ) : (
-                  <button
-                    onClick={() => setEditingField('vat')}
-                    className="h-8 px-2 text-xs font-medium border border-[var(--border)] rounded bg-[var(--background)] hover:bg-[var(--accent)] transition-colors cursor-pointer"
-                  >
-                    {formatPercentage(vatPct)}%
-                  </button>
-                )}
-                <span className="text-xs text-[var(--muted-fg)]">=</span>
-                <span className="text-xs font-medium text-[var(--card-fg)]">
-                  {formatCurrency(vatAmount)}
-                </span>
-              </div>
-            </div>
-
-            {/* Final Total Section */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-[var(--muted-fg)]">Total Final</label>
-              <div className="text-lg font-bold text-[var(--accent-2)]">
-                {formatCurrency(grandTotal)}
-              </div>
-            </div>
-          </div>
-
-          {/* Calculation Breakdown */}
-          <div className="mt-4 pt-3 border-t border-[var(--card-border)]">
-            <div className="text-xs text-[var(--muted-fg)] space-y-1">
-              <div className="flex justify-between">
-                <span>Subtotal general:</span>
-                <span>{formatCurrency(totalFinals)}</span>
-              </div>
-              {discountValue > 0 && (
-                <div className="flex justify-between">
-                  <span>Descuento ({formatPercentage(discountPct)}%):</span>
-                  <span>-{formatCurrency(discountValue)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span>Base para IVA:</span>
-                <span>{formatCurrency(totalAfterDiscount)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>IVA ({formatPercentage(vatPct)}%):</span>
-                <span>+{formatCurrency(vatAmount)}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-[var(--card-fg)] pt-1 border-t border-[var(--card-border)]">
-                <span>TOTAL FINAL:</span>
-                <span>{formatCurrency(grandTotal)}</span>
-              </div>
-            </div>
-          </div>
+      {/* Discount Row */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div></div> {/* Empty space for item number column */}
+        <div></div> {/* Empty space for description column */}
+        <div></div> {/* Empty space for type column */}
+        <div className="font-semibold">Descuento</div> {/* Title in quantity column */}
+        <div></div> {/* Empty space for unit cost column */}
+        <div className="text-right"> {/* Input in subtotal column */}
+          {editingField === 'discount' ? (
+            <Input
+              type="number"
+              value={localDiscountPct}
+              onChange={(e) => handleDiscountPctChange(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'discount')}
+              onBlur={() => setEditingField(null)}
+              className="h-6 w-16 text-xs text-right bg-white text-black border-[var(--accent-2)]"
+              step="0.1"
+              min="0"
+              max="100"
+              autoFocus
+              onFocus={(e) => e.target.select()}
+            />
+          ) : (
+            <button
+              onClick={() => setEditingField('discount')}
+              className="h-6 px-2 text-xs font-medium text-white hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
+            >
+              {formatPercentage(discountPct)}%
+            </button>
+          )}
         </div>
+        <div></div> {/* Empty space for margin column */}
+        <div className="text-right font-semibold">= -{formatCurrency(discountValue)}</div> {/* Result in total column */}
+        <div></div> {/* Empty space for percentage column */}
+        <div></div> {/* Empty space for actions column */}
+      </div>
+
+      {/* Base para IVA Row */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div></div> {/* Empty space for item number column */}
+        <div></div> {/* Empty space for description column */}
+        <div></div> {/* Empty space for type column */}
+        <div className="font-semibold">Base para IVA</div> {/* Title in quantity column */}
+        <div></div> {/* Empty space for unit cost column */}
+        <div></div> {/* Empty space for subtotal column */}
+        <div></div> {/* Empty space for margin column */}
+        <div className="text-right font-semibold">{formatCurrency(totalAfterDiscount)}</div> {/* Result in total column */}
+        <div></div> {/* Empty space for percentage column */}
+        <div></div> {/* Empty space for actions column */}
+      </div>
+
+      {/* IVA Row */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-xs font-medium bg-[var(--table-group-bg)] text-white"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div></div> {/* Empty space for item number column */}
+        <div></div> {/* Empty space for description column */}
+        <div></div> {/* Empty space for type column */}
+        <div className="font-semibold">IVA ({formatPercentage(vatPct)}%)</div> {/* Title in quantity column */}
+        <div></div> {/* Empty space for unit cost column */}
+        <div className="text-right"> {/* Input in subtotal column */}
+          {editingField === 'vat' ? (
+            <Input
+              type="number"
+              value={localVatPct}
+              onChange={(e) => handleVatPctChange(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'vat')}
+              onBlur={() => setEditingField(null)}
+              className="h-6 w-16 text-xs text-right bg-white text-black border-[var(--accent-2)]"
+              step="0.1"
+              min="0"
+              max="30"
+              autoFocus
+              onFocus={(e) => e.target.select()}
+            />
+          ) : (
+            <button
+              onClick={() => setEditingField('vat')}
+              className="h-6 px-2 text-xs font-medium text-white hover:text-[var(--accent-2)] transition-colors cursor-pointer border-b border-dashed border-transparent hover:border-[var(--accent-2)]"
+            >
+              {formatPercentage(vatPct)}%
+            </button>
+          )}
+        </div>
+        <div></div> {/* Empty space for margin column */}
+        <div className="text-right font-semibold">= +{formatCurrency(vatAmount)}</div> {/* Result in total column */}
+        <div></div> {/* Empty space for percentage column */}
+        <div></div> {/* Empty space for actions column */}
+      </div>
+
+      {/* Total Final Row */}
+      <div 
+        className="grid gap-4 px-4 py-2 text-xs font-bold bg-[var(--table-group-bg)] text-white border-t border-[var(--accent-2)]"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div></div> {/* Empty space for drag handle column */}
+        <div></div> {/* Empty space for item number column */}
+        <div></div> {/* Empty space for description column */}
+        <div></div> {/* Empty space for type column */}
+        <div className="font-bold">TOTAL FINAL</div> {/* Title in quantity column */}
+        <div></div> {/* Empty space for unit cost column */}
+        <div></div> {/* Empty space for subtotal column */}
+        <div></div> {/* Empty space for margin column */}
+        <div className="text-right font-bold text-[var(--accent-2)]">{formatCurrency(grandTotal)}</div> {/* Result in total column */}
+        <div></div> {/* Empty space for percentage column */}
+        <div></div> {/* Empty space for actions column */}
       </div>
     </div>
   );
