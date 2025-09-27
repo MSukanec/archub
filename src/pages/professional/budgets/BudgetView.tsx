@@ -4,6 +4,7 @@ import { DollarSign, Plus } from 'lucide-react';
 
 import { Layout } from '@/components/layout/desktop/Layout';
 import { BudgetListTab } from './view/BudgetListTab';
+import { BudgetMaterialsTab } from './view/BudgetMaterialsTab';
 import { useBudgets } from "@/hooks/use-budgets";
 import { useBudgetItems, useCreateBudgetItem, useDeleteBudgetItem } from "@/hooks/use-budget-items";
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
@@ -12,7 +13,7 @@ import { useProjectContext } from '@/stores/projectContext';
 export default function BudgetView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('Lista');
+  const [activeTab, setActiveTab] = useState('Listado de Items');
   
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: budgets, isLoading } = useBudgets(selectedProjectId || undefined);
@@ -86,9 +87,14 @@ export default function BudgetView() {
 
   const headerTabs = [
     {
-      id: 'Lista',
-      label: 'Lista',
-      isActive: activeTab === 'Lista'
+      id: 'Listado de Items',
+      label: 'Listado de Items',
+      isActive: activeTab === 'Listado de Items'
+    },
+    {
+      id: 'Cómputo de Materiales',
+      label: 'Cómputo de Materiales',
+      isActive: activeTab === 'Cómputo de Materiales'
     }
   ];
 
@@ -136,7 +142,7 @@ export default function BudgetView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'Lista':
+      case 'Listado de Items':
         return (
           <BudgetListTab
             budget={budget}
@@ -145,6 +151,12 @@ export default function BudgetView() {
             onAddTask={handleAddTask}
             onDuplicateTask={handleDuplicateTask}
             onDeleteTask={handleDeleteTask}
+          />
+        );
+      case 'Cómputo de Materiales':
+        return (
+          <BudgetMaterialsTab
+            budget={budget}
           />
         );
       default:
