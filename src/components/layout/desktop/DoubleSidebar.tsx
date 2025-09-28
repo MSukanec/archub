@@ -539,8 +539,8 @@ export function MainSidebar() {
         style={{
           height: '100%', // Usar altura del contenedor padre, no 100vh
           width: isDocked 
-            ? '256px' // Cuando está anclado, coincidir con w-64
-            : (isHovered ? '256px' : '48px') // Cuando no está anclado, coincidir con w-64/w-12
+            ? '240px' // Cuando está anclado, más estrecho para que no haya espacio extra
+            : (isHovered ? '240px' : '48px') // Cuando no está anclado, más estrecho
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -548,7 +548,7 @@ export function MainSidebar() {
         <aside 
           className={cn(
             "flex flex-col overflow-visible flex-1",
-            isExpanded ? "w-64" : "w-12"
+            isExpanded ? "w-60" : "w-12"
           )}
         >
           {/* Navigation Items */}
