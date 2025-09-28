@@ -22,7 +22,10 @@ export function MainHeader() {
   const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
   const { data: currentProject } = useProject(selectedProjectId || undefined);
   
-  const currentOrganization = userData?.organization?.name || "Organización";
+  // Get current organization name from the organizations list using currentOrganizationId
+  const currentOrganization = userData?.organizations?.find(org => org.id === currentOrganizationId)?.name || 
+                              userData?.organization?.name || 
+                              "Organización";
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
 
   const handleOrganizationClick = () => {
