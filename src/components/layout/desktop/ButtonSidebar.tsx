@@ -64,7 +64,7 @@ export default function SidebarButton({
         ref={buttonRef}
         data-active={isActive}
         className={cn(
-          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded",
+          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded px-3",
           "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
           !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
           "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"
@@ -78,8 +78,8 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* RAIL DE 47px - El icono SIEMPRE está perfectamente centrado aquí y NUNCA se mueve */}
-        <span className="shrink-0 w-12 flex items-center justify-center transition-colors duration-200">
+        {/* Icono con margen derecho fijo */}
+        <span className="flex-shrink-0 mr-2 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
@@ -111,11 +111,11 @@ export default function SidebarButton({
           )}
         </span>
         
-        {/* Texto - Solo aparece cuando expandido, SIN mover el icono */}
+        {/* Texto - Solo aparece cuando expandido */}
         {isExpanded && (
           <span 
             className={cn(
-              "text-xs whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2 text-current",
+              "text-xs whitespace-nowrap text-left flex items-center justify-start flex-1 pr-2 text-current",
               isHeaderButton ? "font-bold" : "font-normal"
             )}
           >
