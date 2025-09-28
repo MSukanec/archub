@@ -502,7 +502,7 @@ const BudgetSummaryRow = ({
     <div>
       {/* Summary Title Row - Separador */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-bold border-t-2 border-[var(--accent-2)]"
+        className="grid gap-4 px-4 py-3 text-xs font-bold"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -513,9 +513,9 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for item number column */}
         <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
-        <div className="font-bold">RESUMEN</div> {/* Title in quantity column */}
+        <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div></div> {/* Empty space for subtotal column */}
+        <div className="flex items-center font-bold">RESUMEN</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
         <div></div> {/* Empty space for total column */}
         <div></div> {/* Empty space for percentage column */}
@@ -524,8 +524,12 @@ const BudgetSummaryRow = ({
 
       {/* Subtotal General Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs border-b border-gray-200 bg-gray-50/50 hover:bg-gray-100"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-3 text-xs border-b"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-row-bg)",
+          borderBottomColor: "var(--table-border)"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -533,17 +537,21 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900">Subtotal General</div> {/* SUBTOTAL column */}
+        <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}>Subtotal General</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalFinals)}</div> {/* TOTAL column */}
+        <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>{formatCurrency(totalFinals)}</div> {/* TOTAL column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
       {/* Discount Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs border-b border-gray-200 bg-gray-50/50 hover:bg-gray-100"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-3 text-xs border-b"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-row-bg)",
+          borderBottomColor: "var(--table-border)"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -551,7 +559,7 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900"> {/* SUBTOTAL column with editable percentage */}
+        <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
           <span className="mr-1">Descuento</span>
           <span className="text-gray-600">(</span>
           {editingField === 'discount' ? (
@@ -583,15 +591,19 @@ const BudgetSummaryRow = ({
           <span className="text-gray-600">%)</span>
         </div>
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(discountValue)}</div> {/* TOTAL column - clean value without - */}
+        <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>{formatCurrency(discountValue)}</div> {/* TOTAL column - clean value without - */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
       {/* Base para IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs border-b border-gray-200 bg-gray-50/50 hover:bg-gray-100"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-3 text-xs border-b"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-row-bg)",
+          borderBottomColor: "var(--table-border)"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -599,17 +611,21 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900">Base para IVA</div> {/* SUBTOTAL column */}
+        <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}>Base para IVA</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalAfterDiscount)}</div> {/* TOTAL column */}
+        <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>{formatCurrency(totalAfterDiscount)}</div> {/* TOTAL column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
       {/* IVA Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs border-b border-gray-200 bg-gray-50/50 hover:bg-gray-100"
-        style={{ gridTemplateColumns: GRID_COLUMNS }}
+        className="grid gap-4 px-4 py-3 text-xs border-b"
+        style={{ 
+          gridTemplateColumns: GRID_COLUMNS,
+          backgroundColor: "var(--table-row-bg)",
+          borderBottomColor: "var(--table-border)"
+        }}
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
@@ -617,7 +633,7 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900"> {/* SUBTOTAL column with editable percentage */}
+        <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
           <span className="mr-1">IVA</span>
           <span className="text-gray-600">(</span>
           {editingField === 'vat' ? (
@@ -649,14 +665,14 @@ const BudgetSummaryRow = ({
           <span className="text-gray-600">%)</span>
         </div>
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(vatAmount)}</div> {/* TOTAL column - clean value without + */}
+        <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>{formatCurrency(vatAmount)}</div> {/* TOTAL column - clean value without + */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
       {/* Total Final Row */}
       <div 
-        className="grid gap-4 px-4 py-2 text-xs font-bold"
+        className="grid gap-4 px-4 py-3 text-sm font-bold"
         style={{ 
           gridTemplateColumns: GRID_COLUMNS,
           backgroundColor: "var(--table-group-header-bg)",
@@ -669,9 +685,9 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-bold">TOTAL FINAL</div> {/* SUBTOTAL column */}
+        <div className="flex items-center font-bold text-sm">TOTAL FINAL</div> {/* SUBTOTAL column - larger text */}
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-bold">{formatCurrency(grandTotal)}</div> {/* TOTAL column */}
+        <div className="flex items-center justify-end font-bold text-sm">{formatCurrency(grandTotal)}</div> {/* TOTAL column - larger text */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
