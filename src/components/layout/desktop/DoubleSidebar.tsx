@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useProjectContext } from '@/stores/projectContext';
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Settings, 
   UserCircle,
@@ -527,6 +528,27 @@ export function MainSidebar() {
     }
   };
 
+  // Helper function to wrap buttons with tooltip when collapsed
+  const wrapWithTooltip = (buttonElement: React.ReactNode, label: string) => {
+    if (isExpanded) {
+      return buttonElement;
+    }
+    
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {buttonElement}
+        </TooltipTrigger>
+        <TooltipContent 
+          side="right" 
+          className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-[var(--main-sidebar-border)] text-xs"
+        >
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
   return (
     <>
     {/* Container principal para el sidebar */}
@@ -540,8 +562,8 @@ export function MainSidebar() {
           height: '100vh', // Ahora llega hasta arriba, sin header
           width: isHovered ? (isExpanded ? '304px' : '96px') : (isExpanded ? '256px' : '48px')
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        // onMouseEnter={() => setHovered(true)}
+        // onMouseLeave={() => setHovered(false)}
       >
         <aside 
           className={cn(
