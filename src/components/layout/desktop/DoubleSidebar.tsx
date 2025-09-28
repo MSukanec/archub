@@ -671,7 +671,8 @@ export function MainSidebar() {
           </div>
 
           {/* Anchor Button - Fixed at bottom */}
-          <div className="border-t border-[var(--main-sidebar-border)] p-2 bg-red-500 min-h-[60px]">
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] p-2 bg-yellow-500">
+            <p className="text-black">TEST BUTTON AREA</p>
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
               label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
