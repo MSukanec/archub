@@ -28,19 +28,20 @@ export default function OrganizationDashboard() {
   const { openModal } = useGlobalModalStore();
   
   const { data: userData, isLoading } = useCurrentUser();
-  const organizationId = userData?.organization?.id;
+  const { currentOrganizationId, setSelectedProject } = useProjectContext();
+  const organizationId = currentOrganizationId || userData?.organization?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
-  const { setSelectedProject } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   
-  // Usar la organización actual del usuario
-  const organization = (userData as UserData | undefined)?.organization ?? null;
+  // Usar la organización actual del contexto, fallback a la del usuario
+  const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
+                      ((userData as UserData | undefined)?.organization ?? null);
   const currentTime = new Date();
   
   // Prepare projects with active flag
