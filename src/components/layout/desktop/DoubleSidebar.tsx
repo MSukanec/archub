@@ -539,17 +539,20 @@ export function MainSidebar() {
         style={{
           height: '100vh', // Ocupar toda la altura de la ventana
           width: isDocked 
-            ? '220px' // Cuando está anclado, ancho más pequeño
-            : (isHovered ? '240px' : '48px') // Cuando no está anclado, expandir en hover (más pequeño)
+            ? '256px' // Cuando está anclado, coincidir con w-64
+            : (isHovered ? '256px' : '48px') // Cuando no está anclado, coincidir con w-64/w-12
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <aside 
-          className="flex flex-col overflow-visible flex-1 w-full"
+          className={cn(
+            "flex flex-col overflow-visible flex-1",
+            isExpanded ? "w-64" : "w-12"
+          )}
         >
           {/* Navigation Items */}
-          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-2 min-h-0">
+          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
             <div className="flex flex-col gap-[2px] h-full">
               {(() => {
                 const items = getTertiarySidebarItems();
