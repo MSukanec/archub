@@ -24,18 +24,18 @@
 
   /* Sidebar */
   --main-sidebar-bg: hsl(0, 0%, 16%);
-  --main-sidebar-fg: hsl(0, 0%, 40%);
+  --main-sidebar-fg: hsl(0, 0%, 60%);
   --main-sidebar-border: transparent;
   --main-sidebar-button-bg: transparent;
-  --main-sidebar-button-fg: hsl(0, 0%, 44%);
+  --main-sidebar-button-fg: hsl(0, 0%, 50%);
   --main-sidebar-button-icon-fg: hsl(0, 0%, 44%);
   --main-sidebar-button-text-fg: hsl(0, 0%, 44%);
-  --main-sidebar-button-active-bg: transparent;
-  --main-sidebar-button-active-fg: hsl(76, 100%, 40%);
-  --main-sidebar-button-active-icon-fg: hsl(76, 100%, 40%);
-  --main-sidebar-button-active-text-fg: hsl(0, 0%, 20%);
+  --main-sidebar-button-active-bg: hsl(0, 0%, 20%);
+  --main-sidebar-button-active-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-active-icon-fg: hsl(0, 0%, 100%);
+  --main-sidebar-button-active-text-fg: hsl(0, 0%, 100%);
   --main-sidebar-button-hover-bg: hsl(0, 0%, 20%);
-  --main-sidebar-button-hover-fg: hsl(76, 100%, 40%);
+  --main-sidebar-button-hover-fg: hsl(0, 0%, 100%);
   --main-sidebar-button-hover-icon-fg: hsl(76, 100%, 40%);
   --main-sidebar-button-hover-text-fg: hsl(0, 0%, 20%);
 

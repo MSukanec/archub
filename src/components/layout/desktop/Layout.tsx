@@ -136,57 +136,58 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               </div>
             )}
 
-            {/* Main Content Area with rounded corners and inset appearance */}
-            <main
-              className={`flex-1 flex flex-col overflow-y-auto ${!isDocked ? 'w-full' : ''}`}
-              style={{ 
-                backgroundColor: "hsl(0, 0%, 95%)",
-                marginLeft: isDocked ? '0' : '0', // No margin when not docked since sidebar is absolute
-              }}
-            >
-              {headerProps ? (
-                <PageLayout
-                  icon={headerProps.icon}
-                  title={headerProps.title}
-                  tabs={headerProps.tabs?.map((tab) => ({
-                    id: tab.id,
-                    label: tab.label,
-                    isActive: tab.isActive,
-                    onClick: () => headerProps.onTabChange?.(tab.id),
-                  }))}
-                  onTabChange={headerProps.onTabChange}
-                  showHeaderSearch={headerProps.showHeaderSearch}
-                  headerSearchValue={headerProps.headerSearchValue}
-                  onHeaderSearchChange={headerProps.onHeaderSearchChange}
-                  showCurrencySelector={headerProps.showCurrencySelector}
-                  currencyView={headerProps.currencyView}
-                  onCurrencyViewChange={headerProps.onCurrencyViewChange}
-                  actionButton={headerProps.actionButton}
-                  actions={headerProps.actions}
-                  showBackButton={headerProps.showBackButton}
-                  onBackClick={headerProps.onBackClick}
-                  backButtonText={headerProps.backButtonText}
-                  isViewMode={headerProps.isViewMode}
-                  wide={wide}
-                >
+            {/* Main Content Area with rounded corners and framing effect */}
+            <div className="flex-1 pr-3 pb-3">
+              <main
+                className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
+                style={{ 
+                  backgroundColor: "hsl(0, 0%, 95%)",
+                }}
+              >
+                {headerProps ? (
+                  <PageLayout
+                    icon={headerProps.icon}
+                    title={headerProps.title}
+                    tabs={headerProps.tabs?.map((tab) => ({
+                      id: tab.id,
+                      label: tab.label,
+                      isActive: tab.isActive,
+                      onClick: () => headerProps.onTabChange?.(tab.id),
+                    }))}
+                    onTabChange={headerProps.onTabChange}
+                    showHeaderSearch={headerProps.showHeaderSearch}
+                    headerSearchValue={headerProps.headerSearchValue}
+                    onHeaderSearchChange={headerProps.onHeaderSearchChange}
+                    showCurrencySelector={headerProps.showCurrencySelector}
+                    currencyView={headerProps.currencyView}
+                    onCurrencyViewChange={headerProps.onCurrencyViewChange}
+                    actionButton={headerProps.actionButton}
+                    actions={headerProps.actions}
+                    showBackButton={headerProps.showBackButton}
+                    onBackClick={headerProps.onBackClick}
+                    backButtonText={headerProps.backButtonText}
+                    isViewMode={headerProps.isViewMode}
+                    wide={wide}
+                  >
+                    <div
+                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
+                        isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+                      }`}
+                    >
+                      {children}
+                    </div>
+                  </PageLayout>
+                ) : (
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
-                      isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-0 ${
+                      isDocked ? 'md:pl-[120px] md:pr-[72px]' : 'md:pl-[168px] md:pr-[72px]'
                     }`}
                   >
                     {children}
                   </div>
-                </PageLayout>
-              ) : (
-                <div
-                  className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-0 ${
-                    isDocked ? 'md:pl-[120px] md:pr-[72px]' : 'md:pl-[168px] md:pr-[72px]'
-                  }`}
-                >
-                  {children}
-                </div>
-              )}
-            </main>
+                )}
+              </main>
+            </div>
 
           </div>
         </div>
