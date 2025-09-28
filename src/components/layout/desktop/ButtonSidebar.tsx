@@ -115,7 +115,7 @@ export default function SidebarButton({
         {isExpanded && (
           <span 
             className={cn(
-              "text-sm whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2 text-current",
+              "text-xs whitespace-nowrap text-left flex items-center justify-between flex-1 ml-2 text-current",
               isHeaderButton ? "font-bold" : "font-normal"
             )}
           >
