@@ -100,7 +100,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       style={{
         backgroundColor: isMobile
           ? "var(--layout-mobile-bg)"
-          : "var(--layout-bg)",
+          : "var(--main-sidebar-bg)",
       }}
     >
       {/* Main Header for Desktop - Only shown on desktop */}
