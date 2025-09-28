@@ -123,21 +123,13 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
-            {/* Tertiary Sidebar - Conditional layout based on docked state */}
-            {isDocked ? (
-              // When docked: Take up space and push content
-              <div className="flex-shrink-0">
-                <MainSidebar />
-              </div>
-            ) : (
-              // When not docked: Overlay on top of content from top
-              <div className="absolute left-0 z-20" style={{ top: 0, bottom: 0, height: '100%' }}>
-                <MainSidebar />
-              </div>
-            )}
+            {/* Tertiary Sidebar - Always pushes content to the side */}
+            <div className="flex-shrink-0">
+              <MainSidebar />
+            </div>
 
             {/* Main Content Area with rounded corners and framing effect */}
-            <div className={`flex-1 pr-3 pb-3 pl-3 ${isDocked ? 'ml-3' : ''}`}>
+            <div className="flex-1 pr-3 pb-3 pl-3">
               <main
                 className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
                 style={{ 

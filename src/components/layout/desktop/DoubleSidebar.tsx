@@ -539,8 +539,8 @@ export function MainSidebar() {
         style={{
           height: '100vh', // Ocupar toda la altura de la ventana
           width: isDocked 
-            ? '256px' // Cuando está anclado, mantener ancho fijo
-            : (isHovered ? '304px' : '48px') // Cuando no está anclado, expandir en hover
+            ? '220px' // Cuando está anclado, ancho más pequeño
+            : (isHovered ? '240px' : '48px') // Cuando no está anclado, expandir en hover (más pequeño)
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
