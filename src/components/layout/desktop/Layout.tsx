@@ -96,7 +96,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{
         backgroundColor: isMobile
           ? "var(--layout-mobile-bg)"
@@ -117,7 +117,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - Frame Layout without Header */
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex">
           {/* Main Layout Frame - Full height */}
           <div
             className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}
