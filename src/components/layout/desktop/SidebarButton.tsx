@@ -163,7 +163,7 @@ export default function SidebarButton({
           <span 
             data-text
             className={cn(
-              "text-sm whitespace-nowrap text-left transition-opacity duration-300 delay-100",
+              "text-xs whitespace-nowrap text-left transition-opacity duration-300 delay-100",
               isHeaderButton ? "font-bold" : "font-normal" // Negrita solo para botones header
             )}
             style={{
