@@ -131,7 +131,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
               </div>
             ) : (
               // When not docked: Overlay on top of content from top
-              <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
+              <div className="absolute left-0 z-20" style={{ top: 0, bottom: 0, height: '100%' }}>
                 <MainSidebar />
               </div>
             )}

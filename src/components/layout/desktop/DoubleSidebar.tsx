@@ -535,9 +535,9 @@ export function MainSidebar() {
 
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-row overflow-visible"
         style={{
-          height: '100%', // Ocupar toda la altura disponible
+          height: '100vh', // Ocupar toda la altura de la ventana
           width: isDocked 
             ? '256px' // Cuando está anclado, mantener ancho fijo
             : (isHovered ? '304px' : '48px') // Cuando no está anclado, expandir en hover
@@ -673,7 +673,7 @@ export function MainSidebar() {
           </div>
 
           {/* Anchor Button - Fixed at bottom with reasonable padding */}
-          <div className="mt-auto border-t border-[var(--main-sidebar-border)] p-2 pb-4">
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] px-2 py-2">
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
               label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
