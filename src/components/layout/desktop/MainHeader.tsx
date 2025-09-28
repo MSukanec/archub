@@ -35,7 +35,7 @@ export function MainHeader() {
 
   const handleProjectClick = () => {
     setSidebarLevel('project');
-    navigate('/professional/project/dashboard');
+    navigate('/project/dashboard');
   };
 
   const handleOrganizationChange = (orgId: string) => {
@@ -47,7 +47,7 @@ export function MainHeader() {
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId);
     setSidebarLevel('project');
-    navigate('/professional/project/dashboard');
+    navigate('/project/dashboard');
   };
 
   return (
