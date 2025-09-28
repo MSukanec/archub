@@ -532,8 +532,8 @@ export function MainSidebar() {
     {/* Container principal para AMBOS sidebars */}
     <div className="flex flex-row">
       
-      {/* SIDEBAR IZQUIERDO - Solo iconos, ancho fijo, sin expansión */}
-      <div 
+      {/* SIDEBAR IZQUIERDO - DESHABILITADO: Solo se muestra el sidebar derecho */}
+      {false && <div 
         className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-30 flex flex-row overflow-visible"
         style={{
           height: '100vh', // Ahora llega hasta arriba, sin header
@@ -632,7 +632,7 @@ export function MainSidebar() {
             </div>
           </div>
         </aside>
-      </div>
+      </div>}
 
       {/* SIDEBAR DERECHO - Idéntico al izquierdo */}
       <div 
@@ -650,8 +650,8 @@ export function MainSidebar() {
             isExpanded ? "w-64" : "w-12"
           )}
         >
-          {/* Selector de Proyectos - SIDEBAR DERECHO */}
-          <div className={cn(
+          {/* Selector de Proyectos - SIDEBAR DERECHO - COMENTADO */}
+          {/*<div className={cn(
             "flex items-center border-b border-[var(--main-sidebar-border)] flex-shrink-0 px-0 py-0",
             isExpanded ? "min-h-[72px]" : "h-[72px]" // Mismo alto que tenía el logo antes
           )}>
@@ -764,7 +764,7 @@ export function MainSidebar() {
                 )}
               </div>
             )}
-          </div>
+          </div>*/}
           
           {/* Navigation Items - SIDEBAR DERECHO */}
           <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
