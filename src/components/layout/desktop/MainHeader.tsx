@@ -71,27 +71,21 @@ export function MainHeader() {
 
         {/* Organization selector */}
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={handleOrganizationClick}
-            className="h-8 px-2 text-xs font-medium"
-            style={{ color: "var(--main-sidebar-fg)" }}
+            className="flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
           >
             <Building2 className="h-4 w-4 mr-1" />
             {currentOrganization}
-          </Button>
+          </button>
           
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-1"
-                style={{ color: "var(--main-sidebar-fg)" }}
+              <button
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
               >
                 <ChevronDown className="h-3 w-3" />
-              </Button>
+              </button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" align="start">
               <div className="space-y-1">
@@ -117,27 +111,21 @@ export function MainHeader() {
 
         {/* Project selector */}
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={handleProjectClick}
-            className="h-8 px-2 text-xs font-medium"
-            style={{ color: "var(--main-sidebar-fg)" }}
+            className="flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
           >
             <FolderOpen className="h-4 w-4 mr-1" />
             {currentProjectName}
-          </Button>
+          </button>
           
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-1"
-                style={{ color: "var(--main-sidebar-fg)" }}
+              <button
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
               >
                 <ChevronDown className="h-3 w-3" />
-              </Button>
+              </button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" align="start">
               <div className="space-y-1">
@@ -164,12 +152,17 @@ export function MainHeader() {
 
       {/* Right side: User avatar */}
       <div className="flex items-center">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.user_metadata?.avatar_url || ''} />
-          <AvatarFallback className="text-xs">
-            {user?.email?.charAt(0)?.toUpperCase() || 'U'}
-          </AvatarFallback>
-        </Avatar>
+        <div 
+          className="h-8 w-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-200 ease-out hover:bg-[var(--main-sidebar-button-hover-bg)]"
+          onClick={() => navigate('/profile')}
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user?.user_metadata?.avatar_url || ''} />
+            <AvatarFallback className="text-xs">
+              {user?.email?.charAt(0)?.toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+        </div>
       </div>
     </div>
   );
