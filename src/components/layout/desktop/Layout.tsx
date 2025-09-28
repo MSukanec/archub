@@ -137,7 +137,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             )}
 
             {/* Main Content Area with rounded corners and framing effect */}
-            <div className="flex-1 pr-3 pb-3 pl-3">
+            <div className="flex-1 pr-3 pb-3 pl-6">
               <main
                 className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
                 style={{ 
