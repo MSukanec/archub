@@ -529,14 +529,14 @@ const BudgetSummaryRow = ({
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
-        <div className="flex items-center font-medium text-gray-900">Subtotal General</div>
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalFinals)}</div>
+        <div className="flex items-center font-medium text-gray-900">Subtotal General</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalFinals)}</div>
-        <div className="flex items-center justify-end text-gray-600">100.0%</div>
+        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalFinals)}</div> {/* TOTAL column */}
+        <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
 
@@ -547,11 +547,13 @@ const BudgetSummaryRow = ({
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
-        <div className="flex items-center font-medium text-gray-900">Descuento</div>
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center justify-end"> {/* Subtotal column with editable percentage */}
+        <div className="flex items-center font-medium text-gray-900">Descuento</div> {/* SUBTOTAL column */}
+        <div></div> {/* Empty space for margin column */}
+        <div className="flex items-center justify-end"> {/* TOTAL column with editable percentage */}
           <span className="text-gray-900 font-medium mr-1">= -{formatCurrency(discountValue)}</span>
           <span className="text-gray-600">(</span>
           {editingField === 'discount' ? (
@@ -582,8 +584,6 @@ const BudgetSummaryRow = ({
           )}
           <span className="text-gray-600">%)</span>
         </div>
-        <div></div> {/* Empty space for margin column */}
-        <div></div> {/* Empty space for total column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
@@ -595,13 +595,13 @@ const BudgetSummaryRow = ({
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
-        <div className="flex items-center font-medium text-gray-900">Base para IVA</div>
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalAfterDiscount)}</div>
+        <div className="flex items-center font-medium text-gray-900">Base para IVA</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
-        <div></div> {/* Empty space for total column */}
+        <div className="flex items-center justify-end font-semibold text-gray-900">{formatCurrency(totalAfterDiscount)}</div> {/* TOTAL column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
@@ -613,11 +613,13 @@ const BudgetSummaryRow = ({
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
-        <div className="flex items-center font-medium text-gray-900">IVA</div>
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center justify-end"> {/* Subtotal column with editable percentage */}
+        <div className="flex items-center font-medium text-gray-900">IVA</div> {/* SUBTOTAL column */}
+        <div></div> {/* Empty space for margin column */}
+        <div className="flex items-center justify-end"> {/* TOTAL column with editable percentage */}
           <span className="text-gray-900 font-medium mr-1">= +{formatCurrency(vatAmount)}</span>
           <span className="text-gray-600">(</span>
           {editingField === 'vat' ? (
@@ -648,8 +650,6 @@ const BudgetSummaryRow = ({
           )}
           <span className="text-gray-600">%)</span>
         </div>
-        <div></div> {/* Empty space for margin column */}
-        <div></div> {/* Empty space for total column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
@@ -661,13 +661,13 @@ const BudgetSummaryRow = ({
       >
         <div></div> {/* Empty space for drag handle column */}
         <div></div> {/* Empty space for item number column */}
-        <div className="flex items-center font-bold text-gray-900">TOTAL FINAL</div> {/* Title in description column */}
+        <div></div> {/* Empty space for description column */}
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center justify-end font-bold text-lg text-green-700">{formatCurrency(grandTotal)}</div> {/* Result in subtotal column */}
+        <div className="flex items-center font-bold text-gray-900">TOTAL FINAL</div> {/* SUBTOTAL column */}
         <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end font-bold text-lg text-green-700">{formatCurrency(grandTotal)}</div> {/* Result in total column */}
+        <div className="flex items-center justify-end font-bold text-lg text-green-700">{formatCurrency(grandTotal)}</div> {/* TOTAL column */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
