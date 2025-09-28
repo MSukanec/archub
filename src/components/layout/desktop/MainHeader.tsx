@@ -5,25 +5,56 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ChevronDown, Building2, FolderOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/stores/authStore";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useProjectsLite } from "@/hooks/use-projects-lite";
+import { useProject } from "@/hooks/use-projects";
+import { useProjectContext } from "@/stores/projectContext";
+import { useNavigationStore } from "@/stores/navigationStore";
 
 export function MainHeader() {
   const [, navigate] = useLocation();
   const { user } = useAuthStore();
-
-  // Mock data - replace with real data later
-  const currentOrganization = "Mi Organización";
-  const currentProject = "Proyecto Actual";
+  const { data: userData } = useCurrentUser();
+  const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
+  const { setSidebarLevel } = useNavigationStore();
+  
+  // Get real data
+  const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
+  const { data: currentProject } = useProject(selectedProjectId || undefined);
+  
+  const currentOrganization = userData?.organization?.name || "Organización";
+  const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
 
   const handleOrganizationClick = () => {
-    navigate('/profile/organizations');
+    setSidebarLevel('organization');
+    navigate('/organization/dashboard');
   };
 
   const handleProjectClick = () => {
-    navigate('/professional/projects');
+    setSidebarLevel('project');
+    navigate('/professional/project/dashboard');
+  };
+
+  const handleOrganizationChange = (orgId: string) => {
+    setCurrentOrganization(orgId);
+    setSidebarLevel('organization');
+    navigate('/organization/dashboard');
+  };
+
+  const handleProjectChange = (projectId: string) => {
+    setSelectedProject(projectId);
+    setSidebarLevel('project');
+    navigate('/professional/project/dashboard');
   };
 
   return (
-    <div className="w-full h-12 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 z-50">
+    <div 
+      className="w-full h-12 border-b flex items-center justify-between px-4 z-50"
+      style={{ 
+        backgroundColor: "var(--main-sidebar-bg)",
+        borderBottomColor: "var(--main-sidebar-border)"
+      }}
+    >
       {/* Left side: Logo and navigation */}
       <div className="flex items-center gap-4">
         {/* Logo */}
@@ -41,10 +72,11 @@ export function MainHeader() {
             variant="ghost"
             size="sm"
             onClick={handleOrganizationClick}
-            className="h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            className="h-8 px-2 text-xs font-medium"
+            style={{ color: "var(--main-sidebar-fg)" }}
           >
             <Building2 className="h-4 w-4 mr-1" />
-            Organización
+            {currentOrganization}
           </Button>
           
           <Popover>
@@ -52,10 +84,10 @@ export function MainHeader() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                className="h-8 px-1"
+                style={{ color: "var(--main-sidebar-fg)" }}
               >
-                {currentOrganization}
-                <ChevronDown className="h-3 w-3 ml-1" />
+                <ChevronDown className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" align="start">
@@ -63,22 +95,18 @@ export function MainHeader() {
                 <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                   Seleccionar Organización
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start h-8 text-sm"
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Mi Organización
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start h-8 text-sm"
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Otra Organización
-                </Button>
+                {userData?.organizations?.map((org) => (
+                  <Button
+                    key={org.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOrganizationChange(org.id)}
+                    className="w-full justify-start h-8 text-xs"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    {org.name}
+                  </Button>
+                ))}
               </div>
             </PopoverContent>
           </Popover>
@@ -90,10 +118,11 @@ export function MainHeader() {
             variant="ghost"
             size="sm"
             onClick={handleProjectClick}
-            className="h-8 px-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            className="h-8 px-2 text-xs font-medium"
+            style={{ color: "var(--main-sidebar-fg)" }}
           >
             <FolderOpen className="h-4 w-4 mr-1" />
-            Proyecto
+            {currentProjectName}
           </Button>
           
           <Popover>
@@ -101,10 +130,10 @@ export function MainHeader() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                className="h-8 px-1"
+                style={{ color: "var(--main-sidebar-fg)" }}
               >
-                {currentProject}
-                <ChevronDown className="h-3 w-3 ml-1" />
+                <ChevronDown className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-2" align="start">
@@ -112,22 +141,18 @@ export function MainHeader() {
                 <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                   Seleccionar Proyecto
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start h-8 text-sm"
-                >
-                  <FolderOpen className="h-4 w-4 mr-2" />
-                  Proyecto Actual
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start h-8 text-sm"
-                >
-                  <FolderOpen className="h-4 w-4 mr-2" />
-                  Otro Proyecto
-                </Button>
+                {projectsLite.map((project) => (
+                  <Button
+                    key={project.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleProjectChange(project.id)}
+                    className="w-full justify-start h-8 text-xs"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    {project.name}
+                  </Button>
+                ))}
               </div>
             </PopoverContent>
           </Popover>
