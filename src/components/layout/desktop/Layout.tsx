@@ -118,26 +118,21 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       ) : (
         /* Desktop View - Frame Layout without Header */
         <div className="flex-1 flex overflow-hidden">
-          {/* Main Layout Frame - Full height */}
-          <div
-            className={`flex-1 flex min-h-0 relative ${isDocked ? 'pr-3 pb-3 pl-3' : ''}`}
-            style={{ borderColor: "var(--main-sidebar-bg)" }}
-          >
-            {/* Tertiary Sidebar - Conditional layout based on docked state */}
-            {isDocked ? (
-              // When docked: Take up space and push content
-              <div className="flex-shrink-0">
-                <MainSidebar />
-              </div>
-            ) : (
-              // When not docked: Overlay on top of content from top
-              <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
-                <MainSidebar />
-              </div>
-            )}
+          {/* Tertiary Sidebar - Conditional layout based on docked state */}
+          {isDocked ? (
+            // When docked: Take up space and push content
+            <div className="flex-shrink-0">
+              <MainSidebar />
+            </div>
+          ) : (
+            // When not docked: Overlay on top of content from top
+            <div className="absolute left-0 z-50" style={{ top: 0, bottom: 0, height: '100%' }}>
+              <MainSidebar />
+            </div>
+          )}
 
-            {/* Main Content Area with rounded corners and framing effect */}
-            <div className={`flex-1 ${!isDocked ? 'pr-3 pb-3 pl-3' : ''}`}>
+          {/* Main Content Area with rounded corners and framing effect */}
+          <div className="flex-1 pr-3 pb-3 pl-3">
               <main
                 className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
                 style={{ 
@@ -170,28 +165,22 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
                     wide={wide}
                   >
                     <div
-                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
-                        isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
-                      }`}
+                      className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 px-6`}
                     >
                       {children}
                     </div>
                   </PageLayout>
                 ) : (
                   <div
-                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-4 py-3 md:py-6 pb-32 min-h-0 ${
-                      isDocked ? 'md:pl-[120px] md:pr-[72px]' : 'md:pl-[168px] md:pr-[72px]'
-                    }`}
+                    className={`${wide ? "" : "max-w-[1440px] mx-auto"} px-6 py-3 md:py-6 pb-32 min-h-0`}
                   >
                     {children}
                   </div>
                 )}
               </main>
             </div>
-
           </div>
-        </div>
-      )}
+        )}
 
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
