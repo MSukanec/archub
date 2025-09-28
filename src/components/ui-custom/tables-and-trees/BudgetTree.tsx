@@ -358,8 +358,11 @@ const TaskActionButtons = ({
       return;
     }
     
-    // Set source in localStorage so TaskView knows where we came from
+    // Set source and budget_id in localStorage so TaskView knows where we came from
     localStorage.setItem('taskViewSource', 'budgets');
+    if (task.budget_id) {
+      localStorage.setItem('taskViewSourceBudgetId', task.budget_id);
+    }
     // Navigate to task view using the correct route
     navigate(`/analysis/${task.task_id}`);
   };
@@ -523,219 +526,203 @@ const BudgetSummaryRow = ({
       </div>
 
       {/* Subtotal General Row */}
-      <div 
-        className="grid gap-4 px-4 py-3 text-xs"
-        style={{ 
-          gridTemplateColumns: GRID_COLUMNS,
-          backgroundColor: "var(--table-row-bg)"
-        }}
-      >
-        <div></div> {/* Empty space for drag handle column */}
-        <div></div> {/* Empty space for item number column */}
-        <div></div> {/* Empty space for description column */}
-        <div></div> {/* Empty space for type column */}
-        <div></div> {/* Empty space for quantity column */}
-        <div></div> {/* Empty space for unit cost column */}
+      <div className="relative">
         <div 
-          className="flex items-center font-medium border-b" 
+          className="grid gap-4 px-4 py-3 text-xs"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            gridTemplateColumns: GRID_COLUMNS,
+            backgroundColor: "var(--table-row-bg)"
           }}
         >
-          Subtotal General
-        </div> {/* SUBTOTAL column */}
+          <div></div> {/* Empty space for drag handle column */}
+          <div></div> {/* Empty space for item number column */}
+          <div></div> {/* Empty space for description column */}
+          <div></div> {/* Empty space for type column */}
+          <div></div> {/* Empty space for quantity column */}
+          <div></div> {/* Empty space for unit cost column */}
+          <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}>
+            Subtotal General
+          </div> {/* SUBTOTAL column */}
+          <div></div> {/* Margin column */}
+          <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>
+            {formatCurrency(totalFinals)}
+          </div> {/* TOTAL column */}
+          <div></div> {/* Empty space for percentage column */}
+          <div></div> {/* Empty space for actions column */}
+        </div>
+        {/* Continuous line from SUBTOTAL to TOTAL */}
         <div 
-          className="border-b" 
-          style={{ borderBottomColor: "var(--table-row-border)" }}
-        ></div> {/* Margin column with border */}
-        <div 
-          className="flex items-center justify-end font-semibold border-b" 
+          className="absolute bottom-0 h-px"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            backgroundColor: "var(--table-row-border)",
+            left: "60%", /* Approximate start at SUBTOTAL column */
+            right: "18%" /* Approximate end after TOTAL column */
           }}
-        >
-          {formatCurrency(totalFinals)}
-        </div> {/* TOTAL column */}
-        <div></div> {/* Empty space for percentage column */}
-        <div></div> {/* Empty space for actions column */}
+        />
       </div>
 
       {/* Discount Row */}
-      <div 
-        className="grid gap-4 px-4 py-3 text-xs"
-        style={{ 
-          gridTemplateColumns: GRID_COLUMNS,
-          backgroundColor: "var(--table-row-bg)"
-        }}
-      >
-        <div></div> {/* Empty space for drag handle column */}
-        <div></div> {/* Empty space for item number column */}
-        <div></div> {/* Empty space for description column */}
-        <div></div> {/* Empty space for type column */}
-        <div></div> {/* Empty space for quantity column */}
-        <div></div> {/* Empty space for unit cost column */}
+      <div className="relative">
         <div 
-          className="flex items-center font-medium border-b" 
+          className="grid gap-4 px-4 py-3 text-xs"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
-          }}
-        > {/* SUBTOTAL column with editable percentage */}
-          <span className="mr-1">Descuento</span>
-          <span className="text-gray-600">(</span>
-          {editingField === 'discount' ? (
-            <Input
-              type="number"
-              value={localDiscountPct}
-              onChange={(e) => handleDiscountPctChange(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'discount')}
-              onBlur={() => setEditingField(null)}
-              className="h-6 w-12 text-xs text-center bg-white text-black mx-1"
-              step="0.1"
-              min="0"
-              max="100"
-              autoFocus
-              onFocus={(e) => e.target.select()}
-            />
-          ) : (
-            <button
-              onClick={() => setEditingField('discount')}
-              className="text-xs font-medium transition-colors cursor-pointer border-b border-dashed mx-1"
-              style={{ 
-                color: "var(--accent-2)",
-                borderBottomColor: "var(--accent-2)"
-              }}
-            >
-              {formatPercentage(discountPct)}
-            </button>
-          )}
-          <span className="text-gray-600">%)</span>
-        </div>
-        <div 
-          className="border-b" 
-          style={{ borderBottomColor: "var(--table-row-border)" }}
-        ></div> {/* Margin column with border */}
-        <div 
-          className="flex items-center justify-end font-semibold border-b" 
-          style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            gridTemplateColumns: GRID_COLUMNS,
+            backgroundColor: "var(--table-row-bg)"
           }}
         >
-          {formatCurrency(discountValue)}
-        </div> {/* TOTAL column - clean value without - */}
-        <div></div> {/* Empty space for percentage column */}
-        <div></div> {/* Empty space for actions column */}
+          <div></div> {/* Empty space for drag handle column */}
+          <div></div> {/* Empty space for item number column */}
+          <div></div> {/* Empty space for description column */}
+          <div></div> {/* Empty space for type column */}
+          <div></div> {/* Empty space for quantity column */}
+          <div></div> {/* Empty space for unit cost column */}
+          <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
+            <span className="mr-1">Descuento</span>
+            <span className="text-gray-600">(</span>
+            {editingField === 'discount' ? (
+              <Input
+                type="number"
+                value={localDiscountPct}
+                onChange={(e) => handleDiscountPctChange(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'discount')}
+                onBlur={() => setEditingField(null)}
+                className="h-6 w-12 text-xs text-center bg-white text-black mx-1"
+                step="0.1"
+                min="0"
+                max="100"
+                autoFocus
+                onFocus={(e) => e.target.select()}
+              />
+            ) : (
+              <button
+                onClick={() => setEditingField('discount')}
+                className="text-xs font-medium transition-colors cursor-pointer border-b border-dashed mx-1"
+                style={{ 
+                  color: "var(--accent-2)",
+                  borderBottomColor: "var(--accent-2)"
+                }}
+              >
+                {formatPercentage(discountPct)}
+              </button>
+            )}
+            <span className="text-gray-600">%)</span>
+          </div>
+          <div></div> {/* Margin column */}
+          <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>
+            {formatCurrency(discountValue)}
+          </div> {/* TOTAL column - clean value without - */}
+          <div></div> {/* Empty space for percentage column */}
+          <div></div> {/* Empty space for actions column */}
+        </div>
+        {/* Continuous line from SUBTOTAL to TOTAL */}
+        <div 
+          className="absolute bottom-0 h-px"
+          style={{ 
+            backgroundColor: "var(--table-row-border)",
+            left: "60%", /* Approximate start at SUBTOTAL column */
+            right: "18%" /* Approximate end after TOTAL column */
+          }}
+        />
       </div>
 
       {/* Base para IVA Row */}
-      <div 
-        className="grid gap-4 px-4 py-3 text-xs"
-        style={{ 
-          gridTemplateColumns: GRID_COLUMNS,
-          backgroundColor: "var(--table-row-bg)"
-        }}
-      >
-        <div></div> {/* Empty space for drag handle column */}
-        <div></div> {/* Empty space for item number column */}
-        <div></div> {/* Empty space for description column */}
-        <div></div> {/* Empty space for type column */}
-        <div></div> {/* Empty space for quantity column */}
-        <div></div> {/* Empty space for unit cost column */}
+      <div className="relative">
         <div 
-          className="flex items-center font-medium border-b" 
+          className="grid gap-4 px-4 py-3 text-xs"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            gridTemplateColumns: GRID_COLUMNS,
+            backgroundColor: "var(--table-row-bg)"
           }}
         >
-          Base para IVA
-        </div> {/* SUBTOTAL column */}
+          <div></div> {/* Empty space for drag handle column */}
+          <div></div> {/* Empty space for item number column */}
+          <div></div> {/* Empty space for description column */}
+          <div></div> {/* Empty space for type column */}
+          <div></div> {/* Empty space for quantity column */}
+          <div></div> {/* Empty space for unit cost column */}
+          <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}>
+            Base para IVA
+          </div> {/* SUBTOTAL column */}
+          <div></div> {/* Margin column */}
+          <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>
+            {formatCurrency(totalAfterDiscount)}
+          </div> {/* TOTAL column */}
+          <div></div> {/* Empty space for percentage column */}
+          <div></div> {/* Empty space for actions column */}
+        </div>
+        {/* Continuous line from SUBTOTAL to TOTAL */}
         <div 
-          className="border-b" 
-          style={{ borderBottomColor: "var(--table-row-border)" }}
-        ></div> {/* Margin column with border */}
-        <div 
-          className="flex items-center justify-end font-semibold border-b" 
+          className="absolute bottom-0 h-px"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            backgroundColor: "var(--table-row-border)",
+            left: "60%", /* Approximate start at SUBTOTAL column */
+            right: "18%" /* Approximate end after TOTAL column */
           }}
-        >
-          {formatCurrency(totalAfterDiscount)}
-        </div> {/* TOTAL column */}
-        <div></div> {/* Empty space for percentage column */}
-        <div></div> {/* Empty space for actions column */}
+        />
       </div>
 
       {/* IVA Row */}
-      <div 
-        className="grid gap-4 px-4 py-3 text-xs"
-        style={{ 
-          gridTemplateColumns: GRID_COLUMNS,
-          backgroundColor: "var(--table-row-bg)"
-        }}
-      >
-        <div></div> {/* Empty space for drag handle column */}
-        <div></div> {/* Empty space for item number column */}
-        <div></div> {/* Empty space for description column */}
-        <div></div> {/* Empty space for type column */}
-        <div></div> {/* Empty space for quantity column */}
-        <div></div> {/* Empty space for unit cost column */}
+      <div className="relative">
         <div 
-          className="flex items-center font-medium border-b" 
+          className="grid gap-4 px-4 py-3 text-xs"
           style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
-          }}
-        > {/* SUBTOTAL column with editable percentage */}
-          <span className="mr-1">IVA</span>
-          <span className="text-gray-600">(</span>
-          {editingField === 'vat' ? (
-            <Input
-              type="number"
-              value={localVatPct}
-              onChange={(e) => handleVatPctChange(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'vat')}
-              onBlur={() => setEditingField(null)}
-              className="h-6 w-12 text-xs text-center bg-white text-black mx-1"
-              step="0.1"
-              min="0"
-              max="30"
-              autoFocus
-              onFocus={(e) => e.target.select()}
-            />
-          ) : (
-            <button
-              onClick={() => setEditingField('vat')}
-              className="text-xs font-medium transition-colors cursor-pointer border-b border-dashed mx-1"
-              style={{ 
-                color: "var(--accent-2)",
-                borderBottomColor: "var(--accent-2)"
-              }}
-            >
-              {formatPercentage(vatPct)}
-            </button>
-          )}
-          <span className="text-gray-600">%)</span>
-        </div>
-        <div 
-          className="border-b" 
-          style={{ borderBottomColor: "var(--table-row-border)" }}
-        ></div> {/* Margin column with border */}
-        <div 
-          className="flex items-center justify-end font-semibold border-b" 
-          style={{ 
-            color: "var(--table-row-fg)",
-            borderBottomColor: "var(--table-row-border)"
+            gridTemplateColumns: GRID_COLUMNS,
+            backgroundColor: "var(--table-row-bg)"
           }}
         >
-          {formatCurrency(vatAmount)}
-        </div> {/* TOTAL column - clean value without + */}
-        <div></div> {/* Empty space for percentage column */}
-        <div></div> {/* Empty space for actions column */}
+          <div></div> {/* Empty space for drag handle column */}
+          <div></div> {/* Empty space for item number column */}
+          <div></div> {/* Empty space for description column */}
+          <div></div> {/* Empty space for type column */}
+          <div></div> {/* Empty space for quantity column */}
+          <div></div> {/* Empty space for unit cost column */}
+          <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
+            <span className="mr-1">IVA</span>
+            <span className="text-gray-600">(</span>
+            {editingField === 'vat' ? (
+              <Input
+                type="number"
+                value={localVatPct}
+                onChange={(e) => handleVatPctChange(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'vat')}
+                onBlur={() => setEditingField(null)}
+                className="h-6 w-12 text-xs text-center bg-white text-black mx-1"
+                step="0.1"
+                min="0"
+                max="30"
+                autoFocus
+                onFocus={(e) => e.target.select()}
+              />
+            ) : (
+              <button
+                onClick={() => setEditingField('vat')}
+                className="text-xs font-medium transition-colors cursor-pointer border-b border-dashed mx-1"
+                style={{ 
+                  color: "var(--accent-2)",
+                  borderBottomColor: "var(--accent-2)"
+                }}
+              >
+                {formatPercentage(vatPct)}
+              </button>
+            )}
+            <span className="text-gray-600">%)</span>
+          </div>
+          <div></div> {/* Margin column */}
+          <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>
+            {formatCurrency(vatAmount)}
+          </div> {/* TOTAL column - clean value without + */}
+          <div></div> {/* Empty space for percentage column */}
+          <div></div> {/* Empty space for actions column */}
+        </div>
+        {/* Continuous line from SUBTOTAL to TOTAL */}
+        <div 
+          className="absolute bottom-0 h-px"
+          style={{ 
+            backgroundColor: "var(--table-row-border)",
+            left: "60%", /* Approximate start at SUBTOTAL column */
+            right: "18%" /* Approximate end after TOTAL column */
+          }}
+        />
       </div>
 
       {/* Total Final Row */}

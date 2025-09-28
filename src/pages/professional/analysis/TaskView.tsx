@@ -61,7 +61,14 @@ export default function TaskView() {
           navigate('/admin/tasks');
           break;
         case 'budgets':
-          navigate('/professional/budgets');
+          // Get budget_id from localStorage if available
+          const budgetId = localStorage.getItem('taskViewSourceBudgetId');
+          if (budgetId) {
+            localStorage.removeItem('taskViewSourceBudgetId');
+            navigate(`/professional/budgets/view/${budgetId}`);
+          } else {
+            navigate('/professional/budgets');
+          }
           break;
         default:
           navigate('/analysis');
