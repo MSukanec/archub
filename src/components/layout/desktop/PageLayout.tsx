@@ -175,7 +175,9 @@ export function PageLayout({
     <div className="flex flex-col min-h-0">
       {/* Page Header */}
       <div style={{ backgroundColor: "var(--layout-bg)" }}>
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 px-6`}>
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
+          isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+        }`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           {/* Left: Page Title */}
