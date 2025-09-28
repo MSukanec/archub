@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { MainSidebar } from "./MainSidebar";
+import { MainHeader } from "./MainHeader";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -95,13 +96,16 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{
         backgroundColor: isMobile
           ? "var(--layout-mobile-bg)"
           : "var(--layout-bg)",
       }}
     >
+      {/* Main Header for Desktop - Only shown on desktop */}
+      {!isMobile && <MainHeader />}
+      
       {/* Mobile View - Unchanged */}
       {isMobile ? (
         <HeaderMobile {...(headerProps ?? {})}>
@@ -113,7 +117,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - Frame Layout without Header */
-        <div className="h-screen flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden">
           {/* Main Layout Frame - Full height */}
           <div
             className="flex-1 flex min-h-0 relative"
