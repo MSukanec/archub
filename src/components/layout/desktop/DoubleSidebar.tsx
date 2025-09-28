@@ -537,7 +537,7 @@ export function MainSidebar() {
       <div 
         className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-row overflow-visible"
         style={{
-          height: '100vh', // Ocupar toda la altura de la ventana
+          height: '100%', // Usar altura del contenedor padre, no 100vh
           width: isDocked 
             ? '256px' // Cuando está anclado, coincidir con w-64
             : (isHovered ? '256px' : '48px') // Cuando no está anclado, coincidir con w-64/w-12
