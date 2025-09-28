@@ -60,8 +60,8 @@ export function MainHeader() {
     >
       {/* Left side: Logo and navigation */}
       <div className="flex items-center gap-4">
-        {/* Logo - Aligned exactly like sidebar buttons */}
-        <div className="shrink-0 w-12 flex items-center justify-center">
+        {/* Logo - Perfectly centered in 48x48px space */}
+        <div className="shrink-0 w-12 h-12 flex items-center justify-center">
           <img 
             src="/ArchubLogo.png" 
             alt="Archub" 
