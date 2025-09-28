@@ -117,7 +117,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         </HeaderMobile>
       ) : (
         /* Desktop View - Frame Layout without Header */
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden" style={{ backgroundColor: "var(--main-sidebar-bg)" }}>
           {/* Tertiary Sidebar - Conditional layout based on docked state */}
           {isDocked ? (
             // When docked: Take up space and push content
@@ -132,9 +132,9 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           )}
 
           {/* Main Content Area with rounded corners and framing effect */}
-          <div className="flex-1 pr-3 pb-3 pl-3">
+          <div className={`flex-1 pr-6 pb-6 ${isDocked ? 'pl-6' : 'pl-[calc(24px+256px)]'}`}>
               <main
-                className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
+                className="h-full flex flex-col overflow-y-auto rounded-lg"
                 style={{ 
                   backgroundColor: "var(--layout-bg)",
                 }}
