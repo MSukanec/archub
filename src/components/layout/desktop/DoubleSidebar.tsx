@@ -667,23 +667,22 @@ export function MainSidebar() {
                 
                 return elementsToRender;
               })()}
+              
+              {/* Anchor Button - Positioned after menu items */}
+              <div className="mt-6 pt-2 border-t border-[var(--main-sidebar-border)]">
+                <ButtonSidebar
+                  icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+                  label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+                  isActive={false}
+                  isExpanded={isExpanded}
+                  onClick={() => {
+                    console.log('DOCK TOGGLE CLICKED!', isDocked);
+                    handleDockToggle();
+                  }}
+                  variant="secondary"
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Anchor Button - Fixed at bottom */}
-          <div className="mt-auto border-t border-[var(--main-sidebar-border)] p-2 bg-yellow-500">
-            <p className="text-black">TEST BUTTON AREA</p>
-            <ButtonSidebar
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={() => {
-                console.log('DOCK TOGGLE CLICKED!', isDocked);
-                handleDockToggle();
-              }}
-              variant="secondary"
-            />
           </div>
         </aside>
       </div>
