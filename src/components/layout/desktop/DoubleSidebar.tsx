@@ -546,13 +546,10 @@ export function MainSidebar() {
         onMouseLeave={() => setHovered(false)}
       >
         <aside 
-          className={cn(
-            "flex flex-col overflow-visible flex-1",
-            isExpanded ? "w-64" : "w-12"
-          )}
+          className="flex flex-col overflow-visible flex-1 w-full"
         >
           {/* Navigation Items */}
-          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
+          <div className="flex-1 overflow-y-auto pt-3 pb-2 px-2 min-h-0">
             <div className="flex flex-col gap-[2px] h-full">
               {(() => {
                 const items = getTertiarySidebarItems();
