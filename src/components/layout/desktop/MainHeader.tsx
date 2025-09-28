@@ -52,7 +52,7 @@ export function MainHeader() {
 
   return (
     <div 
-      className="w-full h-12 border-b flex items-center justify-between px-4 z-50"
+      className="w-full h-12 border-b flex items-center justify-between pr-4 z-50"
       style={{ 
         backgroundColor: "var(--main-sidebar-bg)",
         borderBottomColor: "var(--main-sidebar-border)"
@@ -60,7 +60,7 @@ export function MainHeader() {
     >
       {/* Left side: Logo and navigation */}
       <div className="flex items-center gap-4">
-        {/* Logo - Perfectly centered in 48x48px space */}
+        {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
         <div className="shrink-0 w-12 h-12 flex items-center justify-center">
           <img 
             src="/ArchubLogo.png" 
