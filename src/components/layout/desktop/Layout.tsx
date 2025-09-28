@@ -120,7 +120,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
         <div className="flex-1 flex overflow-hidden">
           {/* Main Layout Frame - Full height */}
           <div
-            className="flex-1 flex min-h-0 relative"
+            className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}
             style={{ borderColor: "var(--main-sidebar-bg)" }}
           >
             {/* Tertiary Sidebar - Conditional layout based on docked state */}
@@ -137,7 +137,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
             )}
 
             {/* Main Content Area with rounded corners and framing effect */}
-            <div className="flex-1 pr-3 pb-3 pl-6">
+            <div className="flex-1 pr-3 pb-3 pl-3">
               <main
                 className={`h-full flex flex-col overflow-y-auto rounded-lg ${!isDocked ? 'w-full' : ''}`}
                 style={{ 
