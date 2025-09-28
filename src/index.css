@@ -128,7 +128,7 @@
   --table-row-fg: hsl(0, 0%, 40%);
   --table-row-hover-bg: hsl(60, 8%, 92%);
   --table-row-border: hsl(0, 0%, 85%);
-  --table-group-header-bg: hsl(0, 0%, 50%);
+  --table-group-header-bg: hsl(0, 0%, 40%);
   --table-group-header-fg: hsl(0, 0%, 100%);
 
   /* Table Dynamic Group Headers (filas de agrupación dinámicas) */
