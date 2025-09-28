@@ -12,7 +12,7 @@
   --layout-border: hsl(0, 0%, 40%);
 
   /* Header */
-  --header-bg: hsl(0, 0%, 97%);
+  --header-bg: hsl(0, 0%, 16%);
   --header-fg: hsl(0, 0%, 40%);
   --header-border: hsl(0, 0%, 88%);
   --header-button-bg: transparent;
@@ -23,7 +23,7 @@
   --header-button-hover-fg: hsl(0, 0%, 100%);
 
   /* Sidebar */
-  --main-sidebar-bg: hsl(0, 0%, 97%);
+  --main-sidebar-bg: hsl(0, 0%, 16%);
   --main-sidebar-fg: hsl(0, 0%, 40%);
   --main-sidebar-border: hsl(0, 0%, 88%);
   --main-sidebar-button-bg: transparent;
