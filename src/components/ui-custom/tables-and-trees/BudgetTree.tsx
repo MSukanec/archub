@@ -551,10 +551,8 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900">Descuento</div> {/* SUBTOTAL column */}
-        <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end"> {/* TOTAL column with editable percentage */}
-          <span className="text-gray-900 font-medium mr-1">= -{formatCurrency(discountValue)}</span>
+        <div className="flex items-center font-medium text-gray-900"> {/* SUBTOTAL column with editable percentage */}
+          <span className="mr-1">Descuento</span>
           <span className="text-gray-600">(</span>
           {editingField === 'discount' ? (
             <Input
@@ -584,6 +582,8 @@ const BudgetSummaryRow = ({
           )}
           <span className="text-gray-600">%)</span>
         </div>
+        <div></div> {/* Empty space for margin column */}
+        <div className="flex items-center justify-end font-semibold text-gray-900">-{formatCurrency(discountValue)}</div> {/* TOTAL column - clean value */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
@@ -617,10 +617,8 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for type column */}
         <div></div> {/* Empty space for quantity column */}
         <div></div> {/* Empty space for unit cost column */}
-        <div className="flex items-center font-medium text-gray-900">IVA</div> {/* SUBTOTAL column */}
-        <div></div> {/* Empty space for margin column */}
-        <div className="flex items-center justify-end"> {/* TOTAL column with editable percentage */}
-          <span className="text-gray-900 font-medium mr-1">= +{formatCurrency(vatAmount)}</span>
+        <div className="flex items-center font-medium text-gray-900"> {/* SUBTOTAL column with editable percentage */}
+          <span className="mr-1">IVA</span>
           <span className="text-gray-600">(</span>
           {editingField === 'vat' ? (
             <Input
@@ -650,6 +648,8 @@ const BudgetSummaryRow = ({
           )}
           <span className="text-gray-600">%)</span>
         </div>
+        <div></div> {/* Empty space for margin column */}
+        <div className="flex items-center justify-end font-semibold text-gray-900">+{formatCurrency(vatAmount)}</div> {/* TOTAL column - clean value */}
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
