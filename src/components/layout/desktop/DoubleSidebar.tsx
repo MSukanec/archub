@@ -669,6 +669,18 @@ export function MainSidebar() {
               })()}
             </div>
           </div>
+
+          {/* Anchor Button - Fixed at bottom */}
+          <div className="border-t border-[var(--main-sidebar-border)] p-2">
+            <ButtonSidebar
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="secondary"
+            />
+          </div>
         </aside>
       </div>
     </div>
