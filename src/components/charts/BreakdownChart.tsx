@@ -64,24 +64,22 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   });
   
   return (
-    <div className={`relative ${className}`}>
-      {/* Líneas verticales que atraviesan todo el componente */}
+    <div className={`relative flex flex-col h-full ${className}`}>
+      {/* Líneas verticales que atraviesan TODA la altura del componente */}
       {segments.map((segment, index) => (
         <div
           key={`line-${segment.label}-${index}`}
-          className="absolute w-px"
+          className="absolute w-px inset-y-0"
           style={{
             left: `${segment.startPos}%`,
-            top: 0,
-            height: '100%',
             backgroundColor: segment.color,
             zIndex: 10
           }}
         />
       ))}
 
-      {/* Valores de dinero y porcentajes arriba de cada línea */}
-      <div className="relative h-12 mb-2">
+      {/* Valores de dinero y porcentajes arriba */}
+      <div className="relative flex-none h-16">
         {segments.map((segment, index) => (
           <div
             key={`values-${segment.label}-${index}`}
@@ -102,8 +100,8 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
         ))}
       </div>
 
-      {/* Iconos y labels arriba de la barra, alineados con las líneas */}
-      <div className="relative h-8 mb-1">
+      {/* Iconos y labels */}
+      <div className="relative flex-none h-12">
         {segments.map((segment, index) => (
           <div
             key={`labels-${segment.label}-${index}`}
@@ -128,8 +126,8 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
         ))}
       </div>
       
-      {/* Barra horizontal gruesa */}
-      <div className="relative">
+      {/* Barra horizontal pegada al fondo con mt-auto */}
+      <div className="relative flex-none mt-auto">
         <div className="flex w-full h-6 rounded-sm">
           {segments.map((segment, index) => (
             <div

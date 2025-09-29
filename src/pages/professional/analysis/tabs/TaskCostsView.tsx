@@ -387,8 +387,9 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 title="Distribución de Costos" 
                 description="Desglose de costos por categoría"
               />
-              <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-                <BreakdownChart 
+              <CardContent className={`${isMobile ? 'p-4' : 'p-6'} h-full flex`}>
+                <BreakdownChart
+                  className="h-full" 
                   data={[
                     { 
                       label: 'Materiales', 
