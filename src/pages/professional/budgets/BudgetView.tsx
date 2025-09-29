@@ -109,11 +109,14 @@ export default function BudgetView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actionButton: {
-      icon: Plus,
-      label: "Agregar Tarea",
-      onClick: handleAddTask
-    }
+    // Solo mostrar actionButton en la tab de "Listado de Items"
+    ...(activeTab === 'Listado de Items' && {
+      actionButton: {
+        icon: Plus,
+        label: "Agregar Tarea",
+        onClick: handleAddTask
+      }
+    })
   };
 
   if (isLoading || isLoadingItems) {
@@ -158,6 +161,7 @@ export default function BudgetView() {
         return (
           <BudgetMaterialsTab
             budget={budget}
+            onNavigateToTasks={() => setActiveTab('Listado de Items')}
           />
         );
       default:

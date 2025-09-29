@@ -1,21 +1,23 @@
 import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { Button } from '@/components/ui/button'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useBudgetItems } from '@/hooks/use-budget-items'
-import { Package } from 'lucide-react'
+import { Package, Plus } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
 
 interface BudgetMaterialsTabProps {
   budget: any
+  onNavigateToTasks?: () => void
 }
 
-export function BudgetMaterialsTab({ budget }: BudgetMaterialsTabProps) {
+export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterialsTabProps) {
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("category")
   const [selectedCategory, setSelectedCategory] = useState("")
@@ -182,6 +184,15 @@ export function BudgetMaterialsTab({ budget }: BudgetMaterialsTabProps) {
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
           title="No hay tareas en este presupuesto"
           description={`Para ver materiales, primero agrega tareas de construcción al presupuesto "${budget?.name || 'este presupuesto'}". Los materiales se calcularán automáticamente basándose en las tareas incluidas.`}
+          action={onNavigateToTasks && (
+            <Button 
+              onClick={onNavigateToTasks}
+              className="mt-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar Tareas
+            </Button>
+          )}
         />
       ) : filteredMaterials.length === 0 ? (
         <EmptyState
