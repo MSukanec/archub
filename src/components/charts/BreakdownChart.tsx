@@ -64,24 +64,22 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   });
   
   return (
-    <div className={`relative ${className}`} style={{ minHeight: '200px' }}>
-      {/* Líneas verticales que atraviesan todo el componente con altura fija */}
+    <div className={`flex flex-col h-full ${className}`}>
+      {/* Líneas verticales que van de arriba a abajo de toda la card */}
       {segments.map((segment, index) => (
         <div
           key={`line-${segment.label}-${index}`}
-          className="absolute w-px"
+          className="absolute w-px inset-y-0"
           style={{
             left: `${segment.startPos}%`,
-            top: 0,
-            height: '200px',
             backgroundColor: segment.color,
             zIndex: 10
           }}
         />
       ))}
 
-      {/* Valores de dinero y porcentajes arriba de cada línea */}
-      <div className="relative h-16 mb-4">
+      {/* Valores de dinero y porcentajes - van arriba */}
+      <div className="relative h-16">
         {segments.map((segment, index) => (
           <div
             key={`values-${segment.label}-${index}`}
@@ -102,8 +100,11 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
         ))}
       </div>
 
-      {/* Iconos y labels arriba de la barra, alineados con las líneas */}
-      <div className="relative h-10 mb-2">
+      {/* Espacio flexible para empujar todo hacia abajo */}
+      <div className="flex-1"></div>
+
+      {/* Iconos y labels JUSTO arriba de la barra */}
+      <div className="relative h-8 mb-1">
         {segments.map((segment, index) => (
           <div
             key={`labels-${segment.label}-${index}`}
@@ -128,8 +129,8 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
         ))}
       </div>
       
-      {/* Barra horizontal posicionada al fondo */}
-      <div className="absolute bottom-0 left-0 right-0">
+      {/* Barra horizontal AL FONDO */}
+      <div className="relative">
         <div className="flex w-full h-6 rounded-sm">
           {segments.map((segment, index) => (
             <div
