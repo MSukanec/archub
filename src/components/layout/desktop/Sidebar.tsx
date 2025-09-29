@@ -76,6 +76,7 @@ export function Sidebar() {
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
+        { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
       ];
     }
     
