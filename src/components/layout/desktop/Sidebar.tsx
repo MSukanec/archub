@@ -214,15 +214,14 @@ export function Sidebar() {
             {/* Avatar del Usuario */}
             <button
               className={cn(
-                "mx-2 h-12 rounded-md cursor-pointer transition-colors",
+                "mx-2 h-10 rounded-md cursor-pointer transition-colors",
                 "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "flex items-center",
-                isExpanded ? "justify-start gap-3 px-3" : "justify-center"
+                "flex items-center gap-3 pl-2"
               )}
               onClick={() => navigate('/profile')}
             >
-              <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarFallback className="bg-[var(--accent)] text-white text-base font-semibold">
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold">
                   {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
