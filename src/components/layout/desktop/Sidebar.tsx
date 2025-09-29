@@ -216,17 +216,19 @@ export function Sidebar() {
               className={cn(
                 "mx-2 h-10 rounded-md cursor-pointer transition-colors",
                 "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-                "flex items-center gap-3 pl-2"
+                "flex items-center"
               )}
               onClick={() => navigate('/profile')}
             >
-              <Avatar className="h-8 w-8 flex-shrink-0">
-                <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold">
-                  {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="w-full flex items-center justify-center">
+                <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
+                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
               {isExpanded && (
-                <div className="flex flex-col overflow-hidden min-w-0">
+                <div className="flex flex-col overflow-hidden min-w-0 absolute left-14">
                   <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
                     {userData?.user?.full_name || 'Usuario'}
                   </span>
