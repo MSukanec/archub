@@ -213,28 +213,34 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className={cn(
-                "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center px-2",
-                isExpanded ? "mx-2" : "mx-auto"
-              )}
+              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] grid items-center"
+              style={{
+                gridTemplateColumns: isExpanded ? '44px 1fr' : '44px 0fr'
+              }}
               onClick={() => navigate('/profile')}
             >
-              <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
-                <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
-                  {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              {/* Primera columna: Avatar siempre en la misma posición */}
+              <div className="flex items-center justify-center">
+                <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
+                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
               
-              {isExpanded && (
-                <div className="flex flex-col overflow-hidden min-w-0 ml-3">
-                  <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
-                    {userData?.user?.full_name || 'Usuario'}
-                  </span>
-                  <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
-                    Ver perfil
-                  </span>
-                </div>
-              )}
+              {/* Segunda columna: Texto que aparece/desaparece */}
+              <div className="flex flex-col overflow-hidden min-w-0 pl-2">
+                {isExpanded && (
+                  <>
+                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+                      {userData?.user?.full_name || 'Usuario'}
+                    </span>
+                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
+                      Ver perfil
+                    </span>
+                  </>
+                )}
+              </div>
             </button>
           </div>
 
