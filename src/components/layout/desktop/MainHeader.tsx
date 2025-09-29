@@ -1,17 +1,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Building2, FolderOpen, PanelLeftOpen, PanelLeftClose, Crown } from "lucide-react";
+import { ChevronDown, Building2, FolderOpen } from "lucide-react";
 import { useLocation } from "wouter";
-import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -19,12 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 
 export function MainHeader() {
   const [, navigate] = useLocation();
-  const { user } = useAuthStore();
   const { data: userData } = useCurrentUser();
-  const isAdmin = useIsAdmin();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
-  const { isDocked, setDocked } = useSidebarStore();
   const { toast } = useToast();
   
   // ORGANIZATION CHANGE MUTATION - Exact copy from ProfileOrganizations.tsx that WORKS
@@ -245,45 +238,6 @@ export function MainHeader() {
         </div>
       </div>
 
-      {/* Right side: Sidebar controls and User avatar */}
-      <div className="flex items-center gap-2">
-        {/* Pin Sidebar Button */}
-        <button
-          onClick={() => setDocked(!isDocked)}
-          className="h-8 w-8 rounded flex items-center justify-center text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] transition-all duration-200 ease-out"
-          title={isDocked ? "Desanclar Sidebar" : "Anclar Sidebar"}
-        >
-          {isDocked ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-        </button>
-
-        {/* Administrator Button - SOLO VISIBLE PARA ADMINISTRADORES */}
-        {isAdmin && (
-          <button
-            onClick={() => setSidebarLevel('admin')}
-            className={`h-8 w-8 rounded flex items-center justify-center transition-all duration-200 ease-out ${
-              sidebarLevel === 'admin' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
-            }`}
-            title="Administración"
-          >
-            <Crown className="h-4 w-4" />
-          </button>
-        )}
-
-        {/* User Avatar */}
-        <div 
-          className="h-8 w-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-200 ease-out hover:bg-[var(--main-sidebar-button-hover-bg)]"
-          onClick={() => navigate('/profile')}
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url || ''} />
-            <AvatarFallback className="text-xs">
-              {user?.email?.charAt(0)?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
     </div>
   );
 }
