@@ -213,7 +213,7 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] grid items-center"
+              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] grid"
               style={{
                 gridTemplateColumns: isExpanded ? '44px 1fr' : '44px 0fr'
               }}
@@ -229,7 +229,7 @@ export function Sidebar() {
               </div>
               
               {/* Segunda columna: Texto que aparece/desaparece */}
-              <div className="flex flex-col overflow-hidden min-w-0 pl-2">
+              <div className="flex flex-col justify-center overflow-hidden min-w-0 pl-2">
                 {isExpanded && (
                   <>
                     <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
