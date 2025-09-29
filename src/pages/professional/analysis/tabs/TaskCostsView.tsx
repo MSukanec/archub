@@ -381,7 +381,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
         <div className={`${isMobile ? 'space-y-6' : 'flex gap-6'}`}>
           {/* Columna 1: Gráfico (50% ancho) */}
           <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 h-full">
               <CardHeader 
                 icon={TrendingUp}
                 title="Distribución de Costos" 
@@ -412,14 +412,14 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
             </Card>
           </div>
 
-          {/* Columna 2: Costos Personalizados (50% ancho) - Solo para admins */}
+          {/* Columna 2: Costos de Tarea (50% ancho) - Solo para admins */}
           {isAdmin && (
             <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 h-full">
                 <CardHeader 
                   icon={Settings}
-                  title="Precios Personalizados" 
-                  description="Ajusta los costos para esta tarea específica"
+                  title="Costos de Tarea" 
+                  description="Gestiona los costos específicos de esta tarea"
                 >
                   <div className="flex items-center gap-2">
                     {customPrice && (
@@ -493,12 +493,20 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         <div className="space-y-2">
                           {!isEditingLabor ? (
                             <>
-                              <p className="text-2xl font-bold">
-                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.laborTotal)}` : 'Costo calculado automáticamente'}
-                              </p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-2xl font-bold">
+                                  {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
+                                </p>
+                                <Badge 
+                                  className="text-xs" 
+                                  style={{ 
+                                    backgroundColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
+                                    color: 'white' 
+                                  }}
+                                >
+                                  {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
+                                </Badge>
+                              </div>
                             </>
                           ) : (
                             <>
@@ -587,12 +595,20 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="space-y-2">
                       {!isEditingMaterial ? (
                         <>
-                          <p className="text-2xl font-bold">
-                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.materialTotal)}` : 'Costo calculado automáticamente'}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-2xl font-bold">
+                              {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
+                            </p>
+                            <Badge 
+                              className="text-xs" 
+                              style={{ 
+                                backgroundColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
+                                color: 'white' 
+                              }}
+                            >
+                              {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
+                            </Badge>
+                          </div>
                         </>
                       ) : (
                         <>
@@ -681,12 +697,20 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="space-y-2">
                       {!isEditingSupply ? (
                         <>
-                          <p className="text-2xl font-bold">
-                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.supplyTotal)}` : 'Costo calculado automáticamente'}
-                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-2xl font-bold">
+                              {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
+                            </p>
+                            <Badge 
+                              className="text-xs" 
+                              style={{ 
+                                backgroundColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
+                                color: 'white' 
+                              }}
+                            >
+                              {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
+                            </Badge>
+                          </div>
                         </>
                       ) : (
                         <>
@@ -747,9 +771,20 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-2xl font-bold">
-                        {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-2xl font-bold">
+                          {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
+                        </p>
+                        <Badge 
+                          className="text-xs" 
+                          style={{ 
+                            backgroundColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent-2)' : 'var(--accent)', 
+                            color: 'white' 
+                          }}
+                        >
+                          {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'Personalizado' : 'Costo Archub'}
+                        </Badge>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         Materiales + Mano de Obra + Insumos
                       </p>
