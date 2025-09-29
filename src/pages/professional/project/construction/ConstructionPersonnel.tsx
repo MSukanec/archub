@@ -307,7 +307,7 @@ export default function ConstructionPersonnel() {
   
   const headerProps = {
     icon: Users,
-    title: "Personal",
+    title: "Mano de Obra",
     breadcrumb: [
       { name: "Construcción", href: "/construction/dashboard" },
       { name: "Personal", href: "/construction/personnel" }

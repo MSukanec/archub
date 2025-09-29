@@ -60,11 +60,11 @@ export function Sidebar() {
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
         { id: 'dashboard', label: 'Resumen de Proyecto', icon: Home, href: '/project/dashboard' },
-        { id: 'construction', label: 'Construcción', icon: Building, href: '/construction/tasks' },
+        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
+        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
         { id: 'materials', label: 'Materiales', icon: FolderOpen, href: '/construction/materials' },
-        { id: 'personnel', label: 'Personal', icon: Users, href: '/construction/personnel' },
+        { id: 'indirects', label: 'Indirectos', icon: Building, href: '/construction/indirects' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
-        { id: 'indirects', label: 'Indirectos', icon: Calculator, href: '/construction/indirects' },
         { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
@@ -112,8 +112,10 @@ export function Sidebar() {
                 if (item.adminOnly && !isAdmin) return null;
                 
                 const isActive = location === item.href;
-                const shouldShowDivider = sidebarLevel === 'organization' && 
-                  (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses');
+                const shouldShowDivider = (sidebarLevel === 'organization' && 
+                  (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses')) ||
+                  (sidebarLevel === 'project' && 
+                  (item.id === 'dashboard' || item.id === 'indirects'));
                 
                 return (
                   <div key={item.id}>
