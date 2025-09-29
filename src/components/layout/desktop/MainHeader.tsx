@@ -321,12 +321,11 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
                 <button
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
-                  className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded border ${
+                  className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
                     tab.isActive
-                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)] border-[var(--layout-bg)]' 
-                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] border-[var(--layout-bg)]'
+                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
                   }`}
-                  style={{ borderColor: 'var(--layout-bg)' }}
                 >
                   {tab.label}
                 </button>
