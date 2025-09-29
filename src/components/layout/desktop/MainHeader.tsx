@@ -312,30 +312,41 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         
         {/* Tabs - si existen */}
         {tabs && tabs.length > 0 && (
-          <>
-            {/* Separador vertical antes de las tabs */}
-            <div className="h-5 w-px bg-white opacity-30 mx-4" />
-            
-            <div className="flex items-center gap-0 h-full">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => onTabChange?.(tab.id)}
-                  className={`relative flex items-center h-full px-4 text-sm font-medium transition-all duration-200 ${
-                    tab.isActive
-                      ? 'text-[var(--accent)]' 
-                      : 'text-[var(--main-sidebar-fg)] opacity-60 hover:opacity-100'
+          <div className="flex items-center gap-0 h-full ml-6">
+            {tabs.map((tab, index) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange?.(tab.id)}
+                className="relative flex items-center h-full px-4 text-sm font-medium text-white transition-all duration-200 border-l border-r border-white border-opacity-20"
+                style={{
+                  borderLeftWidth: index === 0 ? '1px' : '0',
+                }}
+              >
+                {tab.label}
+                {/* Barra inferior - aparece en active y hover */}
+                <div 
+                  className={`absolute bottom-1 left-2 right-2 h-0.5 transition-all duration-200 ${
+                    tab.isActive 
+                      ? 'bg-white opacity-100' 
+                      : 'bg-white opacity-0 group-hover:opacity-60'
                   }`}
-                >
-                  {tab.label}
-                  {/* Barra inferior para tab activa */}
-                  {tab.isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </>
+                  style={{
+                    opacity: tab.isActive ? 1 : 0,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!tab.isActive) {
+                      e.currentTarget.style.opacity = '0.6';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!tab.isActive) {
+                      e.currentTarget.style.opacity = '0';
+                    }
+                  }}
+                />
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
