@@ -50,7 +50,11 @@ export function PlanRestricted({
   let isRestricted = false;
   let restrictionKey = "";
 
-  if (reason === "general_mode") {
+  // Si el tipo es "coming-soon", SIEMPRE está restringido
+  if (type === "coming-soon") {
+    isRestricted = true;
+    restrictionKey = "coming_soon";
+  } else if (reason === "general_mode") {
     if (selectedProjectId === null) {
       isRestricted = true;
       restrictionKey = "general_mode";
