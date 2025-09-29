@@ -376,74 +376,38 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Layout de 2 columnas: 50% gráfico + 50% costos personalizados */}
-      {kpiData && (
-        <div className={`${isMobile ? 'space-y-6' : 'flex gap-6'}`}>
-          {/* Columna 1: Gráfico (50% ancho) */}
-          <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 h-full">
-              <CardHeader 
-                icon={TrendingUp}
-                title="Distribución de Costos" 
-                description="Desglose de costos por categoría"
-              />
-              <CardContent className={`${isMobile ? 'p-4' : 'p-6'} flex flex-col h-full`}>
-                <BreakdownChart 
-                  data={[
-                    { 
-                      label: 'Mano de Obra', 
-                      value: kpiData.laborTotal,
-                      icon: <Users className="h-4 w-4" />
-                    },
-                    { 
-                      label: 'Materiales', 
-                      value: kpiData.materialTotal,
-                      icon: <Package className="h-4 w-4" />
-                    },
-                    { 
-                      label: 'Insumos', 
-                      value: kpiData.supplyTotal,
-                      icon: <Truck className="h-4 w-4" />
-                    }
-                  ]}
-                  formatValue={(value) => formatCurrency(value)}
-                />
-              </CardContent>
-            </Card>
+      {/* Costos de Tarea - Solo para admins */}
+      {kpiData && isAdmin && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium">Costos de Tarea</h3>
+              <p className="text-sm text-muted-foreground">
+                Gestiona los costos específicos de esta tarea
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
+              </span>
+              {customPrice && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDeleteCustomPrice}
+                  disabled={deleteCustomPrice.isPending}
+                  className="flex items-center gap-2"
+                  data-testid="button-delete-custom-price"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
+                </Button>
+              )}
+            </div>
           </div>
 
-          {/* Columna 2: Costos de Tarea (50% ancho) - Solo para admins */}
-          {isAdmin && (
-            <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 h-full">
-                <CardHeader 
-                  icon={Settings}
-                  title="Costos de Tarea" 
-                  description="Gestiona los costos específicos de esta tarea"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
-                    </span>
-                    {customPrice && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={handleDeleteCustomPrice}
-                        disabled={deleteCustomPrice.isPending}
-                        className="flex items-center gap-2"
-                        data-testid="button-delete-custom-price"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-                  <div className="space-y-6">
-                    {/* Price Cards - Grid 2x2: Mano de Obra | Materiales / Insumos | Total */}
-                    <div className="grid grid-cols-2 gap-4">
+          {/* Price Cards - Grid 1x4: todas una al lado de la otra */}
+          <div className="grid grid-cols-4 gap-4">
                     {/* Fila 1, Columna 1: Mano de Obra */}
                     <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                       <CardContent className="p-4">
@@ -786,12 +750,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
