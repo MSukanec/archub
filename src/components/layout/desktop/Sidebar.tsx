@@ -24,8 +24,10 @@ import {
   Crown,
   Package,
   Layers,
-  ListTodo
+  ListTodo,
+  User
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SidebarItem {
   id: string;
@@ -111,7 +113,7 @@ export function Sidebar() {
           style={{ height: '100%' }}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal */}
-          <div className="overflow-y-auto pt-3 px-0" style={{ paddingBottom: '80px' }}>
+          <div className="overflow-y-auto flex-1 pt-3 px-0 min-h-0">
             <div className="flex flex-col gap-[2px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
@@ -167,6 +169,69 @@ export function Sidebar() {
             </div>
           </div>
 
+          {/* SECCIÓN INFERIOR: Controles y Avatar */}
+          <div className="mt-auto pb-3 px-0 flex flex-col gap-[2px]">
+            {/* Botón de Anclar */}
+            <ButtonSidebar
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar" : "Anclar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="secondary"
+            />
+            
+            {/* Botón de Administración - solo si es admin */}
+            {isAdmin && (
+              <ButtonSidebar
+                icon={<Crown className="w-[18px] h-[18px]" />}
+                label="Administración"
+                isActive={sidebarLevel === 'admin'}
+                isExpanded={isExpanded}
+                onClick={() => {
+                  const { setSidebarLevel } = useNavigationStore.getState();
+                  if (sidebarLevel === 'admin') {
+                    setSidebarLevel('organization');
+                  } else {
+                    setSidebarLevel('admin');
+                  }
+                }}
+                variant="secondary"
+              />
+            )}
+
+            {/* Avatar del Usuario */}
+            <div 
+              className="mx-2 my-1 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/profile')}
+            >
+              {isExpanded ? (
+                <div className="flex items-center gap-3 p-2 rounded-md hover:bg-[var(--main-sidebar-fg)] hover:bg-opacity-10">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-[var(--accent)] text-white">
+                      {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+                      {userData?.user?.full_name || 'Usuario'}
+                    </span>
+                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
+                      Ver perfil
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center p-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-[var(--accent)] text-white">
+                      {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
+            </div>
+          </div>
 
         </aside>
       </div>
