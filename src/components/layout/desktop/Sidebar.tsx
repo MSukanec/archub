@@ -50,8 +50,8 @@ export function Sidebar() {
         { id: 'dashboard', label: 'Resumen de Organización', icon: Home, href: '/organization/dashboard' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
-        { id: 'library', label: 'Biblioteca', icon: FileText, href: '/resources/documentation' },
-        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/finances/movements' },
+        { id: 'analysis', label: 'Análisis de Costos', icon: FileText, href: '/analysis' },
+        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
         { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity' },
@@ -113,7 +113,7 @@ export function Sidebar() {
                 
                 const isActive = location === item.href;
                 const shouldShowDivider = sidebarLevel === 'organization' && 
-                  (item.id === 'dashboard' || item.id === 'library' || item.id === 'expenses');
+                  (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses');
                 
                 return (
                   <div key={item.id}>
@@ -137,16 +137,19 @@ export function Sidebar() {
 
           {/* BOTÓN DE ANCLAR - POSICIÓN ABSOLUTA AL FONDO */}
           <div 
-            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-3 bg-[var(--main-sidebar-bg)]"
+            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]"
+            style={{ padding: '12px 0' }}
           >
-            <ButtonSidebar
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleDockToggle}
-              variant="secondary"
-            />
+            <div className="px-3">
+              <ButtonSidebar
+                icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+                label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+                isActive={false}
+                isExpanded={isExpanded}
+                onClick={handleDockToggle}
+                variant="secondary"
+              />
+            </div>
           </div>
 
         </aside>
