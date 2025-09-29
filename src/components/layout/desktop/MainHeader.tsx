@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Building2, FolderOpen } from "lucide-react";
+import { ChevronDown, Building2, FolderOpen, Pin, Crown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/stores/authStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -241,8 +241,30 @@ export function MainHeader() {
         </div>
       </div>
 
-      {/* Right side: User avatar */}
-      <div className="flex items-center">
+      {/* Right side: Sidebar controls and User avatar */}
+      <div className="flex items-center gap-2">
+        {/* Pin Sidebar Button */}
+        <button
+          className="h-8 w-8 rounded flex items-center justify-center text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] transition-all duration-200 ease-out"
+          title="Anclar Sidebar"
+        >
+          <Pin className="h-4 w-4" />
+        </button>
+
+        {/* Administrator Button */}
+        <button
+          onClick={() => setSidebarLevel('admin')}
+          className={`h-8 w-8 rounded flex items-center justify-center transition-all duration-200 ease-out ${
+            sidebarLevel === 'admin' 
+              ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+              : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+          }`}
+          title="Administración"
+        >
+          <Crown className="h-4 w-4" />
+        </button>
+
+        {/* User Avatar */}
         <div 
           className="h-8 w-8 rounded-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-200 ease-out hover:bg-[var(--main-sidebar-button-hover-bg)]"
           onClick={() => navigate('/profile')}

@@ -61,8 +61,8 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
             unit_of_computation,
             avg_price,
             category_name,
-            commercial_unit_name,
-            commercial_factor
+            default_unit_presentation,
+            unit_equivalence
           )
         `)
         .in('task_id', budgetTaskIds);
@@ -103,8 +103,8 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
           category_name: materialView.category_name || 'Sin categoría',
           unit_name: materialView.unit_of_computation || 'unidad',
           computed_quantity: tm.amount || 0,
-          commercial_unit_name: materialView.commercial_unit_name,
-          commercial_quantity: materialView.commercial_factor ? (tm.amount || 0) * materialView.commercial_factor : null,
+          commercial_unit_name: materialView.default_unit_presentation,
+          commercial_quantity: materialView.unit_equivalence ? (tm.amount || 0) * materialView.unit_equivalence : null,
           phase_name: phaseMap.get(tm.task_id) || null
         };
       }).filter((material): material is NonNullable<typeof material> => material !== null);
