@@ -169,7 +169,7 @@ function Router() {
 
 
         {/* Admin Routes */}
-        <Route path="/admin/dashboard">
+        <Route path="/admin/community">
           <AuthAdmin>
             <AdminCommunity />
           </AuthAdmin>
@@ -180,14 +180,11 @@ function Router() {
 
 
 
-
-
-
         
 
 
 
-        <Route path="/admin/materials">
+        <Route path="/admin/costs">
           <AuthAdmin>
             <AdminCosts />
           </AuthAdmin>

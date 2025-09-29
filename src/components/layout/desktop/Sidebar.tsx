@@ -23,7 +23,8 @@ import {
   History,
   Crown,
   Package,
-  Layers
+  Layers,
+  ListTodo
 } from "lucide-react";
 
 interface SidebarItem {
@@ -71,9 +72,10 @@ export function Sidebar() {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
-        { id: 'materials', label: 'Precios de Materiales', icon: FolderOpen, href: '/admin/materials' },
-        { id: 'tasks', label: 'Administrar Tareas', icon: Building, href: '/admin/tasks' },
-        { id: 'users', label: 'Gestión de Usuarios', icon: Users, href: '/admin/users' },
+        { id: 'community', label: 'Comunidad', icon: Users, href: '/admin/community' },
+        { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
+        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
+        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
       ];
     }
     
