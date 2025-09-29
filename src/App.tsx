@@ -36,7 +36,7 @@ import Preferences from "@/pages/professional/preferences/Preferences";
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
 import Logs from "@/pages/professional/project/construction/logs/Logs";
 import ConstructionPersonnel from "@/pages/professional/project/construction/ConstructionPersonnel";
-import ConstructionMaterials from "@/pages/professional/project/construction/ConstructionMaterials";
+import Materials from "@/pages/professional/materials/Materials";
 import Budgets from "@/pages/professional/budgets/Budgets";
 import BudgetView from "@/pages/professional/budgets/BudgetView";
 
@@ -144,7 +144,7 @@ function Router() {
         <Route path="/construction/indirects" component={ConstructionIndirects} />
         <Route path="/construction/logs" component={Logs} />
         <Route path="/construction/personnel" component={ConstructionPersonnel} />
-        <Route path="/construction/materials" component={ConstructionMaterials} />
+        <Route path="/construction/materials" component={Materials} />
         <Route path="/analysis" component={Analysis} />
         <Route path="/analysis/:id" component={TaskView} />
         
