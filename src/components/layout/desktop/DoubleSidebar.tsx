@@ -672,8 +672,8 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Botón de anclar SOLO */}
-          <div className="border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0">
+          {/* SECCIÓN INFERIOR: Botón de anclar PEGADO AL FONDO */}
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0">
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
               label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
