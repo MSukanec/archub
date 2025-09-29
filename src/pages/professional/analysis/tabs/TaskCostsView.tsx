@@ -452,20 +452,12 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         <div className="space-y-2">
                           {!isEditingLabor ? (
                             <>
-                              <div className="flex items-center justify-between">
-                                <p className="text-2xl font-bold">
-                                  {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
-                                </p>
-                                <Badge 
-                                  className="text-xs" 
-                                  style={{ 
-                                    backgroundColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
-                                    color: 'white' 
-                                  }}
-                                >
-                                  {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
-                                </Badge>
-                              </div>
+                              <p className="text-2xl font-bold">
+                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
+                              </p>
                             </>
                           ) : (
                             <>
@@ -554,20 +546,12 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="space-y-2">
                       {!isEditingMaterial ? (
                         <>
-                          <div className="flex items-center justify-between">
-                            <p className="text-2xl font-bold">
-                              {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
-                            </p>
-                            <Badge 
-                              className="text-xs" 
-                              style={{ 
-                                backgroundColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
-                                color: 'white' 
-                              }}
-                            >
-                              {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
-                            </Badge>
-                          </div>
+                          <p className="text-2xl font-bold">
+                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
+                          </p>
                         </>
                       ) : (
                         <>
@@ -656,20 +640,12 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     <div className="space-y-2">
                       {!isEditingSupply ? (
                         <>
-                          <div className="flex items-center justify-between">
-                            <p className="text-2xl font-bold">
-                              {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
-                            </p>
-                            <Badge 
-                              className="text-xs" 
-                              style={{ 
-                                backgroundColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent-2)' : 'var(--accent)', 
-                                color: 'white' 
-                              }}
-                            >
-                              {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'Personalizado' : 'Costo Archub'}
-                            </Badge>
-                          </div>
+                          <p className="text-2xl font-bold">
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
+                          </p>
                         </>
                       ) : (
                         <>
@@ -730,22 +706,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-2xl font-bold">
-                          {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
-                        </p>
-                        <Badge 
-                          className="text-xs" 
-                          style={{ 
-                            backgroundColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent-2)' : 'var(--accent)', 
-                            color: 'white' 
-                          }}
-                        >
-                          {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'Personalizado' : 'Costo Archub'}
-                        </Badge>
-                      </div>
+                      <p className="text-2xl font-bold">
+                        {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        Materiales + Mano de Obra + Insumos
+                        {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'Costo Personalizado' : 'Costo Automático'}
                       </p>
                     </div>
                   </CardContent>
