@@ -217,8 +217,8 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
             onClick={handleOrganizationClick}
             className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
               sidebarLevel === 'organization' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
           >
             <Building2 className="h-4 w-4 mr-1" />
@@ -228,7 +228,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
           <Popover>
             <PopoverTrigger asChild>
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
               >
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -256,7 +256,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         </div>
         
         {/* Separator */}
-        <span className="text-sm text-[var(--main-sidebar-fg)] opacity-30 mx-1">/</span>
+        <span className="text-sm text-white opacity-50 mx-1">/</span>
 
         {/* Project selector */}
         <div className="flex items-center gap-1">
@@ -264,8 +264,8 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
             onClick={handleProjectClick}
             className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
               sidebarLevel === 'project' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
           >
             <FolderOpen className="h-4 w-4 mr-1" />
@@ -275,7 +275,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
           <Popover>
             <PopoverTrigger asChild>
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
               >
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -303,10 +303,10 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         </div>
         
         {/* Separator */}
-        <span className="text-sm text-[var(--main-sidebar-fg)] opacity-30 mx-1">/</span>
+        <span className="text-sm text-white opacity-50 mx-1">/</span>
         
         {/* Nombre de la página actual */}
-        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+        <span className="text-sm font-medium text-white opacity-90">
           {currentPageName}
         </span>
         
@@ -314,7 +314,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         {tabs && tabs.length > 0 && (
           <>
             {/* Separador vertical antes de las tabs */}
-            <div className="h-5 w-px bg-[var(--main-sidebar-fg)] opacity-20 mx-4" />
+            <div className="h-5 w-px bg-white opacity-30 mx-4" />
             
             <div className="flex items-center gap-0 h-full">
               {tabs.map((tab) => (
