@@ -535,7 +535,7 @@ export function MainSidebar() {
 
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-row overflow-visible"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-row overflow-visible relative"
         style={{
           height: '100%', // Usar altura del contenedor padre, no 100vh
           width: isDocked 
@@ -672,18 +672,19 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* Botón de anclar - PEGADO al borde inferior */}
-          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-3 pb-0">
-            <ButtonSidebar
-              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-              isActive={false}
-              isExpanded={isExpanded}
-              onClick={handleDockToggle}
-              variant="secondary"
-            />
-          </div>
         </aside>
+        
+        {/* Botón de anclar - POSICIÓN ABSOLUTA ABAJO DEL TODO */}
+        <div className="absolute bottom-0 left-0 right-0 bg-[var(--main-sidebar-bg)] border-t border-[var(--main-sidebar-border)] p-2">
+          <ButtonSidebar
+            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+            label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={handleDockToggle}
+            variant="secondary"
+          />
+        </div>
       </div>
     </div>
     </>
