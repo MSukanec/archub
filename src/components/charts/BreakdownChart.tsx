@@ -65,8 +65,8 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   
   return (
     <div className={`relative ${className}`}>
-      {/* Contenedor con información arriba */}
-      <div className="mb-8">
+      {/* Información arriba de cada segmento */}
+      <div className="relative h-20 mb-4">
         {segments.map((segment, index) => {
           const centerPos = segment.startPos + (segment.percentage / 2);
           
@@ -81,7 +81,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
               }}
             >
               {/* Valor y porcentaje */}
-              <div className="text-center mb-2">
+              <div className="text-center">
                 <div className="text-lg font-bold text-foreground">
                   {formatFn(segment.value)}
                 </div>
@@ -89,30 +89,19 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
                   {segment.percentage.toFixed(1)}%
                 </div>
               </div>
-              
-              {/* Línea vertical divisoria */}
-              {index < segments.length - 1 && (
-                <div
-                  className="absolute w-px bg-border"
-                  style={{
-                    left: `${(segment.percentage / 2) + (segments[index + 1]?.percentage || 0) / 2}%`,
-                    top: '60px',
-                    height: '40px'
-                  }}
-                />
-              )}
             </div>
           );
         })}
       </div>
       
-      {/* Barra horizontal principal */}
-      <div className="relative mt-16 mb-8">
-        <div className="flex w-full h-8 rounded-lg overflow-hidden">
+      {/* Barra horizontal principal con líneas verticales */}
+      <div className="relative">
+        {/* La barra */}
+        <div className="flex w-full h-6 rounded-sm overflow-hidden">
           {segments.map((segment, index) => (
             <div
               key={`bar-${segment.label}-${index}`}
-              className="h-full transition-all duration-500"
+              className="h-full relative"
               style={{
                 width: `${segment.percentage}%`,
                 backgroundColor: segment.color
@@ -120,10 +109,27 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
             />
           ))}
         </div>
+        
+        {/* Líneas verticales separadoras */}
+        {segments.slice(0, -1).map((segment, index) => {
+          const linePosition = segment.endPos;
+          return (
+            <div
+              key={`line-${index}`}
+              className="absolute w-px bg-white"
+              style={{
+                left: `${linePosition}%`,
+                top: 0,
+                height: '24px',
+                zIndex: 10
+              }}
+            />
+          );
+        })}
       </div>
       
-      {/* Labels abajo */}
-      <div className="relative">
+      {/* Labels e iconos abajo */}
+      <div className="relative h-16 mt-4">
         {segments.map((segment, index) => {
           const centerPos = segment.startPos + (segment.percentage / 2);
           
