@@ -88,7 +88,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
             className="absolute flex flex-col items-start"
             style={{
               left: `${segment.startPos}%`,
-              transform: 'translateX(-2px)',
+              transform: 'translateX(8px)',
               top: 0
             }}
           >
@@ -110,7 +110,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
             className="absolute flex flex-col items-start"
             style={{
               left: `${segment.startPos}%`,
-              transform: 'translateX(-2px)',
+              transform: 'translateX(8px)',
               top: 0
             }}
           >
