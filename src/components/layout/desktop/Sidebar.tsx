@@ -65,8 +65,8 @@ export function Sidebar() {
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
-        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects' },
+        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
         { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
@@ -117,7 +117,7 @@ export function Sidebar() {
                 const shouldShowDivider = (sidebarLevel === 'organization' && 
                   (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses')) ||
                   (sidebarLevel === 'project' && 
-                  (item.id === 'dashboard' || item.id === 'subcontracts'));
+                  (item.id === 'dashboard' || item.id === 'budgets' || item.id === 'subcontracts'));
                 
                 return (
                   <div key={item.id}>
