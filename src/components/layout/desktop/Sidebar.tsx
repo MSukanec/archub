@@ -127,7 +127,7 @@ export function Sidebar() {
                       variant="secondary"
                     />
                     {shouldShowDivider && (
-                      <div className="h-[1px] bg-gray-400 dark:bg-gray-500 mx-3 my-3 opacity-60" />
+                      <div className="h-[1px] bg-[var(--main-sidebar-fg)] mx-3 my-3 opacity-20" />
                     )}
                   </div>
                 );
@@ -137,7 +137,7 @@ export function Sidebar() {
 
           {/* BOTÓN DE ANCLAR - POSICIÓN ABSOLUTA AL FONDO */}
           <div 
-            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0 bg-[var(--main-sidebar-bg)]"
+            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-3 bg-[var(--main-sidebar-bg)]"
           >
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}

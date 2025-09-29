@@ -78,8 +78,8 @@ export default function SidebarButton({
           setIsHovered(false);
         }}
       >
-        {/* Icono con margen derecho fijo */}
-        <span className="flex-shrink-0 mr-2 flex items-center justify-center transition-colors duration-200">
+        {/* Icono centrado */}
+        <span className="flex-shrink-0 w-6 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (
