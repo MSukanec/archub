@@ -142,19 +142,19 @@ export function Sidebar() {
                       variant="secondary"
                     />
                     {dividerInfo.show && (
-                      <div className="mx-3 my-3">
+                      <div className="mx-3 my-3 h-[12px] flex items-center">
                         {isExpanded ? (
                           // Divisor con texto cuando está expandido
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 w-full">
                             <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
-                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
+                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1 leading-none">
                               {dividerInfo.text}
                             </span>
                             <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                           </div>
                         ) : (
-                          // Línea simple cuando está colapsado
-                          <div className="h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                          // Línea simple cuando está colapsado - misma altura
+                          <div className="h-[1px] bg-[var(--main-sidebar-fg)] opacity-20 w-full" />
                         )}
                       </div>
                     )}
