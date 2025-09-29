@@ -94,10 +94,10 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex flex-row h-screen">
+    <div className="flex flex-row h-[calc(100vh-3rem)]">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-visible relative h-screen"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-visible relative h-[calc(100vh-3rem)]"
         style={{
           width: isDocked 
             ? '240px' 
@@ -108,7 +108,7 @@ export function Sidebar() {
       >
         <aside 
           className={cn(
-            "grid h-screen grid-rows-[1fr_auto]",
+            "grid h-[calc(100vh-3rem)] grid-rows-[1fr_auto]",
             isExpanded ? "w-60" : "w-12"
           )}
         >
