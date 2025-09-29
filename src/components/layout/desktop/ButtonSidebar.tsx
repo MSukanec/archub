@@ -64,11 +64,10 @@ export default function SidebarButton({
         ref={buttonRef}
         data-active={isActive}
         className={cn(
-          "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded",
+          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded",
           "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
           !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
-          "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]",
-          isExpanded ? "w-full px-3" : "w-8 justify-center"
+          "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"
         )}
         onClick={handleClick}
         onMouseEnter={(e) => {
@@ -80,7 +79,7 @@ export default function SidebarButton({
         }}
       >
         {/* Icono centrado */}
-        <span className="flex-shrink-0 w-6 flex items-center justify-center transition-colors duration-200">
+        <span className="flex-shrink-0 w-8 flex items-center justify-center transition-colors duration-200">
           {!isChild && !(isHeaderButton && icon === null) && (
             <>
               {avatarUrl ? (

@@ -158,7 +158,7 @@ export function Sidebar() {
                       button
                     )}
                     {dividerInfo.show && (
-                      <div className="mx-3 my-3 h-[12px] flex items-center">
+                      <div className="my-3 h-[12px] flex items-center">
                         {isExpanded ? (
                           // Divisor con texto cuando está expandido
                           <div className="flex items-center gap-2 w-full">
@@ -169,8 +169,8 @@ export function Sidebar() {
                             <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                           </div>
                         ) : (
-                          // Línea simple cuando está colapsado - misma altura
-                          <div className="h-[1px] bg-[var(--main-sidebar-fg)] opacity-20 w-full" />
+                          // Línea simple cuando está colapsado - centrada en los 32px
+                          <div className="w-8 mx-auto h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                         )}
                       </div>
                     )}
