@@ -28,6 +28,7 @@ import {
   User
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PlanRestricted } from "@/components/ui-custom/security/PlanRestricted";
 
 interface SidebarItem {
   id: string;
@@ -35,6 +36,7 @@ interface SidebarItem {
   icon: React.ComponentType<any>;
   href: string;
   adminOnly?: boolean;
+  comingSoon?: boolean;
 }
 
 export function Sidebar() {
@@ -59,7 +61,7 @@ export function Sidebar() {
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements' },
         { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
-        { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity' },
+        { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', comingSoon: true },
         { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
@@ -134,17 +136,28 @@ export function Sidebar() {
 
                 const dividerInfo = getDividerInfo();
                 
+                // Botón con o sin restricción
+                const button = (
+                  <ButtonSidebar
+                    icon={<item.icon className="w-[18px] h-[18px]" />}
+                    label={item.label}
+                    isActive={isActive}
+                    isExpanded={isExpanded}
+                    onClick={() => navigate(item.href)}
+                    href={item.href}
+                    variant="secondary"
+                  />
+                );
+                
                 return (
                   <div key={item.id}>
-                    <ButtonSidebar
-                      icon={<item.icon className="w-[18px] h-[18px]" />}
-                      label={item.label}
-                      isActive={isActive}
-                      isExpanded={isExpanded}
-                      onClick={() => navigate(item.href)}
-                      href={item.href}
-                      variant="secondary"
-                    />
+                    {item.comingSoon ? (
+                      <PlanRestricted type="coming-soon">
+                        {button}
+                      </PlanRestricted>
+                    ) : (
+                      button
+                    )}
                     {dividerInfo.show && (
                       <div className="mx-3 my-3 h-[12px] flex items-center">
                         {isExpanded ? (
