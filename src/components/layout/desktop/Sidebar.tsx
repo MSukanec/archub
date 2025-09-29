@@ -94,12 +94,11 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row h-screen">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-row overflow-visible relative"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-visible relative h-screen"
         style={{
-          height: '100%',
           width: isDocked 
             ? '240px' 
             : (isHovered ? '240px' : '48px')
@@ -109,12 +108,12 @@ export function Sidebar() {
       >
         <aside 
           className={cn(
-            "flex flex-col h-full",
+            "grid h-screen grid-rows-[1fr_auto]",
             isExpanded ? "w-60" : "w-12"
           )}
         >
-          {/* SECCIÓN SUPERIOR: Navegación principal */}
-          <div className="pt-3 px-0 overflow-y-auto flex-shrink-0" style={{ maxHeight: 'calc(100% - 180px)' }}>
+          {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
+          <div className="pt-3 px-0 overflow-y-auto">
             <div className="flex flex-col gap-[2px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
@@ -181,11 +180,8 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* ESPACIADOR: Crea el espacio vacío entre secciones */}
-          <div className="flex-1 min-h-0"></div>
-
-          {/* SECCIÓN INFERIOR: Controles y Avatar */}
-          <div className="flex-shrink-0 pb-3 px-0 flex flex-col gap-[2px]">
+          {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
+          <div className="pb-3 px-0 flex flex-col gap-[2px]">
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
