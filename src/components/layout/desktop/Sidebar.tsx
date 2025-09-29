@@ -212,36 +212,15 @@ export function Sidebar() {
             )}
 
             {/* Avatar del Usuario */}
-            <div 
-              className="mx-2 my-1 cursor-pointer hover:opacity-80 transition-opacity"
+            <ButtonSidebar
+              icon={null}
+              label={userData?.user?.full_name || 'Usuario'}
+              isActive={false}
+              isExpanded={isExpanded}
               onClick={() => navigate('/profile')}
-            >
-              {isExpanded ? (
-                <div className="flex items-center gap-3 p-2 rounded-md hover:bg-[var(--main-sidebar-fg)] hover:bg-opacity-10">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-[var(--accent)] text-white">
-                      {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
-                      {userData?.user?.full_name || 'Usuario'}
-                    </span>
-                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
-                      Ver perfil
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center p-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-[var(--accent)] text-white">
-                      {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              )}
-            </div>
+              variant="secondary"
+              userFullName={userData?.user?.full_name || 'U'}
+            />
           </div>
 
         </aside>
