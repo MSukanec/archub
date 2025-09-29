@@ -313,18 +313,18 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         {/* Tabs - si existen */}
         {tabs && tabs.length > 0 && (
           <>
-            {/* Indicador de tabs */}
-            <span className="text-sm text-[var(--main-sidebar-fg)] opacity-40 mx-2">›</span>
+            {/* Separador vertical antes de las tabs */}
+            <div className="h-5 w-px bg-[var(--main-sidebar-fg)] opacity-20 mx-3" />
             
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
-                  className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+                  className={`flex items-center h-7 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded-md border ${
                     tab.isActive
-                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)] border-[var(--main-sidebar-button-active-bg)] shadow-sm' 
+                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] border-[var(--main-sidebar-border)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] hover:border-[var(--main-sidebar-button-hover-bg)]'
                   }`}
                 >
                   {tab.label}
