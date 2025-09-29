@@ -65,14 +65,14 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   
   return (
     <div className={`relative ${className}`}>
-      {/* Información arriba de cada segmento */}
-      <div className="relative h-20 mb-4">
+      {/* Valores de dinero y porcentajes arriba */}
+      <div className="relative h-16 mb-6">
         {segments.map((segment, index) => {
           const centerPos = segment.startPos + (segment.percentage / 2);
           
           return (
             <div
-              key={`top-${segment.label}-${index}`}
+              key={`values-${segment.label}-${index}`}
               className="absolute flex flex-col items-center"
               style={{
                 left: `${centerPos}%`,
@@ -80,62 +80,25 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
                 top: 0
               }}
             >
-              {/* Valor y porcentaje */}
-              <div className="text-center">
-                <div className="text-lg font-bold text-foreground">
-                  {formatFn(segment.value)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {segment.percentage.toFixed(1)}%
-                </div>
+              <div className="text-lg font-bold text-foreground">
+                {formatFn(segment.value)}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {segment.percentage.toFixed(1)}%
               </div>
             </div>
           );
         })}
       </div>
-      
-      {/* Barra horizontal principal con líneas verticales */}
-      <div className="relative">
-        {/* La barra */}
-        <div className="flex w-full h-6 rounded-sm overflow-hidden">
-          {segments.map((segment, index) => (
-            <div
-              key={`bar-${segment.label}-${index}`}
-              className="h-full relative"
-              style={{
-                width: `${segment.percentage}%`,
-                backgroundColor: segment.color
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Líneas verticales separadoras */}
-        {segments.slice(0, -1).map((segment, index) => {
-          const linePosition = segment.endPos;
-          return (
-            <div
-              key={`line-${index}`}
-              className="absolute w-px bg-white"
-              style={{
-                left: `${linePosition}%`,
-                top: 0,
-                height: '24px',
-                zIndex: 10
-              }}
-            />
-          );
-        })}
-      </div>
-      
-      {/* Labels e iconos abajo */}
-      <div className="relative h-16 mt-4">
+
+      {/* Iconos y labels ARRIBA de la barra */}
+      <div className="relative h-12 mb-2">
         {segments.map((segment, index) => {
           const centerPos = segment.startPos + (segment.percentage / 2);
           
           return (
             <div
-              key={`bottom-${segment.label}-${index}`}
+              key={`labels-${segment.label}-${index}`}
               className="absolute flex flex-col items-center"
               style={{
                 left: `${centerPos}%`,
@@ -150,10 +113,46 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
                 </div>
               )}
               {/* Label */}
-              <div className="text-sm font-medium text-foreground text-center">
+              <div className="text-sm font-medium text-muted-foreground text-center">
                 {segment.label}
               </div>
             </div>
+          );
+        })}
+      </div>
+      
+      {/* Barra horizontal GRUESA */}
+      <div className="relative">
+        {/* La barra principal */}
+        <div className="flex w-full h-4 rounded-sm">
+          {segments.map((segment, index) => (
+            <div
+              key={`bar-${segment.label}-${index}`}
+              className="h-full relative"
+              style={{
+                width: `${segment.percentage}%`,
+                backgroundColor: segment.color
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Líneas verticales separadoras del color del segmento */}
+        {segments.slice(0, -1).map((segment, index) => {
+          const linePosition = segment.endPos;
+          const nextSegment = segments[index + 1];
+          return (
+            <div
+              key={`line-${index}`}
+              className="absolute w-px"
+              style={{
+                left: `${linePosition}%`,
+                top: '-12px',
+                height: '28px',
+                backgroundColor: nextSegment.color,
+                zIndex: 10
+              }}
+            />
           );
         })}
       </div>
