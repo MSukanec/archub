@@ -177,7 +177,7 @@ export function PageLayout({
       <div className="flex-1 overflow-y-auto">
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
-            isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+            isDocked ? 'px-16' : 'px-16'
           }`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
@@ -484,7 +484,7 @@ export function PageLayout({
 
         {/* Page Content */}
         <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
-          isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+          isDocked ? 'px-16' : 'px-16'
         }`}>
           {children}
         </div>
