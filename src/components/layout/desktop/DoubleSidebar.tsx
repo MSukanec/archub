@@ -547,11 +547,11 @@ export function MainSidebar() {
       >
         <aside 
           className={cn(
-            "flex flex-col overflow-visible flex-1",
+            "flex h-full flex-col justify-between flex-1",
             isExpanded ? "w-60" : "w-12"
           )}
         >
-          {/* Navigation Items */}
+          {/* SECCIÓN SUPERIOR: Navegación principal */}
           <div className="flex-1 overflow-y-auto pt-3 pb-2 px-0 min-h-0">
             <div className="flex flex-col gap-[2px] h-full">
               {(() => {
@@ -672,19 +672,19 @@ export function MainSidebar() {
             </div>
           </div>
 
+          {/* SECCIÓN INFERIOR: Botón de anclar SOLO */}
+          <div className="border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0">
+            <ButtonSidebar
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="secondary"
+            />
+          </div>
+
         </aside>
-        
-        {/* Botón de anclar - POSICIÓN ABSOLUTA ABAJO DEL TODO */}
-        <div className="absolute bottom-0 left-0 right-0 bg-[var(--main-sidebar-bg)] border-t border-[var(--main-sidebar-border)] p-2">
-          <ButtonSidebar
-            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-            label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-            isActive={false}
-            isExpanded={isExpanded}
-            onClick={handleDockToggle}
-            variant="secondary"
-          />
-        </div>
       </div>
     </div>
     </>
