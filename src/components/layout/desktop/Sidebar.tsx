@@ -213,21 +213,16 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className={cn(
-                "mx-2 h-10 rounded-md cursor-pointer transition-colors relative",
-                "hover:bg-[var(--main-sidebar-button-hover-bg)]"
-              )}
+              className="mx-2 h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center gap-3"
               onClick={() => navigate('/profile')}
             >
-              <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
-                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
-                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+              <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
+                <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
+                  {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
               {isExpanded && (
-                <div className="flex flex-col overflow-hidden min-w-0 pl-14">
+                <div className="flex flex-col overflow-hidden min-w-0">
                   <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
                     {userData?.user?.full_name || 'Usuario'}
                   </span>
