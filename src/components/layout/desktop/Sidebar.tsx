@@ -114,10 +114,21 @@ export function Sidebar() {
                 if (item.adminOnly && !isAdmin) return null;
                 
                 const isActive = location === item.href;
-                const shouldShowDivider = (sidebarLevel === 'organization' && 
-                  (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses')) ||
-                  (sidebarLevel === 'project' && 
-                  (item.id === 'dashboard' || item.id === 'budgets' || item.id === 'subcontracts'));
+                // Configuración de divisores con texto
+                const getDividerInfo = () => {
+                  if (sidebarLevel === 'organization') {
+                    if (item.id === 'dashboard') return { show: true, text: 'Gestión' };
+                    if (item.id === 'analysis') return { show: true, text: 'Finanzas' };
+                    if (item.id === 'expenses') return { show: true, text: 'Organización' };
+                  } else if (sidebarLevel === 'project') {
+                    if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
+                    if (item.id === 'budgets') return { show: true, text: 'Recursos' };
+                    if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
+                  }
+                  return { show: false, text: '' };
+                };
+
+                const dividerInfo = getDividerInfo();
                 
                 return (
                   <div key={item.id}>
@@ -130,8 +141,22 @@ export function Sidebar() {
                       href={item.href}
                       variant="secondary"
                     />
-                    {shouldShowDivider && (
-                      <div className="h-[1px] bg-[var(--main-sidebar-fg)] mx-3 my-3 opacity-20" />
+                    {dividerInfo.show && (
+                      <div className="mx-3 my-3">
+                        {isExpanded ? (
+                          // Divisor con texto cuando está expandido
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                            <span className="text-[10px] font-medium text-[var(--main-sidebar-fg)] opacity-60 px-1">
+                              {dividerInfo.text}
+                            </span>
+                            <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                          </div>
+                        ) : (
+                          // Línea simple cuando está colapsado
+                          <div className="h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                        )}
+                      </div>
                     )}
                   </div>
                 );
