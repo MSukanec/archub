@@ -64,7 +64,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   });
   
   return (
-    <div className={`relative ${className} h-full flex flex-col`}>
+    <div className={`relative ${className}`}>
       {/* Líneas verticales que atraviesan todo el componente */}
       {segments.map((segment, index) => (
         <div
@@ -81,7 +81,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
       ))}
 
       {/* Valores de dinero y porcentajes arriba de cada línea */}
-      <div className="relative h-16 mb-4">
+      <div className="relative h-12 mb-2">
         {segments.map((segment, index) => (
           <div
             key={`values-${segment.label}-${index}`}
@@ -103,7 +103,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
       </div>
 
       {/* Iconos y labels arriba de la barra, alineados con las líneas */}
-      <div className="relative h-10 mb-2">
+      <div className="relative h-8 mb-1">
         {segments.map((segment, index) => (
           <div
             key={`labels-${segment.label}-${index}`}
@@ -120,16 +120,16 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
                 {segment.icon}
               </div>
             )}
-            {/* Label */}
-            <div className="text-sm font-medium text-muted-foreground">
+            {/* Label - sin wrap para que "Mano de Obra" esté en una línea */}
+            <div className="text-sm font-medium text-muted-foreground whitespace-nowrap">
               {segment.label}
             </div>
           </div>
         ))}
       </div>
       
-      {/* Barra horizontal gruesa - ocupa el espacio restante */}
-      <div className="relative flex-1 flex items-end pb-4">
+      {/* Barra horizontal gruesa */}
+      <div className="relative">
         <div className="flex w-full h-6 rounded-sm">
           {segments.map((segment, index) => (
             <div
