@@ -108,22 +108,28 @@ export function Sidebar() {
           {/* SECCIÓN SUPERIOR: Navegación principal */}
           <div className="overflow-y-auto pt-3 px-0" style={{ paddingBottom: '80px' }}>
             <div className="flex flex-col gap-[2px]">
-              {navigationItems.map((item) => {
+              {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
                 const isActive = location === item.href;
+                const shouldShowDivider = sidebarLevel === 'organization' && 
+                  (item.id === 'dashboard' || item.id === 'library' || item.id === 'expenses');
                 
                 return (
-                  <ButtonSidebar
-                    key={item.id}
-                    icon={<item.icon className="w-[18px] h-[18px]" />}
-                    label={item.label}
-                    isActive={isActive}
-                    isExpanded={isExpanded}
-                    onClick={() => navigate(item.href)}
-                    href={item.href}
-                    variant="secondary"
-                  />
+                  <div key={item.id}>
+                    <ButtonSidebar
+                      icon={<item.icon className="w-[18px] h-[18px]" />}
+                      label={item.label}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                      onClick={() => navigate(item.href)}
+                      href={item.href}
+                      variant="secondary"
+                    />
+                    {shouldShowDivider && (
+                      <div className="h-px bg-[var(--main-sidebar-border)] mx-3 my-2" />
+                    )}
+                  </div>
                 );
               })}
             </div>
