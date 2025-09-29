@@ -101,7 +101,7 @@ export function Sidebar() {
         style={{
           width: isDocked 
             ? '240px' 
-            : (isHovered ? '240px' : '48px')
+            : (isHovered ? '240px' : '50px')
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -109,12 +109,12 @@ export function Sidebar() {
         <aside 
           className={cn(
             "grid h-[calc(100vh-3rem)] grid-rows-[1fr_auto]",
-            isExpanded ? "w-60" : "w-12"
+            isExpanded ? "w-60" : "w-[50px]"
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
           <div className="pt-3 px-0 overflow-y-auto">
-            <div className="flex flex-col gap-[2px] px-2">
+            <div className="flex flex-col gap-[2px] px-[9px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
@@ -181,7 +181,7 @@ export function Sidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
-          <div className="pt-3 pb-3 px-2 flex flex-col gap-[2px]">
+          <div className="pt-3 pb-3 px-[9px] flex flex-col gap-[2px]">
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
@@ -215,7 +215,7 @@ export function Sidebar() {
             <button
               className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white grid group"
               style={{
-                gridTemplateColumns: isExpanded ? '44px 1fr' : '44px 0fr'
+                gridTemplateColumns: isExpanded ? '50px 1fr' : '50px 0fr'
               }}
               onClick={() => navigate('/profile')}
             >
