@@ -547,13 +547,13 @@ export function MainSidebar() {
       >
         <aside 
           className={cn(
-            "flex flex-col flex-1 h-full",
+            "flex flex-col flex-1 h-full relative",
             isExpanded ? "w-60" : "w-12"
           )}
           style={{ height: '100%' }}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal */}
-          <div className="flex-1 overflow-y-auto pt-3 px-0 min-h-0">
+          <div className="overflow-y-auto pt-3 px-0" style={{ paddingBottom: '80px' }}>
             <div className="flex flex-col gap-[2px] h-full">
               {(() => {
                 const items = getTertiarySidebarItems();
@@ -673,8 +673,10 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* SECCIÓN INFERIOR: Botón de anclar PEGADO AL FONDO */}
-          <div className="border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0" style={{ marginTop: 'auto' }}>
+          {/* BOTÓN DE ANCLAR - POSICIÓN ABSOLUTA AL FONDO */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] pt-3 pb-3 px-0 bg-[var(--main-sidebar-bg)]"
+          >
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
               label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
