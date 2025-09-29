@@ -113,7 +113,7 @@ export function Sidebar() {
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
-          <div className="pt-3 px-0 overflow-y-auto">
+          <div className="pt-3 px-2 overflow-y-auto">
             <div className="flex flex-col gap-[2px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
@@ -181,7 +181,7 @@ export function Sidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
-          <div className="pt-3 pb-3 px-0 flex flex-col gap-[2px]">
+          <div className="pt-3 pb-3 px-2 flex flex-col gap-[2px]">
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
@@ -215,7 +215,7 @@ export function Sidebar() {
             <button
               className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white grid group"
               style={{
-                gridTemplateColumns: isExpanded ? '48px 1fr' : '48px 0fr'
+                gridTemplateColumns: isExpanded ? '44px 1fr' : '44px 0fr'
               }}
               onClick={() => navigate('/profile')}
             >
