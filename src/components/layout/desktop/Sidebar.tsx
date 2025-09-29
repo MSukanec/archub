@@ -21,7 +21,9 @@ import {
   PanelLeftClose,
   Calculator,
   History,
-  Crown
+  Crown,
+  Package,
+  Layers
 } from "lucide-react";
 
 interface SidebarItem {
@@ -62,9 +64,9 @@ export function Sidebar() {
         { id: 'dashboard', label: 'Resumen de Proyecto', icon: Home, href: '/project/dashboard' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
-        { id: 'materials', label: 'Materiales', icon: FolderOpen, href: '/construction/materials' },
-        { id: 'indirects', label: 'Indirectos', icon: Building, href: '/construction/indirects' },
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects' },
         { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
@@ -115,7 +117,7 @@ export function Sidebar() {
                 const shouldShowDivider = (sidebarLevel === 'organization' && 
                   (item.id === 'dashboard' || item.id === 'analysis' || item.id === 'expenses')) ||
                   (sidebarLevel === 'project' && 
-                  (item.id === 'dashboard' || item.id === 'indirects'));
+                  (item.id === 'dashboard' || item.id === 'subcontracts'));
                 
                 return (
                   <div key={item.id}>
