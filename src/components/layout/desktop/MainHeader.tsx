@@ -201,7 +201,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
       }}
     >
       {/* FILA SUPERIOR: Logo + Breadcrumb + Botón de acción */}
-      <div className="h-12 flex items-center justify-between pr-4">
+      <div className="h-12 flex items-center justify-between pl-[50px] pr-4">
         {/* Left side: Logo and navigation */}
         <div className="flex items-center gap-2">
           {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
@@ -331,7 +331,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
       {/* FILA INFERIOR: Tabs (solo si existen) */}
       {tabs && tabs.length > 0 && (
         <div 
-          className="h-10 flex items-center px-12 border-t"
+          className="h-10 flex items-center pl-[50px] pr-12 border-t"
           style={{ borderTopColor: "var(--main-sidebar-border)" }}
         >
           <div className="flex items-center gap-0 h-full">
