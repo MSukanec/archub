@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { BreakdownChart } from '@/components/charts/BreakdownChart';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -375,6 +376,39 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Cost Breakdown Chart - Show when there are costs */}
+      {kpiData && (
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+          <CardHeader 
+            icon={TrendingUp}
+            title="Distribución de Costos" 
+            description="Desglose de costos por categoría"
+          />
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+            <BreakdownChart 
+              data={[
+                { 
+                  label: 'Materiales', 
+                  value: kpiData.materialTotal,
+                  icon: <Package className="h-4 w-4" />
+                },
+                { 
+                  label: 'Mano de Obra', 
+                  value: kpiData.laborTotal,
+                  icon: <Users className="h-4 w-4" />
+                },
+                { 
+                  label: 'Insumos', 
+                  value: kpiData.supplyTotal,
+                  icon: <Truck className="h-4 w-4" />
+                }
+              ]}
+              formatValue={(value) => formatCurrency(value)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Custom Pricing Section - Only show for admins and when there are costs */}
       {isAdmin && kpiData && (
         <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
