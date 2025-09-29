@@ -229,13 +229,13 @@ export function Sidebar() {
               </div>
               
               {/* Segunda columna: Texto que aparece/desaparece */}
-              <div className="flex flex-col justify-center overflow-hidden min-w-0 pl-2">
+              <div className="flex flex-col justify-center overflow-hidden min-w-0">
                 {isExpanded && (
                   <>
-                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate text-left">
                       {userData?.user?.full_name || 'Usuario'}
                     </span>
-                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
+                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate text-left">
                       Ver perfil
                     </span>
                   </>
