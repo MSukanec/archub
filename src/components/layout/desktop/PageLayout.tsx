@@ -419,7 +419,7 @@ export function PageLayout({
 
           {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
-            <div className="h-8 flex items-center border-b border-[var(--main-sidebar-border)] relative overflow-hidden">
+            <div className="h-8 flex items-center border-b border-border relative overflow-hidden">
               <div ref={tabsContainerRef} className="flex items-center relative w-full" style={{ gap: '24px' }}>
                 {tabs.map((tab) => {
                   const tabContent = (
