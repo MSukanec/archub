@@ -112,7 +112,7 @@ export function Sidebar() {
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal */}
-          <div className="flex-1 overflow-y-auto pt-3 px-0 min-h-0">
+          <div className="pt-3 px-0 overflow-y-auto flex-shrink-0" style={{ maxHeight: 'calc(100% - 180px)' }}>
             <div className="flex flex-col gap-[2px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
@@ -167,6 +167,9 @@ export function Sidebar() {
               })}
             </div>
           </div>
+
+          {/* ESPACIADOR: Crea el espacio vacío entre secciones */}
+          <div className="flex-1 min-h-0"></div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar */}
           <div className="flex-shrink-0 pb-3 px-0 flex flex-col gap-[2px]">
