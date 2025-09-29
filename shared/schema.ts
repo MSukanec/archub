@@ -133,6 +133,43 @@ export type User = typeof users.$inferSelect;
 export type Country = typeof countries.$inferSelect;
 export type UserData = typeof user_data.$inferSelect;
 export type UserPreferences = typeof user_preferences.$inferSelect;
+
+// Units Table
+export const units = pgTable("units", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+// Unit Presentations Table
+export const unit_presentations = pgTable("unit_presentations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  unit_id: uuid("unit_id").notNull(),
+  name: text("name").notNull(),
+  equivalence: real("equivalence").notNull(),
+  description: text("description"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUnitSchema = createInsertSchema(units).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export const insertUnitPresentationSchema = createInsertSchema(unit_presentations).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type Unit = typeof units.$inferSelect;
+export type InsertUnit = z.infer<typeof insertUnitSchema>;
+export type UnitPresentation = typeof unit_presentations.$inferSelect;
+export type InsertUnitPresentation = z.infer<typeof insertUnitPresentationSchema>;
+
 // Task Parameters System
 export const task_parameters = pgTable("task_parameters", {
   id: uuid("id").primaryKey().defaultRandom(),
