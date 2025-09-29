@@ -19,8 +19,8 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   
   // Colores CSS en orden
   const chartColors = [
-    'var(--chart-1)',
-    'var(--chart-2)', 
+    'var(--accent)',
+    'var(--accent-2)', 
     'var(--chart-3)',
     'var(--chart-4)',
     'var(--chart-5)'

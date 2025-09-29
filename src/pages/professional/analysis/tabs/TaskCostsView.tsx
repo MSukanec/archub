@@ -391,14 +391,14 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 <BreakdownChart 
                   data={[
                     { 
-                      label: 'Materiales', 
-                      value: kpiData.materialTotal,
-                      icon: <Package className="h-4 w-4" />
-                    },
-                    { 
                       label: 'Mano de Obra', 
                       value: kpiData.laborTotal,
                       icon: <Users className="h-4 w-4" />
+                    },
+                    { 
+                      label: 'Materiales', 
+                      value: kpiData.materialTotal,
+                      icon: <Package className="h-4 w-4" />
                     },
                     { 
                       label: 'Insumos', 
