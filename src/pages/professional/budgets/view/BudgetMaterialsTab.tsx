@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useConstructionMaterials } from '@/hooks/use-construction-materials'
 import { useBudgetItems } from '@/hooks/use-budget-items'
 import { Package, Plus } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 
 interface BudgetMaterialsTabProps {
   budget: any
@@ -38,11 +39,83 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
       .filter((taskId): taskId is string => taskId !== null && taskId !== undefined)
   }, [budgetItems])
 
-  const { data: materialsResult, isLoading: materialsLoading } = useConstructionMaterials(
-    selectedProjectId || '',
-    selectedPhase,
-    budgetTaskIds.length > 0 ? budgetTaskIds : undefined // Only filter if we have task IDs
-  )
+  // Get materials directly from budget tasks using task_materials table
+  const { data: materialsResult, isLoading: materialsLoading } = useQuery({
+    queryKey: ['budget-materials', budget?.id, selectedPhase, budgetTaskIds],
+    queryFn: async () => {
+      if (!selectedProjectId || budgetTaskIds.length === 0) {
+        return { materials: [], phases: [] };
+      }
+
+      // Get materials for all budget task IDs
+      const { data: taskMaterials, error } = await supabase
+        .from('task_materials')
+        .select(`
+          id,
+          task_id,
+          material_id,
+          amount,
+          materials_view (
+            id,
+            name,
+            unit_of_computation,
+            avg_price,
+            category_name,
+            commercial_unit_name,
+            commercial_factor
+          )
+        `)
+        .in('task_id', budgetTaskIds);
+
+      if (error) {
+        console.error('Error fetching budget materials:', error);
+        throw error;
+      }
+
+      // Get construction tasks data for phase information
+      const { data: constructionTasks, error: constructionError } = await supabase
+        .from('construction_tasks_view')
+        .select('task_id, phase_name')
+        .eq('project_id', selectedProjectId)
+        .in('task_id', budgetTaskIds);
+
+      if (constructionError) {
+        console.error('Error fetching construction tasks for phases:', constructionError);
+        throw constructionError;
+      }
+
+      // Create phase mapping
+      const phaseMap = new Map();
+      constructionTasks?.forEach(ct => {
+        phaseMap.set(ct.task_id, ct.phase_name);
+      });
+
+      // Transform to match expected format
+      const materials = (taskMaterials || []).map(tm => {
+        const materialView = Array.isArray(tm.materials_view) ? tm.materials_view[0] : tm.materials_view;
+        if (!materialView) return null;
+
+        return {
+          id: tm.id,
+          task_id: tm.task_id,
+          material_id: tm.material_id,
+          name: materialView.name,
+          category_name: materialView.category_name || 'Sin categoría',
+          unit_name: materialView.unit_of_computation || 'unidad',
+          computed_quantity: tm.amount || 0,
+          commercial_unit_name: materialView.commercial_unit_name,
+          commercial_quantity: materialView.commercial_factor ? (tm.amount || 0) * materialView.commercial_factor : null,
+          phase_name: phaseMap.get(tm.task_id) || null
+        };
+      }).filter((material): material is NonNullable<typeof material> => material !== null);
+
+      // Get unique phases
+      const phases = Array.from(new Set(materials.map(m => m?.phase_name).filter(Boolean))).sort();
+
+      return { materials, phases };
+    },
+    enabled: !!selectedProjectId && budgetTaskIds.length > 0
+  })
   
   const materials = materialsResult?.materials || []
   const phases = materialsResult?.phases || []
@@ -51,21 +124,23 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
   const budgetSpecificMaterials = materials || []
 
   // Get unique categories for filter
-  const uniqueCategories = Array.from(new Set(budgetSpecificMaterials.map(m => m.category_name))).sort()
+  const uniqueCategories = Array.from(new Set(budgetSpecificMaterials.map(m => m?.category_name).filter(Boolean))).sort()
 
   // Filter and sort materials with groupKey
   const filteredMaterials = budgetSpecificMaterials
     .filter((material) => {
-      const matchesSearch = material.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-        material.category_name.toLowerCase().includes(searchValue.toLowerCase())
+      if (!material) return false;
+      const matchesSearch = material.name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        material.category_name?.toLowerCase().includes(searchValue.toLowerCase())
       const matchesCategory = !selectedCategory || material.category_name === selectedCategory
       return matchesSearch && matchesCategory
     })
     .sort((a, b) => {
-      if (sortBy === 'name') return a.name.localeCompare(b.name)
-      if (sortBy === 'category') return a.category_name.localeCompare(b.category_name)
-      if (sortBy === 'quantity') return b.computed_quantity - a.computed_quantity
-      return a.category_name.localeCompare(b.category_name)
+      if (!a || !b) return 0;
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '')
+      if (sortBy === 'category') return (a.category_name || '').localeCompare(b.category_name || '')
+      if (sortBy === 'quantity') return (b.computed_quantity || 0) - (a.computed_quantity || 0)
+      return (a.category_name || '').localeCompare(b.category_name || '')
     })
     .map(material => {
       // Agregar groupKey según el tipo de agrupación
@@ -94,7 +169,7 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
         label: 'Categoría',
         width: '15%',
         render: (material: any) => (
-          <span className="text-sm font-medium">{material.category_name}</span>
+          <span className="text-sm font-medium">{material?.category_name || 'Sin categoría'}</span>
         )
       },
       {
@@ -102,7 +177,7 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
         label: 'Nombre',
         width: groupingType === 'categories' ? '35%' : '25%', // Más ancho cuando no hay categoría
         render: (material: any) => (
-          <span className="text-sm">{material.name}</span>
+          <span className="text-sm">{material?.name || 'Sin nombre'}</span>
         )
       },
       {
@@ -199,6 +274,15 @@ export function BudgetMaterialsTab({ budget, onNavigateToTasks }: BudgetMaterial
           icon={<Package className="w-8 h-8 text-muted-foreground" />}
           title="No hay materiales para las tareas seleccionadas"
           description={`Las tareas en este presupuesto no requieren materiales, o los filtros aplicados no coinciden con ningún material.`}
+          action={onNavigateToTasks && (
+            <Button 
+              onClick={onNavigateToTasks}
+              className="mt-4"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar Tareas
+            </Button>
+          )}
         />
       ) : (
         <Table
