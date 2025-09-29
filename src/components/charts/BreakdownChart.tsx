@@ -14,8 +14,9 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   // Filtrar datos con valores válidos
   const validData = data.filter(item => item.value > 0);
   
-  // Calcular el total
+  // Calcular el total y valor máximo para normalizar alturas
   const total = validData.reduce((sum, item) => sum + item.value, 0);
+  const maxValue = Math.max(...validData.map(item => item.value));
   
   // Colores CSS en orden
   const chartColors = [
@@ -47,48 +48,55 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   }
   
   return (
-    <div className={`space-y-4 ${className}`}>
-      {validData.map((item, index) => {
-        const percentage = (item.value / total) * 100;
-        const color = chartColors[index % chartColors.length];
-        
-        return (
-          <div key={`${item.label}-${index}`} className="space-y-2">
-            {/* Header con nombre, valor y porcentaje */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {item.icon && (
-                  <div className="flex-shrink-0" style={{ color }}>
-                    {item.icon}
-                  </div>
-                )}
-                <span className="text-sm font-medium text-foreground">
-                  {item.label}
-                </span>
-              </div>
-              <div className="text-right">
-                <div className="text-sm font-bold">
+    <div className={`${className}`}>
+      {/* Container principal con las barras */}
+      <div className="flex items-end justify-between gap-4 h-48 mb-6">
+        {validData.map((item, index) => {
+          const percentage = (item.value / total) * 100;
+          const heightPercentage = (item.value / maxValue) * 100;
+          const color = chartColors[index % chartColors.length];
+          
+          return (
+            <div key={`${item.label}-${index}`} className="flex-1 flex flex-col items-center">
+              {/* Valor arriba de la barra */}
+              <div className="mb-2 text-center">
+                <div className="text-lg font-bold text-foreground">
                   {formatFn(item.value)}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   {percentage.toFixed(1)}%
                 </div>
               </div>
+              
+              {/* Barra vertical */}
+              <div className="w-full flex flex-col justify-end h-full">
+                <div
+                  className="w-full rounded-t-lg transition-all duration-500 ease-out"
+                  style={{
+                    height: `${heightPercentage}%`,
+                    backgroundColor: color,
+                    minHeight: '20px'
+                  }}
+                />
+              </div>
+              
+              {/* Label abajo de la barra */}
+              <div className="mt-3 text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  {item.icon && (
+                    <div className="flex-shrink-0" style={{ color }}>
+                      {item.icon}
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm font-medium text-foreground">
+                  {item.label}
+                </div>
+              </div>
             </div>
-            
-            {/* Barra de progreso */}
-            <div className="w-full bg-muted rounded-full h-2">
-              <div
-                className="h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${percentage}%`,
-                  backgroundColor: color
-                }}
-              />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
