@@ -64,7 +64,8 @@ export default function SidebarButton({
         ref={buttonRef}
         data-active={isActive}
         className={cn(
-          "flex items-center h-8 w-full transition-all duration-200 ease-out overflow-hidden rounded",
+          "flex items-center h-8 transition-all duration-200 ease-out overflow-hidden rounded",
+          isExpanded ? "w-full" : "w-8",
           "text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)]",
           !disableHover && "hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]",
           "data-[active=true]:bg-[var(--main-sidebar-button-active-bg)] data-[active=true]:text-[var(--main-sidebar-button-active-fg)]"

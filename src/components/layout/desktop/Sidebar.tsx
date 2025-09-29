@@ -114,7 +114,10 @@ export function Sidebar() {
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
           <div className="pt-3 px-0 overflow-y-auto">
-            <div className="flex flex-col gap-[2px] px-[9px]">
+            <div className={cn(
+              "flex flex-col gap-[2px]",
+              isExpanded ? "px-[9px]" : "items-center"
+            )}>
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
@@ -181,7 +184,10 @@ export function Sidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
-          <div className="pt-3 pb-3 px-[9px] flex flex-col gap-[2px]">
+          <div className={cn(
+            "pt-3 pb-3 flex flex-col gap-[2px]",
+            isExpanded ? "px-[9px]" : "items-center"
+          )}>
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
@@ -213,14 +219,14 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white grid group"
-              style={{
-                gridTemplateColumns: isExpanded ? '50px 1fr' : '50px 0fr'
-              }}
+              className={cn(
+                "h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white flex items-center group overflow-hidden",
+                isExpanded ? "w-full" : "w-8"
+              )}
               onClick={() => navigate('/profile')}
             >
-              {/* Primera columna: Avatar siempre en la misma posición */}
-              <div className="flex items-center justify-center">
+              {/* Avatar siempre centrado */}
+              <div className="flex items-center justify-center w-8 flex-shrink-0">
                 <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
                   <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
                     {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
@@ -228,19 +234,17 @@ export function Sidebar() {
                 </Avatar>
               </div>
               
-              {/* Segunda columna: Texto que aparece/desaparece */}
-              <div className="flex flex-col justify-center overflow-hidden min-w-0 pl-3">
-                {isExpanded && (
-                  <>
-                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
-                      {userData?.user?.full_name || 'Usuario'}
-                    </span>
-                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
-                      Ver perfil
-                    </span>
-                  </>
-                )}
-              </div>
+              {/* Texto que aparece cuando se expande */}
+              {isExpanded && (
+                <div className="flex flex-col justify-center overflow-hidden min-w-0 ml-3">
+                  <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
+                    {userData?.user?.full_name || 'Usuario'}
+                  </span>
+                  <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
+                    Ver perfil
+                  </span>
+                </div>
+              )}
             </button>
           </div>
 
