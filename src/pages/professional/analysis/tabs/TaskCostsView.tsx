@@ -376,78 +376,175 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Cost Breakdown Chart - Show when there are costs */}
+      {/* Layout de 2 columnas: 50% gráfico + 50% costos personalizados */}
       {kpiData && (
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-          <CardHeader 
-            icon={TrendingUp}
-            title="Distribución de Costos" 
-            description="Desglose de costos por categoría"
-          />
-          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-            <BreakdownChart 
-              data={[
-                { 
-                  label: 'Materiales', 
-                  value: kpiData.materialTotal,
-                  icon: <Package className="h-4 w-4" />
-                },
-                { 
-                  label: 'Mano de Obra', 
-                  value: kpiData.laborTotal,
-                  icon: <Users className="h-4 w-4" />
-                },
-                { 
-                  label: 'Insumos', 
-                  value: kpiData.supplyTotal,
-                  icon: <Truck className="h-4 w-4" />
-                }
-              ]}
-              formatValue={(value) => formatCurrency(value)}
-            />
-          </CardContent>
-        </Card>
-      )}
+        <div className={`${isMobile ? 'space-y-6' : 'flex gap-6'}`}>
+          {/* Columna 1: Gráfico (50% ancho) */}
+          <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+              <CardHeader 
+                icon={TrendingUp}
+                title="Distribución de Costos" 
+                description="Desglose de costos por categoría"
+              />
+              <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+                <BreakdownChart 
+                  data={[
+                    { 
+                      label: 'Materiales', 
+                      value: kpiData.materialTotal,
+                      icon: <Package className="h-4 w-4" />
+                    },
+                    { 
+                      label: 'Mano de Obra', 
+                      value: kpiData.laborTotal,
+                      icon: <Users className="h-4 w-4" />
+                    },
+                    { 
+                      label: 'Insumos', 
+                      value: kpiData.supplyTotal,
+                      icon: <Truck className="h-4 w-4" />
+                    }
+                  ]}
+                  formatValue={(value) => formatCurrency(value)}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Custom Pricing Section - Only show for admins and when there are costs */}
-      {isAdmin && kpiData && (
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-          <CardHeader 
-            icon={Settings}
-            title="Precios Personalizados" 
-            description="Ajusta los costos para esta tarea específica"
-          >
-            <div className="flex items-center gap-2">
-              {customPrice && (
-                <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-                  PERSONALIZADO
-                </Badge>
-              )}
-              <span className="text-xs text-muted-foreground">
-                Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
-              </span>
-              {customPrice && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleDeleteCustomPrice}
-                  disabled={deleteCustomPrice.isPending}
-                  className="flex items-center gap-2"
-                  data-testid="button-delete-custom-price"
+          {/* Columna 2: Costos Personalizados (50% ancho) - Solo para admins */}
+          {isAdmin && (
+            <div className={`${isMobile ? 'w-full' : 'w-1/2'}`}>
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
+                <CardHeader 
+                  icon={Settings}
+                  title="Precios Personalizados" 
+                  description="Ajusta los costos para esta tarea específica"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
-            <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    {customPrice && (
+                      <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
+                        PERSONALIZADO
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
+                    </span>
+                    {customPrice && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleDeleteCustomPrice}
+                        disabled={deleteCustomPrice.isPending}
+                        className="flex items-center gap-2"
+                        data-testid="button-delete-custom-price"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
+                  <div className="space-y-6">
+                    {/* Price Cards - Grid 2x2: Mano de Obra | Materiales / Insumos | Total */}
+                    <div className="grid grid-cols-2 gap-4">
+                    {/* Fila 1, Columna 1: Mano de Obra */}
+                    <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" style={{ color: 'var(--accent)' }} />
+                            <span className="text-sm text-muted-foreground">Mano de obra</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
+                              <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
+                            )}
+                            {!isEditingLabor ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingLabor(true)}
+                                className="h-7 px-2 text-xs"
+                                data-testid="button-edit-labor"
+                              >
+                                <Edit className="h-3 w-3 mr-1" />
+                                Editar
+                              </Button>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={() => {
+                                    setIsEditingLabor(false);
+                                    setCustomLaborCost(customPrice?.labor_unit_cost?.toString() || '');
+                                  }}
+                                  className="h-6 w-6 p-0"
+                                  data-testid="button-cancel-labor"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {!isEditingLabor ? (
+                            <>
+                              <p className="text-2xl font-bold">
+                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.laborTotal)}` : 'Costo calculado automáticamente'}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
+                                  value={customLaborCost}
+                                  onChange={(e) => setCustomLaborCost(e.target.value)}
+                                  className="text-right text-lg font-bold"
+                                  data-testid="input-labor-cost"
+                                  autoFocus
+                                />
+                                <Button 
+                                  onClick={() => handleSaveLaborCost({ laborCost: customLaborCost })}
+                                  disabled={upsertCustomPrice.isPending}
+                                  size="sm"
+                                  className="ml-2"
+                                  data-testid="button-save-labor"
+                                >
+                                  {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
+                                </Button>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setCustomLaborCost('');
+                                  handleSaveLaborCost({ laborCost: '' });
+                                }}
+                                className="text-xs hover:underline"
+                                style={{ color: 'var(--accent)' }}
+                                type="button"
+                              >
+                                Restaurar
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* Price Cards - CAMBIO: de grid horizontal a flex vertical */}
-                <div className="flex flex-col gap-4">
-                {/* Material Cost - Editable */}
-                <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
+                    {/* Fila 1, Columna 2: Materiales */}
+                    <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -540,102 +637,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   </CardContent>
                 </Card>
 
-                {/* Labor Cost - Editable */}
-                <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" style={{ color: 'var(--accent)' }} />
-                        <span className="text-sm text-muted-foreground">Mano de obra</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
-                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
-                        )}
-                        {!isEditingLabor ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsEditingLabor(true)}
-                            className="h-7 px-2 text-xs"
-                            data-testid="button-edit-labor"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Editar
-                          </Button>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => {
-                                setIsEditingLabor(false);
-                                setCustomLaborCost(customPrice?.labor_unit_cost?.toString() || '');
-                              }}
-                              className="h-6 w-6 p-0"
-                              data-testid="button-cancel-labor"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {!isEditingLabor ? (
-                        <>
-                          <p className="text-2xl font-bold">
-                            {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? `Costo original: ${formatCurrency(kpiData.laborTotal)}` : 'Costo calculado automáticamente'}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder={`Actual: ${formatCurrency(kpiData?.laborTotal || 0)}`}
-                              value={customLaborCost}
-                              onChange={(e) => setCustomLaborCost(e.target.value)}
-                              className="text-right text-lg font-bold"
-                              data-testid="input-labor-cost"
-                              autoFocus
-                            />
-                            <Button 
-                              onClick={() => handleSaveLaborCost({ laborCost: customLaborCost })}
-                              disabled={upsertCustomPrice.isPending}
-                              size="sm"
-                              className="ml-2"
-                              data-testid="button-save-labor"
-                            >
-                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Valor calculado: {formatCurrency(kpiData?.laborTotal || 0)}
-                          </p>
-                          <button
-                            onClick={() => {
-                              setCustomLaborCost('');
-                              handleSaveLaborCost({ laborCost: '' });
-                            }}
-                            className="text-xs hover:underline"
-                            style={{ color: 'var(--accent)' }}
-                            type="button"
-                          >
-                            Restaurar
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Supply Cost - Editable */}
-                <Card className="border-2" style={{ borderColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
+                    {/* Fila 2, Columna 1: Insumos */}
+                    <Card className="border-2" style={{ borderColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -728,8 +731,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   </CardContent>
                 </Card>
 
-                {/* Total Cost - Always calculated automatically, READ-ONLY */}
-                <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
+                    {/* Fila 2, Columna 2: Total */}
+                    <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -753,10 +756,13 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
-                </div>
-              </div>
-            </CardContent>
-        </Card>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Tabla de Costos */}
