@@ -215,10 +215,10 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         <div className="flex items-center gap-1">
           <button
             onClick={handleOrganizationClick}
-            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-fg)] ${
               sidebarLevel === 'organization' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                ? 'bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
           >
             <Building2 className="h-4 w-4 mr-1" />
@@ -262,10 +262,10 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         <div className="flex items-center gap-1">
           <button
             onClick={handleProjectClick}
-            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-fg)] ${
               sidebarLevel === 'project' 
-                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                ? 'bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)]'
             }`}
           >
             <FolderOpen className="h-4 w-4 mr-1" />
@@ -306,7 +306,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         <span className="text-sm text-[var(--main-sidebar-fg)] opacity-30 mx-1">/</span>
         
         {/* Nombre de la página actual */}
-        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+        <span className="text-sm font-medium text-[var(--main-sidebar-fg)]">
           {currentPageName}
         </span>
         
