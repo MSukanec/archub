@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Building2, FolderOpen, Slash } from "lucide-react";
+import { ChevronDown, Building2, FolderOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
@@ -55,15 +55,24 @@ const PAGE_NAMES: Record<string, string> = {
   '/admin/material-prices': 'Precios de Materiales',
 };
 
+interface Tab {
+  id: string;
+  label: string;
+  isActive: boolean;
+}
+
 interface MainHeaderProps {
   actionButton?: {
     label: string;
     icon?: React.ComponentType<any>;
     onClick: () => void;
   };
+  tabs?: Tab[];
+  onTabChange?: (tabId: string) => void;
+  title?: string;
 }
 
-export function MainHeader({ actionButton }: MainHeaderProps = {}) {
+export function MainHeader({ actionButton, tabs = [], onTabChange, title }: MainHeaderProps = {}) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
@@ -155,8 +164,8 @@ export function MainHeader({ actionButton }: MainHeaderProps = {}) {
                               "Organización";
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
   
-  // Obtener el nombre de la página actual
-  const currentPageName = PAGE_NAMES[location] || 'Página';
+  // Obtener el nombre de la página actual - usar title si está disponible, sino mapeo
+  const currentPageName = title || PAGE_NAMES[location] || 'Página';
 
   const handleOrganizationClick = () => {
     setSidebarLevel('organization');
@@ -247,7 +256,7 @@ export function MainHeader({ actionButton }: MainHeaderProps = {}) {
         </div>
         
         {/* Separator */}
-        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+        <span className="text-sm text-[var(--main-sidebar-fg)] opacity-30 mx-1">/</span>
 
         {/* Project selector */}
         <div className="flex items-center gap-1">
@@ -294,12 +303,31 @@ export function MainHeader({ actionButton }: MainHeaderProps = {}) {
         </div>
         
         {/* Separator */}
-        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+        <span className="text-sm text-[var(--main-sidebar-fg)] opacity-30 mx-1">/</span>
         
         {/* Nombre de la página actual */}
         <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
           {currentPageName}
         </span>
+        
+        {/* Tabs - si existen */}
+        {tabs && tabs.length > 0 && (
+          <div className="flex items-center gap-1 ml-4">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange?.(tab.id)}
+                className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+                  tab.isActive
+                    ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                    : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Right side: Action button */}
