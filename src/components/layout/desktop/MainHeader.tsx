@@ -10,6 +10,7 @@ import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useUpdateUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
 
 export function MainHeader() {
   const [, navigate] = useLocation();
@@ -17,6 +18,7 @@ export function MainHeader() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
+  const updateUserOrgPreferences = useUpdateUserOrganizationPreferences();
   
   // Get real data
   const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
@@ -42,6 +44,12 @@ export function MainHeader() {
     setCurrentOrganization(orgId);
     setSidebarLevel('organization');
     navigate('/organization/dashboard');
+    
+    // CRITICAL: Save to Supabase to persist the organization change
+    updateUserOrgPreferences.mutate({
+      organizationId: orgId,
+      lastProjectId: null // Reset project when changing organization
+    });
   };
 
   const handleProjectChange = (projectId: string) => {
