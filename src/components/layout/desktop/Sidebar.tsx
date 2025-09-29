@@ -113,8 +113,8 @@ export function Sidebar() {
           )}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal con scroll */}
-          <div className="pt-3 px-2 overflow-y-auto">
-            <div className="flex flex-col gap-[2px]">
+          <div className="pt-3 px-0 overflow-y-auto">
+            <div className="flex flex-col gap-[2px] px-2">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
                 
