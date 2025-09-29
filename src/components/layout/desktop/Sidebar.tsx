@@ -213,9 +213,9 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] grid"
+              className="h-10 w-full rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-white grid group"
               style={{
-                gridTemplateColumns: isExpanded ? '44px 1fr' : '44px 0fr'
+                gridTemplateColumns: isExpanded ? '48px 1fr' : '48px 0fr'
               }}
               onClick={() => navigate('/profile')}
             >
@@ -229,13 +229,13 @@ export function Sidebar() {
               </div>
               
               {/* Segunda columna: Texto que aparece/desaparece */}
-              <div className="flex flex-col justify-center overflow-hidden min-w-0">
+              <div className="flex flex-col justify-center overflow-hidden min-w-0 pl-3">
                 {isExpanded && (
                   <>
-                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate text-left">
+                    <span className="text-sm font-medium text-[var(--main-sidebar-fg)] group-hover:text-white truncate text-left">
                       {userData?.user?.full_name || 'Usuario'}
                     </span>
-                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate text-left">
+                    <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 group-hover:text-white group-hover:opacity-100 truncate text-left">
                       Ver perfil
                     </span>
                   </>
