@@ -672,8 +672,8 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* Anchor Button - Fixed at bottom, same style as other buttons */}
-          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-2">
+          {/* Anchor Button - Fixed at bottom, separated with more space */}
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-4 pb-3">
             <div className="flex flex-col gap-[2px]">
               <ButtonSidebar
                 icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
