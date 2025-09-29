@@ -68,11 +68,11 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Resumen de Proyecto', icon: Home, href: '/project/dashboard' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets' },
-        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
-        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
-        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects' },
+        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
-        { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs' },
+        { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
