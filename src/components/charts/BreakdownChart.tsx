@@ -65,70 +65,76 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   
   return (
     <div className={`relative ${className}`}>
-      {/* Valores de dinero y porcentajes arriba */}
+      {/* Líneas verticales que atraviesan todo el componente */}
+      {segments.map((segment, index) => (
+        <div
+          key={`line-${segment.label}-${index}`}
+          className="absolute w-px"
+          style={{
+            left: `${segment.startPos}%`,
+            top: 0,
+            height: '100%',
+            backgroundColor: segment.color,
+            zIndex: 10
+          }}
+        />
+      ))}
+
+      {/* Valores de dinero y porcentajes arriba de cada línea */}
       <div className="relative h-16 mb-6">
-        {segments.map((segment, index) => {
-          const centerPos = segment.startPos + (segment.percentage / 2);
-          
-          return (
-            <div
-              key={`values-${segment.label}-${index}`}
-              className="absolute flex flex-col items-center"
-              style={{
-                left: `${centerPos}%`,
-                transform: 'translateX(-50%)',
-                top: 0
-              }}
-            >
-              <div className="text-lg font-bold text-foreground">
-                {formatFn(segment.value)}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {segment.percentage.toFixed(1)}%
-              </div>
+        {segments.map((segment, index) => (
+          <div
+            key={`values-${segment.label}-${index}`}
+            className="absolute flex flex-col items-start"
+            style={{
+              left: `${segment.startPos}%`,
+              transform: 'translateX(-2px)',
+              top: 0
+            }}
+          >
+            <div className="text-lg font-bold text-foreground">
+              {formatFn(segment.value)}
             </div>
-          );
-        })}
+            <div className="text-sm text-muted-foreground">
+              {segment.percentage.toFixed(1)}%
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Iconos y labels ARRIBA de la barra */}
+      {/* Iconos y labels arriba de la barra, alineados con las líneas */}
       <div className="relative h-12 mb-2">
-        {segments.map((segment, index) => {
-          const centerPos = segment.startPos + (segment.percentage / 2);
-          
-          return (
-            <div
-              key={`labels-${segment.label}-${index}`}
-              className="absolute flex flex-col items-center"
-              style={{
-                left: `${centerPos}%`,
-                transform: 'translateX(-50%)',
-                top: 0
-              }}
-            >
-              {/* Icono */}
-              {segment.icon && (
-                <div className="mb-1" style={{ color: segment.color }}>
-                  {segment.icon}
-                </div>
-              )}
-              {/* Label */}
-              <div className="text-sm font-medium text-muted-foreground text-center">
-                {segment.label}
+        {segments.map((segment, index) => (
+          <div
+            key={`labels-${segment.label}-${index}`}
+            className="absolute flex flex-col items-start"
+            style={{
+              left: `${segment.startPos}%`,
+              transform: 'translateX(-2px)',
+              top: 0
+            }}
+          >
+            {/* Icono */}
+            {segment.icon && (
+              <div className="mb-1" style={{ color: segment.color }}>
+                {segment.icon}
               </div>
+            )}
+            {/* Label */}
+            <div className="text-sm font-medium text-muted-foreground">
+              {segment.label}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
       
-      {/* Barra horizontal GRUESA */}
-      <div className="relative">
-        {/* La barra principal */}
-        <div className="flex w-full h-4 rounded-sm">
+      {/* Barra horizontal gruesa */}
+      <div className="relative h-4">
+        <div className="flex w-full h-full rounded-sm">
           {segments.map((segment, index) => (
             <div
               key={`bar-${segment.label}-${index}`}
-              className="h-full relative"
+              className="h-full"
               style={{
                 width: `${segment.percentage}%`,
                 backgroundColor: segment.color
@@ -136,25 +142,6 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
             />
           ))}
         </div>
-        
-        {/* Líneas verticales separadoras del color del segmento */}
-        {segments.slice(0, -1).map((segment, index) => {
-          const linePosition = segment.endPos;
-          const nextSegment = segments[index + 1];
-          return (
-            <div
-              key={`line-${index}`}
-              className="absolute w-px"
-              style={{
-                left: `${linePosition}%`,
-                top: '-12px',
-                height: '28px',
-                backgroundColor: nextSegment.color,
-                zIndex: 10
-              }}
-            />
-          );
-        })}
       </div>
     </div>
   );
