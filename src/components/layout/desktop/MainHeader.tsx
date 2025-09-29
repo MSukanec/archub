@@ -314,20 +314,24 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         {tabs && tabs.length > 0 && (
           <>
             {/* Separador vertical antes de las tabs */}
-            <div className="h-5 w-px bg-[var(--main-sidebar-fg)] opacity-20 mx-3" />
+            <div className="h-5 w-px bg-[var(--main-sidebar-fg)] opacity-20 mx-4" />
             
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-0 h-full">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange?.(tab.id)}
-                  className={`flex items-center h-7 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded-md border ${
+                  className={`relative flex items-center h-full px-4 text-sm font-medium transition-all duration-200 ${
                     tab.isActive
-                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)] border-[var(--main-sidebar-button-active-bg)] shadow-sm' 
-                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] border-[var(--main-sidebar-border)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] hover:border-[var(--main-sidebar-button-hover-bg)]'
+                      ? 'text-[var(--accent)]' 
+                      : 'text-[var(--main-sidebar-fg)] opacity-60 hover:opacity-100'
                   }`}
                 >
                   {tab.label}
+                  {/* Barra inferior para tab activa */}
+                  {tab.isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
+                  )}
                 </button>
               ))}
             </div>
