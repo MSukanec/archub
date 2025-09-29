@@ -20,7 +20,7 @@ export function MainHeader() {
   const { user } = useAuthStore();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
-  const { setSidebarLevel } = useNavigationStore();
+  const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { toast } = useToast();
   
   // ORGANIZATION CHANGE MUTATION - Exact copy from ProfileOrganizations.tsx that WORKS
@@ -156,7 +156,11 @@ export function MainHeader() {
         <div className="flex items-center gap-1">
           <button
             onClick={handleOrganizationClick}
-            className="flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+              sidebarLevel === 'organization' 
+                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+            }`}
           >
             <Building2 className="h-4 w-4 mr-1" />
             {currentOrganization}
@@ -196,7 +200,11 @@ export function MainHeader() {
         <div className="flex items-center gap-1">
           <button
             onClick={handleProjectClick}
-            className="flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+              sidebarLevel === 'project' 
+                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
+            }`}
           >
             <FolderOpen className="h-4 w-4 mr-1" />
             {currentProjectName}
