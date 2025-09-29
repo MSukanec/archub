@@ -70,7 +70,7 @@ export function MainSidebar() {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Navigation Items */}
+        {/* DIV SUPERIOR - Navigation Items */}
         <div className="flex-1 overflow-y-auto pt-3 px-0 min-h-0">
           <div className="flex flex-col gap-[2px]">
             {sidebarItems.map((item, index) => {
@@ -91,8 +91,8 @@ export function MainSidebar() {
           </div>
         </div>
 
-        {/* Botón de anclar - EXACTAMENTE donde lo dibujaste con rojo: esquina inferior izquierda */}
-        <div className="absolute bottom-0 left-0 border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] p-2">
+        {/* DIV INFERIOR - Solo botón de anclar alineado abajo */}
+        <div className="border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] p-2 flex flex-col justify-end">
           <ButtonSidebar
             icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
             label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
