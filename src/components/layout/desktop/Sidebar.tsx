@@ -181,7 +181,7 @@ export function Sidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar (siempre pegados al fondo) */}
-          <div className="pb-3 px-0 flex flex-col gap-[2px]">
+          <div className="pt-3 pb-3 px-0 flex flex-col gap-[2px]">
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
@@ -212,15 +212,31 @@ export function Sidebar() {
             )}
 
             {/* Avatar del Usuario */}
-            <ButtonSidebar
-              icon={null}
-              label={userData?.user?.full_name || 'Usuario'}
-              isActive={false}
-              isExpanded={isExpanded}
+            <button
+              className={cn(
+                "mx-2 h-12 rounded-md cursor-pointer transition-colors",
+                "hover:bg-[var(--main-sidebar-button-hover-bg)]",
+                "flex items-center",
+                isExpanded ? "justify-start gap-3 px-3" : "justify-center"
+              )}
               onClick={() => navigate('/profile')}
-              variant="secondary"
-              userFullName={userData?.user?.full_name || 'U'}
-            />
+            >
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarFallback className="bg-[var(--accent)] text-white text-base font-semibold">
+                  {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {isExpanded && (
+                <div className="flex flex-col overflow-hidden min-w-0">
+                  <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
+                    {userData?.user?.full_name || 'Usuario'}
+                  </span>
+                  <span className="text-xs text-[var(--main-sidebar-fg)] opacity-60 truncate">
+                    Ver perfil
+                  </span>
+                </div>
+              )}
+            </button>
           </div>
 
         </aside>
