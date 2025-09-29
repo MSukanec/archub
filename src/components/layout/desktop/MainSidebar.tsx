@@ -60,9 +60,8 @@ export function MainSidebar() {
     <div className="flex flex-row">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-col overflow-visible relative"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 flex flex-col h-full overflow-visible"
         style={{
-          height: '100%',
           width: isDocked 
             ? '240px'
             : (isHovered ? '240px' : '48px')
@@ -91,8 +90,8 @@ export function MainSidebar() {
           </div>
         </div>
 
-        {/* DIV INFERIOR - Solo botón de anclar alineado abajo */}
-        <div className="border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] p-2 flex flex-col justify-end">
+        {/* DIV INFERIOR - Solo botón de anclar pegado al fondo */}
+        <div className="mt-auto border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] p-2">
           <ButtonSidebar
             icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
             label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
