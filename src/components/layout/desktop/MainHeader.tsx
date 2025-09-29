@@ -10,7 +10,10 @@ import { useProjectsLite } from "@/hooks/use-projects-lite";
 import { useProject } from "@/hooks/use-projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useUpdateUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences';
+import { supabase } from '@/lib/supabase';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export function MainHeader() {
   const [, navigate] = useLocation();
@@ -18,7 +21,82 @@ export function MainHeader() {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
   const { setSidebarLevel } = useNavigationStore();
-  const updateUserOrgPreferences = useUpdateUserOrganizationPreferences();
+  const { toast } = useToast();
+  
+  // ORGANIZATION CHANGE MUTATION - Exact copy from ProfileOrganizations.tsx that WORKS
+  const switchOrganization = useMutation({
+    mutationFn: async (organizationId: string) => {
+      console.log('🔄 Switching to organization:', organizationId)
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .update({ last_organization_id: organizationId })
+        .eq('user_id', userData?.user?.id)
+        .select()
+      
+      if (error) {
+        console.error('❌ Error switching organization:', error)
+        throw error
+      }
+      console.log('✅ Organization switch successful:', data)
+      return data
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'] });
+      console.log('✅ Organization switch queries invalidated');
+    },
+    onError: (error) => {
+      console.error('❌ Organization switch error:', error)
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo cambiar la organización.",
+        variant: "destructive"
+      })
+    }
+  });
+
+  // PROJECT CHANGE MUTATION - Exact copy from OrganizationDashboard.tsx that WORKS  
+  const selectProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      if (!supabase || !userData?.user?.id || !currentOrganizationId) {
+        throw new Error('Required data not available');
+      }
+      
+      const { error } = await supabase
+        .from('user_organization_preferences')
+        .upsert({
+          user_id: userData.user.id,
+          organization_id: currentOrganizationId,
+          last_project_id: projectId,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id'
+        })
+      
+      if (error) throw error
+      return projectId;
+    },
+    onSuccess: (projectId) => {
+      // Update project context
+      setSelectedProject(projectId, currentOrganizationId);
+      setSidebarLevel('project');
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-organization-preferences', userData?.user?.id, currentOrganizationId] 
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      console.log('✅ Project selection successful:', projectId);
+    },
+    onError: (error) => {
+      console.error('❌ Project selection error:', error)
+      toast({
+        title: "Error",
+        description: "No se pudo seleccionar el proyecto",
+        variant: "destructive"
+      })
+    }
+  });
   
   // Get real data
   const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
@@ -45,16 +123,13 @@ export function MainHeader() {
     setSidebarLevel('organization');
     navigate('/organization/dashboard');
     
-    // CRITICAL: Save to Supabase to persist the organization change
-    updateUserOrgPreferences.mutate({
-      organizationId: orgId,
-      lastProjectId: null // Reset project when changing organization
-    });
+    // SAVE TO SUPABASE using the EXACT same method that works in ProfileOrganizations.tsx
+    switchOrganization.mutate(orgId);
   };
 
   const handleProjectChange = (projectId: string) => {
-    setSelectedProject(projectId);
-    setSidebarLevel('project');
+    // SAVE TO SUPABASE using the EXACT same method that works in OrganizationDashboard.tsx
+    selectProjectMutation.mutate(projectId);
     // NO navigate - solo cambiar proyecto activo
   };
 
