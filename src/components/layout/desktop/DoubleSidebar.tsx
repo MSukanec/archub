@@ -672,18 +672,16 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* Separador visual entre botones y botón de anclar */}
-          <div className="mt-auto pt-4">
-            <div className="border-t border-[var(--main-sidebar-border)] pt-3 pb-3">
-              <ButtonSidebar
-                icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-                label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-                isActive={false}
-                isExpanded={isExpanded}
-                onClick={handleDockToggle}
-                variant="secondary"
-              />
-            </div>
+          {/* Botón de anclar - PEGADO al borde inferior */}
+          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-3 pb-0">
+            <ButtonSidebar
+              icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+              label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+              isActive={false}
+              isExpanded={isExpanded}
+              onClick={handleDockToggle}
+              variant="secondary"
+            />
           </div>
         </aside>
       </div>

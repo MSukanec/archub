@@ -173,11 +173,12 @@ export function PageLayout({
 
   return (
     <div className="flex flex-col min-h-0">
-      {/* Page Header */}
-      <div style={{ backgroundColor: "var(--layout-bg)" }}>
-        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
-          isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
-        }`}>
+      {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
+      <div className="flex-1 overflow-y-auto">
+        <div style={{ backgroundColor: "var(--layout-bg)" }}>
+          <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
+            isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+          }`}>
           {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
           {/* Left: Page Title */}
@@ -478,13 +479,15 @@ export function PageLayout({
               </div>
             </div>
           )}
+          </div>
         </div>
 
-      </div>
-
-      {/* Page Content */}
-      <div className="flex-1 overflow-y-auto">
-        {children}
+        {/* Page Content */}
+        <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${
+          isDocked ? 'pl-[120px] pr-[72px]' : 'pl-[168px] pr-[72px]'
+        }`}>
+          {children}
+        </div>
       </div>
     </div>
   );
