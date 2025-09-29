@@ -381,8 +381,8 @@ export const budgets = pgTable("budgets", {
   exchange_rate: real("exchange_rate"),
   // New fields for discount and VAT at budget level
   discount_pct: real("discount_pct").default(0),
-  discount_amount: real("discount_amount").default(0),
-  vat_pct: real("vat_pct").default(21), // Default 21% IVA for Argentina
+  tax_pct: real("tax_pct").default(21), // Default 21% IVA for Argentina
+  tax_label: text("tax_label").default("IVA"), // IVA or VAT
 });
 
 // Budget Items Table

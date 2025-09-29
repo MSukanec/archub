@@ -398,7 +398,7 @@ const BudgetSummaryRow = ({
   budgetId,
   initialDiscountPct = 0,
   initialDiscountAmount = 0,
-  initialVatPct = 21,
+  initialTaxPct = 21,
   onBudgetUpdate
 }: { 
   totalSubtotals: number; 
@@ -406,32 +406,32 @@ const BudgetSummaryRow = ({
   budgetId?: string;
   initialDiscountPct?: number;
   initialDiscountAmount?: number;
-  initialVatPct?: number;
-  onBudgetUpdate?: (updates: { discount_pct?: number; discount_amount?: number; vat_pct?: number }) => void;
+  initialTaxPct?: number;
+  onBudgetUpdate?: (updates: { discount_pct?: number; tax_pct?: number }) => void;
 }) => {
   const [discountPct, setDiscountPct] = useState(initialDiscountPct);
   const [discountAmount, setDiscountAmount] = useState(initialDiscountAmount);
-  const [vatPct, setVatPct] = useState(initialVatPct);
+  const [taxPct, setTaxPct] = useState(initialTaxPct);
   const [localDiscountPct, setLocalDiscountPct] = useState(initialDiscountPct.toString());
-  const [localVatPct, setLocalVatPct] = useState(initialVatPct.toString());
+  const [localTaxPct, setLocalTaxPct] = useState(initialTaxPct.toString());
   
   // Update local state when props change (budget data loads)
   useEffect(() => {
     setDiscountPct(initialDiscountPct);
     setDiscountAmount(initialDiscountAmount);
-    setVatPct(initialVatPct);
+    setTaxPct(initialTaxPct);
     setLocalDiscountPct(initialDiscountPct.toString());
-    setLocalVatPct(initialVatPct.toString());
-  }, [initialDiscountPct, initialDiscountAmount, initialVatPct]);
+    setLocalTaxPct(initialTaxPct.toString());
+  }, [initialDiscountPct, initialDiscountAmount, initialTaxPct]);
   const [editingField, setEditingField] = useState<string | null>(null);
 
   // State for tracking changes to save
-  const [budgetUpdates, setBudgetUpdates] = useState<{ discount_pct?: number; discount_amount?: number; vat_pct?: number }>({});
+  const [budgetUpdates, setBudgetUpdates] = useState<{ discount_pct?: number; tax_pct?: number }>({});
 
   // Debounced save function
   const { isSaving } = useDebouncedAutoSave({
     data: budgetUpdates,
-    saveFn: useCallback(async (updates: { discount_pct?: number; discount_amount?: number; vat_pct?: number }) => {
+    saveFn: useCallback(async (updates: { discount_pct?: number; tax_pct?: number }) => {
       if (onBudgetUpdate && Object.keys(updates).length > 0) {
         onBudgetUpdate(updates);
       }
@@ -448,8 +448,8 @@ const BudgetSummaryRow = ({
   // Calculate final totals
   const discountValue = discountPct > 0 ? calculateDiscountAmount(discountPct) : discountAmount;
   const totalAfterDiscount = totalFinals - discountValue;
-  const vatAmount = (totalAfterDiscount * vatPct) / 100;
-  const grandTotal = totalAfterDiscount + vatAmount;
+  const taxAmount = (totalAfterDiscount * taxPct) / 100;
+  const grandTotal = totalAfterDiscount + taxAmount;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -473,15 +473,15 @@ const BudgetSummaryRow = ({
     const numValue = parseFloat(value) || 0;
     setDiscountPct(numValue);
     setDiscountAmount(0); // Reset fixed amount when using percentage
-    setBudgetUpdates({ discount_pct: numValue, discount_amount: 0 });
+    setBudgetUpdates({ discount_pct: numValue });
   };
 
-  // Handle VAT percentage change
-  const handleVatPctChange = (value: string) => {
-    setLocalVatPct(value);
+  // Handle Tax percentage change
+  const handleTaxPctChange = (value: string) => {
+    setLocalTaxPct(value);
     const numValue = parseFloat(value) || 0;
-    setVatPct(numValue);
-    setBudgetUpdates(prev => ({ ...prev, vat_pct: numValue }));
+    setTaxPct(numValue);
+    setBudgetUpdates(prev => ({ ...prev, tax_pct: numValue }));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
@@ -491,8 +491,8 @@ const BudgetSummaryRow = ({
       // Reset to previous values
       if (field === 'discount') {
         setLocalDiscountPct(discountPct.toString());
-      } else if (field === 'vat') {
-        setLocalVatPct(vatPct.toString());
+      } else if (field === 'tax') {
+        setLocalTaxPct(taxPct.toString());
       }
       setEditingField(null);
     }
@@ -679,12 +679,12 @@ const BudgetSummaryRow = ({
           <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
             <span className="mr-1">IVA</span>
             <span className="text-gray-600">(</span>
-            {editingField === 'vat' ? (
+            {editingField === 'tax' ? (
               <Input
                 type="number"
-                value={localVatPct}
-                onChange={(e) => handleVatPctChange(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'vat')}
+                value={localTaxPct}
+                onChange={(e) => handleTaxPctChange(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'tax')}
                 onBlur={() => setEditingField(null)}
                 className="h-6 w-12 text-xs text-center bg-white text-black mx-1"
                 step="0.1"
@@ -695,21 +695,21 @@ const BudgetSummaryRow = ({
               />
             ) : (
               <button
-                onClick={() => setEditingField('vat')}
+                onClick={() => setEditingField('tax')}
                 className="text-xs font-medium transition-colors cursor-pointer border-b border-dashed mx-1"
                 style={{ 
                   color: "var(--accent-2)",
                   borderBottomColor: "var(--accent-2)"
                 }}
               >
-                {formatPercentage(vatPct)}
+                {formatPercentage(taxPct)}
               </button>
             )}
             <span className="text-gray-600">%)</span>
           </div>
           <div></div> {/* Margin column */}
           <div className="flex items-center justify-end font-semibold" style={{ color: "var(--table-row-fg)" }}>
-            {formatCurrency(vatAmount)}
+            {formatCurrency(taxAmount)}
           </div> {/* TOTAL column - clean value without + */}
           <div></div> {/* Empty space for percentage column */}
           <div></div> {/* Empty space for actions column */}
@@ -1924,8 +1924,8 @@ export function BudgetTree({
           budgetId={budgetId || tasks[0]?.budget_id}
           // Pass current budget values as initial values
           initialDiscountPct={currentBudget?.discount_pct || 0}
-          initialDiscountAmount={currentBudget?.discount_amount || 0}
-          initialVatPct={currentBudget?.vat_pct || 21}
+          initialDiscountAmount={0}
+          initialTaxPct={currentBudget?.tax_pct || 21}
           onBudgetUpdate={(updates) => {
             const targetBudgetId = budgetId || tasks[0]?.budget_id;
             if (targetBudgetId) {
