@@ -14,17 +14,16 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
   // Filtrar datos con valores válidos
   const validData = data.filter(item => item.value > 0);
   
-  // Calcular el total y valor máximo para normalizar alturas
+  // Calcular el total
   const total = validData.reduce((sum, item) => sum + item.value, 0);
-  const maxValue = Math.max(...validData.map(item => item.value));
   
   // Colores CSS en orden
   const chartColors = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))'
+    'var(--chart-1)',
+    'var(--chart-2)', 
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)'
   ];
   
   // Función por defecto para formatear valores
@@ -47,51 +46,106 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
     );
   }
   
+  // Calcular porcentajes acumulados para posicionamiento
+  let cumulativePercentage = 0;
+  const segments = validData.map((item, index) => {
+    const percentage = (item.value / total) * 100;
+    const color = chartColors[index % chartColors.length];
+    const startPos = cumulativePercentage;
+    cumulativePercentage += percentage;
+    
+    return {
+      ...item,
+      percentage,
+      color,
+      startPos,
+      endPos: cumulativePercentage
+    };
+  });
+  
   return (
-    <div className={`${className}`}>
-      {/* Container principal con las barras */}
-      <div className="flex items-end justify-between gap-4 h-48 mb-6">
-        {validData.map((item, index) => {
-          const percentage = (item.value / total) * 100;
-          const heightPercentage = (item.value / maxValue) * 100;
-          const color = chartColors[index % chartColors.length];
+    <div className={`relative ${className}`}>
+      {/* Contenedor con información arriba */}
+      <div className="mb-8">
+        {segments.map((segment, index) => {
+          const centerPos = segment.startPos + (segment.percentage / 2);
           
           return (
-            <div key={`${item.label}-${index}`} className="flex-1 flex flex-col items-center">
-              {/* Valor arriba de la barra */}
-              <div className="mb-2 text-center">
+            <div
+              key={`top-${segment.label}-${index}`}
+              className="absolute flex flex-col items-center"
+              style={{
+                left: `${centerPos}%`,
+                transform: 'translateX(-50%)',
+                top: 0
+              }}
+            >
+              {/* Valor y porcentaje */}
+              <div className="text-center mb-2">
                 <div className="text-lg font-bold text-foreground">
-                  {formatFn(item.value)}
+                  {formatFn(segment.value)}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {percentage.toFixed(1)}%
+                  {segment.percentage.toFixed(1)}%
                 </div>
               </div>
               
-              {/* Barra vertical */}
-              <div className="w-full flex flex-col justify-end h-full">
+              {/* Línea vertical divisoria */}
+              {index < segments.length - 1 && (
                 <div
-                  className="w-full rounded-t-lg transition-all duration-500 ease-out"
+                  className="absolute w-px bg-border"
                   style={{
-                    height: `${heightPercentage}%`,
-                    backgroundColor: color,
-                    minHeight: '20px'
+                    left: `${(segment.percentage / 2) + (segments[index + 1]?.percentage || 0) / 2}%`,
+                    top: '60px',
+                    height: '40px'
                   }}
                 />
-              </div>
-              
-              {/* Label abajo de la barra */}
-              <div className="mt-3 text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  {item.icon && (
-                    <div className="flex-shrink-0" style={{ color }}>
-                      {item.icon}
-                    </div>
-                  )}
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Barra horizontal principal */}
+      <div className="relative mt-16 mb-8">
+        <div className="flex w-full h-8 rounded-lg overflow-hidden">
+          {segments.map((segment, index) => (
+            <div
+              key={`bar-${segment.label}-${index}`}
+              className="h-full transition-all duration-500"
+              style={{
+                width: `${segment.percentage}%`,
+                backgroundColor: segment.color
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* Labels abajo */}
+      <div className="relative">
+        {segments.map((segment, index) => {
+          const centerPos = segment.startPos + (segment.percentage / 2);
+          
+          return (
+            <div
+              key={`bottom-${segment.label}-${index}`}
+              className="absolute flex flex-col items-center"
+              style={{
+                left: `${centerPos}%`,
+                transform: 'translateX(-50%)',
+                top: 0
+              }}
+            >
+              {/* Icono */}
+              {segment.icon && (
+                <div className="mb-1" style={{ color: segment.color }}>
+                  {segment.icon}
                 </div>
-                <div className="text-sm font-medium text-foreground">
-                  {item.label}
-                </div>
+              )}
+              {/* Label */}
+              <div className="text-sm font-medium text-foreground text-center">
+                {segment.label}
               </div>
             </div>
           );
