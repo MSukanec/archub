@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/desktop/Layout'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Info } from 'lucide-react'
 import ProjectDashboard from './ProjectDashboard'
-import ProjectDataTab from '../../projects/tabs/ProjectDataTab'
+import ProjectBasicDataTab from './ProjectBasicDataTab'
 
 export default function Project() {
   const { setSidebarContext } = useNavigationStore()
@@ -41,7 +41,7 @@ export default function Project() {
   return (
     <Layout headerProps={headerProps} wide>
       {activeTab === "dashboard" && <ProjectDashboard />}
-      {activeTab === "basic-data" && <ProjectDataTab />}
+      {activeTab === "basic-data" && <ProjectBasicDataTab />}
     </Layout>
   )
 }
