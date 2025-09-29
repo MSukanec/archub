@@ -312,21 +312,27 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         
         {/* Tabs - si existen */}
         {tabs && tabs.length > 0 && (
-          <div className="flex items-center gap-1 ml-4">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange?.(tab.id)}
-                className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
-                  tab.isActive
-                    ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
-                    : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <>
+            {/* Indicador de tabs */}
+            <span className="text-sm text-[var(--main-sidebar-fg)] opacity-40 mx-2">›</span>
+            
+            <div className="flex items-center gap-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange?.(tab.id)}
+                  className={`flex items-center h-8 px-3 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded border ${
+                    tab.isActive
+                      ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)] border-[var(--layout-bg)]' 
+                      : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)] border-[var(--layout-bg)]'
+                  }`}
+                  style={{ borderColor: 'var(--layout-bg)' }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
