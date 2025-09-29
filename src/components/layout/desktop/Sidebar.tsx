@@ -107,13 +107,12 @@ export function Sidebar() {
       >
         <aside 
           className={cn(
-            "flex flex-col flex-1 h-full relative",
+            "flex flex-col h-full",
             isExpanded ? "w-60" : "w-12"
           )}
-          style={{ height: '100%' }}
         >
           {/* SECCIÓN SUPERIOR: Navegación principal */}
-          <div className="overflow-y-auto flex-1 pt-3 px-0 min-h-0">
+          <div className="flex-1 overflow-y-auto pt-3 px-0 min-h-0">
             <div className="flex flex-col gap-[2px]">
               {navigationItems.map((item, index) => {
                 if (item.adminOnly && !isAdmin) return null;
@@ -170,7 +169,7 @@ export function Sidebar() {
           </div>
 
           {/* SECCIÓN INFERIOR: Controles y Avatar */}
-          <div className="mt-auto pb-3 px-0 flex flex-col gap-[2px]">
+          <div className="flex-shrink-0 pb-3 px-0 flex flex-col gap-[2px]">
             {/* Botón de Anclar */}
             <ButtonSidebar
               icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
