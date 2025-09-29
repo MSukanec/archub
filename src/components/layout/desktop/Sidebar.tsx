@@ -97,7 +97,7 @@ export function Sidebar() {
     <div className="flex flex-row h-[calc(100vh-3rem)]">
       {/* SIDEBAR PRINCIPAL */}
       <div 
-        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-visible relative h-[calc(100vh-3rem)]"
+        className="bg-[var(--main-sidebar-bg)] text-[var(--main-sidebar-fg)] border-r border-[var(--main-sidebar-border)] transition-all duration-150 z-10 overflow-hidden relative h-[calc(100vh-3rem)]"
         style={{
           width: isDocked 
             ? '240px' 
@@ -158,7 +158,7 @@ export function Sidebar() {
                       button
                     )}
                     {dividerInfo.show && (
-                      <div className="my-3 h-[12px] flex items-center">
+                      <div className="my-3 h-[12px] flex items-center justify-center w-full">
                         {isExpanded ? (
                           // Divisor con texto cuando está expandido
                           <div className="flex items-center gap-2 w-full">
@@ -169,8 +169,8 @@ export function Sidebar() {
                             <div className="flex-1 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                           </div>
                         ) : (
-                          // Línea simple cuando está colapsado - centrada en los 32px
-                          <div className="w-8 mx-auto h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
+                          // Línea simple cuando está colapsado - centrada en los 32px del botón
+                          <div className="w-8 h-[1px] bg-[var(--main-sidebar-fg)] opacity-20" />
                         )}
                       </div>
                     )}
