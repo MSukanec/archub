@@ -213,16 +213,21 @@ export function Sidebar() {
 
             {/* Avatar del Usuario */}
             <button
-              className="mx-2 h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center justify-center gap-3"
+              className="mx-2 h-10 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center px-2"
               onClick={() => navigate('/profile')}
             >
-              <Avatar className="h-8 w-8 flex-shrink-0 ring-0 border-0">
-                <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
-                  {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              {/* Avatar centrado con ancho fijo */}
+              <span className="flex-shrink-0 w-8 flex items-center justify-center">
+                <Avatar className="h-8 w-8 ring-0 border-0">
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-semibold border-0">
+                    {userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </span>
+              
+              {/* Texto - Solo aparece cuando expandido */}
               {isExpanded && (
-                <div className="flex flex-col overflow-hidden min-w-0">
+                <div className="flex flex-col overflow-hidden min-w-0 ml-3 flex-1">
                   <span className="text-sm font-medium text-[var(--main-sidebar-fg)] truncate">
                     {userData?.user?.full_name || 'Usuario'}
                   </span>
