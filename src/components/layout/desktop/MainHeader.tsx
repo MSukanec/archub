@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Building2, FolderOpen } from "lucide-react";
+import { ChevronDown, Building2, FolderOpen, Slash } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
@@ -13,8 +13,58 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
-export function MainHeader() {
-  const [, navigate] = useLocation();
+// Mapeo de rutas a nombres de páginas
+const PAGE_NAMES: Record<string, string> = {
+  // Organization level
+  '/organization/dashboard': 'Dashboard',
+  '/organization/personnel': 'Personal',
+  '/organization/analysis': 'Análisis de Costos',
+  '/organization/expenses': 'Gastos Generales',
+  '/organization/activity': 'Actividad',
+  '/organization/preferences': 'Preferencias',
+  
+  // Project level
+  '/project/dashboard': 'Dashboard',
+  '/project/gantt': 'Gantt',
+  '/project/kanban': 'Kanban',
+  '/project/budgets': 'Presupuesto',
+  '/project/construction-personnel': 'Personal',
+  '/project/construction-materials': 'Materiales',
+  '/project/indirects': 'Gastos Indirectos',
+  '/project/subcontracts': 'Subcontratos',
+  '/project/logs': 'Registros',
+  
+  // Resources
+  '/resources/documentation': 'Documentación',
+  '/resources/gallery': 'Galería',
+  '/resources/contacts': 'Contactos',
+  
+  // Finances
+  '/finances/movements': 'Movimientos',
+  '/finances/conversions': 'Conversiones',
+  '/finances/transfers': 'Transferencias',
+  '/finances/budgets': 'Presupuestos',
+  '/finances/clients': 'Clientes',
+  '/finances/capital': 'Capital Social',
+  '/finances/general-costs': 'Gastos Generales',
+  
+  // Admin
+  '/admin/users': 'Usuarios',
+  '/admin/task-params': 'Parámetros de Tareas',
+  '/admin/task-list': 'Lista de Tareas',
+  '/admin/material-prices': 'Precios de Materiales',
+};
+
+interface MainHeaderProps {
+  actionButton?: {
+    label: string;
+    icon?: React.ComponentType<any>;
+    onClick: () => void;
+  };
+}
+
+export function MainHeader({ actionButton }: MainHeaderProps = {}) {
+  const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
@@ -104,6 +154,9 @@ export function MainHeader() {
                               userData?.organization?.name || 
                               "Organización";
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
+  
+  // Obtener el nombre de la página actual
+  const currentPageName = PAGE_NAMES[location] || 'Página';
 
   const handleOrganizationClick = () => {
     setSidebarLevel('organization');
@@ -139,7 +192,7 @@ export function MainHeader() {
       }}
     >
       {/* Left side: Logo and navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
         <div className="shrink-0 w-12 h-12 flex items-center justify-center">
           <img 
@@ -192,6 +245,9 @@ export function MainHeader() {
             </PopoverContent>
           </Popover>
         </div>
+        
+        {/* Separator */}
+        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
 
         {/* Project selector */}
         <div className="flex items-center gap-1">
@@ -236,8 +292,29 @@ export function MainHeader() {
             </PopoverContent>
           </Popover>
         </div>
+        
+        {/* Separator */}
+        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
+        
+        {/* Nombre de la página actual */}
+        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
+          {currentPageName}
+        </span>
       </div>
 
+      {/* Right side: Action button */}
+      {actionButton && (
+        <div className="flex items-center">
+          <Button
+            onClick={actionButton.onClick}
+            size="sm"
+            className="h-8 text-xs font-medium"
+          >
+            {actionButton.icon && <actionButton.icon className="h-4 w-4 mr-1" />}
+            {actionButton.label}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
