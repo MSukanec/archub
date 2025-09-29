@@ -422,11 +422,6 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   description="Gestiona los costos específicos de esta tarea"
                 >
                   <div className="flex items-center gap-2">
-                    {customPrice && (
-                      <Badge style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-                        PERSONALIZADO
-                      </Badge>
-                    )}
                     <span className="text-xs text-muted-foreground">
                       Última actualización: {formatDate(customPrice?.updated_at ? new Date(customPrice.updated_at) : kpiData?.lastUpdate || new Date())}
                     </span>
