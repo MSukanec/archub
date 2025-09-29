@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
-import { MainSidebar } from "./MainSidebar";
 import { MainHeader } from "./MainHeader";
+import { DoubleSidebar } from "./DoubleSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -125,7 +125,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
           >
             {/* Tertiary Sidebar - Always pushes content to the side */}
             <div className="flex-shrink-0">
-              <MainSidebar />
+              <DoubleSidebar />
             </div>
 
             {/* Main Content Area with rounded corners and framing effect */}

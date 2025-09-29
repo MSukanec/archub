@@ -108,7 +108,7 @@ interface SidebarSection {
 
 type AnySidebarItem = SidebarItem | SidebarItemWithSubmenu | SidebarDivider | SidebarSection;
 
-export function MainSidebar() {
+export function DoubleSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setSelectedProject } = useProjectContext();
