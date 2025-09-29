@@ -55,7 +55,7 @@ export function MainHeader() {
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId);
     setSidebarLevel('project');
-    navigate('/project/dashboard');
+    // NO navigate - solo cambiar proyecto activo
   };
 
   return (

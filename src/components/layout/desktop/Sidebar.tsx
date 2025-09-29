@@ -137,22 +137,6 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* BOTÓN DE ANCLAR - POSICIÓN ABSOLUTA AL FONDO */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]"
-            style={{ padding: '12px 0' }}
-          >
-            <div className="px-3">
-              <ButtonSidebar
-                icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-                label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-                isActive={false}
-                isExpanded={isExpanded}
-                onClick={handleDockToggle}
-                variant="secondary"
-              />
-            </div>
-          </div>
 
         </aside>
       </div>
