@@ -49,11 +49,11 @@ export function Sidebar() {
       return [
         { id: 'dashboard', label: 'Resumen de Organización', icon: Home, href: '/organization/dashboard' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Building, href: '/organization/projects' },
-        { id: 'contacts', label: 'Contactos', icon: Users, href: '/resources/contacts' },
+        { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'library', label: 'Biblioteca', icon: FileText, href: '/resources/documentation' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/finances/movements' },
         { id: 'capital', label: 'Capital', icon: Calculator, href: '/finances/capital' },
-        { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/expenses' },
+        { id: 'expenses', label: 'Gastos Generales', icon: FolderOpen, href: '/finances/general-costs' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity' },
         { id: 'preferences', label: 'Preferencias', icon: Settings, href: '/organization/preferences' },
       ];
@@ -127,7 +127,7 @@ export function Sidebar() {
                       variant="secondary"
                     />
                     {shouldShowDivider && (
-                      <div className="h-px bg-[var(--main-sidebar-border)] mx-3 my-2" />
+                      <div className="h-[1px] bg-gray-400 dark:bg-gray-500 mx-3 my-3 opacity-60" />
                     )}
                   </div>
                 );
