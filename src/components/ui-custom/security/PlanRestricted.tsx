@@ -82,14 +82,10 @@ export function PlanRestricted({
   // CASO: COMING SOON - Solo deshabilitar sin decoración
   if (reason === "coming_soon") {
     return (
-      <div>
+      <div className="opacity-40 pointer-events-none cursor-not-allowed">
         {React.cloneElement(children as React.ReactElement, {
-          disabled: true,
-          className: `${(children as React.ReactElement).props.className || ''} cursor-not-allowed text-muted-foreground hover:bg-transparent hover:text-muted-foreground pointer-events-none`,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+          disableHover: true,
+          onClick: undefined
         })}
       </div>
     );
