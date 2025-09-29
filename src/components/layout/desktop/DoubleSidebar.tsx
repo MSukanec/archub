@@ -672,20 +672,19 @@ export function MainSidebar() {
             </div>
           </div>
 
-          {/* Anchor Button - Fixed at bottom, separated with more space */}
-          <div className="mt-auto border-t border-[var(--main-sidebar-border)] pt-4 pb-3">
-            <div className="flex flex-col gap-[2px]">
-              <ButtonSidebar
-                icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
-                label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-                isActive={false}
-                isExpanded={isExpanded}
-                onClick={handleDockToggle}
-                variant="secondary"
-              />
-            </div>
-          </div>
         </aside>
+        
+        {/* Anchor Button - SEPARADO COMPLETAMENTE en su propio div, abajo de todo */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)] p-3">
+          <ButtonSidebar
+            icon={isDocked ? <PanelLeftClose className="w-[18px] h-[18px]" /> : <PanelLeftOpen className="w-[18px] h-[18px]" />}
+            label={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+            isActive={false}
+            isExpanded={isExpanded}
+            onClick={handleDockToggle}
+            variant="secondary"
+          />
+        </div>
       </div>
     </div>
     </>
