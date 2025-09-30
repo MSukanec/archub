@@ -246,15 +246,10 @@ const AdminCommunityOrganizations = () => {
       label: 'Organización',
       width: '32%',
       render: (organization: Organization) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-            <Building className="w-4 h-4 text-accent" />
-          </div>
-          <div>
-            <div className="font-medium">{organization.name}</div>
-            <div className="text-xs text-muted-foreground">
-              {organization.creator?.full_name || 'Usuario desconocido'}
-            </div>
+        <div>
+          <div className="font-bold">{organization.name}</div>
+          <div className="text-xs text-muted-foreground">
+            {organization.creator?.full_name || 'Usuario desconocido'}
           </div>
         </div>
       ),
@@ -308,8 +303,8 @@ const AdminCommunityOrganizations = () => {
       render: (organization: Organization) => (
         <div className="flex items-center gap-2">
           <Badge 
-            variant={organization.is_active ? 'default' : 'secondary'}
-            className={organization.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : ''}
+            variant="default"
+            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
           >
             {organization.is_active ? 'Activa' : 'Inactiva'}
           </Badge>
