@@ -1,4 +1,3 @@
-/*
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,9 +33,9 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
       className
     )}>
       <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
-        {/* Fila Superior: Título a la izquierda, Acciones a la derecha *\/}
+        {/* Fila Superior: Título a la izquierda, Acciones a la derecha */}
       <div className="h-12 flex items-center justify-between">
-        {/* Left: Title *\/}
+        {/* Left: Title */}
         <div className="flex items-center">
           {title && (
             <h1 className="text-lg font-semibold text-[var(--foreground)]">
@@ -45,7 +44,7 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
           )}
         </div>
 
-        {/* Right: Action Buttons *\/}
+        {/* Right: Action Buttons */}
         <div className="flex items-center gap-2">
           {actions.map((action) => (
             <Button
@@ -63,7 +62,7 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
         </div>
         </div>
 
-        {/* Fila Inferior: Tabs a la izquierda *\/}
+        {/* Fila Inferior: Tabs a la izquierda */}
         {tabs.length > 0 && (
           <div className="h-12 flex items-center">
           <div className="flex items-center gap-1">
@@ -88,4 +87,3 @@ export function Header({ title, tabs = [], actions = [], className }: HeaderProp
     </div>
   );
 }
-*/

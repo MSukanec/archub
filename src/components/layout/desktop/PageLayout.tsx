@@ -175,13 +175,13 @@ export function PageLayout({
     <div className="flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div className="flex-1 overflow-y-auto">
-        {/* COMENTADO - AHORA SE USA EL MAINHEADER UNIFICADO */}
-        {/*
         <div style={{ backgroundColor: "var(--layout-bg)" }}>
           <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} pt-6 ${
             isDocked ? 'px-16' : 'px-16'
           }`}>
+          {/* FILA SUPERIOR: Título de página a la izquierda + Botones de acción a la derecha */}
           <div className={`h-[50px] flex items-center justify-between ${!hasTabs ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
+          {/* Left: Page Title */}
           <div className="flex items-center gap-4">
             {showBackButton && (
               <Button
@@ -210,7 +210,9 @@ export function PageLayout({
             )}
           </div>
 
+          {/* Right: Header Action Buttons + Main Action Buttons */}
           <div className="flex items-center gap-1">
+            {/* Header Search Button (expandible) */}
             {showHeaderSearch && (
               <div 
                 className="relative flex items-center"
@@ -269,6 +271,7 @@ export function PageLayout({
               </div>
             )}
 
+            {/* Currency Selector */}
             {showCurrencySelector && onCurrencyViewChange && (
               <Popover>
                 <PopoverTrigger asChild>
@@ -312,6 +315,7 @@ export function PageLayout({
               </Popover>
             )}
 
+            {/* Header Filter Button */}
             {showHeaderFilter && renderHeaderFilterContent && (
               <Popover>
                 <PopoverTrigger asChild>
@@ -329,6 +333,7 @@ export function PageLayout({
               </Popover>
             )}
 
+            {/* Header Clear Filters Button */}
             {showHeaderClearFilters && (
               <Button
                 variant="ghost"
@@ -341,10 +346,12 @@ export function PageLayout({
               </Button>
             )}
 
+            {/* Separator if there are header actions and main action buttons */}
             {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton || actions.length > 0) && (
               <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
             )}
 
+            {/* Additional Button (appears first/left) */}
             {actionButton?.additionalButton && (
               <Button
                 variant={actionButton.additionalButton.variant || "ghost"}
@@ -359,12 +366,14 @@ export function PageLayout({
               </Button>
             )}
 
+            {/* Custom Actions (like PlanRestricted) */}
             {actions.map((action, index) => (
               <div key={index}>
                 {action}
               </div>
             ))}
 
+            {/* Main Action Button */}
             {actionButton && (
               <>
                 {actionButton.dropdown ? (
@@ -408,6 +417,7 @@ export function PageLayout({
           </div>
         </div>
 
+          {/* FILA INFERIOR: Tabs a la izquierda */}
           {hasTabs && (
             <div className="h-8 flex items-center border-b border-border relative overflow-hidden">
               <div ref={tabsContainerRef} className="flex items-center relative w-full" style={{ gap: '24px' }}>
@@ -444,6 +454,7 @@ export function PageLayout({
                     </button>
                   );
 
+                  // Si la tab está restringida, envolverla con PlanRestricted
                   if (tab.isRestricted && tab.restrictionReason) {
                     return (
                       <PlanRestricted key={tab.id} reason={tab.restrictionReason}>
@@ -455,6 +466,7 @@ export function PageLayout({
                   return tabContent;
                 })}
                 
+                {/* Subrayado animado dinámico */}
                 <div
                   className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out pointer-events-none"
                   style={{
@@ -469,7 +481,6 @@ export function PageLayout({
           )}
           </div>
         </div>
-        */}
 
         {/* Page Content */}
         <div className={`${wide ? "" : "max-w-[1440px] mx-auto"} py-6 pb-32 min-h-0 ${

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, Building2, FolderOpen } from "lucide-react";
+import { ChevronDown, Building2, FolderOpen, Slash } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectsLite } from "@/hooks/use-projects-lite";
@@ -55,24 +55,15 @@ const PAGE_NAMES: Record<string, string> = {
   '/admin/material-prices': 'Precios de Materiales',
 };
 
-interface Tab {
-  id: string;
-  label: string;
-  isActive: boolean;
-}
-
 interface MainHeaderProps {
   actionButton?: {
     label: string;
     icon?: React.ComponentType<any>;
     onClick: () => void;
   };
-  tabs?: Tab[];
-  onTabChange?: (tabId: string) => void;
-  title?: string;
 }
 
-export function MainHeader({ actionButton, tabs = [], onTabChange, title }: MainHeaderProps = {}) {
+export function MainHeader({ actionButton }: MainHeaderProps = {}) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
@@ -164,8 +155,8 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
                               "Organización";
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
   
-  // Obtener el nombre de la página actual - usar title si está disponible, sino mapeo
-  const currentPageName = title || PAGE_NAMES[location] || 'Página';
+  // Obtener el nombre de la página actual
+  const currentPageName = PAGE_NAMES[location] || 'Página';
 
   const handleOrganizationClick = () => {
     setSidebarLevel('organization');
@@ -217,8 +208,8 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
             onClick={handleOrganizationClick}
             className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
               sidebarLevel === 'organization' 
-                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
             }`}
           >
             <Building2 className="h-4 w-4 mr-1" />
@@ -228,7 +219,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
           <Popover>
             <PopoverTrigger asChild>
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
               >
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -256,7 +247,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         </div>
         
         {/* Separator */}
-        <span className="text-sm text-white opacity-50 mx-1">/</span>
+        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
 
         {/* Project selector */}
         <div className="flex items-center gap-1">
@@ -264,8 +255,8 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
             onClick={handleProjectClick}
             className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
               sidebarLevel === 'project' 
-                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
-                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
+                ? 'text-[var(--main-sidebar-button-active-fg)] bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]'
             }`}
           >
             <FolderOpen className="h-4 w-4 mr-1" />
@@ -275,7 +266,7 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
           <Popover>
             <PopoverTrigger asChild>
               <button
-                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-[var(--main-sidebar-button-fg)] bg-[var(--main-sidebar-button-bg)] hover:bg-[var(--main-sidebar-button-hover-bg)] hover:text-[var(--main-sidebar-button-hover-fg)]"
               >
                 <ChevronDown className="h-3 w-3" />
               </button>
@@ -303,40 +294,12 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
         </div>
         
         {/* Separator */}
-        <span className="text-sm text-white opacity-50 mx-1">/</span>
+        <Slash className="h-4 w-4 text-[var(--main-sidebar-fg)] opacity-30" />
         
         {/* Nombre de la página actual */}
-        <span className="text-sm font-medium text-white opacity-90">
+        <span className="text-sm font-medium text-[var(--main-sidebar-fg)] opacity-80">
           {currentPageName}
         </span>
-        
-        {/* Tabs - si existen */}
-        {tabs && tabs.length > 0 && (
-          <>
-            {/* Separador vertical antes de las tabs */}
-            <div className="h-5 w-px bg-white opacity-30 mx-4" />
-            
-            <div className="flex items-center gap-0 h-full">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => onTabChange?.(tab.id)}
-                  className={`relative flex items-center h-full px-4 text-sm font-medium transition-all duration-200 ${
-                    tab.isActive
-                      ? 'text-[var(--accent)]' 
-                      : 'text-[var(--main-sidebar-fg)] opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  {tab.label}
-                  {/* Barra inferior para tab activa */}
-                  {tab.isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
       </div>
 
       {/* Right side: Action button */}
