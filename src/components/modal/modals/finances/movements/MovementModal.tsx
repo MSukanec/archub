@@ -147,38 +147,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     const hasManycurrencies = currencies.length > 1
     const hasManyWallets = wallets.length > 1
     
-    // Debug log
-    console.log('🔧 Filtering movement concepts:', {
-      totalConcepts: movementConcepts.length,
-      currencies: currencies.length,
-      wallets: wallets.length,
-      hasManycurrencies,
-      hasManyWallets
-    })
-    
     const filtered = movementConcepts.filter(concept => {
       const viewMode = concept.view_mode?.trim()
       
       // Only show "Conversión" if there are multiple currencies
       if (viewMode?.includes('conversion')) {
-        console.log('🔧 Conversion concept filtered:', { name: concept.name, show: hasManycurrencies })
         return hasManycurrencies
       }
       
       // Only show "Transferencia Interna" if there are multiple wallets  
       if (viewMode?.includes('transfer')) {
-        console.log('🔧 Transfer concept filtered:', { name: concept.name, show: hasManyWallets })
         return hasManyWallets
       }
       
       // Show all other concepts normally
       return true
-    })
-    
-    console.log('🔧 Filtered concepts result:', {
-      original: movementConcepts.length,
-      filtered: filtered.length,
-      filteredNames: filtered.map(c => c.name)
     })
     
     return filtered
@@ -253,10 +236,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const [selectedPartnerWithdrawals, setSelectedPartnerWithdrawals] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   const [selectedPartnerContributions, setSelectedPartnerContributions] = React.useState<Array<{partner_id: string, partner_name: string}>>([])
   
-  // Simplified flags for association data loading
-  const [hasLoadedAssociations, setHasLoadedAssociations] = React.useState(false)
+  // Simplified flag for initial data loading
   const [hasLoadedInitialData, setHasLoadedInitialData] = React.useState(false)
-  const [isInitialLoading, setIsInitialLoading] = React.useState(false)
 
   // Synchronous initialization of hierarchical selection states
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
@@ -270,27 +251,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return ''
   })
   const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('') // Clear subcategory since they no longer exist
-
-  // Lazy load association data when needed
-  const loadAssociationData = React.useCallback(async () => {
-    if (!isEditing || !editingMovement?.id || hasLoadedAssociations) return
-    
-    // Load all associations in parallel
-    const promises = [
-      refetchPartners(),
-      refetchSubcontracts(), 
-      refetchProjectClients(),
-      refetchGeneralCosts(),
-      refetchPersonnel()
-    ]
-    
-    try {
-      await Promise.all(promises)
-      setHasLoadedAssociations(true)
-    } catch (error) {
-      console.error('Error loading association data:', error)
-    }
-  }, [isEditing, editingMovement?.id, hasLoadedAssociations, refetchPartners, refetchSubcontracts, refetchProjectClients, refetchGeneralCosts, refetchPersonnel])
   
   // Process association data when loaded
   React.useEffect(() => {
@@ -478,30 +438,36 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   // Update form defaults when better data becomes available (non-blocking)
   React.useEffect(() => {
-    // Add guards to prevent repetitive calls
-    if (hasLoadedInitialData || isInitialLoading) return
+    // Skip if we're editing (editing movement already has all values)
+    if (isEditing && editingMovement?.created_by) {
+      setHasLoadedInitialData(true)
+      return
+    }
+    
+    // Wait for essential data to be available
     if (!userData?.user?.id || !currentMember?.id || currencies.length === 0 || wallets.length === 0) return
     
     const updatedDefaults = {
-      created_by: editingMovement?.created_by || currentMember.id,
-      currency_id: editingMovement?.currency_id || defaultCurrency || currencies[0]?.currency?.id,
-      wallet_id: editingMovement?.wallet_id || defaultWallet || wallets[0]?.id
+      created_by: currentMember.id,
+      currency_id: defaultCurrency || currencies[0]?.currency?.id,
+      wallet_id: defaultWallet || wallets[0]?.id
     }
     
-    // Only update if values have changed significantly
+    // Only update if values are empty/need updating
     const currentValues = form.getValues()
-    const hasSignificantChanges = (
-      currentValues.created_by !== updatedDefaults.created_by ||
-      currentValues.currency_id !== updatedDefaults.currency_id ||
-      currentValues.wallet_id !== updatedDefaults.wallet_id
+    const needsUpdate = (
+      !currentValues.created_by ||
+      !currentValues.currency_id ||
+      !currentValues.wallet_id
     )
     
-    if (hasSignificantChanges) {
-      // Avoid triggering validation/dirty flags during reset
+    if (needsUpdate) {
+      // Reset with updated values
       const resetOptions = { keepDirtyValues: false, keepTouched: false, keepIsValidating: false }
       form.reset({ ...currentValues, ...updatedDefaults }, resetOptions)
+      setHasLoadedInitialData(true)
     }
-  }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, hasLoadedInitialData, isInitialLoading, editingMovement?.created_by, editingMovement?.currency_id, editingMovement?.wallet_id, form])
+  }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, form])
 
   // Synchronous conversion form initialization
   const conversionForm = useForm<ConversionForm>({
@@ -522,6 +488,22 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   })
 
+  // Update conversion form defaults when data becomes available
+  React.useEffect(() => {
+    if (isEditing && editingMovement?.created_by) return
+    if (!currentMember?.id || currencies.length === 0 || wallets.length === 0) return
+    
+    const currentValues = conversionForm.getValues()
+    if (!currentValues.created_by || !currentValues.currency_id_from || !currentValues.wallet_id_from) {
+      const updatedDefaults = {
+        created_by: currentMember.id,
+        currency_id_from: defaultCurrency || currencies[0]?.currency?.id,
+        wallet_id_from: defaultWallet || wallets[0]?.id
+      }
+      conversionForm.reset({ ...currentValues, ...updatedDefaults }, { keepDirtyValues: false })
+    }
+  }, [currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, conversionForm])
+
   // Synchronous transfer form initialization
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
@@ -536,6 +518,22 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       amount: editingMovement?.amount || 0
     }
   })
+
+  // Update transfer form defaults when data becomes available
+  React.useEffect(() => {
+    if (isEditing && editingMovement?.created_by) return
+    if (!currentMember?.id || currencies.length === 0 || wallets.length === 0) return
+    
+    const currentValues = transferForm.getValues()
+    if (!currentValues.created_by || !currentValues.currency_id || !currentValues.wallet_id_from) {
+      const updatedDefaults = {
+        created_by: currentMember.id,
+        currency_id: defaultCurrency || currencies[0]?.currency?.id,
+        wallet_id_from: defaultWallet || wallets[0]?.id
+      }
+      transferForm.reset({ ...currentValues, ...updatedDefaults }, { keepDirtyValues: false })
+    }
+  }, [currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, transferForm])
 
   // Handle type change para detectar conversión (como en el modal original) - MOVED AFTER FORMS
   const handleTypeChange = React.useCallback((newTypeId: string) => {
@@ -557,10 +555,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     // Detectar tipo de movimiento por view_mode 
     const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
     const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-    
-    console.log('🔧 HandleTypeChange - selectedConcept:', selectedConcept)
-    console.log('🔧 HandleTypeChange - viewMode (trimmed):', `"${viewMode}"`)
-    console.log('🔧 HandleTypeChange - current movementType:', movementType)
     
     // Update selectedTypeId only if different
     if (newTypeId !== selectedTypeId) {
@@ -614,7 +608,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     const newMovementType = viewMode.includes("conversion") ? 'conversion' : 
                            viewMode.includes("transfer") ? 'transfer' : 'normal'
     
-    console.log('🔧 HandleTypeChange - setting movementType to:', newMovementType)
     if (newMovementType !== movementType) {
       setMovementType(newMovementType)
     }
@@ -783,9 +776,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   React.useEffect(() => {
     if (!isEditing || !editingMovement || !movementConcepts || hasLoadedInitialData) return
 
-    // Iniciar carga - evitar efectos adicionales
-    setIsInitialLoading(true)
-
     // Llenar formulario principal con los datos básicos del movimiento
     form.setValue('movement_date', parseMovementDate(editingMovement.movement_date))
     form.setValue('description', editingMovement.description || '')
@@ -856,11 +846,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       loadMovementIndirects(editingMovement.id)
     }
 
-    // Finalizar carga inicial después de un delay
-    setTimeout(() => {
-      setIsInitialLoading(false)
-      setHasLoadedInitialData(true)
-    }, 800)
+    // Finalizar carga inicial
+    setHasLoadedInitialData(true)
 
   }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData, hasLoadedInitialData])
 
@@ -2015,8 +2002,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
                   // No changes needed - prevent redundant processing
                   return
                 }
-                
-                console.log('🎯 CascadingSelect processing changes:', { typeId, categoryId, subcategoryId })
                 
                 // Update hierarchical selection states  
                 setSelectedTypeId(typeId)
