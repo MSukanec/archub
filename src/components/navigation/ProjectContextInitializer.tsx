@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useUserOrganizationPreferences } from '@/hooks/use-user-organization-preferences'
 import { useProjectContext } from '@/stores/projectContext'
+import { useHeartbeat } from '@/hooks/use-heartbeat'
 
 /**
  * Componente que inicializa automáticamente el proyecto correcto
@@ -11,6 +12,9 @@ import { useProjectContext } from '@/stores/projectContext'
 export function ProjectContextInitializer() {
   const { data: userData } = useCurrentUser()
   const { currentOrganizationId, selectedProjectId, setSelectedProject } = useProjectContext()
+  
+  // Enviar heartbeat periódico para tracking de presencia
+  useHeartbeat(currentOrganizationId)
   
   // Obtener las preferencias de la organización actual
   const { data: orgPreferences } = useUserOrganizationPreferences(currentOrganizationId || undefined)

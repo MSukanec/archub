@@ -62,19 +62,19 @@
 
   /* Buttons - Secondary */
   --button-secondary-bg: transparent;
-  --button-secondary-text: hsl(0, 0%, 50%);
-  --button-secondary-border: hsl(0, 0%, 50%);
+  --button-secondary-text: hsl(0, 0%, 30%);
+  --button-secondary-border: hsl(0, 0%, 30%);
   --button-secondary-hover-bg: hsl(0, 0%, 100%);
-  --button-secondary-hover-text: hsl(0, 0%, 50%);
-  --button-secondary-hover-border: hsl(0, 0%, 50%);
+  --button-secondary-hover-text: hsl(0, 0%, 20%);
+  --button-secondary-hover-border: hsl(0, 0%, 20%);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: hsl(0, 0%, 70%);
-  --button-ghost-border: hsl(0, 0%, 70%);
+  --button-ghost-text: hsl(0, 0%, 80%);
+  --button-ghost-border: hsl(0, 0%, 80%);
   --button-ghost-hover-bg: transparent;
-  --button-ghost-hover-text: hsl(0, 0%, 20%);
-  --button-ghost-hover-border: hsl(0, 0%, 20%);
+  --button-ghost-hover-text: hsl(0, 0%, 40%);
+  --button-ghost-hover-border: hsl(0, 0%, 40%);
 
   /* Inputs */
   --input-bg: hsl(0, 0%, 100%);
