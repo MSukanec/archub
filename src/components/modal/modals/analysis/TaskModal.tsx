@@ -488,9 +488,8 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         const updateData: any = {
           custom_name: customName,
           unit_id: unitId || null,
-          task_template_id: null,
           task_division_id: taskDivisionId || null,
-          is_completed: false // Always false for analysis tasks
+          is_completed: false
         }
         
         console.log('🔧 Updating task with data:', updateData)
@@ -517,15 +516,11 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         const newTask = {
           code: generateTaskCode(),
           custom_name: customName,
-          param_values: {}, // Empty object since we're not using parameters
-          param_order: [], // Empty array since we're not using parameters
-          name_rendered: null, // NULL since we're not using parametric generation
           unit_id: unitId || null,
-          task_template_id: null,
           task_division_id: taskDivisionId || null,
-          organization_id: userData.organization.id, // SET TO ORGANIZATION ID for analysis tasks
-          is_system: false, // SET TO FALSE for analysis tasks
-          is_completed: false // Always false for analysis tasks
+          organization_id: userData.organization.id,
+          is_system: false,
+          is_completed: false
         }
         
         console.log('🔧 Creating task with data:', newTask)
