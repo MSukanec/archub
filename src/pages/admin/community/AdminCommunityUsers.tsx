@@ -172,7 +172,15 @@ const AdminCommunityUsers = () => {
         })
       )
       
-      return usersWithCounts
+      // Ordenar por última actividad (más reciente primero)
+      const sortedUsers = usersWithCounts.sort((a, b) => {
+        if (!a.last_seen_at && !b.last_seen_at) return 0;
+        if (!a.last_seen_at) return 1; // Sin actividad al final
+        if (!b.last_seen_at) return -1; // Sin actividad al final
+        return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime();
+      });
+      
+      return sortedUsers
     }
   })
 
