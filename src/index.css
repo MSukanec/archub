@@ -70,11 +70,11 @@
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: hsl(0, 0%, 50%);
-  --button-ghost-border: hsl(0, 0%, 50%);
+  --button-ghost-text: hsl(0, 0%, 70%);
+  --button-ghost-border: hsl(0, 0%, 70%);
   --button-ghost-hover-bg: transparent;
   --button-ghost-hover-text: hsl(0, 0%, 20%);
-  --button-ghost-hover-border: transparent;
+  --button-ghost-hover-border: hsl(0, 0%, 20%);
 
   /* Inputs */
   --input-bg: hsl(0, 0%, 100%);
