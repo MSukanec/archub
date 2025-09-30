@@ -14,6 +14,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
 import { TaskCostPopover } from '@/components/popovers/TaskCostPopover'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
@@ -146,6 +147,22 @@ export default function TaskList() {
   // Columnas base para la tabla
   const baseColumns = [
     {
+      key: 'is_system',
+      label: 'Tipo',
+      width: '10%',
+      render: (task: any) => (
+        <Badge 
+          variant={task.is_system ? "default" : "secondary"}
+          className={`text-xs ${task.is_system 
+            ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-300' 
+            : 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
+          }`}
+        >
+          {task.is_system ? 'Sistema' : 'Organización'}
+        </Badge>
+      )
+    },
+    {
       key: 'category',
       label: 'Rubro',
       width: '18%',
@@ -158,7 +175,7 @@ export default function TaskList() {
     {
       key: 'name_rendered',
       label: 'Tarea',
-      width: '40%',
+      width: '35%',
       render: (task: any) => (
         <span className="text-sm font-medium">{task.custom_name || 'Sin nombre'}</span>
       )
@@ -184,72 +201,42 @@ export default function TaskList() {
       )
     },
     {
-      key: 'is_system',
-      label: 'Tipo',
-      width: '8%',
-      render: (task: any) => (
-        <Badge 
-          variant={task.is_system ? "default" : "secondary"}
-          className={`text-xs ${task.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
-            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
-          }`}
-        >
-          {task.is_system ? 'Sistema' : 'Organización'}
-        </Badge>
-      )
-    },
-    {
       key: 'actions',
       label: 'Acciones',
-      width: '9%',
+      width: '12%',
       render: (task: any) => {
         // Solo las tareas de la organización pueden ser editadas y eliminadas
         const canEdit = !task.is_system && task.organization_id === userData?.organization?.id;
         
         return (
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleView(task.id)}
-              className="h-7 w-7 p-0"
-              title="Ver detalles"
-            >
-              <Eye className="h-3 w-3" />
-            </Button>
-            {canEdit && (
+          <TableActionButtons
+            onEdit={canEdit ? () => handleEdit(task) : undefined}
+            onDelete={canEdit ? () => handleDelete(task) : undefined}
+            editLabel="Editar"
+            deleteLabel="Eliminar"
+            additionalButtons={[
               <Button
+                key="view"
+                variant="default"
+                size="sm"
+                onClick={() => handleView(task.id)}
+                className="h-8 px-3 gap-2"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Ver Detalle
+              </Button>,
+              <Button
+                key="duplicate"
                 variant="ghost"
                 size="sm"
-                onClick={() => handleEdit(task)}
-                className="h-7 w-7 p-0"
-                title="Editar tarea"
+                onClick={() => handleDuplicate(task)}
+                className="h-8 w-8 p-0"
+                title="Duplicar tarea"
               >
-                <Edit className="h-3 w-3" />
+                <Copy className="h-4 w-4" />
               </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDuplicate(task)}
-              className="h-7 w-7 p-0"
-              title="Duplicar tarea"
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
-            {canEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDelete(task)}
-                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                title="Eliminar tarea"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+            ]}
+          />
         );
       }
     }
