@@ -263,11 +263,27 @@ const AdminCommunityOrganizations = () => {
       key: 'plan',
       label: 'Plan',
       width: '10%',
-      render: (organization: Organization) => (
-        <Badge variant={organization.plan?.name === 'Free' ? 'secondary' : 'default'}>
-          {organization.plan?.name || 'Sin plan'}
-        </Badge>
-      ),
+      render: (organization: Organization) => {
+        const planName = organization.plan?.name || 'Sin plan';
+        let bgColor = '';
+        
+        if (planName === 'Free') {
+          bgColor = 'bg-[var(--plan-free-bg)]';
+        } else if (planName === 'Pro') {
+          bgColor = 'bg-[var(--plan-pro-bg)]';
+        } else if (planName === 'Teams') {
+          bgColor = 'bg-[var(--plan-teams-bg)]';
+        }
+        
+        return (
+          <Badge 
+            variant="default"
+            className={`${bgColor} text-white hover:${bgColor}/90`}
+          >
+            {planName}
+          </Badge>
+        );
+      },
     },
     {
       key: 'members',
