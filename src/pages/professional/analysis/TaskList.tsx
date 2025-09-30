@@ -211,8 +211,10 @@ export default function TaskList() {
         return (
           <TableActionButtons
             onEdit={canEdit ? () => handleEdit(task) : undefined}
+            onDuplicate={() => handleDuplicate(task)}
             onDelete={canEdit ? () => handleDelete(task) : undefined}
             editLabel="Editar"
+            duplicateLabel="Duplicar"
             deleteLabel="Eliminar"
             additionalButtons={[
               <Button
@@ -224,16 +226,6 @@ export default function TaskList() {
               >
                 <Eye className="h-3.5 w-3.5" />
                 Ver Detalle
-              </Button>,
-              <Button
-                key="duplicate"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDuplicate(task)}
-                className="h-8 w-8 p-0"
-                title="Duplicar tarea"
-              >
-                <Copy className="h-4 w-4" />
               </Button>
             ]}
           />

@@ -1,4 +1,4 @@
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Edit, Trash2, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -10,8 +10,10 @@ interface TableActionButtonsProps {
   // Botones principales que van en el popover
   onEdit?: () => void
   onDelete?: () => void
+  onDuplicate?: () => void
   editLabel?: string
   deleteLabel?: string
+  duplicateLabel?: string
   // Botones adicionales que van por fuera del popover
   additionalButtons?: React.ReactNode[]
   // Props para personalizar estilos
@@ -22,8 +24,10 @@ interface TableActionButtonsProps {
 export function TableActionButtons({
   onEdit,
   onDelete,
+  onDuplicate,
   editLabel = 'Editar',
   deleteLabel = 'Eliminar',
+  duplicateLabel = 'Duplicar',
   additionalButtons = [],
   className = '',
   disabled = false
@@ -59,6 +63,17 @@ export function TableActionButtons({
               >
                 <Edit className="h-4 w-4" />
                 {editLabel}
+              </Button>
+            )}
+            {onDuplicate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDuplicate}
+                className="w-full justify-start gap-2 h-8"
+              >
+                <Copy className="h-4 w-4" />
+                {duplicateLabel}
               </Button>
             )}
             {onDelete && (
