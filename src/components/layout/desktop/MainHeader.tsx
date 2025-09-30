@@ -194,165 +194,162 @@ export function MainHeader({ actionButton, tabs = [], onTabChange, title }: Main
 
   return (
     <div 
-      className="w-full border-b z-50"
+      className="w-full h-12 border-b flex items-center justify-between pr-4 z-50"
       style={{ 
         backgroundColor: "var(--main-sidebar-bg)",
         borderBottomColor: "var(--main-sidebar-border)"
       }}
     >
-      {/* FILA SUPERIOR: Logo + Breadcrumb + Botón de acción */}
-      <div className="h-12 flex items-center justify-between pr-4">
-        {/* Left side: Logo and navigation */}
-        <div className="flex items-center gap-2">
-          {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
-          <div className="shrink-0 w-12 h-12 flex items-center justify-center">
-            <img 
-              src="/ArchubLogo.png" 
-              alt="Archub" 
-              className="h-8 w-auto"
-            />
-          </div>
-
-          {/* Organization selector */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleOrganizationClick}
-              className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
-                sidebarLevel === 'organization' 
-                  ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
-                  : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
-              }`}
-            >
-              <Building2 className="h-4 w-4 mr-1" />
-              {currentOrganization}
-            </button>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-2" align="start">
-                <div className="space-y-1">
-                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                    Seleccionar Organización
-                  </div>
-                  {userData?.organizations?.map((org) => (
-                    <Button
-                      key={org.id}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleOrganizationChange(org.id)}
-                      className="w-full justify-start h-8 text-xs"
-                    >
-                      <Building2 className="h-4 w-4 mr-2" />
-                      {org.name}
-                    </Button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          {/* Separator */}
-          <span className="text-sm text-white opacity-50 mx-1">/</span>
-
-          {/* Project selector */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleProjectClick}
-              className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
-                sidebarLevel === 'project' 
-                  ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
-                  : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
-              }`}
-            >
-              <FolderOpen className="h-4 w-4 mr-1" />
-              {currentProjectName}
-            </button>
-            
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-2" align="start">
-                <div className="space-y-1">
-                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                    Seleccionar Proyecto
-                  </div>
-                  {projectsLite.map((project) => (
-                    <Button
-                      key={project.id}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleProjectChange(project.id)}
-                      className="w-full justify-start h-8 text-xs"
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      {project.name}
-                    </Button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          {/* Separator */}
-          <span className="text-sm text-white opacity-50 mx-1">/</span>
-          
-          {/* Nombre de la página actual */}
-          <span className="text-sm font-medium text-white opacity-90">
-            {currentPageName}
-          </span>
+      {/* Left side: Logo and navigation */}
+      <div className="flex items-center gap-2">
+        {/* Logo - Perfectly aligned with sidebar icons at 24px from left edge */}
+        <div className="shrink-0 w-12 h-12 flex items-center justify-center">
+          <img 
+            src="/ArchubLogo.png" 
+            alt="Archub" 
+            className="h-8 w-auto"
+          />
         </div>
 
-        {/* Right side: Action button */}
-        {actionButton && (
-          <div className="flex items-center">
-            <Button
-              onClick={actionButton.onClick}
-              size="sm"
-              className="h-8 text-xs font-medium"
-            >
-              {actionButton.icon && <actionButton.icon className="h-4 w-4 mr-1" />}
-              {actionButton.label}
-            </Button>
-          </div>
+        {/* Organization selector */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleOrganizationClick}
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+              sidebarLevel === 'organization' 
+                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+          >
+            <Building2 className="h-4 w-4 mr-1" />
+            {currentOrganization}
+          </button>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-2" align="start">
+              <div className="space-y-1">
+                <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Seleccionar Organización
+                </div>
+                {userData?.organizations?.map((org) => (
+                  <Button
+                    key={org.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOrganizationChange(org.id)}
+                    className="w-full justify-start h-8 text-xs"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    {org.name}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {/* Separator */}
+        <span className="text-sm text-white opacity-50 mx-1">/</span>
+
+        {/* Project selector */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleProjectClick}
+            className={`flex items-center h-8 px-2 text-xs font-medium transition-all duration-200 ease-out overflow-hidden rounded ${
+              sidebarLevel === 'project' 
+                ? 'text-white bg-[var(--main-sidebar-button-active-bg)]' 
+                : 'text-white hover:bg-[var(--main-sidebar-button-hover-bg)]'
+            }`}
+          >
+            <FolderOpen className="h-4 w-4 mr-1" />
+            {currentProjectName}
+          </button>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="flex items-center h-8 px-1 transition-all duration-200 ease-out overflow-hidden rounded text-white hover:bg-[var(--main-sidebar-button-hover-bg)]"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-2" align="start">
+              <div className="space-y-1">
+                <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Seleccionar Proyecto
+                </div>
+                {projectsLite.map((project) => (
+                  <Button
+                    key={project.id}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleProjectChange(project.id)}
+                    className="w-full justify-start h-8 text-xs"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    {project.name}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {/* Separator */}
+        <span className="text-sm text-white opacity-50 mx-1">/</span>
+        
+        {/* Nombre de la página actual */}
+        <span className="text-sm font-medium text-white opacity-90">
+          {currentPageName}
+        </span>
+        
+        {/* Tabs - si existen */}
+        {tabs && tabs.length > 0 && (
+          <>
+            {/* Separador vertical antes de las tabs */}
+            <div className="h-5 w-px bg-white opacity-30 mx-4" />
+            
+            <div className="flex items-center gap-0 h-full">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange?.(tab.id)}
+                  className={`relative flex items-center h-full px-4 text-sm font-medium transition-all duration-200 ${
+                    tab.isActive
+                      ? 'text-[var(--accent)]' 
+                      : 'text-[var(--main-sidebar-fg)] opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  {tab.label}
+                  {/* Barra inferior para tab activa */}
+                  {tab.isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
-      {/* FILA INFERIOR: Tabs (solo si existen) */}
-      {tabs && tabs.length > 0 && (
-        <div 
-          className="h-10 flex items-center px-12 border-t"
-          style={{ borderTopColor: "var(--main-sidebar-border)" }}
-        >
-          <div className="flex items-center gap-0 h-full">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange?.(tab.id)}
-                className={`relative flex items-center h-full px-4 text-sm font-medium transition-all duration-200 ${
-                  tab.isActive
-                    ? 'text-[var(--accent)]' 
-                    : 'text-[var(--main-sidebar-fg)] opacity-60 hover:opacity-100'
-                }`}
-              >
-                {tab.label}
-                {/* Barra inferior para tab activa */}
-                {tab.isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
-                )}
-              </button>
-            ))}
-          </div>
+      {/* Right side: Action button */}
+      {actionButton && (
+        <div className="flex items-center">
+          <Button
+            onClick={actionButton.onClick}
+            size="sm"
+            className="h-8 text-xs font-medium"
+          >
+            {actionButton.icon && <actionButton.icon className="h-4 w-4 mr-1" />}
+            {actionButton.label}
+          </Button>
         </div>
       )}
     </div>
