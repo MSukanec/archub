@@ -16,54 +16,58 @@ import { useToast } from '@/hooks/use-toast';
 // Mapeo de rutas a nombres de páginas
 const PAGE_NAMES: Record<string, string> = {
   // Organization level
-  '/organization/dashboard': 'Dashboard',
+  '/organization/dashboard': 'Resumen de Organización',
+  '/organization/projects': 'Gestión de Proyectos',
   '/organization/personnel': 'Personal',
-  '/organization/analysis': 'Análisis de Costos',
-  '/organization/expenses': 'Gastos Generales',
   '/organization/activity': 'Actividad',
   '/organization/preferences': 'Preferencias',
   
   // Project level
-  '/project/dashboard': 'Dashboard',
+  '/project/dashboard': 'Resumen de Proyecto',
   '/project/gantt': 'Gantt',
   '/project/kanban': 'Kanban',
-  '/project/budgets': 'Presupuesto',
-  '/project/construction-personnel': 'Personal',
-  '/project/construction-materials': 'Materiales',
-  '/project/indirects': 'Gastos Indirectos',
-  '/project/subcontracts': 'Subcontratos',
-  '/project/logs': 'Registros',
+  '/budgets': 'Cómputo y Presupuesto',
+  '/professional/budgets': 'Cómputo y Presupuesto',
   
-  // Resources
-  '/resources/documentation': 'Documentación',
-  '/resources/gallery': 'Galería',
-  '/resources/contacts': 'Contactos',
+  // Construction
+  '/construction/dashboard': 'Dashboard de Construcción',
+  '/construction/personnel': 'Mano de Obra',
+  '/construction/materials': 'Materiales',
+  '/construction/indirects': 'Indirectos',
+  '/construction/subcontracts': 'Subcontratos',
+  '/construction/logs': 'Bitácora',
+  
+  // General
+  '/contacts': 'Contactos',
+  '/analysis': 'Análisis de Costos',
+  '/movements': 'Movimientos',
+  '/clients': 'Clientes',
+  '/media': 'Galería',
+  '/calendar': 'Calendario',
   
   // Finances
-  '/finances/movements': 'Movimientos',
-  '/finances/conversions': 'Conversiones',
-  '/finances/transfers': 'Transferencias',
-  '/finances/budgets': 'Presupuestos',
-  '/finances/clients': 'Clientes',
-  '/finances/capital': 'Capital Social',
+  '/finances/capital': 'Capital',
   '/finances/general-costs': 'Gastos Generales',
+  '/finances/dashboard': 'Dashboard Financiero',
   
   // Admin
-  '/admin/users': 'Usuarios',
-  '/admin/task-params': 'Parámetros de Tareas',
-  '/admin/task-list': 'Lista de Tareas',
-  '/admin/material-prices': 'Precios de Materiales',
+  '/admin/community': 'Comunidad',
+  '/admin/costs': 'Costos',
+  '/admin/tasks': 'Tareas',
+  '/admin/general': 'General',
+  '/providers/products': 'Productos',
+  
+  // Profile
+  '/profile': 'Perfil',
+  '/profile/organizations': 'Gestión de Organizaciones',
+  '/profile/preferences': 'Preferencias de Perfil',
 };
 
 interface MainHeaderProps {
-  actionButton?: {
-    label: string;
-    icon?: React.ComponentType<any>;
-    onClick: () => void;
-  };
+  // Vacío por ahora - sin props
 }
 
-export function MainHeader({ actionButton }: MainHeaderProps = {}) {
+export function MainHeader() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId, setCurrentOrganization, setSelectedProject } = useProjectContext();
@@ -302,19 +306,6 @@ export function MainHeader({ actionButton }: MainHeaderProps = {}) {
         </span>
       </div>
 
-      {/* Right side: Action button */}
-      {actionButton && (
-        <div className="flex items-center">
-          <Button
-            onClick={actionButton.onClick}
-            size="sm"
-            className="h-8 text-xs font-medium"
-          >
-            {actionButton.icon && <actionButton.icon className="h-4 w-4 mr-1" />}
-            {actionButton.label}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

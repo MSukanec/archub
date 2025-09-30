@@ -104,7 +104,7 @@ export function Layout({ children, wide = false, headerProps }: LayoutProps) {
       }}
     >
       {/* Main Header for Desktop - Only shown on desktop */}
-      {!isMobile && <MainHeader actionButton={headerProps?.actionButton} />}
+      {!isMobile && <MainHeader />}
       
       {/* Mobile View - Unchanged */}
       {isMobile ? (
