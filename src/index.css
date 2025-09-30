@@ -70,8 +70,8 @@
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
-  --button-ghost-text: var(--text-subtle);
-  --button-ghost-border: var(--text-subtle);
+  --button-ghost-text: hsl(0, 0%, 50%);
+  --button-ghost-border: hsl(0, 0%, 50%);
   --button-ghost-hover-bg: transparent;
   --button-ghost-hover-text: hsl(0, 0%, 20%);
   --button-ghost-hover-border: transparent;
