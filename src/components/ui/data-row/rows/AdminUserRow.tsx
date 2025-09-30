@@ -20,7 +20,8 @@ interface User {
     country: string;
   };
   organizations_count: number;
-  last_activity_at: string;
+  last_activity_at?: string;
+  last_seen_at?: string | null;
 }
 
 interface AdminUserRowProps {

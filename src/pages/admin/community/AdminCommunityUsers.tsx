@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Building, Users } from 'lucide-react'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import AdminUserRow from '@/components/ui/data-row/rows/AdminUserRow'
@@ -27,7 +27,71 @@ interface User {
     country: string
   }
   organizations_count: number
-  last_activity_at: string
+  last_seen_at: string | null
+}
+
+// Componente para mostrar la última actividad
+function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { label, isOnline, tooltip } = useMemo(() => {
+    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin registro' };
+    
+    const lastSeenTime = new Date(lastSeen).getTime();
+    const now = Date.now();
+    const diffMs = now - lastSeenTime;
+    
+    // Activo si está dentro de 90 segundos
+    if (diffMs <= 90_000) {
+      return { label: 'Activo ahora', isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
+    }
+    
+    // Tiempo relativo
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHr / 24);
+    
+    let relativeLabel = '';
+    if (diffDays >= 1) {
+      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    } else if (diffHr >= 1) {
+      relativeLabel = `hace ${diffHr} h`;
+    } else if (diffMin >= 1) {
+      relativeLabel = `hace ${diffMin} min`;
+    } else {
+      relativeLabel = `hace ${diffSec} s`;
+    }
+    
+    return { 
+      label: relativeLabel, 
+      isOnline: false, 
+      tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
+    };
+  }, [lastSeen, tick]);
+
+  return (
+    <div className="flex items-center gap-2" title={tooltip}>
+      {isOnline ? (
+        <>
+          <span className="inline-block w-2 h-2 rounded-full bg-[var(--plan-free-bg)]" />
+          <Badge 
+            variant="default"
+            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
+          >
+            {label}
+          </Badge>
+        </>
+      ) : (
+        <span className="text-sm text-muted-foreground">{label}</span>
+      )}
+    </div>
+  );
 }
 
 const AdminCommunityUsers = () => {
@@ -79,6 +143,15 @@ const AdminCommunityUsers = () => {
       const { data, error } = await query
       if (error) throw error
       
+      // Get user presence data
+      const userIds = data.map(u => u.id);
+      const { data: presenceData } = await supabase
+        .from('user_presence')
+        .select('user_id, last_seen_at')
+        .in('user_id', userIds);
+      
+      const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
+      
       // Get organization counts for each user
       const usersWithCounts = await Promise.all(
         data.map(async (user) => {
@@ -91,7 +164,7 @@ const AdminCommunityUsers = () => {
           return {
             ...user,
             organizations_count: count || 0,
-            last_activity_at: user.updated_at || user.created_at
+            last_seen_at: presenceMap.get(user.id) || null
           }
         })
       )
@@ -154,29 +227,15 @@ const AdminCommunityUsers = () => {
 
   const columns = [
     {
-      key: 'created_at',
-      label: 'Fecha de Registro',
-      width: '20%',
-      render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
-        </span>
-      )
-    },
-    {
-      key: 'last_activity_at',
+      key: 'last_activity',
       label: 'Última Actividad',
       width: '20%',
-      render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(user.last_activity_at), 'dd/MM/yy', { locale: es })}
-        </span>
-      )
+      render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
       key: 'full_name',
       label: 'Usuario',
-      width: '20%',
+      width: '25%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -195,12 +254,22 @@ const AdminCommunityUsers = () => {
     {
       key: 'organizations_count',
       label: 'Organizaciones',
-      width: '20%',
+      width: '15%',
       render: (user: User) => (
         <div className="flex items-center gap-1">
           <Building className="h-3 w-3 text-muted-foreground" />
           <span className="text-xs">{user.organizations_count}</span>
         </div>
+      )
+    },
+    {
+      key: 'created_at',
+      label: 'Fecha de Registro',
+      width: '20%',
+      render: (user: User) => (
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
+        </span>
       )
     },
     {
