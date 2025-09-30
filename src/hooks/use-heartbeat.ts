@@ -8,33 +8,23 @@ import { supabase } from '@/lib/supabase';
  */
 export function useHeartbeat(orgId: string | null | undefined) {
   useEffect(() => {
-    console.log('🔥 useHeartbeat: Hook montado con orgId:', orgId);
-    
     // Función para enviar el heartbeat
     const sendHeartbeat = async () => {
       // Validar que orgId sea válido
       if (!orgId) {
-        console.warn('Heartbeat no enviado porque orgId es inválido:', orgId);
         return;
       }
 
       try {
-        console.log('Enviando heartbeat...', { 
-          orgId, 
-          timestamp: new Date().toISOString() 
-        });
-
         const { error } = await supabase.rpc('heartbeat', { 
           p_org_id: orgId 
         });
 
         if (error) {
-          console.error('❌ Error enviando heartbeat:', error);
-        } else {
-          console.log('✅ Heartbeat enviado exitosamente');
+          console.error('Error enviando heartbeat:', error);
         }
       } catch (err) {
-        console.error('❌ Error en heartbeat:', err);
+        console.error('Error en heartbeat:', err);
       }
     };
 
@@ -44,12 +34,7 @@ export function useHeartbeat(orgId: string | null | undefined) {
     // Configurar intervalo para enviar cada 30 segundos
     const interval = setInterval(sendHeartbeat, 30_000);
 
-    console.log('🔥 useHeartbeat: Intervalo configurado (cada 30s)');
-
     // Cleanup al desmontar
-    return () => {
-      console.log('🔥 useHeartbeat: Limpiando intervalo');
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [orgId]);
 }

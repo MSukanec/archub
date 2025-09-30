@@ -169,7 +169,6 @@ const AdminCommunityUsers = () => {
         })
       )
       
-      console.log('Users with counts:', usersWithCounts)
       return usersWithCounts
     }
   })
