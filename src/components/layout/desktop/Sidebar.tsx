@@ -73,6 +73,7 @@ export function Sidebar() {
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts' },
         { id: 'logs', label: 'Bitácora', icon: History, href: '/construction/logs', restricted: 'coming_soon' },
+        { id: 'clients', label: 'Clientes', icon: Users, href: '/clients' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
@@ -132,6 +133,7 @@ export function Sidebar() {
                     if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
                     if (item.id === 'budgets') return { show: true, text: 'Recursos' };
                     if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
+                    if (item.id === 'clients') return { show: true, text: 'Comercialización' };
                   }
                   return { show: false, text: '' };
                 };
