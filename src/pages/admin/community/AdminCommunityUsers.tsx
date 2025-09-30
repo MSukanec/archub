@@ -145,12 +145,18 @@ const AdminCommunityUsers = () => {
       
       // Get user presence data
       const userIds = data.map(u => u.id);
-      const { data: presenceData } = await supabase
+      console.log('👥 Buscando presencia para estos user_id:', userIds);
+      
+      const { data: presenceData, error: presenceError } = await supabase
         .from('user_presence')
         .select('user_id, last_seen_at')
         .in('user_id', userIds);
       
+      console.log('📊 Datos de presencia obtenidos:', presenceData);
+      console.log('❌ Error de presencia:', presenceError);
+      
       const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
+      console.log('🗺️ Map de presencia:', Object.fromEntries(presenceMap));
       
       // Get organization counts for each user
       const usersWithCounts = await Promise.all(
