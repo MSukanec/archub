@@ -144,19 +144,16 @@ const AdminCommunityUsers = () => {
       if (error) throw error
       
       // Get user presence data
-      const userIds = data.map(u => u.id);
-      console.log('👥 Buscando presencia para estos user_id:', userIds);
+      // IMPORTANTE: user_presence.user_id guarda auth_id (de Supabase Auth), no users.id
+      const authIds = data.map(u => u.auth_id);
       
-      const { data: presenceData, error: presenceError } = await supabase
+      const { data: presenceData } = await supabase
         .from('user_presence')
         .select('user_id, last_seen_at')
-        .in('user_id', userIds);
+        .in('user_id', authIds);
       
-      console.log('📊 Datos de presencia obtenidos:', presenceData);
-      console.log('❌ Error de presencia:', presenceError);
-      
+      // Crear un map usando auth_id como clave
       const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.last_seen_at]) ?? []);
-      console.log('🗺️ Map de presencia:', Object.fromEntries(presenceMap));
       
       // Get organization counts for each user
       const usersWithCounts = await Promise.all(
@@ -170,7 +167,7 @@ const AdminCommunityUsers = () => {
           return {
             ...user,
             organizations_count: count || 0,
-            last_seen_at: presenceMap.get(user.id) || null
+            last_seen_at: presenceMap.get(user.auth_id) || null // Buscar por auth_id
           }
         })
       )
