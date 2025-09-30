@@ -133,7 +133,7 @@ export function Sidebar() {
                     if (item.id === 'dashboard') return { show: true, text: 'Planificación' };
                     if (item.id === 'budgets') return { show: true, text: 'Recursos' };
                     if (item.id === 'subcontracts') return { show: true, text: 'Ejecución' };
-                    if (item.id === 'clients') return { show: true, text: 'Comercialización' };
+                    if (item.id === 'logs') return { show: true, text: 'Comercialización' };
                   }
                   return { show: false, text: '' };
                 };
