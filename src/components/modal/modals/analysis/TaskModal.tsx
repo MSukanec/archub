@@ -172,7 +172,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const [materialAmount, setMaterialAmount] = useState<string>('')
   const [customName, setCustomName] = useState<string>('')
   const [taskTemplateId, setTaskTemplateId] = useState<string>('')
-  const [categoryId, setCategoryId] = useState<string>('')
   const [taskDivisionId, setTaskDivisionId] = useState<string>('')
   const [unitId, setUnitId] = useState<string>('')
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
@@ -488,7 +487,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         // Update existing task
         const updateData: any = {
           custom_name: customName,
-          category_id: null,
           unit_id: unitId || null,
           task_template_id: null,
           task_division_id: taskDivisionId || null,
@@ -497,7 +495,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         
         console.log('🔧 Updating task with data:', updateData)
         console.log('🔧 Current isCompleted value:', isCompleted)
-        console.log('🔧 CategoryId value:', categoryId)
         console.log('🔧 UnitId value:', unitId)
         
         const { error: updateError } = await supabase
@@ -524,7 +521,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
           param_order: [], // Empty array since we're not using parameters
           name_rendered: null, // NULL since we're not using parametric generation
           unit_id: unitId || null,
-          category_id: null,
           task_template_id: null,
           task_division_id: taskDivisionId || null,
           organization_id: userData.organization.id, // SET TO ORGANIZATION ID for analysis tasks
@@ -534,7 +530,6 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         
         console.log('🔧 Creating task with data:', newTask)
         console.log('🔧 Current isCompleted value:', isCompleted)
-        console.log('🔧 CategoryId value:', categoryId)
         console.log('🔧 UnitId value:', unitId)
         console.log('🔧 TaskDivisionId value:', taskDivisionId)
         console.log('🔧 TaskTemplateId value:', taskTemplateId)
