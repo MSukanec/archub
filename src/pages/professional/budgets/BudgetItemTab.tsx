@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore'
 import { useLocation } from 'wouter'
+import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons'
 
 interface BudgetItemsProps {
   onAddTask?: () => void
@@ -69,7 +70,7 @@ export function BudgetItems({
     {
       key: 'name',
       label: 'Nombre',
-      width: '28%',
+      width: '30%',
       render: (budget: any) => (
         <div>
           <div className="font-medium text-sm">{budget.name}</div>
@@ -82,31 +83,9 @@ export function BudgetItems({
       )
     },
     {
-      key: 'status',
-      label: 'Estado',
-      width: '13%',
-      render: (budget: any) => {
-        const getStatusBadge = (status: string) => {
-          switch (status) {
-            case 'draft':
-              return <Badge variant="secondary">Borrador</Badge>
-            case 'approved':
-              return <Badge variant="default">Aprobado</Badge>
-            case 'in_progress':
-              return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">En progreso</Badge>
-            case 'completed':
-              return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Completado</Badge>
-            default:
-              return <Badge variant="secondary">{status}</Badge>
-          }
-        }
-        return getStatusBadge(budget.status)
-      }
-    },
-    {
       key: 'version',
       label: 'Versión',
-      width: '9%',
+      width: '10%',
       render: (budget: any) => (
         <span className="text-sm">v{budget.version}</span>
       )
@@ -114,11 +93,21 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      width: '11%',
+      width: '10%',
+      render: (budget: any) => (
+        <div className="text-sm font-medium">
+          {budget.currency?.code || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: 'total',
+      label: 'Total',
+      width: '15%',
       render: (budget: any) => (
         <div className="text-sm">
-          <div className="font-medium">
-            {budget.currency?.code || 'N/A'}
+          <div className="font-medium text-green-700">
+            {budget.currency?.symbol || '$'} {formatCurrency(budget.total || 0)}
           </div>
           {budget.exchange_rate && (
             <div className="text-xs text-muted-foreground">
@@ -129,21 +118,9 @@ export function BudgetItems({
       )
     },
     {
-      key: 'total',
-      label: 'Total',
-      width: '14%',
-      render: (budget: any) => (
-        <div className="text-sm font-medium">
-          <div className="text-green-700">
-            {budget.currency?.symbol || '$'} {formatCurrency(budget.total || 0)}
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'created_at',
       label: 'Creado',
-      width: '11%',
+      width: '10%',
       sortable: true,
       sortType: 'date' as const,
       render: (budget: any) => (
@@ -153,38 +130,45 @@ export function BudgetItems({
       )
     },
     {
+      key: 'status',
+      label: 'Estado',
+      width: '10%',
+      render: (budget: any) => {
+        const getStatusBadge = (status: string) => {
+          switch (status) {
+            case 'draft':
+              return <Badge className="bg-gray-500 text-white hover:bg-gray-600">Borrador</Badge>
+            case 'approved':
+              return <Badge className="bg-green-600 text-white hover:bg-green-700">Aprobado</Badge>
+            case 'in_progress':
+              return <Badge className="bg-blue-600 text-white hover:bg-blue-700">En progreso</Badge>
+            case 'completed':
+              return <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">Completado</Badge>
+            default:
+              return <Badge className="bg-gray-500 text-white hover:bg-gray-600">{status}</Badge>
+          }
+        }
+        return getStatusBadge(budget.status)
+      }
+    },
+    {
       key: 'actions',
       label: 'Acciones',
-      width: '14%',
+      width: '15%',
       render: (budget: any) => (
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant="default"
             size="sm"
             onClick={() => handleView(budget)}
-            className="h-8 w-8 p-0"
-            title="Ver"
+            className="h-8"
           >
-            <Eye className="h-4 w-4" />
+            Editar
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEdit(budget)}
-            className="h-8 w-8 p-0"
-            title="Editar"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(budget)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-            title="Eliminar"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <TableActionButtons
+            onEdit={() => handleEdit(budget)}
+            onDelete={() => handleDelete(budget)}
+          />
         </div>
       )
     }
